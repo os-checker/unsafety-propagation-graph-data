@@ -1,0 +1,89 @@
+{
+  "name": "<iter::adapters::chain::Chain<A, B> as iter::traits::iterator::Iterator>::advance_by",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::advance_by": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator by `n` elements.\n\n This method will eagerly skip `n` elements by calling [`next`] up to `n`\n times until [`None`] is encountered.\n\n `advance_by(n)` will return `Ok(())` if the iterator successfully advances by\n `n` elements, or a `Err(NonZero<usize>)` with value `k` if [`None`] is encountered,\n where `k` is remaining number of steps that could not be advanced because the iterator ran out.\n If `self` is empty and `n` is non-zero, then this returns `Err(n)`.\n Otherwise, `k` is always less than `n`.\n\n Calling `advance_by(0)` can do meaningful work, for example [`Flatten`]\n can advance its outer iterator until it finds an inner iterator that is not empty, which\n then often allows it to return a more accurate `size_hint()` than in its initial state.\n\n [`Flatten`]: crate::iter::Flatten\n [`next`]: Iterator::next\n\n # Examples\n\n ```\n #![feature(iter_advance_by)]\n\n use std::num::NonZero;\n\n let a = [1, 2, 3, 4];\n let mut iter = a.into_iter();\n\n assert_eq!(iter.advance_by(2), Ok(()));\n assert_eq!(iter.next(), Some(3));\n assert_eq!(iter.advance_by(0), Ok(()));\n assert_eq!(iter.advance_by(100), Err(NonZero::new(99).unwrap())); // only `4` was skipped\n ```\n",
+      "adt": {
+        "result::Result": "Constructor",
+        "num::nonzero::NonZero": "Constructor"
+      }
+    },
+    "num::nonzero::NonZero::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained value as a primitive type.\n",
+      "adt": {}
+    },
+    "num::nonzero::NonZero::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a non-zero if the given value is not zero.\n",
+      "adt": {
+        "num::nonzero::NonZero": "Constructor",
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::map_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the provided default result (if none),\n or applies a function to the contained value (if any).\n\n Arguments passed to `map_or` are eagerly evaluated; if you are passing\n the result of a function call, it is recommended to use [`map_or_else`],\n which is lazily evaluated.\n\n [`map_or_else`]: Option::map_or_else\n\n # Examples\n\n ```\n let x = Some(\"foo\");\n assert_eq!(x.map_or(42, |v| v.len()), 3);\n\n let x: Option<&str> = None;\n assert_eq!(x.map_or(42, |v| v.len()), 42);\n ```\n",
+      "adt": {}
+    },
+    "result::Result::Err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Contains the error value\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "iter::adapters::chain::Chain": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 1742, kind: RigidTy(Adt(AdtDef(DefId { id: 24832, name: \"num::nonzero::NonZero\" }), GenericArgs([Type(Ty { id: 47, kind: RigidTy(Uint(Usize)) })]))) })])"
+    ],
+    "num::nonzero::NonZero": [
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 13653,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/chain.rs:130:5: 145:6",
+  "src": "fn advance_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>> {\n        if let Some(ref mut a) = self.a {\n            n = match a.advance_by(n) {\n                Ok(()) => return Ok(()),\n                Err(k) => k.get(),\n            };\n            self.a = None;\n        }\n\n        if let Some(ref mut b) = self.b {\n            return b.advance_by(n);\n            // we don't fuse the second iterator\n        }\n\n        NonZero::new(n).map_or(Ok(()), Err)\n    }",
+  "mir": "fn <iter::adapters::chain::Chain<A, B> as iter::traits::iterator::Iterator>::advance_by(_1: &mut iter::adapters::chain::Chain<A, B>, _2: usize) -> result::Result<(), num::nonzero::NonZero<usize>> {\n    let mut _0: result::Result<(), num::nonzero::NonZero<usize>>;\n    let mut _3: isize;\n    let  _4: &mut A;\n    let mut _5: usize;\n    let mut _6: result::Result<(), num::nonzero::NonZero<usize>>;\n    let mut _7: usize;\n    let mut _8: isize;\n    let  _9: num::nonzero::NonZero<usize>;\n    let mut _10: option::Option<A>;\n    let mut _11: isize;\n    let  _12: &mut B;\n    let mut _13: usize;\n    let mut _14: option::Option<num::nonzero::NonZero<usize>>;\n    let mut _15: usize;\n    let mut _16: result::Result<(), num::nonzero::NonZero<usize>>;\n    debug self => _1;\n    debug n => _2;\n    debug a => _4;\n    debug k => _9;\n    debug b => _12;\n    bb0: {\n        _3 = discriminant(((*_1).0: option::Option<A>));\n        switchInt(move _3) -> [1: bb1, 0: bb8, otherwise: bb3];\n    }\n    bb1: {\n        _4 = &mut ((((*_1).0: option::Option<A>) as variant#1).0: A);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = _2;\n        _6 = <A as iter::traits::iterator::Iterator>::advance_by(_4, move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _8 = discriminant(_6);\n        switchInt(move _8) -> [0: bb5, 1: bb4, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _9 = ((_6 as variant#1).0: num::nonzero::NonZero<usize>);\n        _5 = num::nonzero::NonZero::<usize>::get(_9) -> [return: bb6, unwind unreachable];\n    }\n    bb5: {\n        _0 = result::Result::Ok(());\n        StorageDead(_5);\n        StorageDead(_6);\n        goto -> bb14;\n    }\n    bb6: {\n        _2 = move _5;\n        StorageDead(_5);\n        StorageDead(_6);\n        StorageLive(_10);\n        _10 = option::Option::None;\n        drop(((*_1).0: option::Option<A>)) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        ((*_1).0: option::Option<A>) = move _10;\n        StorageDead(_10);\n        goto -> bb8;\n    }\n    bb8: {\n        _11 = discriminant(((*_1).1: option::Option<B>));\n        switchInt(move _11) -> [1: bb9, 0: bb11, otherwise: bb3];\n    }\n    bb9: {\n        _12 = &mut ((((*_1).1: option::Option<B>) as variant#1).0: B);\n        StorageLive(_13);\n        _13 = _2;\n        _0 = <B as iter::traits::iterator::Iterator>::advance_by(_12, move _13) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_13);\n        goto -> bb14;\n    }\n    bb11: {\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = _2;\n        _14 = num::nonzero::NonZero::<usize>::new(move _15) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_15);\n        StorageLive(_16);\n        _16 = result::Result::Ok(());\n        _0 = option::Option::<num::nonzero::NonZero<usize>>::map_or::<result::Result<(), num::nonzero::NonZero<usize>>, fn(num::nonzero::NonZero<usize>) -> result::Result<(), num::nonzero::NonZero<usize>> {result::Result::<(), num::nonzero::NonZero<usize>>::Err}>(move _14, move _16, result::Result::<(), num::nonzero::NonZero<usize>>::Err) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_16);\n        StorageDead(_14);\n        goto -> bb14;\n    }\n    bb14: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

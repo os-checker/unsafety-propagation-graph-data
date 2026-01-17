@@ -1,0 +1,46 @@
+{
+  "name": "vec::Vec::<T, A>::into_parts_with_alloc",
+  "safe": true,
+  "callees": {
+    "vec::Vec::<T, A>::into_raw_parts_with_alloc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Decomposes a `Vec<T>` into its raw components: `(pointer, length, capacity, allocator)`.\n\n Returns the raw pointer to the underlying data, the length of the vector (in elements),\n the allocated capacity of the data (in elements), and the allocator. These are the same\n arguments in the same order as the arguments to [`from_raw_parts_in`].\n\n After calling this function, the caller is responsible for the\n memory previously managed by the `Vec`. The only way to do\n this is to convert the raw pointer, length, and capacity back\n into a `Vec` with the [`from_raw_parts_in`] function, allowing\n the destructor to perform the cleanup.\n\n [`from_raw_parts_in`]: Vec::from_raw_parts_in\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let mut v: Vec<i32, System> = Vec::new_in(System);\n v.push(-1);\n v.push(0);\n v.push(1);\n\n let (ptr, len, cap, alloc) = v.into_raw_parts_with_alloc();\n\n let rebuilt = unsafe {\n     // We can now make changes to the components, such as\n     // transmuting the raw pointer to a compatible type.\n     let ptr = ptr as *mut u32;\n\n     Vec::from_raw_parts_in(ptr, len, cap, alloc)\n };\n assert_eq!(rebuilt, [4294967295, 0, 1]);\n ```\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "core::ptr::NonNull::<T>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `NonNull`.\n\n # Safety\n\n `ptr` must be non-null.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = unsafe { NonNull::new_unchecked(&mut x as *mut _) };\n ```\n\n *Incorrect* usage of this function:\n\n ```rust,no_run\n use std::ptr::NonNull;\n\n // NEVER DO THAT!!! This is undefined behavior. ⚠️\n let ptr = unsafe { NonNull::<u32>::new_unchecked(std::ptr::null_mut()) };\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 2369,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:1243:5: 1247:6",
+  "src": "pub fn into_parts_with_alloc(self) -> (NonNull<T>, usize, usize, A) {\n        let (ptr, len, capacity, alloc) = self.into_raw_parts_with_alloc();\n        // SAFETY: A `Vec` always has a non-null pointer.\n        (unsafe { NonNull::new_unchecked(ptr) }, len, capacity, alloc)\n    }",
+  "mir": "fn vec::Vec::<T, A>::into_parts_with_alloc(_1: vec::Vec<T, A>) -> (core::ptr::NonNull<T>, usize, usize, A) {\n    let mut _0: (core::ptr::NonNull<T>, usize, usize, A);\n    let  _2: *mut T;\n    let  _3: usize;\n    let  _4: usize;\n    let  _5: A;\n    let mut _6: (*mut T, usize, usize, A);\n    let mut _7: core::ptr::NonNull<T>;\n    debug self => _1;\n    debug ptr => _2;\n    debug len => _3;\n    debug capacity => _4;\n    debug alloc => _5;\n    bb0: {\n        StorageLive(_6);\n        _6 = vec::Vec::<T, A>::into_raw_parts_with_alloc(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = (_6.0: *mut T);\n        _3 = (_6.1: usize);\n        _4 = (_6.2: usize);\n        _5 = move (_6.3: A);\n        StorageDead(_6);\n        StorageLive(_7);\n        _7 = core::ptr::NonNull::<T>::new_unchecked(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _0 = (move _7, _3, _4, _5);\n        StorageDead(_7);\n        return;\n    }\n}\n",
+  "doc": " Decomposes a `Vec<T>` into its raw components: `(NonNull pointer, length, capacity, allocator)`.\n\n Returns the `NonNull` pointer to the underlying data, the length of the vector (in elements),\n the allocated capacity of the data (in elements), and the allocator. These are the same\n arguments in the same order as the arguments to [`from_parts_in`].\n\n After calling this function, the caller is responsible for the\n memory previously managed by the `Vec`. The only way to do\n this is to convert the `NonNull` pointer, length, and capacity back\n into a `Vec` with the [`from_parts_in`] function, allowing\n the destructor to perform the cleanup.\n\n [`from_parts_in`]: Vec::from_parts_in\n\n # Examples\n\n ```\n #![feature(allocator_api, box_vec_non_null)]\n\n use std::alloc::System;\n\n let mut v: Vec<i32, System> = Vec::new_in(System);\n v.push(-1);\n v.push(0);\n v.push(1);\n\n let (ptr, len, cap, alloc) = v.into_parts_with_alloc();\n\n let rebuilt = unsafe {\n     // We can now make changes to the components, such as\n     // transmuting the raw pointer to a compatible type.\n     let ptr = ptr.cast::<u32>();\n\n     Vec::from_parts_in(ptr, len, cap, alloc)\n };\n assert_eq!(rebuilt, [4294967295, 0, 1]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

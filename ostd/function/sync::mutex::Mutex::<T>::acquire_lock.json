@@ -1,0 +1,52 @@
+{
+  "name": "sync::mutex::Mutex::<T>::acquire_lock",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicBool::compare_exchange": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the [`bool`] if the current value is the same as the `current` value.\n\n The return value is a result indicating whether the new value was written and containing\n the previous value. On success this value is guaranteed to be equal to `current`.\n\n `compare_exchange` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. `success` describes the required ordering for the\n read-modify-write operation that takes place if the comparison with `current` succeeds.\n `failure` describes the required ordering for the load operation that takes place when\n the comparison fails. Using [`Acquire`] as success ordering makes the store part\n of this operation [`Relaxed`], and using [`Release`] makes the successful load\n [`Relaxed`]. The failure ordering can only be [`SeqCst`], [`Acquire`] or [`Relaxed`].\n\n **Note:** This method is only available on platforms that support atomic\n operations on `u8`.\n\n # Examples\n\n ```\n use std::sync::atomic::{AtomicBool, Ordering};\n\n let some_bool = AtomicBool::new(true);\n\n assert_eq!(some_bool.compare_exchange(true,\n                                       false,\n                                       Ordering::Acquire,\n                                       Ordering::Relaxed),\n            Ok(true));\n assert_eq!(some_bool.load(Ordering::Relaxed), false);\n\n assert_eq!(some_bool.compare_exchange(true, true,\n                                       Ordering::SeqCst,\n                                       Ordering::Acquire),\n            Err(false));\n assert_eq!(some_bool.load(Ordering::Relaxed), false);\n ```\n\n # Considerations\n\n `compare_exchange` is a [compare-and-swap operation] and thus exhibits the usual downsides\n of CAS operations. In particular, a load of the value followed by a successful\n `compare_exchange` with the previous load *does not ensure* that other threads have not\n changed the value in the interim. This is usually important when the *equality* check in\n the `compare_exchange` is being used to check the *identity* of a value, but equality\n does not necessarily imply identity. In this case, `compare_exchange` can lead to the\n [ABA problem].\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::is_ok": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the result is [`Ok`].\n\n # Examples\n\n ```\n let x: Result<i32, &str> = Ok(-3);\n assert_eq!(x.is_ok(), true);\n\n let x: Result<i32, &str> = Err(\"Some error message\");\n assert_eq!(x.is_ok(), false);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicBool": [
+      "Ref"
+    ],
+    "sync::mutex::Mutex": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 2554,
+  "span": "ostd/src/sync/mutex.rs:62:5: 66:6",
+  "src": "fn acquire_lock(&self) -> bool {\n        self.lock\n            .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)\n            .is_ok()\n    }",
+  "mir": "fn sync::mutex::Mutex::<T>::acquire_lock(_1: &sync::mutex::Mutex<T>) -> bool {\n    let mut _0: bool;\n    let mut _2: &core::result::Result<bool, bool>;\n    let  _3: core::result::Result<bool, bool>;\n    let mut _4: &core::sync::atomic::AtomicBool;\n    let mut _5: core::sync::atomic::Ordering;\n    let mut _6: core::sync::atomic::Ordering;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &((*_1).0: core::sync::atomic::AtomicBool);\n        StorageLive(_5);\n        _5 = core::sync::atomic::Ordering::Acquire;\n        StorageLive(_6);\n        _6 = core::sync::atomic::Ordering::Relaxed;\n        _3 = core::sync::atomic::AtomicBool::compare_exchange(move _4, false, true, move _5, move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = &_3;\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_4);\n        _0 = core::result::Result::<bool, bool>::is_ok(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

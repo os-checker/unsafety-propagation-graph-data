@@ -1,0 +1,77 @@
+{
+  "name": "str::<impl str>::floor_char_boundary",
+  "safe": true,
+  "callees": {
+    "str::<impl str>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of `self`.\n\n This length is in bytes, not [`char`]s or graphemes. In other words,\n it might not be what a human considers the length of the string.\n\n [`char`]: prim@char\n\n # Examples\n\n ```\n let len = \"foo\".len();\n assert_eq!(3, len);\n\n assert_eq!(\"ƒoo\".len(), 4); // fancy f!\n assert_eq!(\"ƒoo\".chars().count(), 3);\n ```\n",
+      "adt": {}
+    },
+    "str::<impl str>::as_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unused_attributes"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unused_attributes\n"
+        ]
+      },
+      "doc": " Converts a string slice to a byte slice. To convert the byte slice back\n into a string slice, use the [`from_utf8`] function.\n\n # Examples\n\n ```\n let bytes = \"bors\".as_bytes();\n assert_eq!(b\"bors\", bytes);\n ```\n",
+      "adt": {}
+    },
+    "num::<impl u8>::is_utf8_char_boundary": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "num::<impl usize>::saturating_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Saturating integer subtraction. Computes `self - rhs`, saturating\n at the numeric bounds instead of overflowing.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    },
+    "panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 3096,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/str/mod.rs:410:5: 427:6",
+  "src": "pub const fn floor_char_boundary(&self, index: usize) -> usize {\n        if index >= self.len() {\n            self.len()\n        } else {\n            let mut i = index;\n            while i > 0 {\n                if self.as_bytes()[i].is_utf8_char_boundary() {\n                    break;\n                }\n                i -= 1;\n            }\n\n            //  The character boundary will be within four bytes of the index\n            debug_assert!(i >= index.saturating_sub(3));\n\n            i\n        }\n    }",
+  "mir": "fn str::<impl str>::floor_char_boundary(_1: &str, _2: usize) -> usize {\n    let mut _0: usize;\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: usize;\n    let mut _6: bool;\n    let mut _7: usize;\n    let mut _8: bool;\n    let mut _9: u8;\n    let mut _10: &[u8];\n    let  _11: usize;\n    let mut _12: usize;\n    let mut _13: bool;\n    let mut _14: (usize, bool);\n    let mut _15: bool;\n    let mut _16: usize;\n    let mut _17: usize;\n    let mut _18: !;\n    debug self => _1;\n    debug index => _2;\n    debug i => _5;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = str::<impl str>::len(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = Ge(_2, move _4);\n        switchInt(move _3) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = str::<impl str>::len(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        goto -> bb18;\n    }\n    bb4: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = _2;\n        goto -> bb5;\n    }\n    bb5: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = _5;\n        _6 = Gt(move _7, 0_usize);\n        switchInt(move _6) -> [0: bb13, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = str::<impl str>::as_bytes(_1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageLive(_11);\n        _11 = _5;\n        _12 = PtrMetadata(_10);\n        _13 = Lt(_11, _12);\n        assert(move _13, \"index out of bounds: the length is {} but the index is {}\", move _12, _11) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _9 = (*_10)[_11];\n        _8 = num::<impl u8>::is_utf8_char_boundary(move _9) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        switchInt(move _8) -> [0: bb11, otherwise: bb10];\n    }\n    bb10: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_8);\n        goto -> bb14;\n    }\n    bb11: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_8);\n        _14 = CheckedSub(_5, 1_usize);\n        assert(!move (_14.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _5, 1_usize) -> [success: bb12, unwind unreachable];\n    }\n    bb12: {\n        _5 = move (_14.0: usize);\n        StorageDead(_6);\n        goto -> bb5;\n    }\n    bb13: {\n        StorageDead(_7);\n        goto -> bb14;\n    }\n    bb14: {\n        StorageDead(_6);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = _5;\n        StorageLive(_17);\n        _17 = num::<impl usize>::saturating_sub(_2, 3_usize) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        _15 = Ge(move _16, move _17);\n        switchInt(move _15) -> [0: bb17, otherwise: bb16];\n    }\n    bb16: {\n        StorageDead(_17);\n        StorageDead(_16);\n        StorageDead(_15);\n        _0 = _5;\n        StorageDead(_5);\n        goto -> bb18;\n    }\n    bb17: {\n        StorageDead(_17);\n        StorageDead(_16);\n        _18 = panicking::panic(\"assertion failed: i >= index.saturating_sub(3)\") -> unwind unreachable;\n    }\n    bb18: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Finds the closest `x` not exceeding `index` where [`is_char_boundary(x)`] is `true`.\n\n This method can help you truncate a string so that it's still valid UTF-8, but doesn't\n exceed a given number of bytes. Note that this is done purely at the character level\n and can still visually split graphemes, even though the underlying characters aren't\n split. For example, the emoji 🧑‍🔬 (scientist) could be split so that the string only\n includes 🧑 (person) instead.\n\n [`is_char_boundary(x)`]: Self::is_char_boundary\n\n # Examples\n\n ```\n let s = \"❤️🧡💛💚💙💜\";\n assert_eq!(s.len(), 26);\n assert!(!s.is_char_boundary(13));\n\n let closest = s.floor_char_boundary(13);\n assert_eq!(closest, 10);\n assert_eq!(&s[..closest], \"❤️🧡\");\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

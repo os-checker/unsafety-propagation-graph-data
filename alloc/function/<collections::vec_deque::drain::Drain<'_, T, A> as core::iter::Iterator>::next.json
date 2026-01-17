@@ -1,0 +1,79 @@
+{
+  "name": "<collections::vec_deque::drain::Drain<'_, T, A> as core::iter::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "core::ptr::NonNull::<T>::as_ref": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a shared reference to the value. If the value may be uninitialized, [`as_uninit_ref`]\n must be used instead.\n\n For the mutable counterpart see [`as_mut`].\n\n [`as_uninit_ref`]: NonNull::as_uninit_ref\n [`as_mut`]: NonNull::as_mut\n\n # Safety\n\n When calling this method, you have to ensure that\n the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"ptr is null!\");\n\n let ref_x = unsafe { ptr.as_ref() };\n println!(\"{ref_x}\");\n ```\n\n [the module documentation]: crate::ptr#safety\n",
+      "adt": {}
+    },
+    "collections::vec_deque::VecDeque::<T, A>::to_physical_idx": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::NonNull::<T>::as_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a unique reference to the value. If the value may be uninitialized, [`as_uninit_mut`]\n must be used instead.\n\n For the shared counterpart see [`as_ref`].\n\n [`as_uninit_mut`]: NonNull::as_uninit_mut\n [`as_ref`]: NonNull::as_ref\n\n # Safety\n\n When calling this method, you have to ensure that\n the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let mut ptr = NonNull::new(&mut x).expect(\"null pointer\");\n\n let x_ref = unsafe { ptr.as_mut() };\n assert_eq!(*x_ref, 0);\n *x_ref += 2;\n assert_eq!(*x_ref, 2);\n ```\n\n [the module documentation]: crate::ptr#safety\n",
+      "adt": {}
+    },
+    "collections::vec_deque::VecDeque::<T, A>::buffer_read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Moves an element out of the buffer\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "collections::vec_deque::drain::Drain": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(4)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Ref",
+      "MutRef"
+    ],
+    "collections::vec_deque::VecDeque": [
+      "Ref",
+      "MutRef"
+    ]
+  },
+  "path": 1323,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/drain.rs:240:5: 248:6",
+  "src": "fn next(&mut self) -> Option<T> {\n        if self.remaining == 0 {\n            return None;\n        }\n        let wrapped_idx = unsafe { self.deque.as_ref().to_physical_idx(self.idx) };\n        self.idx += 1;\n        self.remaining -= 1;\n        Some(unsafe { self.deque.as_mut().buffer_read(wrapped_idx) })\n    }",
+  "mir": "fn <collections::vec_deque::drain::Drain<'_, T, A> as core::iter::Iterator>::next(_1: &mut collections::vec_deque::drain::Drain<'_, T, A>) -> core::option::Option<T> {\n    let mut _0: core::option::Option<T>;\n    let mut _2: usize;\n    let  _3: usize;\n    let  _4: &collections::vec_deque::VecDeque<T, A>;\n    let mut _5: &core::ptr::NonNull<collections::vec_deque::VecDeque<T, A>>;\n    let mut _6: usize;\n    let mut _7: (usize, bool);\n    let mut _8: (usize, bool);\n    let mut _9: T;\n    let mut _10: &mut collections::vec_deque::VecDeque<T, A>;\n    let mut _11: &mut core::ptr::NonNull<collections::vec_deque::VecDeque<T, A>>;\n    debug self => _1;\n    debug wrapped_idx => _3;\n    bb0: {\n        StorageLive(_2);\n        _2 = ((*_1).4: usize);\n        switchInt(move _2) -> [0: bb1, otherwise: bb2];\n    }\n    bb1: {\n        StorageDead(_2);\n        _0 = core::option::Option::None;\n        goto -> bb9;\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_5);\n        _5 = &((*_1).0: core::ptr::NonNull<collections::vec_deque::VecDeque<T, A>>);\n        _4 = core::ptr::NonNull::<collections::vec_deque::VecDeque<T, A>>::as_ref::<'_>(move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageLive(_6);\n        _6 = ((*_1).2: usize);\n        _3 = collections::vec_deque::VecDeque::<T, A>::to_physical_idx(_4, move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        _7 = CheckedAdd(((*_1).2: usize), 1_usize);\n        assert(!move (_7.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).2: usize), 1_usize) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        ((*_1).2: usize) = move (_7.0: usize);\n        _8 = CheckedSub(((*_1).4: usize), 1_usize);\n        assert(!move (_8.1: bool), \"attempt to compute `{} - {}`, which would overflow\", ((*_1).4: usize), 1_usize) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        ((*_1).4: usize) = move (_8.0: usize);\n        StorageLive(_9);\n        StorageLive(_11);\n        _11 = &mut ((*_1).0: core::ptr::NonNull<collections::vec_deque::VecDeque<T, A>>);\n        _10 = core::ptr::NonNull::<collections::vec_deque::VecDeque<T, A>>::as_mut::<'_>(move _11) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_11);\n        _9 = collections::vec_deque::VecDeque::<T, A>::buffer_read(_10, _3) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _0 = core::option::Option::Some(move _9);\n        StorageDead(_9);\n        goto -> bb9;\n    }\n    bb9: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

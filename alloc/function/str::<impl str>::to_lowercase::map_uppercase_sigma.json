@@ -1,0 +1,90 @@
+{
+  "name": "str::<impl str>::to_lowercase::map_uppercase_sigma",
+  "safe": true,
+  "callees": {
+    "core::char::methods::<impl char>::len_utf8": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of bytes this `char` would need if encoded in UTF-8.\n\n That number of bytes is always between 1 and 4, inclusive.\n\n # Examples\n\n Basic usage:\n\n ```\n let len = 'A'.len_utf8();\n assert_eq!(len, 1);\n\n let len = 'ß'.len_utf8();\n assert_eq!(len, 2);\n\n let len = 'ℝ'.len_utf8();\n assert_eq!(len, 3);\n\n let len = '💣'.len_utf8();\n assert_eq!(len, 4);\n ```\n\n The `&str` type guarantees that its contents are UTF-8, and so we can compare the length it\n would take if each code point was represented as a `char` vs in the `&str` itself:\n\n ```\n // as chars\n let eastern = '東';\n let capital = '京';\n\n // both can be represented as three bytes\n assert_eq!(3, eastern.len_utf8());\n assert_eq!(3, capital.len_utf8());\n\n // as a &str, these two are encoded in UTF-8\n let tokyo = \"東京\";\n\n let len = eastern.len_utf8() + capital.len_utf8();\n\n // we can see that they take six bytes total...\n assert_eq!(6, tokyo.len());\n\n // ... just like the &str\n assert_eq!(len, tokyo.len());\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "core::str::<impl str>::chars": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the [`char`]s of a string slice.\n\n As a string slice consists of valid UTF-8, we can iterate through a\n string slice by [`char`]. This method returns such an iterator.\n\n It's important to remember that [`char`] represents a Unicode Scalar\n Value, and might not match your idea of what a 'character' is. Iteration\n over grapheme clusters may be what you actually want. This functionality\n is not provided by Rust's standard library, check crates.io instead.\n\n # Examples\n\n Basic usage:\n\n ```\n let word = \"goodbye\";\n\n let count = word.chars().count();\n assert_eq!(7, count);\n\n let mut chars = word.chars();\n\n assert_eq!(Some('g'), chars.next());\n assert_eq!(Some('o'), chars.next());\n assert_eq!(Some('o'), chars.next());\n assert_eq!(Some('d'), chars.next());\n assert_eq!(Some('b'), chars.next());\n assert_eq!(Some('y'), chars.next());\n assert_eq!(Some('e'), chars.next());\n\n assert_eq!(None, chars.next());\n ```\n\n Remember, [`char`]s might not match your intuition about characters:\n\n [`char`]: prim@char\n\n ```\n let y = \"y̆\";\n\n let mut chars = y.chars();\n\n assert_eq!(Some('y'), chars.next()); // not 'y̆'\n assert_eq!(Some('\\u{0306}'), chars.next());\n\n assert_eq!(None, chars.next());\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::rev": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reverses an iterator's direction.\n\n Usually, iterators iterate from left to right. After using `rev()`,\n an iterator will instead iterate from right to left.\n\n This is only possible if the iterator has an end, so `rev()` only\n works on [`DoubleEndedIterator`]s.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter().rev();\n\n assert_eq!(iter.next(), Some(3));\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(1));\n\n assert_eq!(iter.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "str::<impl str>::to_lowercase::case_ignorable_then_cased": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ops::RangeTo": [
+      "Plain"
+    ],
+    "core::str::Chars": [
+      "Plain"
+    ],
+    "core::iter::Rev": [
+      "Plain"
+    ],
+    "core::ops::RangeFrom": [
+      "Plain"
+    ]
+  },
+  "path": 1879,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/str.rs:411:9: 418:10",
+  "src": "fn map_uppercase_sigma(from: &str, i: usize) -> char {\n            // See https://www.unicode.org/versions/Unicode7.0.0/ch03.pdf#G33992\n            // for the definition of `Final_Sigma`.\n            debug_assert!('Σ'.len_utf8() == 2);\n            let is_word_final = case_ignorable_then_cased(from[..i].chars().rev())\n                && !case_ignorable_then_cased(from[i + 2..].chars());\n            if is_word_final { 'ς' } else { 'σ' }\n        }",
+  "mir": "fn str::<impl str>::to_lowercase::map_uppercase_sigma(_1: &str, _2: usize) -> char {\n    let mut _0: char;\n    let mut _3: usize;\n    let mut _4: !;\n    let  _5: bool;\n    let mut _6: bool;\n    let mut _7: core::iter::Rev<core::str::Chars<'_>>;\n    let mut _8: core::str::Chars<'_>;\n    let  _9: &str;\n    let mut _10: core::ops::RangeTo<usize>;\n    let mut _11: bool;\n    let mut _12: core::str::Chars<'_>;\n    let  _13: &str;\n    let mut _14: core::ops::RangeFrom<usize>;\n    let mut _15: usize;\n    let mut _16: (usize, bool);\n    let mut _17: bool;\n    debug from => _1;\n    debug i => _2;\n    debug is_word_final => _5;\n    bb0: {\n        StorageLive(_3);\n        _3 = core::char::methods::<impl char>::len_utf8('Σ') -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [2: bb2, otherwise: bb3];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_10);\n        _10 = RangeTo(_2);\n        _9 = <str as core::ops::Index<core::ops::RangeTo<usize>>>::index(_1, move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        _4 = core::panicking::panic(\"assertion failed: 'Σ'.len_utf8() == 2\") -> unwind unreachable;\n    }\n    bb4: {\n        StorageDead(_10);\n        _8 = core::str::<impl str>::chars(_9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _7 = <core::str::Chars<'_> as core::iter::Iterator>::rev(move _8) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_8);\n        _6 = str::<impl str>::to_lowercase::case_ignorable_then_cased::<core::iter::Rev<core::str::Chars<'_>>>(move _7) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        switchInt(move _6) -> [0: bb9, otherwise: bb8];\n    }\n    bb8: {\n        StorageDead(_7);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_14);\n        StorageLive(_15);\n        _16 = CheckedAdd(_2, 2_usize);\n        assert(!move (_16.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _2, 2_usize) -> [success: bb10, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_7);\n        _5 = false;\n        goto -> bb14;\n    }\n    bb10: {\n        _15 = move (_16.0: usize);\n        _14 = RangeFrom(move _15);\n        StorageDead(_15);\n        _13 = <str as core::ops::Index<core::ops::RangeFrom<usize>>>::index(_1, move _14) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_14);\n        _12 = core::str::<impl str>::chars(_13) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        _11 = str::<impl str>::to_lowercase::case_ignorable_then_cased::<core::str::Chars<'_>>(move _12) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_12);\n        _5 = Not(move _11);\n        StorageDead(_11);\n        goto -> bb14;\n    }\n    bb14: {\n        StorageDead(_6);\n        StorageLive(_17);\n        _17 = _5;\n        switchInt(move _17) -> [0: bb16, otherwise: bb15];\n    }\n    bb15: {\n        _0 = 'ς';\n        goto -> bb17;\n    }\n    bb16: {\n        _0 = 'σ';\n        goto -> bb17;\n    }\n    bb17: {\n        StorageDead(_17);\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

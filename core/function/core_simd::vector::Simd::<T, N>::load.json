@@ -1,0 +1,79 @@
+{
+  "name": "core_simd::vector::Simd::<T, N>::load",
+  "safe": false,
+  "callees": {
+    "mem::maybe_uninit::MaybeUninit::<T>::uninit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `MaybeUninit<T>` in an uninitialized state.\n\n Note that dropping a `MaybeUninit<T>` will never call `T`'s drop code.\n It is your responsibility to make sure `T` gets dropped if it got initialized.\n\n See the [type-level documentation][MaybeUninit] for some examples.\n\n # Example\n\n ```\n use std::mem::MaybeUninit;\n\n let v: MaybeUninit<String> = MaybeUninit::uninit();\n ```\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "Constructor"
+      }
+    },
+    "mem::maybe_uninit::MaybeUninit::<T>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<Vec<u32>>`.\n // This is okay because we initialized it.\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n x_vec.push(3);\n assert_eq!(x_vec.len(), 4);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "MutableAsArgument"
+      }
+    },
+    "ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "mem::maybe_uninit::MaybeUninit::<T>::assume_init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the value from the `MaybeUninit<T>` container. This is a great way\n to ensure that the data will get dropped, because the resulting `T` is\n subject to the usual drop handling.\n\n # Safety\n\n It is up to the caller to guarantee that the `MaybeUninit<T>` really is in an initialized\n state. Calling this when the content is not yet fully initialized causes immediate undefined\n behavior. The [type-level documentation][inv] contains more information about\n this initialization invariant.\n\n [inv]: #initialization-invariant\n\n On top of that, remember that most types have additional invariants beyond merely\n being considered initialized at the type level. For example, a `1`-initialized [`Vec<T>`]\n is considered initialized (under the current implementation; this does not constitute\n a stable guarantee) because the only requirement the compiler knows about it\n is that the data pointer must be non-null. Creating such a `Vec<T>` does not cause\n *immediate* undefined behavior, but will cause undefined behavior with most\n safe operations (including dropping it).\n\n [`Vec<T>`]: ../../std/vec/struct.Vec.html\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<bool>::uninit();\n x.write(true);\n let x_init = unsafe { x.assume_init() };\n assert_eq!(x_init, true);\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let x = MaybeUninit::<Vec<u32>>::uninit();\n let x_init = unsafe { x.assume_init() };\n // `x` had not been initialized yet, so this last line caused undefined behavior. ⚠️\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mem::maybe_uninit::MaybeUninit": [
+      "Plain",
+      "MutRef"
+    ],
+    "core_simd::vector::Simd": [
+      "Plain"
+    ]
+  },
+  "path": 12676,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/vector.rs:216:5: 228:6",
+  "src": "const unsafe fn load(ptr: *const [T; N]) -> Self {\n        // There are potentially simpler ways to write this function, but this should result in\n        // LLVM `load <N x T>`\n\n        let mut tmp = core::mem::MaybeUninit::<Self>::uninit();\n        // SAFETY: `Simd<T, N>` always contains `N` elements of type `T`.  It may have padding\n        // which does not need to be initialized.  The safety of reading `ptr` is ensured by the\n        // caller.\n        unsafe {\n            core::ptr::copy_nonoverlapping(ptr, tmp.as_mut_ptr().cast(), 1);\n            tmp.assume_init()\n        }\n    }",
+  "mir": "fn core_simd::vector::Simd::<T, N>::load(_1: *const [T; N]) -> core_simd::vector::Simd<T, N> {\n    let mut _0: core_simd::vector::Simd<T, N>;\n    let mut _2: mem::maybe_uninit::MaybeUninit<core_simd::vector::Simd<T, N>>;\n    let  _3: ();\n    let mut _4: *mut [T; N];\n    let mut _5: *mut core_simd::vector::Simd<T, N>;\n    let mut _6: &mut mem::maybe_uninit::MaybeUninit<core_simd::vector::Simd<T, N>>;\n    let mut _7: mem::maybe_uninit::MaybeUninit<core_simd::vector::Simd<T, N>>;\n    debug ptr => _1;\n    debug tmp => _2;\n    bb0: {\n        StorageLive(_2);\n        _2 = mem::maybe_uninit::MaybeUninit::<core_simd::vector::Simd<T, N>>::uninit() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut _2;\n        _5 = mem::maybe_uninit::MaybeUninit::<core_simd::vector::Simd<T, N>>::as_mut_ptr(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _4 = ptr::mut_ptr::<impl *mut core_simd::vector::Simd<T, N>>::cast::<[T; N]>(move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        _3 = ptr::copy_nonoverlapping::<[T; N]>(_1, move _4, 1_usize) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        StorageLive(_7);\n        _7 = _2;\n        _0 = mem::maybe_uninit::MaybeUninit::<core_simd::vector::Simd<T, N>>::assume_init(move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Loads a vector from an array of `T`.\n\n This function is necessary since `repr(simd)` has padding for non-power-of-2 vectors (at the time of writing).\n With padding, `read_unaligned` will read past the end of an array of N elements.\n\n # Safety\n Reading `ptr` must be safe, as if by `<*const [T; N]>::read`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

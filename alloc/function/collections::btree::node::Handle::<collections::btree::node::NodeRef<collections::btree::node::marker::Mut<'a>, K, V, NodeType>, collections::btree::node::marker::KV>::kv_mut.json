@@ -1,0 +1,89 @@
+{
+  "name": "collections::btree::node::Handle::<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'a>, K, V, NodeType>, collections::btree::node::marker::KV>::kv_mut",
+  "safe": true,
+  "callees": {
+    "collections::btree::node::NodeRef::<BorrowType, K, V, Type>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Finds the length of the node. This is the number of keys or values.\n The number of edges is `len() + 1`.\n Note that, despite being safe, calling this function can have the side effect\n of invalidating mutable references that unsafe code has created.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "ImmutableAsArgument"
+      }
+    },
+    "collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'a>, K, V, Type>::as_leaf_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Borrows exclusive access to the leaf portion of a leaf or internal node.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "MutableAsArgument"
+      }
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::get_unchecked_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to an element or subslice, without doing\n bounds checking.\n\n For a safe alternative see [`get_mut`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used.\n\n You can think of this like `.get_mut(index).unwrap_unchecked()`.  It's\n UB to call `.get_unchecked_mut(len)`, even if you immediately convert\n to a pointer.  And it's UB to call `.get_unchecked_mut(..len + 1)`,\n `.get_unchecked_mut(..=len)`, or similar.\n\n [`get_mut`]: slice::get_mut\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n\n unsafe {\n     let elem = x.get_unchecked_mut(1);\n     *elem = 13;\n }\n assert_eq!(x, &[1, 13, 4]);\n ```\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::assume_init_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable (unique) reference to the contained value.\n\n This can be useful when we want to access a `MaybeUninit` that has been\n initialized but don't have ownership of the `MaybeUninit` (preventing the use\n of `.assume_init()`).\n\n # Safety\n\n Calling this when the content is not yet fully initialized causes undefined\n behavior: it is up to the caller to guarantee that the `MaybeUninit<T>` really\n is in an initialized state. For instance, `.assume_init_mut()` cannot be used to\n initialize a `MaybeUninit`.\n\n # Examples\n\n ### Correct usage of this method:\n\n ```rust\n # #![allow(unexpected_cfgs)]\n use std::mem::MaybeUninit;\n\n # unsafe extern \"C\" fn initialize_buffer(buf: *mut [u8; 1024]) { unsafe { *buf = [0; 1024] } }\n # #[cfg(FALSE)]\n extern \"C\" {\n     /// Initializes *all* the bytes of the input buffer.\n     fn initialize_buffer(buf: *mut [u8; 1024]);\n }\n\n let mut buf = MaybeUninit::<[u8; 1024]>::uninit();\n\n // Initialize `buf`:\n unsafe { initialize_buffer(buf.as_mut_ptr()); }\n // Now we know that `buf` has been initialized, so we could `.assume_init()` it.\n // However, using `.assume_init()` may trigger a `memcpy` of the 1024 bytes.\n // To assert our buffer has been initialized without copying it, we upgrade\n // the `&mut MaybeUninit<[u8; 1024]>` to a `&mut [u8; 1024]`:\n let buf: &mut [u8; 1024] = unsafe {\n     // SAFETY: `buf` has been initialized.\n     buf.assume_init_mut()\n };\n\n // Now we can use `buf` as a normal slice:\n buf.sort_unstable();\n assert!(\n     buf.windows(2).all(|pair| pair[0] <= pair[1]),\n     \"buffer is sorted\",\n );\n ```\n\n ### *Incorrect* usages of this method:\n\n You cannot use `.assume_init_mut()` to initialize a value:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let mut b = MaybeUninit::<bool>::uninit();\n unsafe {\n     *b.assume_init_mut() = true;\n     // We have created a (mutable) reference to an uninitialized `bool`!\n     // This is undefined behavior. ⚠️\n }\n ```\n\n For instance, you cannot [`Read`] into an uninitialized buffer:\n\n [`Read`]: ../../std/io/trait.Read.html\n\n ```rust,no_run\n use std::{io, mem::MaybeUninit};\n\n fn read_chunk (reader: &'_ mut dyn io::Read) -> io::Result<[u8; 64]>\n {\n     let mut buffer = MaybeUninit::<[u8; 64]>::uninit();\n     reader.read_exact(unsafe { buffer.assume_init_mut() })?;\n     //                         ^^^^^^^^^^^^^^^^^^^^^^^^\n     // (mutable) reference to uninitialized memory!\n     // This is undefined behavior.\n     Ok(unsafe { buffer.assume_init() })\n }\n ```\n\n Nor can you use direct field access to do field-by-field gradual initialization:\n\n ```rust,no_run\n use std::{mem::MaybeUninit, ptr};\n\n struct Foo {\n     a: u32,\n     b: u8,\n }\n\n let foo: Foo = unsafe {\n     let mut foo = MaybeUninit::<Foo>::uninit();\n     ptr::write(&mut foo.assume_init_mut().a as *mut u32, 1337);\n     //              ^^^^^^^^^^^^^^^^^^^^^\n     // (mutable) reference to uninitialized memory!\n     // This is undefined behavior.\n     ptr::write(&mut foo.assume_init_mut().b as *mut u8, 42);\n     //              ^^^^^^^^^^^^^^^^^^^^^\n     // (mutable) reference to uninitialized memory!\n     // This is undefined behavior.\n     foo.assume_init()\n };\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::btree::node::Handle": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "collections::btree::node::NodeRef": [
+      "Ref",
+      "MutRef"
+    ],
+    "collections::btree::node::LeafNode": [
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(4)))"
+    ],
+    "core::mem::MaybeUninit": [
+      "MutRef"
+    ]
+  },
+  "path": 898,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/node.rs:1157:5: 1167:6",
+  "src": "pub(super) fn kv_mut(&mut self) -> (&mut K, &mut V) {\n        debug_assert!(self.idx < self.node.len());\n        // We cannot call separate key and value methods, because calling the second one\n        // invalidates the reference returned by the first.\n        unsafe {\n            let leaf = self.node.as_leaf_mut();\n            let key = leaf.keys.get_unchecked_mut(self.idx).assume_init_mut();\n            let val = leaf.vals.get_unchecked_mut(self.idx).assume_init_mut();\n            (key, val)\n        }\n    }",
+  "mir": "fn collections::btree::node::Handle::<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'a>, K, V, NodeType>, collections::btree::node::marker::KV>::kv_mut(_1: &mut collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, NodeType>, collections::btree::node::marker::KV>) -> (&mut K, &mut V) {\n    let mut _0: (&mut K, &mut V);\n    let mut _2: bool;\n    let mut _3: usize;\n    let mut _4: usize;\n    let mut _5: &collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, NodeType>;\n    let mut _6: !;\n    let  _7: &mut collections::btree::node::LeafNode<K, V>;\n    let mut _8: &mut collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, NodeType>;\n    let  _9: &mut K;\n    let mut _10: &mut core::mem::MaybeUninit<K>;\n    let mut _11: &mut [core::mem::MaybeUninit<K>];\n    let mut _12: &mut [core::mem::MaybeUninit<K>; 11];\n    let mut _13: usize;\n    let  _14: &mut V;\n    let mut _15: &mut core::mem::MaybeUninit<V>;\n    let mut _16: &mut [core::mem::MaybeUninit<V>];\n    let mut _17: &mut [core::mem::MaybeUninit<V>; 11];\n    let mut _18: usize;\n    debug self => _1;\n    debug leaf => _7;\n    debug key => _9;\n    debug val => _14;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = ((*_1).1: usize);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_1).0: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, NodeType>);\n        _4 = collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'_>, K, V, NodeType>::len(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _2 = Lt(move _3, move _4);\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageDead(_2);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &mut ((*_1).0: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, NodeType>);\n        _7 = collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'_>, K, V, NodeType>::as_leaf_mut(move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_3);\n        _6 = core::panicking::panic(\"assertion failed: self.idx < self.node.len()\") -> unwind unreachable;\n    }\n    bb4: {\n        StorageDead(_8);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &mut ((*_7).3: [core::mem::MaybeUninit<K>; 11]);\n        _11 = move _12 as &mut [core::mem::MaybeUninit<K>];\n        StorageDead(_12);\n        StorageLive(_13);\n        _13 = ((*_1).1: usize);\n        _10 = core::slice::<impl [core::mem::MaybeUninit<K>]>::get_unchecked_mut::<usize>(move _11, move _13) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_13);\n        StorageDead(_11);\n        _9 = core::mem::MaybeUninit::<K>::assume_init_mut(_10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &mut ((*_7).4: [core::mem::MaybeUninit<V>; 11]);\n        _16 = move _17 as &mut [core::mem::MaybeUninit<V>];\n        StorageDead(_17);\n        StorageLive(_18);\n        _18 = ((*_1).1: usize);\n        _15 = core::slice::<impl [core::mem::MaybeUninit<V>]>::get_unchecked_mut::<usize>(move _16, move _18) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_18);\n        StorageDead(_16);\n        _14 = core::mem::MaybeUninit::<V>::assume_init_mut(_15) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _0 = (_9, _14);\n        StorageDead(_7);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

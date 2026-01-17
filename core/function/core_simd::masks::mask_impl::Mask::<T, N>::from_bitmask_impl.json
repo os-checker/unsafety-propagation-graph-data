@@ -1,0 +1,70 @@
+{
+  "name": "core_simd::masks::mask_impl::Mask::<T, N>::from_bitmask_impl",
+  "safe": false,
+  "callees": {
+    "core_simd::vector::Simd::<T, N>::splat": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new SIMD vector with all elements set to the given value.\n\n # Examples\n\n ```\n # #![feature(portable_simd)]\n # #[cfg(feature = \"as_crate\")] use core_simd::simd;\n # #[cfg(not(feature = \"as_crate\"))] use core::simd;\n # use simd::u32x4;\n let v = u32x4::splat(8);\n assert_eq!(v.as_array(), &[8, 8, 8, 8]);\n ```\n",
+      "adt": {
+        "core_simd::vector::Simd": "Constructor"
+      }
+    },
+    "intrinsics::simd::simd_select_bitmask": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Selects elements from a bitmask.\n\n `M` must be an unsigned integer or array of `u8`, matching `simd_bitmask`.\n\n `T` must be a vector.\n\n For each element, if the bit in `mask` is `1`, select the element from\n `if_true`.  If the corresponding bit in `mask` is `0`, select the element from\n `if_false`.\n The remaining bits of the mask are ignored.\n\n The bitmask bit order matches `simd_bitmask`.\n",
+      "adt": {}
+    },
+    "core_simd::swizzle::<impl core_simd::vector::Simd<T, N>>::resize": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Resize a vector.\n\n If `M` > `N`, extends the length of a vector, setting the new elements to `value`.\n If `M` < `N`, truncates the vector to the first `M` elements.\n\n ```\n # #![feature(portable_simd)]\n # #[cfg(feature = \"as_crate\")] use core_simd::simd;\n # #[cfg(not(feature = \"as_crate\"))] use core::simd;\n # use simd::u32x4;\n let x = u32x4::from_array([0, 1, 2, 3]);\n assert_eq!(x.resize::<8>(9).to_array(), [0, 1, 2, 3, 9, 9, 9, 9]);\n assert_eq!(x.resize::<2>(9).to_array(), [0, 1]);\n ```\n",
+      "adt": {
+        "core_simd::vector::Simd": "Constructor"
+      }
+    },
+    "core_simd::masks::mask_impl::Mask::<T, N>::from_int_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core_simd::masks::mask_impl::Mask": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core_simd::vector::Simd": [
+      "Plain"
+    ],
+    "core_simd::masks::mask_impl::Mask": [
+      "Plain"
+    ]
+  },
+  "path": 12401,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/masks/full_masks.rs:161:5: 183:6",
+  "src": "unsafe fn from_bitmask_impl<U: ReverseBits, const M: usize>(bitmask: U) -> Self\n    where\n        LaneCount<M>: SupportedLaneCount,\n    {\n        // LLVM assumes bit order should match endianness\n        let bitmask = if cfg!(target_endian = \"big\") {\n            bitmask.reverse_bits(M)\n        } else {\n            bitmask\n        };\n\n        // SAFETY: `mask` is the correct bitmask type for a u64 bitmask\n        let mask: Simd<T, M> = unsafe {\n            core::intrinsics::simd::simd_select_bitmask(\n                bitmask,\n                Simd::<T, M>::splat(T::TRUE),\n                Simd::<T, M>::splat(T::FALSE),\n            )\n        };\n\n        // SAFETY: `mask` only contains `T::TRUE` or `T::FALSE`\n        unsafe { Self::from_int_unchecked(mask.resize::<N>(T::FALSE)) }\n    }",
+  "mir": "fn core_simd::masks::mask_impl::Mask::<T, N>::from_bitmask_impl(_1: U) -> core_simd::masks::mask_impl::Mask<T, N> {\n    let mut _0: core_simd::masks::mask_impl::Mask<T, N>;\n    let  _2: core_simd::vector::Simd<T, M>;\n    let mut _3: core_simd::vector::Simd<T, M>;\n    let mut _4: core_simd::vector::Simd<T, M>;\n    let mut _5: core_simd::vector::Simd<T, N>;\n    debug bitmask => _1;\n    debug bitmask => _1;\n    debug mask => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = core_simd::vector::Simd::<T, M>::splat(<T as core_simd::masks::sealed::Sealed>::TRUE) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = core_simd::vector::Simd::<T, M>::splat(<T as core_simd::masks::sealed::Sealed>::FALSE) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _2 = intrinsics::simd::simd_select_bitmask::<U, core_simd::vector::Simd<T, M>>(_1, move _3, move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = core_simd::swizzle::<impl core_simd::vector::Simd<T, M>>::resize::<N>(_2, <T as core_simd::masks::sealed::Sealed>::FALSE) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _0 = core_simd::masks::mask_impl::Mask::<T, N>::from_int_unchecked(move _5) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

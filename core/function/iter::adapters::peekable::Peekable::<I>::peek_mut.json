@@ -1,0 +1,51 @@
+{
+  "name": "iter::adapters::peekable::Peekable::<I>::peek_mut",
+  "safe": true,
+  "callees": {
+    "option::Option::<T>::get_or_insert_with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Inserts a value computed from `f` into the option if it is [`None`],\n then returns a mutable reference to the contained value.\n\n # Examples\n\n ```\n let mut x = None;\n\n {\n     let y: &mut u32 = x.get_or_insert_with(|| 5);\n     assert_eq!(y, &5);\n\n     *y = 7;\n }\n\n assert_eq!(x, Some(7));\n ```\n",
+      "adt": {
+        "option::Option": "MutableAsArgument"
+      }
+    },
+    "option::Option::<T>::as_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts from `&mut Option<T>` to `Option<&mut T>`.\n\n # Examples\n\n ```\n let mut x = Some(2);\n match x.as_mut() {\n     Some(v) => *v = 42,\n     None => {},\n }\n assert_eq!(x, Some(42));\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "iter::adapters::peekable::Peekable": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "MutRef",
+      "Plain"
+    ]
+  },
+  "path": 13988,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/peekable.rs:256:5: 259:6",
+  "src": "pub fn peek_mut(&mut self) -> Option<&mut I::Item> {\n        let iter = &mut self.iter;\n        self.peeked.get_or_insert_with(|| iter.next()).as_mut()\n    }",
+  "mir": "fn iter::adapters::peekable::Peekable::<I>::peek_mut(_1: &mut iter::adapters::peekable::Peekable<I>) -> option::Option<&mut <I as iter::traits::iterator::Iterator>::Item> {\n    let mut _0: option::Option<&mut <I as iter::traits::iterator::Iterator>::Item>;\n    let  _2: &mut I;\n    let mut _3: &mut option::Option<<I as iter::traits::iterator::Iterator>::Item>;\n    let mut _4: &mut option::Option<option::Option<<I as iter::traits::iterator::Iterator>::Item>>;\n    let mut _5: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/peekable.rs:258:40: 258:42};\n    debug self => _1;\n    debug iter => _2;\n    bb0: {\n        _2 = &mut ((*_1).0: I);\n        StorageLive(_4);\n        _4 = &mut ((*_1).1: option::Option<option::Option<<I as iter::traits::iterator::Iterator>::Item>>);\n        StorageLive(_5);\n        _5 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/peekable.rs:258:40: 258:42}(_2);\n        _3 = option::Option::<option::Option<<I as iter::traits::iterator::Iterator>::Item>>::get_or_insert_with::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/peekable.rs:258:40: 258:42}>(move _4, move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _0 = option::Option::<<I as iter::traits::iterator::Iterator>::Item>::as_mut(_3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Returns a mutable reference to the next() value without advancing the iterator.\n\n Like [`next`], if there is a value, it is wrapped in a `Some(T)`.\n But if the iteration is over, `None` is returned.\n\n Because `peek_mut()` returns a reference, and many iterators iterate over\n references, there can be a possibly confusing situation where the\n return value is a double reference. You can see this effect in the examples\n below.\n\n [`next`]: Iterator::next\n\n # Examples\n\n Basic usage:\n\n ```\n let mut iter = [1, 2, 3].iter().peekable();\n\n // Like with `peek()`, we can see into the future without advancing the iterator.\n assert_eq!(iter.peek_mut(), Some(&mut &1));\n assert_eq!(iter.peek_mut(), Some(&mut &1));\n assert_eq!(iter.next(), Some(&1));\n\n // Peek into the iterator and set the value behind the mutable reference.\n if let Some(p) = iter.peek_mut() {\n     assert_eq!(*p, &2);\n     *p = &5;\n }\n\n // The value we put in reappears as the iterator continues.\n assert_eq!(iter.collect::<Vec<_>>(), vec![&5, &3]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

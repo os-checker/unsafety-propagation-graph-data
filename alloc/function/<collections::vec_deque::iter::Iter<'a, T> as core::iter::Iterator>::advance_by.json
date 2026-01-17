@@ -1,0 +1,63 @@
+{
+  "name": "<collections::vec_deque::iter::Iter<'a, T> as core::iter::Iterator>::advance_by",
+  "safe": true,
+  "callees": {
+    "core::iter::Iterator::advance_by": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator by `n` elements.\n\n This method will eagerly skip `n` elements by calling [`next`] up to `n`\n times until [`None`] is encountered.\n\n `advance_by(n)` will return `Ok(())` if the iterator successfully advances by\n `n` elements, or a `Err(NonZero<usize>)` with value `k` if [`None`] is encountered,\n where `k` is remaining number of steps that could not be advanced because the iterator ran out.\n If `self` is empty and `n` is non-zero, then this returns `Err(n)`.\n Otherwise, `k` is always less than `n`.\n\n Calling `advance_by(0)` can do meaningful work, for example [`Flatten`]\n can advance its outer iterator until it finds an inner iterator that is not empty, which\n then often allows it to return a more accurate `size_hint()` than in its initial state.\n\n [`Flatten`]: crate::iter::Flatten\n [`next`]: Iterator::next\n\n # Examples\n\n ```\n #![feature(iter_advance_by)]\n\n use std::num::NonZero;\n\n let a = [1, 2, 3, 4];\n let mut iter = a.into_iter();\n\n assert_eq!(iter.advance_by(2), Ok(()));\n assert_eq!(iter.next(), Some(3));\n assert_eq!(iter.advance_by(0), Ok(()));\n assert_eq!(iter.advance_by(100), Err(NonZero::new(99).unwrap())); // only `4` was skipped\n ```\n",
+      "adt": {}
+    },
+    "core::mem::swap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Swaps the values at two mutable locations, without deinitializing either one.\n\n * If you want to swap with a default or dummy value, see [`take`].\n * If you want to swap with a passed value, returning the old value, see [`replace`].\n\n # Examples\n\n ```\n use std::mem;\n\n let mut x = 5;\n let mut y = 42;\n\n mem::swap(&mut x, &mut y);\n\n assert_eq!(42, x);\n assert_eq!(5, y);\n ```\n",
+      "adt": {}
+    },
+    "core::num::NonZero::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained value as a primitive type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::slice::Iter": [
+      "MutRef"
+    ],
+    "collections::vec_deque::iter::Iter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 173, kind: RigidTy(Adt(AdtDef(DefId { id: 2646, name: \"core::num::NonZero\" }), GenericArgs([Type(Ty { id: 14, kind: RigidTy(Uint(Usize)) })]))) })])"
+    ],
+    "core::num::NonZero": [
+      "Plain"
+    ]
+  },
+  "path": 1375,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/iter.rs:107:5: 116:6",
+  "src": "fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {\n        let remaining = self.i1.advance_by(n);\n        match remaining {\n            Ok(()) => Ok(()),\n            Err(n) => {\n                mem::swap(&mut self.i1, &mut self.i2);\n                self.i1.advance_by(n.get())\n            }\n        }\n    }",
+  "mir": "fn <collections::vec_deque::iter::Iter<'a, T> as core::iter::Iterator>::advance_by(_1: &mut collections::vec_deque::iter::Iter<'_, T>, _2: usize) -> core::result::Result<(), core::num::NonZero<usize>> {\n    let mut _0: core::result::Result<(), core::num::NonZero<usize>>;\n    let  _3: core::result::Result<(), core::num::NonZero<usize>>;\n    let mut _4: &mut core::slice::Iter<'_, T>;\n    let mut _5: isize;\n    let  _6: core::num::NonZero<usize>;\n    let  _7: ();\n    let mut _8: &mut core::slice::Iter<'_, T>;\n    let mut _9: &mut core::slice::Iter<'_, T>;\n    let mut _10: &mut core::slice::Iter<'_, T>;\n    let mut _11: usize;\n    debug self => _1;\n    debug n => _2;\n    debug remaining => _3;\n    debug n => _6;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &mut ((*_1).0: core::slice::Iter<'_, T>);\n        _3 = <core::slice::Iter<'_, T> as core::iter::Iterator>::advance_by(move _4, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [0: bb4, 1: bb3, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        _6 = ((_3 as variant#1).0: core::num::NonZero<usize>);\n        _8 = &mut ((*_1).0: core::slice::Iter<'_, T>);\n        _9 = &mut ((*_1).1: core::slice::Iter<'_, T>);\n        _7 = core::mem::swap::<core::slice::Iter<'_, T>>(_8, _9) -> [return: bb5, unwind unreachable];\n    }\n    bb4: {\n        _0 = core::result::Result::Ok(());\n        goto -> bb8;\n    }\n    bb5: {\n        StorageLive(_10);\n        _10 = &mut ((*_1).0: core::slice::Iter<'_, T>);\n        StorageLive(_11);\n        _11 = core::num::NonZero::<usize>::get(_6) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _0 = <core::slice::Iter<'_, T> as core::iter::Iterator>::advance_by(move _10, move _11) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_11);\n        StorageDead(_10);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

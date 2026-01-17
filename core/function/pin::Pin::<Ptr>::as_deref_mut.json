@@ -1,0 +1,44 @@
+{
+  "name": "pin::Pin::<Ptr>::as_deref_mut",
+  "safe": true,
+  "callees": {
+    "pin::Pin::<&'a mut T>::get_unchecked_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable reference to the data inside of this `Pin`.\n\n # Safety\n\n This function is unsafe. You must guarantee that you will never move\n the data out of the mutable reference you receive when you call this\n function, so that the invariants on the `Pin` type can be upheld.\n\n If the underlying data is `Unpin`, `Pin::get_mut` should be used\n instead.\n",
+      "adt": {}
+    },
+    "pin::Pin::<Ptr>::as_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable reference to the pinned value this `Pin<Ptr>` points to.\n\n This is a generic method to go from `&mut Pin<Pointer<T>>` to `Pin<&mut T>`.\n It is safe because, as part of the contract of `Pin::new_unchecked`,\n the pointee cannot move after `Pin<Pointer<T>>` got created.\n \"Malicious\" implementations of `Pointer::DerefMut` are likewise\n ruled out by the contract of `Pin::new_unchecked`.\n\n This method is useful when doing multiple calls to functions that consume the\n pinning pointer.\n\n # Example\n\n ```\n use std::pin::Pin;\n\n # struct Type {}\n impl Type {\n     fn method(self: Pin<&mut Self>) {\n         // do something\n     }\n\n     fn call_method_twice(mut self: Pin<&mut Self>) {\n         // `method` consumes `self`, so reborrow the `Pin<&mut Self>` via `as_mut`.\n         self.as_mut().method();\n         self.as_mut().method();\n     }\n }\n ```\n",
+      "adt": {
+        "pin::Pin": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "pin::Pin": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 15901,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/pin.rs:1430:5: 1459:6",
+  "src": "pub const fn as_deref_mut(self: Pin<&mut Self>) -> Pin<&mut Ptr::Target>\n    where\n        Ptr: [const] DerefMut,\n    {\n        // SAFETY: What we're asserting here is that going from\n        //\n        //     Pin<&mut Pin<Ptr>>\n        //\n        // to\n        //\n        //     Pin<&mut Ptr::Target>\n        //\n        // is safe.\n        //\n        // We need to ensure that two things hold for that to be the case:\n        //\n        // 1) Once we give out a `Pin<&mut Ptr::Target>`, a `&mut Ptr::Target` will not be given out.\n        // 2) By giving out a `Pin<&mut Ptr::Target>`, we do not risk violating\n        // `Pin<&mut Pin<Ptr>>`\n        //\n        // The existence of `Pin<Ptr>` is sufficient to guarantee #1: since we already have a\n        // `Pin<Ptr>`, it must already uphold the pinning guarantees, which must mean that\n        // `Pin<&mut Ptr::Target>` does as well, since `Pin::as_mut` is safe. We do not have to rely\n        // on the fact that `Ptr` is _also_ pinned.\n        //\n        // For #2, we need to ensure that code given a `Pin<&mut Ptr::Target>` cannot cause the\n        // `Pin<Ptr>` to move? That is not possible, since `Pin<&mut Ptr::Target>` no longer retains\n        // any access to the `Ptr` itself, much less the `Pin<Ptr>`.\n        unsafe { self.get_unchecked_mut() }.as_mut()\n    }",
+  "mir": "fn pin::Pin::<Ptr>::as_deref_mut(_1: pin::Pin<&mut pin::Pin<Ptr>>) -> pin::Pin<&mut <Ptr as ops::deref::Deref>::Target> {\n    let mut _0: pin::Pin<&mut <Ptr as ops::deref::Deref>::Target>;\n    let mut _2: &mut pin::Pin<Ptr>;\n    debug self => _1;\n    bb0: {\n        _2 = pin::Pin::<&mut pin::Pin<Ptr>>::get_unchecked_mut(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = pin::Pin::<Ptr>::as_mut(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Gets `Pin<&mut T>` to the underlying pinned value from this nested `Pin`-pointer.\n\n This is a generic method to go from `Pin<&mut Pin<Pointer<T>>>` to `Pin<&mut T>`. It is\n safe because the existence of a `Pin<Pointer<T>>` ensures that the pointee, `T`, cannot\n move in the future, and this method does not enable the pointee to move. \"Malicious\"\n implementations of `Ptr::DerefMut` are likewise ruled out by the contract of\n `Pin::new_unchecked`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

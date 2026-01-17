@@ -1,0 +1,237 @@
+{
+  "name": "cpu::local::copy_bsp_for_ap",
+  "safe": false,
+  "callees": {
+    "core::mem::size_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of a type in bytes.\n\n More specifically, this is the offset in bytes between successive elements\n in an array with that item type including alignment padding. Thus, for any\n type `T` and length `n`, `[T; n]` has a size of `n * size_of::<T>()`.\n\n In general, the size of a type is not stable across compilations, but\n specific types such as primitives are.\n\n The following table gives the size for primitives.\n\n Type | `size_of::<Type>()`\n ---- | ---------------\n () | 0\n bool | 1\n u8 | 1\n u16 | 2\n u32 | 4\n u64 | 8\n u128 | 16\n i8 | 1\n i16 | 2\n i32 | 4\n i64 | 8\n i128 | 16\n f32 | 4\n f64 | 8\n char | 4\n\n Furthermore, `usize` and `isize` have the same size.\n\n The types [`*const T`], `&T`, [`Box<T>`], [`Option<&T>`], and `Option<Box<T>>` all have\n the same size. If `T` is `Sized`, all of those types have the same size as `usize`.\n\n The mutability of a pointer does not change its size. As such, `&T` and `&mut T`\n have the same size. Likewise for `*const T` and `*mut T`.\n\n # Size of `#[repr(C)]` items\n\n The `C` representation for items has a defined layout. With this layout,\n the size of items is also stable as long as all fields have a stable size.\n\n ## Size of Structs\n\n For `struct`s, the size is determined by the following algorithm.\n\n For each field in the struct ordered by declaration order:\n\n 1. Add the size of the field.\n 2. Round up the current size to the nearest multiple of the next field's [alignment].\n\n Finally, round the size of the struct to the nearest multiple of its [alignment].\n The alignment of the struct is usually the largest alignment of all its\n fields; this can be changed with the use of `repr(align(N))`.\n\n Unlike `C`, zero sized structs are not rounded up to one byte in size.\n\n ## Size of Enums\n\n Enums that carry no data other than the discriminant have the same size as C enums\n on the platform they are compiled for.\n\n ## Size of Unions\n\n The size of a union is the size of its largest field.\n\n Unlike `C`, zero sized unions are not rounded up to one byte in size.\n\n # Examples\n\n ```\n // Some primitives\n assert_eq!(4, size_of::<i32>());\n assert_eq!(8, size_of::<f64>());\n assert_eq!(0, size_of::<()>());\n\n // Some arrays\n assert_eq!(8, size_of::<[i32; 2]>());\n assert_eq!(12, size_of::<[i32; 3]>());\n assert_eq!(0, size_of::<[i32; 0]>());\n\n\n // Pointer size equality\n assert_eq!(size_of::<&i32>(), size_of::<*const i32>());\n assert_eq!(size_of::<&i32>(), size_of::<Box<i32>>());\n assert_eq!(size_of::<&i32>(), size_of::<Option<&i32>>());\n assert_eq!(size_of::<Box<i32>>(), size_of::<Option<Box<i32>>>());\n ```\n\n Using `#[repr(C)]`.\n\n ```\n #[repr(C)]\n struct FieldStruct {\n     first: u8,\n     second: u16,\n     third: u8\n }\n\n // The size of the first field is 1, so add 1 to the size. Size is 1.\n // The alignment of the second field is 2, so add 1 to the size for padding. Size is 2.\n // The size of the second field is 2, so add 2 to the size. Size is 4.\n // The alignment of the third field is 1, so add 0 to the size for padding. Size is 4.\n // The size of the third field is 1, so add 1 to the size. Size is 5.\n // Finally, the alignment of the struct is 2 (because the largest alignment amongst its\n // fields is 2), so add 1 to the size for padding. Size is 6.\n assert_eq!(6, size_of::<FieldStruct>());\n\n #[repr(C)]\n struct TupleStruct(u8, u16, u8);\n\n // Tuple structs follow the same rules.\n assert_eq!(6, size_of::<TupleStruct>());\n\n // Note that reordering the fields can lower the size. We can remove both padding bytes\n // by putting `third` before `second`.\n #[repr(C)]\n struct FieldStructOptimized {\n     first: u8,\n     third: u8,\n     second: u16\n }\n\n assert_eq!(4, size_of::<FieldStructOptimized>());\n\n // Union size is the size of the largest field.\n #[repr(C)]\n union ExampleUnion {\n     smaller: u8,\n     larger: u16\n }\n\n assert_eq!(2, size_of::<ExampleUnion>());\n ```\n\n [alignment]: align_of\n [`*const T`]: primitive@pointer\n [`Box<T>`]: ../../std/boxed/struct.Box.html\n [`Option<&T>`]: crate::option::Option\n\n",
+      "adt": {}
+    },
+    "core::num::<impl usize>::checked_mul": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checked integer multiplication. Computes `self * rhs`, returning\n `None` if overflow occurred.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "align_ext::AlignExt::align_up": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns to the smallest number that is greater than or equal to\n `self` and is a multiple of the given power of two.\n\n The method panics if `power_of_two` is not a\n power of two or is smaller than 2 or the calculation overflows\n because `self` is too large.\n\n # Examples\n\n ```\n use crate::align_ext::AlignExt;\n assert_eq!(12usize.align_up(2), 12);\n assert_eq!(12usize.align_up(4), 12);\n assert_eq!(12usize.align_up(8), 16);\n assert_eq!(12usize.align_up(16), 16);\n ```\n",
+      "adt": {}
+    },
+    "core::alloc::Layout::from_size_align": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `Layout` from a given `size` and `align`,\n or returns `LayoutError` if any of the following conditions\n are not met:\n\n * `align` must not be zero,\n\n * `align` must be a power of two,\n\n * `size`, when rounded up to the nearest multiple of `align`,\n   must not overflow `isize` (i.e., the rounded value must be\n   less than or equal to `isize::MAX`).\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    },
+    "mm::frame::allocator::early_alloc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates a contiguous range of frames in the early boot phase.\n\n The early allocated frames will not be reclaimable, until the metadata is\n initialized by [`super::meta::init`]. Then we can use [`Frame::from_raw`]\n to free the frames.\n\n # Panics\n\n This function panics if:\n  - it is called before [`init_early_allocator`],\n  - or if is called after [`init`].\n",
+      "adt": {
+        "core::option::Option": "Constructor"
+      }
+    },
+    "mm::kspace::paddr_to_vaddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Convert physical address to virtual address using offset, only available inside `ostd`\n",
+      "adt": {}
+    },
+    "core::ptr::write_bytes": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets `count * size_of::<T>()` bytes of memory starting at `dst` to\n `val`.\n\n `write_bytes` is similar to C's [`memset`], but sets `count *\n size_of::<T>()` bytes to `val`.\n\n [`memset`]: https://en.cppreference.com/w/c/string/byte/memset\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * `dst` must be properly aligned.\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointer must be properly aligned.\n\n Additionally, note that changing `*dst` in this way can easily lead to undefined behavior (UB)\n later if the written bytes are not a valid representation of some `T`. For instance, the\n following is an **incorrect** use of this function:\n\n ```rust,no_run\n unsafe {\n     let mut value: u8 = 0;\n     let ptr: *mut bool = &mut value as *mut u8 as *mut bool;\n     let _bool = ptr.read(); // This is fine, `ptr` points to a valid `bool`.\n     ptr.write_bytes(42u8, 1); // This function itself does not cause UB...\n     let _bool = ptr.read(); // ...but it makes this operation UB! ⚠️\n }\n ```\n\n [valid]: crate::ptr#safety\n\n # Examples\n\n Basic usage:\n\n ```\n use std::ptr;\n\n let mut vec = vec![0u32; 4];\n unsafe {\n     let vec_ptr = vec.as_mut_ptr();\n     ptr::write_bytes(vec_ptr, 0xfe, 2);\n }\n assert_eq!(vec, [0xfefefefe, 0xfefefefe, 0, 0]);\n ```\n",
+      "adt": {}
+    },
+    "core::slice::from_raw_parts_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the same functionality as [`from_raw_parts`], except that a\n mutable slice is returned.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for both reads and writes for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be accessed through any other pointer\n   (not derived from the return value) for the duration of lifetime `'a`.\n   Both read and write accesses are forbidden.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    },
+    "cpu::local::__cpu_local_start": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "cpu::local::__cpu_local_end": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::iter_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator that allows modifying each value.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n for elem in x.iter_mut() {\n     *elem += 2;\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "cpu::local::is_used::debug_assert_false": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "spin::once::Once::<T, R>::is_completed": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checks whether the value has been initialized.\n\n This is done using [`Acquire`](core::sync::atomic::Ordering::Acquire) ordering, and\n therefore it is safe to access the value directly via\n [`get_unchecked`](Self::get_unchecked) if this returns true.\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 3512, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 11, kind: RigidTy(Uint(Usize)) }, Mut)) })])"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ],
+    "core::slice::IterMut": [
+      "Plain",
+      "MutRef"
+    ],
+    "spin::once::Once": [
+      "Ref"
+    ]
+  },
+  "path": 1705,
+  "span": "ostd/src/cpu/local/mod.rs:201:1: 254:2",
+  "src": "pub(crate) unsafe fn copy_bsp_for_ap(num_cpus: usize) {\n    let num_aps = num_cpus - 1; // BSP does not need allocated storage.\n    if num_aps == 0 {\n        return;\n    }\n\n    // Allocate a region to store the pointers to the CPU-local storage segments.\n    let res = {\n        let size = size_of::<Paddr>()\n            .checked_mul(num_aps)\n            .unwrap()\n            .align_up(PAGE_SIZE);\n        let addr =\n            allocator::early_alloc(Layout::from_size_align(size, PAGE_SIZE).unwrap()).unwrap();\n        let ptr = paddr_to_vaddr(addr) as *mut Paddr;\n\n        // SAFETY: The memory is properly allocated. We exclusively own it. So it's valid to write.\n        unsafe {\n            core::ptr::write_bytes(ptr as *mut u8, 0, size);\n        }\n        // SAFETY: The memory is properly allocated and initialized. We exclusively own it. We\n        // never deallocate it so it lives for '`static'. So we can create a mutable slice on it.\n        unsafe { core::slice::from_raw_parts_mut(ptr, num_aps) }\n    };\n\n    let bsp_base_va = __cpu_local_start as *const () as usize;\n    let bsp_end_va = __cpu_local_end as *const () as usize;\n\n    // Allocate the CPU-local storage segments for APs.\n    for res_addr_mut in res.iter_mut() {\n        let nbytes = (bsp_end_va - bsp_base_va).align_up(PAGE_SIZE);\n        let ap_pages =\n            allocator::early_alloc(Layout::from_size_align(nbytes, PAGE_SIZE).unwrap()).unwrap();\n        let ap_pages_ptr = paddr_to_vaddr(ap_pages) as *mut u8;\n\n        // SAFETY:\n        // 1. The source is valid to read because it has not been used before,\n        //    so it contains only constants.\n        // 2. The destination is valid to write because it is just allocated.\n        // 3. The memory is aligned because the alignment of `u8` is 1.\n        // 4. The two memory regions do not overlap because allocated memory\n        //    regions never overlap with the kernel data.\n        unsafe {\n            core::ptr::copy_nonoverlapping(bsp_base_va as *const u8, ap_pages_ptr, nbytes);\n        }\n\n        *res_addr_mut = ap_pages;\n    }\n\n    is_used::debug_assert_false();\n\n    assert!(!CPU_LOCAL_STORAGES.is_completed());\n    CPU_LOCAL_STORAGES.call_once(|| res);\n}",
+  "mir": "fn cpu::local::copy_bsp_for_ap(_1: usize) -> () {\n    let mut _0: ();\n    let  _2: usize;\n    let mut _3: (usize, bool);\n    let  _4: usize;\n    let mut _5: usize;\n    let mut _6: core::option::Option<usize>;\n    let mut _7: usize;\n    let  _8: usize;\n    let mut _9: core::option::Option<usize>;\n    let mut _10: core::alloc::Layout;\n    let mut _11: core::result::Result<core::alloc::Layout, core::alloc::LayoutError>;\n    let  _12: *mut usize;\n    let mut _13: usize;\n    let  _14: ();\n    let mut _15: *mut u8;\n    let mut _16: &mut [usize];\n    let  _17: usize;\n    let mut _18: *const ();\n    let mut _19: unsafe extern \"C\" fn();\n    let  _20: usize;\n    let mut _21: *const ();\n    let mut _22: unsafe extern \"C\" fn();\n    let mut _23: core::slice::IterMut<'_, usize>;\n    let mut _24: core::slice::IterMut<'_, usize>;\n    let mut _25: core::slice::IterMut<'_, usize>;\n    let mut _26: core::option::Option<&mut usize>;\n    let mut _27: &mut core::slice::IterMut<'_, usize>;\n    let mut _28: isize;\n    let  _29: &mut usize;\n    let  _30: usize;\n    let mut _31: usize;\n    let mut _32: (usize, bool);\n    let  _33: usize;\n    let mut _34: core::option::Option<usize>;\n    let mut _35: core::alloc::Layout;\n    let mut _36: core::result::Result<core::alloc::Layout, core::alloc::LayoutError>;\n    let  _37: *mut u8;\n    let mut _38: usize;\n    let  _39: ();\n    let mut _40: *const u8;\n    let  _41: ();\n    let mut _42: bool;\n    let mut _43: &spin::once::Once<&[usize]>;\n    let mut _44: !;\n    let  _45: &&[usize];\n    let mut _46: &spin::once::Once<&[usize]>;\n    let mut _47: {closure@ostd/src/cpu/local/mod.rs:253:34: 253:36};\n    let mut _48: &[usize];\n    debug num_cpus => _1;\n    debug num_aps => _2;\n    debug res => _16;\n    debug size => _4;\n    debug addr => _8;\n    debug ptr => _12;\n    debug bsp_base_va => _17;\n    debug bsp_end_va => _20;\n    debug iter => _25;\n    debug res_addr_mut => _29;\n    debug nbytes => _30;\n    debug ap_pages => _33;\n    debug ap_pages_ptr => _37;\n    bb0: {\n        _3 = CheckedSub(_1, 1_usize);\n        assert(!move (_3.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _1, 1_usize) -> [success: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = move (_3.0: usize);\n        switchInt(_2) -> [0: bb2, otherwise: bb3];\n    }\n    bb2: {\n        goto -> bb35;\n    }\n    bb3: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = core::mem::size_of::<usize>() -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _6 = core::num::<impl usize>::checked_mul(move _7, _2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        _5 = core::option::Option::<usize>::unwrap(move _6) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_6);\n        _4 = <usize as align_ext::AlignExt>::align_up(move _5, mm::PAGE_SIZE) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_5);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = core::alloc::Layout::from_size_align(_4, mm::PAGE_SIZE) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _10 = core::result::Result::<core::alloc::Layout, core::alloc::LayoutError>::unwrap(move _11) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_11);\n        _9 = mm::frame::allocator::early_alloc(move _10) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_10);\n        _8 = core::option::Option::<usize>::unwrap(move _9) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_9);\n        StorageLive(_13);\n        _13 = mm::kspace::paddr_to_vaddr(_8) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        _12 = move _13 as *mut usize;\n        StorageDead(_13);\n        StorageLive(_15);\n        _15 = _12 as *mut u8;\n        _14 = core::ptr::write_bytes::<u8>(move _15, 0_u8, _4) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_15);\n        _16 = core::slice::from_raw_parts_mut::<'_, usize>(_12, _2) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = cpu::local::__cpu_local_start as unsafe extern \"C\" fn();\n        _18 = move _19 as *const ();\n        StorageDead(_19);\n        _17 = move _18 as usize;\n        StorageDead(_18);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = cpu::local::__cpu_local_end as unsafe extern \"C\" fn();\n        _21 = move _22 as *const ();\n        StorageDead(_22);\n        _20 = move _21 as usize;\n        StorageDead(_21);\n        StorageLive(_23);\n        StorageLive(_24);\n        _24 = core::slice::<impl [usize]>::iter_mut(_16) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        _23 = <core::slice::IterMut<'_, usize> as core::iter::IntoIterator>::into_iter(move _24) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_24);\n        StorageLive(_25);\n        _25 = move _23;\n        goto -> bb17;\n    }\n    bb17: {\n        StorageLive(_26);\n        _27 = &mut _25;\n        _26 = <core::slice::IterMut<'_, usize> as core::iter::Iterator>::next(_27) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        _28 = discriminant(_26);\n        switchInt(move _28) -> [0: bb21, 1: bb20, otherwise: bb19];\n    }\n    bb19: {\n        unreachable;\n    }\n    bb20: {\n        StorageLive(_29);\n        _29 = move ((_26 as variant#1).0: &mut usize);\n        StorageLive(_31);\n        _32 = CheckedSub(_20, _17);\n        assert(!move (_32.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _20, _17) -> [success: bb22, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_26);\n        StorageDead(_25);\n        StorageDead(_23);\n        _41 = cpu::local::is_used::debug_assert_false() -> [return: bb30, unwind unreachable];\n    }\n    bb22: {\n        _31 = move (_32.0: usize);\n        _30 = <usize as align_ext::AlignExt>::align_up(move _31, mm::PAGE_SIZE) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_31);\n        StorageLive(_34);\n        StorageLive(_35);\n        StorageLive(_36);\n        _36 = core::alloc::Layout::from_size_align(_30, mm::PAGE_SIZE) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        _35 = core::result::Result::<core::alloc::Layout, core::alloc::LayoutError>::unwrap(move _36) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_36);\n        _34 = mm::frame::allocator::early_alloc(move _35) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_35);\n        _33 = core::option::Option::<usize>::unwrap(move _34) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        StorageDead(_34);\n        StorageLive(_38);\n        _38 = mm::kspace::paddr_to_vaddr(_33) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        _37 = move _38 as *mut u8;\n        StorageDead(_38);\n        StorageLive(_40);\n        _40 = _17 as *const u8;\n        _39 = core::ptr::copy_nonoverlapping::<u8>(move _40, _37, _30) -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        StorageDead(_40);\n        (*_29) = _33;\n        StorageDead(_29);\n        StorageDead(_26);\n        goto -> bb17;\n    }\n    bb30: {\n        StorageLive(_42);\n        StorageLive(_43);\n        _43 = {alloc773: &spin::once::Once<&[usize]>};\n        _42 = spin::once::Once::<&[usize]>::is_completed(move _43) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        switchInt(move _42) -> [0: bb33, otherwise: bb32];\n    }\n    bb32: {\n        StorageDead(_43);\n        _44 = core::panicking::panic(\"assertion failed: !CPU_LOCAL_STORAGES.is_completed()\") -> unwind unreachable;\n    }\n    bb33: {\n        StorageDead(_43);\n        StorageDead(_42);\n        StorageLive(_45);\n        StorageLive(_46);\n        _46 = {alloc773: &spin::once::Once<&[usize]>};\n        StorageLive(_47);\n        StorageLive(_48);\n        _48 = &(*_16);\n        _47 = {closure@ostd/src/cpu/local/mod.rs:253:34: 253:36}(move _48);\n        StorageDead(_48);\n        _45 = spin::once::Once::<&[usize]>::call_once::<{closure@ostd/src/cpu/local/mod.rs:253:34: 253:36}>(move _46, move _47) -> [return: bb34, unwind unreachable];\n    }\n    bb34: {\n        StorageDead(_47);\n        StorageDead(_46);\n        StorageDead(_45);\n        goto -> bb35;\n    }\n    bb35: {\n        return;\n    }\n}\n",
+  "doc": " Copies the static CPU-local data on the bootstrap processor (BSP)\n for application processors (APs).\n\n # Safety\n\n This function must be called in the boot context of the BSP, at a time\n when the APs have not yet booted.\n\n The CPU-local data on the BSP must not be used before calling this\n function to copy it for the APs. Otherwise, the copied data will\n contain non-constant (also non-`Copy`) data, resulting in undefined\n behavior when it's loaded on the APs.\n\n The caller must ensure that the `num_cpus` matches the number of all\n CPUs that will access the CPU-local storage.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

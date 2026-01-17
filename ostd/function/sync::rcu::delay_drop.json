@@ -1,0 +1,65 @@
+{
+  "name": "sync::rcu::delay_drop",
+  "safe": false,
+  "callees": {
+    "spin::once::Once::<T, R>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the inner value if the [`Once`] has been initialized.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "sync::rcu::monitor::RcuMonitor::after_grace_period": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::rcu::monitor::RcuMonitor": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "sync::rcu::delay_drop::ForceSend": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "sync::rcu::monitor::RcuMonitor": [
+      "Ref"
+    ]
+  },
+  "path": 2603,
+  "span": "ostd/src/sync/rcu/mod.rs:424:1: 446:2",
+  "src": "unsafe fn delay_drop<P: NonNullPtr + Send>(pointer: NonNull<<P as NonNullPtr>::Target>) {\n    struct ForceSend<P: NonNullPtr + Send>(NonNull<<P as NonNullPtr>::Target>);\n    // SAFETY: Sending a raw pointer to another task is safe as long as\n    // the pointer access in another task is safe (guaranteed by the trait\n    // bound `P: Send`).\n    unsafe impl<P: NonNullPtr + Send> Send for ForceSend<P> {}\n\n    let pointer: ForceSend<P> = ForceSend(pointer);\n\n    let rcu_monitor = RCU_MONITOR.get().unwrap();\n    rcu_monitor.after_grace_period(move || {\n        // This is necessary to make the Rust compiler to move the entire\n        // `ForceSend` structure into the closure.\n        let pointer = pointer;\n\n        // SAFETY:\n        // 1. The pointer was previously returned by `into_raw`.\n        // 2. The pointer won't be used anymore since the grace period has\n        //    finished and this is the only time the pointer gets dropped.\n        let p = unsafe { <P as NonNullPtr>::from_raw(pointer.0) };\n        drop(p);\n    });\n}",
+  "mir": "fn sync::rcu::delay_drop(_1: core::ptr::NonNull<<P as sync::rcu::non_null::NonNullPtr>::Target>) -> () {\n    let mut _0: ();\n    let  _2: sync::rcu::delay_drop::ForceSend<P>;\n    let  _3: &sync::rcu::monitor::RcuMonitor;\n    let mut _4: core::option::Option<&sync::rcu::monitor::RcuMonitor>;\n    let mut _5: &spin::once::Once<sync::rcu::monitor::RcuMonitor>;\n    let  _6: ();\n    let mut _7: {closure@ostd/src/sync/rcu/mod.rs:434:36: 434:43};\n    debug pointer => _1;\n    debug pointer => _2;\n    debug rcu_monitor => _3;\n    bb0: {\n        StorageLive(_2);\n        _2 = ForceSend(_1);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = {alloc1478: &spin::once::Once<sync::rcu::monitor::RcuMonitor>};\n        _4 = spin::once::Once::<sync::rcu::monitor::RcuMonitor>::get(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = core::option::Option::<&sync::rcu::monitor::RcuMonitor>::unwrap(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_7);\n        _7 = {closure@ostd/src/sync/rcu/mod.rs:434:36: 434:43}(move _2);\n        _6 = sync::rcu::monitor::RcuMonitor::after_grace_period::<{closure@ostd/src/sync/rcu/mod.rs:434:36: 434:43}>(_3, move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Delays the dropping of a [`NonNullPtr`] after the RCU grace period.\n\n This is internally needed for implementing [`Rcu`] and [`RcuOption`]\n because we cannot alias a [`Box`]. Restoring `P` and use [`RcuDrop`] for it\n can lead to multiple [`Box`]es simultaneously pointing to the same\n content.\n\n # Safety\n\n The pointer must be previously returned by `into_raw`, will not be used\n after the end of the current grace period, and will only be dropped once.\n\n [`Box`]: alloc::boxed::Box\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

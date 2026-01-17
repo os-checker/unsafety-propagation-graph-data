@@ -1,0 +1,61 @@
+{
+  "name": "boxed::Box::<T, A>::clone_from_ref_in",
+  "safe": true,
+  "callees": {
+    "core::alloc::Layout::for_value": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Produces layout describing a record that could be used to\n allocate backing structure for `T` (which could be a trait\n or other unsized type like a slice).\n",
+      "adt": {}
+    },
+    "boxed::Box::<T, A>::try_clone_from_ref_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory in the given allocator then clones `src` into it, returning an error if allocation fails.\n\n This doesn't actually allocate if `src` is zero-sized.\n\n # Examples\n\n ```\n #![feature(clone_from_ref)]\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let hello: Box<str, System> = Box::try_clone_from_ref_in(\"hello\", System)?;\n # Ok::<(), std::alloc::AllocError>(())\n ```\n",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "boxed::Box": "Constructor"
+      }
+    },
+    "alloc::handle_alloc_error": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Signals a memory allocation error.\n\n Callers of memory allocation APIs wishing to cease execution\n in response to an allocation error are encouraged to call this function,\n rather than directly invoking [`panic!`] or similar.\n\n This function is guaranteed to diverge (not return normally with a value), but depending on\n global configuration, it may either panic (resulting in unwinding or aborting as per\n configuration for all panics), or abort the process (with no unwinding).\n\n The default behavior is:\n\n  * If the binary links against `std` (typically the case), then\n   print a message to standard error and abort the process.\n   This behavior can be replaced with [`set_alloc_error_hook`] and [`take_alloc_error_hook`].\n   Future versions of Rust may panic by default instead.\n\n * If the binary does not link against `std` (all of its crates are marked\n   [`#![no_std]`][no_std]), then call [`panic!`] with a message.\n   [The panic handler] applies as to any panic.\n\n [`set_alloc_error_hook`]: ../../std/alloc/fn.set_alloc_error_hook.html\n [`take_alloc_error_hook`]: ../../std/alloc/fn.take_alloc_error_hook.html\n [The panic handler]: https://doc.rust-lang.org/reference/runtime.html#the-panic_handler-attribute\n [no_std]: https://doc.rust-lang.org/reference/names/preludes.html#the-no_std-attribute\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::alloc::Layout": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 89, kind: RigidTy(Adt(AdtDef(DefId { id: 2609, name: \"boxed::Box\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) }), Type(Ty { id: 21, kind: Param(ParamTy { index: 1, name: \"A\" }) })]))) })])"
+    ],
+    "boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 356,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed.rs:797:5: 803:6",
+  "src": "pub fn clone_from_ref_in(src: &T, alloc: A) -> Box<T, A> {\n        let layout = Layout::for_value::<T>(src);\n        match Box::try_clone_from_ref_in(src, alloc) {\n            Ok(bx) => bx,\n            Err(_) => handle_alloc_error(layout),\n        }\n    }",
+  "mir": "fn boxed::Box::<T, A>::clone_from_ref_in(_1: &T, _2: A) -> boxed::Box<T, A> {\n    let mut _0: boxed::Box<T, A>;\n    let  _3: core::alloc::Layout;\n    let mut _4: core::result::Result<boxed::Box<T, A>, core::alloc::AllocError>;\n    let mut _5: isize;\n    let mut _6: !;\n    debug src => _1;\n    debug alloc => _2;\n    debug layout => _3;\n    debug bx => _0;\n    bb0: {\n        _3 = core::alloc::Layout::for_value::<T>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = boxed::Box::<T, A>::try_clone_from_ref_in(_1, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = discriminant(_4);\n        switchInt(move _5) -> [0: bb5, 1: bb4, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _6 = alloc::handle_alloc_error(_3) -> unwind unreachable;\n    }\n    bb5: {\n        _0 = move ((_4 as variant#0).0: boxed::Box<T, A>);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Allocates memory in the given allocator then clones `src` into it.\n\n This doesn't actually allocate if `src` is zero-sized.\n\n # Examples\n\n ```\n #![feature(clone_from_ref)]\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let hello: Box<str, System> = Box::clone_from_ref_in(\"hello\", System);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

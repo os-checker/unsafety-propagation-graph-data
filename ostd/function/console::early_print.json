@@ -1,0 +1,97 @@
+{
+  "name": "console::early_print",
+  "safe": true,
+  "callees": {
+    "tdx_guest::tdx_is_enabled": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "sync::spin::SpinLock::<T, G>::lock": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the spin lock.\n",
+      "adt": {
+        "sync::spin::SpinLock": "ImmutableAsArgument",
+        "sync::spin::SpinLockGuard": "Constructor"
+      }
+    },
+    "tdx_guest::print": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "core::fmt::Write::write_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Glue for usage of the [`write!`] macro with implementors of this trait.\n\n This method should generally not be invoked manually, but rather through\n the [`write!`] macro itself.\n\n # Errors\n\n This function will return an instance of [`Error`] on error. Please see\n [write_str](Write::write_str) for details.\n\n # Examples\n\n ```\n use std::fmt::{Error, Write};\n\n fn writer<W: Write>(f: &mut W, s: &str) -> Result<(), Error> {\n     f.write_fmt(format_args!(\"{s}\"))\n }\n\n let mut buf = String::new();\n writer(&mut buf, \"world\")?;\n assert_eq!(&buf, \"world\");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::spin::SpinLock": [
+      "Ref"
+    ],
+    "sync::spin::SpinLockGuard": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ],
+    "console::Stdout": [
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1630,
+  "span": "ostd/src/console.rs:23:1: 34:2",
+  "src": "pub fn early_print(args: Arguments) {\n    #[cfg(target_arch = \"x86_64\")]\n    crate::arch::if_tdx_enabled!({\n        // Hold the lock to prevent the logs from interleaving.\n        let _guard = STDOUT.lock();\n        tdx_guest::print(args);\n    } else {\n        STDOUT.lock().write_fmt(args).unwrap();\n    });\n    #[cfg(not(target_arch = \"x86_64\"))]\n    STDOUT.lock().write_fmt(args).unwrap();\n}",
+  "mir": "fn console::early_print(_1: core::fmt::Arguments<'_>) -> () {\n    let mut _0: ();\n    let mut _2: bool;\n    let  _3: sync::spin::SpinLockGuard<'_, console::Stdout, sync::guard::LocalIrqDisabled>;\n    let mut _4: &sync::spin::SpinLock<console::Stdout, sync::guard::LocalIrqDisabled>;\n    let  _5: ();\n    let  _6: ();\n    let mut _7: core::result::Result<(), core::fmt::Error>;\n    let mut _8: &mut console::Stdout;\n    let mut _9: &mut sync::spin::SpinLockGuard<'_, console::Stdout, sync::guard::LocalIrqDisabled>;\n    let mut _10: sync::spin::SpinLockGuard<'_, console::Stdout, sync::guard::LocalIrqDisabled>;\n    let mut _11: &sync::spin::SpinLock<console::Stdout, sync::guard::LocalIrqDisabled>;\n    debug args => _1;\n    debug _guard => _3;\n    bb0: {\n        StorageLive(_2);\n        _2 = tdx_guest::tdx_is_enabled() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb6, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = {alloc750: &sync::spin::SpinLock<console::Stdout, sync::guard::LocalIrqDisabled>};\n        _3 = sync::spin::SpinLock::<console::Stdout, sync::guard::LocalIrqDisabled>::lock(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _5 = tdx_guest::print(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        drop(_3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_3);\n        goto -> bb12;\n    }\n    bb6: {\n        StorageLive(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = {alloc750: &sync::spin::SpinLock<console::Stdout, sync::guard::LocalIrqDisabled>};\n        _10 = sync::spin::SpinLock::<console::Stdout, sync::guard::LocalIrqDisabled>::lock(move _11) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _9 = &mut _10;\n        _8 = <sync::spin::SpinLockGuard<'_, console::Stdout, sync::guard::LocalIrqDisabled> as core::ops::DerefMut>::deref_mut(move _9) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        StorageDead(_9);\n        _7 = <console::Stdout as core::fmt::Write>::write_fmt(_8, _1) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _6 = core::result::Result::<(), core::fmt::Error>::unwrap(move _7) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_7);\n        drop(_10) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_10);\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Prints formatted arguments to the console.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

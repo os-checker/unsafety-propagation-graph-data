@@ -1,0 +1,64 @@
+{
+  "name": "<sync::Arc<[T]>::from_iter_exact::Guard<T> as core::ops::Drop>::drop",
+  "safe": true,
+  "callees": {
+    "core::slice::from_raw_parts_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the same functionality as [`from_raw_parts`], except that a\n mutable slice is returned.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for both reads and writes for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be accessed through any other pointer\n   (not derived from the return value) for the duration of lifetime `'a`.\n   Both read and write accesses are forbidden.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    },
+    "core::ptr::drop_in_place": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Executes the destructor (if any) of the pointed-to value.\n\n This is almost the same as calling [`ptr::read`] and discarding\n the result, but has the following advantages:\n\n * It is *required* to use `drop_in_place` to drop unsized types like\n   trait objects, because they can't be read out onto the stack and\n   dropped normally.\n\n * It is friendlier to the optimizer to do this over [`ptr::read`] when\n   dropping manually allocated memory (e.g., in the implementations of\n   `Box`/`Rc`/`Vec`), as the compiler doesn't need to prove that it's\n   sound to elide the copy.\n\n * It can be used to drop [pinned] data when `T` is not `repr(packed)`\n   (pinned data must not be moved before it is dropped).\n\n Unaligned values cannot be dropped in place, they must be copied to an aligned\n location first using [`ptr::read_unaligned`]. For packed structs, this move is\n done automatically by the compiler. This means the fields of packed structs\n are not dropped in-place.\n\n [`ptr::read`]: self::read\n [`ptr::read_unaligned`]: self::read_unaligned\n [pinned]: crate::pin\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `to_drop` must be [valid] for both reads and writes.\n\n * `to_drop` must be properly aligned, even if `T` has size 0.\n\n * `to_drop` must be nonnull, even if `T` has size 0.\n\n * The value `to_drop` points to must be valid for dropping, which may mean\n   it must uphold additional invariants. These invariants depend on the type\n   of the value being dropped. For instance, when dropping a Box, the box's\n   pointer to the heap must be valid.\n\n * While `drop_in_place` is executing, the only way to access parts of\n   `to_drop` is through the `&mut self` references supplied to the\n   `Drop::drop` methods that `drop_in_place` invokes.\n\n Additionally, if `T` is not [`Copy`], using the pointed-to value after\n calling `drop_in_place` can cause undefined behavior. Note that `*to_drop =\n foo` counts as a use because it will cause the value to be dropped\n again. [`write()`] can be used to overwrite data without causing it to be\n dropped.\n\n [valid]: self#safety\n\n # Examples\n\n Manually remove the last item from a vector:\n\n ```\n use std::ptr;\n use std::rc::Rc;\n\n let last = Rc::new(1);\n let weak = Rc::downgrade(&last);\n\n let mut v = vec![Rc::new(0), last];\n\n unsafe {\n     // Get a raw pointer to the last element in `v`.\n     let ptr = &mut v[1] as *mut _;\n     // Shorten `v` to prevent the last item from being dropped. We do that first,\n     // to prevent issues if the `drop_in_place` below panics.\n     v.set_len(1);\n     // Without a call `drop_in_place`, the last item would never be dropped,\n     // and the memory it manages would be leaked.\n     ptr::drop_in_place(ptr);\n }\n\n assert_eq!(v, &[0.into()]);\n\n // Ensure that the last item was dropped.\n assert!(weak.upgrade().is_none());\n ```\n",
+      "adt": {}
+    },
+    "core::alloc::Allocator::deallocate": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Deallocates the memory referenced by `ptr`.\n\n # Safety\n\n * `ptr` must denote a block of memory [*currently allocated*] via this allocator, and\n * `layout` must [*fit*] that block of memory.\n\n [*currently allocated*]: #currently-allocated-memory\n [*fit*]: #memory-fitting\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::Arc<[T]>::from_iter_exact::Guard": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "MutRef"
+    ],
+    "alloc::Global": [
+      "Ref"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ]
+  },
+  "path": 2006,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:2286:13: 2293:14",
+  "src": "fn drop(&mut self) {\n                unsafe {\n                    let slice = from_raw_parts_mut(self.elems, self.n_elems);\n                    ptr::drop_in_place(slice);\n\n                    Global.deallocate(self.mem, self.layout);\n                }\n            }",
+  "mir": "fn <sync::Arc<[T]>::from_iter_exact::Guard<T> as core::ops::Drop>::drop(_1: &mut sync::Arc<[T]>::from_iter_exact::Guard<T>) -> () {\n    let mut _0: ();\n    let  _2: &mut [T];\n    let mut _3: *mut T;\n    let mut _4: usize;\n    let  _5: ();\n    let mut _6: *mut [T];\n    let  _7: ();\n    let mut _8: &alloc::Global;\n    let mut _9: core::ptr::NonNull<u8>;\n    let mut _10: core::alloc::Layout;\n    debug self => _1;\n    debug slice => _2;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = ((*_1).1: *mut T);\n        StorageLive(_4);\n        _4 = ((*_1).3: usize);\n        _2 = core::slice::from_raw_parts_mut::<'_, T>(move _3, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_6);\n        _6 = &raw mut (*_2);\n        _5 = core::ptr::drop_in_place::<[T]>(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageLive(_8);\n        _8 = <sync::Arc<[T]>::from_iter_exact::Guard<T> as core::ops::Drop>::drop::promoted[0];\n        StorageLive(_9);\n        _9 = ((*_1).0: core::ptr::NonNull<u8>);\n        StorageLive(_10);\n        _10 = ((*_1).2: core::alloc::Layout);\n        _7 = <alloc::Global as core::alloc::Allocator>::deallocate(move _8, move _9, move _10) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "collections::hash::set::HashSet::<T, S>::symmetric_difference",
+  "safe": true,
+  "callees": {
+    "collections::hash::set::HashSet::<T, S>::difference": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Visits the values representing the difference,\n i.e., the values that are in `self` but not in `other`.\n\n # Examples\n\n ```\n use std::collections::HashSet;\n let a = HashSet::from([1, 2, 3]);\n let b = HashSet::from([4, 2, 3, 4]);\n\n // Can be seen as `a - b`.\n for x in a.difference(&b) {\n     println!(\"{x}\"); // Print 1\n }\n\n let diff: HashSet<_> = a.difference(&b).collect();\n assert_eq!(diff, [1].iter().collect());\n\n // Note that difference is not symmetric,\n // and `b - a` means something else:\n let diff: HashSet<_> = b.difference(&a).collect();\n assert_eq!(diff, [4].iter().collect());\n ```\n",
+      "adt": {
+        "collections::hash::set::HashSet": "ImmutableAsArgument",
+        "collections::hash::set::Difference": "Constructor"
+      }
+    },
+    "core::iter::Iterator::chain": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes two iterators and creates a new iterator over both in sequence.\n\n `chain()` will return a new iterator which will first iterate over\n values from the first iterator and then over values from the second\n iterator.\n\n In other words, it links two iterators together, in a chain. 🔗\n\n [`once`] is commonly used to adapt a single value into a chain of\n other kinds of iteration.\n\n # Examples\n\n Basic usage:\n\n ```\n let s1 = \"abc\".chars();\n let s2 = \"def\".chars();\n\n let mut iter = s1.chain(s2);\n\n assert_eq!(iter.next(), Some('a'));\n assert_eq!(iter.next(), Some('b'));\n assert_eq!(iter.next(), Some('c'));\n assert_eq!(iter.next(), Some('d'));\n assert_eq!(iter.next(), Some('e'));\n assert_eq!(iter.next(), Some('f'));\n assert_eq!(iter.next(), None);\n ```\n\n Since the argument to `chain()` uses [`IntoIterator`], we can pass\n anything that can be converted into an [`Iterator`], not just an\n [`Iterator`] itself. For example, arrays (`[T]`) implement\n [`IntoIterator`], and so can be passed to `chain()` directly:\n\n ```\n let a1 = [1, 2, 3];\n let a2 = [4, 5, 6];\n\n let mut iter = a1.into_iter().chain(a2);\n\n assert_eq!(iter.next(), Some(1));\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(3));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), Some(5));\n assert_eq!(iter.next(), Some(6));\n assert_eq!(iter.next(), None);\n ```\n\n If you work with Windows API, you may wish to convert [`OsStr`] to `Vec<u16>`:\n\n ```\n #[cfg(windows)]\n fn os_str_to_utf16(s: &std::ffi::OsStr) -> Vec<u16> {\n     use std::os::windows::ffi::OsStrExt;\n     s.encode_wide().chain(std::iter::once(0)).collect()\n }\n ```\n\n [`once`]: crate::iter::once\n [`OsStr`]: ../../std/ffi/struct.OsStr.html\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::hash::set::HashSet": [
+      "Ref"
+    ],
+    "collections::hash::set::Difference": [
+      "Plain"
+    ],
+    "core::iter::Chain": [
+      "Plain"
+    ],
+    "collections::hash::set::SymmetricDifference": [
+      "Plain"
+    ]
+  },
+  "path": 825,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/collections/hash/set.rs:600:5: 605:6",
+  "src": "pub fn symmetric_difference<'a>(\n        &'a self,\n        other: &'a HashSet<T, S>,\n    ) -> SymmetricDifference<'a, T, S> {\n        SymmetricDifference { iter: self.difference(other).chain(other.difference(self)) }\n    }",
+  "mir": "fn collections::hash::set::HashSet::<T, S>::symmetric_difference(_1: &collections::hash::set::HashSet<T, S>, _2: &collections::hash::set::HashSet<T, S>) -> collections::hash::set::SymmetricDifference<'_, T, S> {\n    let mut _0: collections::hash::set::SymmetricDifference<'_, T, S>;\n    let mut _3: core::iter::Chain<collections::hash::set::Difference<'_, T, S>, collections::hash::set::Difference<'_, T, S>>;\n    let mut _4: collections::hash::set::Difference<'_, T, S>;\n    let mut _5: collections::hash::set::Difference<'_, T, S>;\n    debug self => _1;\n    debug other => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = collections::hash::set::HashSet::<T, S>::difference(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = collections::hash::set::HashSet::<T, S>::difference(_2, _1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = <collections::hash::set::Difference<'_, T, S> as core::iter::Iterator>::chain::<collections::hash::set::Difference<'_, T, S>>(move _4, move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _0 = SymmetricDifference(move _3);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Visits the values representing the symmetric difference,\n i.e., the values that are in `self` or in `other` but not in both.\n\n # Examples\n\n ```\n use std::collections::HashSet;\n let a = HashSet::from([1, 2, 3]);\n let b = HashSet::from([4, 2, 3, 4]);\n\n // Print 1, 4 in arbitrary order.\n for x in a.symmetric_difference(&b) {\n     println!(\"{x}\");\n }\n\n let diff1: HashSet<_> = a.symmetric_difference(&b).collect();\n let diff2: HashSet<_> = b.symmetric_difference(&a).collect();\n\n assert_eq!(diff1, diff2);\n assert_eq!(diff1, [1, 4].iter().collect());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

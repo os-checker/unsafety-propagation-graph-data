@@ -1,0 +1,74 @@
+{
+  "name": "<(ops::range::Bound<usize>, ops::range::Bound<usize>) as slice::index::SliceIndex<[T]>>::get_mut",
+  "safe": true,
+  "callees": {
+    "slice::index::into_range": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts pair of `ops::Bound`s into `ops::Range`.\n Returns `None` on overflowing indices.\n",
+      "adt": {
+        "option::Option": "Constructor",
+        "ops::range::Range": "Constructor"
+      }
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "slice::index::SliceIndex::get_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to the output at this location, if in\n bounds.\n",
+      "adt": {}
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ops::range::Bound": [
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 517, kind: RigidTy(Adt(AdtDef(DefId { id: 24564, name: \"ops::range::Range\" }), GenericArgs([Type(Ty { id: 47, kind: RigidTy(Uint(Usize)) })]))) })])"
+    ],
+    "ops::range::Range": [
+      "Plain"
+    ]
+  },
+  "path": 956,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:1078:5: 1080:6",
+  "src": "fn get_mut(self, slice: &mut [T]) -> Option<&mut Self::Output> {\n        into_range(slice.len(), self)?.get_mut(slice)\n    }",
+  "mir": "fn <(ops::range::Bound<usize>, ops::range::Bound<usize>) as slice::index::SliceIndex<[T]>>::get_mut(_1: (ops::range::Bound<usize>, ops::range::Bound<usize>), _2: &mut [T]) -> option::Option<&mut [T]> {\n    let mut _0: option::Option<&mut [T]>;\n    let mut _3: ops::control_flow::ControlFlow<option::Option<convert::Infallible>, ops::range::Range<usize>>;\n    let mut _4: option::Option<ops::range::Range<usize>>;\n    let mut _5: usize;\n    let mut _6: &[T];\n    let mut _7: isize;\n    let  _8: ops::range::Range<usize>;\n    debug self => _1;\n    debug slice => _2;\n    debug residual => option::Option::<convert::Infallible>::None;\n    debug val => _8;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &(*_2);\n        _5 = PtrMetadata(move _6);\n        StorageDead(_6);\n        _4 = slice::index::into_range(move _5, _1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = <option::Option<ops::range::Range<usize>> as ops::try_trait::Try>::branch(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _7 = discriminant(_3);\n        switchInt(move _7) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _8 = move ((_3 as variant#0).0: ops::range::Range<usize>);\n        _0 = <ops::range::Range<usize> as slice::index::SliceIndex<[T]>>::get_mut(_8, _2) -> [return: bb7, unwind unreachable];\n    }\n    bb5: {\n        _0 = <option::Option<&mut [T]> as ops::try_trait::FromResidual<option::Option<convert::Infallible>>>::from_residual(option::Option::<convert::Infallible>::None) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_3);\n        goto -> bb8;\n    }\n    bb7: {\n        StorageDead(_3);\n        goto -> bb8;\n    }\n    bb8: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

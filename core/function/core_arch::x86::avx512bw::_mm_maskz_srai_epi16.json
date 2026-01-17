@@ -1,0 +1,78 @@
+{
+  "name": "core_arch::x86::avx512bw::_mm_maskz_srai_epi16",
+  "safe": false,
+  "callees": {
+    "core_arch::x86::__m128i::as_i16x8": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core_arch::simd::i16x8": "Constructor"
+      }
+    },
+    "cmp::Ord::min": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the minimum of two values.\n\n Returns the first argument if the comparison determines them to be equal.\n\n # Examples\n\n ```\n assert_eq!(1.min(2), 1);\n assert_eq!(2.min(2), 2);\n ```\n ```\n use std::cmp::Ordering;\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(Equal(\"self\").min(Equal(\"other\")).0, \"self\");\n ```\n",
+      "adt": {}
+    },
+    "core_arch::simd::i16x8::splat": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core_arch::simd::i16x8": "Constructor"
+      }
+    },
+    "intrinsics::simd::simd_shr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Shifts vector right elementwise, with UB on overflow.\n\n `T` must be a vector of integers.\n\n Shifts `lhs` right by `rhs`, shifting in sign bits for signed types.\n\n # Safety\n\n Each element of `rhs` must be less than `<int>::BITS`.\n",
+      "adt": {}
+    },
+    "intrinsics::simd::simd_select_bitmask": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Selects elements from a bitmask.\n\n `M` must be an unsigned integer or array of `u8`, matching `simd_bitmask`.\n\n `T` must be a vector.\n\n For each element, if the bit in `mask` is `1`, select the element from\n `if_true`.  If the corresponding bit in `mask` is `0`, select the element from\n `if_false`.\n The remaining bits of the mask are ignored.\n\n The bitmask bit order matches `simd_bitmask`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_arch::x86::__m128i": [
+      "Plain"
+    ],
+    "core_arch::simd::i16x8": [
+      "Plain"
+    ]
+  },
+  "path": 7071,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../stdarch/crates/core_arch/src/x86/avx512bw.rs:7540:1: 7546:2",
+  "src": "pub fn _mm_maskz_srai_epi16<const IMM8: u32>(k: __mmask8, a: __m128i) -> __m128i {\n    unsafe {\n        static_assert_uimm_bits!(IMM8, 8);\n        let r = simd_shr(a.as_i16x8(), i16x8::splat(IMM8.min(15) as i16));\n        transmute(simd_select_bitmask(k, r, i16x8::ZERO))\n    }\n}",
+  "mir": "fn core_arch::x86::avx512bw::_mm_maskz_srai_epi16(_1: u8, _2: core_arch::x86::__m128i) -> core_arch::x86::__m128i {\n    let mut _0: core_arch::x86::__m128i;\n    let  _3: core_arch::simd::i16x8;\n    let mut _4: core_arch::simd::i16x8;\n    let mut _5: core_arch::simd::i16x8;\n    let mut _6: i16;\n    let mut _7: u32;\n    let mut _8: core_arch::simd::i16x8;\n    debug k => _1;\n    debug a => _2;\n    debug r => _3;\n    bb0: {\n        StorageLive(_4);\n        _4 = core_arch::x86::__m128i::as_i16x8(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = <u32 as cmp::Ord>::min(IMM8, 15_u32) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _6 = move _7 as i16;\n        StorageDead(_7);\n        _5 = core_arch::simd::i16x8::splat(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _3 = intrinsics::simd::simd_shr::<core_arch::simd::i16x8>(move _4, move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_8);\n        _8 = intrinsics::simd::simd_select_bitmask::<u8, core_arch::simd::i16x8>(_1, _3, core_arch::simd::i16x8::ZERO) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = move _8 as core_arch::x86::__m128i;\n        StorageDead(_8);\n        return;\n    }\n}\n",
+  "doc": " Shift packed 16-bit integers in a right by imm8 while shifting in sign bits, and store the results in dst using zeromask k (elements are zeroed out when the corresponding mask bit is not set).\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_maskz_srai_epi16&expand=5420)\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

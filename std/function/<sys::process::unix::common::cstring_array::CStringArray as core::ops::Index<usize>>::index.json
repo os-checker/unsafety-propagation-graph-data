@@ -1,0 +1,61 @@
+{
+  "name": "<sys::process::unix::common::cstring_array::CStringArray as core::ops::Index<usize>>::index",
+  "safe": true,
+  "callees": {
+    "alloc_crate::vec::Vec::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the vector, also referred to\n as its 'length'.\n\n # Examples\n\n ```\n let a = vec![1, 2, 3];\n assert_eq!(a.len(), 3);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "core::ffi::CStr::from_ptr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wraps a raw C string with a safe C string wrapper.\n\n This function will wrap the provided `ptr` with a `CStr` wrapper, which\n allows inspection and interoperation of non-owned C strings. The total\n size of the terminated buffer must be smaller than [`isize::MAX`] **bytes**\n in memory (a restriction from [`slice::from_raw_parts`]).\n\n # Safety\n\n * The memory pointed to by `ptr` must contain a valid nul terminator at the\n   end of the string.\n\n * `ptr` must be [valid] for reads of bytes up to and including the nul terminator.\n   This means in particular:\n\n     * The entire memory range of this `CStr` must be contained within a single allocation!\n     * `ptr` must be non-null even for a zero-length cstr.\n\n * The memory referenced by the returned `CStr` must not be mutated for\n   the duration of lifetime `'a`.\n\n * The nul terminator must be within `isize::MAX` from `ptr`\n\n > **Note**: This operation is intended to be a 0-cost cast but it is\n > currently implemented with an up-front calculation of the length of\n > the string. This is not guaranteed to always be the case.\n\n # Caveat\n\n The lifetime for the returned slice is inferred from its usage. To prevent accidental misuse,\n it's suggested to tie the lifetime to whichever source lifetime is safe in the context,\n such as by providing a helper function taking the lifetime of a host value for the slice,\n or by explicit annotation.\n\n # Examples\n\n ```\n use std::ffi::{c_char, CStr};\n\n fn my_string() -> *const c_char {\n     c\"hello\".as_ptr()\n }\n\n unsafe {\n     let slice = CStr::from_ptr(my_string());\n     assert_eq!(slice.to_str().unwrap(), \"hello\");\n }\n ```\n\n ```\n use std::ffi::{c_char, CStr};\n\n const HELLO_PTR: *const c_char = {\n     const BYTES: &[u8] = b\"Hello, world!\\0\";\n     BYTES.as_ptr().cast()\n };\n const HELLO: &CStr = unsafe { CStr::from_ptr(HELLO_PTR) };\n\n assert_eq!(c\"Hello, world!\", HELLO);\n ```\n\n [valid]: core::ptr#safety\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc_crate::vec::Vec": [
+      "Ref"
+    ],
+    "sys::process::unix::common::cstring_array::CStringArray": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::ops::RangeTo": [
+      "Plain"
+    ],
+    "core::ffi::CStr": [
+      "Ref"
+    ]
+  },
+  "path": 4103,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/process/unix/common/cstring_array.rs:57:5: 63:6",
+  "src": "fn index(&self, index: usize) -> &CStr {\n        let ptr = self.ptrs[..self.ptrs.len() - 1][index];\n        // SAFETY:\n        // `CStringArray` owns all of its strings. Also, this is not the null\n        // pointer since the indexing above would have failed.\n        unsafe { CStr::from_ptr(ptr) }\n    }",
+  "mir": "fn <sys::process::unix::common::cstring_array::CStringArray as core::ops::Index<usize>>::index(_1: &sys::process::unix::common::cstring_array::CStringArray, _2: usize) -> &core::ffi::CStr {\n    let mut _0: &core::ffi::CStr;\n    let  _3: *const u8;\n    let mut _4: &[*const u8];\n    let mut _5: &alloc_crate::vec::Vec<*const u8>;\n    let mut _6: core::ops::RangeTo<usize>;\n    let mut _7: usize;\n    let mut _8: usize;\n    let mut _9: &alloc_crate::vec::Vec<*const u8>;\n    let mut _10: (usize, bool);\n    let mut _11: usize;\n    let mut _12: bool;\n    debug self => _1;\n    debug index => _2;\n    debug ptr => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_1).0: alloc_crate::vec::Vec<*const u8>);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &((*_1).0: alloc_crate::vec::Vec<*const u8>);\n        _8 = alloc_crate::vec::Vec::<*const u8>::len(move _9) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_9);\n        _10 = CheckedSub(_8, 1_usize);\n        assert(!move (_10.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _8, 1_usize) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _7 = move (_10.0: usize);\n        StorageDead(_8);\n        _6 = RangeTo(move _7);\n        StorageDead(_7);\n        _4 = <alloc_crate::vec::Vec<*const u8> as core::ops::Index<core::ops::RangeTo<usize>>>::index(move _5, move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_5);\n        _11 = PtrMetadata(_4);\n        _12 = Lt(_2, _11);\n        assert(move _12, \"index out of bounds: the length is {} but the index is {}\", move _11, _2) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _3 = (*_4)[_2];\n        StorageDead(_4);\n        _0 = core::ffi::CStr::from_ptr::<'_>(_3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "name": "vec::<impl core::convert::TryFrom<vec::Vec<T, A>> for [T; N]>::try_from",
+  "safe": true,
+  "callees": {
+    "vec::Vec::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the vector, also referred to\n as its 'length'.\n\n # Examples\n\n ```\n let a = vec![1, 2, 3];\n assert_eq!(a.len(), 3);\n ```\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "vec::Vec::<T, A>::set_len": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forces the length of the vector to `new_len`.\n\n This is a low-level operation that maintains none of the normal\n invariants of the type. Normally changing the length of a vector\n is done using one of the safe operations instead, such as\n [`truncate`], [`resize`], [`extend`], or [`clear`].\n\n [`truncate`]: Vec::truncate\n [`resize`]: Vec::resize\n [`extend`]: Extend::extend\n [`clear`]: Vec::clear\n\n # Safety\n\n - `new_len` must be less than or equal to [`capacity()`].\n - The elements at `old_len..new_len` must be initialized.\n\n [`capacity()`]: Vec::capacity\n\n # Examples\n\n See [`spare_capacity_mut()`] for an example with safe\n initialization of capacity elements and use of this method.\n\n `set_len()` can be useful for situations in which the vector\n is serving as a buffer for other code, particularly over FFI:\n\n ```no_run\n # #![allow(dead_code)]\n # // This is just a minimal skeleton for the doc example;\n # // don't use this as a starting point for a real library.\n # pub struct StreamWrapper { strm: *mut std::ffi::c_void }\n # const Z_OK: i32 = 0;\n # unsafe extern \"C\" {\n #     fn deflateGetDictionary(\n #         strm: *mut std::ffi::c_void,\n #         dictionary: *mut u8,\n #         dictLength: *mut usize,\n #     ) -> i32;\n # }\n # impl StreamWrapper {\n pub fn get_dictionary(&self) -> Option<Vec<u8>> {\n     // Per the FFI method's docs, \"32768 bytes is always enough\".\n     let mut dict = Vec::with_capacity(32_768);\n     let mut dict_length = 0;\n     // SAFETY: When `deflateGetDictionary` returns `Z_OK`, it holds that:\n     // 1. `dict_length` elements were initialized.\n     // 2. `dict_length` <= the capacity (32_768)\n     // which makes `set_len` safe to call.\n     unsafe {\n         // Make the FFI call...\n         let r = deflateGetDictionary(self.strm, dict.as_mut_ptr(), &mut dict_length);\n         if r == Z_OK {\n             // ...and update the length to what was initialized.\n             dict.set_len(dict_length);\n             Some(dict)\n         } else {\n             None\n         }\n     }\n }\n # }\n ```\n\n While the following example is sound, there is a memory leak since\n the inner vectors were not freed prior to the `set_len` call:\n\n ```\n let mut vec = vec![vec![1, 0, 0],\n                    vec![0, 1, 0],\n                    vec![0, 0, 1]];\n // SAFETY:\n // 1. `old_len..0` is empty so no elements need to be initialized.\n // 2. `0 <= capacity` always holds whatever `capacity` is.\n unsafe {\n     vec.set_len(0);\n #   // FIXME(https://github.com/rust-lang/miri/issues/3670):\n #   // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n #   vec.set_len(3);\n }\n ```\n\n Normally, here, one would use [`clear`] instead to correctly drop\n the contents and thus not leak memory.\n\n [`spare_capacity_mut()`]: Vec::spare_capacity_mut\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "vec::Vec::<T, A>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the vector's buffer, or a dangling raw pointer\n valid for zero sized reads if the vector didn't allocate.\n\n The caller must ensure that the vector outlives the pointer this\n function returns, or else it will end up dangling.\n Modifying the vector may cause its buffer to be reallocated,\n which would also make any pointers to it invalid.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n This method guarantees that for the purpose of the aliasing model, this method\n does not materialize a reference to the underlying slice, and thus the returned pointer\n will remain valid when mixed with other calls to [`as_ptr`], [`as_mut_ptr`],\n and [`as_non_null`].\n Note that calling other methods that materialize mutable references to the slice,\n or mutable references to specific elements you are planning on accessing through this pointer,\n as well as writing to those elements, may still invalidate this pointer.\n See the second example below for how this guarantee can be used.\n\n\n # Examples\n\n ```\n let x = vec![1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(*x_ptr.add(i), 1 << i);\n     }\n }\n ```\n\n Due to the aliasing guarantee, the following code is legal:\n\n ```rust\n unsafe {\n     let mut v = vec![0, 1, 2];\n     let ptr1 = v.as_ptr();\n     let _ = ptr1.read();\n     let ptr2 = v.as_mut_ptr().offset(2);\n     ptr2.write(2);\n     // Notably, the write to `ptr2` did *not* invalidate `ptr1`\n     // because it mutated a different element:\n     let _ = ptr1.read();\n }\n ```\n\n [`as_mut_ptr`]: Vec::as_mut_ptr\n [`as_ptr`]: Vec::as_ptr\n [`as_non_null`]: Vec::as_non_null\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `src` without moving it. This leaves the\n memory in `src` unchanged.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads.\n\n * `src` must be properly aligned. Use [`read_unaligned`] if this is not the\n   case.\n\n * `src` must point to a properly initialized value of type `T`.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n # Examples\n\n Basic usage:\n\n ```\n let x = 12;\n let y = &x as *const i32;\n\n unsafe {\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n\n ## Ownership of the Returned Value\n\n `read` creates a bitwise copy of `T`, regardless of whether `T` is [`Copy`].\n If `T` is not [`Copy`], using both the returned value and the value at\n `*src` can violate memory safety. Note that assigning to `*src` counts as a\n use because it will attempt to drop the value at `*src`.\n\n [`write()`] can be used to overwrite data without causing it to be dropped.\n\n ```\n use std::ptr;\n\n let mut s = String::from(\"foo\");\n unsafe {\n     // `s2` now points to the same underlying memory as `s`.\n     let mut s2: String = ptr::read(&s);\n\n     assert_eq!(s2, \"foo\");\n\n     // Assigning to `s2` causes its original value to be dropped. Beyond\n     // this point, `s` must no longer be used, as the underlying memory has\n     // been freed.\n     s2 = String::default();\n     assert_eq!(s2, \"\");\n\n     // Assigning to `s` would cause the old value to be dropped again,\n     // resulting in undefined behavior.\n     // s = String::from(\"bar\"); // ERROR\n\n     // `ptr::write` can be used to overwrite a value without dropping it.\n     ptr::write(&mut s, String::from(\"bar\"));\n }\n\n assert_eq!(s, \"bar\");\n ```\n\n [valid]: self#safety\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Ref",
+      "Plain",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 113,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:4325:5: 4340:6",
+  "src": "fn try_from(mut vec: Vec<T, A>) -> Result<[T; N], Vec<T, A>> {\n        if vec.len() != N {\n            return Err(vec);\n        }\n\n        // SAFETY: `.set_len(0)` is always sound.\n        unsafe { vec.set_len(0) };\n\n        // SAFETY: A `Vec`'s pointer is always aligned properly, and\n        // the alignment the array needs is the same as the items.\n        // We checked earlier that we have sufficient items.\n        // The items will not double-drop as the `set_len`\n        // tells the `Vec` not to also drop them.\n        let array = unsafe { ptr::read(vec.as_ptr() as *const [T; N]) };\n        Ok(array)\n    }",
+  "mir": "fn vec::<impl core::convert::TryFrom<vec::Vec<T, A>> for [T; N]>::try_from(_1: vec::Vec<T, A>) -> core::result::Result<[T; N], vec::Vec<T, A>> {\n    let mut _0: core::result::Result<[T; N], vec::Vec<T, A>>;\n    let mut _2: bool;\n    let mut _3: usize;\n    let mut _4: &vec::Vec<T, A>;\n    let mut _5: vec::Vec<T, A>;\n    let  _6: ();\n    let mut _7: &mut vec::Vec<T, A>;\n    let  _8: [T; N];\n    let mut _9: *const [T; N];\n    let mut _10: *const T;\n    let mut _11: &vec::Vec<T, A>;\n    debug vec => _1;\n    debug array => _8;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &_1;\n        _3 = vec::Vec::<T, A>::len(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = Ne(move _3, N);\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = move _1;\n        _0 = core::result::Result::Err(move _5);\n        StorageDead(_5);\n        StorageDead(_2);\n        goto -> bb7;\n    }\n    bb3: {\n        StorageDead(_3);\n        StorageDead(_2);\n        StorageLive(_7);\n        _7 = &mut _1;\n        _6 = vec::Vec::<T, A>::set_len(move _7, 0_usize) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &_1;\n        _10 = vec::Vec::<T, A>::as_ptr(move _11) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        _9 = move _10 as *const [T; N];\n        StorageDead(_10);\n        _8 = core::ptr::read::<[T; N]>(move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_9);\n        _0 = core::result::Result::Ok(_8);\n        drop(_1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        return;\n    }\n}\n",
+  "doc": " Gets the entire contents of the `Vec<T>` as an array,\n if its size exactly matches that of the requested array.\n\n # Examples\n\n ```\n assert_eq!(vec![1, 2, 3].try_into(), Ok([1, 2, 3]));\n assert_eq!(<Vec<i32>>::new().try_into(), Ok([]));\n ```\n\n If the length doesn't match, the input comes back in `Err`:\n ```\n let r: Result<[i32; 4], _> = (0..10).collect::<Vec<_>>().try_into();\n assert_eq!(r, Err(vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));\n ```\n\n If you're fine with just getting a prefix of the `Vec<T>`,\n you can call [`.truncate(N)`](Vec::truncate) first.\n ```\n let mut v = String::from(\"hello world\").into_bytes();\n v.sort();\n v.truncate(2);\n let [a, b]: [_; 2] = v.try_into().unwrap();\n assert_eq!(a, b' ');\n assert_eq!(b, b'd');\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "cell::UnsafeCell::<T>::as_ref_unchecked",
+  "safe": false,
+  "callees": {
+    "cell::UnsafeCell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the wrapped value.\n\n This can be cast to a pointer of any kind. When creating references, you must uphold the\n aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and\n caveats.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let five = uc.get();\n ```\n",
+      "adt": {
+        "cell::UnsafeCell": "MutableAsArgument"
+      }
+    },
+    "ptr::mut_ptr::<impl *mut T>::as_ref_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a shared reference to the value behind the pointer.\n If the pointer may be null or the value may be uninitialized, [`as_uninit_ref`] must be used instead.\n If the pointer may be null, but the value is known to have been initialized, [`as_ref`] must be used instead.\n\n For the mutable counterpart see [`as_mut_unchecked`].\n\n [`as_ref`]: #method.as_ref\n [`as_uninit_ref`]: #method.as_uninit_ref\n [`as_mut_unchecked`]: #method.as_mut_unchecked\n\n # Safety\n\n When calling this method, you have to ensure that the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).\n\n # Examples\n\n ```\n #![feature(ptr_as_ref_unchecked)]\n let ptr: *mut u8 = &mut 10u8 as *mut u8;\n\n unsafe {\n     println!(\"We got back the value: {}!\", ptr.as_ref_unchecked());\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "cell::UnsafeCell": [
+      "Ref"
+    ]
+  },
+  "path": 4826,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell.rs:2511:5: 2514:6",
+  "src": "pub const unsafe fn as_ref_unchecked(&self) -> &T {\n        // SAFETY: pointer comes from `&self` so naturally satisfies ptr-to-ref invariants.\n        unsafe { self.get().as_ref_unchecked() }\n    }",
+  "mir": "fn cell::UnsafeCell::<T>::as_ref_unchecked(_1: &cell::UnsafeCell<T>) -> &T {\n    let mut _0: &T;\n    let mut _2: *mut T;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = cell::UnsafeCell::<T>::get(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = ptr::mut_ptr::<impl *mut T>::as_ref_unchecked::<'_>(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Get a shared reference to the value within the `UnsafeCell`.\n\n # Safety\n\n - It is Undefined Behavior to call this while any mutable\n   reference to the wrapped value is alive.\n - Mutating the wrapped value while the returned\n   reference is alive is Undefined Behavior.\n\n # Examples\n\n ```\n #![feature(unsafe_cell_access)]\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let val = unsafe { uc.as_ref_unchecked() };\n assert_eq!(val, &5);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

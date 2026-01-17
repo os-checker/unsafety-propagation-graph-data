@@ -1,0 +1,64 @@
+{
+  "name": "<i16 as iter::range::Step>::forward",
+  "safe": true,
+  "callees": {
+    "iter::range::Step::forward_checked": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the value that would be obtained by taking the *successor*\n of `self` `count` times.\n\n If this would overflow the range of values supported by `Self`, returns `None`.\n\n # Invariants\n\n For any `a`, `n`, and `m`:\n\n * `Step::forward_checked(a, n).and_then(|x| Step::forward_checked(x, m)) == Step::forward_checked(a, m).and_then(|x| Step::forward_checked(x, n))`\n * `Step::forward_checked(a, n).and_then(|x| Step::forward_checked(x, m)) == try { Step::forward_checked(a, n.checked_add(m)) }`\n\n For any `a` and `n`:\n\n * `Step::forward_checked(a, n) == (0..n).try_fold(a, |x, _| Step::forward_checked(&x, 1))`\n   * Corollary: `Step::forward_checked(a, 0) == Some(a)`\n",
+      "adt": {}
+    },
+    "option::Option::<T>::is_none": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the option is a [`None`] value.\n\n # Examples\n\n ```\n let x: Option<u32> = Some(2);\n assert_eq!(x.is_none(), false);\n\n let x: Option<u32> = None;\n assert_eq!(x.is_none(), true);\n ```\n",
+      "adt": {
+        "option::Option": "ImmutableAsArgument"
+      }
+    },
+    "num::<impl i16>::wrapping_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrapping (modular) addition. Computes `self + rhs`, wrapping around at the\n boundary of the type.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 2076,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/range.rs:223:9: 231:10",
+  "src": "fn forward(start: Self, n: usize) -> Self {\n            // In debug builds, trigger a panic on overflow.\n            // This should optimize completely out in release builds.\n            if Self::forward_checked(start, n).is_none() {\n                let _ = Self::MAX + 1;\n            }\n            // Do wrapping math to allow e.g. `Step::forward(-128i8, 255)`.\n            start.wrapping_add(n as Self)\n        }",
+  "mir": "fn <i16 as iter::range::Step>::forward(_1: i16, _2: usize) -> i16 {\n    let mut _0: i16;\n    let mut _3: bool;\n    let mut _4: &option::Option<i16>;\n    let  _5: option::Option<i16>;\n    let mut _6: (i16, bool);\n    let mut _7: i16;\n    debug start => _1;\n    debug n => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = <i16 as iter::range::Step>::forward_checked(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = &_5;\n        _3 = option::Option::<i16>::is_none(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _3) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _6 = CheckedAdd(num::<impl i16>::MAX, 1_i16);\n        assert(!move (_6.1: bool), \"attempt to compute `{} + {}`, which would overflow\", num::<impl i16>::MAX, 1_i16) -> [success: bb5, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_4);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_3);\n        StorageLive(_7);\n        _7 = _2 as i16;\n        _0 = num::<impl i16>::wrapping_add(_1, move _7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_7);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "arithmetic_overflow"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* arithmetic_overflow\n"
+    ]
+  }
+}

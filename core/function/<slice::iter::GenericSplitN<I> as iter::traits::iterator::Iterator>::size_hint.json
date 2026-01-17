@@ -1,0 +1,60 @@
+{
+  "name": "<slice::iter::GenericSplitN<I> as iter::traits::iterator::Iterator>::size_hint",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::size_hint": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the bounds on the remaining length of the iterator.\n\n Specifically, `size_hint()` returns a tuple where the first element\n is the lower bound, and the second element is the upper bound.\n\n The second half of the tuple that is returned is an <code>[Option]<[usize]></code>.\n A [`None`] here means that either there is no known upper bound, or the\n upper bound is larger than [`usize`].\n\n # Implementation notes\n\n It is not enforced that an iterator implementation yields the declared\n number of elements. A buggy iterator may yield less than the lower bound\n or more than the upper bound of elements.\n\n `size_hint()` is primarily intended to be used for optimizations such as\n reserving space for the elements of the iterator, but must not be\n trusted to e.g., omit bounds checks in unsafe code. An incorrect\n implementation of `size_hint()` should not lead to memory safety\n violations.\n\n That said, the implementation should provide a correct estimation,\n because otherwise it would be a violation of the trait's protocol.\n\n The default implementation returns <code>(0, [None])</code> which is correct for any\n iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n let mut iter = a.iter();\n\n assert_eq!((3, Some(3)), iter.size_hint());\n let _ = iter.next();\n assert_eq!((2, Some(2)), iter.size_hint());\n ```\n\n A more complex example:\n\n ```\n // The even numbers in the range of zero to nine.\n let iter = (0..10).filter(|x| x % 2 == 0);\n\n // We might iterate from zero to ten times. Knowing that it's five\n // exactly wouldn't be possible without executing filter().\n assert_eq!((0, Some(10)), iter.size_hint());\n\n // Let's add five more numbers with chain()\n let iter = (0..10).filter(|x| x % 2 == 0).chain(15..20);\n\n // now both bounds are increased by five\n assert_eq!((5, Some(15)), iter.size_hint());\n ```\n\n Returning `None` for an upper bound:\n\n ```\n // an infinite iterator has no upper bound\n // and the maximum possible lower bound\n let iter = 0..;\n\n assert_eq!((usize::MAX, None), iter.size_hint());\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "cmp::min": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the minimum of two values.\n\n Returns the first argument if the comparison determines them to be equal.\n\n Internally uses an alias to [`Ord::min`].\n\n # Examples\n\n ```\n use std::cmp;\n\n assert_eq!(cmp::min(1, 2), 1);\n assert_eq!(cmp::min(2, 2), 2);\n ```\n ```\n use std::cmp::{self, Ordering};\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(cmp::min(Equal(\"v1\"), Equal(\"v2\")).0, \"v1\");\n ```\n",
+      "adt": {}
+    },
+    "option::Option::<T>::map_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the provided default result (if none),\n or applies a function to the contained value (if any).\n\n Arguments passed to `map_or` are eagerly evaluated; if you are passing\n the result of a function call, it is recommended to use [`map_or_else`],\n which is lazily evaluated.\n\n [`map_or_else`]: Option::map_or_else\n\n # Examples\n\n ```\n let x = Some(\"foo\");\n assert_eq!(x.map_or(42, |v| v.len()), 3);\n\n let x: Option<&str> = None;\n assert_eq!(x.map_or(42, |v| v.len()), 42);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::GenericSplitN": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Ref"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(1, Ty { id: 518, kind: RigidTy(Adt(AdtDef(DefId { id: 24532, name: \"option::Option\" }), GenericArgs([Type(Ty { id: 47, kind: RigidTy(Uint(Usize)) })]))) })])"
+    ]
+  },
+  "path": 16431,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:1129:5: 1135:6",
+  "src": "fn size_hint(&self) -> (usize, Option<usize>) {\n        let (lower, upper_opt) = self.iter.size_hint();\n        (\n            cmp::min(self.count, lower),\n            Some(upper_opt.map_or(self.count, |upper| cmp::min(self.count, upper))),\n        )\n    }",
+  "mir": "fn <slice::iter::GenericSplitN<I> as iter::traits::iterator::Iterator>::size_hint(_1: &slice::iter::GenericSplitN<I>) -> (usize, option::Option<usize>) {\n    let mut _0: (usize, option::Option<usize>);\n    let  _2: usize;\n    let  _3: option::Option<usize>;\n    let mut _4: (usize, option::Option<usize>);\n    let mut _5: &I;\n    let mut _6: usize;\n    let mut _7: usize;\n    let mut _8: option::Option<usize>;\n    let mut _9: usize;\n    let mut _10: usize;\n    let mut _11: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:1133:47: 1133:54};\n    debug self => _1;\n    debug lower => _2;\n    debug upper_opt => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_1).0: I);\n        _4 = <I as iter::traits::iterator::Iterator>::size_hint(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _2 = (_4.0: usize);\n        _3 = (_4.1: option::Option<usize>);\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = ((*_1).1: usize);\n        _6 = cmp::min::<usize>(move _7, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = ((*_1).1: usize);\n        StorageLive(_11);\n        _11 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:1133:47: 1133:54}(_1);\n        _9 = option::Option::<usize>::map_or::<usize, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:1133:47: 1133:54}>(_3, move _10, move _11) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_11);\n        StorageDead(_10);\n        _8 = option::Option::Some(move _9);\n        StorageDead(_9);\n        _0 = (move _6, move _8);\n        StorageDead(_8);\n        StorageDead(_6);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

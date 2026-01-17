@@ -1,0 +1,100 @@
+{
+  "name": "<io::cursor::Cursor<T> as io::Read>::read_buf",
+  "safe": true,
+  "callees": {
+    "core::io::BorrowedCursor::<'a>::written": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of bytes written to the `BorrowedBuf` this cursor was created from.\n\n In particular, the count returned is shared by all reborrows of the cursor.\n",
+      "adt": {}
+    },
+    "io::cursor::Cursor::<T>::split": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Splits the underlying slice at the cursor position and returns them.\n\n # Examples\n\n ```\n #![feature(cursor_split)]\n use std::io::Cursor;\n\n let mut buff = Cursor::new(vec![1, 2, 3, 4, 5]);\n\n assert_eq!(buff.split(), ([].as_slice(), [1, 2, 3, 4, 5].as_slice()));\n\n buff.set_position(2);\n assert_eq!(buff.split(), ([1, 2].as_slice(), [3, 4, 5].as_slice()));\n\n buff.set_position(6);\n assert_eq!(buff.split(), ([1, 2, 3, 4, 5].as_slice(), [].as_slice()));\n ```\n",
+      "adt": {
+        "io::cursor::Cursor": "ImmutableAsArgument"
+      }
+    },
+    "core::io::BorrowedCursor::<'a>::reborrow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reborrows this cursor by cloning it with a smaller lifetime.\n\n Since a cursor maintains unique access to its underlying buffer, the borrowed cursor is\n not accessible while the new cursor exists.\n",
+      "adt": {}
+    },
+    "io::Read::read_buf": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Pull some bytes from this source into the specified buffer.\n\n This is equivalent to the [`read`](Read::read) method, except that it is passed a [`BorrowedCursor`] rather than `[u8]` to allow use\n with uninitialized buffers. The new data will be appended to any existing contents of `buf`.\n\n The default implementation delegates to `read`.\n\n This method makes it possible to return both data and an error but it is advised against.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::io::BorrowedCursor": [
+      "Ref",
+      "Plain",
+      "MutRef"
+    ],
+    "io::cursor::Cursor": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 1429,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/cursor.rs:334:5: 342:6",
+  "src": "fn read_buf(&mut self, mut cursor: BorrowedCursor<'_>) -> io::Result<()> {\n        let prev_written = cursor.written();\n\n        Read::read_buf(&mut Cursor::split(self).1, cursor.reborrow())?;\n\n        self.pos += (cursor.written() - prev_written) as u64;\n\n        Ok(())\n    }",
+  "mir": "fn <io::cursor::Cursor<T> as io::Read>::read_buf(_1: &mut io::cursor::Cursor<T>, _2: core::io::BorrowedCursor<'_>) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let  _3: usize;\n    let mut _4: &core::io::BorrowedCursor<'_>;\n    let mut _5: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>>;\n    let mut _6: core::result::Result<(), io::error::Error>;\n    let mut _7: &mut &[u8];\n    let mut _8: (&[u8], &[u8]);\n    let mut _9: &io::cursor::Cursor<T>;\n    let mut _10: core::io::BorrowedCursor<'_>;\n    let mut _11: &mut core::io::BorrowedCursor<'_>;\n    let mut _12: isize;\n    let  _13: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let mut _14: u64;\n    let mut _15: usize;\n    let mut _16: usize;\n    let mut _17: &core::io::BorrowedCursor<'_>;\n    let mut _18: (usize, bool);\n    let mut _19: (u64, bool);\n    debug self => _1;\n    debug cursor => _2;\n    debug prev_written => _3;\n    debug residual => _13;\n    debug val => ();\n    bb0: {\n        StorageLive(_4);\n        _4 = &_2;\n        _3 = core::io::BorrowedCursor::<'_>::written(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &(*_1);\n        _8 = io::cursor::Cursor::<T>::split(move _9) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_9);\n        _7 = &mut (_8.1: &[u8]);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &mut _2;\n        _10 = core::io::BorrowedCursor::<'_>::reborrow(move _11) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_11);\n        _6 = <&[u8] as io::Read>::read_buf(_7, move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        _5 = <core::result::Result<(), io::error::Error> as core::ops::Try>::branch(move _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        _12 = discriminant(_5);\n        switchInt(move _12) -> [0: bb7, 1: bb8, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        StorageDead(_8);\n        StorageDead(_5);\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &_2;\n        _16 = core::io::BorrowedCursor::<'_>::written(move _17) -> [return: bb10, unwind unreachable];\n    }\n    bb8: {\n        _13 = move ((_5 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<(), io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_13) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_8);\n        StorageDead(_5);\n        goto -> bb13;\n    }\n    bb10: {\n        StorageDead(_17);\n        _18 = CheckedSub(_16, _3);\n        assert(!move (_18.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _16, _3) -> [success: bb11, unwind unreachable];\n    }\n    bb11: {\n        _15 = move (_18.0: usize);\n        StorageDead(_16);\n        _14 = move _15 as u64;\n        StorageDead(_15);\n        _19 = CheckedAdd(((*_1).1: u64), _14);\n        assert(!move (_19.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).1: u64), move _14) -> [success: bb12, unwind unreachable];\n    }\n    bb12: {\n        ((*_1).1: u64) = move (_19.0: u64);\n        StorageDead(_14);\n        _0 = core::result::Result::Ok(());\n        goto -> bb13;\n    }\n    bb13: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

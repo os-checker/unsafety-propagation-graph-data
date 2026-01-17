@@ -1,0 +1,102 @@
+{
+  "name": "sync::mpmc::utils::Backoff::spin_light",
+  "safe": true,
+  "callees": {
+    "core::cell::Cell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a copy of the contained value.\n\n # Examples\n\n ```\n use std::cell::Cell;\n\n let c = Cell::new(5);\n\n let five = c.get();\n ```\n",
+      "adt": {}
+    },
+    "core::cmp::Ord::min": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the minimum of two values.\n\n Returns the first argument if the comparison determines them to be equal.\n\n # Examples\n\n ```\n assert_eq!(1.min(2), 1);\n assert_eq!(2.min(2), 2);\n ```\n ```\n use std::cmp::Ordering;\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(Equal(\"self\").min(Equal(\"other\")).0, \"self\");\n ```\n",
+      "adt": {}
+    },
+    "core::num::<impl u32>::pow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Raises self to the power of `exp`, using exponentiation by squaring.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    },
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::hint::spin_loop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Emits a machine instruction to signal the processor that it is running in\n a busy-wait spin-loop (\"spin lock\").\n\n Upon receiving the spin-loop signal the processor can optimize its behavior by,\n for example, saving power or switching hyper-threads.\n\n This function is different from [`thread::yield_now`] which directly\n yields to the system's scheduler, whereas `spin_loop` does not interact\n with the operating system.\n\n A common use case for `spin_loop` is implementing bounded optimistic\n spinning in a CAS loop in synchronization primitives. To avoid problems\n like priority inversion, it is strongly recommended that the spin loop is\n terminated after a finite amount of iterations and an appropriate blocking\n syscall is made.\n\n **Note**: On platforms that do not support receiving spin-loop hints this\n function does not do anything at all.\n\n # Examples\n\n ```ignore-wasm\n use std::sync::atomic::{AtomicBool, Ordering};\n use std::sync::Arc;\n use std::{hint, thread};\n\n // A shared atomic value that threads will use to coordinate\n let live = Arc::new(AtomicBool::new(false));\n\n // In a background thread we'll eventually set the value\n let bg_work = {\n     let live = live.clone();\n     thread::spawn(move || {\n         // Do some work, then make the value live\n         do_some_work();\n         live.store(true, Ordering::Release);\n     })\n };\n\n // Back on our current thread, we wait for the value to be set\n while !live.load(Ordering::Acquire) {\n     // The spin loop is a hint to the CPU that we're waiting, but probably\n     // not for very long\n     hint::spin_loop();\n }\n\n // The value is now set\n # fn do_some_work() {}\n do_some_work();\n bg_work.join()?;\n # Ok::<(), Box<dyn core::any::Any + Send + 'static>>(())\n ```\n\n [`thread::yield_now`]: ../../std/thread/fn.yield_now.html\n",
+      "adt": {}
+    },
+    "core::cell::Cell::<T>::set": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets the contained value.\n\n # Examples\n\n ```\n use std::cell::Cell;\n\n let c = Cell::new(5);\n\n c.set(10);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::cell::Cell": [
+      "Ref"
+    ],
+    "sync::mpmc::utils::Backoff": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::ops::Range": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 2891,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/utils.rs:113:5: 120:6",
+  "src": "pub fn spin_light(&self) {\n        let step = self.step.get().min(SPIN_LIMIT);\n        for _ in 0..step.pow(2) {\n            crate::hint::spin_loop();\n        }\n\n        self.step.set(self.step.get() + 1);\n    }",
+  "mir": "fn sync::mpmc::utils::Backoff::spin_light(_1: &sync::mpmc::utils::Backoff) -> () {\n    let mut _0: ();\n    let  _2: u32;\n    let mut _3: u32;\n    let mut _4: &core::cell::Cell<u32>;\n    let mut _5: core::ops::Range<u32>;\n    let mut _6: core::ops::Range<u32>;\n    let mut _7: u32;\n    let mut _8: core::ops::Range<u32>;\n    let mut _9: core::option::Option<u32>;\n    let mut _10: &mut core::ops::Range<u32>;\n    let mut _11: isize;\n    let  _12: ();\n    let  _13: ();\n    let mut _14: &core::cell::Cell<u32>;\n    let mut _15: u32;\n    let mut _16: u32;\n    let mut _17: &core::cell::Cell<u32>;\n    let mut _18: (u32, bool);\n    debug self => _1;\n    debug step => _2;\n    debug iter => _8;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &((*_1).0: core::cell::Cell<u32>);\n        _3 = core::cell::Cell::<u32>::get(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = <u32 as core::cmp::Ord>::min(move _3, sync::mpmc::utils::SPIN_LIMIT) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = core::num::<impl u32>::pow(_2, 2_u32) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = Range(0_u32, move _7);\n        StorageDead(_7);\n        _5 = <core::ops::Range<u32> as core::iter::IntoIterator>::into_iter(move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageLive(_8);\n        _8 = move _5;\n        goto -> bb5;\n    }\n    bb5: {\n        StorageLive(_9);\n        _10 = &mut _8;\n        _9 = <core::ops::Range<u32> as core::iter::Iterator>::next(_10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _11 = discriminant(_9);\n        switchInt(move _11) -> [0: bb9, 1: bb8, otherwise: bb7];\n    }\n    bb7: {\n        unreachable;\n    }\n    bb8: {\n        _12 = core::hint::spin_loop() -> [return: bb10, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_5);\n        StorageLive(_14);\n        _14 = &((*_1).0: core::cell::Cell<u32>);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &((*_1).0: core::cell::Cell<u32>);\n        _16 = core::cell::Cell::<u32>::get(move _17) -> [return: bb11, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_9);\n        goto -> bb5;\n    }\n    bb11: {\n        StorageDead(_17);\n        _18 = CheckedAdd(_16, 1_u32);\n        assert(!move (_18.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _16, 1_u32) -> [success: bb12, unwind unreachable];\n    }\n    bb12: {\n        _15 = move (_18.0: u32);\n        StorageDead(_16);\n        _13 = core::cell::Cell::<u32>::set(move _14, move _15) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_15);\n        StorageDead(_14);\n        return;\n    }\n}\n",
+  "doc": " Backs off using lightweight spinning.\n\n This method should be used for retrying an operation because another thread made\n progress. i.e. on CAS failure.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

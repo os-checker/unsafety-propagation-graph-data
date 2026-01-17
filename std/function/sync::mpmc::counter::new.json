@@ -1,0 +1,76 @@
+{
+  "name": "sync::mpmc::counter::new",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicUsize::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new atomic integer.\n\n # Examples\n\n ```\n\n ```\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicBool::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `AtomicBool`.\n\n # Examples\n\n ```\n use std::sync::atomic::AtomicBool;\n\n let atomic_true = AtomicBool::new(true);\n let atomic_false = AtomicBool::new(false);\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::boxed::Box::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory on the heap and then places `x` into it.\n\n This doesn't actually allocate if `T` is zero-sized.\n\n # Examples\n\n ```\n let five = Box::new(5);\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::boxed::Box::<T>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the `Box`, returning a wrapped raw pointer.\n\n The pointer will be properly aligned and non-null.\n\n After calling this function, the caller is responsible for the\n memory previously managed by the `Box`. In particular, the\n caller should properly destroy `T` and release the memory, taking\n into account the [memory layout] used by `Box`. The easiest way to\n do this is to convert the raw pointer back into a `Box` with the\n [`Box::from_raw`] function, allowing the `Box` destructor to perform\n the cleanup.\n\n Note: this is an associated function, which means that you have\n to call it as `Box::into_raw(b)` instead of `b.into_raw()`. This\n is so that there is no conflict with a method on the inner type.\n\n # Examples\n Converting the raw pointer back into a `Box` with [`Box::from_raw`]\n for automatic cleanup:\n ```\n let x = Box::new(String::from(\"Hello\"));\n let ptr = Box::into_raw(x);\n let x = unsafe { Box::from_raw(ptr) };\n ```\n Manual cleanup by explicitly running the destructor and deallocating\n the memory:\n ```\n use std::alloc::{dealloc, Layout};\n use std::ptr;\n\n let x = Box::new(String::from(\"Hello\"));\n let ptr = Box::into_raw(x);\n unsafe {\n     ptr::drop_in_place(ptr);\n     dealloc(ptr as *mut u8, Layout::new::<String>());\n }\n ```\n Note: This is equivalent to the following:\n ```\n let x = Box::new(String::from(\"Hello\"));\n let ptr = Box::into_raw(x);\n unsafe {\n     drop(Box::from_raw(ptr));\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicUsize": [
+      "Plain"
+    ],
+    "core::sync::atomic::AtomicBool": [
+      "Plain"
+    ],
+    "sync::mpmc::counter::Counter": [
+      "Plain"
+    ],
+    "alloc_crate::boxed::Box": [
+      "Plain"
+    ],
+    "sync::mpmc::counter::Sender": [
+      "Plain"
+    ],
+    "sync::mpmc::counter::Receiver": [
+      "Plain"
+    ]
+  },
+  "path": 2817,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/counter.rs:20:1: 30:2",
+  "src": "pub(crate) fn new<C>(chan: C) -> (Sender<C>, Receiver<C>) {\n    let counter = Box::into_raw(Box::new(Counter {\n        senders: AtomicUsize::new(1),\n        receivers: AtomicUsize::new(1),\n        destroy: AtomicBool::new(false),\n        chan,\n    }));\n    let s = Sender { counter };\n    let r = Receiver { counter };\n    (s, r)\n}",
+  "mir": "fn sync::mpmc::counter::new(_1: C) -> (sync::mpmc::counter::Sender<C>, sync::mpmc::counter::Receiver<C>) {\n    let mut _0: (sync::mpmc::counter::Sender<C>, sync::mpmc::counter::Receiver<C>);\n    let  _2: *mut sync::mpmc::counter::Counter<C>;\n    let mut _3: alloc_crate::boxed::Box<sync::mpmc::counter::Counter<C>>;\n    let mut _4: sync::mpmc::counter::Counter<C>;\n    let mut _5: core::sync::atomic::AtomicUsize;\n    let mut _6: core::sync::atomic::AtomicUsize;\n    let mut _7: core::sync::atomic::AtomicBool;\n    let  _8: sync::mpmc::counter::Sender<C>;\n    let  _9: sync::mpmc::counter::Receiver<C>;\n    debug chan => _1;\n    debug counter => _2;\n    debug s => _8;\n    debug r => _9;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = core::sync::atomic::AtomicUsize::new(1_usize) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        _6 = core::sync::atomic::AtomicUsize::new(1_usize) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_7);\n        _7 = core::sync::atomic::AtomicBool::new(false) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _4 = Counter(move _5, move _6, move _7, _1);\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_5);\n        _3 = alloc_crate::boxed::Box::<sync::mpmc::counter::Counter<C>>::new(move _4) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        _2 = alloc_crate::boxed::Box::<sync::mpmc::counter::Counter<C>>::into_raw(move _3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_3);\n        _8 = Sender(_2);\n        _9 = Receiver(_2);\n        _0 = (_8, _9);\n        return;\n    }\n}\n",
+  "doc": " Wraps a channel into the reference counter.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

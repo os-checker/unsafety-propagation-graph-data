@@ -1,0 +1,84 @@
+{
+  "name": "sys::net::connection::socket::unix::Socket::shutdown",
+  "safe": true,
+  "callees": {
+    "os::fd::raw::AsRawFd::as_raw_fd": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the raw file descriptor.\n\n This function is typically used to **borrow** an owned file descriptor.\n When used in this way, this method does **not** pass ownership of the\n raw file descriptor to the caller, and the file descriptor is only\n guaranteed to be valid while the original object has not yet been\n destroyed.\n\n However, borrowing is not strictly required. See [`AsFd::as_fd`]\n for an API which strictly borrows a file descriptor.\n\n # Example\n\n ```no_run\n use std::fs::File;\n # use std::io;\n #[cfg(any(unix, target_os = \"wasi\"))]\n use std::os::fd::{AsRawFd, RawFd};\n\n let mut f = File::open(\"foo.txt\")?;\n // Note that `raw_fd` is only valid as long as `f` exists.\n #[cfg(any(unix, target_os = \"wasi\"))]\n let raw_fd: RawFd = f.as_raw_fd();\n # Ok::<(), io::Error>(())\n ```\n",
+      "adt": {}
+    },
+    "libc::shutdown": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "sys::pal::unix::cvt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts native return values to Result using the *-1 means error is in `errno`*  convention.\n Non-error values are `Ok`-wrapped.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "net::Shutdown": [
+      "Plain"
+    ],
+    "sys::net::connection::socket::unix::Socket": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 44, kind: RigidTy(Int(I32)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 3714,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/net/connection/socket/unix.rs:420:5: 428:6",
+  "src": "pub fn shutdown(&self, how: Shutdown) -> io::Result<()> {\n        let how = match how {\n            Shutdown::Write => libc::SHUT_WR,\n            Shutdown::Read => libc::SHUT_RD,\n            Shutdown::Both => libc::SHUT_RDWR,\n        };\n        cvt(unsafe { libc::shutdown(self.as_raw_fd(), how) })?;\n        Ok(())\n    }",
+  "mir": "fn sys::net::connection::socket::unix::Socket::shutdown(_1: &sys::net::connection::socket::unix::Socket, _2: net::Shutdown) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let  _3: i32;\n    let mut _4: isize;\n    let mut _5: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, i32>;\n    let mut _6: core::result::Result<i32, io::error::Error>;\n    let mut _7: i32;\n    let mut _8: i32;\n    let mut _9: isize;\n    let  _10: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _11: i32;\n    debug self => _1;\n    debug how => _2;\n    debug how => _3;\n    debug residual => _10;\n    debug val => _11;\n    bb0: {\n        _4 = discriminant(_2);\n        _3 = _4 as i32;\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = <sys::net::connection::socket::unix::Socket as os::fd::raw::AsRawFd>::as_raw_fd(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb1: {\n        unreachable;\n    }\n    bb2: {\n        _7 = libc::shutdown(move _8, _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        _6 = sys::pal::unix::cvt::<i32>(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        _5 = <core::result::Result<i32, io::error::Error> as core::ops::Try>::branch(move _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        _9 = discriminant(_5);\n        switchInt(move _9) -> [0: bb6, 1: bb7, otherwise: bb1];\n    }\n    bb6: {\n        StorageLive(_11);\n        _11 = ((_5 as variant#0).0: i32);\n        StorageDead(_11);\n        StorageDead(_5);\n        _0 = core::result::Result::Ok(());\n        goto -> bb9;\n    }\n    bb7: {\n        _10 = move ((_5 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<(), io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_10) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_5);\n        goto -> bb9;\n    }\n    bb9: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

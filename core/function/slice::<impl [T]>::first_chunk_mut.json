@@ -1,0 +1,41 @@
+{
+  "name": "slice::<impl [T]>::first_chunk_mut",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unsafe mutable pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n let x_ptr = x.as_mut_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         *x_ptr.add(i) += 2;\n     }\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::cast_array": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts from a pointer-to-`T` to a pointer-to-`[T; N]`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 1261,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:356:5: 365:6",
+  "src": "pub const fn first_chunk_mut<const N: usize>(&mut self) -> Option<&mut [T; N]> {\n        if self.len() < N {\n            None\n        } else {\n            // SAFETY: We explicitly check for the correct number of elements,\n            //   do not let the reference outlive the slice,\n            //   and require exclusive access to the entire slice to mutate the chunk.\n            Some(unsafe { &mut *(self.as_mut_ptr().cast_array()) })\n        }\n    }",
+  "mir": "fn slice::<impl [T]>::first_chunk_mut(_1: &mut [T]) -> option::Option<&mut [T; N]> {\n    let mut _0: option::Option<&mut [T; N]>;\n    let mut _2: bool;\n    let mut _3: usize;\n    let mut _4: &[T];\n    let mut _5: &mut [T; N];\n    let mut _6: *mut [T; N];\n    let mut _7: *mut T;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &(*_1);\n        _3 = PtrMetadata(move _4);\n        StorageDead(_4);\n        _2 = Lt(move _3, N);\n        switchInt(move _2) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_3);\n        _0 = option::Option::None;\n        goto -> bb5;\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = slice::<impl [T]>::as_mut_ptr(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = ptr::mut_ptr::<impl *mut T>::cast_array::<N>(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        _5 = &mut (*_6);\n        StorageDead(_6);\n        _0 = option::Option::Some(_5);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns a mutable array reference to the first `N` items in the slice.\n\n If the slice is not at least `N` in length, this will return `None`.\n\n # Examples\n\n ```\n let x = &mut [0, 1, 2];\n\n if let Some(first) = x.first_chunk_mut::<2>() {\n     first[0] = 5;\n     first[1] = 4;\n }\n assert_eq!(x, &[5, 4, 2]);\n\n assert_eq!(None, x.first_chunk_mut::<4>());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

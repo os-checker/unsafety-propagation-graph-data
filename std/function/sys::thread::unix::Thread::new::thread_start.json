@@ -1,0 +1,78 @@
+{
+  "name": "sys::thread::unix::Thread::new::thread_start",
+  "safe": true,
+  "callees": {
+    "alloc_crate::boxed::Box::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a box from a raw pointer.\n\n After calling this function, the raw pointer is owned by the\n resulting `Box`. Specifically, the `Box` destructor will call\n the destructor of `T` and free the allocated memory. For this\n to be safe, the memory must have been allocated in accordance\n with the [memory layout] used by `Box` .\n\n # Safety\n\n This function is unsafe because improper use may lead to\n memory problems. For example, a double-free may occur if the\n function is called twice on the same raw pointer.\n\n The raw pointer must point to a block of memory allocated by the global allocator.\n\n The safety conditions are described in the [memory layout] section.\n\n # Examples\n\n Recreate a `Box` which was previously converted to a raw pointer\n using [`Box::into_raw`]:\n ```\n let x = Box::new(5);\n let ptr = Box::into_raw(x);\n let x = unsafe { Box::from_raw(ptr) };\n ```\n Manually create a `Box` from scratch by using the global allocator:\n ```\n use std::alloc::{alloc, Layout};\n\n unsafe {\n     let ptr = alloc(Layout::new::<i32>()) as *mut i32;\n     // In general .write is required to avoid attempting to destruct\n     // the (uninitialized) previous contents of `ptr`, though for this\n     // simple example `*ptr = 5` would have worked as well.\n     ptr.write(5);\n     let x = Box::from_raw(ptr);\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+      "adt": {}
+    },
+    "thread::lifecycle::ThreadInit::init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Initialize the 'current thread' mechanism on this thread, returning the\n Rust entry point.\n",
+      "adt": {
+        "alloc_crate::boxed::Box": "Constructor"
+      }
+    },
+    "sys::pal::unix::stack_overflow::Handler::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::pal::unix::stack_overflow::Handler": "Constructor"
+      }
+    },
+    "core::ops::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "core::ptr::null_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a null mutable raw pointer.\n\n This function is equivalent to zero-initializing the pointer:\n `MaybeUninit::<*mut T>::zeroed().assume_init()`.\n The resulting pointer has the address 0.\n\n # Examples\n\n ```\n use std::ptr;\n\n let p: *mut i32 = ptr::null_mut();\n assert!(p.is_null());\n assert_eq!(p as usize, 0); // this pointer has the address 0\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc_crate::boxed::Box": [
+      "Plain"
+    ],
+    "sys::pal::unix::stack_overflow::Handler": [
+      "Plain"
+    ]
+  },
+  "path": 4353,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/thread/unix.rs:108:9: 121:10",
+  "src": "extern \"C\" fn thread_start(data: *mut libc::c_void) -> *mut libc::c_void {\n            unsafe {\n                // SAFETY: we are simply recreating the box that was leaked earlier.\n                let init = Box::from_raw(data as *mut ThreadInit);\n                let rust_start = init.init();\n\n                // Now that the thread information is set, set up our stack\n                // overflow handler.\n                let _handler = stack_overflow::Handler::new();\n\n                rust_start();\n            }\n            ptr::null_mut()\n        }",
+  "mir": "fn sys::thread::unix::Thread::new::thread_start(_1: *mut libc::c_void) -> *mut libc::c_void {\n    let mut _0: *mut libc::c_void;\n    let  _2: alloc_crate::boxed::Box<thread::lifecycle::ThreadInit>;\n    let mut _3: *mut thread::lifecycle::ThreadInit;\n    let  _4: alloc_crate::boxed::Box<dyn core::ops::FnOnce() + core::marker::Send>;\n    let  _5: sys::pal::unix::stack_overflow::Handler;\n    let  _6: ();\n    debug data => _1;\n    debug init => _2;\n    debug rust_start => _4;\n    debug _handler => _5;\n    bb0: {\n        StorageLive(_3);\n        _3 = _1 as *mut thread::lifecycle::ThreadInit;\n        _2 = alloc_crate::boxed::Box::<thread::lifecycle::ThreadInit>::from_raw(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _4 = thread::lifecycle::ThreadInit::init(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_5);\n        _5 = sys::pal::unix::stack_overflow::Handler::new() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = <alloc_crate::boxed::Box<dyn core::ops::FnOnce() + core::marker::Send> as core::ops::FnOnce<()>>::call_once(_4, ()) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        drop(_5) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_5);\n        _0 = core::ptr::null_mut::<libc::c_void>() -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

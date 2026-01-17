@@ -1,0 +1,79 @@
+{
+  "name": "path::Path::components",
+  "safe": true,
+  "callees": {
+    "path::Path::as_os_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Yields the underlying [`OsStr`] slice.\n\n # Examples\n\n ```\n use std::path::Path;\n\n let os_str = Path::new(\"foo.txt\").as_os_str();\n assert_eq!(os_str, std::ffi::OsStr::new(\"foo.txt\"));\n ```\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument"
+      }
+    },
+    "sys::path::unix::parse_prefix": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::option::Option": "Constructor"
+      }
+    },
+    "path::Path::as_u8_slice": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "path::Path": "ImmutableAsArgument"
+      }
+    },
+    "path::has_physical_root": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Says whether the first byte after the prefix is a separator.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "path::Path": [
+      "Ref"
+    ],
+    "ffi::os_str::OsStr": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "path::State": [
+      "Plain"
+    ],
+    "path::Components": [
+      "Plain"
+    ]
+  },
+  "path": 2421,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:3145:5: 3156:6",
+  "src": "pub fn components(&self) -> Components<'_> {\n        let prefix = parse_prefix(self.as_os_str());\n        Components {\n            path: self.as_u8_slice(),\n            prefix,\n            has_physical_root: has_physical_root(self.as_u8_slice(), prefix),\n            // use a platform-specific initial state to avoid one turn of\n            // the state-machine when the platform doesn't have a Prefix.\n            front: const { if HAS_PREFIXES { State::Prefix } else { State::StartDir } },\n            back: State::Body,\n        }\n    }",
+  "mir": "fn path::Path::components(_1: &path::Path) -> path::Components<'_> {\n    let mut _0: path::Components<'_>;\n    let  _2: core::option::Option<path::Prefix<'_>>;\n    let  _3: &ffi::os_str::OsStr;\n    let  _4: &[u8];\n    let mut _5: bool;\n    let  _6: &[u8];\n    let mut _7: path::State;\n    debug self => _1;\n    debug prefix => _2;\n    bb0: {\n        _3 = path::Path::as_os_str(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = sys::path::unix::parse_prefix(_3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = path::Path::as_u8_slice(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_5);\n        _6 = path::Path::as_u8_slice(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _5 = path::has_physical_root(_6, _2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_7);\n        _7 = path::State::Body;\n        _0 = Components(_4, _2, move _5, path::Path::components::{constant#0}, move _7);\n        StorageDead(_7);\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": " Produces an iterator over the [`Component`]s of the path.\n\n When parsing the path, there is a small amount of normalization:\n\n * Repeated separators are ignored, so `a/b` and `a//b` both have\n   `a` and `b` as components.\n\n * Occurrences of `.` are normalized away, except if they are at the\n   beginning of the path. For example, `a/./b`, `a/b/`, `a/b/.` and\n   `a/b` all have `a` and `b` as components, but `./a/b` starts with\n   an additional [`CurDir`] component.\n\n * Trailing separators are normalized away, so `/a/b` and `/a/b/` are equivalent.\n\n Note that no other normalization takes place; in particular, `a/c`\n and `a/b/../c` are distinct, to account for the possibility that `b`\n is a symbolic link (so its parent isn't `a`).\n\n # Examples\n\n ```\n use std::path::{Path, Component};\n use std::ffi::OsStr;\n\n let mut components = Path::new(\"/tmp/foo.txt\").components();\n\n assert_eq!(components.next(), Some(Component::RootDir));\n assert_eq!(components.next(), Some(Component::Normal(OsStr::new(\"tmp\"))));\n assert_eq!(components.next(), Some(Component::Normal(OsStr::new(\"foo.txt\"))));\n assert_eq!(components.next(), None)\n ```\n\n [`CurDir`]: Component::CurDir\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

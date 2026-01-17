@@ -1,0 +1,51 @@
+{
+  "name": "io::stdio::_eprint",
+  "safe": true,
+  "callees": {
+    "io::stdio::stderr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new handle to the standard error of the current process.\n\n This handle is not buffered.\n\n ### Note: Windows Portability Considerations\n\n When operating in a console, the Windows implementation of this stream does not support\n non-UTF-8 byte sequences. Attempting to write bytes that are not valid UTF-8 will return\n an error.\n\n In a process with a detached console, such as one using\n `#![windows_subsystem = \"windows\"]`, or in a child process spawned from such a process,\n the contained handle will be null. In such cases, the standard library's `Read` and\n `Write` will do nothing and silently succeed. All other I/O operations, via the\n standard library or via raw Windows API calls, will fail.\n\n # Examples\n\n Using implicit synchronization:\n\n ```no_run\n use std::io::{self, Write};\n\n fn main() -> io::Result<()> {\n     io::stderr().write_all(b\"hello world\")?;\n\n     Ok(())\n }\n ```\n\n Using explicit synchronization:\n\n ```no_run\n use std::io::{self, Write};\n\n fn main() -> io::Result<()> {\n     let stderr = io::stderr();\n     let mut handle = stderr.lock();\n\n     handle.write_all(b\"hello world\")?;\n\n     Ok(())\n }\n ```\n",
+      "adt": {}
+    },
+    "io::stdio::print_to": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes `args` to the capture buffer if enabled and possible, or `global_s`\n otherwise. `label` identifies the stream in a panic message.\n\n This function is used to print error messages, so it takes extra\n care to avoid causing a panic when `OUTPUT_CAPTURE` is unusable.\n For instance, if the TLS key for output capturing is already destroyed, or\n if the local stream is in use by another thread, it will just fall back to\n the global stream.\n\n However, if the actual I/O causes an error, this function does panic.\n\n Writing to non-blocking stdout/stderr can cause an error, which will lead\n this function to panic.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 1538,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/stdio.rs:1285:1: 1287:2",
+  "src": "pub fn _eprint(args: fmt::Arguments<'_>) {\n    print_to(args, stderr, \"stderr\");\n}",
+  "mir": "fn io::stdio::_eprint(_1: core::fmt::Arguments<'_>) -> () {\n    let mut _0: ();\n    let  _2: ();\n    let mut _3: fn() -> io::stdio::Stderr;\n    let mut _4: &str;\n    debug args => _1;\n    bb0: {\n        StorageLive(_3);\n        _3 = io::stdio::stderr as fn() -> io::stdio::Stderr;\n        StorageLive(_4);\n        _4 = \"stderr\";\n        _2 = io::stdio::print_to::<io::stdio::Stderr>(_1, move _3, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "hidden"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* hidden\n"
+    ]
+  }
+}

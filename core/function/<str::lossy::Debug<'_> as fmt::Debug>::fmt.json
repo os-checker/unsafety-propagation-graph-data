@@ -1,0 +1,268 @@
+{
+  "name": "<str::lossy::Debug<'_> as fmt::Debug>::fmt",
+  "safe": true,
+  "callees": {
+    "fmt::Write::write_char": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a [`char`] into this writer, returning whether the write succeeded.\n\n A single [`char`] may be encoded as more than one byte.\n This method can only succeed if the entire byte sequence was successfully\n written, and this method will not return until all data has been\n written or an error occurs.\n\n # Errors\n\n This function will return an instance of [`Error`] on error.\n\n # Examples\n\n ```\n use std::fmt::{Error, Write};\n\n fn writer<W: Write>(f: &mut W, c: char) -> Result<(), Error> {\n     f.write_char(c)\n }\n\n let mut buf = String::new();\n writer(&mut buf, 'a')?;\n writer(&mut buf, 'b')?;\n assert_eq!(&buf, \"ab\");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {
+        "result::Result": "Constructor"
+      }
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "str::lossy::<impl [u8]>::utf8_chunks": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator over the contiguous valid UTF-8 ranges of this\n slice, and the non-UTF-8 fragments in between.\n\n See the [`Utf8Chunk`] type for documentation of the items yielded by this iterator.\n\n # Examples\n\n This function formats arbitrary but mostly-UTF-8 bytes into Rust source\n code in the form of a C-string literal (`c\"...\"`).\n\n ```\n use std::fmt::Write as _;\n\n pub fn cstr_literal(bytes: &[u8]) -> String {\n     let mut repr = String::new();\n     repr.push_str(\"c\\\"\");\n     for chunk in bytes.utf8_chunks() {\n         for ch in chunk.valid().chars() {\n             // Escapes \\0, \\t, \\r, \\n, \\\\, \\', \\\", and uses \\u{...} for non-printable characters.\n             write!(repr, \"{}\", ch.escape_debug()).unwrap();\n         }\n         for byte in chunk.invalid() {\n             write!(repr, \"\\\\x{:02X}\", byte).unwrap();\n         }\n     }\n     repr.push('\"');\n     repr\n }\n\n fn main() {\n     let lit = cstr_literal(b\"\\xferris the \\xf0\\x9f\\xa6\\x80\\x07\");\n     let expected = stringify!(c\"\\xFErris the 🦀\\u{7}\");\n     assert_eq!(lit, expected);\n }\n ```\n",
+      "adt": {
+        "str::lossy::Utf8Chunks": "Constructor"
+      }
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::collect::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "str::lossy::Utf8Chunk::<'a>::valid": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the next validated UTF-8 substring.\n\n This substring can be empty at the start of the string or between\n broken UTF-8 characters.\n",
+      "adt": {
+        "str::lossy::Utf8Chunk": "ImmutableAsArgument"
+      }
+    },
+    "str::<impl str>::char_indices": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the [`char`]s of a string slice, and their\n positions.\n\n As a string slice consists of valid UTF-8, we can iterate through a\n string slice by [`char`]. This method returns an iterator of both\n these [`char`]s, as well as their byte positions.\n\n The iterator yields tuples. The position is first, the [`char`] is\n second.\n\n # Examples\n\n Basic usage:\n\n ```\n let word = \"goodbye\";\n\n let count = word.char_indices().count();\n assert_eq!(7, count);\n\n let mut char_indices = word.char_indices();\n\n assert_eq!(Some((0, 'g')), char_indices.next());\n assert_eq!(Some((1, 'o')), char_indices.next());\n assert_eq!(Some((2, 'o')), char_indices.next());\n assert_eq!(Some((3, 'd')), char_indices.next());\n assert_eq!(Some((4, 'b')), char_indices.next());\n assert_eq!(Some((5, 'y')), char_indices.next());\n assert_eq!(Some((6, 'e')), char_indices.next());\n\n assert_eq!(None, char_indices.next());\n ```\n\n Remember, [`char`]s might not match your intuition about characters:\n\n [`char`]: prim@char\n\n ```\n let yes = \"y̆es\";\n\n let mut char_indices = yes.char_indices();\n\n assert_eq!(Some((0, 'y')), char_indices.next()); // not (0, 'y̆')\n assert_eq!(Some((1, '\\u{0306}')), char_indices.next());\n\n // note the 3 here - the previous character took up two bytes\n assert_eq!(Some((3, 'e')), char_indices.next());\n assert_eq!(Some((4, 's')), char_indices.next());\n\n assert_eq!(None, char_indices.next());\n ```\n",
+      "adt": {
+        "str::iter::CharIndices": "Constructor"
+      }
+    },
+    "char::methods::<impl char>::escape_debug_ext": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An extended version of `escape_debug` that optionally permits escaping\n Extended Grapheme codepoints, single quotes, and double quotes. This\n allows us to format characters like nonspacing marks better when they're\n at the start of a string, and allows escaping single quotes in\n characters, and double quotes in strings.\n",
+      "adt": {
+        "char::EscapeDebug": "Constructor"
+      }
+    },
+    "ops::index::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "iter::traits::exact_size::ExactSizeIterator::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the exact remaining length of the iterator.\n\n The implementation ensures that the iterator will return exactly `len()`\n more times a [`Some(T)`] value, before returning [`None`].\n This method has a default implementation, so you usually should not\n implement it directly. However, if you can provide a more efficient\n implementation, you can do so. See the [trait-level] docs for an\n example.\n\n This function has the same safety guarantees as the\n [`Iterator::size_hint`] function.\n\n [trait-level]: ExactSizeIterator\n [`Some(T)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n // a finite range knows exactly how many times it will iterate\n let mut range = 0..5;\n\n assert_eq!(5, range.len());\n let _ = range.next();\n assert_eq!(4, range.len());\n ```\n",
+      "adt": {}
+    },
+    "fmt::Formatter::<'a>::write_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes some data to the underlying buffer contained within this\n formatter.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Foo;\n\n impl fmt::Display for Foo {\n     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {\n         formatter.write_str(\"Foo\")\n         // This is equivalent to:\n         // write!(formatter, \"Foo\")\n     }\n }\n\n assert_eq!(format!(\"{Foo}\"), \"Foo\");\n assert_eq!(format!(\"{Foo:0>8}\"), \"Foo\");\n ```\n",
+      "adt": {
+        "fmt::Formatter": "MutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    },
+    "char::methods::<impl char>::len_utf8": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of bytes this `char` would need if encoded in UTF-8.\n\n That number of bytes is always between 1 and 4, inclusive.\n\n # Examples\n\n Basic usage:\n\n ```\n let len = 'A'.len_utf8();\n assert_eq!(len, 1);\n\n let len = 'ß'.len_utf8();\n assert_eq!(len, 2);\n\n let len = 'ℝ'.len_utf8();\n assert_eq!(len, 3);\n\n let len = '💣'.len_utf8();\n assert_eq!(len, 4);\n ```\n\n The `&str` type guarantees that its contents are UTF-8, and so we can compare the length it\n would take if each code point was represented as a `char` vs in the `&str` itself:\n\n ```\n // as chars\n let eastern = '東';\n let capital = '京';\n\n // both can be represented as three bytes\n assert_eq!(3, eastern.len_utf8());\n assert_eq!(3, capital.len_utf8());\n\n // as a &str, these two are encoded in UTF-8\n let tokyo = \"東京\";\n\n let len = eastern.len_utf8() + capital.len_utf8();\n\n // we can see that they take six bytes total...\n assert_eq!(6, tokyo.len());\n\n // ... just like the &str\n assert_eq!(len, tokyo.len());\n ```\n",
+      "adt": {}
+    },
+    "str::lossy::Utf8Chunk::<'a>::invalid": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the invalid sequence that caused a failure.\n\n The returned slice will have a maximum length of 3 and starts after the\n substring given by [`valid`]. Decoding will resume after this sequence.\n\n If empty, this is the last chunk in the string. If non-empty, an\n unexpected byte was encountered or the end of the input was reached\n unexpectedly.\n\n Lossy decoding would replace this sequence with [`U+FFFD REPLACEMENT\n CHARACTER`].\n\n [`valid`]: Self::valid\n [`U+FFFD REPLACEMENT CHARACTER`]: crate::char::REPLACEMENT_CHARACTER\n",
+      "adt": {
+        "str::lossy::Utf8Chunk": "ImmutableAsArgument"
+      }
+    },
+    "fmt::rt::Argument::<'_>::new_upper_hex": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "fmt::rt::Argument": "Constructor"
+      }
+    },
+    "fmt::Arguments::<'a>::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "fmt::Formatter::<'a>::write_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Glue for usage of the [`write!`] macro with implementors of this trait.\n\n This method should generally not be invoked manually, but rather through\n the [`write!`] macro itself.\n\n Writes some formatted information into this instance.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Foo(i32);\n\n impl fmt::Display for Foo {\n     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {\n         formatter.write_fmt(format_args!(\"Foo {}\", self.0))\n     }\n }\n\n assert_eq!(format!(\"{}\", Foo(-1)), \"Foo -1\");\n assert_eq!(format!(\"{:0>8}\", Foo(2)), \"Foo 2\");\n ```\n",
+      "adt": {
+        "fmt::Formatter": "MutableAsArgument",
+        "result::Result": "Constructor",
+        "fmt::Arguments": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "fmt::Formatter": [
+      "MutRef"
+    ],
+    "result::Result": [
+      "Plain"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain"
+    ],
+    "str::lossy::Debug": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "str::lossy::Utf8Chunks": [
+      "Plain",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4779, kind: RigidTy(Adt(AdtDef(DefId { id: 25953, name: \"str::lossy::Utf8Chunk\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 14309, kind: RigidTy(Tuple([Ty { id: 47, kind: RigidTy(Uint(Usize)) }, Ty { id: 4458, kind: RigidTy(Char) }])) }), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 14309, kind: RigidTy(Tuple([Ty { id: 47, kind: RigidTy(Uint(Usize)) }, Ty { id: 4458, kind: RigidTy(Char) }])) }), Field(1, Ty { id: 4458, kind: RigidTy(Char) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4458, kind: RigidTy(Char) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 447, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 46, kind: RigidTy(Uint(U8)) }, Not)) })])"
+    ],
+    "str::lossy::Utf8Chunk": [
+      "Plain",
+      "Ref"
+    ],
+    "str::iter::CharIndices": [
+      "Plain",
+      "MutRef"
+    ],
+    "char::methods::EscapeDebugExtArgs": [
+      "Plain"
+    ],
+    "char::EscapeDebug": [
+      "Plain",
+      "Ref",
+      "MutRef"
+    ],
+    "ops::range::RangeFrom": [
+      "Plain"
+    ],
+    "ops::range::Range": [
+      "Plain"
+    ],
+    "slice::iter::Iter": [
+      "Plain",
+      "MutRef"
+    ],
+    "fmt::rt::Argument": [
+      "Plain"
+    ],
+    "fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 16982,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/str/lossy.rs:115:5: 149:6",
+  "src": "fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {\n        f.write_char('\"')?;\n\n        for chunk in self.0.utf8_chunks() {\n            // Valid part.\n            // Here we partially parse UTF-8 again which is suboptimal.\n            {\n                let valid = chunk.valid();\n                let mut from = 0;\n                for (i, c) in valid.char_indices() {\n                    let esc = c.escape_debug_ext(EscapeDebugExtArgs {\n                        escape_grapheme_extended: true,\n                        escape_single_quote: false,\n                        escape_double_quote: true,\n                    });\n                    // If char needs escaping, flush backlog so far and write, else skip\n                    if esc.len() != 1 {\n                        f.write_str(&valid[from..i])?;\n                        for c in esc {\n                            f.write_char(c)?;\n                        }\n                        from = i + c.len_utf8();\n                    }\n                }\n                f.write_str(&valid[from..])?;\n            }\n\n            // Broken parts of string as hex escape.\n            for &b in chunk.invalid() {\n                write!(f, \"\\\\x{:02X}\", b)?;\n            }\n        }\n\n        f.write_char('\"')\n    }",
+  "mir": "fn <str::lossy::Debug<'_> as fmt::Debug>::fmt(_1: &str::lossy::Debug<'_>, _2: &mut fmt::Formatter<'_>) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    let mut _3: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _4: result::Result<(), fmt::Error>;\n    let mut _5: isize;\n    let mut _6: str::lossy::Utf8Chunks<'_>;\n    let mut _7: str::lossy::Utf8Chunks<'_>;\n    let mut _8: str::lossy::Utf8Chunks<'_>;\n    let mut _9: option::Option<str::lossy::Utf8Chunk<'_>>;\n    let mut _10: &mut str::lossy::Utf8Chunks<'_>;\n    let mut _11: isize;\n    let  _12: str::lossy::Utf8Chunk<'_>;\n    let  _13: &str;\n    let mut _14: &str::lossy::Utf8Chunk<'_>;\n    let mut _15: usize;\n    let mut _16: str::iter::CharIndices<'_>;\n    let mut _17: str::iter::CharIndices<'_>;\n    let mut _18: str::iter::CharIndices<'_>;\n    let mut _19: option::Option<(usize, char)>;\n    let mut _20: &mut str::iter::CharIndices<'_>;\n    let mut _21: isize;\n    let  _22: usize;\n    let  _23: char;\n    let  _24: char::EscapeDebug;\n    let mut _25: char::methods::EscapeDebugExtArgs;\n    let mut _26: usize;\n    let mut _27: &char::EscapeDebug;\n    let mut _28: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _29: result::Result<(), fmt::Error>;\n    let  _30: &str;\n    let mut _31: ops::range::Range<usize>;\n    let mut _32: usize;\n    let mut _33: isize;\n    let mut _34: char::EscapeDebug;\n    let mut _35: char::EscapeDebug;\n    let mut _36: option::Option<char>;\n    let mut _37: &mut char::EscapeDebug;\n    let mut _38: isize;\n    let  _39: char;\n    let mut _40: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _41: result::Result<(), fmt::Error>;\n    let mut _42: isize;\n    let mut _43: usize;\n    let mut _44: (usize, bool);\n    let mut _45: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _46: result::Result<(), fmt::Error>;\n    let  _47: &str;\n    let mut _48: ops::range::RangeFrom<usize>;\n    let mut _49: usize;\n    let mut _50: isize;\n    let mut _51: slice::iter::Iter<'_, u8>;\n    let mut _52: &[u8];\n    let mut _53: &str::lossy::Utf8Chunk<'_>;\n    let mut _54: slice::iter::Iter<'_, u8>;\n    let mut _55: option::Option<&u8>;\n    let mut _56: &mut slice::iter::Iter<'_, u8>;\n    let mut _57: isize;\n    let  _58: u8;\n    let mut _59: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _60: result::Result<(), fmt::Error>;\n    let mut _61: fmt::Arguments<'_>;\n    let  _62: (&u8,);\n    let mut _63: &u8;\n    let  _64: [fmt::rt::Argument<'_>; 1];\n    let mut _65: fmt::rt::Argument<'_>;\n    let mut _66: &[u8; 11];\n    let  _67: &[fmt::rt::Argument<'_>; 1];\n    let mut _68: isize;\n    let mut _69: &[u8];\n    let mut _70: &u8;\n    let mut _71: &u8;\n    debug self => _1;\n    debug f => _2;\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    debug iter => _8;\n    debug chunk => _12;\n    debug valid => _13;\n    debug from => _15;\n    debug iter => _18;\n    debug i => _22;\n    debug c => _23;\n    debug esc => _24;\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    debug iter => _35;\n    debug c => _39;\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    debug iter => _54;\n    debug b => _58;\n    debug args => _62;\n    debug args => _64;\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = <fmt::Formatter<'_> as fmt::Write>::write_char(_2, '\"') -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        StorageDead(_3);\n        StorageLive(_6);\n        StorageLive(_7);\n        _69 = ((*_1).0: &[u8]);\n        _7 = str::lossy::<impl [u8]>::utf8_chunks(_69) -> [return: bb7, unwind unreachable];\n    }\n    bb5: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_3);\n        goto -> bb66;\n    }\n    bb7: {\n        _6 = <str::lossy::Utf8Chunks<'_> as iter::traits::collect::IntoIterator>::into_iter(move _7) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_7);\n        StorageLive(_8);\n        _8 = move _6;\n        goto -> bb9;\n    }\n    bb9: {\n        StorageLive(_9);\n        _10 = &mut _8;\n        _9 = <str::lossy::Utf8Chunks<'_> as iter::traits::iterator::Iterator>::next(_10) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _11 = discriminant(_9);\n        switchInt(move _11) -> [0: bb12, 1: bb11, otherwise: bb3];\n    }\n    bb11: {\n        StorageLive(_12);\n        _12 = move ((_9 as variant#1).0: str::lossy::Utf8Chunk<'_>);\n        StorageLive(_14);\n        _14 = &_12;\n        _13 = str::lossy::Utf8Chunk::<'_>::valid(move _14) -> [return: bb13, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_6);\n        _0 = <fmt::Formatter<'_> as fmt::Write>::write_char(_2, '\"') -> [return: bb62, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_14);\n        StorageLive(_15);\n        _15 = 0_usize;\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = str::<impl str>::char_indices(_13) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        _16 = <str::iter::CharIndices<'_> as iter::traits::collect::IntoIterator>::into_iter(move _17) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_17);\n        StorageLive(_18);\n        _18 = move _16;\n        goto -> bb16;\n    }\n    bb16: {\n        StorageLive(_19);\n        _20 = &mut _18;\n        _19 = <str::iter::CharIndices<'_> as iter::traits::iterator::Iterator>::next(_20) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        _21 = discriminant(_19);\n        switchInt(move _21) -> [0: bb19, 1: bb18, otherwise: bb3];\n    }\n    bb18: {\n        _22 = (((_19 as variant#1).0: (usize, char)).0: usize);\n        _23 = (((_19 as variant#1).0: (usize, char)).1: char);\n        StorageLive(_25);\n        _25 = EscapeDebugExtArgs(true, false, true);\n        _24 = char::methods::<impl char>::escape_debug_ext(_23, move _25) -> [return: bb20, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_19);\n        StorageDead(_18);\n        StorageDead(_16);\n        StorageLive(_45);\n        StorageLive(_46);\n        StorageLive(_48);\n        StorageLive(_49);\n        _49 = _15;\n        _48 = RangeFrom(move _49);\n        StorageDead(_49);\n        _47 = <str as ops::index::Index<ops::range::RangeFrom<usize>>>::index(_13, move _48) -> [return: bb43, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_25);\n        StorageLive(_26);\n        StorageLive(_27);\n        _27 = &_24;\n        _26 = <char::EscapeDebug as iter::traits::exact_size::ExactSizeIterator>::len(move _27) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_27);\n        switchInt(move _26) -> [1: bb41, otherwise: bb22];\n    }\n    bb22: {\n        StorageDead(_26);\n        StorageLive(_28);\n        StorageLive(_29);\n        StorageLive(_31);\n        StorageLive(_32);\n        _32 = _15;\n        _31 = Range(move _32, _22);\n        StorageDead(_32);\n        _30 = <str as ops::index::Index<ops::range::Range<usize>>>::index(_13, move _31) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_31);\n        _29 = fmt::Formatter::<'_>::write_str(_2, _30) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        _28 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _29) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_29);\n        _33 = discriminant(_28);\n        switchInt(move _33) -> [0: bb26, 1: bb27, otherwise: bb3];\n    }\n    bb26: {\n        StorageDead(_28);\n        StorageLive(_34);\n        _34 = <char::EscapeDebug as iter::traits::collect::IntoIterator>::into_iter(_24) -> [return: bb29, unwind unreachable];\n    }\n    bb27: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        StorageDead(_28);\n        goto -> bb63;\n    }\n    bb29: {\n        StorageLive(_35);\n        _35 = move _34;\n        goto -> bb30;\n    }\n    bb30: {\n        StorageLive(_36);\n        _37 = &mut _35;\n        _36 = <char::EscapeDebug as iter::traits::iterator::Iterator>::next(_37) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        _38 = discriminant(_36);\n        switchInt(move _38) -> [0: bb33, 1: bb32, otherwise: bb3];\n    }\n    bb32: {\n        _39 = ((_36 as variant#1).0: char);\n        StorageLive(_40);\n        StorageLive(_41);\n        _41 = <fmt::Formatter<'_> as fmt::Write>::write_char(_2, _39) -> [return: bb34, unwind unreachable];\n    }\n    bb33: {\n        StorageDead(_36);\n        StorageDead(_35);\n        StorageDead(_34);\n        StorageLive(_43);\n        _43 = char::methods::<impl char>::len_utf8(_23) -> [return: bb39, unwind unreachable];\n    }\n    bb34: {\n        _40 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _41) -> [return: bb35, unwind unreachable];\n    }\n    bb35: {\n        StorageDead(_41);\n        _42 = discriminant(_40);\n        switchInt(move _42) -> [0: bb36, 1: bb37, otherwise: bb3];\n    }\n    bb36: {\n        StorageDead(_40);\n        StorageDead(_36);\n        goto -> bb30;\n    }\n    bb37: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb38, unwind unreachable];\n    }\n    bb38: {\n        StorageDead(_40);\n        StorageDead(_36);\n        StorageDead(_35);\n        StorageDead(_34);\n        goto -> bb63;\n    }\n    bb39: {\n        _44 = CheckedAdd(_22, _43);\n        assert(!move (_44.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _22, move _43) -> [success: bb40, unwind unreachable];\n    }\n    bb40: {\n        _15 = move (_44.0: usize);\n        StorageDead(_43);\n        goto -> bb42;\n    }\n    bb41: {\n        StorageDead(_26);\n        goto -> bb42;\n    }\n    bb42: {\n        StorageDead(_19);\n        goto -> bb16;\n    }\n    bb43: {\n        StorageDead(_48);\n        _46 = fmt::Formatter::<'_>::write_str(_2, _47) -> [return: bb44, unwind unreachable];\n    }\n    bb44: {\n        _45 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _46) -> [return: bb45, unwind unreachable];\n    }\n    bb45: {\n        StorageDead(_46);\n        _50 = discriminant(_45);\n        switchInt(move _50) -> [0: bb46, 1: bb47, otherwise: bb3];\n    }\n    bb46: {\n        StorageDead(_45);\n        StorageDead(_15);\n        StorageLive(_51);\n        StorageLive(_52);\n        StorageLive(_53);\n        _53 = &_12;\n        _52 = str::lossy::Utf8Chunk::<'_>::invalid(move _53) -> [return: bb49, unwind unreachable];\n    }\n    bb47: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb48, unwind unreachable];\n    }\n    bb48: {\n        StorageDead(_45);\n        goto -> bb64;\n    }\n    bb49: {\n        StorageDead(_53);\n        _51 = <&[u8] as iter::traits::collect::IntoIterator>::into_iter(move _52) -> [return: bb50, unwind unreachable];\n    }\n    bb50: {\n        StorageDead(_52);\n        StorageLive(_54);\n        _54 = move _51;\n        goto -> bb51;\n    }\n    bb51: {\n        StorageLive(_55);\n        _56 = &mut _54;\n        _55 = <slice::iter::Iter<'_, u8> as iter::traits::iterator::Iterator>::next(_56) -> [return: bb52, unwind unreachable];\n    }\n    bb52: {\n        _57 = discriminant(_55);\n        switchInt(move _57) -> [0: bb54, 1: bb53, otherwise: bb3];\n    }\n    bb53: {\n        StorageLive(_58);\n        _70 = ((_55 as variant#1).0: &u8);\n        _58 = (*_70);\n        StorageLive(_59);\n        StorageLive(_60);\n        StorageLive(_61);\n        StorageLive(_62);\n        StorageLive(_63);\n        _63 = &_58;\n        _62 = (move _63);\n        StorageDead(_63);\n        StorageLive(_64);\n        StorageLive(_65);\n        _71 = (_62.0: &u8);\n        _65 = fmt::rt::Argument::<'_>::new_upper_hex::<u8>(_71) -> [return: bb55, unwind unreachable];\n    }\n    bb54: {\n        StorageDead(_55);\n        StorageDead(_54);\n        StorageDead(_51);\n        StorageDead(_12);\n        StorageDead(_9);\n        goto -> bb9;\n    }\n    bb55: {\n        _64 = [move _65];\n        StorageDead(_65);\n        StorageLive(_66);\n        _66 = b\"\\x02\\\\x\\xc3 \\x00\\x00i\\x02\\x00\\x00\";\n        _67 = &_64;\n        _61 = fmt::Arguments::<'_>::new::<11, 1>(move _66, _67) -> [return: bb56, unwind unreachable];\n    }\n    bb56: {\n        StorageDead(_66);\n        _60 = fmt::Formatter::<'_>::write_fmt(_2, move _61) -> [return: bb57, unwind unreachable];\n    }\n    bb57: {\n        StorageDead(_61);\n        _59 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _60) -> [return: bb58, unwind unreachable];\n    }\n    bb58: {\n        StorageDead(_60);\n        _68 = discriminant(_59);\n        switchInt(move _68) -> [0: bb59, 1: bb60, otherwise: bb3];\n    }\n    bb59: {\n        StorageDead(_64);\n        StorageDead(_62);\n        StorageDead(_59);\n        StorageDead(_58);\n        StorageDead(_55);\n        goto -> bb51;\n    }\n    bb60: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb61, unwind unreachable];\n    }\n    bb61: {\n        StorageDead(_64);\n        StorageDead(_62);\n        StorageDead(_59);\n        StorageDead(_58);\n        StorageDead(_55);\n        StorageDead(_54);\n        StorageDead(_51);\n        goto -> bb65;\n    }\n    bb62: {\n        goto -> bb66;\n    }\n    bb63: {\n        StorageDead(_19);\n        StorageDead(_18);\n        StorageDead(_16);\n        goto -> bb64;\n    }\n    bb64: {\n        StorageDead(_15);\n        goto -> bb65;\n    }\n    bb65: {\n        StorageDead(_12);\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_6);\n        goto -> bb66;\n    }\n    bb66: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

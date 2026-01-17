@@ -1,0 +1,61 @@
+{
+  "name": "sync::Arc::<[core::mem::MaybeUninit<T>], A>::assume_init",
+  "safe": false,
+  "callees": {
+    "sync::Arc::<T, A>::into_inner_with_allocator": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::Arc": "ImmutableAsArgument",
+        "core::ptr::NonNull": "Constructor"
+      }
+    },
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "sync::Arc::<T, A>::from_ptr_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::Arc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sync::Arc": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 9572, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 9519, kind: RigidTy(Adt(AdtDef(DefId { id: 5664, name: \"sync::ArcInner\" }), GenericArgs([Type(Ty { id: 74, kind: RigidTy(Slice(Ty { id: 73, kind: RigidTy(Adt(AdtDef(DefId { id: 2984, name: \"core::mem::MaybeUninit\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })) })]))) })]))) })])",
+      "Unknown([Field(1, Ty { id: 21, kind: Param(ParamTy { index: 1, name: \"A\" }) })])"
+    ]
+  },
+  "path": 2051,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:1574:5: 1577:6",
+  "src": "pub unsafe fn assume_init(self) -> Arc<[T], A> {\n        let (ptr, alloc) = Arc::into_inner_with_allocator(self);\n        unsafe { Arc::from_ptr_in(ptr.as_ptr() as _, alloc) }\n    }",
+  "mir": "fn sync::Arc::<[core::mem::MaybeUninit<T>], A>::assume_init(_1: sync::Arc<[core::mem::MaybeUninit<T>], A>) -> sync::Arc<[T], A> {\n    let mut _0: sync::Arc<[T], A>;\n    let  _2: core::ptr::NonNull<sync::ArcInner<[core::mem::MaybeUninit<T>]>>;\n    let  _3: A;\n    let mut _4: (core::ptr::NonNull<sync::ArcInner<[core::mem::MaybeUninit<T>]>>, A);\n    let mut _5: *mut sync::ArcInner<[T]>;\n    let mut _6: *mut sync::ArcInner<[core::mem::MaybeUninit<T>]>;\n    debug self => _1;\n    debug ptr => _2;\n    debug alloc => _3;\n    bb0: {\n        StorageLive(_4);\n        _4 = sync::Arc::<[core::mem::MaybeUninit<T>], A>::into_inner_with_allocator(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = (_4.0: core::ptr::NonNull<sync::ArcInner<[core::mem::MaybeUninit<T>]>>);\n        _3 = move (_4.1: A);\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = core::ptr::NonNull::<sync::ArcInner<[core::mem::MaybeUninit<T>]>>::as_ptr(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = move _6 as *mut sync::ArcInner<[T]>;\n        StorageDead(_6);\n        _0 = sync::Arc::<[T], A>::from_ptr_in(_5, _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": " Converts to `Arc<[T]>`.\n\n # Safety\n\n As with [`MaybeUninit::assume_init`],\n it is up to the caller to guarantee that the inner value\n really is in an initialized state.\n Calling this when the content is not yet fully initialized\n causes immediate undefined behavior.\n\n [`MaybeUninit::assume_init`]: mem::MaybeUninit::assume_init\n\n # Examples\n\n ```\n use std::sync::Arc;\n\n let mut values = Arc::<[u32]>::new_uninit_slice(3);\n\n // Deferred initialization:\n let data = Arc::get_mut(&mut values).unwrap();\n data[0].write(1);\n data[1].write(2);\n data[2].write(3);\n\n let values = unsafe { values.assume_init() };\n\n assert_eq!(*values, [1, 2, 3])\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

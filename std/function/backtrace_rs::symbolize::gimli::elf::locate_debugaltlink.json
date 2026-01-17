@@ -1,0 +1,195 @@
+{
+  "name": "backtrace_rs::symbolize::gimli::elf::locate_debugaltlink",
+  "safe": true,
+  "callees": {
+    "path::Path::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Directly wraps a string slice as a `Path` slice.\n\n This is a cost-free conversion.\n\n # Examples\n\n ```\n use std::path::Path;\n\n Path::new(\"foo.txt\");\n ```\n\n You can create `Path`s from `String`s, or even other `Path`s:\n\n ```\n use std::path::Path;\n\n let string = String::from(\"foo.txt\");\n let from_string = Path::new(&string);\n let from_path = Path::new(&from_string);\n assert_eq!(from_string, from_path);\n ```\n",
+      "adt": {}
+    },
+    "path::Path::is_absolute": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "deprecated"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* deprecated\n"
+        ]
+      },
+      "doc": " Returns `true` if the `Path` is absolute, i.e., if it is independent of\n the current directory.\n\n * On Unix, a path is absolute if it starts with the root, so\n `is_absolute` and [`has_root`] are equivalent.\n\n * On Windows, a path is absolute if it has a prefix and starts with the\n root: `c:\\windows` is absolute, while `c:temp` and `\\temp` are not.\n\n # Examples\n\n ```\n use std::path::Path;\n\n assert!(!Path::new(\"foo.txt\").is_absolute());\n ```\n\n [`has_root`]: Path::has_root\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument"
+      }
+    },
+    "path::Path::is_file": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the path exists on disk and is pointing at a regular file.\n\n This function will traverse symbolic links to query information about the\n destination file.\n\n If you cannot access the metadata of the file, e.g. because of a\n permission error or broken symbolic links, this will return `false`.\n\n # Examples\n\n ```no_run\n use std::path::Path;\n assert_eq!(Path::new(\"./is_a_directory/\").is_file(), false);\n assert_eq!(Path::new(\"a_file.txt\").is_file(), true);\n ```\n\n # See Also\n\n This is a convenience function that coerces errors to false. If you want to\n check errors, call [`fs::metadata`] and handle its [`Result`]. Then call\n [`fs::Metadata::is_file`] if it was [`Ok`].\n\n When the goal is simply to read from (or write to) the source, the most\n reliable way to test the source can be read (or written to) is to open\n it. Only using `is_file` can break workflows like `diff <( prog_a )` on\n a Unix-like system for example. See [`fs::File::open`] or\n [`fs::OpenOptions::open`] for more information.\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument"
+      }
+    },
+    "core::convert::Into::into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "fs::canonicalize": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the canonical, absolute form of a path with all intermediate\n components normalized and symbolic links resolved.\n\n # Platform-specific behavior\n\n This function currently corresponds to the `realpath` function on Unix\n and the `CreateFile` and `GetFinalPathNameByHandle` functions on Windows.\n Note that this [may change in the future][changes].\n\n On Windows, this converts the path to use [extended length path][path]\n syntax, which allows your program to use longer path names, but means you\n can only join backslash-delimited paths to it, and it may be incompatible\n with other applications (if passed to the application on the command-line,\n or written to a file another application may read).\n\n [changes]: io#platform-specific-behavior\n [path]: https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file\n\n # Errors\n\n This function will return an error in the following situations, but is not\n limited to just these cases:\n\n * `path` does not exist.\n * A non-final component in path is not a directory.\n\n # Examples\n\n ```no_run\n use std::fs;\n\n fn main() -> std::io::Result<()> {\n     let path = fs::canonicalize(\"../a/../foo.txt\")?;\n     Ok(())\n }\n ```\n",
+      "adt": {
+        "path::PathBuf": "Constructor",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::ok": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts from `Result<T, E>` to [`Option<T>`].\n\n Converts `self` into an [`Option<T>`], consuming `self`,\n and discarding the error, if any.\n\n # Examples\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.ok(), Some(2));\n\n let x: Result<u32, &str> = Err(\"Nothing here\");\n assert_eq!(x.ok(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "path::Path::parent": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the `Path` without its final component, if there is one.\n\n This means it returns `Some(\"\")` for relative paths with one component.\n\n Returns [`None`] if the path terminates in a root or prefix, or if it's\n the empty string.\n\n # Examples\n\n ```\n use std::path::Path;\n\n let path = Path::new(\"/foo/bar\");\n let parent = path.parent().unwrap();\n assert_eq!(parent, Path::new(\"/foo\"));\n\n let grand_parent = parent.parent().unwrap();\n assert_eq!(grand_parent, Path::new(\"/\"));\n assert_eq!(grand_parent.parent(), None);\n\n let relative_path = Path::new(\"foo/bar\");\n let parent = relative_path.parent();\n assert_eq!(parent, Some(Path::new(\"foo\")));\n let grand_parent = parent.and_then(Path::parent);\n assert_eq!(grand_parent, Some(Path::new(\"\")));\n let great_grand_parent = grand_parent.and_then(Path::parent);\n assert_eq!(great_grand_parent, None);\n ```\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "path::PathBuf::push": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extends `self` with `path`.\n\n If `path` is absolute, it replaces the current path.\n\n On Windows:\n\n * if `path` has a root but no prefix (e.g., `\\windows`), it\n   replaces everything except for the prefix (if any) of `self`.\n * if `path` has a prefix but no root, it replaces `self`.\n * if `self` has a verbatim prefix (e.g. `\\\\?\\C:\\windows`)\n   and `path` is not empty, the new path is normalized: all references\n   to `.` and `..` are removed.\n\n Consider using [`Path::join`] if you need a new `PathBuf` instead of\n using this function on a cloned `PathBuf`.\n\n # Examples\n\n Pushing a relative path extends the existing path:\n\n ```\n use std::path::PathBuf;\n\n let mut path = PathBuf::from(\"/tmp\");\n path.push(\"file.bk\");\n assert_eq!(path, PathBuf::from(\"/tmp/file.bk\"));\n ```\n\n Pushing an absolute path replaces the existing path:\n\n ```\n use std::path::PathBuf;\n\n let mut path = PathBuf::from(\"/tmp\");\n path.push(\"/etc\");\n assert_eq!(path, PathBuf::from(\"/etc\"));\n ```\n",
+      "adt": {
+        "path::PathBuf": "MutableAsArgument"
+      }
+    },
+    "backtrace_rs::symbolize::gimli::elf::locate_build_id": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Locate a debug file based on its build ID.\n\n The format of build id paths is documented at:\n https://sourceware.org/gdb/onlinedocs/gdb/Separate-Debug-Files.html\n",
+      "adt": {
+        "path::PathBuf": "Constructor",
+        "core::option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "ffi::os_str::OsStr": [
+      "Ref"
+    ],
+    "path::Path": [
+      "Ref"
+    ],
+    "path::PathBuf": [
+      "Plain",
+      "Ref",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 1226, kind: RigidTy(Adt(AdtDef(DefId { id: 5561, name: \"path::PathBuf\" }), GenericArgs([]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 2754, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 2756, kind: RigidTy(Adt(AdtDef(DefId { id: 5564, name: \"path::Path\" }), GenericArgs([]))) }, Not)) })])"
+    ]
+  },
+  "path": 495,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli/elf.rs:511:1: 528:2",
+  "src": "fn locate_debugaltlink(path: &Path, filename: &OsStr, build_id: &[u8]) -> Option<PathBuf> {\n    let filename = Path::new(filename);\n    if filename.is_absolute() {\n        if filename.is_file() {\n            return Some(filename.into());\n        }\n    } else {\n        let path = fs::canonicalize(path).ok()?;\n        let parent = path.parent()?;\n        let mut f = PathBuf::from(parent);\n        f.push(filename);\n        if f.is_file() {\n            return Some(f);\n        }\n    }\n\n    locate_build_id(build_id)\n}",
+  "mir": "fn backtrace_rs::symbolize::gimli::elf::locate_debugaltlink(_1: &path::Path, _2: &ffi::os_str::OsStr, _3: &[u8]) -> core::option::Option<path::PathBuf> {\n    let mut _0: core::option::Option<path::PathBuf>;\n    let  _4: &path::Path;\n    let mut _5: bool;\n    let mut _6: bool;\n    let mut _7: path::PathBuf;\n    let  _8: path::PathBuf;\n    let mut _9: core::ops::ControlFlow<core::option::Option<core::convert::Infallible>, path::PathBuf>;\n    let mut _10: core::option::Option<path::PathBuf>;\n    let mut _11: core::result::Result<path::PathBuf, io::error::Error>;\n    let mut _12: isize;\n    let  _13: path::PathBuf;\n    let mut _14: core::ops::ControlFlow<core::option::Option<core::convert::Infallible>, &path::Path>;\n    let mut _15: core::option::Option<&path::Path>;\n    let  _16: &path::Path;\n    let mut _17: &path::PathBuf;\n    let mut _18: isize;\n    let  _19: &path::Path;\n    let mut _20: path::PathBuf;\n    let  _21: ();\n    let mut _22: &mut path::PathBuf;\n    let mut _23: bool;\n    let  _24: &path::Path;\n    let mut _25: &path::PathBuf;\n    let mut _26: path::PathBuf;\n    debug path => _1;\n    debug filename => _2;\n    debug build_id => _3;\n    debug filename => _4;\n    debug path => _8;\n    debug residual => core::option::Option::<core::convert::Infallible>::None;\n    debug val => _13;\n    debug parent => _19;\n    debug residual => core::option::Option::<core::convert::Infallible>::None;\n    debug val => _19;\n    debug f => _20;\n    bb0: {\n        _4 = path::Path::new::<ffi::os_str::OsStr>(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = path::Path::is_absolute(_4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _5) -> [0: bb8, otherwise: bb3];\n    }\n    bb3: {\n        StorageLive(_6);\n        _6 = path::Path::is_file(_4) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        switchInt(move _6) -> [0: bb7, otherwise: bb5];\n    }\n    bb5: {\n        StorageLive(_7);\n        _7 = <&path::Path as core::convert::Into<path::PathBuf>>::into(_4) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _0 = core::option::Option::Some(move _7);\n        StorageDead(_7);\n        StorageDead(_6);\n        goto -> bb34;\n    }\n    bb7: {\n        StorageDead(_6);\n        goto -> bb30;\n    }\n    bb8: {\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = fs::canonicalize::<&path::Path>(_1) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _10 = core::result::Result::<path::PathBuf, io::error::Error>::ok(move _11) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_11);\n        _9 = <core::option::Option<path::PathBuf> as core::ops::Try>::branch(move _10) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_10);\n        _12 = discriminant(_9);\n        switchInt(move _12) -> [0: bb13, 1: bb14, otherwise: bb12];\n    }\n    bb12: {\n        unreachable;\n    }\n    bb13: {\n        StorageLive(_13);\n        _13 = move ((_9 as variant#0).0: path::PathBuf);\n        _8 = move _13;\n        StorageDead(_13);\n        StorageDead(_9);\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_17);\n        _17 = &_8;\n        _16 = <path::PathBuf as core::ops::Deref>::deref(move _17) -> [return: bb16, unwind unreachable];\n    }\n    bb14: {\n        _0 = <core::option::Option<path::PathBuf> as core::ops::FromResidual<core::option::Option<core::convert::Infallible>>>::from_residual(core::option::Option::<core::convert::Infallible>::None) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_9);\n        goto -> bb33;\n    }\n    bb16: {\n        StorageDead(_17);\n        _15 = path::Path::parent(_16) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        _14 = <core::option::Option<&path::Path> as core::ops::Try>::branch(move _15) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_15);\n        _18 = discriminant(_14);\n        switchInt(move _18) -> [0: bb19, 1: bb20, otherwise: bb12];\n    }\n    bb19: {\n        _19 = ((_14 as variant#0).0: &path::Path);\n        StorageDead(_14);\n        StorageLive(_20);\n        _20 = <path::PathBuf as core::convert::From<&path::Path>>::from(_19) -> [return: bb22, unwind unreachable];\n    }\n    bb20: {\n        _0 = <core::option::Option<path::PathBuf> as core::ops::FromResidual<core::option::Option<core::convert::Infallible>>>::from_residual(core::option::Option::<core::convert::Infallible>::None) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_14);\n        goto -> bb32;\n    }\n    bb22: {\n        StorageLive(_22);\n        _22 = &mut _20;\n        _21 = path::PathBuf::push::<&path::Path>(move _22, _4) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_22);\n        StorageLive(_23);\n        StorageLive(_25);\n        _25 = &_20;\n        _24 = <path::PathBuf as core::ops::Deref>::deref(move _25) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        StorageDead(_25);\n        _23 = path::Path::is_file(_24) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        switchInt(move _23) -> [0: bb27, otherwise: bb26];\n    }\n    bb26: {\n        StorageLive(_26);\n        _26 = move _20;\n        _0 = core::option::Option::Some(move _26);\n        StorageDead(_26);\n        StorageDead(_23);\n        StorageDead(_20);\n        goto -> bb32;\n    }\n    bb27: {\n        StorageDead(_23);\n        drop(_20) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        StorageDead(_20);\n        drop(_8) -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        StorageDead(_8);\n        goto -> bb30;\n    }\n    bb30: {\n        StorageDead(_5);\n        _0 = backtrace_rs::symbolize::gimli::elf::locate_build_id(_3) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        goto -> bb35;\n    }\n    bb32: {\n        drop(_8) -> [return: bb33, unwind unreachable];\n    }\n    bb33: {\n        StorageDead(_8);\n        goto -> bb34;\n    }\n    bb34: {\n        StorageDead(_5);\n        goto -> bb35;\n    }\n    bb35: {\n        return;\n    }\n}\n",
+  "doc": " Locate a file specified in a `.gnu_debugaltlink` section.\n\n `path` is the file containing the section.\n `filename` and `build_id` are the contents of the section.\n\n Search order is based on gdb:\n - filename, which is either absolute or relative to `path`\n - the build ID path under `BUILD_ID_PATH`\n\n gdb also allows the user to customize the debug search path, but we don't.\n\n gdb also supports debuginfod, but we don't yet.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

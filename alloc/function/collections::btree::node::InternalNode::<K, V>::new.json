@@ -1,0 +1,70 @@
+{
+  "name": "collections::btree::node::InternalNode::<K, V>::new",
+  "safe": false,
+  "callees": {
+    "boxed::Box::<T, A>::new_uninit_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new box with uninitialized contents in the provided allocator.\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let mut five = Box::<u32, _>::new_uninit_in(System);\n // Deferred initialization:\n five.write(5);\n let five = unsafe { five.assume_init() };\n\n assert_eq!(*five, 5)\n ```\n",
+      "adt": {
+        "boxed::Box": "Constructor",
+        "core::mem::MaybeUninit": "Constructor"
+      }
+    },
+    "core::mem::MaybeUninit::<T>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<Vec<u32>>`.\n // This is okay because we initialized it.\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n x_vec.push(3);\n assert_eq!(x_vec.len(), 4);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {}
+    },
+    "collections::btree::node::LeafNode::<K, V>::init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Initializes a new `LeafNode` in-place.\n\n # Safety\n\n The caller must ensure that `this` points to a (possibly uninitialized) `LeafNode`\n",
+      "adt": {}
+    },
+    "boxed::Box::<core::mem::MaybeUninit<T>, A>::assume_init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to `Box<T, A>`.\n\n # Safety\n\n As with [`MaybeUninit::assume_init`],\n it is up to the caller to guarantee that the value\n really is in an initialized state.\n Calling this when the content is not yet fully initialized\n causes immediate undefined behavior.\n\n [`MaybeUninit::assume_init`]: mem::MaybeUninit::assume_init\n\n # Examples\n\n ```\n let mut five = Box::<u32>::new_uninit();\n // Deferred initialization:\n five.write(5);\n let five: Box<u32> = unsafe { five.assume_init() };\n\n assert_eq!(*five, 5)\n ```\n",
+      "adt": {
+        "boxed::Box": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "boxed::Box": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 4316, kind: RigidTy(Adt(AdtDef(DefId { id: 2645, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 4325, kind: RigidTy(Adt(AdtDef(DefId { id: 2984, name: \"core::mem::MaybeUninit\" }), GenericArgs([Type(Ty { id: 4324, kind: RigidTy(Adt(AdtDef(DefId { id: 4049, name: \"collections::btree::node::InternalNode\" }), GenericArgs([Type(Ty { id: 2376, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 2377, kind: Param(ParamTy { index: 1, name: \"V\" }) })]))) })]))) })]))) }), Field(0, Ty { id: 4317, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 4325, kind: RigidTy(Adt(AdtDef(DefId { id: 2984, name: \"core::mem::MaybeUninit\" }), GenericArgs([Type(Ty { id: 4324, kind: RigidTy(Adt(AdtDef(DefId { id: 4049, name: \"collections::btree::node::InternalNode\" }), GenericArgs([Type(Ty { id: 2376, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 2377, kind: Param(ParamTy { index: 1, name: \"V\" }) })]))) })]))) })]))) })])"
+    ],
+    "core::mem::MaybeUninit": [
+      "MutRef"
+    ]
+  },
+  "path": 922,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/node.rs:120:5: 128:6",
+  "src": "unsafe fn new<A: Allocator + Clone>(alloc: A) -> Box<Self, A> {\n        let mut node = Box::<Self, _>::new_uninit_in(alloc);\n        unsafe {\n            // SAFETY: argument points to the `node.data` `LeafNode`\n            LeafNode::init(&raw mut (*node.as_mut_ptr()).data);\n            // SAFETY: `node.data` was just initialized and `node.edges` is MaybeUninit.\n            node.assume_init()\n        }\n    }",
+  "mir": "fn collections::btree::node::InternalNode::<K, V>::new(_1: A) -> boxed::Box<collections::btree::node::InternalNode<K, V>, A> {\n    let mut _0: boxed::Box<collections::btree::node::InternalNode<K, V>, A>;\n    let mut _2: boxed::Box<core::mem::MaybeUninit<collections::btree::node::InternalNode<K, V>>, A>;\n    let  _3: ();\n    let mut _4: *mut collections::btree::node::LeafNode<K, V>;\n    let mut _5: *mut collections::btree::node::InternalNode<K, V>;\n    let mut _6: &mut core::mem::MaybeUninit<collections::btree::node::InternalNode<K, V>>;\n    let mut _7: *const core::mem::MaybeUninit<collections::btree::node::InternalNode<K, V>>;\n    debug alloc => _1;\n    debug node => _2;\n    bb0: {\n        _2 = boxed::Box::<collections::btree::node::InternalNode<K, V>, A>::new_uninit_in(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _7 = ((_2.0: core::ptr::Unique<core::mem::MaybeUninit<collections::btree::node::InternalNode<K, V>>>).0: core::ptr::NonNull<core::mem::MaybeUninit<collections::btree::node::InternalNode<K, V>>>) as *const core::mem::MaybeUninit<collections::btree::node::InternalNode<K, V>>;\n        _6 = &mut (*_7);\n        _5 = core::mem::MaybeUninit::<collections::btree::node::InternalNode<K, V>>::as_mut_ptr(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _4 = &raw mut ((*_5).0: collections::btree::node::LeafNode<K, V>);\n        _3 = collections::btree::node::LeafNode::<K, V>::init(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_5);\n        _0 = boxed::Box::<core::mem::MaybeUninit<collections::btree::node::InternalNode<K, V>>, A>::assume_init(_2) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        return;\n    }\n}\n",
+  "doc": " Creates a new boxed `InternalNode`.\n\n # Safety\n An invariant of internal nodes is that they have at least one\n initialized and valid edge. This function does not set up\n such an edge.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

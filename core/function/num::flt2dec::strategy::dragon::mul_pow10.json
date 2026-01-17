@@ -1,0 +1,77 @@
+{
+  "name": "num::flt2dec::strategy::dragon::mul_pow10",
+  "safe": true,
+  "callees": {
+    "panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "num::bignum::Big32x40::mul_small": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Multiplies itself by a digit-sized `other` and returns its own\n mutable reference.\n",
+      "adt": {
+        "num::bignum::Big32x40": "MutableAsArgument"
+      }
+    },
+    "num::bignum::Big32x40::mul_digits": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Multiplies itself by a number described by `other[0] + other[1] * 2^W +\n other[2] * 2^(2W) + ...` (where `W` is the number of bits in the digit type)\n and returns its own mutable reference.\n",
+      "adt": {
+        "num::bignum::Big32x40": "MutableAsArgument"
+      }
+    },
+    "num::bignum::Big32x40::mul_pow2": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Multiplies itself by `2^bits` and returns its own mutable reference.\n",
+      "adt": {
+        "num::bignum::Big32x40": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "num::bignum::Big32x40": [
+      "MutRef"
+    ]
+  },
+  "path": 14864,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/flt2dec/strategy/dragon.rs:30:1: 60:2",
+  "src": "pub fn mul_pow10(x: &mut Big, n: usize) -> &mut Big {\n    debug_assert!(n < 512);\n    // Save ourself the left shift for the smallest cases.\n    if n < 8 {\n        return x.mul_small(POW10[n & 7]);\n    }\n    // Multiply by the powers of 5 and shift the 2s in at the end.\n    // This keeps the intermediate products smaller and faster.\n    if n & 7 != 0 {\n        x.mul_small(POW10[n & 7] >> (n & 7));\n    }\n    if n & 8 != 0 {\n        x.mul_small(POW10[8] >> 8);\n    }\n    if n & 16 != 0 {\n        x.mul_digits(&POW5TO16);\n    }\n    if n & 32 != 0 {\n        x.mul_digits(&POW5TO32);\n    }\n    if n & 64 != 0 {\n        x.mul_digits(&POW5TO64);\n    }\n    if n & 128 != 0 {\n        x.mul_digits(&POW5TO128);\n    }\n    if n & 256 != 0 {\n        x.mul_digits(&POW5TO256);\n    }\n    x.mul_pow2(n)\n}",
+  "mir": "fn num::flt2dec::strategy::dragon::mul_pow10(_1: &mut num::bignum::Big32x40, _2: usize) -> &mut num::bignum::Big32x40 {\n    let mut _0: &mut num::bignum::Big32x40;\n    let mut _3: bool;\n    let mut _4: !;\n    let mut _5: bool;\n    let mut _6: &mut num::bignum::Big32x40;\n    let mut _7: u32;\n    let mut _8: &[u32; 10];\n    let  _9: usize;\n    let mut _10: bool;\n    let mut _11: usize;\n    let  _12: &mut num::bignum::Big32x40;\n    let mut _13: u32;\n    let mut _14: u32;\n    let mut _15: &[u32; 10];\n    let  _16: usize;\n    let mut _17: bool;\n    let mut _18: usize;\n    let mut _19: bool;\n    let mut _20: usize;\n    let  _21: &mut num::bignum::Big32x40;\n    let mut _22: u32;\n    let mut _23: u32;\n    let mut _24: &[u32; 10];\n    let  _25: usize;\n    let mut _26: bool;\n    let mut _27: u32;\n    let mut _28: bool;\n    let mut _29: usize;\n    let  _30: &mut num::bignum::Big32x40;\n    let mut _31: &[u32];\n    let  _32: &[u32; 2];\n    let mut _33: usize;\n    let  _34: &mut num::bignum::Big32x40;\n    let mut _35: &[u32];\n    let  _36: &[u32; 3];\n    let mut _37: usize;\n    let  _38: &mut num::bignum::Big32x40;\n    let mut _39: &[u32];\n    let  _40: &[u32; 5];\n    let mut _41: usize;\n    let  _42: &mut num::bignum::Big32x40;\n    let mut _43: &[u32];\n    let  _44: &[u32; 10];\n    let mut _45: usize;\n    let  _46: &mut num::bignum::Big32x40;\n    let mut _47: &[u32];\n    let  _48: &[u32; 19];\n    let mut _49: &mut num::bignum::Big32x40;\n    debug x => _1;\n    debug n => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = Lt(_2, 512_usize);\n        switchInt(move _3) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = Lt(_2, 8_usize);\n        switchInt(move _5) -> [0: bb6, otherwise: bb3];\n    }\n    bb2: {\n        _4 = panicking::panic(\"assertion failed: n < 512\") -> unwind unreachable;\n    }\n    bb3: {\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = {alloc1075: &[u32; 10]};\n        StorageLive(_9);\n        _9 = BitAnd(_2, 7_usize);\n        _10 = Lt(_9, 10_usize);\n        assert(move _10, \"index out of bounds: the length is {} but the index is {}\", 10_usize, _9) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _7 = (*_8)[_9];\n        _6 = num::bignum::Big32x40::mul_small(_1, move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = _6;\n        StorageDead(_7);\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_6);\n        StorageDead(_5);\n        goto -> bb40;\n    }\n    bb6: {\n        StorageDead(_5);\n        StorageLive(_11);\n        _11 = BitAnd(_2, 7_usize);\n        switchInt(move _11) -> [0: bb8, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = {alloc1075: &[u32; 10]};\n        StorageLive(_16);\n        _16 = BitAnd(_2, 7_usize);\n        _17 = Lt(_16, 10_usize);\n        assert(move _17, \"index out of bounds: the length is {} but the index is {}\", 10_usize, _16) -> [success: bb9, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        goto -> bb12;\n    }\n    bb9: {\n        _14 = (*_15)[_16];\n        StorageLive(_18);\n        _18 = BitAnd(_2, 7_usize);\n        _19 = Lt(_18, 32_usize);\n        assert(move _19, \"attempt to shift right by `{}`, which would overflow\", _18) -> [success: bb10, unwind unreachable];\n    }\n    bb10: {\n        _13 = Shr(move _14, move _18);\n        StorageDead(_18);\n        StorageDead(_14);\n        _12 = num::bignum::Big32x40::mul_small(_1, move _13) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_13);\n        StorageDead(_16);\n        StorageDead(_15);\n        StorageDead(_12);\n        goto -> bb12;\n    }\n    bb12: {\n        StorageLive(_20);\n        _20 = BitAnd(_2, 8_usize);\n        switchInt(move _20) -> [0: bb17, otherwise: bb13];\n    }\n    bb13: {\n        StorageDead(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        StorageLive(_23);\n        StorageLive(_24);\n        _24 = {alloc1075: &[u32; 10]};\n        StorageLive(_25);\n        _25 = 8_usize;\n        _26 = Lt(_25, 10_usize);\n        assert(move _26, \"index out of bounds: the length is {} but the index is {}\", 10_usize, _25) -> [success: bb14, unwind unreachable];\n    }\n    bb14: {\n        _23 = (*_24)[_25];\n        _27 = 8_i32 as u32;\n        _28 = Lt(move _27, 32_u32);\n        assert(move _28, \"attempt to shift right by `{}`, which would overflow\", 8_i32) -> [success: bb15, unwind unreachable];\n    }\n    bb15: {\n        _22 = Shr(move _23, 8_i32);\n        StorageDead(_23);\n        _21 = num::bignum::Big32x40::mul_small(_1, move _22) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_22);\n        StorageDead(_25);\n        StorageDead(_24);\n        StorageDead(_21);\n        goto -> bb18;\n    }\n    bb17: {\n        StorageDead(_20);\n        goto -> bb18;\n    }\n    bb18: {\n        StorageLive(_29);\n        _29 = BitAnd(_2, 16_usize);\n        switchInt(move _29) -> [0: bb21, otherwise: bb19];\n    }\n    bb19: {\n        StorageDead(_29);\n        StorageLive(_30);\n        StorageLive(_31);\n        _32 = {alloc1077: &[u32; 2]};\n        _31 = _32 as &[u32];\n        _30 = num::bignum::Big32x40::mul_digits(_1, move _31) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_31);\n        StorageDead(_30);\n        goto -> bb22;\n    }\n    bb21: {\n        StorageDead(_29);\n        goto -> bb22;\n    }\n    bb22: {\n        StorageLive(_33);\n        _33 = BitAnd(_2, 32_usize);\n        switchInt(move _33) -> [0: bb25, otherwise: bb23];\n    }\n    bb23: {\n        StorageDead(_33);\n        StorageLive(_34);\n        StorageLive(_35);\n        _36 = {alloc1079: &[u32; 3]};\n        _35 = _36 as &[u32];\n        _34 = num::bignum::Big32x40::mul_digits(_1, move _35) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        StorageDead(_35);\n        StorageDead(_34);\n        goto -> bb26;\n    }\n    bb25: {\n        StorageDead(_33);\n        goto -> bb26;\n    }\n    bb26: {\n        StorageLive(_37);\n        _37 = BitAnd(_2, 64_usize);\n        switchInt(move _37) -> [0: bb29, otherwise: bb27];\n    }\n    bb27: {\n        StorageDead(_37);\n        StorageLive(_38);\n        StorageLive(_39);\n        _40 = {alloc1081: &[u32; 5]};\n        _39 = _40 as &[u32];\n        _38 = num::bignum::Big32x40::mul_digits(_1, move _39) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        StorageDead(_39);\n        StorageDead(_38);\n        goto -> bb30;\n    }\n    bb29: {\n        StorageDead(_37);\n        goto -> bb30;\n    }\n    bb30: {\n        StorageLive(_41);\n        _41 = BitAnd(_2, 128_usize);\n        switchInt(move _41) -> [0: bb33, otherwise: bb31];\n    }\n    bb31: {\n        StorageDead(_41);\n        StorageLive(_42);\n        StorageLive(_43);\n        _44 = {alloc1083: &[u32; 10]};\n        _43 = _44 as &[u32];\n        _42 = num::bignum::Big32x40::mul_digits(_1, move _43) -> [return: bb32, unwind unreachable];\n    }\n    bb32: {\n        StorageDead(_43);\n        StorageDead(_42);\n        goto -> bb34;\n    }\n    bb33: {\n        StorageDead(_41);\n        goto -> bb34;\n    }\n    bb34: {\n        StorageLive(_45);\n        _45 = BitAnd(_2, 256_usize);\n        switchInt(move _45) -> [0: bb37, otherwise: bb35];\n    }\n    bb35: {\n        StorageDead(_45);\n        StorageLive(_46);\n        StorageLive(_47);\n        _48 = {alloc1085: &[u32; 19]};\n        _47 = _48 as &[u32];\n        _46 = num::bignum::Big32x40::mul_digits(_1, move _47) -> [return: bb36, unwind unreachable];\n    }\n    bb36: {\n        StorageDead(_47);\n        StorageDead(_46);\n        goto -> bb38;\n    }\n    bb37: {\n        StorageDead(_45);\n        goto -> bb38;\n    }\n    bb38: {\n        StorageLive(_49);\n        _49 = num::bignum::Big32x40::mul_pow2(_1, _2) -> [return: bb39, unwind unreachable];\n    }\n    bb39: {\n        _0 = _49;\n        StorageDead(_49);\n        goto -> bb40;\n    }\n    bb40: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "hidden"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* hidden\n"
+    ]
+  }
+}

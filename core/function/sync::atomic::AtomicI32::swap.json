@@ -1,0 +1,50 @@
+{
+  "name": "sync::atomic::AtomicI32::swap",
+  "safe": true,
+  "callees": {
+    "cell::UnsafeCell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the wrapped value.\n\n This can be cast to a pointer of any kind. When creating references, you must uphold the\n aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and\n caveats.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let five = uc.get();\n ```\n",
+      "adt": {
+        "cell::UnsafeCell": "MutableAsArgument"
+      }
+    },
+    "sync::atomic::atomic_swap": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "cell::UnsafeCell": [
+      "Ref"
+    ],
+    "sync::atomic::AtomicI32": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "sync::atomic::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 17268,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/sync/atomic.rs:2977:13: 2980:14",
+  "src": "pub fn swap(&self, val: $int_type, order: Ordering) -> $int_type {\n                // SAFETY: data races are prevented by atomic intrinsics.\n                unsafe { atomic_swap(self.v.get(), val, order) }\n            }",
+  "mir": "fn sync::atomic::AtomicI32::swap(_1: &sync::atomic::AtomicI32, _2: i32, _3: sync::atomic::Ordering) -> i32 {\n    let mut _0: i32;\n    let mut _4: *mut i32;\n    let mut _5: &cell::UnsafeCell<i32>;\n    debug self => _1;\n    debug val => _2;\n    debug order => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_1).0: cell::UnsafeCell<i32>);\n        _4 = cell::UnsafeCell::<i32>::get(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _0 = sync::atomic::atomic_swap::<i32>(move _4, _2, _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Stores a value into the atomic integer, returning the previous value.\n\n `swap` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.swap(10, Ordering::Relaxed), 5);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

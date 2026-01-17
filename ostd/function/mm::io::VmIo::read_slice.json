@@ -1,0 +1,53 @@
+{
+  "name": "mm::io::VmIo::read_slice",
+  "safe": true,
+  "callees": {
+    "core::mem::size_of_val": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of the pointed-to value in bytes.\n\n This is usually the same as [`size_of::<T>()`]. However, when `T` *has* no\n statically-known size, e.g., a slice [`[T]`][slice] or a [trait object],\n then `size_of_val` can be used to get the dynamically-known size.\n\n [trait object]: ../../book/ch17-02-trait-objects.html\n\n # Examples\n\n ```\n assert_eq!(4, size_of_val(&5i32));\n\n let x: [u8; 13] = [0; 13];\n let y: &[u8] = &x;\n assert_eq!(13, size_of_val(y));\n ```\n\n [`size_of::<T>()`]: size_of\n",
+      "adt": {}
+    },
+    "core::slice::from_raw_parts_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the same functionality as [`from_raw_parts`], except that a\n mutable slice is returned.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for both reads and writes for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be accessed through any other pointer\n   (not derived from the return value) for the duration of lifetime `'a`.\n   Both read and write accesses are forbidden.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    },
+    "mm::io::VmIo::read_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads a specified number of bytes at a specified offset into a given buffer.\n\n # No short reads\n\n Similar to [`read`].\n\n [`read`]: VmIo::read\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": "mm::io::VmIo::read_slice",
+  "span": "ostd/src/mm/io.rs:123:5: 130:6",
+  "src": "fn read_slice<T: Pod>(&self, offset: usize, slice: &mut [T]) -> Result<()> {\n        let len_in_bytes = size_of_val(slice);\n        let ptr = slice as *mut [T] as *mut u8;\n        // SAFETY: the slice can be transmuted to a writable byte slice since the elements\n        // are all Plain-Old-Data (Pod) types.\n        let buf = unsafe { core::slice::from_raw_parts_mut(ptr, len_in_bytes) };\n        self.read_bytes(offset, buf)\n    }",
+  "mir": "fn mm::io::VmIo::read_slice(_1: &Self, _2: usize, _3: &mut [T]) -> core::result::Result<(), error::Error> {\n    let mut _0: core::result::Result<(), error::Error>;\n    let  _4: usize;\n    let mut _5: &[T];\n    let  _6: *mut u8;\n    let mut _7: *mut [T];\n    let mut _8: &mut [u8];\n    debug self => _1;\n    debug offset => _2;\n    debug slice => _3;\n    debug len_in_bytes => _4;\n    debug ptr => _6;\n    debug buf => _8;\n    bb0: {\n        StorageLive(_5);\n        _5 = &(*_3);\n        _4 = core::mem::size_of_val::<[T]>(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageLive(_7);\n        _7 = &raw mut (*_3);\n        _6 = move _7 as *mut u8;\n        StorageDead(_7);\n        _8 = core::slice::from_raw_parts_mut::<'_, u8>(_6, _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _0 = <Self as mm::io::VmIo>::read_bytes(_1, _2, _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": " Reads a slice of a specified type at a specified offset.\n\n # No short reads\n\n Similar to [`read`].\n\n [`read`]: VmIo::read\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

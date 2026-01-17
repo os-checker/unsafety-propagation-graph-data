@@ -1,0 +1,71 @@
+{
+  "name": "boxed::Box::<T, A>::into_raw_with_allocator",
+  "safe": true,
+  "callees": {
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::ptr::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `src` without moving it. This leaves the\n memory in `src` unchanged.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads.\n\n * `src` must be properly aligned. Use [`read_unaligned`] if this is not the\n   case.\n\n * `src` must point to a properly initialized value of type `T`.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n # Examples\n\n Basic usage:\n\n ```\n let x = 12;\n let y = &x as *const i32;\n\n unsafe {\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n\n ## Ownership of the Returned Value\n\n `read` creates a bitwise copy of `T`, regardless of whether `T` is [`Copy`].\n If `T` is not [`Copy`], using both the returned value and the value at\n `*src` can violate memory safety. Note that assigning to `*src` counts as a\n use because it will attempt to drop the value at `*src`.\n\n [`write()`] can be used to overwrite data without causing it to be dropped.\n\n ```\n use std::ptr;\n\n let mut s = String::from(\"foo\");\n unsafe {\n     // `s2` now points to the same underlying memory as `s`.\n     let mut s2: String = ptr::read(&s);\n\n     assert_eq!(s2, \"foo\");\n\n     // Assigning to `s2` causes its original value to be dropped. Beyond\n     // this point, `s` must no longer be used, as the underlying memory has\n     // been freed.\n     s2 = String::default();\n     assert_eq!(s2, \"\");\n\n     // Assigning to `s` would cause the old value to be dropped again,\n     // resulting in undefined behavior.\n     // s = String::from(\"bar\"); // ERROR\n\n     // `ptr::write` can be used to overwrite a value without dropping it.\n     ptr::write(&mut s, String::from(\"bar\"));\n }\n\n assert_eq!(s, \"bar\");\n ```\n\n [valid]: self#safety\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "boxed::Box": [
+      "Plain",
+      "MutRef",
+      "Deref",
+      "Unknown([Field(0, Ty { id: 176, kind: RigidTy(Adt(AdtDef(DefId { id: 2645, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) }), Field(0, Ty { id: 101, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])",
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ]
+  },
+  "path": 370,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed.rs:1599:5: 1609:6",
+  "src": "pub fn into_raw_with_allocator(b: Self) -> (*mut T, A) {\n        let mut b = mem::ManuallyDrop::new(b);\n        // We carefully get the raw pointer out in a way that Miri's aliasing model understands what\n        // is happening: using the primitive \"deref\" of `Box`. In case `A` is *not* `Global`, we\n        // want *no* aliasing requirements here!\n        // In case `A` *is* `Global`, this does not quite have the right behavior; `into_raw`\n        // works around that.\n        let ptr = &raw mut **b;\n        let alloc = unsafe { ptr::read(&b.1) };\n        (ptr, alloc)\n    }",
+  "mir": "fn boxed::Box::<T, A>::into_raw_with_allocator(_1: boxed::Box<T, A>) -> (*mut T, A) {\n    let mut _0: (*mut T, A);\n    let mut _2: core::mem::ManuallyDrop<boxed::Box<T, A>>;\n    let  _3: *mut T;\n    let mut _4: &mut boxed::Box<T, A>;\n    let mut _5: &mut core::mem::ManuallyDrop<boxed::Box<T, A>>;\n    let  _6: A;\n    let mut _7: *const A;\n    let  _8: &A;\n    let  _9: &boxed::Box<T, A>;\n    let mut _10: &core::mem::ManuallyDrop<boxed::Box<T, A>>;\n    let mut _11: boxed::Box<T, A>;\n    let mut _12: *const T;\n    debug b => _1;\n    debug b => _2;\n    debug ptr => _3;\n    debug alloc => _6;\n    bb0: {\n        StorageLive(_2);\n        _2 = core::mem::ManuallyDrop::<boxed::Box<T, A>>::new(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &mut _2;\n        _4 = <core::mem::ManuallyDrop<boxed::Box<T, A>> as core::ops::DerefMut>::deref_mut(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _11 = (*_4);\n        _12 = ((_11.0: core::ptr::Unique<T>).0: core::ptr::NonNull<T>) as *const T;\n        _3 = &raw mut (*_12);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_2;\n        _9 = <core::mem::ManuallyDrop<boxed::Box<T, A>> as core::ops::Deref>::deref(move _10) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        _8 = &((*_9).1: A);\n        _7 = &raw const (*_8);\n        _6 = core::ptr::read::<A>(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_7);\n        _0 = (_3, _6);\n        StorageDead(_4);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Consumes the `Box`, returning a wrapped raw pointer and the allocator.\n\n The pointer will be properly aligned and non-null.\n\n After calling this function, the caller is responsible for the\n memory previously managed by the `Box`. In particular, the\n caller should properly destroy `T` and release the memory, taking\n into account the [memory layout] used by `Box`. The easiest way to\n do this is to convert the raw pointer back into a `Box` with the\n [`Box::from_raw_in`] function, allowing the `Box` destructor to perform\n the cleanup.\n\n Note: this is an associated function, which means that you have\n to call it as `Box::into_raw_with_allocator(b)` instead of `b.into_raw_with_allocator()`. This\n is so that there is no conflict with a method on the inner type.\n\n # Examples\n Converting the raw pointer back into a `Box` with [`Box::from_raw_in`]\n for automatic cleanup:\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let x = Box::new_in(String::from(\"Hello\"), System);\n let (ptr, alloc) = Box::into_raw_with_allocator(x);\n let x = unsafe { Box::from_raw_in(ptr, alloc) };\n ```\n Manual cleanup by explicitly running the destructor and deallocating\n the memory:\n ```\n #![feature(allocator_api)]\n\n use std::alloc::{Allocator, Layout, System};\n use std::ptr::{self, NonNull};\n\n let x = Box::new_in(String::from(\"Hello\"), System);\n let (ptr, alloc) = Box::into_raw_with_allocator(x);\n unsafe {\n     ptr::drop_in_place(ptr);\n     let non_null = NonNull::new_unchecked(ptr);\n     alloc.deallocate(non_null.cast(), Layout::new::<String>());\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "<iter::adapters::GenericShunt<'_, I, R> as iter::traits::iterator::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::try_for_each": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An iterator method that applies a fallible function to each item in the\n iterator, stopping at the first error and returning that error.\n\n This can also be thought of as the fallible form of [`for_each()`]\n or as the stateless version of [`try_fold()`].\n\n [`for_each()`]: Iterator::for_each\n [`try_fold()`]: Iterator::try_fold\n\n # Examples\n\n ```\n use std::fs::rename;\n use std::io::{stdout, Write};\n use std::path::Path;\n\n let data = [\"no_tea.txt\", \"stale_bread.json\", \"torrential_rain.png\"];\n\n let res = data.iter().try_for_each(|x| writeln!(stdout(), \"{x}\"));\n assert!(res.is_ok());\n\n let mut it = data.iter().cloned();\n let res = it.try_for_each(|x| rename(x, Path::new(x).with_extension(\"old\")));\n assert!(res.is_err());\n // It short-circuited, so the remaining items are still in the iterator:\n assert_eq!(it.next(), Some(\"stale_bread.json\"));\n ```\n\n The [`ControlFlow`] type can be used with this method for the situations\n in which you'd use `break` and `continue` in a normal loop:\n\n ```\n use std::ops::ControlFlow;\n\n let r = (2..100).try_for_each(|x| {\n     if 323 % x == 0 {\n         return ControlFlow::Break(x)\n     }\n\n     ControlFlow::Continue(())\n });\n assert_eq!(r, ControlFlow::Break(17));\n ```\n",
+      "adt": {}
+    },
+    "ops::control_flow::ControlFlow::Break": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Exit the operation without running subsequent phases.\n",
+      "adt": {}
+    },
+    "ops::control_flow::ControlFlow::<B, C>::break_value": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts the `ControlFlow` into an `Option` which is `Some` if the\n `ControlFlow` was `Break` and `None` otherwise.\n\n # Examples\n\n ```\n use std::ops::ControlFlow;\n\n assert_eq!(ControlFlow::<&str, i32>::Break(\"Stop right there!\").break_value(), Some(\"Stop right there!\"));\n assert_eq!(ControlFlow::<&str, i32>::Continue(3).break_value(), None);\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "iter::adapters::GenericShunt": [
+      "MutRef"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 14154,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/mod.rs:173:5: 175:6",
+  "src": "fn next(&mut self) -> Option<Self::Item> {\n        self.try_for_each(ControlFlow::Break).break_value()\n    }",
+  "mir": "fn <iter::adapters::GenericShunt<'_, I, R> as iter::traits::iterator::Iterator>::next(_1: &mut iter::adapters::GenericShunt<'_, I, R>) -> option::Option<<<I as iter::traits::iterator::Iterator>::Item as ops::try_trait::Try>::Output> {\n    let mut _0: option::Option<<<I as iter::traits::iterator::Iterator>::Item as ops::try_trait::Try>::Output>;\n    let mut _2: ops::control_flow::ControlFlow<<<I as iter::traits::iterator::Iterator>::Item as ops::try_trait::Try>::Output>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = <iter::adapters::GenericShunt<'_, I, R> as iter::traits::iterator::Iterator>::try_for_each::<fn(<<I as iter::traits::iterator::Iterator>::Item as ops::try_trait::Try>::Output) -> ops::control_flow::ControlFlow<<<I as iter::traits::iterator::Iterator>::Item as ops::try_trait::Try>::Output> {ops::control_flow::ControlFlow::<<<I as iter::traits::iterator::Iterator>::Item as ops::try_trait::Try>::Output>::Break}, ops::control_flow::ControlFlow<<<I as iter::traits::iterator::Iterator>::Item as ops::try_trait::Try>::Output>>(_1, ops::control_flow::ControlFlow::<<<I as iter::traits::iterator::Iterator>::Item as ops::try_trait::Try>::Output>::Break) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = ops::control_flow::ControlFlow::<<<I as iter::traits::iterator::Iterator>::Item as ops::try_trait::Try>::Output>::break_value(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

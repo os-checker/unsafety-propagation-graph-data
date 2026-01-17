@@ -1,0 +1,114 @@
+{
+  "name": "<slice::iter::Iter<'a, T> as iter::adapters::copied::SpecNextChunk<'a, N, T>>::spec_next_chunk",
+  "safe": true,
+  "callees": {
+    "iter::traits::exact_size::ExactSizeIterator::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the exact remaining length of the iterator.\n\n The implementation ensures that the iterator will return exactly `len()`\n more times a [`Some(T)`] value, before returning [`None`].\n This method has a default implementation, so you usually should not\n implement it directly. However, if you can provide a more efficient\n implementation, you can do so. See the [trait-level] docs for an\n example.\n\n This function has the same safety guarantees as the\n [`Iterator::size_hint`] function.\n\n [trait-level]: ExactSizeIterator\n [`Some(T)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n // a finite range knows exactly how many times it will iterate\n let mut range = 0..5;\n\n assert_eq!(5, range.len());\n let _ = range.next();\n assert_eq!(4, range.len());\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::advance_by": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator by `n` elements.\n\n This method will eagerly skip `n` elements by calling [`next`] up to `n`\n times until [`None`] is encountered.\n\n `advance_by(n)` will return `Ok(())` if the iterator successfully advances by\n `n` elements, or a `Err(NonZero<usize>)` with value `k` if [`None`] is encountered,\n where `k` is remaining number of steps that could not be advanced because the iterator ran out.\n If `self` is empty and `n` is non-zero, then this returns `Err(n)`.\n Otherwise, `k` is always less than `n`.\n\n Calling `advance_by(0)` can do meaningful work, for example [`Flatten`]\n can advance its outer iterator until it finds an inner iterator that is not empty, which\n then often allows it to return a more accurate `size_hint()` than in its initial state.\n\n [`Flatten`]: crate::iter::Flatten\n [`next`]: Iterator::next\n\n # Examples\n\n ```\n #![feature(iter_advance_by)]\n\n use std::num::NonZero;\n\n let a = [1, 2, 3, 4];\n let mut iter = a.into_iter();\n\n assert_eq!(iter.advance_by(2), Ok(()));\n assert_eq!(iter.next(), Some(3));\n assert_eq!(iter.advance_by(0), Ok(()));\n assert_eq!(iter.advance_by(100), Err(NonZero::new(99).unwrap())); // only `4` was skipped\n ```\n",
+      "adt": {
+        "result::Result": "Constructor"
+      }
+    },
+    "array::iter::IntoIter::<T, N>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator over the elements in a partially-initialized buffer.\n\n If you have a fully-initialized array, then use [`IntoIterator`].\n But this is useful for returning partial results from unsafe code.\n\n # Safety\n\n - The `buffer[initialized]` elements must all be initialized.\n - The range must be canonical, with `initialized.start <= initialized.end`.\n - The range must be in-bounds for the buffer, with `initialized.end <= N`.\n   (Like how indexing `[0][100..100]` fails despite the range being empty.)\n\n It's sound to have more elements initialized than mentioned, though that\n will most likely result in them being leaked.\n\n # Examples\n\n ```\n #![feature(array_into_iter_constructors)]\n #![feature(maybe_uninit_uninit_array_transpose)]\n use std::array::IntoIter;\n use std::mem::MaybeUninit;\n\n # // Hi!  Thanks for reading the code. This is restricted to `Copy` because\n # // otherwise it could leak. A fully-general version this would need a drop\n # // guard to handle panics from the iterator, but this works for an example.\n fn next_chunk<T: Copy, const N: usize>(\n     it: &mut impl Iterator<Item = T>,\n ) -> Result<[T; N], IntoIter<T, N>> {\n     let mut buffer = [const { MaybeUninit::uninit() }; N];\n     let mut i = 0;\n     while i < N {\n         match it.next() {\n             Some(x) => {\n                 buffer[i].write(x);\n                 i += 1;\n             }\n             None => {\n                 // SAFETY: We've initialized the first `i` items\n                 unsafe {\n                     return Err(IntoIter::new_unchecked(buffer, 0..i));\n                 }\n             }\n         }\n     }\n\n     // SAFETY: We've initialized all N items\n     unsafe { Ok(buffer.transpose().assume_init()) }\n }\n\n let r: [_; 4] = next_chunk(&mut (10..16)).unwrap();\n assert_eq!(r, [10, 11, 12, 13]);\n let r: IntoIter<_, 40> = next_chunk(&mut (10..16)).unwrap_err();\n assert_eq!(r.collect::<Vec<_>>(), vec![10, 11, 12, 13, 14, 15]);\n ```\n",
+      "adt": {
+        "array::iter::IntoIter": "Constructor"
+      }
+    },
+    "mem::maybe_uninit::MaybeUninit::<T>::array_assume_init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the values from an array of `MaybeUninit` containers.\n\n # Safety\n\n It is up to the caller to guarantee that all elements of the array are\n in an initialized state.\n\n # Examples\n\n ```\n #![feature(maybe_uninit_array_assume_init)]\n use std::mem::MaybeUninit;\n\n let mut array: [MaybeUninit<i32>; 3] = [MaybeUninit::uninit(); 3];\n array[0].write(0);\n array[1].write(1);\n array[2].write(2);\n\n // SAFETY: Now safe as we initialised all elements\n let array = unsafe {\n     MaybeUninit::array_assume_init(array)\n };\n\n assert_eq!(array, [0, 1, 2]);\n ```\n",
+      "adt": {}
+    },
+    "convert::AsRef::as_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into a shared reference of the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unsafe mutable pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n let x_ptr = x.as_mut_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         *x_ptr.add(i) += 2;\n     }\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {}
+    },
+    "ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::Iter": [
+      "MutRef"
+    ],
+    "result::Result": [
+      "Plain"
+    ],
+    "ops::range::Range": [
+      "Plain"
+    ],
+    "array::iter::IntoIter": [
+      "Plain"
+    ]
+  },
+  "path": 16437,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/copied.rs:208:5: 246:6",
+  "src": "fn spec_next_chunk(&mut self) -> Result<[T; N], array::IntoIter<T, N>> {\n        let mut raw_array = [const { MaybeUninit::uninit() }; N];\n\n        let len = self.len();\n\n        if T::IS_ZST {\n            if len < N {\n                let _ = self.advance_by(len);\n                // SAFETY: ZSTs can be conjured ex nihilo; only the amount has to be correct\n                return Err(unsafe { array::IntoIter::new_unchecked(raw_array, 0..len) });\n            }\n\n            let _ = self.advance_by(N);\n            // SAFETY: ditto\n            return Ok(unsafe { MaybeUninit::array_assume_init(raw_array) });\n        }\n\n        if len < N {\n            // SAFETY: `len` indicates that this many elements are available and we just checked that\n            // it fits into the array.\n            unsafe {\n                ptr::copy_nonoverlapping(\n                    self.as_ref().as_ptr(),\n                    raw_array.as_mut_ptr() as *mut T,\n                    len,\n                );\n                let _ = self.advance_by(len);\n                return Err(array::IntoIter::new_unchecked(raw_array, 0..len));\n            }\n        }\n\n        // SAFETY: `len` is larger than the array size. Copy a fixed amount here to fully initialize\n        // the array.\n        unsafe {\n            ptr::copy_nonoverlapping(self.as_ref().as_ptr(), raw_array.as_mut_ptr() as *mut T, N);\n            let _ = self.advance_by(N);\n            Ok(MaybeUninit::array_assume_init(raw_array))\n        }\n    }",
+  "mir": "fn <slice::iter::Iter<'a, T> as iter::adapters::copied::SpecNextChunk<'a, N, T>>::spec_next_chunk(_1: &mut slice::iter::Iter<'_, T>) -> result::Result<[T; N], array::iter::IntoIter<T, N>> {\n    let mut _0: result::Result<[T; N], array::iter::IntoIter<T, N>>;\n    let mut _2: [mem::maybe_uninit::MaybeUninit<T>; N];\n    let  _3: usize;\n    let mut _4: &&mut slice::iter::Iter<'_, T>;\n    let mut _5: bool;\n    let mut _6: result::Result<(), num::nonzero::NonZero<usize>>;\n    let mut _7: array::iter::IntoIter<T, N>;\n    let mut _8: [mem::maybe_uninit::MaybeUninit<T>; N];\n    let mut _9: ops::range::Range<usize>;\n    let mut _10: result::Result<(), num::nonzero::NonZero<usize>>;\n    let mut _11: [T; N];\n    let mut _12: [mem::maybe_uninit::MaybeUninit<T>; N];\n    let mut _13: bool;\n    let  _14: ();\n    let mut _15: *const T;\n    let  _16: &[T];\n    let mut _17: &&mut slice::iter::Iter<'_, T>;\n    let mut _18: *mut T;\n    let mut _19: *mut mem::maybe_uninit::MaybeUninit<T>;\n    let mut _20: &mut [mem::maybe_uninit::MaybeUninit<T>];\n    let mut _21: &mut [mem::maybe_uninit::MaybeUninit<T>; N];\n    let mut _22: result::Result<(), num::nonzero::NonZero<usize>>;\n    let mut _23: array::iter::IntoIter<T, N>;\n    let mut _24: [mem::maybe_uninit::MaybeUninit<T>; N];\n    let mut _25: ops::range::Range<usize>;\n    let  _26: ();\n    let mut _27: *const T;\n    let  _28: &[T];\n    let mut _29: &&mut slice::iter::Iter<'_, T>;\n    let mut _30: *mut T;\n    let mut _31: *mut mem::maybe_uninit::MaybeUninit<T>;\n    let mut _32: &mut [mem::maybe_uninit::MaybeUninit<T>];\n    let mut _33: &mut [mem::maybe_uninit::MaybeUninit<T>; N];\n    let mut _34: result::Result<(), num::nonzero::NonZero<usize>>;\n    let mut _35: [T; N];\n    let mut _36: [mem::maybe_uninit::MaybeUninit<T>; N];\n    debug self => _1;\n    debug raw_array => _2;\n    debug len => _3;\n    bb0: {\n        StorageLive(_2);\n        _2 = [<slice::iter::Iter<'_, T> as iter::adapters::copied::SpecNextChunk<'_, N, T>>::spec_next_chunk::{constant#1}; N];\n        StorageLive(_4);\n        _4 = &_1;\n        _3 = <&mut slice::iter::Iter<'_, T> as iter::traits::exact_size::ExactSizeIterator>::len(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        switchInt(<T as mem::SizedTypeProperties>::IS_ZST) -> [0: bb9, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_5);\n        _5 = Lt(_3, N);\n        switchInt(move _5) -> [0: bb6, otherwise: bb3];\n    }\n    bb3: {\n        StorageLive(_6);\n        _6 = <slice::iter::Iter<'_, T> as iter::traits::iterator::Iterator>::advance_by(_1, _3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = _2;\n        StorageLive(_9);\n        _9 = Range(0_usize, _3);\n        _7 = array::iter::IntoIter::<T, N>::new_unchecked(move _8, move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        StorageDead(_8);\n        _0 = result::Result::Err(move _7);\n        StorageDead(_7);\n        StorageDead(_5);\n        goto -> bb24;\n    }\n    bb6: {\n        StorageDead(_5);\n        StorageLive(_10);\n        _10 = <slice::iter::Iter<'_, T> as iter::traits::iterator::Iterator>::advance_by(_1, N) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = _2;\n        _11 = mem::maybe_uninit::MaybeUninit::<T>::array_assume_init::<N>(move _12) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_12);\n        _0 = result::Result::Ok(move _11);\n        StorageDead(_11);\n        goto -> bb24;\n    }\n    bb9: {\n        StorageLive(_13);\n        _13 = Lt(_3, N);\n        switchInt(move _13) -> [0: bb11, otherwise: bb10];\n    }\n    bb10: {\n        StorageLive(_15);\n        StorageLive(_17);\n        _17 = &_1;\n        _16 = <&mut slice::iter::Iter<'_, T> as convert::AsRef<[T]>>::as_ref(move _17) -> [return: bb12, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_13);\n        StorageLive(_27);\n        StorageLive(_29);\n        _29 = &_1;\n        _28 = <&mut slice::iter::Iter<'_, T> as convert::AsRef<[T]>>::as_ref(move _29) -> [return: bb18, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_17);\n        _15 = slice::<impl [T]>::as_ptr(_16) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageLive(_18);\n        StorageLive(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = &mut _2;\n        _20 = move _21 as &mut [mem::maybe_uninit::MaybeUninit<T>];\n        StorageDead(_21);\n        _19 = slice::<impl [mem::maybe_uninit::MaybeUninit<T>]>::as_mut_ptr(move _20) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_20);\n        _18 = move _19 as *mut T;\n        StorageDead(_19);\n        _14 = ptr::copy_nonoverlapping::<T>(move _15, move _18, _3) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_18);\n        StorageDead(_15);\n        StorageLive(_22);\n        _22 = <slice::iter::Iter<'_, T> as iter::traits::iterator::Iterator>::advance_by(_1, _3) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_22);\n        StorageLive(_23);\n        StorageLive(_24);\n        _24 = _2;\n        StorageLive(_25);\n        _25 = Range(0_usize, _3);\n        _23 = array::iter::IntoIter::<T, N>::new_unchecked(move _24, move _25) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_25);\n        StorageDead(_24);\n        _0 = result::Result::Err(move _23);\n        StorageDead(_23);\n        StorageDead(_13);\n        goto -> bb25;\n    }\n    bb18: {\n        StorageDead(_29);\n        _27 = slice::<impl [T]>::as_ptr(_28) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageLive(_30);\n        StorageLive(_31);\n        StorageLive(_32);\n        StorageLive(_33);\n        _33 = &mut _2;\n        _32 = move _33 as &mut [mem::maybe_uninit::MaybeUninit<T>];\n        StorageDead(_33);\n        _31 = slice::<impl [mem::maybe_uninit::MaybeUninit<T>]>::as_mut_ptr(move _32) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_32);\n        _30 = move _31 as *mut T;\n        StorageDead(_31);\n        _26 = ptr::copy_nonoverlapping::<T>(move _27, move _30, N) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_30);\n        StorageDead(_27);\n        StorageLive(_34);\n        _34 = <slice::iter::Iter<'_, T> as iter::traits::iterator::Iterator>::advance_by(_1, N) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_34);\n        StorageLive(_35);\n        StorageLive(_36);\n        _36 = _2;\n        _35 = mem::maybe_uninit::MaybeUninit::<T>::array_assume_init::<N>(move _36) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_36);\n        _0 = result::Result::Ok(move _35);\n        StorageDead(_35);\n        StorageDead(_2);\n        goto -> bb26;\n    }\n    bb24: {\n        goto -> bb25;\n    }\n    bb25: {\n        StorageDead(_2);\n        goto -> bb26;\n    }\n    bb26: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

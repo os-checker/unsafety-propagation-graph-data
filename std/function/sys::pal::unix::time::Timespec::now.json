@@ -1,0 +1,108 @@
+{
+  "name": "sys::pal::unix::time::Timespec::now",
+  "safe": true,
+  "callees": {
+    "core::mem::MaybeUninit::<T>::uninit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `MaybeUninit<T>` in an uninitialized state.\n\n Note that dropping a `MaybeUninit<T>` will never call `T`'s drop code.\n It is your responsibility to make sure `T` gets dropped if it got initialized.\n\n See the [type-level documentation][MaybeUninit] for some examples.\n\n # Example\n\n ```\n use std::mem::MaybeUninit;\n\n let v: MaybeUninit<String> = MaybeUninit::uninit();\n ```\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<Vec<u32>>`.\n // This is okay because we initialized it.\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n x_vec.push(3);\n assert_eq!(x_vec.len(), 4);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {}
+    },
+    "libc::clock_gettime": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "sys::pal::unix::cvt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts native return values to Result using the *-1 means error is in `errno`*  convention.\n Non-error values are `Ok`-wrapped.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::assume_init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the value from the `MaybeUninit<T>` container. This is a great way\n to ensure that the data will get dropped, because the resulting `T` is\n subject to the usual drop handling.\n\n # Safety\n\n It is up to the caller to guarantee that the `MaybeUninit<T>` really is in an initialized\n state. Calling this when the content is not yet fully initialized causes immediate undefined\n behavior. The [type-level documentation][inv] contains more information about\n this initialization invariant.\n\n [inv]: #initialization-invariant\n\n On top of that, remember that most types have additional invariants beyond merely\n being considered initialized at the type level. For example, a `1`-initialized [`Vec<T>`]\n is considered initialized (under the current implementation; this does not constitute\n a stable guarantee) because the only requirement the compiler knows about it\n is that the data pointer must be non-null. Creating such a `Vec<T>` does not cause\n *immediate* undefined behavior, but will cause undefined behavior with most\n safe operations (including dropping it).\n\n [`Vec<T>`]: ../../std/vec/struct.Vec.html\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<bool>::uninit();\n x.write(true);\n let x_init = unsafe { x.assume_init() };\n assert_eq!(x_init, true);\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let x = MaybeUninit::<Vec<u32>>::uninit();\n let x_init = unsafe { x.assume_init() };\n // `x` had not been initialized yet, so this last line caused undefined behavior. ⚠️\n ```\n",
+      "adt": {}
+    },
+    "sys::pal::unix::time::Timespec::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "sys::pal::unix::time::Timespec": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::mem::MaybeUninit": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "libc::timespec": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 4522, kind: RigidTy(Int(I64)) })])",
+      "Unknown([Field(1, Ty { id: 4522, kind: RigidTy(Int(I64)) })])"
+    ],
+    "sys::pal::unix::time::Timespec": [
+      "Plain"
+    ]
+  },
+  "path": 4022,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/time.rs:99:5: 134:6",
+  "src": "pub fn now(clock: libc::clockid_t) -> Timespec {\n        use crate::mem::MaybeUninit;\n        use crate::sys::cvt;\n\n        // Try to use 64-bit time in preparation for Y2038.\n        #[cfg(all(\n            target_os = \"linux\",\n            target_env = \"gnu\",\n            target_pointer_width = \"32\",\n            not(target_arch = \"riscv32\")\n        ))]\n        {\n            use crate::sys::weak::weak;\n\n            // __clock_gettime64 was added to 32-bit arches in glibc 2.34,\n            // and it handles both vDSO calls and ENOSYS fallbacks itself.\n            weak!(\n                fn __clock_gettime64(\n                    clockid: libc::clockid_t,\n                    tp: *mut __timespec64,\n                ) -> libc::c_int;\n            );\n\n            if let Some(clock_gettime64) = __clock_gettime64.get() {\n                let mut t = MaybeUninit::uninit();\n                cvt(unsafe { clock_gettime64(clock, t.as_mut_ptr()) }).unwrap();\n                let t = unsafe { t.assume_init() };\n                return Timespec::new(t.tv_sec as i64, t.tv_nsec as i64).unwrap();\n            }\n        }\n\n        let mut t = MaybeUninit::uninit();\n        cvt(unsafe { libc::clock_gettime(clock, t.as_mut_ptr()) }).unwrap();\n        let t = unsafe { t.assume_init() };\n        Timespec::new(t.tv_sec as i64, t.tv_nsec as i64).unwrap()\n    }",
+  "mir": "fn sys::pal::unix::time::Timespec::now(_1: i32) -> sys::pal::unix::time::Timespec {\n    let mut _0: sys::pal::unix::time::Timespec;\n    let mut _2: core::mem::MaybeUninit<libc::timespec>;\n    let  _3: i32;\n    let mut _4: core::result::Result<i32, io::error::Error>;\n    let mut _5: i32;\n    let mut _6: *mut libc::timespec;\n    let mut _7: &mut core::mem::MaybeUninit<libc::timespec>;\n    let  _8: libc::timespec;\n    let mut _9: core::mem::MaybeUninit<libc::timespec>;\n    let mut _10: core::result::Result<sys::pal::unix::time::Timespec, io::error::Error>;\n    let mut _11: i64;\n    let mut _12: i64;\n    debug clock => _1;\n    debug t => _2;\n    debug t => _8;\n    bb0: {\n        StorageLive(_2);\n        _2 = core::mem::MaybeUninit::<libc::timespec>::uninit() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &mut _2;\n        _6 = core::mem::MaybeUninit::<libc::timespec>::as_mut_ptr(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = libc::clock_gettime(_1, move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _4 = sys::pal::unix::cvt::<i32>(move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        _3 = core::result::Result::<i32, io::error::Error>::unwrap(move _4) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = _2;\n        _8 = core::mem::MaybeUninit::<libc::timespec>::assume_init(move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = (_8.0: i64);\n        StorageLive(_12);\n        _12 = (_8.1: i64);\n        _10 = sys::pal::unix::time::Timespec::new(move _11, move _12) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        StorageDead(_11);\n        _0 = core::result::Result::<sys::pal::unix::time::Timespec, io::error::Error>::unwrap(move _10) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_10);\n        StorageDead(_8);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "name": "time::Duration::checked_add",
+  "safe": true,
+  "callees": {
+    "num::<impl u64>::checked_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checked integer addition. Computes `self + rhs`, returning `None`\n if overflow occurred.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "num::niche_types::Nanoseconds::as_inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "time::Duration::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `Duration` from the specified number of whole seconds and\n additional nanoseconds.\n\n If the number of nanoseconds is greater than 1 billion (the number of\n nanoseconds in a second), then it will carry over into the seconds provided.\n\n # Panics\n\n This constructor will panic if the carry from the nanoseconds overflows\n the seconds counter.\n\n # Examples\n\n ```\n use std::time::Duration;\n\n let five_seconds = Duration::new(5, 0);\n ```\n",
+      "adt": {
+        "time::Duration": "Constructor"
+      }
+    },
+    "panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "time::Duration": [
+      "Unknown([Field(0, Ty { id: 325, kind: RigidTy(Uint(U64)) })])",
+      "Unknown([Field(1, Ty { id: 1264, kind: RigidTy(Adt(AdtDef(DefId { id: 24923, name: \"num::niche_types::Nanoseconds\" }), GenericArgs([]))) })])",
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 325, kind: RigidTy(Uint(U64)) })])"
+    ],
+    "num::niche_types::Nanoseconds": [
+      "Plain"
+    ]
+  },
+  "path": 17666,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/time.rs:670:5: 686:6",
+  "src": "pub const fn checked_add(self, rhs: Duration) -> Option<Duration> {\n        if let Some(mut secs) = self.secs.checked_add(rhs.secs) {\n            let mut nanos = self.nanos.as_inner() + rhs.nanos.as_inner();\n            if nanos >= NANOS_PER_SEC {\n                nanos -= NANOS_PER_SEC;\n                if let Some(new_secs) = secs.checked_add(1) {\n                    secs = new_secs;\n                } else {\n                    return None;\n                }\n            }\n            debug_assert!(nanos < NANOS_PER_SEC);\n            Some(Duration::new(secs, nanos))\n        } else {\n            None\n        }\n    }",
+  "mir": "fn time::Duration::checked_add(_1: time::Duration, _2: time::Duration) -> option::Option<time::Duration> {\n    let mut _0: option::Option<time::Duration>;\n    let mut _3: option::Option<u64>;\n    let mut _4: u64;\n    let mut _5: u64;\n    let mut _6: isize;\n    let mut _7: u64;\n    let mut _8: u32;\n    let mut _9: u32;\n    let mut _10: num::niche_types::Nanoseconds;\n    let mut _11: u32;\n    let mut _12: num::niche_types::Nanoseconds;\n    let mut _13: (u32, bool);\n    let mut _14: bool;\n    let mut _15: u32;\n    let mut _16: (u32, bool);\n    let mut _17: option::Option<u64>;\n    let mut _18: u64;\n    let mut _19: isize;\n    let  _20: u64;\n    let mut _21: bool;\n    let mut _22: u32;\n    let mut _23: !;\n    let mut _24: time::Duration;\n    let mut _25: u64;\n    let mut _26: u32;\n    debug self => _1;\n    debug rhs => _2;\n    debug secs => _7;\n    debug nanos => _8;\n    debug new_secs => _20;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = (_1.0: u64);\n        StorageLive(_5);\n        _5 = (_2.0: u64);\n        _3 = num::<impl u64>::checked_add(move _4, move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _6 = discriminant(_3);\n        switchInt(move _6) -> [1: bb2, 0: bb16, otherwise: bb18];\n    }\n    bb2: {\n        StorageLive(_7);\n        _7 = ((_3 as variant#1).0: u64);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = (_1.1: num::niche_types::Nanoseconds);\n        _9 = num::niche_types::Nanoseconds::as_inner(move _10) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = (_2.1: num::niche_types::Nanoseconds);\n        _11 = num::niche_types::Nanoseconds::as_inner(move _12) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_12);\n        _13 = CheckedAdd(_9, _11);\n        assert(!move (_13.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _9, move _11) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _8 = move (_13.0: u32);\n        StorageDead(_11);\n        StorageDead(_9);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = _8;\n        _14 = Ge(move _15, time::NANOS_PER_SEC);\n        switchInt(move _14) -> [0: bb11, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_15);\n        _16 = CheckedSub(_8, time::NANOS_PER_SEC);\n        assert(!move (_16.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _8, time::NANOS_PER_SEC) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _8 = move (_16.0: u32);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = _7;\n        _17 = num::<impl u64>::checked_add(move _18, 1_u64) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_18);\n        _19 = discriminant(_17);\n        switchInt(move _19) -> [1: bb9, 0: bb10, otherwise: bb18];\n    }\n    bb9: {\n        _20 = ((_17 as variant#1).0: u64);\n        _7 = _20;\n        StorageDead(_17);\n        goto -> bb12;\n    }\n    bb10: {\n        StorageDead(_17);\n        _0 = option::Option::None;\n        StorageDead(_14);\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_3);\n        goto -> bb17;\n    }\n    bb11: {\n        StorageDead(_15);\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_14);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = _8;\n        _21 = Lt(move _22, time::NANOS_PER_SEC);\n        switchInt(move _21) -> [0: bb14, otherwise: bb13];\n    }\n    bb13: {\n        StorageDead(_22);\n        StorageDead(_21);\n        StorageLive(_24);\n        StorageLive(_25);\n        _25 = _7;\n        StorageLive(_26);\n        _26 = _8;\n        _24 = time::Duration::new(move _25, move _26) -> [return: bb15, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_22);\n        _23 = panicking::panic(\"assertion failed: nanos < NANOS_PER_SEC\") -> unwind unreachable;\n    }\n    bb15: {\n        StorageDead(_26);\n        StorageDead(_25);\n        _0 = option::Option::Some(move _24);\n        StorageDead(_24);\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_3);\n        goto -> bb17;\n    }\n    bb16: {\n        StorageDead(_3);\n        _0 = option::Option::None;\n        goto -> bb17;\n    }\n    bb17: {\n        return;\n    }\n    bb18: {\n        unreachable;\n    }\n}\n",
+  "doc": " Checked `Duration` addition. Computes `self + other`, returning [`None`]\n if overflow occurred.\n\n # Examples\n\n ```\n use std::time::Duration;\n\n assert_eq!(Duration::new(0, 0).checked_add(Duration::new(0, 1)), Some(Duration::new(0, 1)));\n assert_eq!(Duration::new(1, 0).checked_add(Duration::new(u64::MAX, 0)), None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

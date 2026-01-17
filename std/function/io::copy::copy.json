@@ -1,0 +1,86 @@
+{
+  "name": "io::copy::copy",
+  "safe": true,
+  "callees": {
+    "sys::io::kernel_copy::linux::kernel_copy": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "sys::io::kernel_copy::CopyState": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "io::copy::generic_copy": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The userspace read-write-loop implementation of `io::copy` that is used when\n OS-specific specializations for copy offloading are not available or not applicable.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<U, E>` by applying a function to a\n contained [`Ok`] value, leaving an [`Err`] value untouched.\n\n This function can be used to compose the results of two functions.\n\n # Examples\n\n Print the numbers on each line of a string multiplied by two.\n\n ```\n let line = \"1\\n2\\n3\\n4\\n\";\n\n for num in line.lines() {\n     match num.parse::<i32>().map(|i| i * 2) {\n         Ok(n) => println!(\"{n}\"),\n         Err(..) => {}\n     }\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 5050, kind: RigidTy(Adt(AdtDef(DefId { id: 6594, name: \"sys::io::kernel_copy::CopyState\" }), GenericArgs([]))) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "sys::io::kernel_copy::CopyState": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 553, kind: RigidTy(Uint(U64)) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 553, kind: RigidTy(Uint(U64)) })])"
+    ]
+  },
+  "path": 1400,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/copy.rs:62:1: 73:2",
+  "src": "pub fn copy<R: ?Sized, W: ?Sized>(reader: &mut R, writer: &mut W) -> Result<u64>\nwhere\n    R: Read,\n    W: Write,\n{\n    match kernel_copy(reader, writer)? {\n        CopyState::Ended(copied) => Ok(copied),\n        CopyState::Fallback(copied) => {\n            generic_copy(reader, writer).map(|additional| copied + additional)\n        }\n    }\n}",
+  "mir": "fn io::copy::copy(_1: &mut R, _2: &mut W) -> core::result::Result<u64, io::error::Error> {\n    let mut _0: core::result::Result<u64, io::error::Error>;\n    let mut _3: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, sys::io::kernel_copy::CopyState>;\n    let mut _4: core::result::Result<sys::io::kernel_copy::CopyState, io::error::Error>;\n    let mut _5: isize;\n    let  _6: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _7: sys::io::kernel_copy::CopyState;\n    let mut _8: isize;\n    let  _9: u64;\n    let  _10: u64;\n    let mut _11: core::result::Result<u64, io::error::Error>;\n    let mut _12: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/copy.rs:70:46: 70:58};\n    let mut _13: &u64;\n    debug reader => _1;\n    debug writer => _2;\n    debug residual => _6;\n    debug val => _7;\n    debug copied => _9;\n    debug copied => _10;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = sys::io::kernel_copy::linux::kernel_copy::<R, W>(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = <core::result::Result<sys::io::kernel_copy::CopyState, io::error::Error> as core::ops::Try>::branch(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _7 = move ((_3 as variant#0).0: sys::io::kernel_copy::CopyState);\n        _8 = discriminant(_7);\n        switchInt(move _8) -> [0: bb8, 1: bb7, otherwise: bb3];\n    }\n    bb5: {\n        _6 = move ((_3 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<u64, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_6) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_3);\n        goto -> bb11;\n    }\n    bb7: {\n        StorageLive(_10);\n        _10 = ((_7 as variant#1).0: u64);\n        StorageLive(_11);\n        _11 = io::copy::generic_copy::<R, W>(_1, _2) -> [return: bb9, unwind unreachable];\n    }\n    bb8: {\n        _9 = ((_7 as variant#0).0: u64);\n        _0 = core::result::Result::Ok(_9);\n        goto -> bb12;\n    }\n    bb9: {\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &_10;\n        _12 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/copy.rs:70:46: 70:58}(move _13);\n        StorageDead(_13);\n        _0 = core::result::Result::<u64, io::error::Error>::map::<u64, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/copy.rs:70:46: 70:58}>(move _11, move _12) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        goto -> bb12;\n    }\n    bb11: {\n        return;\n    }\n    bb12: {\n        StorageDead(_3);\n        goto -> bb11;\n    }\n}\n",
+  "doc": " Copies the entire contents of a reader into a writer.\n\n This function will continuously read data from `reader` and then\n write it into `writer` in a streaming fashion until `reader`\n returns EOF.\n\n On success, the total number of bytes that were copied from\n `reader` to `writer` is returned.\n\n If you want to copy the contents of one file to another and you’re\n working with filesystem paths, see the [`fs::copy`] function.\n\n [`fs::copy`]: crate::fs::copy\n\n # Errors\n\n This function will return an error immediately if any call to [`read`] or\n [`write`] returns an error. All instances of [`ErrorKind::Interrupted`] are\n handled by this function and the underlying operation is retried.\n\n [`read`]: Read::read\n [`write`]: Write::write\n [`ErrorKind::Interrupted`]: crate::io::ErrorKind::Interrupted\n\n # Examples\n\n ```\n use std::io;\n\n fn main() -> io::Result<()> {\n     let mut reader: &[u8] = b\"hello\";\n     let mut writer: Vec<u8> = vec![];\n\n     io::copy(&mut reader, &mut writer)?;\n\n     assert_eq!(&b\"hello\"[..], &writer[..]);\n     Ok(())\n }\n ```\n\n # Platform-specific behavior\n\n On Linux (including Android), this function uses `copy_file_range(2)`,\n `sendfile(2)` or `splice(2)` syscalls to move data directly between file\n descriptors if possible.\n\n Note that platform-specific behavior [may change in the future][changes].\n\n [changes]: crate::io#platform-specific-behavior\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

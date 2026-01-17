@@ -1,0 +1,50 @@
+{
+  "name": "<ffi::c_str::Bytes<'_> as iter::traits::iterator::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "ptr::non_null::NonNull::<T>::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `self` without moving it. This leaves the\n memory in `self` unchanged.\n\n See [`ptr::read`] for safety concerns and examples.\n\n [`ptr::read`]: crate::ptr::read()\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds an offset to a pointer (convenience for `.offset(count as isize)`).\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n If any of the following conditions are violated, the result is Undefined Behavior:\n\n * The computed offset, `count * size_of::<T>()` bytes, must not overflow `isize`.\n\n * If the computed offset is non-zero, then `self` must be derived from a pointer to some\n   [allocation], and the entire memory range between `self` and the result must be in\n   bounds of that allocation. In particular, this range must not \"wrap around\" the edge\n   of the address space.\n\n Allocations can never be larger than `isize::MAX` bytes, so if the computed offset\n stays in bounds of the allocation, it is guaranteed to satisfy the first requirement.\n This implies, for instance, that `vec.as_ptr().add(vec.len())` (for `vec: Vec<T>`) is always\n safe.\n\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let s: &str = \"123\";\n let ptr: NonNull<u8> = NonNull::new(s.as_ptr().cast_mut()).unwrap();\n\n unsafe {\n     println!(\"{}\", ptr.add(1).read() as char);\n     println!(\"{}\", ptr.add(2).read() as char);\n }\n ```\n",
+      "adt": {
+        "ptr::non_null::NonNull": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ],
+    "ffi::c_str::Bytes": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 12826,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ffi/c_str.rs:791:5: 807:6",
+  "src": "fn next(&mut self) -> Option<u8> {\n        // SAFETY: We only choose a pointer from a valid C string, which must\n        // be non-null and contain at least one value. Since we always stop at\n        // the nul terminator, which is guaranteed to exist, we can assume that\n        // the pointer is non-null and valid. This lets us safely dereference\n        // it and assume that adding 1 will create a new, non-null, valid\n        // pointer.\n        unsafe {\n            let ret = self.ptr.read();\n            if ret == 0 {\n                None\n            } else {\n                self.ptr = self.ptr.add(1);\n                Some(ret)\n            }\n        }\n    }",
+  "mir": "fn <ffi::c_str::Bytes<'_> as iter::traits::iterator::Iterator>::next(_1: &mut ffi::c_str::Bytes<'_>) -> option::Option<u8> {\n    let mut _0: option::Option<u8>;\n    let  _2: u8;\n    let mut _3: ptr::non_null::NonNull<u8>;\n    let mut _4: ptr::non_null::NonNull<u8>;\n    let mut _5: ptr::non_null::NonNull<u8>;\n    debug self => _1;\n    debug ret => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = ((*_1).0: ptr::non_null::NonNull<u8>);\n        _2 = ptr::non_null::NonNull::<u8>::read(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        switchInt(_2) -> [0: bb2, otherwise: bb3];\n    }\n    bb2: {\n        _0 = option::Option::None;\n        goto -> bb5;\n    }\n    bb3: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = ((*_1).0: ptr::non_null::NonNull<u8>);\n        _4 = ptr::non_null::NonNull::<u8>::add(move _5, 1_usize) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        ((*_1).0: ptr::non_null::NonNull<u8>) = move _4;\n        StorageDead(_4);\n        _0 = option::Option::Some(_2);\n        goto -> bb5;\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

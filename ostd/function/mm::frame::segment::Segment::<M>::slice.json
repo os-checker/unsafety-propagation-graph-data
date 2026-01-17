@@ -1,0 +1,97 @@
+{
+  "name": "mm::frame::segment::Segment::<M>::slice",
+  "safe": true,
+  "callees": {
+    "core::num::<impl usize>::is_multiple_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if `self` is an integer multiple of `rhs`, and false otherwise.\n\n This function is equivalent to `self % rhs == 0`, except that it will not panic\n for `rhs == 0`. Instead, `0.is_multiple_of(0) == true`, and for any non-zero `n`,\n `n.is_multiple_of(0) == false`.\n\n # Examples\n\n ```\n\n ```\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::step_by": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator starting at the same point, but stepping by\n the given amount at each iteration.\n\n Note 1: The first element of the iterator will always be returned,\n regardless of the step given.\n\n Note 2: The time at which ignored elements are pulled is not fixed.\n `StepBy` behaves like the sequence `self.next()`, `self.nth(step-1)`,\n `self.nth(step-1)`, …, but is also free to behave like the sequence\n `advance_n_and_return_first(&mut self, step)`,\n `advance_n_and_return_first(&mut self, step)`, …\n Which way is used may change for some iterators for performance reasons.\n The second way will advance the iterator earlier and may consume more items.\n\n `advance_n_and_return_first` is the equivalent of:\n ```\n fn advance_n_and_return_first<I>(iter: &mut I, n: usize) -> Option<I::Item>\n where\n     I: Iterator,\n {\n     let next = iter.next();\n     if n > 1 {\n         iter.nth(n - 2);\n     }\n     next\n }\n ```\n\n # Panics\n\n The method will panic if the given step is `0`.\n\n # Examples\n\n ```\n let a = [0, 1, 2, 3, 4, 5];\n let mut iter = a.into_iter().step_by(2);\n\n assert_eq!(iter.next(), Some(0));\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "mm::frame::inc_frame_ref_count": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Increases the reference count of the frame by one.\n\n # Safety\n\n The caller should ensure the following conditions:\n  1. The physical address must represent a valid frame;\n  2. The caller must have already held a reference to the frame.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ops::Range": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Plain",
+      "Ref"
+    ],
+    "mm::frame::segment::Segment": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Plain",
+      "Ref"
+    ],
+    "core::iter::StepBy": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])"
+    ]
+  },
+  "path": 2012,
+  "span": "ostd/src/mm/frame/segment.rs:158:5: 175:6",
+  "src": "pub fn slice(&self, range: &Range<usize>) -> Self {\n        assert!(range.start.is_multiple_of(PAGE_SIZE) && range.end.is_multiple_of(PAGE_SIZE));\n        let start = self.range.start + range.start;\n        let end = self.range.start + range.end;\n        assert!(start <= end && end <= self.range.end);\n\n        for paddr in (start..end).step_by(PAGE_SIZE) {\n            // SAFETY: We already have reference counts for the frames since\n            // for each frame there would be a forgotten handle when creating\n            // the `Segment` object.\n            unsafe { inc_frame_ref_count(paddr) };\n        }\n\n        Self {\n            range: start..end,\n            _marker: core::marker::PhantomData,\n        }\n    }",
+  "mir": "fn mm::frame::segment::Segment::<M>::slice(_1: &mm::frame::segment::Segment<M>, _2: &core::ops::Range<usize>) -> mm::frame::segment::Segment<M> {\n    let mut _0: mm::frame::segment::Segment<M>;\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: bool;\n    let mut _6: usize;\n    let mut _7: !;\n    let  _8: usize;\n    let mut _9: usize;\n    let mut _10: usize;\n    let mut _11: (usize, bool);\n    let  _12: usize;\n    let mut _13: usize;\n    let mut _14: usize;\n    let mut _15: (usize, bool);\n    let mut _16: bool;\n    let mut _17: bool;\n    let mut _18: usize;\n    let mut _19: !;\n    let mut _20: core::iter::StepBy<core::ops::Range<usize>>;\n    let mut _21: core::iter::StepBy<core::ops::Range<usize>>;\n    let mut _22: core::ops::Range<usize>;\n    let mut _23: core::iter::StepBy<core::ops::Range<usize>>;\n    let mut _24: core::option::Option<usize>;\n    let mut _25: &mut core::iter::StepBy<core::ops::Range<usize>>;\n    let mut _26: isize;\n    let  _27: usize;\n    let  _28: ();\n    let mut _29: core::ops::Range<usize>;\n    debug self => _1;\n    debug range => _2;\n    debug start => _8;\n    debug end => _12;\n    debug iter => _23;\n    debug paddr => _27;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_2).0: usize);\n        _3 = core::num::<impl usize>::is_multiple_of(move _4, mm::PAGE_SIZE) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb6, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = ((*_2).1: usize);\n        _5 = core::num::<impl usize>::is_multiple_of(move _6, mm::PAGE_SIZE) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _5) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageLive(_9);\n        _9 = (((*_1).0: core::ops::Range<usize>).0: usize);\n        StorageLive(_10);\n        _10 = ((*_2).0: usize);\n        _11 = CheckedAdd(_9, _10);\n        assert(!move (_11.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _9, move _10) -> [success: bb8, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        goto -> bb7;\n    }\n    bb6: {\n        StorageDead(_4);\n        goto -> bb7;\n    }\n    bb7: {\n        _7 = core::panicking::panic(\"assertion failed: range.start.is_multiple_of(PAGE_SIZE) && range.end.is_multiple_of(PAGE_SIZE)\") -> unwind unreachable;\n    }\n    bb8: {\n        _8 = move (_11.0: usize);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_13);\n        _13 = (((*_1).0: core::ops::Range<usize>).0: usize);\n        StorageLive(_14);\n        _14 = ((*_2).1: usize);\n        _15 = CheckedAdd(_13, _14);\n        assert(!move (_15.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _13, move _14) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        _12 = move (_15.0: usize);\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageLive(_16);\n        _16 = Le(_8, _12);\n        switchInt(move _16) -> [0: bb13, otherwise: bb10];\n    }\n    bb10: {\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = (((*_1).0: core::ops::Range<usize>).1: usize);\n        _17 = Le(_12, move _18);\n        switchInt(move _17) -> [0: bb12, otherwise: bb11];\n    }\n    bb11: {\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageDead(_16);\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = Range(_8, _12);\n        _21 = <core::ops::Range<usize> as core::iter::Iterator>::step_by(move _22, mm::PAGE_SIZE) -> [return: bb15, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_18);\n        goto -> bb14;\n    }\n    bb13: {\n        goto -> bb14;\n    }\n    bb14: {\n        _19 = core::panicking::panic(\"assertion failed: start <= end && end <= self.range.end\") -> unwind unreachable;\n    }\n    bb15: {\n        StorageDead(_22);\n        _20 = <core::iter::StepBy<core::ops::Range<usize>> as core::iter::IntoIterator>::into_iter(move _21) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_21);\n        StorageLive(_23);\n        _23 = move _20;\n        goto -> bb17;\n    }\n    bb17: {\n        StorageLive(_24);\n        _25 = &mut _23;\n        _24 = <core::iter::StepBy<core::ops::Range<usize>> as core::iter::Iterator>::next(_25) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        _26 = discriminant(_24);\n        switchInt(move _26) -> [0: bb21, 1: bb20, otherwise: bb19];\n    }\n    bb19: {\n        unreachable;\n    }\n    bb20: {\n        _27 = ((_24 as variant#1).0: usize);\n        _28 = mm::frame::inc_frame_ref_count(_27) -> [return: bb22, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_24);\n        StorageDead(_23);\n        StorageDead(_20);\n        StorageLive(_29);\n        _29 = Range(_8, _12);\n        _0 = Segment(move _29, ZeroSized: core::marker::PhantomData<M>);\n        StorageDead(_29);\n        return;\n    }\n    bb22: {\n        StorageDead(_24);\n        goto -> bb17;\n    }\n}\n",
+  "doc": " Gets an extra handle to the frames in the byte offset range.\n\n The sliced byte offset range in indexed by the offset from the start of\n the contiguous frames. The resulting frames holds extra reference counts.\n\n # Panics\n\n The function panics if the byte offset range is out of bounds, or if\n any of the ends of the byte offset range is not base-page aligned.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

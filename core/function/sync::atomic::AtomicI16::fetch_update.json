@@ -1,0 +1,67 @@
+{
+  "name": "sync::atomic::AtomicI16::fetch_update",
+  "safe": true,
+  "callees": {
+    "sync::atomic::AtomicI16::load": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads a value from the atomic integer.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering of this operation.\n Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.load(Ordering::Relaxed), 5);\n ```\n",
+      "adt": {
+        "sync::atomic::AtomicI16": "ImmutableAsArgument"
+      }
+    },
+    "ops::function::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "sync::atomic::AtomicI16::compare_exchange_weak": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer if the current value is the same as\n the `current` value.\n\n this function is allowed to spuriously fail even\n when the comparison succeeds, which can result in more efficient code on some\n platforms. The return value is a result indicating whether the new value was\n written and containing the previous value.\n\n `compare_exchange_weak` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. `success` describes the required ordering for the\n read-modify-write operation that takes place if the comparison with `current` succeeds.\n `failure` describes the required ordering for the load operation that takes place when\n the comparison fails. Using [`Acquire`] as success ordering makes the store part\n of this operation [`Relaxed`], and using [`Release`] makes the successful load\n [`Relaxed`]. The failure ordering can only be [`SeqCst`], [`Acquire`] or [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n let mut old = val.load(Ordering::Relaxed);\n loop {\n     let new = old * 2;\n     match val.compare_exchange_weak(old, new, Ordering::SeqCst, Ordering::Relaxed) {\n         Ok(_) => break,\n         Err(x) => old = x,\n     }\n }\n ```\n\n # Considerations\n\n `compare_exchange` is a [compare-and-swap operation] and thus exhibits the usual downsides\n of CAS operations. In particular, a load of the value followed by a successful\n `compare_exchange` with the previous load *does not ensure* that other threads have not\n changed the value in the interim. This is usually important when the *equality* check in\n the `compare_exchange` is being used to check the *identity* of a value, but equality\n does not necessarily imply identity. This is a particularly common case for pointers, as\n a pointer holding the same address does not imply that the same object exists at that\n address! In this case, `compare_exchange` can lead to the [ABA problem].\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n",
+      "adt": {
+        "sync::atomic::AtomicI16": "ImmutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sync::atomic::AtomicI16": [
+      "Ref"
+    ],
+    "sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 178, kind: RigidTy(Int(I16)) })])"
+    ],
+    "result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 178, kind: RigidTy(Int(I16)) })])"
+    ]
+  },
+  "path": 17228,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/sync/atomic.rs:3434:13: 3447:14",
+  "src": "pub fn fetch_update<F>(&self,\n                                   set_order: Ordering,\n                                   fetch_order: Ordering,\n                                   mut f: F) -> Result<$int_type, $int_type>\n            where F: FnMut($int_type) -> Option<$int_type> {\n                let mut prev = self.load(fetch_order);\n                while let Some(next) = f(prev) {\n                    match self.compare_exchange_weak(prev, next, set_order, fetch_order) {\n                        x @ Ok(_) => return x,\n                        Err(next_prev) => prev = next_prev\n                    }\n                }\n                Err(prev)\n            }",
+  "mir": "fn sync::atomic::AtomicI16::fetch_update(_1: &sync::atomic::AtomicI16, _2: sync::atomic::Ordering, _3: sync::atomic::Ordering, _4: F) -> result::Result<i16, i16> {\n    let mut _0: result::Result<i16, i16>;\n    let mut _5: i16;\n    let mut _6: option::Option<i16>;\n    let mut _7: &mut F;\n    let mut _8: (i16,);\n    let mut _9: i16;\n    let mut _10: isize;\n    let  _11: i16;\n    let mut _12: result::Result<i16, i16>;\n    let mut _13: i16;\n    let mut _14: isize;\n    let  _15: i16;\n    let mut _16: i16;\n    debug self => _1;\n    debug set_order => _2;\n    debug fetch_order => _3;\n    debug f => _4;\n    debug prev => _5;\n    debug next => _11;\n    debug x => _12;\n    debug next_prev => _15;\n    bb0: {\n        StorageLive(_5);\n        _5 = sync::atomic::AtomicI16::load(_1, _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        goto -> bb2;\n    }\n    bb2: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &mut _4;\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = _5;\n        _8 = (move _9);\n        _6 = <F as ops::function::FnMut<(i16,)>>::call_mut(move _7, move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_7);\n        _10 = discriminant(_6);\n        switchInt(move _10) -> [1: bb4, 0: bb9, otherwise: bb6];\n    }\n    bb4: {\n        _11 = ((_6 as variant#1).0: i16);\n        StorageLive(_13);\n        _13 = _5;\n        _12 = sync::atomic::AtomicI16::compare_exchange_weak(_1, move _13, _11, _2, _3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_13);\n        _14 = discriminant(_12);\n        switchInt(move _14) -> [0: bb8, 1: bb7, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        _15 = ((_12 as variant#1).0: i16);\n        _5 = _15;\n        StorageDead(_6);\n        goto -> bb2;\n    }\n    bb8: {\n        _0 = _12;\n        StorageDead(_6);\n        StorageDead(_5);\n        drop(_4) -> [return: bb10, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_6);\n        StorageLive(_16);\n        _16 = _5;\n        _0 = result::Result::Err(move _16);\n        StorageDead(_16);\n        StorageDead(_5);\n        drop(_4) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        return;\n    }\n}\n",
+  "doc": " Fetches the value, and applies a function to it that returns an optional\n new value. Returns a `Result` of `Ok(previous_value)` if the function returned `Some(_)`, else\n `Err(previous_value)`.\n\n Note: This may call the function multiple times if the value has been changed from other threads in\n the meantime, as long as the function returns `Some(_)`, but the function will have been applied\n only once to the stored value.\n\n `fetch_update` takes two [`Ordering`] arguments to describe the memory ordering of this operation.\n The first describes the required ordering for when the operation finally succeeds while the second\n describes the required ordering for loads. These correspond to the success and failure orderings of\n respectively.\n\n Using [`Acquire`] as success ordering makes the store part\n of this operation [`Relaxed`], and using [`Release`] makes the final successful load\n [`Relaxed`]. The (failed) load ordering can only be [`SeqCst`], [`Acquire`] or [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Considerations\n\n This method is not magic; it is not provided by the hardware, and does not act like a\n critical section or mutex.\n\n It is implemented on top of an atomic [compare-and-swap operation], and thus is subject to\n the usual drawbacks of CAS operations. In particular, be careful of the [ABA problem]\n if this atomic integer is an index or more generally if knowledge of only the *bitwise value*\n of the atomic is not in and of itself sufficient to ensure any required preconditions.\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n\n # Examples\n\n ```rust\n\n assert_eq!(x.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |_| None), Err(7));\n assert_eq!(x.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| Some(x + 1)), Ok(7));\n assert_eq!(x.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| Some(x + 1)), Ok(8));\n assert_eq!(x.load(Ordering::SeqCst), 9);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

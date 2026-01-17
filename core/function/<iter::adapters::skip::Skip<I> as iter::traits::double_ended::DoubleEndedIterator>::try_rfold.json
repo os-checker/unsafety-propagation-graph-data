@@ -1,0 +1,75 @@
+{
+  "name": "<iter::adapters::skip::Skip<I> as iter::traits::double_ended::DoubleEndedIterator>::try_rfold",
+  "safe": true,
+  "callees": {
+    "iter::traits::exact_size::ExactSizeIterator::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the exact remaining length of the iterator.\n\n The implementation ensures that the iterator will return exactly `len()`\n more times a [`Some(T)`] value, before returning [`None`].\n This method has a default implementation, so you usually should not\n implement it directly. However, if you can provide a more efficient\n implementation, you can do so. See the [trait-level] docs for an\n example.\n\n This function has the same safety guarantees as the\n [`Iterator::size_hint`] function.\n\n [trait-level]: ExactSizeIterator\n [`Some(T)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n // a finite range knows exactly how many times it will iterate\n let mut range = 0..5;\n\n assert_eq!(5, range.len());\n let _ = range.next();\n assert_eq!(4, range.len());\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::Try::from_output": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from its `Output` type.\n\n This should be implemented consistently with the `branch` method\n such that applying the `?` operator will get back the original value:\n `Try::from_output(x).branch() --> ControlFlow::Continue(x)`.\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::Try;\n\n assert_eq!(<Result<_, String> as Try>::from_output(3), Ok(3));\n assert_eq!(<Option<_> as Try>::from_output(4), Some(4));\n assert_eq!(\n     <std::ops::ControlFlow<String, _> as Try>::from_output(5),\n     std::ops::ControlFlow::Continue(5),\n );\n\n # fn make_question_mark_work() -> Option<()> {\n assert_eq!(Option::from_output(4)?, 4);\n # None }\n # make_question_mark_work();\n\n // This is used, for example, on the accumulator in `try_fold`:\n let r = std::iter::empty().try_fold(4, |_, ()| -> Option<_> { unreachable!() });\n assert_eq!(r, Some(4));\n ```\n",
+      "adt": {}
+    },
+    "<iter::adapters::skip::Skip<I> as iter::traits::double_ended::DoubleEndedIterator>::try_rfold::check": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "iter::traits::double_ended::DoubleEndedIterator::try_rfold": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " This is the reverse version of [`Iterator::try_fold()`]: it takes\n elements starting from the back of the iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [\"1\", \"2\", \"3\"];\n let sum = a.iter()\n     .map(|&s| s.parse::<i32>())\n     .try_rfold(0, |acc, x| x.and_then(|y| Ok(acc + y)));\n assert_eq!(sum, Ok(6));\n ```\n\n Short-circuiting:\n\n ```\n let a = [\"1\", \"rust\", \"3\"];\n let mut it = a.iter();\n let sum = it\n     .by_ref()\n     .map(|&s| s.parse::<i32>())\n     .try_rfold(0, |acc, x| x.and_then(|y| Ok(acc + y)));\n assert!(sum.is_err());\n\n // Because it short-circuited, the remaining elements are still\n // available through the iterator.\n assert_eq!(it.next_back(), Some(&\"1\"));\n ```\n",
+      "adt": {}
+    },
+    "ops::control_flow::ControlFlow::<R, <R as ops::try_trait::Try>::Output>::into_try": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a `ControlFlow` into any type implementing `Try`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "iter::adapters::skip::Skip": [
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain"
+    ]
+  },
+  "path": 14032,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/skip.rs:213:5: 232:6",
+  "src": "fn try_rfold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R\n    where\n        Self: Sized,\n        Fold: FnMut(Acc, Self::Item) -> R,\n        R: Try<Output = Acc>,\n    {\n        fn check<T, Acc, R: Try<Output = Acc>>(\n            mut n: usize,\n            mut fold: impl FnMut(Acc, T) -> R,\n        ) -> impl FnMut(Acc, T) -> ControlFlow<R, Acc> {\n            move |acc, x| {\n                n -= 1;\n                let r = fold(acc, x);\n                if n == 0 { ControlFlow::Break(r) } else { ControlFlow::from_try(r) }\n            }\n        }\n\n        let n = self.len();\n        if n == 0 { try { init } } else { self.iter.try_rfold(init, check(n, fold)).into_try() }\n    }",
+  "mir": "fn <iter::adapters::skip::Skip<I> as iter::traits::double_ended::DoubleEndedIterator>::try_rfold(_1: &mut iter::adapters::skip::Skip<I>, _2: Acc, _3: Fold) -> R {\n    let mut _0: R;\n    let  _4: usize;\n    let mut _5: &&mut iter::adapters::skip::Skip<I>;\n    let mut _6: ops::control_flow::ControlFlow<R, Acc>;\n    let mut _7: &mut I;\n    let mut _8: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/skip.rs:223:13: 223:26};\n    let mut _9: Fold;\n    let mut _10: bool;\n    debug self => _1;\n    debug init => _2;\n    debug fold => _3;\n    debug n => _4;\n    bb0: {\n        _10 = false;\n        _10 = true;\n        StorageLive(_5);\n        _5 = &_1;\n        _4 = <&mut iter::adapters::skip::Skip<I> as iter::traits::exact_size::ExactSizeIterator>::len(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        switchInt(_4) -> [0: bb2, otherwise: bb4];\n    }\n    bb2: {\n        _0 = <R as ops::try_trait::Try>::from_output(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        goto -> bb8;\n    }\n    bb4: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &mut ((*_1).0: I);\n        StorageLive(_8);\n        StorageLive(_9);\n        _10 = false;\n        _9 = move _3;\n        _8 = <iter::adapters::skip::Skip<I> as iter::traits::double_ended::DoubleEndedIterator>::try_rfold::check::<<I as iter::traits::iterator::Iterator>::Item, Acc, R, Fold>(_4, move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        _6 = <I as iter::traits::double_ended::DoubleEndedIterator>::try_rfold::<Acc, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/skip.rs:223:13: 223:26}, ops::control_flow::ControlFlow<R, Acc>>(move _7, _2, move _8) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_8);\n        StorageDead(_7);\n        _0 = ops::control_flow::ControlFlow::<R, <R as ops::try_trait::Try>::Output>::into_try(move _6) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_6);\n        goto -> bb8;\n    }\n    bb8: {\n        switchInt(_10) -> [0: bb9, otherwise: bb10];\n    }\n    bb9: {\n        return;\n    }\n    bb10: {\n        drop(_3) -> [return: bb9, unwind unreachable];\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

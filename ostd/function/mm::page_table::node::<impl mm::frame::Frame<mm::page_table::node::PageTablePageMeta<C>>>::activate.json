@@ -1,0 +1,137 @@
+{
+  "name": "mm::page_table::node::<impl mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>::activate",
+  "safe": false,
+  "callees": {
+    "mm::page_table::node::<impl mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>::level": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "mm::frame::Frame": "ImmutableAsArgument"
+      }
+    },
+    "arch::mm::current_page_table_paddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::panicking::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Internal function for `assert_eq!` and `assert_ne!` macros\n",
+      "adt": {}
+    },
+    "mm::mem_obj::HasPaddr::paddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the start physical address of the memory object.\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "mm::frame::Frame::<M>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forgets the handle to the frame.\n\n This will result in the frame being leaked without calling the custom dropper.\n\n A physical address to the frame is returned in case the frame needs to be\n restored using [`Frame::from_raw`] later. This is useful when some architectural\n data structures need to hold the frame handle such as the page table.\n",
+      "adt": {
+        "mm::frame::Frame": "ImmutableAsArgument"
+      }
+    },
+    "arch::mm::activate_page_table": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Activates the given root-level page table.\n\n The cache policy of the root page table node is controlled by `root_pt_cache`.\n\n # Safety\n\n Changing the root-level page table is unsafe, because it's possible to violate memory safety by\n changing the page mapping.\n",
+      "adt": {}
+    },
+    "mm::frame::Frame::<M>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Restores a forgotten [`Frame`] from a physical address.\n\n # Safety\n\n The caller should only restore a `Frame` that was previously forgotten using\n [`Frame::into_raw`].\n\n And the restoring operation should only be done once for a forgotten\n [`Frame`]. Otherwise double-free will happen.\n\n Also, the caller ensures that the usage of the frame is correct. There's\n no checking of the usage in this function.\n",
+      "adt": {
+        "mm::frame::Frame": "Constructor"
+      }
+    },
+    "core::mem::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disposes of a value.\n\n This effectively does nothing for types which implement `Copy`, e.g.\n integers. Such values are copied and _then_ moved into the function, so the\n value persists after this function call.\n\n This function is not magic; it is literally defined as\n\n ```\n pub fn drop<T>(_x: T) {}\n ```\n\n Because `_x` is moved into the function, it is automatically [dropped][drop] before\n the function returns.\n\n [drop]: Drop\n\n # Examples\n\n Basic usage:\n\n ```\n let v = vec![1, 2, 3];\n\n drop(v); // explicitly drop the vector\n ```\n\n Since [`RefCell`] enforces the borrow rules at runtime, `drop` can\n release a [`RefCell`] borrow:\n\n ```\n use std::cell::RefCell;\n\n let x = RefCell::new(1);\n\n let mut mutable_borrow = x.borrow_mut();\n *mutable_borrow = 1;\n\n drop(mutable_borrow); // relinquish the mutable borrow on this slot\n\n let borrow = x.borrow();\n println!(\"{}\", *borrow);\n ```\n\n Integers and other types implementing [`Copy`] are unaffected by `drop`.\n\n ```\n # #![allow(dropping_copy_types)]\n #[derive(Copy, Clone)]\n struct Foo(u8);\n\n let x = 1;\n let y = Foo(2);\n drop(x); // a copy of `x` is moved and dropped\n drop(y); // a copy of `y` is moved and dropped\n\n println!(\"x: {}, y: {}\", x, y.0); // still available\n ```\n\n [`RefCell`]: crate::cell::RefCell\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::frame::Frame": [
+      "Ref",
+      "Plain"
+    ],
+    "core::panicking::AssertKind": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "mm::page_prop::CachePolicy": [
+      "Plain"
+    ]
+  },
+  "path": 2052,
+  "span": "ostd/src/mm/page_table/node/mod.rs:98:5: 117:6",
+  "src": "pub(crate) unsafe fn activate(&self) {\n        use crate::{\n            arch::mm::{activate_page_table, current_page_table_paddr},\n            mm::CachePolicy,\n        };\n\n        assert_eq!(self.level(), C::NR_LEVELS);\n\n        let last_activated_paddr = current_page_table_paddr();\n        if last_activated_paddr == self.paddr() {\n            return;\n        }\n\n        // SAFETY: The safety is upheld by the caller.\n        unsafe { activate_page_table(self.clone().into_raw(), CachePolicy::Writeback) };\n\n        // Restore and drop the last activated page table.\n        // SAFETY: The physical address is valid and points to a forgotten page table node.\n        drop(unsafe { Self::from_raw(last_activated_paddr) });\n    }",
+  "mir": "fn mm::page_table::node::<impl mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>::activate(_1: &mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>) -> () {\n    let mut _0: ();\n    let mut _2: (&u8, &u8);\n    let mut _3: &u8;\n    let  _4: u8;\n    let mut _5: &u8;\n    let  _6: &u8;\n    let  _7: &u8;\n    let mut _8: bool;\n    let mut _9: u8;\n    let mut _10: u8;\n    let  _11: core::panicking::AssertKind;\n    let  _12: !;\n    let mut _13: core::option::Option<core::fmt::Arguments<'_>>;\n    let  _14: usize;\n    let mut _15: bool;\n    let mut _16: usize;\n    let  _17: ();\n    let mut _18: usize;\n    let mut _19: mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>;\n    let mut _20: mm::page_prop::CachePolicy;\n    let  _21: ();\n    let mut _22: mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>;\n    debug self => _1;\n    debug left_val => _6;\n    debug right_val => _7;\n    debug kind => _11;\n    debug last_activated_paddr => _14;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = mm::page_table::node::<impl mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>::level(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = &_4;\n        StorageLive(_5);\n        _5 = mm::page_table::node::<impl mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>::activate::promoted[0];\n        _2 = (move _3, move _5);\n        StorageDead(_5);\n        StorageDead(_3);\n        _6 = (_2.0: &u8);\n        _7 = (_2.1: &u8);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = (*_6);\n        StorageLive(_10);\n        _10 = (*_7);\n        _8 = Eq(move _9, move _10);\n        switchInt(move _8) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_4);\n        StorageDead(_2);\n        _14 = arch::mm::current_page_table_paddr() -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        StorageDead(_9);\n        _11 = core::panicking::AssertKind::Eq;\n        StorageLive(_13);\n        _13 = core::option::Option::None;\n        _12 = core::panicking::assert_failed::<u8, u8>(_11, _6, _7, move _13) -> unwind unreachable;\n    }\n    bb4: {\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = <mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>> as mm::mem_obj::HasPaddr>::paddr(_1) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _15 = Eq(_14, move _16);\n        switchInt(move _15) -> [0: bb7, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_16);\n        StorageDead(_15);\n        goto -> bb13;\n    }\n    bb7: {\n        StorageDead(_16);\n        StorageDead(_15);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = <mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>> as core::clone::Clone>::clone(_1) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _18 = mm::frame::Frame::<mm::page_table::node::PageTablePageMeta<C>>::into_raw(move _19) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_19);\n        StorageLive(_20);\n        _20 = mm::page_prop::CachePolicy::Writeback;\n        _17 = arch::mm::activate_page_table(move _18, move _20) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_20);\n        StorageDead(_18);\n        StorageLive(_22);\n        _22 = mm::frame::Frame::<mm::page_table::node::PageTablePageMeta<C>>::from_raw(_14) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _21 = core::mem::drop::<mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>(move _22) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_22);\n        goto -> bb13;\n    }\n    bb13: {\n        return;\n    }\n}\n",
+  "doc": " Activates the page table assuming it is a root page table.\n\n Here we ensure not dropping an active page table by making a\n processor a page table owner. When activating a page table, the\n reference count of the last activated page table is decremented.\n And that of the current page table is incremented.\n\n # Safety\n\n The caller must ensure that the page table to be activated has\n proper mappings for the kernel and has the correct const parameters\n matching the current CPU.\n\n # Panics\n\n Only top-level page tables can be activated using this function.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

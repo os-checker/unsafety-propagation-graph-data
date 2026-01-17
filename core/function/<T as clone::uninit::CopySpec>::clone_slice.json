@@ -1,0 +1,99 @@
+{
+  "name": "<T as clone::uninit::CopySpec>::clone_slice",
+  "safe": false,
+  "callees": {
+    "ptr::mut_ptr::<impl *mut [T]>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of a raw slice.\n\n The returned value is the number of **elements**, not the number of bytes.\n\n This function is safe, even when the raw slice cannot be cast to a slice\n reference because the pointer is null or unaligned.\n\n # Examples\n\n ```rust\n use std::ptr;\n\n let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);\n assert_eq!(slice.len(), 3);\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "panicking::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Internal function for `assert_eq!` and `assert_ne!` macros\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n This is equivalent to casting `self` to `*mut T`, but more type-safe.\n\n # Examples\n\n ```rust\n #![feature(slice_ptr_get)]\n use std::ptr;\n\n let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);\n assert_eq!(slice.as_mut_ptr(), ptr::null_mut());\n ```\n",
+      "adt": {}
+    },
+    "ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "panicking::AssertKind": [
+      "Plain"
+    ],
+    "fmt::Arguments": [
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 1136,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/clone/uninit.rs:67:5: 81:6",
+  "src": "unsafe fn clone_slice(src: &[Self], dst: *mut [Self]) {\n        let len = src.len();\n        // This is the most likely mistake to make, so check it as a debug assertion.\n        debug_assert_eq!(\n            len,\n            dst.len(),\n            \"clone_to_uninit() source and destination must have equal lengths\",\n        );\n\n        // SAFETY: The safety conditions of clone_to_uninit() are a superset of those of\n        // ptr::copy_nonoverlapping().\n        unsafe {\n            ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), len);\n        }\n    }",
+  "mir": "fn <T as clone::uninit::CopySpec>::clone_slice(_1: &[T], _2: *mut [T]) -> () {\n    let mut _0: ();\n    let  _3: usize;\n    let mut _4: (&usize, &usize);\n    let mut _5: &usize;\n    let mut _6: &usize;\n    let  _7: usize;\n    let  _8: &usize;\n    let  _9: &usize;\n    let mut _10: bool;\n    let mut _11: usize;\n    let mut _12: usize;\n    let  _13: panicking::AssertKind;\n    let  _14: !;\n    let mut _15: option::Option<fmt::Arguments<'_>>;\n    let mut _16: fmt::Arguments<'_>;\n    let  _17: ();\n    let mut _18: *const T;\n    let mut _19: *mut T;\n    debug src => _1;\n    debug dst => _2;\n    debug len => _3;\n    debug left_val => _8;\n    debug right_val => _9;\n    debug kind => _13;\n    bb0: {\n        _3 = PtrMetadata(_1);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &_3;\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = ptr::mut_ptr::<impl *mut [T]>::len(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _6 = &_7;\n        _4 = (move _5, move _6);\n        StorageDead(_6);\n        StorageDead(_5);\n        _8 = (_4.0: &usize);\n        _9 = (_4.1: &usize);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = (*_8);\n        StorageLive(_12);\n        _12 = (*_9);\n        _10 = Eq(move _11, move _12);\n        switchInt(move _10) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_7);\n        StorageDead(_4);\n        StorageLive(_18);\n        _18 = slice::<impl [T]>::as_ptr(_1) -> [return: bb5, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_12);\n        StorageDead(_11);\n        _13 = panicking::AssertKind::Eq;\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = fmt::Arguments::<'_>::from_str(\"clone_to_uninit() source and destination must have equal lengths\") -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _15 = option::Option::Some(move _16);\n        StorageDead(_16);\n        _14 = panicking::assert_failed::<usize, usize>(_13, _8, _9, move _15) -> unwind unreachable;\n    }\n    bb5: {\n        StorageLive(_19);\n        _19 = ptr::mut_ptr::<impl *mut [T]>::as_mut_ptr(_2) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _17 = ptr::copy_nonoverlapping::<T>(move _18, move _19, _3) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_19);\n        StorageDead(_18);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

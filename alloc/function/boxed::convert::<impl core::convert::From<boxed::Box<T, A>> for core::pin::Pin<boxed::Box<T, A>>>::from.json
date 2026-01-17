@@ -1,0 +1,37 @@
+{
+  "name": "boxed::convert::<impl core::convert::From<boxed::Box<T, A>> for core::pin::Pin<boxed::Box<T, A>>>::from",
+  "safe": true,
+  "callees": {
+    "boxed::Box::<T, A>::into_pin": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a `Box<T>` into a `Pin<Box<T>>`. If `T` does not implement [`Unpin`], then\n `*boxed` will be pinned in memory and unable to be moved.\n\n This conversion does not allocate on the heap and happens in place.\n\n This is also available via [`From`].\n\n Constructing and pinning a `Box` with <code>Box::into_pin([Box::new]\\(x))</code>\n can also be written more concisely using <code>[Box::pin]\\(x)</code>.\n This `into_pin` method is useful if you already have a `Box<T>`, or you are\n constructing a (pinned) `Box` in a different way than with [`Box::new`].\n\n # Notes\n\n It's not recommended that crates add an impl like `From<Box<T>> for Pin<T>`,\n as it'll introduce an ambiguity when calling `Pin::from`.\n A demonstration of such a poor impl is shown below.\n\n ```compile_fail\n # use std::pin::Pin;\n struct Foo; // A type defined in this crate.\n impl From<Box<()>> for Pin<Foo> {\n     fn from(_: Box<()>) -> Pin<Foo> {\n         Pin::new(Foo)\n     }\n }\n\n let foo = Box::new(());\n let bar = Pin::from(foo);\n ```\n",
+      "adt": {
+        "boxed::Box": "Constructor",
+        "core::pin::Pin": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "boxed::Box": [
+      "Plain"
+    ],
+    "core::pin::Pin": [
+      "Plain"
+    ]
+  },
+  "path": 13,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed/convert.rs:54:5: 56:6",
+  "src": "fn from(boxed: Box<T, A>) -> Self {\n        Box::into_pin(boxed)\n    }",
+  "mir": "fn boxed::convert::<impl core::convert::From<boxed::Box<T, A>> for core::pin::Pin<boxed::Box<T, A>>>::from(_1: boxed::Box<T, A>) -> core::pin::Pin<boxed::Box<T, A>> {\n    let mut _0: core::pin::Pin<boxed::Box<T, A>>;\n    debug boxed => _1;\n    bb0: {\n        _0 = boxed::Box::<T, A>::into_pin(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Converts a `Box<T>` into a `Pin<Box<T>>`. If `T` does not implement [`Unpin`], then\n `*boxed` will be pinned in memory and unable to be moved.\n\n This conversion does not allocate on the heap and happens in place.\n\n This is also available via [`Box::into_pin`].\n\n Constructing and pinning a `Box` with <code><Pin<Box\\<T>>>::from([Box::new]\\(x))</code>\n can also be written more concisely using <code>[Box::pin]\\(x)</code>.\n This `From` implementation is useful if you already have a `Box<T>`, or you are\n constructing a (pinned) `Box` in a different way than with [`Box::new`].\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

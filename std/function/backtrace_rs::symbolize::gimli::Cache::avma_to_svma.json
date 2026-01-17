@@ -1,0 +1,88 @@
+{
+  "name": "backtrace_rs::symbolize::gimli::Cache::avma_to_svma",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the slice.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let mut iterator = x.iter();\n\n assert_eq!(iterator.next(), Some(&1));\n assert_eq!(iterator.next(), Some(&2));\n assert_eq!(iterator.next(), Some(&4));\n assert_eq!(iterator.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::enumerate": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator which gives the current iteration count as well as\n the next value.\n\n The iterator returned yields pairs `(i, val)`, where `i` is the\n current index of iteration and `val` is the value returned by the\n iterator.\n\n `enumerate()` keeps its count as a [`usize`]. If you want to count by a\n different sized integer, the [`zip`] function provides similar\n functionality.\n\n # Overflow Behavior\n\n The method does no guarding against overflows, so enumerating more than\n [`usize::MAX`] elements either produces the wrong result or panics. If\n overflow checks are enabled, a panic is guaranteed.\n\n # Panics\n\n The returned iterator might panic if the to-be-returned index would\n overflow a [`usize`].\n\n [`zip`]: Iterator::zip\n\n # Examples\n\n ```\n let a = ['a', 'b', 'c'];\n\n let mut iter = a.into_iter().enumerate();\n\n assert_eq!(iter.next(), Some((0, 'a')));\n assert_eq!(iter.next(), Some((1, 'b')));\n assert_eq!(iter.next(), Some((2, 'c')));\n assert_eq!(iter.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::filter_map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator that both filters and maps.\n\n The returned iterator yields only the `value`s for which the supplied\n closure returns `Some(value)`.\n\n `filter_map` can be used to make chains of [`filter`] and [`map`] more\n concise. The example below shows how a `map().filter().map()` can be\n shortened to a single call to `filter_map`.\n\n [`filter`]: Iterator::filter\n [`map`]: Iterator::map\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [\"1\", \"two\", \"NaN\", \"four\", \"5\"];\n\n let mut iter = a.iter().filter_map(|s| s.parse().ok());\n\n assert_eq!(iter.next(), Some(1));\n assert_eq!(iter.next(), Some(5));\n assert_eq!(iter.next(), None);\n ```\n\n Here's the same example, but with [`filter`] and [`map`]:\n\n ```\n let a = [\"1\", \"two\", \"NaN\", \"four\", \"5\"];\n let mut iter = a.iter().map(|s| s.parse()).filter(|s| s.is_ok()).map(|s| s.unwrap());\n assert_eq!(iter.next(), Some(1));\n assert_eq!(iter.next(), Some(5));\n assert_eq!(iter.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc_crate::vec::Vec": [
+      "Ref"
+    ],
+    "backtrace_rs::symbolize::gimli::Cache": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::slice::Iter": [
+      "Plain"
+    ],
+    "core::iter::Enumerate": [
+      "Plain"
+    ],
+    "core::iter::FilterMap": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 544,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli.rs:383:5: 415:6",
+  "src": "fn avma_to_svma(&self, addr: *const u8) -> Option<(usize, *const u8)> {\n        self.libraries\n            .iter()\n            .enumerate()\n            .filter_map(|(i, lib)| {\n                // First up, test if this `lib` has any segment containing the\n                // `addr` (handling relocation). If this check passes then we\n                // can continue below and actually translate the address.\n                //\n                // Note that we're using `wrapping_add` here to avoid overflow\n                // checks. It's been seen in the wild that the SVMA + bias\n                // computation overflows. It seems a bit odd that would happen\n                // but there's not a huge amount we can do about it other than\n                // probably just ignore those segments since they're likely\n                // pointing off into space. This originally came up in\n                // rust-lang/backtrace-rs#329.\n                if !lib.segments.iter().any(|s| {\n                    let svma = s.stated_virtual_memory_address;\n                    let start = svma.wrapping_add(lib.bias);\n                    let end = start.wrapping_add(s.len);\n                    let address = addr as usize;\n                    start <= address && address < end\n                }) {\n                    return None;\n                }\n\n                // Now that we know `lib` contains `addr`, we can offset with\n                // the bias to find the stated virtual memory address.\n                let svma = (addr as usize).wrapping_sub(lib.bias);\n                Some((i, svma as *const u8))\n            })\n            .next()\n    }",
+  "mir": "fn backtrace_rs::symbolize::gimli::Cache::avma_to_svma(_1: &backtrace_rs::symbolize::gimli::Cache, _2: *const u8) -> core::option::Option<(usize, *const u8)> {\n    let mut _0: core::option::Option<(usize, *const u8)>;\n    let mut _3: &mut core::iter::FilterMap<core::iter::Enumerate<core::slice::Iter<'_, backtrace_rs::symbolize::gimli::Library>>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli.rs:387:25: 387:35}>;\n    let mut _4: core::iter::FilterMap<core::iter::Enumerate<core::slice::Iter<'_, backtrace_rs::symbolize::gimli::Library>>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli.rs:387:25: 387:35}>;\n    let mut _5: core::iter::Enumerate<core::slice::Iter<'_, backtrace_rs::symbolize::gimli::Library>>;\n    let mut _6: core::slice::Iter<'_, backtrace_rs::symbolize::gimli::Library>;\n    let  _7: &[backtrace_rs::symbolize::gimli::Library];\n    let mut _8: &alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::Library>;\n    let mut _9: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli.rs:387:25: 387:35};\n    let mut _10: &*const u8;\n    debug self => _1;\n    debug addr => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_8);\n        _8 = &((*_1).0: alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::Library>);\n        _7 = <alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::Library> as core::ops::Deref>::deref(move _8) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_8);\n        _6 = core::slice::<impl [backtrace_rs::symbolize::gimli::Library]>::iter(_7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = <core::slice::Iter<'_, backtrace_rs::symbolize::gimli::Library> as core::iter::Iterator>::enumerate(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_2;\n        _9 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli.rs:387:25: 387:35}(move _10);\n        StorageDead(_10);\n        _4 = <core::iter::Enumerate<core::slice::Iter<'_, backtrace_rs::symbolize::gimli::Library>> as core::iter::Iterator>::filter_map::<(usize, *const u8), {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli.rs:387:25: 387:35}>(move _5, move _9) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _3 = &mut _4;\n        StorageDead(_9);\n        StorageDead(_5);\n        _0 = <core::iter::FilterMap<core::iter::Enumerate<core::slice::Iter<'_, backtrace_rs::symbolize::gimli::Library>>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli.rs:387:25: 387:35}> as core::iter::Iterator>::next(move _3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_4);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

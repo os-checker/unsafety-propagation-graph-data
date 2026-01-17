@@ -1,0 +1,70 @@
+{
+  "name": "str::<impl str>::trim_matches",
+  "safe": true,
+  "callees": {
+    "str::pattern::Pattern::into_searcher": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the associated searcher from\n `self` and the `haystack` to search in.\n",
+      "adt": {}
+    },
+    "str::pattern::Searcher::next_reject": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Finds the next [`Reject`][SearchStep::Reject] result. See [`next()`][Searcher::next]\n and [`next_match()`][Searcher::next_match].\n\n Unlike [`next()`][Searcher::next], there is no guarantee that the returned ranges\n of this and [`next_match`][Searcher::next_match] will overlap.\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "str::pattern::ReverseSearcher::next_reject_back": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Finds the next [`Reject`][SearchStep::Reject] result.\n See [`next_back()`][ReverseSearcher::next_back].\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "str::<impl str>::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unchecked subslice of `str`.\n\n This is the unchecked alternative to indexing the `str`.\n\n # Safety\n\n Callers of this function are responsible that these preconditions are\n satisfied:\n\n * The starting index must not exceed the ending index;\n * Indexes must be within bounds of the original slice;\n * Indexes must lie on UTF-8 sequence boundaries.\n\n Failing that, the returned string slice may reference invalid memory or\n violate the invariants communicated by the `str` type.\n\n # Examples\n\n ```\n let v = \"🗻∈🌏\";\n unsafe {\n     assert_eq!(\"🗻\", v.get_unchecked(0..4));\n     assert_eq!(\"∈\", v.get_unchecked(4..7));\n     assert_eq!(\"🌏\", v.get_unchecked(7..11));\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4835, kind: RigidTy(Tuple([Ty { id: 47, kind: RigidTy(Uint(Usize)) }, Ty { id: 47, kind: RigidTy(Uint(Usize)) }])) }), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4835, kind: RigidTy(Tuple([Ty { id: 47, kind: RigidTy(Uint(Usize)) }, Ty { id: 47, kind: RigidTy(Uint(Usize)) }])) }), Field(1, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "ops::range::Range": [
+      "Plain"
+    ]
+  },
+  "path": 3151,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/str/mod.rs:2346:5: 2363:6",
+  "src": "pub fn trim_matches<P: Pattern>(&self, pat: P) -> &str\n    where\n        for<'a> P::Searcher<'a>: DoubleEndedSearcher<'a>,\n    {\n        let mut i = 0;\n        let mut j = 0;\n        let mut matcher = pat.into_searcher(self);\n        if let Some((a, b)) = matcher.next_reject() {\n            i = a;\n            j = b; // Remember earliest known match, correct it below if\n            // last match is different\n        }\n        if let Some((_, b)) = matcher.next_reject_back() {\n            j = b;\n        }\n        // SAFETY: `Searcher` is known to return valid indices.\n        unsafe { self.get_unchecked(i..j) }\n    }",
+  "mir": "fn str::<impl str>::trim_matches(_1: &str, _2: P) -> &str {\n    let mut _0: &str;\n    let mut _3: usize;\n    let mut _4: usize;\n    let mut _5: <P as str::pattern::Pattern>::Searcher<'_>;\n    let mut _6: option::Option<(usize, usize)>;\n    let mut _7: &mut <P as str::pattern::Pattern>::Searcher<'_>;\n    let mut _8: isize;\n    let  _9: usize;\n    let  _10: usize;\n    let mut _11: option::Option<(usize, usize)>;\n    let mut _12: &mut <P as str::pattern::Pattern>::Searcher<'_>;\n    let mut _13: isize;\n    let  _14: usize;\n    let mut _15: ops::range::Range<usize>;\n    let mut _16: usize;\n    let mut _17: usize;\n    debug self => _1;\n    debug pat => _2;\n    debug i => _3;\n    debug j => _4;\n    debug matcher => _5;\n    debug a => _9;\n    debug b => _10;\n    debug b => _14;\n    bb0: {\n        StorageLive(_3);\n        _3 = 0_usize;\n        StorageLive(_4);\n        _4 = 0_usize;\n        StorageLive(_5);\n        _5 = <P as str::pattern::Pattern>::into_searcher(_2, _1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &mut _5;\n        _6 = <<P as str::pattern::Pattern>::Searcher<'_> as str::pattern::Searcher<'_>>::next_reject(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _8 = discriminant(_6);\n        switchInt(move _8) -> [1: bb3, 0: bb4, otherwise: bb12];\n    }\n    bb3: {\n        _9 = (((_6 as variant#1).0: (usize, usize)).0: usize);\n        _10 = (((_6 as variant#1).0: (usize, usize)).1: usize);\n        _3 = _9;\n        _4 = _10;\n        StorageDead(_6);\n        goto -> bb5;\n    }\n    bb4: {\n        StorageDead(_6);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &mut _5;\n        _11 = <<P as str::pattern::Pattern>::Searcher<'_> as str::pattern::ReverseSearcher<'_>>::next_reject_back(move _12) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_12);\n        _13 = discriminant(_11);\n        switchInt(move _13) -> [1: bb7, 0: bb8, otherwise: bb12];\n    }\n    bb7: {\n        _14 = (((_11 as variant#1).0: (usize, usize)).1: usize);\n        _4 = _14;\n        StorageDead(_11);\n        goto -> bb9;\n    }\n    bb8: {\n        StorageDead(_11);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = _3;\n        StorageLive(_17);\n        _17 = _4;\n        _15 = Range(move _16, move _17);\n        StorageDead(_17);\n        StorageDead(_16);\n        _0 = str::<impl str>::get_unchecked::<ops::range::Range<usize>>(_1, move _15) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_15);\n        drop(_5) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageDead(_3);\n        return;\n    }\n    bb12: {\n        unreachable;\n    }\n}\n",
+  "doc": " Returns a string slice with all prefixes and suffixes that match a\n pattern repeatedly removed.\n\n The [pattern] can be a [`char`], a slice of [`char`]s, or a function\n or closure that determines if a character matches.\n\n [`char`]: prim@char\n [pattern]: self::pattern\n\n # Examples\n\n Simple patterns:\n\n ```\n assert_eq!(\"11foo1bar11\".trim_matches('1'), \"foo1bar\");\n assert_eq!(\"123foo1bar123\".trim_matches(char::is_numeric), \"foo1bar\");\n\n let x: &[_] = &['1', '2'];\n assert_eq!(\"12foo1bar12\".trim_matches(x), \"foo1bar\");\n ```\n\n A more complex pattern, using a closure:\n\n ```\n assert_eq!(\"1foo1barXX\".trim_matches(|c| c == '1' || c == 'X'), \"foo1bar\");\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

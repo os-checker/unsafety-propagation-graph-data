@@ -1,0 +1,83 @@
+{
+  "name": "sys::fs::unix::FileAttr::created",
+  "safe": true,
+  "callees": {
+    "sys::pal::unix::time::SystemTime::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "io::error::Error": "Constructor"
+      }
+    },
+    "io::error::Error::from_static_message": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Creates a new I/O error from a known kind of error as well as a constant\n message.\n\n This function does not allocate.\n\n You should not use this directly, and instead use the `const_error!`\n macro: `io::const_error!(ErrorKind::Something, \"some_message\")`.\n\n This function should maybe change to `from_static_message<const MSG: &'static\n str>(kind: ErrorKind)` in the future, when const generics allow that.\n",
+      "adt": {
+        "io::error::Error": "Constructor"
+      }
+    },
+    "core::hint::must_use": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An identity function that causes an `unused_must_use` warning to be\n triggered if the given value is not used (returned, stored in a variable,\n etc) by the caller.\n\n This is primarily intended for use in macro-generated code, in which a\n [`#[must_use]` attribute][must_use] either on a type or a function would not\n be convenient.\n\n [must_use]: https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute\n\n # Example\n\n ```\n #![feature(hint_must_use)]\n\n use core::fmt;\n\n pub struct Error(/* ... */);\n\n #[macro_export]\n macro_rules! make_error {\n     ($($args:expr),*) => {\n         core::hint::must_use({\n             let error = $crate::make_error(core::format_args!($($args),*));\n             error\n         })\n     };\n }\n\n // Implementation detail of make_error! macro.\n #[doc(hidden)]\n pub fn make_error(args: fmt::Arguments<'_>) -> Error {\n     Error(/* ... */)\n }\n\n fn demo() -> Option<Error> {\n     if true {\n         // Oops, meant to write `return Some(make_error!(\"...\"));`\n         Some(make_error!(\"...\"));\n     }\n     None\n }\n #\n # // Make rustdoc not wrap the whole snippet in fn main, so that $crate::make_error works\n # fn main() {}\n ```\n\n In the above example, we'd like an `unused_must_use` lint to apply to the\n value created by `make_error!`. However, neither `#[must_use]` on a struct\n nor `#[must_use]` on a function is appropriate here, so the macro expands\n using `core::hint::must_use` instead.\n\n - We wouldn't want `#[must_use]` on the `struct Error` because that would\n   make the following unproblematic code trigger a warning:\n\n   ```\n   # struct Error;\n   #\n   fn f(arg: &str) -> Result<(), Error>\n   # { Ok(()) }\n\n   #[test]\n   fn t() {\n       // Assert that `f` returns error if passed an empty string.\n       // A value of type `Error` is unused here but that's not a problem.\n       f(\"\").unwrap_err();\n   }\n   ```\n\n - Using `#[must_use]` on `fn make_error` can't help because the return value\n   *is* used, as the right-hand side of a `let` statement. The `let`\n   statement looks useless but is in fact necessary for ensuring that\n   temporaries within the `format_args` expansion are not kept alive past the\n   creation of the `Error`, as keeping them alive past that point can cause\n   autotrait issues in async code:\n\n   ```\n   # #![feature(hint_must_use)]\n   #\n   # struct Error;\n   #\n   # macro_rules! make_error {\n   #     ($($args:expr),*) => {\n   #         core::hint::must_use({\n   #             // If `let` isn't used, then `f()` produces a non-Send future.\n   #             let error = make_error(core::format_args!($($args),*));\n   #             error\n   #         })\n   #     };\n   # }\n   #\n   # fn make_error(args: core::fmt::Arguments<'_>) -> Error {\n   #     Error\n   # }\n   #\n   async fn f() {\n       // Using `let` inside the make_error expansion causes temporaries like\n       // `unsync()` to drop at the semicolon of that `let` statement, which\n       // is prior to the await point. They would otherwise stay around until\n       // the semicolon on *this* statement, which is after the await point,\n       // and the enclosing Future would not implement Send.\n       log(make_error!(\"look: {:p}\", unsync())).await;\n   }\n\n   async fn log(error: Error) {/* ... */}\n\n   // Returns something without a Sync impl.\n   fn unsync() -> *const () {\n       0 as *const ()\n   }\n   #\n   # fn test() {\n   #     fn assert_send(_: impl Send) {}\n   #     assert_send(f());\n   # }\n   ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Ref",
+      "Deref",
+      "Unknown([Deref, Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 15611, kind: RigidTy(Adt(AdtDef(DefId { id: 11568, name: \"sys::fs::unix::StatxExtraFields\" }), GenericArgs([]))) })])"
+    ],
+    "sys::fs::unix::FileAttr": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Ref"
+    ],
+    "sys::fs::unix::StatxExtraFields": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "io::error::Error": [
+      "Plain"
+    ]
+  },
+  "path": 3548,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/fs/unix.rs:572:5: 590:6",
+  "src": "pub fn created(&self) -> io::Result<SystemTime> {\n        cfg_has_statx! {\n            if let Some(ext) = &self.statx_extra_fields {\n                return if (ext.stx_mask & libc::STATX_BTIME) != 0 {\n                    SystemTime::new(ext.stx_btime.tv_sec, ext.stx_btime.tv_nsec as i64)\n                } else {\n                    Err(io::const_error!(\n                        io::ErrorKind::Unsupported,\n                        \"creation time is not available for the filesystem\",\n                    ))\n                };\n            }\n        }\n\n        Err(io::const_error!(\n            io::ErrorKind::Unsupported,\n            \"creation time is not available on this platform currently\",\n        ))\n    }",
+  "mir": "fn sys::fs::unix::FileAttr::created(_1: &sys::fs::unix::FileAttr) -> core::result::Result<sys::pal::unix::time::SystemTime, io::error::Error> {\n    let mut _0: core::result::Result<sys::pal::unix::time::SystemTime, io::error::Error>;\n    let mut _2: &core::option::Option<sys::fs::unix::StatxExtraFields>;\n    let mut _3: isize;\n    let  _4: &sys::fs::unix::StatxExtraFields;\n    let mut _5: u32;\n    let mut _6: u32;\n    let mut _7: i64;\n    let mut _8: i64;\n    let mut _9: u32;\n    let mut _10: io::error::Error;\n    let mut _11: io::error::Error;\n    let mut _12: io::error::Error;\n    let mut _13: io::error::Error;\n    debug self => _1;\n    debug ext => _4;\n    bb0: {\n        StorageLive(_2);\n        _2 = &((*_1).1: core::option::Option<sys::fs::unix::StatxExtraFields>);\n        _3 = discriminant((*_2));\n        switchInt(move _3) -> [1: bb1, 0: bb8, otherwise: bb12];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = &(((*_2) as variant#1).0: sys::fs::unix::StatxExtraFields);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = ((*_4).0: u32);\n        _5 = BitAnd(move _6, libc::STATX_BTIME);\n        StorageDead(_6);\n        switchInt(move _5) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_7);\n        _7 = (((*_4).1: libc::statx_timestamp).0: i64);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = (((*_4).1: libc::statx_timestamp).1: u32);\n        _8 = move _9 as i64;\n        StorageDead(_9);\n        _0 = sys::pal::unix::time::SystemTime::new(move _7, move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageDead(_7);\n        goto -> bb7;\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = io::error::Error::from_static_message(sys::fs::unix::FileAttr::created::{constant#1}) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _10 = core::hint::must_use::<io::error::Error>(move _11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        _0 = core::result::Result::Err(move _10);\n        StorageDead(_10);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageDead(_4);\n        StorageDead(_2);\n        goto -> bb11;\n    }\n    bb8: {\n        StorageDead(_2);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = io::error::Error::from_static_message(sys::fs::unix::FileAttr::created::{constant#0}) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _12 = core::hint::must_use::<io::error::Error>(move _13) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_13);\n        _0 = core::result::Result::Err(move _12);\n        StorageDead(_12);\n        goto -> bb11;\n    }\n    bb11: {\n        return;\n    }\n    bb12: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

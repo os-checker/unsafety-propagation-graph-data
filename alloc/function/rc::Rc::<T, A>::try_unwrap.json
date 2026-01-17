@@ -1,0 +1,104 @@
+{
+  "name": "rc::Rc::<T, A>::try_unwrap",
+  "safe": true,
+  "callees": {
+    "rc::Rc::<T, A>::strong_count": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the number of strong (`Rc`) pointers to this allocation.\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let five = Rc::new(5);\n let _also_five = Rc::clone(&five);\n\n assert_eq!(2, Rc::strong_count(&five));\n ```\n",
+      "adt": {
+        "rc::Rc": "ImmutableAsArgument"
+      }
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::ptr::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `src` without moving it. This leaves the\n memory in `src` unchanged.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads.\n\n * `src` must be properly aligned. Use [`read_unaligned`] if this is not the\n   case.\n\n * `src` must point to a properly initialized value of type `T`.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n # Examples\n\n Basic usage:\n\n ```\n let x = 12;\n let y = &x as *const i32;\n\n unsafe {\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n\n ## Ownership of the Returned Value\n\n `read` creates a bitwise copy of `T`, regardless of whether `T` is [`Copy`].\n If `T` is not [`Copy`], using both the returned value and the value at\n `*src` can violate memory safety. Note that assigning to `*src` counts as a\n use because it will attempt to drop the value at `*src`.\n\n [`write()`] can be used to overwrite data without causing it to be dropped.\n\n ```\n use std::ptr;\n\n let mut s = String::from(\"foo\");\n unsafe {\n     // `s2` now points to the same underlying memory as `s`.\n     let mut s2: String = ptr::read(&s);\n\n     assert_eq!(s2, \"foo\");\n\n     // Assigning to `s2` causes its original value to be dropped. Beyond\n     // this point, `s` must no longer be used, as the underlying memory has\n     // been freed.\n     s2 = String::default();\n     assert_eq!(s2, \"\");\n\n     // Assigning to `s` would cause the old value to be dropped again,\n     // resulting in undefined behavior.\n     // s = String::from(\"bar\"); // ERROR\n\n     // `ptr::write` can be used to overwrite a value without dropping it.\n     ptr::write(&mut s, String::from(\"bar\"));\n }\n\n assert_eq!(s, \"bar\");\n ```\n\n [valid]: self#safety\n",
+      "adt": {}
+    },
+    "rc::Rc::<T, A>::inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "rc::Rc": "ImmutableAsArgument"
+      }
+    },
+    "rc::RcInnerPtr::dec_strong": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "rc::Rc": [
+      "Ref",
+      "Plain",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "rc::RcInner": [
+      "Ref"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "rc::Weak": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1789,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:1047:5: 1064:6",
+  "src": "pub fn try_unwrap(this: Self) -> Result<T, Self> {\n        if Rc::strong_count(&this) == 1 {\n            let this = ManuallyDrop::new(this);\n\n            let val: T = unsafe { ptr::read(&**this) }; // copy the contained object\n            let alloc: A = unsafe { ptr::read(&this.alloc) }; // copy the allocator\n\n            // Indicate to Weaks that they can't be promoted by decrementing\n            // the strong count, and then remove the implicit \"strong weak\"\n            // pointer while also handling drop logic by just crafting a\n            // fake Weak.\n            this.inner().dec_strong();\n            let _weak = Weak { ptr: this.ptr, alloc };\n            Ok(val)\n        } else {\n            Err(this)\n        }\n    }",
+  "mir": "fn rc::Rc::<T, A>::try_unwrap(_1: rc::Rc<T, A>) -> core::result::Result<T, rc::Rc<T, A>> {\n    let mut _0: core::result::Result<T, rc::Rc<T, A>>;\n    let mut _2: usize;\n    let  _3: &rc::Rc<T, A>;\n    let  _4: core::mem::ManuallyDrop<rc::Rc<T, A>>;\n    let mut _5: rc::Rc<T, A>;\n    let  _6: T;\n    let mut _7: *const T;\n    let  _8: &T;\n    let  _9: &rc::Rc<T, A>;\n    let mut _10: &core::mem::ManuallyDrop<rc::Rc<T, A>>;\n    let  _11: A;\n    let mut _12: *const A;\n    let  _13: &A;\n    let  _14: &rc::Rc<T, A>;\n    let mut _15: &core::mem::ManuallyDrop<rc::Rc<T, A>>;\n    let  _16: ();\n    let  _17: &rc::RcInner<T>;\n    let  _18: &rc::Rc<T, A>;\n    let mut _19: &core::mem::ManuallyDrop<rc::Rc<T, A>>;\n    let  _20: rc::Weak<T, A>;\n    let mut _21: core::ptr::NonNull<rc::RcInner<T>>;\n    let mut _22: &rc::Rc<T, A>;\n    let mut _23: &core::mem::ManuallyDrop<rc::Rc<T, A>>;\n    let mut _24: rc::Rc<T, A>;\n    debug this => _1;\n    debug this => _4;\n    debug val => _6;\n    debug alloc => _11;\n    debug _weak => _20;\n    bb0: {\n        StorageLive(_2);\n        _3 = &_1;\n        _2 = rc::Rc::<T, A>::strong_count(_3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [1: bb2, otherwise: bb14];\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = move _1;\n        _4 = core::mem::ManuallyDrop::<rc::Rc<T, A>>::new(move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageLive(_7);\n        StorageLive(_10);\n        _10 = &_4;\n        _9 = <core::mem::ManuallyDrop<rc::Rc<T, A>> as core::ops::Deref>::deref(move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        _8 = <rc::Rc<T, A> as core::ops::Deref>::deref(_9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _7 = &raw const (*_8);\n        _6 = core::ptr::read::<T>(move _7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_7);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = &_4;\n        _14 = <core::mem::ManuallyDrop<rc::Rc<T, A>> as core::ops::Deref>::deref(move _15) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_15);\n        _13 = &((*_14).2: A);\n        _12 = &raw const (*_13);\n        _11 = core::ptr::read::<A>(move _12) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageLive(_19);\n        _19 = &_4;\n        _18 = <core::mem::ManuallyDrop<rc::Rc<T, A>> as core::ops::Deref>::deref(move _19) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_19);\n        _17 = rc::Rc::<T, A>::inner(_18) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _16 = <rc::RcInner<T> as rc::RcInnerPtr>::dec_strong(_17) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = &_4;\n        _22 = <core::mem::ManuallyDrop<rc::Rc<T, A>> as core::ops::Deref>::deref(move _23) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_23);\n        _21 = ((*_22).0: core::ptr::NonNull<rc::RcInner<T>>);\n        _20 = Weak(move _21, _11);\n        StorageDead(_21);\n        StorageDead(_22);\n        _0 = core::result::Result::Ok(_6);\n        drop(_20) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_20);\n        StorageDead(_4);\n        goto -> bb15;\n    }\n    bb14: {\n        StorageDead(_2);\n        StorageLive(_24);\n        _24 = move _1;\n        _0 = core::result::Result::Err(move _24);\n        StorageDead(_24);\n        goto -> bb15;\n    }\n    bb15: {\n        return;\n    }\n}\n",
+  "doc": " Returns the inner value, if the `Rc` has exactly one strong reference.\n\n Otherwise, an [`Err`] is returned with the same `Rc` that was\n passed in.\n\n This will succeed even if there are outstanding weak references.\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let x = Rc::new(3);\n assert_eq!(Rc::try_unwrap(x), Ok(3));\n\n let x = Rc::new(4);\n let _y = Rc::clone(&x);\n assert_eq!(*Rc::try_unwrap(x).unwrap_err(), 4);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

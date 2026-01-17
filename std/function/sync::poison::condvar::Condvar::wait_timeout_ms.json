@@ -1,0 +1,66 @@
+{
+  "name": "sync::poison::condvar::Condvar::wait_timeout_ms",
+  "safe": true,
+  "callees": {
+    "core::time::Duration::from_millis": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `Duration` from the specified number of milliseconds.\n\n # Examples\n\n ```\n use std::time::Duration;\n\n let duration = Duration::from_millis(2_569);\n\n assert_eq!(2, duration.as_secs());\n assert_eq!(569_000_000, duration.subsec_nanos());\n ```\n",
+      "adt": {}
+    },
+    "sync::poison::condvar::Condvar::wait_timeout": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Waits on this condition variable for a notification, timing out after a\n specified duration.\n\n The semantics of this function are equivalent to [`wait`] except that\n the thread will be blocked for roughly no longer than `dur`. This\n method should not be used for precise timing due to anomalies such as\n preemption or platform differences that might not cause the maximum\n amount of time waited to be precisely `dur`.\n\n Note that the best effort is made to ensure that the time waited is\n measured with a monotonic clock, and not affected by the changes made to\n the system time. This function is susceptible to spurious wakeups.\n Condition variables normally have a boolean predicate associated with\n them, and the predicate must always be checked each time this function\n returns to protect against spurious wakeups. Furthermore, since the timeout\n is given relative to the moment this function is called, it needs to be adjusted\n when this function is called in a loop. The [`wait_timeout_while`] method\n lets you wait with a timeout while a predicate is true, taking care of all these concerns.\n\n The returned [`WaitTimeoutResult`] value indicates if the timeout is\n known to have elapsed.\n\n Like [`wait`], the lock specified will be re-acquired when this function\n returns, regardless of whether the timeout elapsed or not.\n\n [`wait`]: Self::wait\n [`wait_timeout_while`]: Self::wait_timeout_while\n\n # Examples\n\n ```\n use std::sync::{Arc, Mutex, Condvar};\n use std::thread;\n use std::time::Duration;\n\n let pair = Arc::new((Mutex::new(false), Condvar::new()));\n let pair2 = Arc::clone(&pair);\n\n thread::spawn(move || {\n     let (lock, cvar) = &*pair2;\n     let mut started = lock.lock().unwrap();\n     *started = true;\n     // We notify the condvar that the value has changed.\n     cvar.notify_one();\n });\n\n // wait for the thread to start up\n let (lock, cvar) = &*pair;\n let mut started = lock.lock().unwrap();\n // as long as the value inside the `Mutex<bool>` is `false`, we wait\n loop {\n     let result = cvar.wait_timeout(started, Duration::from_millis(10)).unwrap();\n     // 10 milliseconds have passed, or maybe the value changed!\n     started = result.0;\n     if *started == true {\n         // We received the notification and the value has been updated, we can leave.\n         break\n     }\n }\n ```\n",
+      "adt": {
+        "sync::poison::condvar::Condvar": "ImmutableAsArgument",
+        "sync::poison::mutex::MutexGuard": "Constructor",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "sync::poison::map_result": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::time::Duration": [
+      "Plain"
+    ],
+    "sync::poison::condvar::Condvar": [
+      "Ref"
+    ],
+    "sync::poison::mutex::MutexGuard": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 3197,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/condvar.rs:252:5: 259:6",
+  "src": "pub fn wait_timeout_ms<'a, T>(\n        &self,\n        guard: MutexGuard<'a, T>,\n        ms: u32,\n    ) -> LockResult<(MutexGuard<'a, T>, bool)> {\n        let res = self.wait_timeout(guard, Duration::from_millis(ms as u64));\n        poison::map_result(res, |(a, b)| (a, !b.timed_out()))\n    }",
+  "mir": "fn sync::poison::condvar::Condvar::wait_timeout_ms(_1: &sync::poison::condvar::Condvar, _2: sync::poison::mutex::MutexGuard<'_, T>, _3: u32) -> core::result::Result<(sync::poison::mutex::MutexGuard<'_, T>, bool), sync::poison::PoisonError<(sync::poison::mutex::MutexGuard<'_, T>, bool)>> {\n    let mut _0: core::result::Result<(sync::poison::mutex::MutexGuard<'_, T>, bool), sync::poison::PoisonError<(sync::poison::mutex::MutexGuard<'_, T>, bool)>>;\n    let  _4: core::result::Result<(sync::poison::mutex::MutexGuard<'_, T>, sync::WaitTimeoutResult), sync::poison::PoisonError<(sync::poison::mutex::MutexGuard<'_, T>, sync::WaitTimeoutResult)>>;\n    let mut _5: core::time::Duration;\n    let mut _6: u64;\n    debug self => _1;\n    debug guard => _2;\n    debug ms => _3;\n    debug res => _4;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = _3 as u64;\n        _5 = core::time::Duration::from_millis(move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        _4 = sync::poison::condvar::Condvar::wait_timeout::<T>(_1, _2, move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _0 = sync::poison::map_result::<(sync::poison::mutex::MutexGuard<'_, T>, sync::WaitTimeoutResult), (sync::poison::mutex::MutexGuard<'_, T>, bool), {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/condvar.rs:258:33: 258:41}>(_4, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/condvar.rs:258:33: 258:41}) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": " Waits on this condition variable for a notification, timing out after a\n specified duration.\n\n The semantics of this function are equivalent to [`wait`]\n except that the thread will be blocked for roughly no longer\n than `ms` milliseconds. This method should not be used for\n precise timing due to anomalies such as preemption or platform\n differences that might not cause the maximum amount of time\n waited to be precisely `ms`.\n\n Note that the best effort is made to ensure that the time waited is\n measured with a monotonic clock, and not affected by the changes made to\n the system time.\n\n The returned boolean is `false` only if the timeout is known\n to have elapsed.\n\n Like [`wait`], the lock specified will be re-acquired when this function\n returns, regardless of whether the timeout elapsed or not.\n\n [`wait`]: Self::wait\n\n # Examples\n\n ```\n use std::sync::{Arc, Mutex, Condvar};\n use std::thread;\n\n let pair = Arc::new((Mutex::new(false), Condvar::new()));\n let pair2 = Arc::clone(&pair);\n\n thread::spawn(move || {\n     let (lock, cvar) = &*pair2;\n     let mut started = lock.lock().unwrap();\n     *started = true;\n     // We notify the condvar that the value has changed.\n     cvar.notify_one();\n });\n\n // Wait for the thread to start up.\n let (lock, cvar) = &*pair;\n let mut started = lock.lock().unwrap();\n // As long as the value inside the `Mutex<bool>` is `false`, we wait.\n loop {\n     let result = cvar.wait_timeout_ms(started, 10).unwrap();\n     // 10 milliseconds have passed, or maybe the value changed!\n     started = result.0;\n     if *started == true {\n         // We received the notification and the value has been updated, we can leave.\n         break\n     }\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

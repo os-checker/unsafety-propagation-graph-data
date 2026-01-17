@@ -1,0 +1,114 @@
+{
+  "name": "io::error::Error::downcast",
+  "safe": true,
+  "callees": {
+    "io::error::repr_bitpacked::Repr::data": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::error::repr_bitpacked::Repr": "ImmutableAsArgument",
+        "io::error::ErrorData": "Constructor"
+      }
+    },
+    "<(dyn core::error::Error + core::marker::Send + core::marker::Sync + 'static)>::is": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forwards to the method defined on the type `dyn Error`.\n",
+      "adt": {}
+    },
+    "io::error::repr_bitpacked::Repr::into_data": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::error::repr_bitpacked::Repr": "ImmutableAsArgument",
+        "io::error::ErrorData": "Constructor",
+        "io::error::Custom": "Constructor",
+        "alloc_crate::boxed::Box": "Constructor"
+      }
+    },
+    "core::ops::Drop::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Executes the destructor for this type.\n\n This method is called implicitly when the value goes out of scope,\n and cannot be called explicitly (this is compiler error [E0040]).\n However, the [`mem::drop`] function in the prelude can be\n used to call the argument's `Drop` implementation.\n\n When this method has been called, `self` has not yet been deallocated.\n That only happens after the method is over.\n If this wasn't the case, `self` would be a dangling reference.\n\n # Panics\n\n Implementations should generally avoid [`panic!`]ing, because `drop()` may itself be called\n during unwinding due to a panic, and if the `drop()` panics in that situation (a “double\n panic”), this will likely abort the program. It is possible to check [`panicking()`] first,\n which may be desirable for a `Drop` implementation that is reporting a bug of the kind\n “you didn't finish using this before it was dropped”; but most types should simply clean up\n their owned allocations or other resources and return normally from `drop()`, regardless of\n what state they are in.\n\n Note that even if this panics, the value is considered to be dropped;\n you must not cause `drop` to be called again. This is normally automatically\n handled by the compiler, but when using unsafe code, can sometimes occur\n unintentionally, particularly when using [`ptr::drop_in_place`].\n\n [E0040]: ../../error_codes/E0040.html\n [`panic!`]: crate::panic!\n [`panicking()`]: ../../std/thread/fn.panicking.html\n [`mem::drop`]: drop\n [`ptr::drop_in_place`]: crate::ptr::drop_in_place\n",
+      "adt": {}
+    },
+    "core::hint::unreachable_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Informs the compiler that the site which is calling this function is not\n reachable, possibly enabling further optimizations.\n\n # Safety\n\n Reaching this function is *Undefined Behavior*.\n\n As the compiler assumes that all forms of Undefined Behavior can never\n happen, it will eliminate all branches in the surrounding code that it can\n determine will invariably lead to a call to `unreachable_unchecked()`.\n\n If the assumptions embedded in using this function turn out to be wrong -\n that is, if the site which is calling `unreachable_unchecked()` is actually\n reachable at runtime - the compiler may have generated nonsensical machine\n instructions for this situation, including in seemingly unrelated code,\n causing difficult-to-debug problems.\n\n Use this function sparingly. Consider using the [`unreachable!`] macro,\n which may prevent some optimizations but will safely panic in case it is\n actually reached at runtime. Benchmark your code to find out if using\n `unreachable_unchecked()` comes with a performance benefit.\n\n # Examples\n\n `unreachable_unchecked()` can be used in situations where the compiler\n can't prove invariants that were previously established. Such situations\n have a higher chance of occurring if those invariants are upheld by\n external code that the compiler can't analyze.\n ```\n fn prepare_inputs(divisors: &mut Vec<u32>) {\n     // Note to future-self when making changes: The invariant established\n     // here is NOT checked in `do_computation()`; if this changes, you HAVE\n     // to change `do_computation()`.\n     divisors.retain(|divisor| *divisor != 0)\n }\n\n /// # Safety\n /// All elements of `divisor` must be non-zero.\n unsafe fn do_computation(i: u32, divisors: &[u32]) -> u32 {\n     divisors.iter().fold(i, |acc, divisor| {\n         // Convince the compiler that a division by zero can't happen here\n         // and a check is not needed below.\n         if *divisor == 0 {\n             // Safety: `divisor` can't be zero because of `prepare_inputs`,\n             // but the compiler does not know about this. We *promise*\n             // that we always call `prepare_inputs`.\n             unsafe { std::hint::unreachable_unchecked() }\n         }\n         // The compiler would normally introduce a check here that prevents\n         // a division by zero. However, if `divisor` was zero, the branch\n         // above would reach what we explicitly marked as unreachable.\n         // The compiler concludes that `divisor` can't be zero at this point\n         // and removes the - now proven useless - check.\n         acc / divisor\n     })\n }\n\n let mut divisors = vec![2, 0, 4];\n prepare_inputs(&mut divisors);\n let result = unsafe {\n     // Safety: prepare_inputs() guarantees that divisors is non-zero\n     do_computation(100, &divisors)\n };\n assert_eq!(result, 12);\n\n ```\n\n While using `unreachable_unchecked()` is perfectly sound in the following\n example, as the compiler is able to prove that a division by zero is not\n possible, benchmarking reveals that `unreachable_unchecked()` provides\n no benefit over using [`unreachable!`], while the latter does not introduce\n the possibility of Undefined Behavior.\n\n ```\n fn div_1(a: u32, b: u32) -> u32 {\n     use std::hint::unreachable_unchecked;\n\n     // `b.saturating_add(1)` is always positive (not zero),\n     // hence `checked_div` will never return `None`.\n     // Therefore, the else branch is unreachable.\n     a.checked_div(b.saturating_add(1))\n         .unwrap_or_else(|| unsafe { unreachable_unchecked() })\n }\n\n assert_eq!(div_1(7, 0), 7);\n assert_eq!(div_1(9, 1), 4);\n assert_eq!(div_1(11, u32::MAX), 0);\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::boxed::convert::<impl (dyn core::error::Error + core::marker::Send + core::marker::Sync + 'static)>::downcast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to downcast the box to a concrete type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "io::error::repr_bitpacked::Repr": [
+      "Ref",
+      "Plain"
+    ],
+    "io::error::Error": [
+      "Unknown([Field(0, Ty { id: 5462, kind: RigidTy(Adt(AdtDef(DefId { id: 6804, name: \"io::error::repr_bitpacked::Repr\" }), GenericArgs([]))) })])",
+      "Plain"
+    ],
+    "io::error::ErrorData": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(3, ThreadLocalIndex)), Field(0, Ty { id: 5470, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 5468, kind: RigidTy(Adt(AdtDef(DefId { id: 6829, name: \"io::error::Custom\" }), GenericArgs([]))) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(3, ThreadLocalIndex)), Field(0, Ty { id: 5463, kind: RigidTy(Adt(AdtDef(DefId { id: 4386, name: \"alloc_crate::boxed::Box\" }), GenericArgs([Type(Ty { id: 5468, kind: RigidTy(Adt(AdtDef(DefId { id: 6829, name: \"io::error::Custom\" }), GenericArgs([]))) }), Type(Ty { id: 19, kind: RigidTy(Adt(AdtDef(DefId { id: 4635, name: \"alloc_crate::alloc::Global\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "io::error::Custom": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ],
+    "alloc_crate::boxed::Box": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 5570, kind: RigidTy(Adt(AdtDef(DefId { id: 4689, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 5559, kind: RigidTy(Dynamic([Binder { value: Trait(ExistentialTraitRef { def_id: TraitDef(DefId { id: 5681, name: \"core::error::Error\" }), generic_args: GenericArgs([]) }), bound_vars: [] }, Binder { value: AutoTrait(TraitDef(DefId { id: 4411, name: \"core::marker::Sync\" })), bound_vars: [] }, Binder { value: AutoTrait(TraitDef(DefId { id: 4634, name: \"core::marker::Send\" })), bound_vars: [] }], Region { kind: ReErased })) })]))) }), Field(0, Ty { id: 5571, kind: RigidTy(Adt(AdtDef(DefId { id: 4690, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 5559, kind: RigidTy(Dynamic([Binder { value: Trait(ExistentialTraitRef { def_id: TraitDef(DefId { id: 5681, name: \"core::error::Error\" }), generic_args: GenericArgs([]) }), bound_vars: [] }, Binder { value: AutoTrait(TraitDef(DefId { id: 4411, name: \"core::marker::Sync\" })), bound_vars: [] }, Binder { value: AutoTrait(TraitDef(DefId { id: 4634, name: \"core::marker::Send\" })), bound_vars: [] }], Region { kind: ReErased })) })]))) })])",
+      "Unknown([Field(0, Ty { id: 5584, kind: RigidTy(Adt(AdtDef(DefId { id: 4689, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 5468, kind: RigidTy(Adt(AdtDef(DefId { id: 6829, name: \"io::error::Custom\" }), GenericArgs([]))) })]))) }), Field(0, Ty { id: 5585, kind: RigidTy(Adt(AdtDef(DefId { id: 4690, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 5468, kind: RigidTy(Adt(AdtDef(DefId { id: 6829, name: \"io::error::Custom\" }), GenericArgs([]))) })]))) })])",
+      "Unknown([Field(0, Ty { id: 5594, kind: RigidTy(Adt(AdtDef(DefId { id: 4689, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 2993, kind: Param(ParamTy { index: 0, name: \"E\" }) })]))) }), Field(0, Ty { id: 5595, kind: RigidTy(Adt(AdtDef(DefId { id: 4690, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 2993, kind: Param(ParamTy { index: 0, name: \"E\" }) })]))) })])",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 5593, kind: RigidTy(Adt(AdtDef(DefId { id: 4386, name: \"alloc_crate::boxed::Box\" }), GenericArgs([Type(Ty { id: 2993, kind: Param(ParamTy { index: 0, name: \"E\" }) }), Type(Ty { id: 19, kind: RigidTy(Adt(AdtDef(DefId { id: 4635, name: \"alloc_crate::alloc::Global\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 1479,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/error.rs:949:5: 967:6",
+  "src": "pub fn downcast<E>(self) -> result::Result<E, Self>\n    where\n        E: error::Error + Send + Sync + 'static,\n    {\n        if let ErrorData::Custom(c) = self.repr.data()\n            && c.error.is::<E>()\n        {\n            if let ErrorData::Custom(b) = self.repr.into_data()\n                && let Ok(err) = b.error.downcast::<E>()\n            {\n                Ok(*err)\n            } else {\n                // Safety: We have just checked that the condition is true\n                unsafe { crate::hint::unreachable_unchecked() }\n            }\n        } else {\n            Err(self)\n        }\n    }",
+  "mir": "fn io::error::Error::downcast(_1: io::error::Error) -> core::result::Result<E, io::error::Error> {\n    let mut _0: core::result::Result<E, io::error::Error>;\n    let mut _2: io::error::ErrorData<&io::error::Custom>;\n    let mut _3: &io::error::repr_bitpacked::Repr;\n    let mut _4: isize;\n    let  _5: &io::error::Custom;\n    let mut _6: bool;\n    let mut _7: &dyn core::error::Error + core::marker::Send + core::marker::Sync;\n    let mut _8: io::error::ErrorData<alloc_crate::boxed::Box<io::error::Custom>>;\n    let mut _9: io::error::repr_bitpacked::Repr;\n    let mut _10: isize;\n    let  _11: alloc_crate::boxed::Box<io::error::Custom>;\n    let mut _12: core::result::Result<alloc_crate::boxed::Box<E>, alloc_crate::boxed::Box<dyn core::error::Error + core::marker::Send + core::marker::Sync>>;\n    let mut _13: alloc_crate::boxed::Box<dyn core::error::Error + core::marker::Send + core::marker::Sync>;\n    let mut _14: isize;\n    let  _15: alloc_crate::boxed::Box<E>;\n    let mut _16: E;\n    let mut _17: !;\n    let mut _18: alloc_crate::boxed::Box<dyn core::error::Error + core::marker::Send + core::marker::Sync>;\n    let mut _19: &mut alloc_crate::boxed::Box<E>;\n    let mut _20: ();\n    let mut _21: isize;\n    let mut _22: &mut alloc_crate::boxed::Box<io::error::Custom>;\n    let mut _23: ();\n    let mut _24: isize;\n    let mut _25: &mut alloc_crate::boxed::Box<io::error::Custom>;\n    let mut _26: ();\n    let mut _27: *const dyn core::error::Error + core::marker::Send + core::marker::Sync;\n    let mut _28: *const io::error::Custom;\n    let mut _29: *const E;\n    let mut _30: *const ();\n    let mut _31: usize;\n    let mut _32: usize;\n    let mut _33: usize;\n    let mut _34: bool;\n    let mut _35: *const ();\n    let mut _36: usize;\n    let mut _37: usize;\n    let mut _38: usize;\n    let mut _39: bool;\n    let mut _40: *const ();\n    let mut _41: usize;\n    let mut _42: bool;\n    let mut _43: bool;\n    let mut _44: bool;\n    let mut _45: bool;\n    let mut _46: *const ();\n    let mut _47: usize;\n    let mut _48: bool;\n    let mut _49: bool;\n    let mut _50: bool;\n    let mut _51: bool;\n    debug self => _1;\n    debug c => _5;\n    debug b => _11;\n    debug err => _15;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &(_1.0: io::error::repr_bitpacked::Repr);\n        _2 = io::error::repr_bitpacked::Repr::data(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _4 = discriminant(_2);\n        switchInt(move _4) -> [3: bb2, otherwise: bb10];\n    }\n    bb2: {\n        StorageLive(_5);\n        _5 = ((_2 as variant#3).0: &io::error::Custom);\n        StorageLive(_6);\n        StorageLive(_7);\n        _18 = ((*_5).1: alloc_crate::boxed::Box<dyn core::error::Error + core::marker::Send + core::marker::Sync>);\n        _27 = ((_18.0: core::ptr::Unique<dyn core::error::Error + core::marker::Send + core::marker::Sync>).0: core::ptr::NonNull<dyn core::error::Error + core::marker::Send + core::marker::Sync>) as *const dyn core::error::Error + core::marker::Send + core::marker::Sync;\n        _7 = &(*_27);\n        _6 = <(dyn core::error::Error + core::marker::Send + core::marker::Sync + 'static)>::is::<E>(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _6) -> [0: bb9, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = (_1.0: io::error::repr_bitpacked::Repr);\n        _8 = io::error::repr_bitpacked::Repr::into_data(move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        _10 = discriminant(_8);\n        switchInt(move _10) -> [3: bb6, otherwise: bb17];\n    }\n    bb6: {\n        StorageLive(_11);\n        _11 = move ((_8 as variant#3).0: alloc_crate::boxed::Box<io::error::Custom>);\n        StorageLive(_12);\n        StorageLive(_13);\n        _28 = ((_11.0: core::ptr::Unique<io::error::Custom>).0: core::ptr::NonNull<io::error::Custom>) as *const io::error::Custom;\n        _35 = _28 as *const ();\n        _36 = _35 as usize;\n        _37 = Sub(<io::error::Custom as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _38 = BitAnd(_36, _37);\n        _39 = Eq(_38, 0_usize);\n        assert(_39, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<io::error::Custom as core::mem::SizedTypeProperties>::ALIGN, _36) -> [success: bb22, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_13);\n        _14 = discriminant(_12);\n        switchInt(move _14) -> [0: bb8, 1: bb15, otherwise: bb25];\n    }\n    bb8: {\n        StorageLive(_15);\n        _15 = move ((_12 as variant#0).0: alloc_crate::boxed::Box<E>);\n        StorageLive(_16);\n        _29 = ((_15.0: core::ptr::Unique<E>).0: core::ptr::NonNull<E>) as *const E;\n        _30 = _29 as *const ();\n        _31 = _30 as usize;\n        _32 = Sub(<E as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _33 = BitAnd(_31, _32);\n        _34 = Eq(_33, 0_usize);\n        assert(_34, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<E as core::mem::SizedTypeProperties>::ALIGN, _31) -> [success: bb21, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_7);\n        StorageDead(_5);\n        goto -> bb10;\n    }\n    bb10: {\n        StorageDead(_2);\n        _0 = core::result::Result::Err(_1);\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_6);\n        return;\n    }\n    bb12: {\n        StorageDead(_15);\n        _24 = discriminant(_12);\n        switchInt(move _24) -> [0: bb18, 1: bb19, otherwise: bb25];\n    }\n    bb13: {\n        StorageDead(_12);\n        _22 = &mut _11;\n        _23 = <alloc_crate::boxed::Box<io::error::Custom> as core::ops::Drop>::drop(move _22) -> [return: bb16, unwind unreachable];\n    }\n    bb14: {\n        drop(_12) -> [return: bb13, unwind unreachable];\n    }\n    bb15: {\n        _21 = discriminant(_12);\n        switchInt(move _21) -> [0: bb13, 1: bb14, otherwise: bb25];\n    }\n    bb16: {\n        StorageDead(_11);\n        goto -> bb17;\n    }\n    bb17: {\n        StorageDead(_8);\n        _17 = core::hint::unreachable_unchecked() -> unwind unreachable;\n    }\n    bb18: {\n        StorageDead(_12);\n        _25 = &mut _11;\n        _26 = <alloc_crate::boxed::Box<io::error::Custom> as core::ops::Drop>::drop(move _25) -> [return: bb20, unwind unreachable];\n    }\n    bb19: {\n        drop(_12) -> [return: bb18, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_11);\n        StorageDead(_8);\n        StorageDead(_5);\n        StorageDead(_2);\n        goto -> bb11;\n    }\n    bb21: {\n        _46 = _29 as *const ();\n        _47 = _46 as usize;\n        _48 = Ne(<E as core::mem::SizedTypeProperties>::SIZE, 0_usize);\n        _49 = Eq(_47, 0_usize);\n        _50 = BitAnd(_49, _48);\n        _51 = Not(_50);\n        assert(_51, \"null pointer dereference occurred\") -> [success: bb24, unwind unreachable];\n    }\n    bb22: {\n        _40 = _28 as *const ();\n        _41 = _40 as usize;\n        _42 = Ne(<io::error::Custom as core::mem::SizedTypeProperties>::SIZE, 0_usize);\n        _43 = Eq(_41, 0_usize);\n        _44 = BitAnd(_43, _42);\n        _45 = Not(_44);\n        assert(_45, \"null pointer dereference occurred\") -> [success: bb23, unwind unreachable];\n    }\n    bb23: {\n        _13 = move ((*_28).1: alloc_crate::boxed::Box<dyn core::error::Error + core::marker::Send + core::marker::Sync>);\n        _12 = alloc_crate::boxed::convert::<impl (dyn core::error::Error + core::marker::Send + core::marker::Sync + 'static)>::downcast::<E>(move _13) -> [return: bb7, unwind unreachable];\n    }\n    bb24: {\n        _16 = move (*_29);\n        _0 = core::result::Result::Ok(move _16);\n        StorageDead(_16);\n        _19 = &mut _15;\n        _20 = <alloc_crate::boxed::Box<E> as core::ops::Drop>::drop(move _19) -> [return: bb12, unwind unreachable];\n    }\n    bb25: {\n        unreachable;\n    }\n}\n",
+  "doc": " Attempts to downcast the custom boxed error to `E`.\n\n If this [`Error`] contains a custom boxed error,\n then it would attempt downcasting on the boxed error,\n otherwise it will return [`Err`].\n\n If the custom boxed error has the same type as `E`, it will return [`Ok`],\n otherwise it will also return [`Err`].\n\n This method is meant to be a convenience routine for calling\n `Box<dyn Error + Sync + Send>::downcast` on the custom boxed error, returned by\n [`Error::into_inner`].\n\n\n # Examples\n\n ```\n use std::fmt;\n use std::io;\n use std::error::Error;\n\n #[derive(Debug)]\n enum E {\n     Io(io::Error),\n     SomeOtherVariant,\n }\n\n impl fmt::Display for E {\n    // ...\n #    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n #        todo!()\n #    }\n }\n impl Error for E {}\n\n impl From<io::Error> for E {\n     fn from(err: io::Error) -> E {\n         err.downcast::<E>()\n             .unwrap_or_else(E::Io)\n     }\n }\n\n impl From<E> for io::Error {\n     fn from(err: E) -> io::Error {\n         match err {\n             E::Io(io_error) => io_error,\n             e => io::Error::new(io::ErrorKind::Other, e),\n         }\n     }\n }\n\n # fn main() {\n let e = E::SomeOtherVariant;\n // Convert it to an io::Error\n let io_error = io::Error::from(e);\n // Cast it back to the original variant\n let e = E::from(io_error);\n assert!(matches!(e, E::SomeOtherVariant));\n\n let io_error = io::Error::from(io::ErrorKind::AlreadyExists);\n // Convert it to E\n let e = E::from(io_error);\n // Cast it back to the original variant\n let io_error = io::Error::from(e);\n assert_eq!(io_error.kind(), io::ErrorKind::AlreadyExists);\n assert!(io_error.get_ref().is_none());\n assert!(io_error.raw_os_error().is_none());\n # }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "name": "<core_simd::vector::Simd<T, N> as convert::TryFrom<&mut [T]>>::try_from",
+  "safe": true,
+  "callees": {
+    "convert::TryInto::try_into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the conversion.\n",
+      "adt": {}
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core_simd::vector::Simd::<T, N>::from_array": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts an array to a SIMD vector.\n",
+      "adt": {
+        "core_simd::vector::Simd": "Constructor"
+      }
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "result::Result": [
+      "Plain"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 4219, kind: RigidTy(Array(Ty { id: 622, kind: Param(ParamTy { index: 1, name: \"T\" }) }, TyConst { kind: Param(ParamConst { index: 2, name: \"N\" }), id: TyConstId(47, ThreadLocalIndex) })) })])"
+    ],
+    "core_simd::vector::Simd": [
+      "Plain"
+    ]
+  },
+  "path": 12525,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/vector.rs:1102:5: 1104:6",
+  "src": "fn try_from(slice: &mut [T]) -> Result<Self, core::array::TryFromSliceError> {\n        Ok(Self::from_array(slice.try_into()?))\n    }",
+  "mir": "fn <core_simd::vector::Simd<T, N> as convert::TryFrom<&mut [T]>>::try_from(_1: &mut [T]) -> result::Result<core_simd::vector::Simd<T, N>, array::TryFromSliceError> {\n    let mut _0: result::Result<core_simd::vector::Simd<T, N>, array::TryFromSliceError>;\n    let mut _2: core_simd::vector::Simd<T, N>;\n    let mut _3: ops::control_flow::ControlFlow<result::Result<convert::Infallible, array::TryFromSliceError>, [T; N]>;\n    let mut _4: result::Result<[T; N], array::TryFromSliceError>;\n    let mut _5: isize;\n    let  _6: [T; N];\n    debug slice => _1;\n    debug residual => result::Result::<convert::Infallible, array::TryFromSliceError>::Err(array::TryFromSliceError(()));\n    debug val => _6;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = <&mut [T] as convert::TryInto<[T; N]>>::try_into(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = <result::Result<[T; N], array::TryFromSliceError> as ops::try_trait::Try>::branch(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _6 = ((_3 as variant#0).0: [T; N]);\n        _2 = core_simd::vector::Simd::<T, N>::from_array(_6) -> [return: bb7, unwind unreachable];\n    }\n    bb5: {\n        _0 = <result::Result<core_simd::vector::Simd<T, N>, array::TryFromSliceError> as ops::try_trait::FromResidual<result::Result<convert::Infallible, array::TryFromSliceError>>>::from_residual(result::Result::<convert::Infallible, array::TryFromSliceError>::Err(array::TryFromSliceError(()))) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_3);\n        StorageDead(_2);\n        goto -> bb8;\n    }\n    bb7: {\n        _0 = result::Result::Ok(move _2);\n        StorageDead(_3);\n        StorageDead(_2);\n        goto -> bb8;\n    }\n    bb8: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

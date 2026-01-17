@@ -1,0 +1,37 @@
+{
+  "name": "sys::pal::unix::stack_overflow::imp::sigstack_size",
+  "safe": true,
+  "callees": {
+    "libc::getauxval": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::cmp::Ord::max": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the maximum of two values.\n\n Returns the second argument if the comparison determines them to be equal.\n\n # Examples\n\n ```\n assert_eq!(1.max(2), 2);\n assert_eq!(2.max(2), 2);\n ```\n ```\n use std::cmp::Ordering;\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(Equal(\"self\").max(Equal(\"other\")).0, \"other\");\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 3969,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/stack_overflow.rs:309:5: 315:6",
+  "src": "fn sigstack_size() -> usize {\n        let dynamic_sigstksz = unsafe { libc::getauxval(libc::AT_MINSIGSTKSZ) };\n        // If getauxval couldn't find the entry, it returns 0,\n        // so take the higher of the \"constant\" and auxval.\n        // This transparently supports older kernels which don't provide AT_MINSIGSTKSZ\n        libc::SIGSTKSZ.max(dynamic_sigstksz as _)\n    }",
+  "mir": "fn sys::pal::unix::stack_overflow::imp::sigstack_size() -> usize {\n    let mut _0: usize;\n    let  _1: u64;\n    let mut _2: usize;\n    debug dynamic_sigstksz => _1;\n    bb0: {\n        _1 = libc::getauxval(libc::AT_MINSIGSTKSZ) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = _1 as usize;\n        _0 = <usize as core::cmp::Ord>::max(libc::SIGSTKSZ, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Modern kernels on modern hardware can have dynamic signal stack sizes.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

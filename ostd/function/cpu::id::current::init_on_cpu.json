@@ -1,0 +1,33 @@
+{
+  "name": "cpu::id::current::init_on_cpu",
+  "safe": false,
+  "callees": {
+    "cpu::local::cell::CpuLocalCell::<T>::store": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a value to the per-CPU object in a single instruction.\n\n Note that this memory operation will not be elided or reordered by the\n compiler since it is a black-box.\n",
+      "adt": {
+        "cpu::local::cell::CpuLocalCell": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "cpu::local::cell::CpuLocalCell": [
+      "Ref"
+    ]
+  },
+  "path": 1636,
+  "span": "ostd/src/cpu/id.rs:165:5: 173:6",
+  "src": "pub(super) unsafe fn init_on_cpu(current_cpu_id: u32) {\n        // FIXME: If there are safe APIs that rely on the correctness of\n        // the CPU ID for soundness, we'd better make the CPU ID a global\n        // invariant and initialize it before entering `ap_early_entry`.\n        CURRENT_CPU.store(current_cpu_id);\n\n        #[cfg(debug_assertions)]\n        IS_CURRENT_CPU_INITED.store(true);\n    }",
+  "mir": "fn cpu::id::current::init_on_cpu(_1: u32) -> () {\n    let mut _0: ();\n    let  _2: ();\n    let mut _3: &cpu::local::cell::CpuLocalCell<u32>;\n    let  _4: ();\n    let mut _5: &cpu::local::cell::CpuLocalCell<bool>;\n    debug current_cpu_id => _1;\n    bb0: {\n        StorageLive(_3);\n        _3 = {alloc760: &cpu::local::cell::CpuLocalCell<u32>};\n        _2 = cpu::local::cell::CpuLocalCell::<u32>::store(move _3, _1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = {alloc763: &cpu::local::cell::CpuLocalCell<bool>};\n        _4 = cpu::local::cell::CpuLocalCell::<bool>::store(move _5, true) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": " Initializes the module on the current CPU.\n\n Note that this method will use the current CPU's CPU-local storage.\n\n # Safety\n\n The caller must ensure:\n 1. This method is called on each CPU in the boot context.\n 2. The CPU ID for the current CPU is correct.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "name": "<slice::iter::RChunksMut<'a, T> as iter::traits::iterator::Iterator>::nth",
+  "safe": true,
+  "callees": {
+    "num::<impl usize>::checked_mul": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checked integer multiplication. Computes `self * rhs`, returning\n `None` if overflow occurred.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of a raw slice.\n\n The returned value is the number of **elements**, not the number of bytes.\n\n This function is safe, even when the raw slice cannot be cast to a slice\n reference because the pointer is null or unaligned.\n\n # Examples\n\n ```rust\n use std::ptr;\n\n let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);\n assert_eq!(slice.len(), 3);\n ```\n",
+      "adt": {}
+    },
+    "num::<impl usize>::checked_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checked integer subtraction. Computes `self - rhs`, returning\n `None` if overflow occurred.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::split_at_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable raw slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.\n\n # Safety\n\n `mid` must be [in-bounds] of the underlying [allocation].\n Which means `self` must be dereferenceable and span a single allocation\n that is at least `mid * size_of::<T>()` bytes long. Not upholding these\n requirements is *[undefined behavior]* even if the resulting pointers are not used.\n\n Since `len` being in-bounds it is not a safety invariant of `*mut [T]` the\n safety requirements of this method are the same as for [`split_at_mut_unchecked`].\n The explicit bounds check is only as useful as `len` is correct.\n\n [`split_at_mut_unchecked`]: #method.split_at_mut_unchecked\n [in-bounds]: #method.add\n [allocation]: crate::ptr#allocation\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n #![feature(raw_slice_split)]\n #![feature(slice_ptr_get)]\n\n let mut v = [1, 0, 3, 0, 5, 6];\n let ptr = &mut v as *mut [_];\n unsafe {\n     let (left, right) = ptr.split_at_mut(2);\n     assert_eq!(&*left, [1, 0]);\n     assert_eq!(&*right, [3, 0, 5, 6]);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::RChunksMut": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ]
+  },
+  "path": 16548,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:2495:5: 2517:6",
+  "src": "fn nth(&mut self, n: usize) -> Option<&'a mut [T]> {\n        if let Some(end) = n.checked_mul(self.chunk_size)\n            && end < self.v.len()\n        {\n            let end = self.v.len() - end;\n            let start = match end.checked_sub(self.chunk_size) {\n                Some(sum) => sum,\n                None => 0,\n            };\n            // SAFETY: This type ensures that self.v is a valid pointer with a correct len.\n            // Therefore the bounds check in split_at_mut guarantees the split point is inbounds.\n            let (head, tail) = unsafe { self.v.split_at_mut(start) };\n            // SAFETY: This type ensures that self.v is a valid pointer with a correct len.\n            // Therefore the bounds check in split_at_mut guarantees the split point is inbounds.\n            let (nth, _) = unsafe { tail.split_at_mut(end - start) };\n            self.v = head;\n            // SAFETY: Nothing else points to or will point to the contents of this slice.\n            Some(unsafe { &mut *nth })\n        } else {\n            self.v = &mut [];\n            None\n        }\n    }",
+  "mir": "fn <slice::iter::RChunksMut<'a, T> as iter::traits::iterator::Iterator>::nth(_1: &mut slice::iter::RChunksMut<'_, T>, _2: usize) -> option::Option<&mut [T]> {\n    let mut _0: option::Option<&mut [T]>;\n    let mut _3: option::Option<usize>;\n    let mut _4: usize;\n    let mut _5: isize;\n    let  _6: usize;\n    let mut _7: bool;\n    let mut _8: usize;\n    let mut _9: *mut [T];\n    let  _10: usize;\n    let mut _11: usize;\n    let mut _12: *mut [T];\n    let mut _13: (usize, bool);\n    let  _14: usize;\n    let mut _15: option::Option<usize>;\n    let mut _16: usize;\n    let mut _17: isize;\n    let  _18: usize;\n    let  _19: *mut [T];\n    let  _20: *mut [T];\n    let mut _21: (*mut [T], *mut [T]);\n    let mut _22: *mut [T];\n    let mut _23: usize;\n    let  _24: *mut [T];\n    let mut _25: (*mut [T], *mut [T]);\n    let mut _26: usize;\n    let mut _27: usize;\n    let mut _28: (usize, bool);\n    let mut _29: &mut [T];\n    let mut _30: *mut [T; 0];\n    let mut _31: &mut [T; 0];\n    debug self => _1;\n    debug n => _2;\n    debug end => _6;\n    debug end => _10;\n    debug start => _14;\n    debug sum => _18;\n    debug head => _19;\n    debug tail => _20;\n    debug nth => _24;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).1: usize);\n        _3 = num::<impl usize>::checked_mul(_2, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [1: bb2, 0: bb16, otherwise: bb8];\n    }\n    bb2: {\n        _6 = ((_3 as variant#1).0: usize);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = ((*_1).0: *mut [T]);\n        _8 = ptr::mut_ptr::<impl *mut [T]>::len(move _9) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_9);\n        _7 = Lt(_6, move _8);\n        switchInt(move _7) -> [0: bb15, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_8);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = ((*_1).0: *mut [T]);\n        _11 = ptr::mut_ptr::<impl *mut [T]>::len(move _12) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        _13 = CheckedSub(_11, _6);\n        assert(!move (_13.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _11, _6) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _10 = move (_13.0: usize);\n        StorageDead(_11);\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = ((*_1).1: usize);\n        _15 = num::<impl usize>::checked_sub(_10, move _16) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_16);\n        _17 = discriminant(_15);\n        switchInt(move _17) -> [0: bb9, 1: bb10, otherwise: bb8];\n    }\n    bb8: {\n        unreachable;\n    }\n    bb9: {\n        _14 = 0_usize;\n        goto -> bb11;\n    }\n    bb10: {\n        StorageLive(_18);\n        _18 = ((_15 as variant#1).0: usize);\n        _14 = _18;\n        StorageDead(_18);\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_15);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = ((*_1).0: *mut [T]);\n        StorageLive(_23);\n        _23 = _14;\n        _21 = ptr::mut_ptr::<impl *mut [T]>::split_at_mut(move _22, move _23) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_23);\n        StorageDead(_22);\n        _19 = (_21.0: *mut [T]);\n        _20 = (_21.1: *mut [T]);\n        StorageDead(_21);\n        StorageLive(_25);\n        StorageLive(_26);\n        StorageLive(_27);\n        _27 = _14;\n        _28 = CheckedSub(_10, _27);\n        assert(!move (_28.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _10, move _27) -> [success: bb13, unwind unreachable];\n    }\n    bb13: {\n        _26 = move (_28.0: usize);\n        StorageDead(_27);\n        _25 = ptr::mut_ptr::<impl *mut [T]>::split_at_mut(_20, move _26) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_26);\n        StorageLive(_24);\n        _24 = (_25.0: *mut [T]);\n        StorageDead(_25);\n        ((*_1).0: *mut [T]) = _19;\n        _29 = &mut (*_24);\n        _0 = option::Option::Some(_29);\n        StorageDead(_24);\n        StorageDead(_14);\n        StorageDead(_3);\n        goto -> bb17;\n    }\n    bb15: {\n        StorageDead(_8);\n        goto -> bb16;\n    }\n    bb16: {\n        StorageDead(_3);\n        StorageLive(_30);\n        StorageLive(_31);\n        _31 = <slice::iter::RChunksMut<'_, T> as iter::traits::iterator::Iterator>::nth::promoted[0];\n        _30 = &raw mut (*_31);\n        ((*_1).0: *mut [T]) = move _30 as *mut [T];\n        StorageDead(_30);\n        StorageDead(_31);\n        _0 = option::Option::None;\n        goto -> bb17;\n    }\n    bb17: {\n        StorageDead(_7);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

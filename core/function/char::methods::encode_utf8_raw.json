@@ -1,0 +1,87 @@
+{
+  "name": "char::methods::encode_utf8_raw",
+  "safe": true,
+  "callees": {
+    "char::methods::len_utf8": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "char::methods::encode_utf8_raw::do_panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unsafe mutable pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n let x_ptr = x.as_mut_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         *x_ptr.add(i) += 2;\n     }\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {}
+    },
+    "char::methods::encode_utf8_raw_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Encodes a raw `u32` value as UTF-8 into the byte buffer pointed to by `dst`.\n\n Unlike `char::encode_utf8`, this method also handles codepoints in the surrogate range.\n (Creating a `char` in the surrogate range is UB.)\n The result is valid [generalized UTF-8] but not valid UTF-8.\n\n [generalized UTF-8]: https://simonsapin.github.io/wtf-8/#generalized-utf8\n\n # Safety\n\n The behavior is undefined if the buffer pointed to by `dst` is not\n large enough to hold the encoded codepoint. A buffer of length four\n is large enough to encode any `char`.\n\n For a safe version of this function, see the [`encode_utf8_raw`] function.\n",
+      "adt": {}
+    },
+    "slice::raw::from_raw_parts_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the same functionality as [`from_raw_parts`], except that a\n mutable slice is returned.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for both reads and writes for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be accessed through any other pointer\n   (not derived from the return value) for the duration of lifetime `'a`.\n   Both read and write accesses are forbidden.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 4877,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/char/methods.rs:1873:1: 1890:2",
+  "src": "pub const fn encode_utf8_raw(code: u32, dst: &mut [u8]) -> &mut [u8] {\n    let len = len_utf8(code);\n    if dst.len() < len {\n        const_panic!(\n            \"encode_utf8: buffer does not have enough bytes to encode code point\",\n            \"encode_utf8: need {len} bytes to encode U+{code:04X} but buffer has just {dst_len}\",\n            code: u32 = code,\n            len: usize = len,\n            dst_len: usize = dst.len(),\n        );\n    }\n\n    // SAFETY: `dst` is checked to be at least the length needed to encode the codepoint.\n    unsafe { encode_utf8_raw_unchecked(code, dst.as_mut_ptr()) };\n\n    // SAFETY: `<&mut [u8]>::as_mut_ptr` is guaranteed to return a valid pointer and `len` has been tested to be within bounds.\n    unsafe { slice::from_raw_parts_mut(dst.as_mut_ptr(), len) }\n}",
+  "mir": "fn char::methods::encode_utf8_raw(_1: u32, _2: &mut [u8]) -> &mut [u8] {\n    let mut _0: &mut [u8];\n    let  _3: usize;\n    let mut _4: bool;\n    let mut _5: usize;\n    let mut _6: &[u8];\n    let  _7: !;\n    let mut _8: usize;\n    let mut _9: &[u8];\n    let  _10: ();\n    let mut _11: *mut u8;\n    let mut _12: *mut u8;\n    debug code => _1;\n    debug dst => _2;\n    debug len => _3;\n    bb0: {\n        _3 = char::methods::len_utf8(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &(*_2);\n        _5 = PtrMetadata(move _6);\n        StorageDead(_6);\n        _4 = Lt(move _5, _3);\n        switchInt(move _4) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &(*_2);\n        _8 = PtrMetadata(move _9);\n        StorageDead(_9);\n        _7 = char::methods::encode_utf8_raw::do_panic(_1, _3, move _8) -> unwind unreachable;\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_11);\n        _11 = slice::<impl [u8]>::as_mut_ptr(_2) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _10 = char::methods::encode_utf8_raw_unchecked(_1, move _11) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        StorageLive(_12);\n        _12 = slice::<impl [u8]>::as_mut_ptr(_2) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _0 = slice::raw::from_raw_parts_mut::<'_, u8>(move _12, _3) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        return;\n    }\n}\n",
+  "doc": " Encodes a raw `u32` value as UTF-8 into the provided byte buffer,\n and then returns the subslice of the buffer that contains the encoded character.\n\n Unlike `char::encode_utf8`, this method also handles codepoints in the surrogate range.\n (Creating a `char` in the surrogate range is UB.)\n The result is valid [generalized UTF-8] but not valid UTF-8.\n\n [generalized UTF-8]: https://simonsapin.github.io/wtf-8/#generalized-utf8\n\n # Panics\n\n Panics if the buffer is not large enough.\n A buffer of length four is large enough to encode any `char`.\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "hidden"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* hidden\n"
+    ]
+  }
+}

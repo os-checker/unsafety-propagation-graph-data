@@ -1,0 +1,74 @@
+{
+  "name": "num::bignum::tests::Big8x3::mul_small",
+  "safe": true,
+  "callees": {
+    "ops::index::IndexMut::index_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the mutable indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "iter::traits::collect::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "num::<impl u8>::carrying_mul": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calculates the \"full multiplication\" `self * rhs + carry`\n without the possibility to overflow.\n\n This returns the low-order (wrapping) bits and the high-order (overflow) bits\n of the result as two separate values, in that order.\n\n Performs \"long multiplication\" which takes in an extra amount to add, and may return an\n additional amount of overflow. This allows for chaining together multiple\n multiplications to create \"big integers\" which represent larger values.\n\n If you also need to add a value, then use [`Self::carrying_mul_add`].\n\n # Examples\n\n Please note that this example is shared among integer types, which is why `u32` is used.\n\n ```\n assert_eq!(5u32.carrying_mul(2, 0), (10, 0));\n assert_eq!(5u32.carrying_mul(2, 10), (20, 0));\n assert_eq!(1_000_000_000u32.carrying_mul(10, 0), (1410065408, 2));\n assert_eq!(1_000_000_000u32.carrying_mul(10, 10), (1410065418, 2));\n ```\n\n This is the core operation needed for scalar multiplication when\n implementing it for wider-than-native types.\n\n ```\n #![feature(bigint_helper_methods)]\n fn scalar_mul_eq(little_endian_digits: &mut Vec<u16>, multiplicand: u16) {\n     let mut carry = 0;\n     for d in little_endian_digits.iter_mut() {\n         (*d, carry) = d.carrying_mul(multiplicand, carry);\n     }\n     if carry != 0 {\n         little_endian_digits.push(carry);\n     }\n }\n\n let mut v = vec![10, 20];\n scalar_mul_eq(&mut v, 3);\n assert_eq!(v, [30, 60]);\n\n assert_eq!(0x87654321_u64 * 0xFEED, 0x86D3D159E38D);\n let mut v = vec![0x4321, 0x8765];\n scalar_mul_eq(&mut v, 0xFEED);\n assert_eq!(v, [0xE38D, 0xD159, 0x86D3]);\n ```\n\n If `carry` is zero, this is similar to [`overflowing_mul`](Self::overflowing_mul),\n except that it gives the value of the overflow instead of just whether one happened:\n\n ```\n #![feature(bigint_helper_methods)]\n let r = u8::carrying_mul(7, 13, 0);\n assert_eq!((r.0, r.1 != 0), u8::overflowing_mul(7, 13));\n let r = u8::carrying_mul(13, 42, 0);\n assert_eq!((r.0, r.1 != 0), u8::overflowing_mul(13, 42));\n ```\n\n The value of the first field in the returned tuple matches what you'd get\n by combining the [`wrapping_mul`](Self::wrapping_mul) and\n [`wrapping_add`](Self::wrapping_add) methods:\n\n ```\n #![feature(bigint_helper_methods)]\n assert_eq!(\n     789_u16.carrying_mul(456, 123).0,\n     789_u16.wrapping_mul(456).wrapping_add(123),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "num::bignum::tests::Big8x3": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "ops::range::RangeTo": [
+      "Plain"
+    ],
+    "slice::iter::IterMut": [
+      "Plain",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 898, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 46, kind: RigidTy(Uint(U8)) }, Mut)) })])"
+    ]
+  },
+  "path": 14719,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/bignum.rs:197:13: 211:14",
+  "src": "pub fn mul_small(&mut self, other: $ty) -> &mut $name {\n                let mut sz = self.size;\n                let mut carry = 0;\n                for a in &mut self.base[..sz] {\n                    let (v, c) = (*a).carrying_mul(other, carry);\n                    *a = v;\n                    carry = c;\n                }\n                if carry > 0 {\n                    self.base[sz] = carry;\n                    sz += 1;\n                }\n                self.size = sz;\n                self\n            }",
+  "mir": "fn num::bignum::tests::Big8x3::mul_small(_1: &mut num::bignum::tests::Big8x3, _2: u8) -> &mut num::bignum::tests::Big8x3 {\n    let mut _0: &mut num::bignum::tests::Big8x3;\n    let mut _3: usize;\n    let mut _4: u8;\n    let mut _5: slice::iter::IterMut<'_, u8>;\n    let mut _6: &mut [u8];\n    let mut _7: &mut [u8; 3];\n    let mut _8: ops::range::RangeTo<usize>;\n    let mut _9: usize;\n    let mut _10: slice::iter::IterMut<'_, u8>;\n    let mut _11: option::Option<&mut u8>;\n    let mut _12: &mut slice::iter::IterMut<'_, u8>;\n    let mut _13: isize;\n    let  _14: &mut u8;\n    let  _15: u8;\n    let  _16: u8;\n    let mut _17: (u8, u8);\n    let mut _18: u8;\n    let mut _19: u8;\n    let mut _20: bool;\n    let mut _21: u8;\n    let mut _22: u8;\n    let  _23: usize;\n    let mut _24: bool;\n    let mut _25: (usize, bool);\n    let mut _26: usize;\n    debug self => _1;\n    debug other => _2;\n    debug sz => _3;\n    debug carry => _4;\n    debug iter => _10;\n    debug a => _14;\n    debug v => _15;\n    debug c => _16;\n    bb0: {\n        StorageLive(_3);\n        _3 = ((*_1).0: usize);\n        StorageLive(_4);\n        _4 = 0_u8;\n        StorageLive(_5);\n        StorageLive(_7);\n        _7 = &mut ((*_1).1: [u8; 3]);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = _3;\n        _8 = RangeTo(move _9);\n        StorageDead(_9);\n        _6 = <[u8; 3] as ops::index::IndexMut<ops::range::RangeTo<usize>>>::index_mut(move _7, move _8) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_8);\n        StorageDead(_7);\n        _5 = <&mut [u8] as iter::traits::collect::IntoIterator>::into_iter(_6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_10);\n        _10 = move _5;\n        goto -> bb3;\n    }\n    bb3: {\n        StorageLive(_11);\n        _12 = &mut _10;\n        _11 = <slice::iter::IterMut<'_, u8> as iter::traits::iterator::Iterator>::next(_12) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _13 = discriminant(_11);\n        switchInt(move _13) -> [0: bb7, 1: bb6, otherwise: bb5];\n    }\n    bb5: {\n        unreachable;\n    }\n    bb6: {\n        StorageLive(_14);\n        _14 = move ((_11 as variant#1).0: &mut u8);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = (*_14);\n        StorageLive(_19);\n        _19 = _4;\n        _17 = num::<impl u8>::carrying_mul(move _18, _2, move _19) -> [return: bb8, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_5);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = _4;\n        _20 = Gt(move _21, 0_u8);\n        switchInt(move _20) -> [0: bb10, otherwise: bb9];\n    }\n    bb8: {\n        StorageDead(_19);\n        StorageDead(_18);\n        _15 = (_17.0: u8);\n        _16 = (_17.1: u8);\n        StorageDead(_17);\n        (*_14) = _15;\n        _4 = _16;\n        StorageDead(_14);\n        StorageDead(_11);\n        goto -> bb3;\n    }\n    bb9: {\n        StorageDead(_21);\n        StorageLive(_22);\n        _22 = _4;\n        StorageLive(_23);\n        _23 = _3;\n        _24 = Lt(_23, 3_usize);\n        assert(move _24, \"index out of bounds: the length is {} but the index is {}\", 3_usize, _23) -> [success: bb11, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_21);\n        goto -> bb13;\n    }\n    bb11: {\n        ((*_1).1: [u8; 3])[_23] = move _22;\n        StorageDead(_22);\n        StorageDead(_23);\n        _25 = CheckedAdd(_3, 1_usize);\n        assert(!move (_25.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _3, 1_usize) -> [success: bb12, unwind unreachable];\n    }\n    bb12: {\n        _3 = move (_25.0: usize);\n        goto -> bb13;\n    }\n    bb13: {\n        StorageDead(_20);\n        StorageLive(_26);\n        _26 = _3;\n        ((*_1).0: usize) = move _26;\n        StorageDead(_26);\n        StorageDead(_4);\n        StorageDead(_3);\n        _0 = _1;\n        return;\n    }\n}\n",
+  "doc": " Multiplies itself by a digit-sized `other` and returns its own\n mutable reference.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

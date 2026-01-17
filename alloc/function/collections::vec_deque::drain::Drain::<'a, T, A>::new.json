@@ -1,0 +1,48 @@
+{
+  "name": "collections::vec_deque::drain::Drain::<'a, T, A>::new",
+  "safe": false,
+  "callees": {
+    "core::mem::replace": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Moves `src` into the referenced `dest`, returning the previous `dest` value.\n\n Neither value is dropped.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a default value, see [`take`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::replace(&mut v, vec![3, 4, 5]);\n assert_eq!(vec![1, 2], old_v);\n assert_eq!(vec![3, 4, 5], v);\n ```\n\n `replace` allows consumption of a struct field by replacing it with another value.\n Without `replace` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let t = self.buf[i];\n         self.buf[i] = v;\n         t\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so we can't even clone `self.buf[i]` to\n avoid the move. But `replace` can be used to disassociate the original value at that index from\n `self`, allowing it to be returned:\n\n ```\n # #![allow(dead_code)]\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         mem::replace(&mut self.buf[i], v)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf[0], 0);\n\n assert_eq!(buffer.replace_index(0, 2), 0);\n assert_eq!(buffer.buf[0], 2);\n ```\n",
+      "adt": {}
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "collections::vec_deque::drain::Drain": [
+      "Plain"
+    ]
+  },
+  "path": 1327,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/drain.rs:37:5: 52:6",
+  "src": "pub(super) unsafe fn new(\n        deque: &'a mut VecDeque<T, A>,\n        drain_start: usize,\n        drain_len: usize,\n    ) -> Self {\n        let orig_len = mem::replace(&mut deque.len, drain_start);\n        let new_len = orig_len - drain_len;\n        Drain {\n            deque: NonNull::from(deque),\n            drain_len,\n            idx: drain_start,\n            new_len,\n            remaining: drain_len,\n            _marker: PhantomData,\n        }\n    }",
+  "mir": "fn collections::vec_deque::drain::Drain::<'a, T, A>::new(_1: &mut collections::vec_deque::VecDeque<T, A>, _2: usize, _3: usize) -> collections::vec_deque::drain::Drain<'_, T, A> {\n    let mut _0: collections::vec_deque::drain::Drain<'_, T, A>;\n    let  _4: usize;\n    let mut _5: &mut usize;\n    let  _6: usize;\n    let mut _7: (usize, bool);\n    let mut _8: core::ptr::NonNull<collections::vec_deque::VecDeque<T, A>>;\n    debug deque => _1;\n    debug drain_start => _2;\n    debug drain_len => _3;\n    debug orig_len => _4;\n    debug new_len => _6;\n    bb0: {\n        _5 = &mut ((*_1).1: usize);\n        _4 = core::mem::replace::<usize>(_5, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _7 = CheckedSub(_4, _3);\n        assert(!move (_7.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _4, _3) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _6 = move (_7.0: usize);\n        StorageLive(_8);\n        _8 = <core::ptr::NonNull<collections::vec_deque::VecDeque<T, A>> as core::convert::From<&mut collections::vec_deque::VecDeque<T, A>>>::from(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _0 = Drain(move _8, _3, _2, _6, _3, ZeroSized: core::marker::PhantomData<&T>);\n        StorageDead(_8);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

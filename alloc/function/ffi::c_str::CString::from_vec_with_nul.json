@@ -1,0 +1,82 @@
+{
+  "name": "ffi::c_str::CString::from_vec_with_nul",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::slice::memchr::memchr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the first index matching the byte `x` in `text`.\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the vector, also referred to\n as its 'length'.\n\n # Examples\n\n ```\n let a = vec![1, 2, 3];\n assert_eq!(a.len(), 3);\n ```\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "ffi::c_str::CString::_from_vec_with_nul_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "ffi::c_str::CString": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Ref",
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "ffi::c_str::FromBytesWithNulErrorKind": [
+      "Plain"
+    ],
+    "ffi::c_str::FromVecWithNulError": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "ffi::c_str::CString": [
+      "Plain"
+    ]
+  },
+  "path": 1585,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/ffi/c_str.rs:673:5: 690:6",
+  "src": "pub fn from_vec_with_nul(v: Vec<u8>) -> Result<Self, FromVecWithNulError> {\n        let nul_pos = memchr::memchr(0, &v);\n        match nul_pos {\n            Some(nul_pos) if nul_pos + 1 == v.len() => {\n                // SAFETY: We know there is only one nul byte, at the end\n                // of the vec.\n                Ok(unsafe { Self::_from_vec_with_nul_unchecked(v) })\n            }\n            Some(nul_pos) => Err(FromVecWithNulError {\n                error_kind: FromBytesWithNulErrorKind::InteriorNul(nul_pos),\n                bytes: v,\n            }),\n            None => Err(FromVecWithNulError {\n                error_kind: FromBytesWithNulErrorKind::NotNulTerminated,\n                bytes: v,\n            }),\n        }\n    }",
+  "mir": "fn ffi::c_str::CString::from_vec_with_nul(_1: vec::Vec<u8>) -> core::result::Result<ffi::c_str::CString, ffi::c_str::FromVecWithNulError> {\n    let mut _0: core::result::Result<ffi::c_str::CString, ffi::c_str::FromVecWithNulError>;\n    let  _2: core::option::Option<usize>;\n    let  _3: &[u8];\n    let  _4: &vec::Vec<u8>;\n    let mut _5: isize;\n    let  _6: usize;\n    let  _7: &usize;\n    let mut _8: bool;\n    let mut _9: usize;\n    let mut _10: usize;\n    let mut _11: (usize, bool);\n    let mut _12: usize;\n    let mut _13: &vec::Vec<u8>;\n    let mut _14: ffi::c_str::CString;\n    let  _15: usize;\n    let mut _16: ffi::c_str::FromVecWithNulError;\n    let mut _17: ffi::c_str::FromBytesWithNulErrorKind;\n    let mut _18: ffi::c_str::FromVecWithNulError;\n    let mut _19: ffi::c_str::FromBytesWithNulErrorKind;\n    debug v => _1;\n    debug nul_pos => _2;\n    debug nul_pos => _6;\n    debug nul_pos => _7;\n    debug nul_pos => _15;\n    bb0: {\n        StorageLive(_2);\n        _4 = &_1;\n        _3 = <vec::Vec<u8> as core::ops::Deref>::deref(_4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = core::slice::memchr::memchr(0_u8, _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = discriminant(_2);\n        switchInt(move _5) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = ffi::c_str::FromBytesWithNulErrorKind::NotNulTerminated;\n        _18 = FromVecWithNulError(move _19, _1);\n        StorageDead(_19);\n        _0 = core::result::Result::Err(move _18);\n        StorageDead(_18);\n        goto -> bb11;\n    }\n    bb5: {\n        StorageLive(_7);\n        _7 = &((_2 as variant#1).0: usize);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = (*_7);\n        _11 = CheckedAdd(_10, 1_usize);\n        assert(!move (_11.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _10, 1_usize) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _9 = move (_11.0: usize);\n        StorageDead(_10);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &_1;\n        _12 = vec::Vec::<u8>::len(move _13) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_13);\n        _8 = Eq(move _9, move _12);\n        switchInt(move _8) -> [0: bb9, otherwise: bb8];\n    }\n    bb8: {\n        StorageDead(_12);\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_6);\n        _6 = ((_2 as variant#1).0: usize);\n        StorageLive(_14);\n        _14 = ffi::c_str::CString::_from_vec_with_nul_unchecked(_1) -> [return: bb10, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_12);\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_7);\n        _15 = ((_2 as variant#1).0: usize);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = ffi::c_str::FromBytesWithNulErrorKind::InteriorNul(_15);\n        _16 = FromVecWithNulError(move _17, _1);\n        StorageDead(_17);\n        _0 = core::result::Result::Err(move _16);\n        StorageDead(_16);\n        goto -> bb11;\n    }\n    bb10: {\n        _0 = core::result::Result::Ok(move _14);\n        StorageDead(_14);\n        StorageDead(_6);\n        StorageDead(_7);\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Attempts to converts a <code>[Vec]<[u8]></code> to a [`CString`].\n\n Runtime checks are present to ensure there is only one nul byte in the\n [`Vec`], its last element.\n\n # Errors\n\n If a nul byte is present and not the last element or no nul bytes\n is present, an error will be returned.\n\n # Examples\n\n A successful conversion will produce the same result as [`CString::new`]\n when called without the ending nul byte.\n\n ```\n use std::ffi::CString;\n assert_eq!(\n     CString::from_vec_with_nul(b\"abc\\0\".to_vec())\n         .expect(\"CString::from_vec_with_nul failed\"),\n     c\"abc\".to_owned()\n );\n ```\n\n An incorrectly formatted [`Vec`] will produce an error.\n\n ```\n use std::ffi::{CString, FromVecWithNulError};\n // Interior nul byte\n let _: FromVecWithNulError = CString::from_vec_with_nul(b\"a\\0bc\".to_vec()).unwrap_err();\n // No nul byte\n let _: FromVecWithNulError = CString::from_vec_with_nul(b\"abc\".to_vec()).unwrap_err();\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

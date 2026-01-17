@@ -1,0 +1,147 @@
+{
+  "name": "<str as net::socket_addr::ToSocketAddrs>::to_socket_addrs",
+  "safe": true,
+  "callees": {
+    "core::str::<impl str>::parse": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Parses this string slice into another type.\n\n Because `parse` is so general, it can cause problems with type\n inference. As such, `parse` is one of the few times you'll see\n the syntax affectionately known as the 'turbofish': `::<>`. This\n helps the inference algorithm understand specifically which type\n you're trying to parse into.\n\n `parse` can parse into any type that implements the [`FromStr`] trait.\n\n # Errors\n\n Will return [`Err`] if it's not possible to parse this string slice into\n the desired type.\n\n [`Err`]: FromStr::Err\n\n # Examples\n\n Basic usage:\n\n ```\n let four: u32 = \"4\".parse().unwrap();\n\n assert_eq!(4, four);\n ```\n\n Using the 'turbofish' instead of annotating `four`:\n\n ```\n let four = \"4\".parse::<u32>();\n\n assert_eq!(Ok(4), four);\n ```\n\n Failing to parse:\n\n ```\n let nope = \"j\".parse::<u32>();\n\n assert!(nope.is_err());\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::alloc::exchange_malloc": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::str::<impl str>::rsplit_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Splits the string on the last occurrence of the specified delimiter and\n returns prefix before delimiter and suffix after delimiter.\n\n # Examples\n\n ```\n assert_eq!(\"cfg\".rsplit_once('='), None);\n assert_eq!(\"cfg=\".rsplit_once('='), Some((\"cfg\", \"\")));\n assert_eq!(\"cfg=foo\".rsplit_once('='), Some((\"cfg\", \"foo\")));\n assert_eq!(\"cfg=foo=bar\".rsplit_once('='), Some((\"cfg=foo\", \"bar\")));\n ```\n",
+      "adt": {}
+    },
+    "core::hint::must_use": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An identity function that causes an `unused_must_use` warning to be\n triggered if the given value is not used (returned, stored in a variable,\n etc) by the caller.\n\n This is primarily intended for use in macro-generated code, in which a\n [`#[must_use]` attribute][must_use] either on a type or a function would not\n be convenient.\n\n [must_use]: https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute\n\n # Example\n\n ```\n #![feature(hint_must_use)]\n\n use core::fmt;\n\n pub struct Error(/* ... */);\n\n #[macro_export]\n macro_rules! make_error {\n     ($($args:expr),*) => {\n         core::hint::must_use({\n             let error = $crate::make_error(core::format_args!($($args),*));\n             error\n         })\n     };\n }\n\n // Implementation detail of make_error! macro.\n #[doc(hidden)]\n pub fn make_error(args: fmt::Arguments<'_>) -> Error {\n     Error(/* ... */)\n }\n\n fn demo() -> Option<Error> {\n     if true {\n         // Oops, meant to write `return Some(make_error!(\"...\"));`\n         Some(make_error!(\"...\"));\n     }\n     None\n }\n #\n # // Make rustdoc not wrap the whole snippet in fn main, so that $crate::make_error works\n # fn main() {}\n ```\n\n In the above example, we'd like an `unused_must_use` lint to apply to the\n value created by `make_error!`. However, neither `#[must_use]` on a struct\n nor `#[must_use]` on a function is appropriate here, so the macro expands\n using `core::hint::must_use` instead.\n\n - We wouldn't want `#[must_use]` on the `struct Error` because that would\n   make the following unproblematic code trigger a warning:\n\n   ```\n   # struct Error;\n   #\n   fn f(arg: &str) -> Result<(), Error>\n   # { Ok(()) }\n\n   #[test]\n   fn t() {\n       // Assert that `f` returns error if passed an empty string.\n       // A value of type `Error` is unused here but that's not a problem.\n       f(\"\").unwrap_err();\n   }\n   ```\n\n - Using `#[must_use]` on `fn make_error` can't help because the return value\n   *is* used, as the right-hand side of a `let` statement. The `let`\n   statement looks useless but is in fact necessary for ensuring that\n   temporaries within the `format_args` expansion are not kept alive past the\n   creation of the `Error`, as keeping them alive past that point can cause\n   autotrait issues in async code:\n\n   ```\n   # #![feature(hint_must_use)]\n   #\n   # struct Error;\n   #\n   # macro_rules! make_error {\n   #     ($($args:expr),*) => {\n   #         core::hint::must_use({\n   #             // If `let` isn't used, then `f()` produces a non-Send future.\n   #             let error = make_error(core::format_args!($($args),*));\n   #             error\n   #         })\n   #     };\n   # }\n   #\n   # fn make_error(args: core::fmt::Arguments<'_>) -> Error {\n   #     Error\n   # }\n   #\n   async fn f() {\n       // Using `let` inside the make_error expansion causes temporaries like\n       // `unsync()` to drop at the semicolon of that `let` statement, which\n       // is prior to the await point. They would otherwise stay around until\n       // the semicolon on *this* statement, which is after the await point,\n       // and the enclosing Future would not implement Send.\n       log(make_error!(\"look: {:p}\", unsync())).await;\n   }\n\n   async fn log(error: Error) {/* ... */}\n\n   // Returns something without a Sync impl.\n   fn unsync() -> *const () {\n       0 as *const ()\n   }\n   #\n   # fn test() {\n   #     fn assert_send(_: impl Send) {}\n   #     assert_send(f());\n   # }\n   ```\n",
+      "adt": {}
+    },
+    "io::error::Error::from_static_message": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Creates a new I/O error from a known kind of error as well as a constant\n message.\n\n This function does not allocate.\n\n You should not use this directly, and instead use the `const_error!`\n macro: `io::const_error!(ErrorKind::Something, \"some_message\")`.\n\n This function should maybe change to `from_static_message<const MSG: &'static\n str>(kind: ErrorKind)` in the future, when const generics allow that.\n",
+      "adt": {
+        "io::error::Error": "Constructor"
+      }
+    },
+    "net::socket_addr::lookup_host": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "core::net::SocketAddr": "Constructor",
+        "alloc_crate::vec::IntoIter": "Constructor",
+        "io::error::Error": "Constructor"
+      }
+    },
+    "alloc_crate::slice::<impl [T]>::into_vec": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts `self` into a vector without clones or allocation.\n\n The resulting vector can be converted back into a box via\n `Vec<T>`'s `into_boxed_slice` method.\n\n # Examples\n\n ```\n let s: Box<[i32]> = Box::new([10, 40, 30]);\n let x = s.into_vec();\n // `s` cannot be used anymore because it has been converted into `x`.\n\n assert_eq!(x, vec![10, 40, 30]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 7336, kind: RigidTy(Adt(AdtDef(DefId { id: 7705, name: \"core::net::SocketAddr\" }), GenericArgs([]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 1225, kind: RigidTy(Uint(U16)) })])"
+    ],
+    "core::net::SocketAddr": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "core::ptr::Unique": [
+      "Plain"
+    ],
+    "alloc_crate::boxed::Box": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 7398, kind: RigidTy(Adt(AdtDef(DefId { id: 4689, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 7395, kind: RigidTy(Array(Ty { id: 7336, kind: RigidTy(Adt(AdtDef(DefId { id: 7705, name: \"core::net::SocketAddr\" }), GenericArgs([]))) }, TyConst { kind: Value(Ty { id: 393, kind: RigidTy(Uint(Usize)) }, Allocation { bytes: [Some(1), Some(0), Some(0), Some(0), Some(0), Some(0), Some(0), Some(0)], provenance: ProvenanceMap { ptrs: [] }, align: 8, mutability: Mut }), id: TyConstId(1, ThreadLocalIndex) })) })]))) }), Field(0, Ty { id: 7399, kind: RigidTy(Adt(AdtDef(DefId { id: 4690, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 7395, kind: RigidTy(Array(Ty { id: 7336, kind: RigidTy(Adt(AdtDef(DefId { id: 7705, name: \"core::net::SocketAddr\" }), GenericArgs([]))) }, TyConst { kind: Value(Ty { id: 393, kind: RigidTy(Uint(Usize)) }, Allocation { bytes: [Some(1), Some(0), Some(0), Some(0), Some(0), Some(0), Some(0), Some(0)], provenance: ProvenanceMap { ptrs: [] }, align: 8, mutability: Mut }), id: TyConstId(1, ThreadLocalIndex) })) })]))) })])"
+    ],
+    "alloc_crate::vec::Vec": [
+      "Plain"
+    ],
+    "alloc_crate::vec::IntoIter": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 7424, kind: RigidTy(Tuple([Ty { id: 7, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 17, kind: RigidTy(Str) }, Not)) }, Ty { id: 7, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 17, kind: RigidTy(Str) }, Not)) }])) }), Field(0, Ty { id: 7, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 17, kind: RigidTy(Str) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 7424, kind: RigidTy(Tuple([Ty { id: 7, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 17, kind: RigidTy(Str) }, Not)) }, Ty { id: 7, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 17, kind: RigidTy(Str) }, Not)) }])) }), Field(1, Ty { id: 7, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 17, kind: RigidTy(Str) }, Not)) })])"
+    ],
+    "io::error::Error": [
+      "Plain"
+    ]
+  },
+  "path": 378,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/net/socket_addr.rs:226:5: 242:6",
+  "src": "fn to_socket_addrs(&self) -> io::Result<vec::IntoIter<SocketAddr>> {\n        // Try to parse as a regular SocketAddr first\n        if let Ok(addr) = self.parse() {\n            return Ok(vec![addr].into_iter());\n        }\n\n        // Otherwise, split the string by ':' and convert the second part to u16...\n        let Some((host, port_str)) = self.rsplit_once(':') else {\n            return Err(io::const_error!(io::ErrorKind::InvalidInput, \"invalid socket address\"));\n        };\n        let Ok(port) = port_str.parse::<u16>() else {\n            return Err(io::const_error!(io::ErrorKind::InvalidInput, \"invalid port value\"));\n        };\n\n        // ... and make the system look up the host.\n        lookup_host(host, port)\n    }",
+  "mir": "fn <str as net::socket_addr::ToSocketAddrs>::to_socket_addrs(_1: &str) -> core::result::Result<alloc_crate::vec::IntoIter<core::net::SocketAddr>, io::error::Error> {\n    let mut _0: core::result::Result<alloc_crate::vec::IntoIter<core::net::SocketAddr>, io::error::Error>;\n    let mut _2: core::result::Result<core::net::SocketAddr, core::net::AddrParseError>;\n    let mut _3: isize;\n    let  _4: core::net::SocketAddr;\n    let mut _5: alloc_crate::vec::IntoIter<core::net::SocketAddr>;\n    let mut _6: alloc_crate::vec::Vec<core::net::SocketAddr>;\n    let mut _7: alloc_crate::boxed::Box<[core::net::SocketAddr]>;\n    let mut _8: *mut u8;\n    let mut _9: alloc_crate::boxed::Box<[core::net::SocketAddr; 1]>;\n    let mut _10: io::error::Error;\n    let mut _11: io::error::Error;\n    let  _12: &str;\n    let  _13: &str;\n    let mut _14: core::option::Option<(&str, &str)>;\n    let mut _15: isize;\n    let mut _16: io::error::Error;\n    let mut _17: io::error::Error;\n    let  _18: u16;\n    let mut _19: core::result::Result<u16, core::num::ParseIntError>;\n    let mut _20: isize;\n    let mut _21: *const [core::net::SocketAddr; 1];\n    let mut _22: core::ptr::NonNull<[core::net::SocketAddr; 1]>;\n    let mut _23: core::ptr::Unique<[core::net::SocketAddr; 1]>;\n    let mut _24: *const [core::net::SocketAddr; 1];\n    let mut _25: *const ();\n    let mut _26: usize;\n    let mut _27: usize;\n    let mut _28: usize;\n    let mut _29: bool;\n    let mut _30: *const ();\n    let mut _31: usize;\n    let mut _32: bool;\n    let mut _33: bool;\n    let mut _34: bool;\n    let mut _35: bool;\n    debug self => _1;\n    debug addr => _4;\n    debug host => _12;\n    debug port_str => _13;\n    debug port => _18;\n    bb0: {\n        StorageLive(_2);\n        _2 = core::str::<impl str>::parse::<core::net::SocketAddr>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = discriminant(_2);\n        switchInt(move _3) -> [0: bb2, 1: bb6, otherwise: bb21];\n    }\n    bb2: {\n        _4 = ((_2 as variant#0).0: core::net::SocketAddr);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _8 = alloc_crate::alloc::exchange_malloc(<[core::net::SocketAddr; 1] as core::mem::SizedTypeProperties>::SIZE, <[core::net::SocketAddr; 1] as core::mem::SizedTypeProperties>::ALIGN) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _21 = move _8 as *const [core::net::SocketAddr; 1];\n        _22 = NonNull(move _21);\n        _23 = Unique(move _22, core::marker::PhantomData::<[core::net::SocketAddr; 1]>);\n        _9 = Box(move _23, alloc_crate::alloc::Global);\n        _24 = ((_9.0: core::ptr::Unique<[core::net::SocketAddr; 1]>).0: core::ptr::NonNull<[core::net::SocketAddr; 1]>) as *const [core::net::SocketAddr; 1];\n        _25 = _24 as *const ();\n        _26 = _25 as usize;\n        _27 = Sub(<[core::net::SocketAddr; 1] as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _28 = BitAnd(_26, _27);\n        _29 = Eq(_28, 0_usize);\n        assert(_29, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<[core::net::SocketAddr; 1] as core::mem::SizedTypeProperties>::ALIGN, _26) -> [success: bb19, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        _5 = <alloc_crate::vec::Vec<core::net::SocketAddr> as core::iter::IntoIterator>::into_iter(move _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        _0 = core::result::Result::Ok(move _5);\n        StorageDead(_5);\n        StorageDead(_2);\n        goto -> bb18;\n    }\n    bb6: {\n        StorageDead(_2);\n        StorageLive(_14);\n        _14 = core::str::<impl str>::rsplit_once::<char>(_1, ':') -> [return: bb9, unwind unreachable];\n    }\n    bb7: {\n        _10 = core::hint::must_use::<io::error::Error>(move _11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        _0 = core::result::Result::Err(move _10);\n        StorageDead(_10);\n        goto -> bb18;\n    }\n    bb9: {\n        _15 = discriminant(_14);\n        switchInt(move _15) -> [1: bb10, 0: bb11, otherwise: bb21];\n    }\n    bb10: {\n        _12 = (((_14 as variant#1).0: (&str, &str)).0: &str);\n        _13 = (((_14 as variant#1).0: (&str, &str)).1: &str);\n        StorageDead(_14);\n        StorageLive(_19);\n        _19 = core::str::<impl str>::parse::<u16>(_13) -> [return: bb14, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_14);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = io::error::Error::from_static_message(<str as net::socket_addr::ToSocketAddrs>::to_socket_addrs::{constant#0}) -> [return: bb7, unwind unreachable];\n    }\n    bb12: {\n        _16 = core::hint::must_use::<io::error::Error>(move _17) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_17);\n        _0 = core::result::Result::Err(move _16);\n        StorageDead(_16);\n        goto -> bb18;\n    }\n    bb14: {\n        _20 = discriminant(_19);\n        switchInt(move _20) -> [0: bb15, 1: bb16, otherwise: bb21];\n    }\n    bb15: {\n        _18 = ((_19 as variant#0).0: u16);\n        StorageDead(_19);\n        _0 = net::socket_addr::lookup_host(_12, _18) -> [return: bb17, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_19);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = io::error::Error::from_static_message(<str as net::socket_addr::ToSocketAddrs>::to_socket_addrs::{constant#1}) -> [return: bb12, unwind unreachable];\n    }\n    bb17: {\n        goto -> bb18;\n    }\n    bb18: {\n        return;\n    }\n    bb19: {\n        _30 = _24 as *const ();\n        _31 = _30 as usize;\n        _32 = Ne(<[core::net::SocketAddr; 1] as core::mem::SizedTypeProperties>::SIZE, 0_usize);\n        _33 = Eq(_31, 0_usize);\n        _34 = BitAnd(_33, _32);\n        _35 = Not(_34);\n        assert(_35, \"null pointer dereference occurred\") -> [success: bb20, unwind unreachable];\n    }\n    bb20: {\n        (*_24) = [_4];\n        _7 = _9 as alloc_crate::boxed::Box<[core::net::SocketAddr]>;\n        _6 = alloc_crate::slice::<impl [core::net::SocketAddr]>::into_vec::<alloc_crate::alloc::Global>(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb21: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

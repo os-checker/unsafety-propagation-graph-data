@@ -1,0 +1,32 @@
+{
+  "name": "task::scheduler::park_current",
+  "safe": true,
+  "callees": {
+    "task::scheduler::reschedule": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Do rescheduling by acting on the scheduling decision (`ReschedAction`) made by a\n user-given closure.\n\n The closure makes the scheduling decision by taking the local runqueue has its input.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 2821,
+  "span": "ostd/src/task/scheduler/mod.rs:416:1: 456:2",
+  "src": "pub(crate) fn park_current<F>(has_unparked: F)\nwhere\n    F: Fn() -> bool,\n{\n    let mut current = None;\n    let mut is_first_try = true;\n\n    reschedule(|local_rq: &mut dyn LocalRunQueue| {\n        let next_task_opt = if is_first_try {\n            if has_unparked() {\n                return ReschedAction::DoNothing;\n            }\n            is_first_try = false;\n\n            // Note the race conditions: the current task may be woken after the above `has_unparked`\n            // check, but before the below `dequeue_current` action, we need to make sure that the\n            // wakeup event isn't lost.\n            //\n            // Currently, for the FIFO and CFS scheduler, `Scheduler::enqueue` will try to lock `local_rq`\n            // when the above race condition occurs, so it will wait until we finish calling the\n            // `dequeue_current` method and nothing bad will happen. This may need to be revisited\n            // after more complex schedulers are introduced.\n\n            let should_pick_next = local_rq.update_current(UpdateFlags::Wait);\n            current = local_rq.dequeue_current();\n            should_pick_next.then(|| local_rq.pick_next())\n        } else {\n            local_rq.try_pick_next()\n        };\n\n        if let Some(next_task) = next_task_opt {\n            if Arc::ptr_eq(current.as_ref().unwrap(), next_task) {\n                // The current task has been woken and picked as the next runnable task.\n                return ReschedAction::DoNothing;\n            }\n            return ReschedAction::SwitchTo(next_task.clone());\n        }\n\n        ReschedAction::Retry\n    });\n}",
+  "mir": "fn task::scheduler::park_current(_1: F) -> () {\n    let mut _0: ();\n    let mut _2: core::option::Option<alloc::sync::Arc<task::Task>>;\n    let mut _3: bool;\n    let  _4: ();\n    let mut _5: {closure@ostd/src/task/scheduler/mod.rs:423:16: 423:50};\n    let mut _6: &mut bool;\n    let mut _7: &F;\n    let mut _8: &mut core::option::Option<alloc::sync::Arc<task::Task>>;\n    debug has_unparked => _1;\n    debug current => _2;\n    debug is_first_try => _3;\n    bb0: {\n        StorageLive(_2);\n        _2 = core::option::Option::None;\n        StorageLive(_3);\n        _3 = true;\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut _3;\n        StorageLive(_7);\n        _7 = &_1;\n        StorageLive(_8);\n        _8 = &mut _2;\n        _5 = {closure@ostd/src/task/scheduler/mod.rs:423:16: 423:50}(move _6, move _7, move _8);\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_6);\n        _4 = task::scheduler::reschedule::<{closure@ostd/src/task/scheduler/mod.rs:423:16: 423:50}>(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageDead(_3);\n        drop(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        drop(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": " Blocks the current task unless `has_unparked()` returns `true`.\n\n Note that this method may return due to spurious wake events. It's the caller's responsibility\n to detect them (if necessary).\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

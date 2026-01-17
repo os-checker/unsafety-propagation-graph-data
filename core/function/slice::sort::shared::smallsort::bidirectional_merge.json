@@ -1,0 +1,135 @@
+{
+  "name": "slice::sort::shared::smallsort::bidirectional_merge",
+  "safe": false,
+  "callees": {
+    "slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"123\";\n let ptr: *const u8 = s.as_ptr();\n\n unsafe {\n     assert_eq!(*ptr.add(1), b'2');\n     assert_eq!(*ptr.add(2), b'3');\n }\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::collect::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "slice::sort::shared::smallsort::merge_up": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::wrapping_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds an unsigned offset to a pointer using wrapping arithmetic.\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n This operation itself is always safe, but using the resulting pointer is not.\n\n The resulting pointer \"remembers\" the [allocation] that `self` points to; it must not\n be used to read or write other allocations.\n\n In other words, `let z = x.wrapping_add((y as usize) - (x as usize))` does *not* make `z`\n the same as `y` even if we assume `T` has size `1` and there is no overflow: `z` is still\n attached to the object `x` is attached to, and dereferencing it is Undefined Behavior unless\n `x` and `y` point into the same allocation.\n\n Compared to [`add`], this method basically delays the requirement of staying within the\n same allocation: [`add`] is immediate Undefined Behavior when crossing object\n boundaries; `wrapping_add` produces a pointer but still leads to Undefined Behavior if a\n pointer is dereferenced when it is out-of-bounds of the object it is attached to. [`add`]\n can be optimized better and is thus preferable in performance-sensitive code.\n\n The delayed check only considers the value of the pointer that was dereferenced, not the\n intermediate values used during the computation of the final result. For example,\n `x.wrapping_add(o).wrapping_sub(o)` is always the same as `x`. In other words, leaving the\n allocation and then re-entering it later is permitted.\n\n [`add`]: #method.add\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n # use std::fmt::Write;\n // Iterate using a raw pointer in increments of two elements\n let data = [1u8, 2, 3, 4, 5];\n let mut ptr: *const u8 = data.as_ptr();\n let step = 2;\n let end_rounded_up = ptr.wrapping_add(6);\n\n let mut out = String::new();\n while ptr != end_rounded_up {\n     unsafe {\n         write!(&mut out, \"{}, \", *ptr)?;\n     }\n     ptr = ptr.wrapping_add(step);\n }\n assert_eq!(out, \"1, 3, 5, \");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {}
+    },
+    "slice::sort::shared::smallsort::merge_down": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "num::<impl usize>::is_multiple_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if `self` is an integer multiple of `rhs`, and false otherwise.\n\n This function is equivalent to `self % rhs == 0`, except that it will not panic\n for `rhs == 0`. Instead, `0.is_multiple_of(0) == true`, and for any non-zero `n`,\n `n.is_multiple_of(0) == false`.\n\n # Examples\n\n ```\n\n ```\n",
+      "adt": {}
+    },
+    "ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "slice::sort::shared::smallsort::panic_on_ord_violation": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ops::range::Range": [
+      "Plain",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 16668,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/shared/smallsort.rs:760:1: 841:2",
+  "src": "unsafe fn bidirectional_merge<T: FreezeMarker, F: FnMut(&T, &T) -> bool>(\n    v: &[T],\n    dst: *mut T,\n    is_less: &mut F,\n) {\n    // It helps to visualize the merge:\n    //\n    // Initial:\n    //\n    //  |dst (in dst)\n    //  |left               |right\n    //  v                   v\n    // [xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]\n    //                     ^                   ^\n    //                     |left_rev           |right_rev\n    //                                         |dst_rev (in dst)\n    //\n    // After:\n    //\n    //                      |dst (in dst)\n    //        |left         |           |right\n    //        v             v           v\n    // [xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]\n    //       ^             ^           ^\n    //       |left_rev     |           |right_rev\n    //                     |dst_rev (in dst)\n    //\n    // In each iteration one of left or right moves up one position, and one of\n    // left_rev or right_rev moves down one position, whereas dst always moves\n    // up one position and dst_rev always moves down one position. Assuming\n    // the input was sorted and the comparison function is correctly implemented\n    // at the end we will have left == left_rev + 1, and right == right_rev + 1,\n    // fully consuming the input having written it to dst.\n\n    let len = v.len();\n    let src = v.as_ptr();\n\n    let len_div_2 = len / 2;\n\n    // SAFETY: The caller has to ensure that len >= 2.\n    unsafe {\n        intrinsics::assume(len_div_2 != 0); // This can avoid useless code-gen.\n    }\n\n    // SAFETY: no matter what the result of the user-provided comparison function\n    // is, all 4 read pointers will always be in-bounds. Writing `dst` and `dst_rev`\n    // will always be in bounds if the caller guarantees that `dst` is valid for\n    // `v.len()` writes.\n    unsafe {\n        let mut left = src;\n        let mut right = src.add(len_div_2);\n        let mut dst = dst;\n\n        let mut left_rev = src.add(len_div_2 - 1);\n        let mut right_rev = src.add(len - 1);\n        let mut dst_rev = dst.add(len - 1);\n\n        for _ in 0..len_div_2 {\n            (left, right, dst) = merge_up(left, right, dst, is_less);\n            (left_rev, right_rev, dst_rev) = merge_down(left_rev, right_rev, dst_rev, is_less);\n        }\n\n        let left_end = left_rev.wrapping_add(1);\n        let right_end = right_rev.wrapping_add(1);\n\n        // Odd length, so one element is left unconsumed in the input.\n        if !len.is_multiple_of(2) {\n            let left_nonempty = left < left_end;\n            let last_src = if left_nonempty { left } else { right };\n            ptr::copy_nonoverlapping(last_src, dst, 1);\n            left = left.add(left_nonempty as usize);\n            right = right.add((!left_nonempty) as usize);\n        }\n\n        // We now should have consumed the full input exactly once. This can only fail if the\n        // user-provided comparison function fails to implement a strict weak ordering. In that case\n        // we panic and never access the inconsistent state in dst.\n        if left != left_end || right != right_end {\n            panic_on_ord_violation();\n        }\n    }\n}",
+  "mir": "fn slice::sort::shared::smallsort::bidirectional_merge(_1: &[T], _2: *mut T, _3: &mut F) -> () {\n    let mut _0: ();\n    let  _4: usize;\n    let  _5: *const T;\n    let  _6: usize;\n    let mut _7: bool;\n    let mut _8: bool;\n    let mut _9: *const T;\n    let mut _10: *const T;\n    let mut _11: *mut T;\n    let mut _12: *const T;\n    let mut _13: usize;\n    let mut _14: (usize, bool);\n    let mut _15: *const T;\n    let mut _16: usize;\n    let mut _17: (usize, bool);\n    let mut _18: *mut T;\n    let mut _19: *mut T;\n    let mut _20: usize;\n    let mut _21: (usize, bool);\n    let mut _22: ops::range::Range<usize>;\n    let mut _23: ops::range::Range<usize>;\n    let mut _24: ops::range::Range<usize>;\n    let mut _25: option::Option<usize>;\n    let mut _26: &mut ops::range::Range<usize>;\n    let mut _27: isize;\n    let  _28: *const T;\n    let  _29: *const T;\n    let  _30: *mut T;\n    let mut _31: (*const T, *const T, *mut T);\n    let mut _32: *const T;\n    let mut _33: *const T;\n    let mut _34: *mut T;\n    let  _35: *const T;\n    let  _36: *const T;\n    let  _37: *mut T;\n    let mut _38: (*const T, *const T, *mut T);\n    let mut _39: *const T;\n    let mut _40: *const T;\n    let mut _41: *mut T;\n    let  _42: *const T;\n    let mut _43: *const T;\n    let  _44: *const T;\n    let mut _45: *const T;\n    let mut _46: bool;\n    let  _47: bool;\n    let mut _48: *const T;\n    let  _49: *const T;\n    let  _50: ();\n    let mut _51: *const T;\n    let mut _52: *mut T;\n    let mut _53: *const T;\n    let mut _54: *const T;\n    let mut _55: usize;\n    let mut _56: *const T;\n    let mut _57: *const T;\n    let mut _58: usize;\n    let mut _59: bool;\n    let mut _60: bool;\n    let mut _61: *const T;\n    let mut _62: bool;\n    let mut _63: *const T;\n    let  _64: !;\n    debug v => _1;\n    debug dst => _2;\n    debug is_less => _3;\n    debug len => _4;\n    debug src => _5;\n    debug len_div_2 => _6;\n    debug left => _9;\n    debug right => _10;\n    debug dst => _11;\n    debug left_rev => _12;\n    debug right_rev => _15;\n    debug dst_rev => _18;\n    debug iter => _24;\n    debug left_end => _42;\n    debug right_end => _44;\n    debug left_nonempty => _47;\n    debug last_src => _49;\n    bb0: {\n        _4 = PtrMetadata(_1);\n        _5 = slice::<impl [T]>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _7 = Eq(2_usize, 0_usize);\n        assert(!move _7, \"attempt to divide `{}` by zero\", _4) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _6 = Div(_4, 2_usize);\n        StorageLive(_8);\n        _8 = Ne(_6, 0_usize);\n        Intrinsic(Assume(Move(_8)));\n        StorageDead(_8);\n        StorageLive(_9);\n        _9 = _5;\n        StorageLive(_10);\n        _10 = ptr::const_ptr::<impl *const T>::add(_5, _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_11);\n        _11 = _2;\n        StorageLive(_12);\n        StorageLive(_13);\n        _14 = CheckedSub(_6, 1_usize);\n        assert(!move (_14.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _6, 1_usize) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _13 = move (_14.0: usize);\n        _12 = ptr::const_ptr::<impl *const T>::add(_5, move _13) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_13);\n        StorageLive(_15);\n        StorageLive(_16);\n        _17 = CheckedSub(_4, 1_usize);\n        assert(!move (_17.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _4, 1_usize) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _16 = move (_17.0: usize);\n        _15 = ptr::const_ptr::<impl *const T>::add(_5, move _16) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_16);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = _11;\n        StorageLive(_20);\n        _21 = CheckedSub(_4, 1_usize);\n        assert(!move (_21.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _4, 1_usize) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _20 = move (_21.0: usize);\n        _18 = ptr::mut_ptr::<impl *mut T>::add(move _19, move _20) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_20);\n        StorageDead(_19);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = Range(0_usize, _6);\n        _22 = <ops::range::Range<usize> as iter::traits::collect::IntoIterator>::into_iter(move _23) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_23);\n        StorageLive(_24);\n        _24 = move _22;\n        goto -> bb11;\n    }\n    bb11: {\n        StorageLive(_25);\n        _26 = &mut _24;\n        _25 = <ops::range::Range<usize> as iter::traits::iterator::Iterator>::next(_26) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        _27 = discriminant(_25);\n        switchInt(move _27) -> [0: bb15, 1: bb14, otherwise: bb13];\n    }\n    bb13: {\n        unreachable;\n    }\n    bb14: {\n        StorageLive(_31);\n        StorageLive(_32);\n        _32 = _9;\n        StorageLive(_33);\n        _33 = _10;\n        StorageLive(_34);\n        _34 = _11;\n        _31 = slice::sort::shared::smallsort::merge_up::<T, F>(move _32, move _33, move _34, _3) -> [return: bb16, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_25);\n        StorageDead(_24);\n        StorageDead(_22);\n        StorageLive(_43);\n        _43 = _12;\n        _42 = ptr::const_ptr::<impl *const T>::wrapping_add(move _43, 1_usize) -> [return: bb18, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_34);\n        StorageDead(_33);\n        StorageDead(_32);\n        _28 = (_31.0: *const T);\n        _29 = (_31.1: *const T);\n        _30 = (_31.2: *mut T);\n        StorageDead(_31);\n        _9 = _28;\n        _10 = _29;\n        _11 = _30;\n        StorageLive(_38);\n        StorageLive(_39);\n        _39 = _12;\n        StorageLive(_40);\n        _40 = _15;\n        StorageLive(_41);\n        _41 = _18;\n        _38 = slice::sort::shared::smallsort::merge_down::<T, F>(move _39, move _40, move _41, _3) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_41);\n        StorageDead(_40);\n        StorageDead(_39);\n        _35 = (_38.0: *const T);\n        _36 = (_38.1: *const T);\n        _37 = (_38.2: *mut T);\n        StorageDead(_38);\n        _12 = _35;\n        _15 = _36;\n        _18 = _37;\n        StorageDead(_25);\n        goto -> bb11;\n    }\n    bb18: {\n        StorageDead(_43);\n        StorageLive(_45);\n        _45 = _15;\n        _44 = ptr::const_ptr::<impl *const T>::wrapping_add(move _45, 1_usize) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_45);\n        StorageLive(_46);\n        _46 = num::<impl usize>::is_multiple_of(_4, 2_usize) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        switchInt(move _46) -> [0: bb22, otherwise: bb21];\n    }\n    bb21: {\n        goto -> bb29;\n    }\n    bb22: {\n        StorageLive(_48);\n        _48 = _9;\n        _47 = Lt(move _48, _42);\n        StorageDead(_48);\n        StorageLive(_49);\n        switchInt(_47) -> [0: bb24, otherwise: bb23];\n    }\n    bb23: {\n        _49 = _9;\n        goto -> bb25;\n    }\n    bb24: {\n        _49 = _10;\n        goto -> bb25;\n    }\n    bb25: {\n        StorageLive(_51);\n        _51 = _49;\n        StorageLive(_52);\n        _52 = _11;\n        _50 = ptr::copy_nonoverlapping::<T>(move _51, move _52, 1_usize) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_52);\n        StorageDead(_51);\n        StorageLive(_53);\n        StorageLive(_54);\n        _54 = _9;\n        StorageLive(_55);\n        _55 = _47 as usize;\n        _53 = ptr::const_ptr::<impl *const T>::add(move _54, move _55) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        StorageDead(_55);\n        StorageDead(_54);\n        _9 = move _53;\n        StorageDead(_53);\n        StorageLive(_56);\n        StorageLive(_57);\n        _57 = _10;\n        StorageLive(_58);\n        StorageLive(_59);\n        _59 = Not(_47);\n        _58 = move _59 as usize;\n        StorageDead(_59);\n        _56 = ptr::const_ptr::<impl *const T>::add(move _57, move _58) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        StorageDead(_58);\n        StorageDead(_57);\n        _10 = move _56;\n        StorageDead(_56);\n        StorageDead(_49);\n        goto -> bb29;\n    }\n    bb29: {\n        StorageDead(_46);\n        StorageLive(_60);\n        StorageLive(_61);\n        _61 = _9;\n        _60 = Ne(move _61, _42);\n        switchInt(move _60) -> [0: bb31, otherwise: bb30];\n    }\n    bb30: {\n        StorageDead(_61);\n        goto -> bb33;\n    }\n    bb31: {\n        StorageDead(_61);\n        StorageLive(_62);\n        StorageLive(_63);\n        _63 = _10;\n        _62 = Ne(move _63, _44);\n        switchInt(move _62) -> [0: bb34, otherwise: bb32];\n    }\n    bb32: {\n        StorageDead(_63);\n        goto -> bb33;\n    }\n    bb33: {\n        _64 = slice::sort::shared::smallsort::panic_on_ord_violation() -> unwind unreachable;\n    }\n    bb34: {\n        StorageDead(_63);\n        StorageDead(_62);\n        StorageDead(_60);\n        StorageDead(_18);\n        StorageDead(_15);\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_9);\n        return;\n    }\n}\n",
+  "doc": " Merge v assuming v[..len / 2] and v[len / 2..] are sorted.\n\n Original idea for bi-directional merging by Igor van den Hoven (quadsort),\n adapted to only use merge up and down. In contrast to the original\n parity_merge function, it performs 2 writes instead of 4 per iteration.\n\n # Safety\n The caller must guarantee that `dst` is valid for v.len() writes.\n Also `v.as_ptr()` and `dst` must not alias and v.len() must be >= 2.\n\n Note that T must be Freeze, the comparison function is evaluated on outdated\n temporary 'copies' that may not end up in the final array.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

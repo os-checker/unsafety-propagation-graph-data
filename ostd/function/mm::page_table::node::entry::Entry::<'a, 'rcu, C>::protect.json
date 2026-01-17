@@ -1,0 +1,94 @@
+{
+  "name": "mm::page_table::node::entry::Entry::<'a, 'rcu, C>::protect",
+  "safe": true,
+  "callees": {
+    "mm::page_table::PageTableEntryTrait::is_present": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns if the PTE points to something.\n\n For PTEs created by [`Self::new_absent`], this method should return\n false. For PTEs created by [`Self::new_page`] or [`Self::new_pt`]\n and modified with [`Self::set_prop`], this method should return true.\n",
+      "adt": {}
+    },
+    "mm::page_table::PageTableEntryTrait::prop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the page property of the PTE.\n",
+      "adt": {}
+    },
+    "core::ops::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "core::cmp::PartialEq::eq": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests for `self` and `other` values to be equal, and is used by `==`.\n",
+      "adt": {}
+    },
+    "mm::page_table::PageTableEntryTrait::set_prop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets the page property of the PTE.\n\n This methold has an impact only if the PTE is present. If not, this\n method will do nothing.\n",
+      "adt": {}
+    },
+    "mm::page_table::node::PageTableGuard::<'rcu, C>::write_pte": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a page table entry at a given index.\n\n This operation will leak the old child if the old PTE is present.\n\n # Safety\n\n The caller must ensure that:\n  1. The index must be within the bound;\n  2. The PTE must represent a [`Child`] in the same [`PageTableConfig`]\n     and at the right paging level (`self.level() - 1`).\n  3. The page table node will have the ownership of the [`Child`]\n     after this method.\n",
+      "adt": {
+        "mm::page_table::node::PageTableGuard": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "mm::page_table::node::entry::Entry": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "mm::page_prop::PageProperty": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "mm::page_table::node::PageTableGuard": [
+      "MutRef"
+    ]
+  },
+  "path": 2388,
+  "span": "ostd/src/mm/page_table/node/entry.rs:61:5: 82:6",
+  "src": "pub(in crate::mm) fn protect(&mut self, op: &mut impl FnMut(&mut PageProperty)) {\n        if !self.pte.is_present() {\n            return;\n        }\n\n        let prop = self.pte.prop();\n        let mut new_prop = prop;\n        op(&mut new_prop);\n\n        if prop == new_prop {\n            return;\n        }\n\n        self.pte.set_prop(new_prop);\n\n        // SAFETY:\n        //  1. The index is within the bounds.\n        //  2. We replace the PTE with a new one, which differs only in\n        //     `PageProperty`, so it's in `C` and at the correct paging level.\n        //  3. The child is still owned by the page table node.\n        unsafe { self.node.write_pte(self.idx, self.pte) };\n    }",
+  "mir": "fn mm::page_table::node::entry::Entry::<'a, 'rcu, C>::protect(_1: &mut mm::page_table::node::entry::Entry<'_, '_, C>, _2: &mut impl FnMut(&mut PageProperty)) -> () {\n    let mut _0: ();\n    let mut _3: bool;\n    let mut _4: &<C as mm::page_table::PageTableConfig>::E;\n    let  _5: mm::page_prop::PageProperty;\n    let mut _6: &<C as mm::page_table::PageTableConfig>::E;\n    let mut _7: mm::page_prop::PageProperty;\n    let  _8: ();\n    let mut _9: (&mut mm::page_prop::PageProperty,);\n    let mut _10: &mut mm::page_prop::PageProperty;\n    let mut _11: bool;\n    let mut _12: &mm::page_prop::PageProperty;\n    let mut _13: &mm::page_prop::PageProperty;\n    let  _14: ();\n    let mut _15: &mut <C as mm::page_table::PageTableConfig>::E;\n    let mut _16: mm::page_prop::PageProperty;\n    let  _17: ();\n    let mut _18: usize;\n    let mut _19: <C as mm::page_table::PageTableConfig>::E;\n    let mut _20: &mut mm::page_table::node::PageTableGuard<'_, C>;\n    debug self => _1;\n    debug op => _2;\n    debug prop => _5;\n    debug new_prop => _7;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &((*_1).0: <C as mm::page_table::PageTableConfig>::E);\n        _3 = <<C as mm::page_table::PageTableConfig>::E as mm::page_table::PageTableEntryTrait>::is_present(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &((*_1).0: <C as mm::page_table::PageTableConfig>::E);\n        _5 = <<C as mm::page_table::PageTableConfig>::E as mm::page_table::PageTableEntryTrait>::prop(move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb11;\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageLive(_7);\n        _7 = _5;\n        StorageLive(_9);\n        _10 = &mut _7;\n        _9 = (_10);\n        _8 = <impl FnMut(&mut PageProperty) as core::ops::FnMut<(&mut mm::page_prop::PageProperty,)>>::call_mut(_2, move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &_5;\n        StorageLive(_13);\n        _13 = &_7;\n        _11 = <mm::page_prop::PageProperty as core::cmp::PartialEq>::eq(move _12, move _13) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        switchInt(move _11) -> [0: bb8, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_7);\n        StorageDead(_5);\n        goto -> bb11;\n    }\n    bb8: {\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageLive(_15);\n        _15 = &mut ((*_1).0: <C as mm::page_table::PageTableConfig>::E);\n        StorageLive(_16);\n        _16 = _7;\n        _14 = <<C as mm::page_table::PageTableConfig>::E as mm::page_table::PageTableEntryTrait>::set_prop(move _15, move _16) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_16);\n        StorageDead(_15);\n        _20 = ((*_1).2: &mut mm::page_table::node::PageTableGuard<'_, C>);\n        StorageLive(_18);\n        _18 = ((*_1).1: usize);\n        StorageLive(_19);\n        _19 = ((*_1).0: <C as mm::page_table::PageTableConfig>::E);\n        _17 = mm::page_table::node::PageTableGuard::<'_, C>::write_pte(_20, move _18, move _19) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_19);\n        StorageDead(_18);\n        StorageDead(_7);\n        StorageDead(_5);\n        goto -> bb11;\n    }\n    bb11: {\n        return;\n    }\n}\n",
+  "doc": " Operates on the mapping properties of the entry.\n\n It only modifies the properties if the entry is present.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

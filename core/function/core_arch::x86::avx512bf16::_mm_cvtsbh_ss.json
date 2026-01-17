@@ -1,0 +1,51 @@
+{
+  "name": "core_arch::x86::avx512bf16::_mm_cvtsbh_ss",
+  "safe": false,
+  "callees": {
+    "core_arch::x86::bf16::to_bits": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Raw transmutation to `u16`\n",
+      "adt": {}
+    },
+    "f32::<impl f32>::from_bits": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unnecessary_transmutes"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unnecessary_transmutes\n"
+        ]
+      },
+      "doc": " Raw transmutation from `u32`.\n\n This is currently identical to `transmute::<u32, f32>(v)` on all platforms.\n It turns out this is incredibly portable, for two reasons:\n\n * Floats and Ints have the same endianness on all supported platforms.\n * IEEE 754 very precisely specifies the bit layout of floats.\n\n However there is one caveat: prior to the 2008 version of IEEE 754, how\n to interpret the NaN signaling bit wasn't actually specified. Most platforms\n (notably x86 and ARM) picked the interpretation that was ultimately\n standardized in 2008, but some didn't (notably MIPS). As a result, all\n signaling NaNs on MIPS are quiet NaNs on x86, and vice-versa.\n\n Rather than trying to preserve signaling-ness cross-platform, this\n implementation favors preserving the exact bits. This means that\n any payloads encoded in NaNs will be preserved even if the result of\n this method is sent over the network from an x86 machine to a MIPS one.\n\n If the results of this method are only manipulated by the same\n architecture that produced them, then there is no portability concern.\n\n If the input isn't NaN, then there is no portability concern.\n\n If you don't care about signalingness (very likely), then there is no\n portability concern.\n\n Note that this function is distinct from `as` casting, which attempts to\n preserve the *numeric* value, and not the bitwise value.\n\n # Examples\n\n ```\n let v = f32::from_bits(0x41480000);\n assert_eq!(v, 12.5);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_arch::x86::bf16": [
+      "Plain"
+    ]
+  },
+  "path": 6257,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../stdarch/crates/core_arch/src/x86/avx512bf16.rs:509:1: 511:2",
+  "src": "pub fn _mm_cvtsbh_ss(a: bf16) -> f32 {\n    f32::from_bits((a.to_bits() as u32) << 16)\n}",
+  "mir": "fn core_arch::x86::avx512bf16::_mm_cvtsbh_ss(_1: core_arch::x86::bf16) -> f32 {\n    let mut _0: f32;\n    let mut _2: u32;\n    let mut _3: u32;\n    let mut _4: u16;\n    let mut _5: u32;\n    let mut _6: bool;\n    debug a => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = core_arch::x86::bf16::to_bits(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = move _4 as u32;\n        StorageDead(_4);\n        _5 = 16_i32 as u32;\n        _6 = Lt(move _5, 32_u32);\n        assert(move _6, \"attempt to shift left by `{}`, which would overflow\", 16_i32) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _2 = Shl(move _3, 16_i32);\n        StorageDead(_3);\n        _0 = f32::<impl f32>::from_bits(move _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Converts a single BF16 (16-bit) floating-point element in a to a single-precision (32-bit) floating-point\n element, and store the result in dst.\n\n [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm_cvtsbh_ss)\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

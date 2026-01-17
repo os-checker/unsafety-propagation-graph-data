@@ -1,0 +1,55 @@
+{
+  "name": "core_arch::x86::sse::_MM_SET_EXCEPTION_MASK",
+  "safe": false,
+  "callees": {
+    "core_arch::x86::sse::_mm_getcsr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the unsigned 32-bit value of the MXCSR control and status register.\n\n Note that Rust makes no guarantees whatsoever about the contents of this register: Rust\n floating-point operations may or may not result in this register getting updated with exception\n state, and the register can change between two invocations of this function even when no\n floating-point operations appear in the source code (since floating-point operations appearing\n earlier or later can be reordered).\n\n If you need to perform some floating-point operations and check whether they raised an\n exception, use an inline assembly block for the entire sequence of operations.\n\n For more info see [`_mm_setcsr`](fn._mm_setcsr.html)\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_getcsr)\n",
+      "adt": {}
+    },
+    "core_arch::x86::sse::_mm_setcsr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets the MXCSR register with the 32-bit unsigned integer value.\n\n This register controls how SIMD instructions handle floating point\n operations. Modifying this register only affects the current thread.\n\n It contains several groups of flags:\n\n * *Exception flags* report which exceptions occurred since last they were reset.\n\n * *Masking flags* can be used to mask (ignore) certain exceptions. By default\n   these flags are all set to 1, so all exceptions are masked. When\n   an exception is masked, the processor simply sets the exception flag and\n   continues the operation. If the exception is unmasked, the flag is also set\n   but additionally an exception handler is invoked.\n\n * *Rounding mode flags* control the rounding mode of floating point\n   instructions.\n\n * The *denormals-are-zero mode flag* turns all numbers which would be\n   denormalized (exponent bits are all zeros) into zeros.\n\n Note that modifying the masking flags, rounding mode, or denormals-are-zero mode flags leads to\n **immediate Undefined Behavior**: Rust assumes that these are always in their default state and\n will optimize accordingly. This even applies when the register is altered and later reset to its\n original value without any floating-point operations appearing in the source code between those\n operations (since floating-point operations appearing earlier or later can be reordered).\n\n If you need to perform some floating-point operations under a different masking flags, rounding\n mode, or denormals-are-zero mode, use an inline assembly block and make sure to restore the\n original MXCSR register state before the end of the block.\n\n ## Exception Flags\n\n * `_MM_EXCEPT_INVALID`: An invalid operation was performed (e.g., dividing\n   Infinity by Infinity).\n\n * `_MM_EXCEPT_DENORM`: An operation attempted to operate on a denormalized\n   number. Mainly this can cause loss of precision.\n\n * `_MM_EXCEPT_DIV_ZERO`: Division by zero occurred.\n\n * `_MM_EXCEPT_OVERFLOW`: A numeric overflow exception occurred, i.e., a\n   result was too large to be represented (e.g., an `f32` with absolute\n   value greater than `2^128`).\n\n * `_MM_EXCEPT_UNDERFLOW`: A numeric underflow exception occurred, i.e., a\n   result was too small to be represented in a normalized way (e.g., an\n   `f32` with absolute value smaller than `2^-126`.)\n\n * `_MM_EXCEPT_INEXACT`: An inexact-result exception occurred (a.k.a.\n   precision exception). This means some precision was lost due to rounding.\n   For example, the fraction `1/3` cannot be represented accurately in a\n   32 or 64 bit float and computing it would cause this exception to be\n   raised. Precision exceptions are very common, so they are usually masked.\n\n Exception flags can be read and set using the convenience functions\n `_MM_GET_EXCEPTION_STATE` and `_MM_SET_EXCEPTION_STATE`. For example, to\n check if an operation caused some overflow:\n\n ```rust,ignore\n _MM_SET_EXCEPTION_STATE(0); // clear all exception flags\n                             // perform calculations\n if _MM_GET_EXCEPTION_STATE() & _MM_EXCEPT_OVERFLOW != 0 {\n     // handle overflow\n }\n ```\n\n ## Masking Flags\n\n There is one masking flag for each exception flag: `_MM_MASK_INVALID`,\n `_MM_MASK_DENORM`, `_MM_MASK_DIV_ZERO`, `_MM_MASK_OVERFLOW`,\n `_MM_MASK_UNDERFLOW`, `_MM_MASK_INEXACT`.\n\n A single masking bit can be set via\n\n ```rust,ignore\n _MM_SET_EXCEPTION_MASK(_MM_MASK_UNDERFLOW);\n ```\n\n However, since mask bits are by default all set to 1, it is more common to\n want to *disable* certain bits. For example, to unmask the underflow\n exception, use:\n\n ```rust,ignore\n _mm_setcsr(_mm_getcsr() & !_MM_MASK_UNDERFLOW); // unmask underflow\n exception\n ```\n\n Warning: an unmasked exception will cause an exception handler to be\n called.\n The standard handler will simply terminate the process. So, in this case\n any underflow exception would terminate the current process with something\n like `signal: 8, SIGFPE: erroneous arithmetic operation`.\n\n ## Rounding Mode\n\n The rounding mode is describe using two bits. It can be read and set using\n the convenience wrappers `_MM_GET_ROUNDING_MODE()` and\n `_MM_SET_ROUNDING_MODE(mode)`.\n\n The rounding modes are:\n\n * `_MM_ROUND_NEAREST`: (default) Round to closest to the infinite precision\n   value. If two values are equally close, round to even (i.e., least\n   significant bit will be zero).\n\n * `_MM_ROUND_DOWN`: Round toward negative Infinity.\n\n * `_MM_ROUND_UP`: Round toward positive Infinity.\n\n * `_MM_ROUND_TOWARD_ZERO`: Round towards zero (truncate).\n\n Example:\n\n ```rust,ignore\n _MM_SET_ROUNDING_MODE(_MM_ROUND_DOWN)\n ```\n\n ## Denormals-are-zero/Flush-to-zero Mode\n\n If this bit is set, values that would be denormalized will be set to zero\n instead. This is turned off by default.\n\n You can read and enable/disable this mode via the helper functions\n `_MM_GET_FLUSH_ZERO_MODE()` and `_MM_SET_FLUSH_ZERO_MODE()`:\n\n ```rust,ignore\n _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_OFF); // turn off (default)\n _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON); // turn on\n ```\n\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_setcsr)\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 11559,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../stdarch/crates/core_arch/src/x86/sse.rs:1774:1: 1776:2",
+  "src": "pub unsafe fn _MM_SET_EXCEPTION_MASK(x: u32) {\n    _mm_setcsr((_mm_getcsr() & !_MM_MASK_MASK) | (x & _MM_MASK_MASK))\n}",
+  "mir": "fn core_arch::x86::sse::_MM_SET_EXCEPTION_MASK(_1: u32) -> () {\n    let mut _0: ();\n    let mut _2: u32;\n    let mut _3: u32;\n    let mut _4: u32;\n    let mut _5: u32;\n    let mut _6: u32;\n    debug x => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = core_arch::x86::sse::_mm_getcsr() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = Not(core_arch::x86::sse::_MM_MASK_MASK);\n        _3 = BitAnd(move _4, move _5);\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = BitAnd(_1, core_arch::x86::sse::_MM_MASK_MASK);\n        _2 = BitOr(move _3, move _6);\n        StorageDead(_6);\n        StorageDead(_3);\n        _0 = core_arch::x86::sse::_mm_setcsr(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " See [`_mm_setcsr`](fn._mm_setcsr.html)\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_MM_SET_EXCEPTION_MASK)\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "deprecated"
+        },
+        "args": []
+      },
+      {
+        "tag": {
+          "typ": null,
+          "name": "non_snake_case"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* deprecated\n",
+      "* non_snake_case\n"
+    ]
+  }
+}

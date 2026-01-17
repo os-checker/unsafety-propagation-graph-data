@@ -1,0 +1,131 @@
+{
+  "name": "net::udp::UdpSocket::send_to",
+  "safe": true,
+  "callees": {
+    "net::socket_addr::ToSocketAddrs::to_socket_addrs": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this object to an iterator of resolved [`SocketAddr`]s.\n\n The returned iterator might not actually yield any values depending on the\n outcome of any resolution performed.\n\n Note that this function may block the current thread while resolution is\n performed.\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "io::error::Error::from_static_message": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Creates a new I/O error from a known kind of error as well as a constant\n message.\n\n This function does not allocate.\n\n You should not use this directly, and instead use the `const_error!`\n macro: `io::const_error!(ErrorKind::Something, \"some_message\")`.\n\n This function should maybe change to `from_static_message<const MSG: &'static\n str>(kind: ErrorKind)` in the future, when const generics allow that.\n",
+      "adt": {
+        "io::error::Error": "Constructor"
+      }
+    },
+    "sys::net::connection::socket::UdpSocket::send_to": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "io::error::Error": "Constructor",
+        "core::net::SocketAddr": "ImmutableAsArgument",
+        "sys::net::connection::socket::UdpSocket": "ImmutableAsArgument"
+      }
+    },
+    "core::hint::must_use": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An identity function that causes an `unused_must_use` warning to be\n triggered if the given value is not used (returned, stored in a variable,\n etc) by the caller.\n\n This is primarily intended for use in macro-generated code, in which a\n [`#[must_use]` attribute][must_use] either on a type or a function would not\n be convenient.\n\n [must_use]: https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute\n\n # Example\n\n ```\n #![feature(hint_must_use)]\n\n use core::fmt;\n\n pub struct Error(/* ... */);\n\n #[macro_export]\n macro_rules! make_error {\n     ($($args:expr),*) => {\n         core::hint::must_use({\n             let error = $crate::make_error(core::format_args!($($args),*));\n             error\n         })\n     };\n }\n\n // Implementation detail of make_error! macro.\n #[doc(hidden)]\n pub fn make_error(args: fmt::Arguments<'_>) -> Error {\n     Error(/* ... */)\n }\n\n fn demo() -> Option<Error> {\n     if true {\n         // Oops, meant to write `return Some(make_error!(\"...\"));`\n         Some(make_error!(\"...\"));\n     }\n     None\n }\n #\n # // Make rustdoc not wrap the whole snippet in fn main, so that $crate::make_error works\n # fn main() {}\n ```\n\n In the above example, we'd like an `unused_must_use` lint to apply to the\n value created by `make_error!`. However, neither `#[must_use]` on a struct\n nor `#[must_use]` on a function is appropriate here, so the macro expands\n using `core::hint::must_use` instead.\n\n - We wouldn't want `#[must_use]` on the `struct Error` because that would\n   make the following unproblematic code trigger a warning:\n\n   ```\n   # struct Error;\n   #\n   fn f(arg: &str) -> Result<(), Error>\n   # { Ok(()) }\n\n   #[test]\n   fn t() {\n       // Assert that `f` returns error if passed an empty string.\n       // A value of type `Error` is unused here but that's not a problem.\n       f(\"\").unwrap_err();\n   }\n   ```\n\n - Using `#[must_use]` on `fn make_error` can't help because the return value\n   *is* used, as the right-hand side of a `let` statement. The `let`\n   statement looks useless but is in fact necessary for ensuring that\n   temporaries within the `format_args` expansion are not kept alive past the\n   creation of the `Error`, as keeping them alive past that point can cause\n   autotrait issues in async code:\n\n   ```\n   # #![feature(hint_must_use)]\n   #\n   # struct Error;\n   #\n   # macro_rules! make_error {\n   #     ($($args:expr),*) => {\n   #         core::hint::must_use({\n   #             // If `let` isn't used, then `f()` produces a non-Send future.\n   #             let error = make_error(core::format_args!($($args),*));\n   #             error\n   #         })\n   #     };\n   # }\n   #\n   # fn make_error(args: core::fmt::Arguments<'_>) -> Error {\n   #     Error\n   # }\n   #\n   async fn f() {\n       // Using `let` inside the make_error expansion causes temporaries like\n       // `unsync()` to drop at the semicolon of that `let` statement, which\n       // is prior to the await point. They would otherwise stay around until\n       // the semicolon on *this* statement, which is after the await point,\n       // and the enclosing Future would not implement Send.\n       log(make_error!(\"look: {:p}\", unsync())).await;\n   }\n\n   async fn log(error: Error) {/* ... */}\n\n   // Returns something without a Sync impl.\n   fn unsync() -> *const () {\n       0 as *const ()\n   }\n   #\n   # fn test() {\n   #     fn assert_send(_: impl Send) {}\n   #     assert_send(f());\n   # }\n   ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 7723, kind: Alias(Projection, AliasTy { def_id: AliasDef(DefId { id: 7753, name: \"net::socket_addr::ToSocketAddrs::Iter\" }), args: GenericArgs([Type(Ty { id: 5094, kind: Param(ParamTy { index: 0, name: \"A\" }) })]) }) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 7336, kind: RigidTy(Adt(AdtDef(DefId { id: 7705, name: \"core::net::SocketAddr\" }), GenericArgs([]))) })])"
+    ],
+    "io::error::Error": [
+      "Plain"
+    ],
+    "core::net::SocketAddr": [
+      "Plain",
+      "Ref"
+    ],
+    "sys::net::connection::socket::UdpSocket": [
+      "Ref"
+    ],
+    "net::udp::UdpSocket": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ]
+  },
+  "path": 1993,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/net/udp.rs:205:5: 210:6",
+  "src": "pub fn send_to<A: ToSocketAddrs>(&self, buf: &[u8], addr: A) -> io::Result<usize> {\n        match addr.to_socket_addrs()?.next() {\n            Some(addr) => self.0.send_to(buf, &addr),\n            None => Err(io::const_error!(ErrorKind::InvalidInput, \"no addresses to send data to\")),\n        }\n    }",
+  "mir": "fn net::udp::UdpSocket::send_to(_1: &net::udp::UdpSocket, _2: &[u8], _3: A) -> core::result::Result<usize, io::error::Error> {\n    let mut _0: core::result::Result<usize, io::error::Error>;\n    let mut _4: core::option::Option<core::net::SocketAddr>;\n    let mut _5: &mut <A as net::socket_addr::ToSocketAddrs>::Iter;\n    let mut _6: <A as net::socket_addr::ToSocketAddrs>::Iter;\n    let mut _7: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, <A as net::socket_addr::ToSocketAddrs>::Iter>;\n    let mut _8: core::result::Result<<A as net::socket_addr::ToSocketAddrs>::Iter, io::error::Error>;\n    let mut _9: &A;\n    let mut _10: isize;\n    let  _11: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _12: <A as net::socket_addr::ToSocketAddrs>::Iter;\n    let mut _13: isize;\n    let  _14: core::net::SocketAddr;\n    let mut _15: &sys::net::connection::socket::UdpSocket;\n    let  _16: &core::net::SocketAddr;\n    let mut _17: io::error::Error;\n    let mut _18: io::error::Error;\n    debug self => _1;\n    debug buf => _2;\n    debug addr => _3;\n    debug residual => _11;\n    debug val => _12;\n    debug addr => _14;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &_3;\n        _8 = <A as net::socket_addr::ToSocketAddrs>::to_socket_addrs(move _9) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_9);\n        _7 = <core::result::Result<<A as net::socket_addr::ToSocketAddrs>::Iter, io::error::Error> as core::ops::Try>::branch(move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        _10 = discriminant(_7);\n        switchInt(move _10) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        StorageLive(_12);\n        _12 = move ((_7 as variant#0).0: <A as net::socket_addr::ToSocketAddrs>::Iter);\n        _6 = move _12;\n        StorageDead(_12);\n        _5 = &mut _6;\n        _4 = <<A as net::socket_addr::ToSocketAddrs>::Iter as core::iter::Iterator>::next(move _5) -> [return: bb7, unwind unreachable];\n    }\n    bb5: {\n        _11 = move ((_7 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<usize, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_5);\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_4);\n        drop(_3) -> [return: bb14, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_5);\n        _13 = discriminant(_4);\n        switchInt(move _13) -> [0: bb8, 1: bb9, otherwise: bb3];\n    }\n    bb8: {\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = io::error::Error::from_static_message(net::udp::UdpSocket::send_to::<A>::{constant#0}) -> [return: bb11, unwind unreachable];\n    }\n    bb9: {\n        StorageLive(_14);\n        _14 = ((_4 as variant#1).0: core::net::SocketAddr);\n        StorageLive(_15);\n        _15 = &((*_1).0: sys::net::connection::socket::UdpSocket);\n        _16 = &_14;\n        _0 = sys::net::connection::socket::UdpSocket::send_to(move _15, _2, _16) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_15);\n        StorageDead(_14);\n        goto -> bb13;\n    }\n    bb11: {\n        _17 = core::hint::must_use::<io::error::Error>(move _18) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_18);\n        _0 = core::result::Result::Err(move _17);\n        StorageDead(_17);\n        goto -> bb13;\n    }\n    bb13: {\n        drop(_6) -> [return: bb15, unwind unreachable];\n    }\n    bb14: {\n        return;\n    }\n    bb15: {\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_4);\n        drop(_3) -> [return: bb14, unwind unreachable];\n    }\n}\n",
+  "doc": " Sends data on the socket to the given address. On success, returns the\n number of bytes written. Note that the operating system may refuse\n buffers larger than 65507. However, partial writes are not possible\n until buffer sizes above `i32::MAX`.\n\n Address type can be any implementor of [`ToSocketAddrs`] trait. See its\n documentation for concrete examples.\n\n It is possible for `addr` to yield multiple addresses, but `send_to`\n will only send data to the first address yielded by `addr`.\n\n This will return an error when the IP version of the local socket\n does not match that returned from [`ToSocketAddrs`].\n\n See [Issue #34202] for more details.\n\n # Examples\n\n ```no_run\n use std::net::UdpSocket;\n\n let socket = UdpSocket::bind(\"127.0.0.1:34254\").expect(\"couldn't bind to address\");\n socket.send_to(&[0; 10], \"127.0.0.1:4242\").expect(\"couldn't send data\");\n ```\n\n [Issue #34202]: https://github.com/rust-lang/rust/issues/34202\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

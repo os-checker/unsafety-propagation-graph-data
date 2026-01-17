@@ -1,0 +1,81 @@
+{
+  "name": "sys::fs::unix::link",
+  "safe": true,
+  "callees": {
+    "core::ffi::CStr::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the inner pointer to this C string.\n\n The returned pointer will be valid for as long as `self` is, and points\n to a contiguous region of memory terminated with a 0 byte to represent\n the end of the string.\n\n The type of the returned pointer is\n [`*const c_char`][crate::ffi::c_char], and whether it's\n an alias for `*const i8` or `*const u8` is platform-specific.\n\n **WARNING**\n\n The returned pointer is read-only; writing to it (including passing it\n to C code that writes to it) causes undefined behavior.\n\n It is your responsibility to make sure that the underlying memory is not\n freed too early. For example, the following code will cause undefined\n behavior when `ptr` is used inside the `unsafe` block:\n\n ```no_run\n # #![expect(dangling_pointers_from_temporaries)]\n use std::ffi::{CStr, CString};\n\n // 💀 The meaning of this entire program is undefined,\n // 💀 and nothing about its behavior is guaranteed,\n // 💀 not even that its behavior resembles the code as written,\n // 💀 just because it contains a single instance of undefined behavior!\n\n // 🚨 creates a dangling pointer to a temporary `CString`\n // 🚨 that is deallocated at the end of the statement\n let ptr = CString::new(\"Hi!\".to_uppercase()).unwrap().as_ptr();\n\n // without undefined behavior, you would expect that `ptr` equals:\n dbg!(CStr::from_bytes_with_nul(b\"HI!\\0\").unwrap());\n\n // 🙏 Possibly the program behaved as expected so far,\n // 🙏 and this just shows `ptr` is now garbage..., but\n // 💀 this violates `CStr::from_ptr`'s safety contract\n // 💀 leading to a dereference of a dangling pointer,\n // 💀 which is immediate undefined behavior.\n // 💀 *BOOM*, you're dead, your entire program has no meaning.\n dbg!(unsafe { CStr::from_ptr(ptr) });\n ```\n\n This happens because, the pointer returned by `as_ptr` does not carry any\n lifetime information, and the `CString` is deallocated immediately after\n the expression that it is part of has been evaluated.\n To fix the problem, bind the `CString` to a local variable:\n\n ```\n use std::ffi::{CStr, CString};\n\n let c_str = CString::new(\"Hi!\".to_uppercase()).unwrap();\n let ptr = c_str.as_ptr();\n\n assert_eq!(unsafe { CStr::from_ptr(ptr) }, c\"HI!\");\n ```\n",
+      "adt": {}
+    },
+    "libc::linkat": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "sys::pal::unix::cvt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts native return values to Result using the *-1 means error is in `errno`*  convention.\n Non-error values are `Ok`-wrapped.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ffi::CStr": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 44, kind: RigidTy(Int(I32)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 3468,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/fs/unix.rs:2062:1: 2079:2",
+  "src": "pub fn link(original: &CStr, link: &CStr) -> io::Result<()> {\n    cfg_select! {\n        any(target_os = \"vxworks\", target_os = \"redox\", target_os = \"android\", target_os = \"espidf\", target_os = \"horizon\", target_os = \"vita\", target_env = \"nto70\") => {\n            // VxWorks, Redox and ESP-IDF lack `linkat`, so use `link` instead. POSIX leaves\n            // it implementation-defined whether `link` follows symlinks, so rely on the\n            // `symlink_hard_link` test in library/std/src/fs/tests.rs to check the behavior.\n            // Android has `linkat` on newer versions, but we happen to know `link`\n            // always has the correct behavior, so it's here as well.\n            cvt(unsafe { libc::link(original.as_ptr(), link.as_ptr()) })?;\n        }\n        _ => {\n            // Where we can, use `linkat` instead of `link`; see the comment above\n            // this one for details on why.\n            cvt(unsafe { libc::linkat(libc::AT_FDCWD, original.as_ptr(), libc::AT_FDCWD, link.as_ptr(), 0) })?;\n        }\n    }\n    Ok(())\n}",
+  "mir": "fn sys::fs::unix::link(_1: &core::ffi::CStr, _2: &core::ffi::CStr) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let mut _3: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, i32>;\n    let mut _4: core::result::Result<i32, io::error::Error>;\n    let mut _5: i32;\n    let mut _6: *const u8;\n    let mut _7: *const u8;\n    let mut _8: isize;\n    let  _9: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _10: i32;\n    debug original => _1;\n    debug link => _2;\n    debug residual => _9;\n    debug val => _10;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = core::ffi::CStr::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_7);\n        _7 = core::ffi::CStr::as_ptr(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = libc::linkat(libc::AT_FDCWD, move _6, libc::AT_FDCWD, move _7, 0_i32) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageDead(_6);\n        _4 = sys::pal::unix::cvt::<i32>(move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        _3 = <core::result::Result<i32, io::error::Error> as core::ops::Try>::branch(move _4) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_4);\n        _8 = discriminant(_3);\n        switchInt(move _8) -> [0: bb7, 1: bb8, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        StorageLive(_10);\n        _10 = ((_3 as variant#0).0: i32);\n        StorageDead(_10);\n        StorageDead(_3);\n        _0 = core::result::Result::Ok(());\n        goto -> bb10;\n    }\n    bb8: {\n        _9 = move ((_3 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<(), io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_9) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_3);\n        goto -> bb10;\n    }\n    bb10: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

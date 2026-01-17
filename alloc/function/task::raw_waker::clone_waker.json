@@ -1,0 +1,44 @@
+{
+  "name": "task::raw_waker::clone_waker",
+  "safe": false,
+  "callees": {
+    "sync::Arc::<T>::increment_strong_count": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Increments the strong reference count on the `Arc<T>` associated with the\n provided pointer by one.\n\n # Safety\n\n The pointer must have been obtained through `Arc::into_raw` and must satisfy the\n same layout requirements specified in [`Arc::from_raw_in`][from_raw_in].\n The associated `Arc` instance must be valid (i.e. the strong count must be at\n least 1) for the duration of this method, and `ptr` must point to a block of memory\n allocated by the global allocator.\n\n [from_raw_in]: Arc::from_raw_in\n\n # Examples\n\n ```\n use std::sync::Arc;\n\n let five = Arc::new(5);\n\n unsafe {\n     let ptr = Arc::into_raw(five);\n     Arc::increment_strong_count(ptr);\n\n     // This assertion is deterministic because we haven't shared\n     // the `Arc` between threads.\n     let five = Arc::from_raw(ptr);\n     assert_eq!(2, Arc::strong_count(&five));\n #   // Prevent leaks for Miri.\n #   Arc::decrement_strong_count(ptr);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::task::RawWaker::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `RawWaker` from the provided `data` pointer and `vtable`.\n\n The `data` pointer can be used to store arbitrary data as required\n by the executor. This could be e.g. a type-erased pointer to an `Arc`\n that is associated with the task.\n The value of this pointer will get passed to all functions that are part\n of the `vtable` as the first parameter.\n\n It is important to consider that the `data` pointer must point to a\n thread safe type such as an `Arc<T: Send + Sync>`\n when used to construct a [`Waker`]. This restriction is lifted when\n constructing a [`LocalWaker`], which allows using types that do not implement\n <code>[Send] + [Sync]</code> like `Rc<T>`.\n\n The `vtable` customizes the behavior of a `Waker` which gets created\n from a `RawWaker`. For each operation on the `Waker`, the associated\n function in the `vtable` of the underlying `RawWaker` will be called.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::task::RawWakerVTable": [
+      "Ref"
+    ],
+    "core::task::RawWaker": [
+      "Plain"
+    ]
+  },
+  "path": 2180,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/task.rs:148:5: 154:6",
+  "src": "unsafe fn clone_waker<W: Wake + Send + Sync + 'static>(waker: *const ()) -> RawWaker {\n        unsafe { Arc::increment_strong_count(waker as *const W) };\n        RawWaker::new(\n            waker,\n            &RawWakerVTable::new(clone_waker::<W>, wake::<W>, wake_by_ref::<W>, drop_waker::<W>),\n        )\n    }",
+  "mir": "fn task::raw_waker::clone_waker(_1: *const ()) -> core::task::RawWaker {\n    let mut _0: core::task::RawWaker;\n    let  _2: ();\n    let mut _3: *const W;\n    let  _4: &core::task::RawWakerVTable;\n    debug waker => _1;\n    bb0: {\n        StorageLive(_3);\n        _3 = _1 as *const W;\n        _2 = sync::Arc::<W>::increment_strong_count(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _4 = task::raw_waker::clone_waker::<W>::promoted[0];\n        _0 = core::task::RawWaker::new(_1, _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

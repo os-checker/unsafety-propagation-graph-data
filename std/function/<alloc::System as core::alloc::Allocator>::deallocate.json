@@ -1,0 +1,58 @@
+{
+  "name": "<alloc::System as core::alloc::Allocator>::deallocate",
+  "safe": false,
+  "callees": {
+    "core::alloc::Layout::size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The minimum size in bytes for a memory block of this layout.\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "core::alloc::GlobalAlloc::dealloc": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Deallocates the block of memory at the given `ptr` pointer with the given `layout`.\n\n # Safety\n\n The caller must ensure:\n\n * `ptr` is a block of memory currently allocated via this allocator and,\n\n * `layout` is the same layout that was used to allocate that block of\n   memory.\n\n Otherwise the behavior is undefined.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::alloc::Layout": [
+      "Ref",
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "alloc::System": [
+      "Ref"
+    ]
+  },
+  "path": 403,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/alloc.rs:223:5: 229:6",
+  "src": "unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {\n        if layout.size() != 0 {\n            // SAFETY: `layout` is non-zero in size,\n            // other conditions must be upheld by the caller\n            unsafe { GlobalAlloc::dealloc(self, ptr.as_ptr(), layout) }\n        }\n    }",
+  "mir": "fn <alloc::System as core::alloc::Allocator>::deallocate(_1: &alloc::System, _2: core::ptr::NonNull<u8>, _3: core::alloc::Layout) -> () {\n    let mut _0: ();\n    let mut _4: usize;\n    let mut _5: &core::alloc::Layout;\n    let mut _6: *mut u8;\n    debug self => _1;\n    debug ptr => _2;\n    debug layout => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &_3;\n        _4 = core::alloc::Layout::size(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        switchInt(move _4) -> [0: bb5, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = core::ptr::NonNull::<u8>::as_ptr(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _0 = <alloc::System as core::alloc::GlobalAlloc>::dealloc(_1, move _6, _3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_4);\n        goto -> bb6;\n    }\n    bb6: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

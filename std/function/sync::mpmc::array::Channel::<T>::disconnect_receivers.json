@@ -1,0 +1,80 @@
+{
+  "name": "sync::mpmc::array::Channel::<T>::disconnect_receivers",
+  "safe": false,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicUsize::fetch_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Bitwise \"or\" with the current value.\n\n Performs a bitwise \"or\" operation on the current value and the argument `val`, and\n sets the new value to the result.\n\n Returns the previous value.\n\n `fetch_or` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n assert_eq!(foo.fetch_or(0b110011, Ordering::SeqCst), 0b101101);\n assert_eq!(foo.load(Ordering::SeqCst), 0b111111);\n ```\n",
+      "adt": {}
+    },
+    "sync::mpmc::waker::SyncWaker::disconnect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Notifies all threads that the channel is disconnected.\n",
+      "adt": {
+        "sync::mpmc::waker::SyncWaker": "ImmutableAsArgument"
+      }
+    },
+    "sync::mpmc::array::Channel::<T>::discard_all_messages": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Discards all messages.\n\n `tail` should be the current (and therefore last) value of `tail`.\n\n # Panicking\n If a destructor panics, the remaining messages are leaked, matching the\n behavior of the unbounded channel.\n\n # Safety\n This method must only be called when dropping the last receiver. The\n destruction of all other receivers must have been observed with acquire\n ordering or stronger.\n",
+      "adt": {
+        "sync::mpmc::array::Channel": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "sync::mpmc::utils::CachePadded": [
+      "Ref"
+    ],
+    "sync::mpmc::array::Channel": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(5)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(6)))",
+      "Ref"
+    ],
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "sync::mpmc::waker::SyncWaker": [
+      "Ref"
+    ]
+  },
+  "path": 2785,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/array.rs:470:5: 481:6",
+  "src": "pub(crate) unsafe fn disconnect_receivers(&self) -> bool {\n        let tail = self.tail.fetch_or(self.mark_bit, Ordering::SeqCst);\n        let disconnected = if tail & self.mark_bit == 0 {\n            self.senders.disconnect();\n            true\n        } else {\n            false\n        };\n\n        unsafe { self.discard_all_messages(tail) };\n        disconnected\n    }",
+  "mir": "fn sync::mpmc::array::Channel::<T>::disconnect_receivers(_1: &sync::mpmc::array::Channel<T>) -> bool {\n    let mut _0: bool;\n    let  _2: usize;\n    let  _3: &core::sync::atomic::AtomicUsize;\n    let mut _4: &sync::mpmc::utils::CachePadded<core::sync::atomic::AtomicUsize>;\n    let mut _5: usize;\n    let mut _6: core::sync::atomic::Ordering;\n    let  _7: bool;\n    let mut _8: usize;\n    let mut _9: usize;\n    let  _10: ();\n    let mut _11: &sync::mpmc::waker::SyncWaker;\n    let  _12: ();\n    debug self => _1;\n    debug tail => _2;\n    debug disconnected => _7;\n    bb0: {\n        StorageLive(_4);\n        _4 = &((*_1).1: sync::mpmc::utils::CachePadded<core::sync::atomic::AtomicUsize>);\n        _3 = <sync::mpmc::utils::CachePadded<core::sync::atomic::AtomicUsize> as core::ops::Deref>::deref(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = ((*_1).5: usize);\n        StorageLive(_6);\n        _6 = core::sync::atomic::Ordering::SeqCst;\n        _2 = core::sync::atomic::AtomicUsize::fetch_or(_3, move _5, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = ((*_1).5: usize);\n        _8 = BitAnd(_2, move _9);\n        StorageDead(_9);\n        switchInt(move _8) -> [0: bb3, otherwise: bb5];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageLive(_11);\n        _11 = &((*_1).6: sync::mpmc::waker::SyncWaker);\n        _10 = sync::mpmc::waker::SyncWaker::disconnect(move _11) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_11);\n        _7 = true;\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_8);\n        _7 = false;\n        goto -> bb6;\n    }\n    bb6: {\n        _12 = sync::mpmc::array::Channel::<T>::discard_all_messages(_1, _2) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _0 = _7;\n        StorageDead(_7);\n        return;\n    }\n}\n",
+  "doc": " Disconnects receivers and wakes up all blocked senders.\n\n Returns `true` if this call disconnected the channel.\n\n # Safety\n May only be called once upon dropping the last receiver. The\n destruction of all other receivers must have been observed with acquire\n ordering or stronger.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

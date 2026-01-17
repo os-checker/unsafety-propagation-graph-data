@@ -1,0 +1,59 @@
+{
+  "name": "arch::timer::init_on_ap",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the inner value if the [`Once`] has been initialized.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "arch::timer::apic::init_on_ap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Initializes APIC timer on AP.\n\n The caller should provide the [`IrqLine`] for the system timer.\n",
+      "adt": {
+        "irq::top_half::IrqLine": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "irq::top_half::IrqLine": [
+      "Ref"
+    ]
+  },
+  "path": 1528,
+  "span": "ostd/src/arch/x86/timer/mod.rs:29:1: 31:2",
+  "src": "pub(super) fn init_on_ap() {\n    apic::init_on_ap(TIMER_IRQ.get().unwrap());\n}",
+  "mir": "fn arch::timer::init_on_ap() -> () {\n    let mut _0: ();\n    let  _1: ();\n    let  _2: &irq::top_half::IrqLine;\n    let mut _3: core::option::Option<&irq::top_half::IrqLine>;\n    let mut _4: &spin::once::Once<irq::top_half::IrqLine>;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = {alloc598: &spin::once::Once<irq::top_half::IrqLine>};\n        _3 = spin::once::Once::<irq::top_half::IrqLine>::get(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = core::option::Option::<&irq::top_half::IrqLine>::unwrap(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _1 = arch::timer::apic::init_on_ap(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": " Enables timer interrupt on this AP.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

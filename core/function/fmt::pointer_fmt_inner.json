@@ -1,0 +1,117 @@
+{
+  "name": "fmt::pointer_fmt_inner",
+  "safe": true,
+  "callees": {
+    "fmt::FormattingOptions::get_alternate": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the current `#` flag.\n",
+      "adt": {
+        "fmt::FormattingOptions": "ImmutableAsArgument"
+      }
+    },
+    "fmt::FormattingOptions::sign_aware_zero_pad": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets or unsets the `0` flag.\n\n This is used to indicate for integer formats that the padding to width should both be done with a 0 character as well as be sign-aware\n",
+      "adt": {
+        "fmt::FormattingOptions": "MutableAsArgument"
+      }
+    },
+    "fmt::FormattingOptions::get_width": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the current width.\n",
+      "adt": {
+        "fmt::FormattingOptions": "ImmutableAsArgument",
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::is_none": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the option is a [`None`] value.\n\n # Examples\n\n ```\n let x: Option<u32> = Some(2);\n assert_eq!(x.is_none(), false);\n\n let x: Option<u32> = None;\n assert_eq!(x.is_none(), true);\n ```\n",
+      "adt": {
+        "option::Option": "ImmutableAsArgument"
+      }
+    },
+    "fmt::FormattingOptions::width": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets or removes the width.\n\n This is a parameter for the “minimum width” that the format should take\n up. If the value’s string does not fill up this many characters, then\n the padding specified by [`FormattingOptions::fill`]/[`FormattingOptions::align`]\n will be used to take up the required space.\n",
+      "adt": {
+        "fmt::FormattingOptions": "MutableAsArgument"
+      }
+    },
+    "fmt::FormattingOptions::alternate": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets or unsets the `#` flag.\n\n This flag indicates that the \"alternate\" form of printing should be\n used. The alternate forms are:\n - [`Debug`] : pretty-print the [`Debug`] formatting (adds linebreaks and indentation)\n - [`LowerHex`] as well as [`UpperHex`] - precedes the argument with a `0x`\n - [`Octal`] - precedes the argument with a `0o`\n - [`Binary`] - precedes the argument with a `0b`\n",
+      "adt": {
+        "fmt::FormattingOptions": "MutableAsArgument"
+      }
+    },
+    "fmt::LowerHex::fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "fmt::FormattingOptions": [
+      "Plain",
+      "Ref",
+      "MutRef"
+    ],
+    "fmt::Formatter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Ref"
+    ],
+    "result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 12980,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:3011:1: 3032:2",
+  "src": "pub(crate) fn pointer_fmt_inner(ptr_addr: usize, f: &mut Formatter<'_>) -> Result {\n    let old_options = f.options;\n\n    // The alternate flag is already treated by LowerHex as being special-\n    // it denotes whether to prefix with 0x. We use it to work out whether\n    // or not to zero extend, and then unconditionally set it to get the\n    // prefix.\n    if f.options.get_alternate() {\n        f.options.sign_aware_zero_pad(true);\n\n        if f.options.get_width().is_none() {\n            f.options.width(Some((usize::BITS / 4) as u16 + 2));\n        }\n    }\n    f.options.alternate(true);\n\n    let ret = LowerHex::fmt(&ptr_addr, f);\n\n    f.options = old_options;\n\n    ret\n}",
+  "mir": "fn fmt::pointer_fmt_inner(_1: usize, _2: &mut fmt::Formatter<'_>) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    let  _3: fmt::FormattingOptions;\n    let mut _4: bool;\n    let mut _5: &fmt::FormattingOptions;\n    let  _6: &mut fmt::FormattingOptions;\n    let mut _7: &mut fmt::FormattingOptions;\n    let mut _8: bool;\n    let mut _9: &option::Option<u16>;\n    let  _10: option::Option<u16>;\n    let mut _11: &fmt::FormattingOptions;\n    let  _12: &mut fmt::FormattingOptions;\n    let mut _13: &mut fmt::FormattingOptions;\n    let mut _14: option::Option<u16>;\n    let mut _15: u16;\n    let mut _16: u16;\n    let mut _17: u32;\n    let mut _18: bool;\n    let mut _19: (u16, bool);\n    let  _20: &mut fmt::FormattingOptions;\n    let mut _21: &mut fmt::FormattingOptions;\n    let  _22: &usize;\n    debug ptr_addr => _1;\n    debug f => _2;\n    debug old_options => _3;\n    debug ret => _0;\n    bb0: {\n        _3 = ((*_2).0: fmt::FormattingOptions);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_2).0: fmt::FormattingOptions);\n        _4 = fmt::FormattingOptions::get_alternate(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _4) -> [0: bb12, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &mut ((*_2).0: fmt::FormattingOptions);\n        _6 = fmt::FormattingOptions::sign_aware_zero_pad(move _7, true) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &((*_2).0: fmt::FormattingOptions);\n        _10 = fmt::FormattingOptions::get_width(move _11) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _9 = &_10;\n        StorageDead(_11);\n        _8 = option::Option::<u16>::is_none(move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        switchInt(move _8) -> [0: bb10, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &mut ((*_2).0: fmt::FormattingOptions);\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _18 = Eq(4_u32, 0_u32);\n        assert(!move _18, \"attempt to divide `{}` by zero\", num::<impl usize>::BITS) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _17 = Div(num::<impl usize>::BITS, 4_u32);\n        _16 = move _17 as u16;\n        StorageDead(_17);\n        _19 = CheckedAdd(_16, 2_u16);\n        assert(!move (_19.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _16, 2_u16) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _15 = move (_19.0: u16);\n        StorageDead(_16);\n        _14 = option::Option::Some(move _15);\n        StorageDead(_15);\n        _12 = fmt::FormattingOptions::width(move _13, move _14) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_12);\n        goto -> bb11;\n    }\n    bb10: {\n        StorageDead(_10);\n        StorageDead(_9);\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_8);\n        goto -> bb13;\n    }\n    bb12: {\n        StorageDead(_5);\n        goto -> bb13;\n    }\n    bb13: {\n        StorageDead(_4);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = &mut ((*_2).0: fmt::FormattingOptions);\n        _20 = fmt::FormattingOptions::alternate(move _21, true) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_21);\n        StorageDead(_20);\n        _22 = &_1;\n        _0 = <usize as fmt::LowerHex>::fmt(_22, _2) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        ((*_2).0: fmt::FormattingOptions) = _3;\n        return;\n    }\n}\n",
+  "doc": " Since the formatting will be identical for all pointer types, uses a\n non-monomorphized implementation for the actual formatting to reduce the\n amount of codegen work needed.\n\n This uses `ptr_addr: usize` and not `ptr: *const ()` to be able to use this for\n `fn(...) -> ...` without using [problematic] \"Oxford Casts\".\n\n [problematic]: https://github.com/rust-lang/rust/issues/95489\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

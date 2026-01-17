@@ -1,0 +1,71 @@
+{
+  "name": "<cell::RefCell<T> as clone::Clone>::clone",
+  "safe": true,
+  "callees": {
+    "cell::RefCell::<T>::borrow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Immutably borrows the wrapped value.\n\n The borrow lasts until the returned `Ref` exits scope. Multiple\n immutable borrows can be taken out at the same time.\n\n # Panics\n\n Panics if the value is currently mutably borrowed. For a non-panicking variant, use\n [`try_borrow`](#method.try_borrow).\n\n # Examples\n\n ```\n use std::cell::RefCell;\n\n let c = RefCell::new(5);\n\n let borrowed_five = c.borrow();\n let borrowed_five2 = c.borrow();\n ```\n\n An example of panic:\n\n ```should_panic\n use std::cell::RefCell;\n\n let c = RefCell::new(5);\n\n let m = c.borrow_mut();\n let b = c.borrow(); // this causes a panic\n ```\n",
+      "adt": {
+        "cell::RefCell": "ImmutableAsArgument",
+        "cell::Ref": "Constructor"
+      }
+    },
+    "ops::deref::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "cell::RefCell::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `RefCell` containing `value`.\n\n # Examples\n\n ```\n use std::cell::RefCell;\n\n let c = RefCell::new(5);\n ```\n",
+      "adt": {
+        "cell::RefCell": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "cell::RefCell": [
+      "Ref",
+      "Plain"
+    ],
+    "cell::Ref": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 4776,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell.rs:1426:5: 1428:6",
+  "src": "fn clone(&self) -> RefCell<T> {\n        RefCell::new(self.borrow().clone())\n    }",
+  "mir": "fn <cell::RefCell<T> as clone::Clone>::clone(_1: &cell::RefCell<T>) -> cell::RefCell<T> {\n    let mut _0: cell::RefCell<T>;\n    let mut _2: T;\n    let  _3: &T;\n    let mut _4: &cell::Ref<'_, T>;\n    let  _5: cell::Ref<'_, T>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = cell::RefCell::<T>::borrow(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = &_5;\n        _3 = <cell::Ref<'_, T> as ops::deref::Deref>::deref(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _2 = <T as clone::Clone>::clone(_3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _0 = cell::RefCell::<T>::new(move _2) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        drop(_5) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_5);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " # Panics\n\n Panics if the value is currently mutably borrowed.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

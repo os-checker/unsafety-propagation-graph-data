@@ -1,0 +1,137 @@
+{
+  "name": "vec::Vec::<T, A>::split_off",
+  "safe": true,
+  "callees": {
+    "vec::Vec::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the vector, also referred to\n as its 'length'.\n\n # Examples\n\n ```\n let a = vec![1, 2, 3];\n assert_eq!(a.len(), 3);\n ```\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "vec::Vec::<T, A>::split_off::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::allocator": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the underlying allocator.\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::with_capacity_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new, empty `Vec<T, A>` with at least the specified capacity\n with the provided allocator.\n\n The vector will be able to hold at least `capacity` elements without\n reallocating. This method is allowed to allocate for more elements than\n `capacity`. If `capacity` is zero, the vector will not allocate.\n\n It is important to note that although the returned vector has the\n minimum *capacity* specified, the vector will have a zero *length*. For\n an explanation of the difference between length and capacity, see\n *[Capacity and reallocation]*.\n\n If it is important to know the exact allocated capacity of a `Vec`,\n always use the [`capacity`] method after construction.\n\n For `Vec<T, A>` where `T` is a zero-sized type, there will be no allocation\n and the capacity will always be `usize::MAX`.\n\n [Capacity and reallocation]: #capacity-and-reallocation\n [`capacity`]: Vec::capacity\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let mut vec = Vec::with_capacity_in(10, System);\n\n // The vector contains no items, even though it has capacity for more\n assert_eq!(vec.len(), 0);\n assert!(vec.capacity() >= 10);\n\n // These are all done without reallocating...\n for i in 0..10 {\n     vec.push(i);\n }\n assert_eq!(vec.len(), 10);\n assert!(vec.capacity() >= 10);\n\n // ...but this may make the vector reallocate\n vec.push(11);\n assert_eq!(vec.len(), 11);\n assert!(vec.capacity() >= 11);\n\n // A vector of a zero-sized type will always over-allocate, since no\n // allocation is necessary\n let vec_units = Vec::<(), System>::with_capacity_in(10, System);\n assert_eq!(vec_units.capacity(), usize::MAX);\n ```\n",
+      "adt": {
+        "vec::Vec": "Constructor"
+      }
+    },
+    "vec::Vec::<T, A>::set_len": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forces the length of the vector to `new_len`.\n\n This is a low-level operation that maintains none of the normal\n invariants of the type. Normally changing the length of a vector\n is done using one of the safe operations instead, such as\n [`truncate`], [`resize`], [`extend`], or [`clear`].\n\n [`truncate`]: Vec::truncate\n [`resize`]: Vec::resize\n [`extend`]: Extend::extend\n [`clear`]: Vec::clear\n\n # Safety\n\n - `new_len` must be less than or equal to [`capacity()`].\n - The elements at `old_len..new_len` must be initialized.\n\n [`capacity()`]: Vec::capacity\n\n # Examples\n\n See [`spare_capacity_mut()`] for an example with safe\n initialization of capacity elements and use of this method.\n\n `set_len()` can be useful for situations in which the vector\n is serving as a buffer for other code, particularly over FFI:\n\n ```no_run\n # #![allow(dead_code)]\n # // This is just a minimal skeleton for the doc example;\n # // don't use this as a starting point for a real library.\n # pub struct StreamWrapper { strm: *mut std::ffi::c_void }\n # const Z_OK: i32 = 0;\n # unsafe extern \"C\" {\n #     fn deflateGetDictionary(\n #         strm: *mut std::ffi::c_void,\n #         dictionary: *mut u8,\n #         dictLength: *mut usize,\n #     ) -> i32;\n # }\n # impl StreamWrapper {\n pub fn get_dictionary(&self) -> Option<Vec<u8>> {\n     // Per the FFI method's docs, \"32768 bytes is always enough\".\n     let mut dict = Vec::with_capacity(32_768);\n     let mut dict_length = 0;\n     // SAFETY: When `deflateGetDictionary` returns `Z_OK`, it holds that:\n     // 1. `dict_length` elements were initialized.\n     // 2. `dict_length` <= the capacity (32_768)\n     // which makes `set_len` safe to call.\n     unsafe {\n         // Make the FFI call...\n         let r = deflateGetDictionary(self.strm, dict.as_mut_ptr(), &mut dict_length);\n         if r == Z_OK {\n             // ...and update the length to what was initialized.\n             dict.set_len(dict_length);\n             Some(dict)\n         } else {\n             None\n         }\n     }\n }\n # }\n ```\n\n While the following example is sound, there is a memory leak since\n the inner vectors were not freed prior to the `set_len` call:\n\n ```\n let mut vec = vec![vec![1, 0, 0],\n                    vec![0, 1, 0],\n                    vec![0, 0, 1]];\n // SAFETY:\n // 1. `old_len..0` is empty so no elements need to be initialized.\n // 2. `0 <= capacity` always holds whatever `capacity` is.\n unsafe {\n     vec.set_len(0);\n #   // FIXME(https://github.com/rust-lang/miri/issues/3670):\n #   // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n #   vec.set_len(3);\n }\n ```\n\n Normally, here, one would use [`clear`] instead to correctly drop\n the contents and thus not leak memory.\n\n [`spare_capacity_mut()`]: Vec::spare_capacity_mut\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "vec::Vec::<T, A>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the vector's buffer, or a dangling raw pointer\n valid for zero sized reads if the vector didn't allocate.\n\n The caller must ensure that the vector outlives the pointer this\n function returns, or else it will end up dangling.\n Modifying the vector may cause its buffer to be reallocated,\n which would also make any pointers to it invalid.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n This method guarantees that for the purpose of the aliasing model, this method\n does not materialize a reference to the underlying slice, and thus the returned pointer\n will remain valid when mixed with other calls to [`as_ptr`], [`as_mut_ptr`],\n and [`as_non_null`].\n Note that calling other methods that materialize mutable references to the slice,\n or mutable references to specific elements you are planning on accessing through this pointer,\n as well as writing to those elements, may still invalidate this pointer.\n See the second example below for how this guarantee can be used.\n\n\n # Examples\n\n ```\n let x = vec![1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(*x_ptr.add(i), 1 << i);\n     }\n }\n ```\n\n Due to the aliasing guarantee, the following code is legal:\n\n ```rust\n unsafe {\n     let mut v = vec![0, 1, 2];\n     let ptr1 = v.as_ptr();\n     let _ = ptr1.read();\n     let ptr2 = v.as_mut_ptr().offset(2);\n     ptr2.write(2);\n     // Notably, the write to `ptr2` did *not* invalidate `ptr1`\n     // because it mutated a different element:\n     let _ = ptr1.read();\n }\n ```\n\n [`as_mut_ptr`]: Vec::as_mut_ptr\n [`as_ptr`]: Vec::as_ptr\n [`as_non_null`]: Vec::as_non_null\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::const_ptr::<impl *const T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"123\";\n let ptr: *const u8 = s.as_ptr();\n\n unsafe {\n     assert_eq!(*ptr.add(1), b'2');\n     assert_eq!(*ptr.add(2), b'3');\n }\n ```\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw mutable pointer to the vector's buffer, or a dangling\n raw pointer valid for zero sized reads if the vector didn't allocate.\n\n The caller must ensure that the vector outlives the pointer this\n function returns, or else it will end up dangling.\n Modifying the vector may cause its buffer to be reallocated,\n which would also make any pointers to it invalid.\n\n This method guarantees that for the purpose of the aliasing model, this method\n does not materialize a reference to the underlying slice, and thus the returned pointer\n will remain valid when mixed with other calls to [`as_ptr`], [`as_mut_ptr`],\n and [`as_non_null`].\n Note that calling other methods that materialize references to the slice,\n or references to specific elements you are planning on accessing through this pointer,\n may still invalidate this pointer.\n See the second example below for how this guarantee can be used.\n\n The method also guarantees that, as long as `T` is not zero-sized and the capacity is\n nonzero, the pointer may be passed into [`dealloc`] with a layout of\n `Layout::array::<T>(capacity)` in order to deallocate the backing memory. If this is done,\n be careful not to run the destructor of the `Vec`, as dropping it will result in\n double-frees. Wrapping the `Vec` in a [`ManuallyDrop`] is the typical way to achieve this.\n\n # Examples\n\n ```\n // Allocate vector big enough for 4 elements.\n let size = 4;\n let mut x: Vec<i32> = Vec::with_capacity(size);\n let x_ptr = x.as_mut_ptr();\n\n // Initialize elements via raw pointer writes, then set length.\n unsafe {\n     for i in 0..size {\n         *x_ptr.add(i) = i as i32;\n     }\n     x.set_len(size);\n }\n assert_eq!(&*x, &[0, 1, 2, 3]);\n ```\n\n Due to the aliasing guarantee, the following code is legal:\n\n ```rust\n unsafe {\n     let mut v = vec![0];\n     let ptr1 = v.as_mut_ptr();\n     ptr1.write(1);\n     let ptr2 = v.as_mut_ptr();\n     ptr2.write(2);\n     // Notably, the write to `ptr2` did *not* invalidate `ptr1`:\n     ptr1.write(3);\n }\n ```\n\n Deallocating a vector using [`Box`] (which uses [`dealloc`] internally):\n\n ```\n use std::mem::{ManuallyDrop, MaybeUninit};\n\n let mut v = ManuallyDrop::new(vec![0, 1, 2]);\n let ptr = v.as_mut_ptr();\n let capacity = v.capacity();\n let slice_ptr: *mut [MaybeUninit<i32>] =\n     std::ptr::slice_from_raw_parts_mut(ptr.cast(), capacity);\n drop(unsafe { Box::from_raw(slice_ptr) });\n ```\n\n [`as_mut_ptr`]: Vec::as_mut_ptr\n [`as_ptr`]: Vec::as_ptr\n [`as_non_null`]: Vec::as_non_null\n [`dealloc`]: crate::alloc::GlobalAlloc::dealloc\n [`ManuallyDrop`]: core::mem::ManuallyDrop\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "core::ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 2398,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:2913:5: 2940:6",
+  "src": "pub fn split_off(&mut self, at: usize) -> Self\n    where\n        A: Clone,\n    {\n        #[cold]\n        #[cfg_attr(not(panic = \"immediate-abort\"), inline(never))]\n        #[track_caller]\n        #[optimize(size)]\n        fn assert_failed(at: usize, len: usize) -> ! {\n            panic!(\"`at` split index (is {at}) should be <= len (is {len})\");\n        }\n\n        if at > self.len() {\n            assert_failed(at, self.len());\n        }\n\n        let other_len = self.len - at;\n        let mut other = Vec::with_capacity_in(other_len, self.allocator().clone());\n\n        // Unsafely `set_len` and copy items to `other`.\n        unsafe {\n            self.set_len(at);\n            other.set_len(other_len);\n\n            ptr::copy_nonoverlapping(self.as_ptr().add(at), other.as_mut_ptr(), other.len());\n        }\n        other\n    }",
+  "mir": "fn vec::Vec::<T, A>::split_off(_1: &mut vec::Vec<T, A>, _2: usize) -> vec::Vec<T, A> {\n    let mut _0: vec::Vec<T, A>;\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: &vec::Vec<T, A>;\n    let  _6: !;\n    let mut _7: usize;\n    let mut _8: &vec::Vec<T, A>;\n    let  _9: usize;\n    let mut _10: usize;\n    let mut _11: (usize, bool);\n    let mut _12: vec::Vec<T, A>;\n    let mut _13: A;\n    let  _14: &A;\n    let mut _15: &vec::Vec<T, A>;\n    let  _16: ();\n    let  _17: ();\n    let mut _18: &mut vec::Vec<T, A>;\n    let  _19: ();\n    let mut _20: *const T;\n    let mut _21: *const T;\n    let mut _22: &vec::Vec<T, A>;\n    let mut _23: *mut T;\n    let mut _24: &mut vec::Vec<T, A>;\n    let mut _25: usize;\n    let mut _26: &vec::Vec<T, A>;\n    debug self => _1;\n    debug at => _2;\n    debug other_len => _9;\n    debug other => _12;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = vec::Vec::<T, A>::len(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = Gt(_2, move _4);\n        switchInt(move _3) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &(*_1);\n        _7 = vec::Vec::<T, A>::len(move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        _6 = vec::Vec::<T, A>::split_off::assert_failed(_2, move _7) -> unwind unreachable;\n    }\n    bb4: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_10);\n        _10 = ((*_1).1: usize);\n        _11 = CheckedSub(_10, _2);\n        assert(!move (_11.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _10, _2) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _9 = move (_11.0: usize);\n        StorageDead(_10);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_15);\n        _15 = &(*_1);\n        _14 = vec::Vec::<T, A>::allocator(move _15) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_15);\n        _13 = <A as core::clone::Clone>::clone(_14) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _12 = vec::Vec::<T, A>::with_capacity_in(_9, move _13) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_13);\n        _16 = vec::Vec::<T, A>::set_len(_1, _2) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageLive(_18);\n        _18 = &mut _12;\n        _17 = vec::Vec::<T, A>::set_len(move _18, _9) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_18);\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = &(*_1);\n        _21 = vec::Vec::<T, A>::as_ptr(move _22) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_22);\n        _20 = core::ptr::const_ptr::<impl *const T>::add(move _21, _2) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_21);\n        StorageLive(_23);\n        StorageLive(_24);\n        _24 = &mut _12;\n        _23 = vec::Vec::<T, A>::as_mut_ptr(move _24) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_24);\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = &_12;\n        _25 = vec::Vec::<T, A>::len(move _26) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_26);\n        _19 = core::ptr::copy_nonoverlapping::<T>(move _20, move _23, move _25) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_25);\n        StorageDead(_23);\n        StorageDead(_20);\n        _0 = move _12;\n        StorageDead(_12);\n        return;\n    }\n}\n",
+  "doc": " Splits the collection into two at the given index.\n\n Returns a newly allocated vector containing the elements in the range\n `[at, len)`. After the call, the original vector will be left containing\n the elements `[0, at)` with its previous capacity unchanged.\n\n - If you want to take ownership of the entire contents and capacity of\n   the vector, see [`mem::take`] or [`mem::replace`].\n - If you don't need the returned vector at all, see [`Vec::truncate`].\n - If you want to take ownership of an arbitrary subslice, or you don't\n   necessarily want to store the removed items in a vector, see [`Vec::drain`].\n\n # Panics\n\n Panics if `at > len`.\n\n # Examples\n\n ```\n let mut vec = vec!['a', 'b', 'c'];\n let vec2 = vec.split_off(1);\n assert_eq!(vec, ['a']);\n assert_eq!(vec2, ['b', 'c']);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "name": "array::try_from_trusted_iterator",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::size_hint": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the bounds on the remaining length of the iterator.\n\n Specifically, `size_hint()` returns a tuple where the first element\n is the lower bound, and the second element is the upper bound.\n\n The second half of the tuple that is returned is an <code>[Option]<[usize]></code>.\n A [`None`] here means that either there is no known upper bound, or the\n upper bound is larger than [`usize`].\n\n # Implementation notes\n\n It is not enforced that an iterator implementation yields the declared\n number of elements. A buggy iterator may yield less than the lower bound\n or more than the upper bound of elements.\n\n `size_hint()` is primarily intended to be used for optimizations such as\n reserving space for the elements of the iterator, but must not be\n trusted to e.g., omit bounds checks in unsafe code. An incorrect\n implementation of `size_hint()` should not lead to memory safety\n violations.\n\n That said, the implementation should provide a correct estimation,\n because otherwise it would be a violation of the trait's protocol.\n\n The default implementation returns <code>(0, [None])</code> which is correct for any\n iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n let mut iter = a.iter();\n\n assert_eq!((3, Some(3)), iter.size_hint());\n let _ = iter.next();\n assert_eq!((2, Some(2)), iter.size_hint());\n ```\n\n A more complex example:\n\n ```\n // The even numbers in the range of zero to nine.\n let iter = (0..10).filter(|x| x % 2 == 0);\n\n // We might iterate from zero to ten times. Knowing that it's five\n // exactly wouldn't be possible without executing filter().\n assert_eq!((0, Some(10)), iter.size_hint());\n\n // Let's add five more numbers with chain()\n let iter = (0..10).filter(|x| x % 2 == 0).chain(15..20);\n\n // now both bounds are increased by five\n assert_eq!((5, Some(15)), iter.size_hint());\n ```\n\n Returning `None` for an upper bound:\n\n ```\n // an infinite iterator has no upper bound\n // and the maximum possible lower bound\n let iter = 0..;\n\n assert_eq!((usize::MAX, None), iter.size_hint());\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "array::try_from_trusted_iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "array::try_from_fn": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an array `[T; N]` where each fallible array element `T` is returned by the `cb` call.\n Unlike [`from_fn`], where the element creation can't fail, this version will return an error\n if any element creation was unsuccessful.\n\n The return type of this function depends on the return type of the closure.\n If you return `Result<T, E>` from the closure, you'll get a `Result<[T; N], E>`.\n If you return `Option<T>` from the closure, you'll get an `Option<[T; N]>`.\n\n # Arguments\n\n * `cb`: Callback where the passed argument is the current array index.\n\n # Example\n\n ```rust\n #![feature(array_try_from_fn)]\n\n let array: Result<[u8; 5], _> = std::array::try_from_fn(|i| i.try_into());\n assert_eq!(array, Ok([0, 1, 2, 3, 4]));\n\n let array: Result<[i8; 200], _> = std::array::try_from_fn(|i| i.try_into());\n assert!(array.is_err());\n\n let array: Option<[_; 4]> = std::array::try_from_fn(|i| i.checked_add(100));\n assert_eq!(array, Some([100, 101, 102, 103]));\n\n let array: Option<[_; 4]> = std::array::try_from_fn(|i| i.checked_sub(100));\n assert_eq!(array, None);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ]
+  },
+  "path": 4559,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/array/mod.rs:867:1: 884:2",
+  "src": "fn try_from_trusted_iterator<T, R, const N: usize>(\n    iter: impl UncheckedIterator<Item = R>,\n) -> ChangeOutputType<R, [T; N]>\nwhere\n    R: Try<Output = T>,\n    R::Residual: Residual<[T; N]>,\n{\n    assert!(iter.size_hint().0 >= N);\n    fn next<T>(mut iter: impl UncheckedIterator<Item = T>) -> impl FnMut(usize) -> T {\n        move |_| {\n            // SAFETY: We know that `from_fn` will call this at most N times,\n            // and we checked to ensure that we have at least that many items.\n            unsafe { iter.next_unchecked() }\n        }\n    }\n\n    try_from_fn(next(iter))\n}",
+  "mir": "fn array::try_from_trusted_iterator(_1: impl UncheckedIterator<Item = R>) -> <<R as ops::try_trait::Try>::Residual as ops::try_trait::Residual<[T; N]>>::TryType {\n    let mut _0: <<R as ops::try_trait::Try>::Residual as ops::try_trait::Residual<[T; N]>>::TryType;\n    let mut _2: bool;\n    let mut _3: usize;\n    let mut _4: (usize, option::Option<usize>);\n    let mut _5: &impl UncheckedIterator<Item = R>;\n    let mut _6: !;\n    let mut _7: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/array/mod.rs:876:9: 876:17};\n    let mut _8: impl UncheckedIterator<Item = R>;\n    debug iter => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &_1;\n        _4 = <impl UncheckedIterator<Item = R> as iter::traits::iterator::Iterator>::size_hint(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = (_4.0: usize);\n        _2 = Ge(move _3, N);\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageDead(_4);\n        StorageDead(_2);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = move _1;\n        _7 = array::try_from_trusted_iterator::next::<R, impl UncheckedIterator<Item = R>>(move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        StorageDead(_4);\n        _6 = panicking::panic(\"assertion failed: iter.size_hint().0 >= N\") -> unwind unreachable;\n    }\n    bb4: {\n        StorageDead(_8);\n        _0 = array::try_from_fn::<R, N, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/array/mod.rs:876:9: 876:17}>(move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

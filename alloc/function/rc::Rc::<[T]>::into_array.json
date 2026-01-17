@@ -1,0 +1,59 @@
+{
+  "name": "rc::Rc::<[T]>::into_array",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "rc::Rc::<T>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the `Rc`, returning the wrapped pointer.\n\n To avoid a memory leak the pointer must be converted back to an `Rc` using\n [`Rc::from_raw`].\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let x = Rc::new(\"hello\".to_owned());\n let x_ptr = Rc::into_raw(x);\n assert_eq!(unsafe { &*x_ptr }, \"hello\");\n # // Prevent leaks for Miri.\n # drop(unsafe { Rc::from_raw(x_ptr) });\n ```\n",
+      "adt": {
+        "rc::Rc": "ImmutableAsArgument"
+      }
+    },
+    "rc::Rc::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs an `Rc<T>` from a raw pointer.\n\n The raw pointer must have been previously returned by a call to\n [`Rc<U>::into_raw`][into_raw] with the following requirements:\n\n * If `U` is sized, it must have the same size and alignment as `T`. This\n   is trivially true if `U` is `T`.\n * If `U` is unsized, its data pointer must have the same size and\n   alignment as `T`. This is trivially true if `Rc<U>` was constructed\n   through `Rc<T>` and then converted to `Rc<U>` through an [unsized\n   coercion].\n\n Note that if `U` or `U`'s data pointer is not `T` but has the same size\n and alignment, this is basically like transmuting references of\n different types. See [`mem::transmute`][transmute] for more information\n on what restrictions apply in this case.\n\n The raw pointer must point to a block of memory allocated by the global allocator\n\n The user of `from_raw` has to make sure a specific value of `T` is only\n dropped once.\n\n This function is unsafe because improper use may lead to memory unsafety,\n even if the returned `Rc<T>` is never accessed.\n\n [into_raw]: Rc::into_raw\n [transmute]: core::mem::transmute\n [unsized coercion]: https://doc.rust-lang.org/reference/type-coercions.html#unsized-coercions\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let x = Rc::new(\"hello\".to_owned());\n let x_ptr = Rc::into_raw(x);\n\n unsafe {\n     // Convert back to an `Rc` to prevent leak.\n     let x = Rc::from_raw(x_ptr);\n     assert_eq!(&*x, \"hello\");\n\n     // Further calls to `Rc::from_raw(x_ptr)` would be memory-unsafe.\n }\n\n // The memory was freed when `x` went out of scope above, so `x_ptr` is now dangling!\n ```\n\n Convert a slice back into its original array:\n\n ```\n use std::rc::Rc;\n\n let x: Rc<[u32]> = Rc::new([1, 2, 3]);\n let x_ptr: *const [u32] = Rc::into_raw(x);\n\n unsafe {\n     let x: Rc<[u32; 3]> = Rc::from_raw(x_ptr.cast::<[u32; 3]>());\n     assert_eq!(&*x, &[1, 2, 3]);\n }\n ```\n",
+      "adt": {
+        "rc::Rc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "rc::Rc": [
+      "Ref",
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 1755,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:1172:5: 1182:6",
+  "src": "pub fn into_array<const N: usize>(self) -> Option<Rc<[T; N]>> {\n        if self.len() == N {\n            let ptr = Self::into_raw(self) as *const [T; N];\n\n            // SAFETY: The underlying array of a slice has the exact same layout as an actual array `[T; N]` if `N` is equal to the slice's length.\n            let me = unsafe { Rc::from_raw(ptr) };\n            Some(me)\n        } else {\n            None\n        }\n    }",
+  "mir": "fn rc::Rc::<[T]>::into_array(_1: rc::Rc<[T]>) -> core::option::Option<rc::Rc<[T; N]>> {\n    let mut _0: core::option::Option<rc::Rc<[T; N]>>;\n    let mut _2: bool;\n    let mut _3: usize;\n    let  _4: &[T];\n    let mut _5: &rc::Rc<[T]>;\n    let  _6: *const [T; N];\n    let mut _7: *const [T];\n    let mut _8: rc::Rc<[T]>;\n    let  _9: rc::Rc<[T; N]>;\n    let mut _10: bool;\n    debug self => _1;\n    debug ptr => _6;\n    debug me => _9;\n    bb0: {\n        _10 = false;\n        _10 = true;\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_5);\n        _5 = &_1;\n        _4 = <rc::Rc<[T]> as core::ops::Deref>::deref(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = PtrMetadata(_4);\n        _2 = Eq(move _3, N);\n        switchInt(move _2) -> [0: bb5, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_7);\n        StorageLive(_8);\n        _10 = false;\n        _8 = move _1;\n        _7 = rc::Rc::<[T]>::into_raw(move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        _6 = move _7 as *const [T; N];\n        StorageDead(_7);\n        _9 = rc::Rc::<[T; N]>::from_raw(_6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _0 = core::option::Option::Some(_9);\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_3);\n        _0 = core::option::Option::None;\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_2);\n        switchInt(_10) -> [0: bb7, otherwise: bb8];\n    }\n    bb7: {\n        return;\n    }\n    bb8: {\n        drop(_1) -> [return: bb7, unwind unreachable];\n    }\n}\n",
+  "doc": " Converts the reference-counted slice into a reference-counted array.\n\n This operation does not reallocate; the underlying array of the slice is simply reinterpreted as an array type.\n\n If `N` is not exactly equal to the length of `self`, then this method returns `None`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

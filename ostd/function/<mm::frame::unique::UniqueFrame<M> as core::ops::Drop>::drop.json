@@ -1,0 +1,97 @@
+{
+  "name": "<mm::frame::unique::UniqueFrame<M> as core::ops::Drop>::drop",
+  "safe": true,
+  "callees": {
+    "mm::frame::unique::UniqueFrame::<M>::slot": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "mm::frame::unique::UniqueFrame": "ImmutableAsArgument"
+      }
+    },
+    "core::sync::atomic::AtomicU64::store": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer.\n\n `store` takes an [`Ordering`] argument which describes the memory ordering of this operation.\n  Possible values are [`SeqCst`], [`Release`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Acquire`] or [`AcqRel`].\n\n # Examples\n\n ```\n\n\n some_var.store(10, Ordering::Relaxed);\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n",
+      "adt": {}
+    },
+    "mm::frame::meta::MetaSlot::drop_last_in_place": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Drops the metadata and deallocates the frame.\n\n # Safety\n\n The caller should ensure that:\n  - the reference count is `0` (so we are the sole owner of the frame);\n  - the metadata is initialized;\n",
+      "adt": {
+        "mm::frame::meta::MetaSlot": "ImmutableAsArgument"
+      }
+    },
+    "mm::frame::allocator::get_global_frame_allocator": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "mm::mem_obj::HasPaddr::paddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the start physical address of the memory object.\n",
+      "adt": {}
+    },
+    "mm::frame::allocator::GlobalFrameAllocator::dealloc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Deallocates a contiguous range of frames.\n\n The caller guarantees that `addr` and `size` are both aligned to\n [`PAGE_SIZE`]. The deallocated memory should always be allocated by\n [`GlobalFrameAllocator::alloc`]. However, if\n [`GlobalFrameAllocator::alloc`] returns multiple frames, it is possible\n that some of them are deallocated before others. The deallocated memory\n must never overlap with any memory that is already deallocated or\n added, without being allocated in between.\n\n The deallocated memory can be uninitialized.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::frame::unique::UniqueFrame": [
+      "Ref",
+      "Deref",
+      "MutRef"
+    ],
+    "mm::frame::meta::MetaSlot": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ],
+    "core::sync::atomic::AtomicU64": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 2017,
+  "span": "ostd/src/mm/frame/unique.rs:161:5: 168:6",
+  "src": "fn drop(&mut self) {\n        self.slot().ref_count.store(0, Ordering::Relaxed);\n        // SAFETY: We are the sole owner and the reference count is 0.\n        // The slot is initialized.\n        unsafe { self.slot().drop_last_in_place() };\n\n        super::allocator::get_global_frame_allocator().dealloc(self.paddr(), PAGE_SIZE);\n    }",
+  "mir": "fn <mm::frame::unique::UniqueFrame<M> as core::ops::Drop>::drop(_1: &mut mm::frame::unique::UniqueFrame<M>) -> () {\n    let mut _0: ();\n    let  _2: ();\n    let mut _3: &core::sync::atomic::AtomicU64;\n    let  _4: &mm::frame::meta::MetaSlot;\n    let mut _5: &mm::frame::unique::UniqueFrame<M>;\n    let mut _6: core::sync::atomic::Ordering;\n    let  _7: ();\n    let  _8: &mm::frame::meta::MetaSlot;\n    let mut _9: &mm::frame::unique::UniqueFrame<M>;\n    let  _10: ();\n    let  _11: &dyn mm::frame::allocator::GlobalFrameAllocator;\n    let mut _12: usize;\n    let mut _13: &&mut mm::frame::unique::UniqueFrame<M>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = mm::frame::unique::UniqueFrame::<M>::slot(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = &((*_4).1: core::sync::atomic::AtomicU64);\n        StorageLive(_6);\n        _6 = core::sync::atomic::Ordering::Relaxed;\n        _2 = core::sync::atomic::AtomicU64::store(move _3, 0_u64, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_3);\n        StorageDead(_4);\n        StorageLive(_9);\n        _9 = &(*_1);\n        _8 = mm::frame::unique::UniqueFrame::<M>::slot(move _9) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_9);\n        _7 = mm::frame::meta::MetaSlot::drop_last_in_place(_8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _11 = mm::frame::allocator::get_global_frame_allocator() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &_1;\n        _12 = <&mut mm::frame::unique::UniqueFrame<M> as mm::mem_obj::HasPaddr>::paddr(move _13) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_13);\n        _10 = <dyn mm::frame::allocator::GlobalFrameAllocator as mm::frame::allocator::GlobalFrameAllocator>::dealloc(_11, move _12, mm::PAGE_SIZE) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

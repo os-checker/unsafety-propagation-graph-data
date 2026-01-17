@@ -1,0 +1,76 @@
+{
+  "name": "<io::cursor::Cursor<T> as io::Read>::read_buf_exact",
+  "safe": true,
+  "callees": {
+    "core::io::BorrowedCursor::<'a>::written": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of bytes written to the `BorrowedBuf` this cursor was created from.\n\n In particular, the count returned is shared by all reborrows of the cursor.\n",
+      "adt": {}
+    },
+    "io::cursor::Cursor::<T>::split": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Splits the underlying slice at the cursor position and returns them.\n\n # Examples\n\n ```\n #![feature(cursor_split)]\n use std::io::Cursor;\n\n let mut buff = Cursor::new(vec![1, 2, 3, 4, 5]);\n\n assert_eq!(buff.split(), ([].as_slice(), [1, 2, 3, 4, 5].as_slice()));\n\n buff.set_position(2);\n assert_eq!(buff.split(), ([1, 2].as_slice(), [3, 4, 5].as_slice()));\n\n buff.set_position(6);\n assert_eq!(buff.split(), ([1, 2, 3, 4, 5].as_slice(), [].as_slice()));\n ```\n",
+      "adt": {
+        "io::cursor::Cursor": "ImmutableAsArgument"
+      }
+    },
+    "core::io::BorrowedCursor::<'a>::reborrow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reborrows this cursor by cloning it with a smaller lifetime.\n\n Since a cursor maintains unique access to its underlying buffer, the borrowed cursor is\n not accessible while the new cursor exists.\n",
+      "adt": {}
+    },
+    "io::Read::read_buf_exact": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the exact number of bytes required to fill `cursor`.\n\n This is similar to the [`read_exact`](Read::read_exact) method, except\n that it is passed a [`BorrowedCursor`] rather than `[u8]` to allow use\n with uninitialized buffers.\n\n # Errors\n\n If this function encounters an error of the kind [`ErrorKind::Interrupted`]\n then the error is ignored and the operation will continue.\n\n If this function encounters an \"end of file\" before completely filling\n the buffer, it returns an error of the kind [`ErrorKind::UnexpectedEof`].\n\n If any other read error is encountered then this function immediately\n returns.\n\n If this function returns an error, all bytes read will be appended to `cursor`.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::io::BorrowedCursor": [
+      "Ref",
+      "Plain",
+      "MutRef"
+    ],
+    "io::cursor::Cursor": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1430,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/cursor.rs:372:5: 379:6",
+  "src": "fn read_buf_exact(&mut self, mut cursor: BorrowedCursor<'_>) -> io::Result<()> {\n        let prev_written = cursor.written();\n\n        let result = Read::read_buf_exact(&mut Cursor::split(self).1, cursor.reborrow());\n        self.pos += (cursor.written() - prev_written) as u64;\n\n        result\n    }",
+  "mir": "fn <io::cursor::Cursor<T> as io::Read>::read_buf_exact(_1: &mut io::cursor::Cursor<T>, _2: core::io::BorrowedCursor<'_>) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let  _3: usize;\n    let mut _4: &core::io::BorrowedCursor<'_>;\n    let mut _5: &mut &[u8];\n    let mut _6: (&[u8], &[u8]);\n    let mut _7: &io::cursor::Cursor<T>;\n    let mut _8: core::io::BorrowedCursor<'_>;\n    let mut _9: &mut core::io::BorrowedCursor<'_>;\n    let mut _10: u64;\n    let mut _11: usize;\n    let mut _12: usize;\n    let mut _13: &core::io::BorrowedCursor<'_>;\n    let mut _14: (usize, bool);\n    let mut _15: (u64, bool);\n    debug self => _1;\n    debug cursor => _2;\n    debug prev_written => _3;\n    debug result => _0;\n    bb0: {\n        StorageLive(_4);\n        _4 = &_2;\n        _3 = core::io::BorrowedCursor::<'_>::written(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &(*_1);\n        _6 = io::cursor::Cursor::<T>::split(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = &mut (_6.1: &[u8]);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &mut _2;\n        _8 = core::io::BorrowedCursor::<'_>::reborrow(move _9) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_9);\n        _0 = <&[u8] as io::Read>::read_buf_exact(_5, move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        StorageDead(_6);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &_2;\n        _12 = core::io::BorrowedCursor::<'_>::written(move _13) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_13);\n        _14 = CheckedSub(_12, _3);\n        assert(!move (_14.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _12, _3) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _11 = move (_14.0: usize);\n        StorageDead(_12);\n        _10 = move _11 as u64;\n        StorageDead(_11);\n        _15 = CheckedAdd(((*_1).1: u64), _10);\n        assert(!move (_15.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).1: u64), move _10) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        ((*_1).1: u64) = move (_15.0: u64);\n        StorageDead(_10);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

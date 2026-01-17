@@ -1,0 +1,115 @@
+{
+  "name": "string::String::push",
+  "safe": true,
+  "callees": {
+    "string::String::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of this `String`, in bytes, not [`char`]s or\n graphemes. In other words, it might not be what a human considers the\n length of the string.\n\n # Examples\n\n ```\n let a = String::from(\"foo\");\n assert_eq!(a.len(), 3);\n\n let fancy_f = String::from(\"ƒoo\");\n assert_eq!(fancy_f.len(), 4);\n assert_eq!(fancy_f.chars().count(), 3);\n ```\n",
+      "adt": {
+        "string::String": "ImmutableAsArgument"
+      }
+    },
+    "core::char::methods::<impl char>::len_utf8": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of bytes this `char` would need if encoded in UTF-8.\n\n That number of bytes is always between 1 and 4, inclusive.\n\n # Examples\n\n Basic usage:\n\n ```\n let len = 'A'.len_utf8();\n assert_eq!(len, 1);\n\n let len = 'ß'.len_utf8();\n assert_eq!(len, 2);\n\n let len = 'ℝ'.len_utf8();\n assert_eq!(len, 3);\n\n let len = '💣'.len_utf8();\n assert_eq!(len, 4);\n ```\n\n The `&str` type guarantees that its contents are UTF-8, and so we can compare the length it\n would take if each code point was represented as a `char` vs in the `&str` itself:\n\n ```\n // as chars\n let eastern = '東';\n let capital = '京';\n\n // both can be represented as three bytes\n assert_eq!(3, eastern.len_utf8());\n assert_eq!(3, capital.len_utf8());\n\n // as a &str, these two are encoded in UTF-8\n let tokyo = \"東京\";\n\n let len = eastern.len_utf8() + capital.len_utf8();\n\n // we can see that they take six bytes total...\n assert_eq!(6, tokyo.len());\n\n // ... just like the &str\n assert_eq!(len, tokyo.len());\n ```\n",
+      "adt": {}
+    },
+    "string::String::reserve": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reserves capacity for at least `additional` bytes more than the\n current length. The allocator may reserve more space to speculatively\n avoid frequent allocations. After calling `reserve`,\n capacity will be greater than or equal to `self.len() + additional`.\n Does nothing if capacity is already sufficient.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n Basic usage:\n\n ```\n let mut s = String::new();\n\n s.reserve(10);\n\n assert!(s.capacity() >= 10);\n ```\n\n This might not actually increase the capacity:\n\n ```\n let mut s = String::with_capacity(10);\n s.push('a');\n s.push('b');\n\n // s now has a length of 2 and a capacity of at least 10\n let capacity = s.capacity();\n assert_eq!(2, s.len());\n assert!(capacity >= 10);\n\n // Since we already have at least an extra 8 capacity, calling this...\n s.reserve(8);\n\n // ... doesn't actually increase.\n assert_eq!(capacity, s.capacity());\n ```\n",
+      "adt": {
+        "string::String": "MutableAsArgument"
+      }
+    },
+    "vec::Vec::<T, A>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw mutable pointer to the vector's buffer, or a dangling\n raw pointer valid for zero sized reads if the vector didn't allocate.\n\n The caller must ensure that the vector outlives the pointer this\n function returns, or else it will end up dangling.\n Modifying the vector may cause its buffer to be reallocated,\n which would also make any pointers to it invalid.\n\n This method guarantees that for the purpose of the aliasing model, this method\n does not materialize a reference to the underlying slice, and thus the returned pointer\n will remain valid when mixed with other calls to [`as_ptr`], [`as_mut_ptr`],\n and [`as_non_null`].\n Note that calling other methods that materialize references to the slice,\n or references to specific elements you are planning on accessing through this pointer,\n may still invalidate this pointer.\n See the second example below for how this guarantee can be used.\n\n The method also guarantees that, as long as `T` is not zero-sized and the capacity is\n nonzero, the pointer may be passed into [`dealloc`] with a layout of\n `Layout::array::<T>(capacity)` in order to deallocate the backing memory. If this is done,\n be careful not to run the destructor of the `Vec`, as dropping it will result in\n double-frees. Wrapping the `Vec` in a [`ManuallyDrop`] is the typical way to achieve this.\n\n # Examples\n\n ```\n // Allocate vector big enough for 4 elements.\n let size = 4;\n let mut x: Vec<i32> = Vec::with_capacity(size);\n let x_ptr = x.as_mut_ptr();\n\n // Initialize elements via raw pointer writes, then set length.\n unsafe {\n     for i in 0..size {\n         *x_ptr.add(i) = i as i32;\n     }\n     x.set_len(size);\n }\n assert_eq!(&*x, &[0, 1, 2, 3]);\n ```\n\n Due to the aliasing guarantee, the following code is legal:\n\n ```rust\n unsafe {\n     let mut v = vec![0];\n     let ptr1 = v.as_mut_ptr();\n     ptr1.write(1);\n     let ptr2 = v.as_mut_ptr();\n     ptr2.write(2);\n     // Notably, the write to `ptr2` did *not* invalidate `ptr1`:\n     ptr1.write(3);\n }\n ```\n\n Deallocating a vector using [`Box`] (which uses [`dealloc`] internally):\n\n ```\n use std::mem::{ManuallyDrop, MaybeUninit};\n\n let mut v = ManuallyDrop::new(vec![0, 1, 2]);\n let ptr = v.as_mut_ptr();\n let capacity = v.capacity();\n let slice_ptr: *mut [MaybeUninit<i32>] =\n     std::ptr::slice_from_raw_parts_mut(ptr.cast(), capacity);\n drop(unsafe { Box::from_raw(slice_ptr) });\n ```\n\n [`as_mut_ptr`]: Vec::as_mut_ptr\n [`as_ptr`]: Vec::as_ptr\n [`as_non_null`]: Vec::as_non_null\n [`dealloc`]: crate::alloc::GlobalAlloc::dealloc\n [`ManuallyDrop`]: core::mem::ManuallyDrop\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::char::encode_utf8_raw_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Encodes a raw `u32` value as UTF-8 into the byte buffer pointed to by `dst`.\n\n Unlike `char::encode_utf8`, this method also handles codepoints in the surrogate range.\n (Creating a `char` in the surrogate range is UB.)\n The result is valid [generalized UTF-8] but not valid UTF-8.\n\n [generalized UTF-8]: https://simonsapin.github.io/wtf-8/#generalized-utf8\n\n # Safety\n\n The behavior is undefined if the buffer pointed to by `dst` is not\n large enough to hold the encoded codepoint. A buffer of length four\n is large enough to encode any `char`.\n\n For a safe version of this function, see the [`encode_utf8_raw`] function.\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::set_len": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forces the length of the vector to `new_len`.\n\n This is a low-level operation that maintains none of the normal\n invariants of the type. Normally changing the length of a vector\n is done using one of the safe operations instead, such as\n [`truncate`], [`resize`], [`extend`], or [`clear`].\n\n [`truncate`]: Vec::truncate\n [`resize`]: Vec::resize\n [`extend`]: Extend::extend\n [`clear`]: Vec::clear\n\n # Safety\n\n - `new_len` must be less than or equal to [`capacity()`].\n - The elements at `old_len..new_len` must be initialized.\n\n [`capacity()`]: Vec::capacity\n\n # Examples\n\n See [`spare_capacity_mut()`] for an example with safe\n initialization of capacity elements and use of this method.\n\n `set_len()` can be useful for situations in which the vector\n is serving as a buffer for other code, particularly over FFI:\n\n ```no_run\n # #![allow(dead_code)]\n # // This is just a minimal skeleton for the doc example;\n # // don't use this as a starting point for a real library.\n # pub struct StreamWrapper { strm: *mut std::ffi::c_void }\n # const Z_OK: i32 = 0;\n # unsafe extern \"C\" {\n #     fn deflateGetDictionary(\n #         strm: *mut std::ffi::c_void,\n #         dictionary: *mut u8,\n #         dictLength: *mut usize,\n #     ) -> i32;\n # }\n # impl StreamWrapper {\n pub fn get_dictionary(&self) -> Option<Vec<u8>> {\n     // Per the FFI method's docs, \"32768 bytes is always enough\".\n     let mut dict = Vec::with_capacity(32_768);\n     let mut dict_length = 0;\n     // SAFETY: When `deflateGetDictionary` returns `Z_OK`, it holds that:\n     // 1. `dict_length` elements were initialized.\n     // 2. `dict_length` <= the capacity (32_768)\n     // which makes `set_len` safe to call.\n     unsafe {\n         // Make the FFI call...\n         let r = deflateGetDictionary(self.strm, dict.as_mut_ptr(), &mut dict_length);\n         if r == Z_OK {\n             // ...and update the length to what was initialized.\n             dict.set_len(dict_length);\n             Some(dict)\n         } else {\n             None\n         }\n     }\n }\n # }\n ```\n\n While the following example is sound, there is a memory leak since\n the inner vectors were not freed prior to the `set_len` call:\n\n ```\n let mut vec = vec![vec![1, 0, 0],\n                    vec![0, 1, 0],\n                    vec![0, 0, 1]];\n // SAFETY:\n // 1. `old_len..0` is empty so no elements need to be initialized.\n // 2. `0 <= capacity` always holds whatever `capacity` is.\n unsafe {\n     vec.set_len(0);\n #   // FIXME(https://github.com/rust-lang/miri/issues/3670):\n #   // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n #   vec.set_len(3);\n }\n ```\n\n Normally, here, one would use [`clear`] instead to correctly drop\n the contents and thus not leak memory.\n\n [`spare_capacity_mut()`]: Vec::spare_capacity_mut\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "string::String": [
+      "Ref",
+      "Deref",
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "vec::Vec": [
+      "MutRef"
+    ]
+  },
+  "path": 1981,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:1402:5: 1412:6",
+  "src": "pub fn push(&mut self, ch: char) {\n        let len = self.len();\n        let ch_len = ch.len_utf8();\n        self.reserve(ch_len);\n\n        // SAFETY: Just reserved capacity for at least the length needed to encode `ch`.\n        unsafe {\n            core::char::encode_utf8_raw_unchecked(ch as u32, self.vec.as_mut_ptr().add(self.len()));\n            self.vec.set_len(len + ch_len);\n        }\n    }",
+  "mir": "fn string::String::push(_1: &mut string::String, _2: char) -> () {\n    let mut _0: ();\n    let  _3: usize;\n    let mut _4: &string::String;\n    let  _5: usize;\n    let  _6: ();\n    let  _7: ();\n    let mut _8: u32;\n    let mut _9: *mut u8;\n    let mut _10: *mut u8;\n    let mut _11: &mut vec::Vec<u8>;\n    let mut _12: usize;\n    let mut _13: &string::String;\n    let  _14: ();\n    let mut _15: &mut vec::Vec<u8>;\n    let mut _16: usize;\n    let mut _17: (usize, bool);\n    debug self => _1;\n    debug ch => _2;\n    debug len => _3;\n    debug ch_len => _5;\n    bb0: {\n        StorageLive(_4);\n        _4 = &(*_1);\n        _3 = string::String::len(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _5 = core::char::methods::<impl char>::len_utf8(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _6 = string::String::reserve(_1, _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_8);\n        _8 = _2 as u32;\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &mut ((*_1).0: vec::Vec<u8>);\n        _10 = vec::Vec::<u8>::as_mut_ptr(move _11) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &(*_1);\n        _12 = string::String::len(move _13) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_13);\n        _9 = core::ptr::mut_ptr::<impl *mut u8>::add(move _10, move _12) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_12);\n        StorageDead(_10);\n        _7 = core::char::encode_utf8_raw_unchecked(move _8, move _9) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_15);\n        _15 = &mut ((*_1).0: vec::Vec<u8>);\n        StorageLive(_16);\n        _17 = CheckedAdd(_3, _5);\n        assert(!move (_17.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _3, _5) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _16 = move (_17.0: usize);\n        _14 = vec::Vec::<u8>::set_len(move _15, move _16) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_16);\n        StorageDead(_15);\n        return;\n    }\n}\n",
+  "doc": " Appends the given [`char`] to the end of this `String`.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut s = String::from(\"abc\");\n\n s.push('1');\n s.push('2');\n s.push('3');\n\n assert_eq!(\"abc123\", s);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

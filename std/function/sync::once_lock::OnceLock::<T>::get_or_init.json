@@ -1,0 +1,38 @@
+{
+  "name": "sync::once_lock::OnceLock::<T>::get_or_init",
+  "safe": true,
+  "callees": {
+    "sync::once_lock::OnceLock::<T>::get_or_try_init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the contents of the cell, initializing it to `f()` if\n the cell was uninitialized. If the cell was uninitialized\n and `f()` failed, an error is returned.\n\n # Panics\n\n If `f()` panics, the panic is propagated to the caller, and\n the cell remains uninitialized.\n\n It is an error to reentrantly initialize the cell from `f`.\n The exact outcome is unspecified. Current implementation\n deadlocks, but this may be changed to a panic in the future.\n\n # Examples\n\n ```\n #![feature(once_cell_try)]\n\n use std::sync::OnceLock;\n\n let cell = OnceLock::new();\n assert_eq!(cell.get_or_try_init(|| Err(())), Err(()));\n assert!(cell.get().is_none());\n let value = cell.get_or_try_init(|| -> Result<i32, ()> {\n     Ok(92)\n });\n assert_eq!(value, Ok(&92));\n assert_eq!(cell.get(), Some(&92))\n ```\n",
+      "adt": {
+        "sync::once_lock::OnceLock": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sync::once_lock::OnceLock": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 419, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 9, kind: Param(ParamTy { index: 0, name: \"T\" }) }, Not)) })])"
+    ]
+  },
+  "path": 3175,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/once_lock.rs:316:5: 323:6",
+  "src": "pub fn get_or_init<F>(&self, f: F) -> &T\n    where\n        F: FnOnce() -> T,\n    {\n        match self.get_or_try_init(|| Ok::<T, !>(f())) {\n            Ok(val) => val,\n        }\n    }",
+  "mir": "fn sync::once_lock::OnceLock::<T>::get_or_init(_1: &sync::once_lock::OnceLock<T>, _2: F) -> &T {\n    let mut _0: &T;\n    let mut _3: core::result::Result<&T, !>;\n    let mut _4: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/once_lock.rs:320:36: 320:38};\n    debug self => _1;\n    debug f => _2;\n    debug val => _0;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/once_lock.rs:320:36: 320:38}(move _2);\n        _3 = sync::once_lock::OnceLock::<T>::get_or_try_init::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/once_lock.rs:320:36: 320:38}, !>(_1, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _0 = ((_3 as variant#0).0: &T);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Gets the contents of the cell, initializing it to `f()` if the cell\n was uninitialized.\n\n Many threads may call `get_or_init` concurrently with different\n initializing functions, but it is guaranteed that only one function\n will be executed if the function doesn't panic.\n\n # Panics\n\n If `f()` panics, the panic is propagated to the caller, and the cell\n remains uninitialized.\n\n It is an error to reentrantly initialize the cell from `f`. The\n exact outcome is unspecified. Current implementation deadlocks, but\n this may be changed to a panic in the future.\n\n # Examples\n\n ```\n use std::sync::OnceLock;\n\n let cell = OnceLock::new();\n let value = cell.get_or_init(|| 92);\n assert_eq!(value, &92);\n let value = cell.get_or_init(|| unreachable!());\n assert_eq!(value, &92);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

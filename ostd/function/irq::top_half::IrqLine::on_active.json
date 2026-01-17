@@ -1,0 +1,124 @@
+{
+  "name": "irq::top_half::IrqLine::on_active",
+  "safe": true,
+  "callees": {
+    "alloc::boxed::Box::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory on the heap and then places `x` into it.\n\n This doesn't actually allocate if `T` is zero-sized.\n\n # Examples\n\n ```\n let five = Box::new(5);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::from_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a reference to a raw pointer.\n\n For `r: &T`, `from_ref(r)` is equivalent to `r as *const T` (except for the caveat noted below),\n but is a bit safer since it will never silently change type or mutability, in particular if the\n code is refactored.\n\n The caller must ensure that the pointee outlives the pointer this function returns, or else it\n will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to is never\n written to (except inside an `UnsafeCell`) using this pointer or any pointer derived from it. If\n you need to mutate the pointee, use [`from_mut`]. Specifically, to turn a mutable reference `m:\n &mut T` into `*const T`, prefer `from_mut(m).cast_const()` to obtain a pointer that can later be\n used for mutation.\n\n ## Interaction with lifetime extension\n\n Note that this has subtle interactions with the rules for lifetime extension of temporaries in\n tail expressions. This code is valid, albeit in a non-obvious way:\n ```rust\n # type T = i32;\n # fn foo() -> T { 42 }\n // The temporary holding the return value of `foo` has its lifetime extended,\n // because the surrounding expression involves no function call.\n let p = &foo() as *const T;\n unsafe { p.read() };\n ```\n Naively replacing the cast with `from_ref` is not valid:\n ```rust,no_run\n # use std::ptr;\n # type T = i32;\n # fn foo() -> T { 42 }\n // The temporary holding the return value of `foo` does *not* have its lifetime extended,\n // because the surrounding expression involves a function call.\n let p = ptr::from_ref(&foo());\n unsafe { p.read() }; // UB! Reading from a dangling pointer ⚠️\n ```\n The recommended way to write this code is to avoid relying on lifetime extension\n when raw pointers are involved:\n ```rust\n # use std::ptr;\n # type T = i32;\n # fn foo() -> T { 42 }\n let x = foo();\n let p = ptr::from_ref(&x);\n unsafe { p.read() };\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "sync::rwlock::RwLock::<T, G>::write": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires a write lock and spin-wait until it can be acquired.\n\n The calling thread will spin-wait until there are no other writers,\n upreaders or readers present. There is no guarantee for the order\n in which other readers or writers waiting simultaneously will\n obtain the lock.\n",
+      "adt": {
+        "sync::rwlock::RwLock": "ImmutableAsArgument",
+        "sync::rwlock::RwLockWriteGuard": "Constructor"
+      }
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "alloc::vec::Vec::<T, A>::push": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Appends an element to the back of a collection.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut vec = vec![1, 2];\n vec.push(3);\n assert_eq!(vec, [1, 2, 3]);\n ```\n\n # Time complexity\n\n Takes amortized *O*(1) time. If the vector's length would exceed its\n capacity after the push, *O*(*capacity*) time is taken to copy the\n vector's elements to a larger allocation. This expensive operation is\n offset by the *capacity* *O*(1) insertions it allows.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc::boxed::Box": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 3816, kind: RigidTy(Adt(AdtDef(DefId { id: 3281, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 585, kind: Param(ParamTy { index: 0, name: \"F\" }) })]))) }), Field(0, Ty { id: 3817, kind: RigidTy(Adt(AdtDef(DefId { id: 3282, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 585, kind: Param(ParamTy { index: 0, name: \"F\" }) })]))) })])"
+    ],
+    "alloc::sync::Arc": [
+      "Ref"
+    ],
+    "irq::top_half::IrqLine": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "irq::top_half::InnerHandle": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "irq::top_half::Inner": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "sync::rwlock::RwLock": [
+      "Ref"
+    ],
+    "sync::rwlock::RwLockWriteGuard": [
+      "Plain",
+      "MutRef"
+    ],
+    "alloc::vec::Vec": [
+      "MutRef"
+    ],
+    "irq::top_half::CallbackHandle": [
+      "Plain"
+    ]
+  },
+  "path": 1836,
+  "span": "ostd/src/irq/top_half.rs:78:5: 96:6",
+  "src": "pub fn on_active<F>(&mut self, callback: F)\n    where\n        F: Fn(&TrapFrame) + Sync + Send + 'static,\n    {\n        let callback_handle = {\n            let callback_box = Box::new(callback);\n            let callback_addr = core::ptr::from_ref(&*callback_box).addr();\n\n            let mut callbacks = self.inner.callbacks.write();\n            callbacks.push(callback_box);\n\n            CallbackHandle {\n                irq_index: self.inner.index,\n                callback_addr,\n            }\n        };\n\n        self.callbacks.push(callback_handle);\n    }",
+  "mir": "fn irq::top_half::IrqLine::on_active(_1: &mut irq::top_half::IrqLine, _2: F) -> () {\n    let mut _0: ();\n    let  _3: irq::top_half::CallbackHandle;\n    let  _4: alloc::boxed::Box<F>;\n    let  _5: usize;\n    let mut _6: *const F;\n    let  _7: &F;\n    let mut _8: sync::rwlock::RwLockWriteGuard<'_, alloc::vec::Vec<alloc::boxed::Box<dyn for<'a> core::ops::Fn(&'a arch::trap::TrapFrame) + core::marker::Send + core::marker::Sync>>, sync::guard::WriteIrqDisabled>;\n    let mut _9: &sync::rwlock::RwLock<alloc::vec::Vec<alloc::boxed::Box<dyn for<'a> core::ops::Fn(&'a arch::trap::TrapFrame) + core::marker::Send + core::marker::Sync>>, sync::guard::WriteIrqDisabled>;\n    let  _10: &irq::top_half::Inner;\n    let  _11: &irq::top_half::InnerHandle;\n    let mut _12: &alloc::sync::Arc<irq::top_half::InnerHandle>;\n    let  _13: ();\n    let mut _14: &mut alloc::vec::Vec<alloc::boxed::Box<dyn for<'a> core::ops::Fn(&'a arch::trap::TrapFrame) + core::marker::Send + core::marker::Sync>>;\n    let mut _15: &mut sync::rwlock::RwLockWriteGuard<'_, alloc::vec::Vec<alloc::boxed::Box<dyn for<'a> core::ops::Fn(&'a arch::trap::TrapFrame) + core::marker::Send + core::marker::Sync>>, sync::guard::WriteIrqDisabled>;\n    let mut _16: alloc::boxed::Box<dyn for<'a> core::ops::Fn(&'a arch::trap::TrapFrame) + core::marker::Send + core::marker::Sync>;\n    let mut _17: u8;\n    let mut _18: &irq::top_half::InnerHandle;\n    let mut _19: &alloc::sync::Arc<irq::top_half::InnerHandle>;\n    let  _20: ();\n    let mut _21: &mut alloc::vec::Vec<irq::top_half::CallbackHandle>;\n    let mut _22: *const F;\n    debug self => _1;\n    debug callback => _2;\n    debug callback_handle => _3;\n    debug callback_box => _4;\n    debug callback_addr => _5;\n    debug callbacks => _8;\n    bb0: {\n        _4 = alloc::boxed::Box::<F>::new(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        _22 = ((_4.0: core::ptr::Unique<F>).0: core::ptr::NonNull<F>) as *const F;\n        _7 = &(*_22);\n        _6 = core::ptr::from_ref::<F>(_7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = core::ptr::const_ptr::<impl *const F>::addr(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_12);\n        _12 = &((*_1).0: alloc::sync::Arc<irq::top_half::InnerHandle>);\n        _11 = <alloc::sync::Arc<irq::top_half::InnerHandle> as core::ops::Deref>::deref(move _12) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _10 = <irq::top_half::InnerHandle as core::ops::Deref>::deref(_11) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        _9 = &((*_10).0: sync::rwlock::RwLock<alloc::vec::Vec<alloc::boxed::Box<dyn for<'a> core::ops::Fn(&'a arch::trap::TrapFrame) + core::marker::Send + core::marker::Sync>>, sync::guard::WriteIrqDisabled>);\n        _8 = sync::rwlock::RwLock::<alloc::vec::Vec<alloc::boxed::Box<dyn for<'a> core::ops::Fn(&'a arch::trap::TrapFrame) + core::marker::Send + core::marker::Sync>>, sync::guard::WriteIrqDisabled>::write(move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_9);\n        StorageDead(_10);\n        StorageLive(_15);\n        _15 = &mut _8;\n        _14 = <sync::rwlock::RwLockWriteGuard<'_, alloc::vec::Vec<alloc::boxed::Box<dyn for<'a> core::ops::Fn(&'a arch::trap::TrapFrame) + core::marker::Send + core::marker::Sync>>, sync::guard::WriteIrqDisabled> as core::ops::DerefMut>::deref_mut(move _15) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_15);\n        StorageLive(_16);\n        _16 = _4 as alloc::boxed::Box<dyn for<'a> core::ops::Fn(&'a arch::trap::TrapFrame) + core::marker::Send + core::marker::Sync>;\n        _13 = alloc::vec::Vec::<alloc::boxed::Box<dyn for<'a> core::ops::Fn(&'a arch::trap::TrapFrame) + core::marker::Send + core::marker::Sync>>::push(_14, move _16) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = &((*_1).0: alloc::sync::Arc<irq::top_half::InnerHandle>);\n        _18 = <alloc::sync::Arc<irq::top_half::InnerHandle> as core::ops::Deref>::deref(move _19) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_19);\n        _17 = ((*_18).0: u8);\n        _3 = CallbackHandle(move _17, _5);\n        StorageDead(_18);\n        StorageDead(_17);\n        drop(_8) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_8);\n        StorageLive(_21);\n        _21 = &mut ((*_1).1: alloc::vec::Vec<irq::top_half::CallbackHandle>);\n        _20 = alloc::vec::Vec::<irq::top_half::CallbackHandle>::push(move _21, _3) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_21);\n        return;\n    }\n}\n",
+  "doc": " Registers a callback that will be invoked when the IRQ is active.\n\n For each IRQ line, multiple callbacks may be registered.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

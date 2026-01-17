@@ -1,0 +1,53 @@
+{
+  "name": "<ops::range::Range<usize> as slice::index::SliceIndex<[T]>>::get_unchecked",
+  "safe": false,
+  "callees": {
+    "ptr::const_ptr::<impl *const [T]>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of a raw slice.\n\n The returned value is the number of **elements**, not the number of bytes.\n\n This function is safe, even when the raw slice cannot be cast to a slice\n reference because the pointer is null or unaligned.\n\n # Examples\n\n ```rust\n use std::ptr;\n\n let slice: *const [i8] = ptr::slice_from_raw_parts(ptr::null(), 3);\n assert_eq!(slice.len(), 3);\n ```\n",
+      "adt": {}
+    },
+    "<ops::range::Range<usize> as slice::index::SliceIndex<[T]>>::get_unchecked::precondition_check": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "slice::index::get_offset_len_noubcheck": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ops::range::Range": [
+      "Unknown([Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(1, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Plain"
+    ]
+  },
+  "path": 15512,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:392:5: 413:6",
+  "src": "unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {\n        assert_unsafe_precondition!(\n            check_library_ub,\n            \"slice::get_unchecked requires that the range is within the slice\",\n            (\n                start: usize = self.start,\n                end: usize = self.end,\n                len: usize = slice.len()\n            ) => end >= start && end <= len\n        );\n\n        // SAFETY: the caller guarantees that `slice` is not dangling, so it\n        // cannot be longer than `isize::MAX`. They also guarantee that\n        // `self` is in bounds of `slice` so `self` cannot overflow an `isize`,\n        // so the call to `add` is safe and the length calculation cannot overflow.\n        unsafe {\n            // Using the intrinsic avoids a superfluous UB check,\n            // since the one on this method already checked `end >= start`.\n            let new_len = crate::intrinsics::unchecked_sub(self.end, self.start);\n            get_offset_len_noubcheck(slice, self.start, new_len)\n        }\n    }",
+  "mir": "fn <ops::range::Range<usize> as slice::index::SliceIndex<[T]>>::get_unchecked(_1: ops::range::Range<usize>, _2: *const [T]) -> *const [T] {\n    let mut _0: *const [T];\n    let mut _3: bool;\n    let  _4: ();\n    let mut _5: usize;\n    let mut _6: usize;\n    let mut _7: usize;\n    let  _8: usize;\n    let mut _9: usize;\n    let mut _10: usize;\n    let mut _11: usize;\n    debug self => _1;\n    debug slice => _2;\n    debug new_len => _8;\n    bb0: {\n        StorageLive(_3);\n        _3 = RuntimeChecks(UbChecks)() \" \";\n        switchInt(move _3) -> [0: bb4, otherwise: bb1];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = (_1.0: usize);\n        StorageLive(_6);\n        _6 = (_1.1: usize);\n        StorageLive(_7);\n        _7 = ptr::const_ptr::<impl *const [T]>::len(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = <ops::range::Range<usize> as slice::index::SliceIndex<[T]>>::get_unchecked::precondition_check(move _5, move _6, move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_5);\n        goto -> bb4;\n    }\n    bb4: {\n        StorageDead(_3);\n        StorageLive(_9);\n        _9 = (_1.1: usize);\n        StorageLive(_10);\n        _10 = (_1.0: usize);\n        _8 = SubUnchecked(move _9, move _10);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_11);\n        _11 = (_1.0: usize);\n        _0 = slice::index::get_offset_len_noubcheck::<T>(_2, move _11, _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

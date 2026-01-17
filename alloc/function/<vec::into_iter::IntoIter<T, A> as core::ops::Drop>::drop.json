@@ -1,0 +1,47 @@
+{
+  "name": "<vec::into_iter::IntoIter<T, A> as core::ops::Drop>::drop",
+  "safe": true,
+  "callees": {
+    "vec::into_iter::IntoIter::<T, A>::as_raw_mut_slice": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "vec::into_iter::IntoIter": "MutableAsArgument"
+      }
+    },
+    "core::ptr::drop_in_place": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Executes the destructor (if any) of the pointed-to value.\n\n This is almost the same as calling [`ptr::read`] and discarding\n the result, but has the following advantages:\n\n * It is *required* to use `drop_in_place` to drop unsized types like\n   trait objects, because they can't be read out onto the stack and\n   dropped normally.\n\n * It is friendlier to the optimizer to do this over [`ptr::read`] when\n   dropping manually allocated memory (e.g., in the implementations of\n   `Box`/`Rc`/`Vec`), as the compiler doesn't need to prove that it's\n   sound to elide the copy.\n\n * It can be used to drop [pinned] data when `T` is not `repr(packed)`\n   (pinned data must not be moved before it is dropped).\n\n Unaligned values cannot be dropped in place, they must be copied to an aligned\n location first using [`ptr::read_unaligned`]. For packed structs, this move is\n done automatically by the compiler. This means the fields of packed structs\n are not dropped in-place.\n\n [`ptr::read`]: self::read\n [`ptr::read_unaligned`]: self::read_unaligned\n [pinned]: crate::pin\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `to_drop` must be [valid] for both reads and writes.\n\n * `to_drop` must be properly aligned, even if `T` has size 0.\n\n * `to_drop` must be nonnull, even if `T` has size 0.\n\n * The value `to_drop` points to must be valid for dropping, which may mean\n   it must uphold additional invariants. These invariants depend on the type\n   of the value being dropped. For instance, when dropping a Box, the box's\n   pointer to the heap must be valid.\n\n * While `drop_in_place` is executing, the only way to access parts of\n   `to_drop` is through the `&mut self` references supplied to the\n   `Drop::drop` methods that `drop_in_place` invokes.\n\n Additionally, if `T` is not [`Copy`], using the pointed-to value after\n calling `drop_in_place` can cause undefined behavior. Note that `*to_drop =\n foo` counts as a use because it will cause the value to be dropped\n again. [`write()`] can be used to overwrite data without causing it to be\n dropped.\n\n [valid]: self#safety\n\n # Examples\n\n Manually remove the last item from a vector:\n\n ```\n use std::ptr;\n use std::rc::Rc;\n\n let last = Rc::new(1);\n let weak = Rc::downgrade(&last);\n\n let mut v = vec![Rc::new(0), last];\n\n unsafe {\n     // Get a raw pointer to the last element in `v`.\n     let ptr = &mut v[1] as *mut _;\n     // Shorten `v` to prevent the last item from being dropped. We do that first,\n     // to prevent issues if the `drop_in_place` below panics.\n     v.set_len(1);\n     // Without a call `drop_in_place`, the last item would never be dropped,\n     // and the memory it manages would be leaked.\n     ptr::drop_in_place(ptr);\n }\n\n assert_eq!(v, &[0.into()]);\n\n // Ensure that the last item was dropped.\n assert!(weak.upgrade().is_none());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "<vec::into_iter::IntoIter<T, A> as core::ops::Drop>::drop::DropGuard": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 2244, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 2226, kind: RigidTy(Adt(AdtDef(DefId { id: 2905, name: \"vec::into_iter::IntoIter\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) }), Type(Ty { id: 21, kind: Param(ParamTy { index: 1, name: \"A\" }) })]))) }, Mut)) })])"
+    ],
+    "vec::into_iter::IntoIter": [
+      "MutRef"
+    ]
+  },
+  "path": 2253,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/into_iter.rs:493:5: 513:6",
+  "src": "fn drop(&mut self) {\n        struct DropGuard<'a, T, A: Allocator>(&'a mut IntoIter<T, A>);\n\n        impl<T, A: Allocator> Drop for DropGuard<'_, T, A> {\n            fn drop(&mut self) {\n                unsafe {\n                    // `IntoIter::alloc` is not used anymore after this and will be dropped by RawVec\n                    let alloc = ManuallyDrop::take(&mut self.0.alloc);\n                    // RawVec handles deallocation\n                    let _ = RawVec::from_nonnull_in(self.0.buf, self.0.cap, alloc);\n                }\n            }\n        }\n\n        let guard = DropGuard(self);\n        // destroy the remaining elements\n        unsafe {\n            ptr::drop_in_place(guard.0.as_raw_mut_slice());\n        }\n        // now `guard` will be dropped and do the rest\n    }",
+  "mir": "fn <vec::into_iter::IntoIter<T, A> as core::ops::Drop>::drop(_1: &mut vec::into_iter::IntoIter<T, A>) -> () {\n    let mut _0: ();\n    let  _2: <vec::into_iter::IntoIter<T, A> as core::ops::Drop>::drop::DropGuard<'_, T, A>;\n    let  _3: ();\n    let mut _4: *mut [T];\n    let mut _5: &mut vec::into_iter::IntoIter<T, A>;\n    debug self => _1;\n    debug guard => _2;\n    bb0: {\n        StorageLive(_2);\n        _2 = DropGuard(_1);\n        StorageLive(_4);\n        _5 = (_2.0: &mut vec::into_iter::IntoIter<T, A>);\n        _4 = vec::into_iter::IntoIter::<T, A>::as_raw_mut_slice(_5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = core::ptr::drop_in_place::<[T]>(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        drop(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

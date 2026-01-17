@@ -1,0 +1,85 @@
+{
+  "name": "<sync::Weak<T, A> as core::clone::Clone>::clone",
+  "safe": true,
+  "callees": {
+    "sync::Weak::<T, A>::inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `None` when the pointer is dangling and there is no allocated `ArcInner`,\n (i.e., when this `Weak` was created by `Weak::new`).\n",
+      "adt": {
+        "sync::Weak": "ImmutableAsArgument",
+        "core::option::Option": "Constructor",
+        "sync::WeakInner": "Constructor"
+      }
+    },
+    "core::sync::atomic::AtomicUsize::fetch_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds to the current value, returning the previous value.\n\n This operation wraps around on overflow.\n\n `fetch_add` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n assert_eq!(foo.fetch_add(10, Ordering::SeqCst), 0);\n assert_eq!(foo.load(Ordering::SeqCst), 10);\n ```\n",
+      "adt": {}
+    },
+    "core::intrinsics::abort": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Aborts the execution of the process.\n\n Note that, unlike most intrinsics, this is safe to call;\n it does not require an `unsafe` block.\n Therefore, implementations must not require the user to uphold\n any safety invariants.\n\n [`std::process::abort`](../../std/process/fn.abort.html) is to be preferred if possible,\n as its behavior is more user-friendly and more stable.\n\n The current implementation of `intrinsics::abort` is to invoke an invalid instruction,\n on most platforms.\n On Unix, the\n process will probably terminate with a signal like `SIGABRT`, `SIGILL`, `SIGTRAP`, `SIGSEGV` or\n `SIGBUS`.  The precise behavior is not guaranteed and not stable.\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::Weak": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 9740, kind: RigidTy(Adt(AdtDef(DefId { id: 5759, name: \"sync::WeakInner\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])"
+    ],
+    "sync::WeakInner": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 9469, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 9365, kind: RigidTy(Adt(AdtDef(DefId { id: 5675, name: \"core::sync::atomic::AtomicUsize\" }), GenericArgs([]))) }, Not)) })])"
+    ],
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 2158,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:3400:5: 3415:6",
+  "src": "fn clone(&self) -> Weak<T, A> {\n        if let Some(inner) = self.inner() {\n            // See comments in Arc::clone() for why this is relaxed. This can use a\n            // fetch_add (ignoring the lock) because the weak count is only locked\n            // where are *no other* weak pointers in existence. (So we can't be\n            // running this code in that case).\n            let old_size = inner.weak.fetch_add(1, Relaxed);\n\n            // See comments in Arc::clone() for why we do this (for mem::forget).\n            if old_size > MAX_REFCOUNT {\n                abort();\n            }\n        }\n\n        Weak { ptr: self.ptr, alloc: self.alloc.clone() }\n    }",
+  "mir": "fn <sync::Weak<T, A> as core::clone::Clone>::clone(_1: &sync::Weak<T, A>) -> sync::Weak<T, A> {\n    let mut _0: sync::Weak<T, A>;\n    let mut _2: core::option::Option<sync::WeakInner<'_>>;\n    let mut _3: isize;\n    let  _4: sync::WeakInner<'_>;\n    let  _5: usize;\n    let mut _6: core::sync::atomic::Ordering;\n    let mut _7: bool;\n    let  _8: !;\n    let mut _9: core::ptr::NonNull<sync::ArcInner<T>>;\n    let mut _10: A;\n    let mut _11: &A;\n    let mut _12: &core::sync::atomic::AtomicUsize;\n    debug self => _1;\n    debug inner => _4;\n    debug old_size => _5;\n    bb0: {\n        StorageLive(_2);\n        _2 = sync::Weak::<T, A>::inner(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = discriminant(_2);\n        switchInt(move _3) -> [1: bb2, 0: bb6, otherwise: bb9];\n    }\n    bb2: {\n        StorageLive(_4);\n        _4 = move ((_2 as variant#1).0: sync::WeakInner<'_>);\n        _12 = (_4.0: &core::sync::atomic::AtomicUsize);\n        StorageLive(_6);\n        _6 = core::sync::atomic::Ordering::Relaxed;\n        _5 = core::sync::atomic::AtomicUsize::fetch_add(_12, 1_usize, move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageLive(_7);\n        _7 = Gt(_5, sync::MAX_REFCOUNT);\n        switchInt(move _7) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        _8 = core::intrinsics::abort() -> unwind unreachable;\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageDead(_4);\n        StorageDead(_2);\n        goto -> bb7;\n    }\n    bb6: {\n        StorageDead(_2);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageLive(_9);\n        _9 = ((*_1).0: core::ptr::NonNull<sync::ArcInner<T>>);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &((*_1).1: A);\n        _10 = <A as core::clone::Clone>::clone(move _11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        _0 = Weak(move _9, move _10);\n        StorageDead(_10);\n        StorageDead(_9);\n        return;\n    }\n    bb9: {\n        unreachable;\n    }\n}\n",
+  "doc": " Makes a clone of the `Weak` pointer that points to the same allocation.\n\n # Examples\n\n ```\n use std::sync::{Arc, Weak};\n\n let weak_five = Arc::downgrade(&Arc::new(5));\n\n let _ = Weak::clone(&weak_five);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "name": "sync::mpmc::context::Context::unpark",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "thread::thread::Thread::unpark": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Atomically makes the handle's token available if it is not already.\n\n Every thread is equipped with some basic low-level blocking support, via\n the [`park`] function and the `unpark()` method. These can be used as a\n more CPU-efficient implementation of a spinlock.\n\n See the [park documentation] for more details.\n\n # Examples\n\n ```\n use std::thread;\n use std::time::Duration;\n use std::sync::atomic::{AtomicBool, Ordering};\n\n static QUEUED: AtomicBool = AtomicBool::new(false);\n\n let parked_thread = thread::Builder::new()\n     .spawn(|| {\n         println!(\"Parking thread\");\n         QUEUED.store(true, Ordering::Release);\n         thread::park();\n         println!(\"Thread unparked\");\n     })\n     .unwrap();\n\n // Let some time pass for the thread to be spawned.\n thread::sleep(Duration::from_millis(10));\n\n // Wait until the other thread is queued.\n // This is crucial! It guarantees that the `unpark` below is not consumed\n // by some other code in the parked thread (e.g. inside `println!`).\n while !QUEUED.load(Ordering::Acquire) {\n     // Spinning is of course inefficient; in practice, this would more likely be\n     // a dequeue where we have no work to do if there's nobody queued.\n     std::hint::spin_loop();\n }\n\n println!(\"Unpark the thread\");\n parked_thread.thread().unpark();\n\n parked_thread.join().unwrap();\n ```\n\n [`park`]: super::park\n [park documentation]: super::park\n",
+      "adt": {
+        "thread::thread::Thread": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "alloc_crate::sync::Arc": [
+      "Ref"
+    ],
+    "sync::mpmc::context::Context": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "sync::mpmc::context::Inner": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))"
+    ],
+    "thread::thread::Thread": [
+      "Ref"
+    ]
+  },
+  "path": 2811,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/context.rs:150:5: 152:6",
+  "src": "pub fn unpark(&self) {\n        self.inner.thread.unpark();\n    }",
+  "mir": "fn sync::mpmc::context::Context::unpark(_1: &sync::mpmc::context::Context) -> () {\n    let mut _0: ();\n    let  _2: ();\n    let mut _3: &thread::thread::Thread;\n    let  _4: &sync::mpmc::context::Inner;\n    let mut _5: &alloc_crate::sync::Arc<sync::mpmc::context::Inner>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_1).0: alloc_crate::sync::Arc<sync::mpmc::context::Inner>);\n        _4 = <alloc_crate::sync::Arc<sync::mpmc::context::Inner> as core::ops::Deref>::deref(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = &((*_4).2: thread::thread::Thread);\n        _2 = thread::thread::Thread::unpark(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Unparks the thread this context belongs to.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "pin::helper::PinHelper",
+  "constructors": [],
+  "access_self_as_arg": {
+    "read": [],
+    "write": [
+      "<pin::helper::PinHelper<Ptr> as pin::helper::PinDerefMutHelper>::deref_mut"
+    ],
+    "other": []
+  },
+  "access_self_as_locals": {
+    "read": [],
+    "write": [
+      "<pin::Pin<Ptr> as ops::deref::DerefMut>::deref_mut"
+    ],
+    "other": []
+  },
+  "access_field": [
+    {
+      "read": [],
+      "write": [
+        "<pin::helper::PinHelper<Ptr> as pin::helper::PinDerefMutHelper>::deref_mut"
+      ],
+      "other": []
+    }
+  ],
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/pin.rs:1714:5: 1714:30",
+  "src": "pub struct PinHelper<Ptr>",
+  "kind": "Struct",
+  "doc_adt": " Helper that prevents downstream crates from implementing `DerefMut` for `Pin`.\n\n The `Pin` type implements the unsafe trait `PinCoerceUnsized`, which essentially requires\n that the type does not have a malicious `Deref` or `DerefMut` impl. However, without this\n helper module, downstream crates are able to write `impl DerefMut for Pin<LocalType>` as\n long as it does not overlap with the impl provided by stdlib. This is because `Pin` is\n `#[fundamental]`, so stdlib promises to never implement traits for `Pin` that it does not\n implement today.\n\n However, this is problematic. Downstream crates could implement `DerefMut` for\n `Pin<&LocalType>`, and they could do so maliciously. To prevent this, the implementation for\n `Pin` delegates to this helper module. Since `helper::Pin` is not `#[fundamental]`, the\n orphan rules assume that stdlib might implement `helper::DerefMut` for `helper::Pin<&_>` in\n the future. Because of this, downstream crates can no longer provide an implementation of\n `DerefMut` for `Pin<&_>`, as it might overlap with a trait impl that, according to the\n orphan rules, the stdlib could introduce without a breaking change in a future release.\n\n See <https://github.com/rust-lang/rust/issues/85099> for the issue this fixes.\n",
+  "variant_fields": {
+    "VariantIdx(None)-FieldIdx(Some(0))": {
+      "name": "pointer",
+      "doc": ""
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "name": "<slice::iter::RChunksMut<'a, T> as iter::traits::iterator::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "ptr::mut_ptr::<impl *mut [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the raw slice has a length of 0.\n\n # Examples\n\n ```\n use std::ptr;\n\n let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);\n assert!(!slice.is_empty());\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of a raw slice.\n\n The returned value is the number of **elements**, not the number of bytes.\n\n This function is safe, even when the raw slice cannot be cast to a slice\n reference because the pointer is null or unaligned.\n\n # Examples\n\n ```rust\n use std::ptr;\n\n let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);\n assert_eq!(slice.len(), 3);\n ```\n",
+      "adt": {}
+    },
+    "num::<impl usize>::saturating_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Saturating integer subtraction. Computes `self - rhs`, saturating\n at the numeric bounds instead of overflowing.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::split_at_mut_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable raw slice into two at an index, without doing bounds checking.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Safety\n\n `mid` must be [in-bounds] of the underlying [allocation].\n Which means `self` must be dereferenceable and span a single allocation\n that is at least `mid * size_of::<T>()` bytes long. Not upholding these\n requirements is *[undefined behavior]* even if the resulting pointers are not used.\n\n [in-bounds]: #method.add\n [out-of-bounds index]: #method.add\n [allocation]: crate::ptr#allocation\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n #![feature(raw_slice_split)]\n\n let mut v = [1, 0, 3, 0, 5, 6];\n // scoped to restrict the lifetime of the borrows\n unsafe {\n     let ptr = &mut v as *mut [_];\n     let (left, right) = ptr.split_at_mut_unchecked(2);\n     assert_eq!(&*left, [1, 0]);\n     assert_eq!(&*right, [3, 0, 5, 6]);\n     (&mut *left)[1] = 2;\n     (&mut *right)[1] = 4;\n }\n assert_eq!(v, [1, 2, 3, 4, 5, 6]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::RChunksMut": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 16547,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:2465:5: 2477:6",
+  "src": "fn next(&mut self) -> Option<&'a mut [T]> {\n        if self.v.is_empty() {\n            None\n        } else {\n            let idx = self.v.len().saturating_sub(self.chunk_size);\n            // SAFETY: self.chunk_size() > 0, so 0 <= idx < self.v.len().\n            // Thus `idx` is in-bounds for `self.v` and can be used as a valid argument for `split_at_mut_unchecked`.\n            let (rest, chunk) = unsafe { self.v.split_at_mut_unchecked(idx) };\n            self.v = rest;\n            // SAFETY: Nothing else points to or will point to the contents of this slice.\n            Some(unsafe { &mut *chunk })\n        }\n    }",
+  "mir": "fn <slice::iter::RChunksMut<'a, T> as iter::traits::iterator::Iterator>::next(_1: &mut slice::iter::RChunksMut<'_, T>) -> option::Option<&mut [T]> {\n    let mut _0: option::Option<&mut [T]>;\n    let mut _2: bool;\n    let mut _3: *mut [T];\n    let  _4: usize;\n    let mut _5: usize;\n    let mut _6: *mut [T];\n    let mut _7: usize;\n    let  _8: *mut [T];\n    let  _9: *mut [T];\n    let mut _10: (*mut [T], *mut [T]);\n    let mut _11: *mut [T];\n    let mut _12: &mut [T];\n    debug self => _1;\n    debug idx => _4;\n    debug rest => _8;\n    debug chunk => _9;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = ((*_1).0: *mut [T]);\n        _2 = ptr::mut_ptr::<impl *mut [T]>::is_empty(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = option::Option::None;\n        goto -> bb7;\n    }\n    bb3: {\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = ((*_1).0: *mut [T]);\n        _5 = ptr::mut_ptr::<impl *mut [T]>::len(move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageLive(_7);\n        _7 = ((*_1).1: usize);\n        _4 = num::<impl usize>::saturating_sub(move _5, move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = ((*_1).0: *mut [T]);\n        _10 = ptr::mut_ptr::<impl *mut [T]>::split_at_mut_unchecked(move _11, _4) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        _8 = (_10.0: *mut [T]);\n        StorageLive(_9);\n        _9 = (_10.1: *mut [T]);\n        StorageDead(_10);\n        ((*_1).0: *mut [T]) = _8;\n        _12 = &mut (*_9);\n        _0 = option::Option::Some(_12);\n        StorageDead(_9);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

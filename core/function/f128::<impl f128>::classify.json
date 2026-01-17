@@ -1,0 +1,41 @@
+{
+  "name": "f128::<impl f128>::classify",
+  "safe": true,
+  "callees": {
+    "f128::<impl f128>::to_bits": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unnecessary_transmutes"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unnecessary_transmutes\n"
+        ]
+      },
+      "doc": " Raw transmutation to `u128`.\n\n This is currently identical to `transmute::<f128, u128>(self)` on all platforms.\n\n See [`from_bits`](#method.from_bits) for some discussion of the\n portability of this operation (there are almost no issues).\n\n Note that this function is distinct from `as` casting, which attempts to\n preserve the *numeric* value, and not the bitwise value.\n\n ```\n #![feature(f128)]\n\n # // FIXME(f16_f128): enable this once const casting works\n # // assert_ne!((1f128).to_bits(), 1f128 as u128); // to_bits() is not casting!\n assert_eq!((12.5f128).to_bits(), 0x40029000000000000000000000000000);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "num::FpCategory": [
+      "Plain"
+    ]
+  },
+  "path": 1551,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/f128.rs:436:5: 445:6",
+  "src": "pub const fn classify(self) -> FpCategory {\n        let bits = self.to_bits();\n        match (bits & Self::MAN_MASK, bits & Self::EXP_MASK) {\n            (0, Self::EXP_MASK) => FpCategory::Infinite,\n            (_, Self::EXP_MASK) => FpCategory::Nan,\n            (0, 0) => FpCategory::Zero,\n            (_, 0) => FpCategory::Subnormal,\n            _ => FpCategory::Normal,\n        }\n    }",
+  "mir": "fn f128::<impl f128>::classify(_1: f128) -> num::FpCategory {\n    let mut _0: num::FpCategory;\n    let  _2: u128;\n    let mut _3: (u128, u128);\n    let mut _4: u128;\n    let mut _5: u128;\n    debug self => _1;\n    debug bits => _2;\n    bb0: {\n        _2 = f128::<impl f128>::to_bits(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = BitAnd(_2, f128::<impl f128>::MAN_MASK);\n        StorageLive(_5);\n        _5 = BitAnd(_2, f128::<impl f128>::EXP_MASK);\n        _3 = (move _4, move _5);\n        StorageDead(_5);\n        StorageDead(_4);\n        switchInt((_3.0: u128)) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        switchInt((_3.1: u128)) -> [170135991163610696904058773219554885632: bb8, 0: bb5, otherwise: bb4];\n    }\n    bb3: {\n        switchInt((_3.1: u128)) -> [170135991163610696904058773219554885632: bb9, otherwise: bb2];\n    }\n    bb4: {\n        _0 = num::FpCategory::Normal;\n        goto -> bb10;\n    }\n    bb5: {\n        switchInt((_3.0: u128)) -> [0: bb7, otherwise: bb6];\n    }\n    bb6: {\n        _0 = num::FpCategory::Subnormal;\n        goto -> bb10;\n    }\n    bb7: {\n        _0 = num::FpCategory::Zero;\n        goto -> bb10;\n    }\n    bb8: {\n        _0 = num::FpCategory::Nan;\n        goto -> bb10;\n    }\n    bb9: {\n        _0 = num::FpCategory::Infinite;\n        goto -> bb10;\n    }\n    bb10: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Returns the floating point category of the number. If only one property\n is going to be tested, it is generally faster to use the specific\n predicate instead.\n\n ```\n #![feature(f128)]\n # // FIXME(f16_f128): remove when `eqtf2` is available\n # #[cfg(all(target_arch = \"x86_64\", target_os = \"linux\"))] {\n\n use std::num::FpCategory;\n\n let num = 12.4_f128;\n let inf = f128::INFINITY;\n\n assert_eq!(num.classify(), FpCategory::Normal);\n assert_eq!(inf.classify(), FpCategory::Infinite);\n # }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

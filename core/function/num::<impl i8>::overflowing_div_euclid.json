@@ -1,0 +1,37 @@
+{
+  "name": "num::<impl i8>::overflowing_div_euclid",
+  "safe": true,
+  "callees": {
+    "intrinsics::unlikely": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Hints to the compiler that branch condition is likely to be false.\n Returns the value passed to it.\n\n Any use other than with `if` statements will probably not have an effect.\n\n Note that, unlike most intrinsics, this is safe to call;\n it does not require an `unsafe` block.\n Therefore, implementations must not require the user to uphold\n any safety invariants.\n\n This intrinsic does not have a stable counterpart.\n",
+      "adt": {}
+    },
+    "num::<impl i8>::div_euclid": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calculates the quotient of Euclidean division of `self` by `rhs`.\n\n This computes the integer `q` such that `self = q * rhs + r`, with\n `r = self.rem_euclid(rhs)` and `0 <= r < abs(rhs)`.\n\n In other words, the result is `self / rhs` rounded to the integer `q`\n such that `self >= q * rhs`.\n If `self > 0`, this is equal to rounding towards zero (the default in Rust);\n if `self < 0`, this is equal to rounding away from zero (towards +/- infinity).\n If `rhs > 0`, this is equal to rounding towards -infinity;\n if `rhs < 0`, this is equal to rounding towards +infinity.\n\n # Panics\n\n This function will panic if `rhs` is zero or if `self` is `Self::MIN`\n and `rhs` is -1. This behavior is not affected by the `overflow-checks` flag.\n\n # Examples\n\n ```\n let b = 4;\n\n assert_eq!(a.div_euclid(b), 1); // 7 >= 4 * 1\n assert_eq!(a.div_euclid(-b), -1); // 7 >= -4 * -1\n assert_eq!((-a).div_euclid(b), -2); // -7 >= 4 * -2\n assert_eq!((-a).div_euclid(-b), 2); // -7 >= -4 * 2\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 2785,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/int_macros.rs:2821:9: 2828:10",
+  "src": "pub const fn overflowing_div_euclid(self, rhs: Self) -> (Self, bool) {\n            // Using `&` helps LLVM see that it is the same check made in division.\n            if intrinsics::unlikely((self == Self::MIN) & (rhs == -1)) {\n                (self, true)\n            } else {\n                (self.div_euclid(rhs), false)\n            }\n        }",
+  "mir": "fn num::<impl i8>::overflowing_div_euclid(_1: i8, _2: i8) -> (i8, bool) {\n    let mut _0: (i8, bool);\n    let mut _3: bool;\n    let mut _4: bool;\n    let mut _5: bool;\n    let mut _6: bool;\n    let mut _7: i8;\n    debug self => _1;\n    debug rhs => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = Eq(_1, num::<impl i8>::MIN);\n        StorageLive(_6);\n        _6 = Eq(_2, -1_i8);\n        _4 = BitAnd(move _5, move _6);\n        StorageDead(_6);\n        StorageDead(_5);\n        _3 = intrinsics::unlikely(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = (_1, true);\n        goto -> bb5;\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageLive(_7);\n        _7 = num::<impl i8>::div_euclid(_1, _2) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _0 = (move _7, false);\n        StorageDead(_7);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Calculates the quotient of Euclidean division `self.div_euclid(rhs)`.\n\n Returns a tuple of the divisor along with a boolean indicating whether an arithmetic overflow would\n occur. If an overflow would occur then `self` is returned.\n\n # Panics\n\n This function will panic if `rhs` is zero.\n\n # Examples\n\n ```\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "name": "collections::vec_deque::VecDeque::<T, A>::truncate",
+  "safe": true,
+  "callees": {
+    "collections::vec_deque::VecDeque::<T, A>::as_mut_slices": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a pair of slices which contain, in order, the contents of the\n deque.\n\n If [`make_contiguous`] was previously called, all elements of the\n deque will be in the first slice and the second slice will be empty.\n Otherwise, the exact split point depends on implementation details\n and is not guaranteed.\n\n [`make_contiguous`]: VecDeque::make_contiguous\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut deque = VecDeque::new();\n\n deque.push_back(0);\n deque.push_back(1);\n\n deque.push_front(10);\n deque.push_front(9);\n\n // Since the split point is not guaranteed, we may need to update\n // either slice.\n let mut update_nth = |index: usize, val: u32| {\n     let (front, back) = deque.as_mut_slices();\n     if index > front.len() - 1 {\n         back[index - front.len()] = val;\n     } else {\n         front[index] = val;\n     }\n };\n\n update_nth(0, 42);\n update_nth(2, 24);\n\n let v: Vec<_> = deque.into();\n assert_eq!(v, [42, 10, 24, 1]);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    },
+    "core::slice::<impl [T]>::get_unchecked_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to an element or subslice, without doing\n bounds checking.\n\n For a safe alternative see [`get_mut`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used.\n\n You can think of this like `.get_mut(index).unwrap_unchecked()`.  It's\n UB to call `.get_unchecked_mut(len)`, even if you immediately convert\n to a pointer.  And it's UB to call `.get_unchecked_mut(..len + 1)`,\n `.get_unchecked_mut(..=len)`, or similar.\n\n [`get_mut`]: slice::get_mut\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n\n unsafe {\n     let elem = x.get_unchecked_mut(1);\n     *elem = 13;\n }\n assert_eq!(x, &[1, 13, 4]);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::drop_in_place": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Executes the destructor (if any) of the pointed-to value.\n\n This is almost the same as calling [`ptr::read`] and discarding\n the result, but has the following advantages:\n\n * It is *required* to use `drop_in_place` to drop unsized types like\n   trait objects, because they can't be read out onto the stack and\n   dropped normally.\n\n * It is friendlier to the optimizer to do this over [`ptr::read`] when\n   dropping manually allocated memory (e.g., in the implementations of\n   `Box`/`Rc`/`Vec`), as the compiler doesn't need to prove that it's\n   sound to elide the copy.\n\n * It can be used to drop [pinned] data when `T` is not `repr(packed)`\n   (pinned data must not be moved before it is dropped).\n\n Unaligned values cannot be dropped in place, they must be copied to an aligned\n location first using [`ptr::read_unaligned`]. For packed structs, this move is\n done automatically by the compiler. This means the fields of packed structs\n are not dropped in-place.\n\n [`ptr::read`]: self::read\n [`ptr::read_unaligned`]: self::read_unaligned\n [pinned]: crate::pin\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `to_drop` must be [valid] for both reads and writes.\n\n * `to_drop` must be properly aligned, even if `T` has size 0.\n\n * `to_drop` must be nonnull, even if `T` has size 0.\n\n * The value `to_drop` points to must be valid for dropping, which may mean\n   it must uphold additional invariants. These invariants depend on the type\n   of the value being dropped. For instance, when dropping a Box, the box's\n   pointer to the heap must be valid.\n\n * While `drop_in_place` is executing, the only way to access parts of\n   `to_drop` is through the `&mut self` references supplied to the\n   `Drop::drop` methods that `drop_in_place` invokes.\n\n Additionally, if `T` is not [`Copy`], using the pointed-to value after\n calling `drop_in_place` can cause undefined behavior. Note that `*to_drop =\n foo` counts as a use because it will cause the value to be dropped\n again. [`write()`] can be used to overwrite data without causing it to be\n dropped.\n\n [valid]: self#safety\n\n # Examples\n\n Manually remove the last item from a vector:\n\n ```\n use std::ptr;\n use std::rc::Rc;\n\n let last = Rc::new(1);\n let weak = Rc::downgrade(&last);\n\n let mut v = vec![Rc::new(0), last];\n\n unsafe {\n     // Get a raw pointer to the last element in `v`.\n     let ptr = &mut v[1] as *mut _;\n     // Shorten `v` to prevent the last item from being dropped. We do that first,\n     // to prevent issues if the `drop_in_place` below panics.\n     v.set_len(1);\n     // Without a call `drop_in_place`, the last item would never be dropped,\n     // and the memory it manages would be leaked.\n     ptr::drop_in_place(ptr);\n }\n\n assert_eq!(v, &[0.into()]);\n\n // Ensure that the last item was dropped.\n assert!(weak.upgrade().is_none());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "core::ops::RangeFrom": [
+      "Plain"
+    ],
+    "collections::vec_deque::VecDeque<T, A>::truncate::Dropper": [
+      "Plain"
+    ]
+  },
+  "path": 1530,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:1357:5: 1399:6",
+  "src": "pub fn truncate(&mut self, len: usize) {\n        /// Runs the destructor for all items in the slice when it gets dropped (normally or\n        /// during unwinding).\n        struct Dropper<'a, T>(&'a mut [T]);\n\n        impl<'a, T> Drop for Dropper<'a, T> {\n            fn drop(&mut self) {\n                unsafe {\n                    ptr::drop_in_place(self.0);\n                }\n            }\n        }\n\n        // Safe because:\n        //\n        // * Any slice passed to `drop_in_place` is valid; the second case has\n        //   `len <= front.len()` and returning on `len > self.len()` ensures\n        //   `begin <= back.len()` in the first case\n        // * The head of the VecDeque is moved before calling `drop_in_place`,\n        //   so no value is dropped twice if `drop_in_place` panics\n        unsafe {\n            if len >= self.len {\n                return;\n            }\n\n            let (front, back) = self.as_mut_slices();\n            if len > front.len() {\n                let begin = len - front.len();\n                let drop_back = back.get_unchecked_mut(begin..) as *mut _;\n                self.len = len;\n                ptr::drop_in_place(drop_back);\n            } else {\n                let drop_back = back as *mut _;\n                let drop_front = front.get_unchecked_mut(len..) as *mut _;\n                self.len = len;\n\n                // Make sure the second half is dropped even when a destructor\n                // in the first one panics.\n                let _back_dropper = Dropper(&mut *drop_back);\n                ptr::drop_in_place(drop_front);\n            }\n        }\n    }",
+  "mir": "fn collections::vec_deque::VecDeque::<T, A>::truncate(_1: &mut collections::vec_deque::VecDeque<T, A>, _2: usize) -> () {\n    let mut _0: ();\n    let mut _3: bool;\n    let mut _4: usize;\n    let  _5: &mut [T];\n    let  _6: &mut [T];\n    let mut _7: (&mut [T], &mut [T]);\n    let mut _8: bool;\n    let mut _9: usize;\n    let mut _10: &[T];\n    let  _11: usize;\n    let mut _12: usize;\n    let mut _13: &[T];\n    let mut _14: (usize, bool);\n    let mut _15: *mut [T];\n    let mut _16: &mut [T];\n    let mut _17: core::ops::RangeFrom<usize>;\n    let  _18: ();\n    let mut _19: *mut [T];\n    let mut _20: *mut [T];\n    let mut _21: &mut [T];\n    let mut _22: core::ops::RangeFrom<usize>;\n    let  _23: collections::vec_deque::VecDeque<T, A>::truncate::Dropper<'_, T>;\n    let mut _24: &mut [T];\n    let  _25: ();\n    debug self => _1;\n    debug len => _2;\n    debug front => _5;\n    debug back => _6;\n    debug begin => _11;\n    debug drop_back => _15;\n    debug drop_back => _19;\n    debug drop_front => _20;\n    debug _back_dropper => _23;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).1: usize);\n        _3 = Ge(_2, move _4);\n        switchInt(move _3) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb13;\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_7);\n        _7 = collections::vec_deque::VecDeque::<T, A>::as_mut_slices(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _5 = move (_7.0: &mut [T]);\n        _6 = move (_7.1: &mut [T]);\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &(*_5);\n        _9 = PtrMetadata(move _10);\n        StorageDead(_10);\n        _8 = Gt(_2, move _9);\n        switchInt(move _8) -> [0: bb8, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_9);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &(*_5);\n        _12 = PtrMetadata(move _13);\n        StorageDead(_13);\n        _14 = CheckedSub(_2, _12);\n        assert(!move (_14.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _2, move _12) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _11 = move (_14.0: usize);\n        StorageDead(_12);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = RangeFrom(_11);\n        _16 = core::slice::<impl [T]>::get_unchecked_mut::<core::ops::RangeFrom<usize>>(_6, move _17) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _15 = &raw mut (*_16);\n        StorageDead(_17);\n        StorageDead(_16);\n        ((*_1).1: usize) = _2;\n        _18 = core::ptr::drop_in_place::<[T]>(_15) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        goto -> bb12;\n    }\n    bb8: {\n        StorageDead(_9);\n        _19 = &raw mut (*_6);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = RangeFrom(_2);\n        _21 = core::slice::<impl [T]>::get_unchecked_mut::<core::ops::RangeFrom<usize>>(_5, move _22) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _20 = &raw mut (*_21);\n        StorageDead(_22);\n        StorageDead(_21);\n        ((*_1).1: usize) = _2;\n        StorageLive(_23);\n        _24 = &mut (*_19);\n        _23 = Dropper(_24);\n        _25 = core::ptr::drop_in_place::<[T]>(_20) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        drop(_23) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_23);\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_8);\n        goto -> bb13;\n    }\n    bb13: {\n        return;\n    }\n}\n",
+  "doc": " Shortens the deque, keeping the first `len` elements and dropping\n the rest.\n\n If `len` is greater or equal to the deque's current length, this has\n no effect.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut buf = VecDeque::new();\n buf.push_back(5);\n buf.push_back(10);\n buf.push_back(15);\n assert_eq!(buf, [5, 10, 15]);\n buf.truncate(1);\n assert_eq!(buf, [5]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

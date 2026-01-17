@@ -1,0 +1,74 @@
+{
+  "name": "mm::io::VmReader::<'a, mm::io::Infallible>::from_kernel_space",
+  "safe": false,
+  "callees": {
+    "core::ptr::const_ptr::<impl *const T>::addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "core::num::<impl usize>::checked_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checked integer addition. Computes `self + rhs`, returning `None`\n if overflow occurred.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::wrapping_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds an unsigned offset to a pointer using wrapping arithmetic.\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n This operation itself is always safe, but using the resulting pointer is not.\n\n The resulting pointer \"remembers\" the [allocation] that `self` points to; it must not\n be used to read or write other allocations.\n\n In other words, `let z = x.wrapping_add((y as usize) - (x as usize))` does *not* make `z`\n the same as `y` even if we assume `T` has size `1` and there is no overflow: `z` is still\n attached to the object `x` is attached to, and dereferencing it is Undefined Behavior unless\n `x` and `y` point into the same allocation.\n\n Compared to [`add`], this method basically delays the requirement of staying within the\n same allocation: [`add`] is immediate Undefined Behavior when crossing object\n boundaries; `wrapping_add` produces a pointer but still leads to Undefined Behavior if a\n pointer is dereferenced when it is out-of-bounds of the object it is attached to. [`add`]\n can be optimized better and is thus preferable in performance-sensitive code.\n\n The delayed check only considers the value of the pointer that was dereferenced, not the\n intermediate values used during the computation of the final result. For example,\n `x.wrapping_add(o).wrapping_sub(o)` is always the same as `x`. In other words, leaving the\n allocation and then re-entering it later is permitted.\n\n [`add`]: #method.add\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n # use std::fmt::Write;\n // Iterate using a raw pointer in increments of two elements\n let data = [1u8, 2, 3, 4, 5];\n let mut ptr: *const u8 = data.as_ptr();\n let step = 2;\n let end_rounded_up = ptr.wrapping_add(6);\n\n let mut out = String::new();\n while ptr != end_rounded_up {\n     unsafe {\n         write!(&mut out, \"{}, \", *ptr)?;\n     }\n     ptr = ptr.wrapping_add(step);\n }\n assert_eq!(out, \"1, 3, 5, \");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain"
+    ],
+    "mm::io::VmReader": [
+      "Plain"
+    ]
+  },
+  "path": 2125,
+  "span": "ostd/src/mm/io.rs:437:5: 449:6",
+  "src": "pub unsafe fn from_kernel_space(ptr: *const u8, len: usize) -> Self {\n        // Rust is allowed to give the reference to a zero-sized object a very small address,\n        // falling out of the kernel virtual address space range.\n        // So when `len` is zero, we should not and need not to check `ptr`.\n        debug_assert!(len == 0 || KERNEL_BASE_VADDR <= ptr.addr());\n        debug_assert!(len == 0 || ptr.addr().checked_add(len).unwrap() <= KERNEL_END_VADDR);\n\n        Self {\n            cursor: ptr,\n            end: ptr.wrapping_add(len),\n            phantom: PhantomData,\n        }\n    }",
+  "mir": "fn mm::io::VmReader::<'a, mm::io::Infallible>::from_kernel_space(_1: *const u8, _2: usize) -> mm::io::VmReader<'_, mm::io::Infallible> {\n    let mut _0: mm::io::VmReader<'_, mm::io::Infallible>;\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: !;\n    let mut _6: bool;\n    let mut _7: usize;\n    let mut _8: core::option::Option<usize>;\n    let mut _9: usize;\n    let mut _10: !;\n    let mut _11: *const u8;\n    debug ptr => _1;\n    debug len => _2;\n    bb0: {\n        switchInt(_2) -> [0: bb1, otherwise: bb2];\n    }\n    bb1: {\n        goto -> bb6;\n    }\n    bb2: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = core::ptr::const_ptr::<impl *const u8>::addr(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _3 = Le(mm::kspace::KERNEL_BASE_VADDR, move _4);\n        switchInt(move _3) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_4);\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_4);\n        _5 = core::panicking::panic(\"assertion failed: len == 0 || KERNEL_BASE_VADDR <= ptr.addr()\") -> unwind unreachable;\n    }\n    bb6: {\n        StorageDead(_3);\n        switchInt(_2) -> [0: bb7, otherwise: bb8];\n    }\n    bb7: {\n        goto -> bb14;\n    }\n    bb8: {\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = core::ptr::const_ptr::<impl *const u8>::addr(_1) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _8 = core::num::<impl usize>::checked_add(move _9, _2) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_9);\n        _7 = core::option::Option::<usize>::unwrap(move _8) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_8);\n        _6 = Le(move _7, mm::kspace::KERNEL_END_VADDR);\n        switchInt(move _6) -> [0: bb13, otherwise: bb12];\n    }\n    bb12: {\n        StorageDead(_7);\n        goto -> bb14;\n    }\n    bb13: {\n        StorageDead(_7);\n        _10 = core::panicking::panic(\"assertion failed: len == 0 || ptr.addr().checked_add(len).unwrap() <= KERNEL_END_VADDR\") -> unwind unreachable;\n    }\n    bb14: {\n        StorageDead(_6);\n        StorageLive(_11);\n        _11 = core::ptr::const_ptr::<impl *const u8>::wrapping_add(_1, _2) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        _0 = VmReader(_1, move _11, core::marker::PhantomData::<(&[u8], mm::io::Infallible)>);\n        StorageDead(_11);\n        return;\n    }\n}\n",
+  "doc": " Constructs a `VmReader` from a pointer and a length, which represents\n a memory range in kernel space.\n\n # Safety\n\n `ptr` must be [valid] for reads of `len` bytes during the entire lifetime `a`.\n\n [valid]: crate::mm::io#safety\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

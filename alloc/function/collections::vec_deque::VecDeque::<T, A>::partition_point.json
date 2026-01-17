@@ -1,0 +1,67 @@
+{
+  "name": "collections::vec_deque::VecDeque::<T, A>::partition_point",
+  "safe": true,
+  "callees": {
+    "collections::vec_deque::VecDeque::<T, A>::as_slices": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a pair of slices which contain, in order, the contents of the\n deque.\n\n If [`make_contiguous`] was previously called, all elements of the\n deque will be in the first slice and the second slice will be empty.\n Otherwise, the exact split point depends on implementation details\n and is not guaranteed.\n\n [`make_contiguous`]: VecDeque::make_contiguous\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut deque = VecDeque::new();\n\n deque.push_back(0);\n deque.push_back(1);\n deque.push_back(2);\n\n let expected = [0, 1, 2];\n let (front, back) = deque.as_slices();\n assert_eq!(&expected[..front.len()], front);\n assert_eq!(&expected[front.len()..], back);\n\n deque.push_front(10);\n deque.push_front(9);\n\n let expected = [9, 10, 0, 1, 2];\n let (front, back) = deque.as_slices();\n assert_eq!(&expected[..front.len()], front);\n assert_eq!(&expected[front.len()..], back);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "core::slice::<impl [T]>::first": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the first element of the slice, or `None` if it is empty.\n\n # Examples\n\n ```\n let v = [10, 40, 30];\n assert_eq!(Some(&10), v.first());\n\n let w: &[i32] = &[];\n assert_eq!(None, w.first());\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).\n\n # Examples\n\n Calculates the length of an <code>Option<[String]></code> as an\n <code>Option<[usize]></code>, consuming the original:\n\n [String]: ../../std/string/struct.String.html \"String\"\n ```\n let maybe_some_string = Some(String::from(\"Hello, World!\"));\n // `Option::map` takes self *by value*, consuming `maybe_some_string`\n let maybe_some_len = maybe_some_string.map(|s| s.len());\n assert_eq!(maybe_some_len, Some(13));\n\n let x: Option<&str> = None;\n assert_eq!(x.map(|s| s.len()), None);\n ```\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::partition_point": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the index of the partition point according to the given predicate\n (the index of the first element of the second partition).\n\n The slice is assumed to be partitioned according to the given predicate.\n This means that all elements for which the predicate returns true are at the start of the slice\n and all elements for which the predicate returns false are at the end.\n For example, `[7, 15, 3, 5, 4, 12, 6]` is partitioned under the predicate `x % 2 != 0`\n (all odd numbers are at the start, all even at the end).\n\n If this slice is not partitioned, the returned result is unspecified and meaningless,\n as this method performs a kind of binary search.\n\n See also [`binary_search`], [`binary_search_by`], and [`binary_search_by_key`].\n\n [`binary_search`]: slice::binary_search\n [`binary_search_by`]: slice::binary_search_by\n [`binary_search_by_key`]: slice::binary_search_by_key\n\n # Examples\n\n ```\n let v = [1, 2, 3, 3, 5, 6, 7];\n let i = v.partition_point(|&x| x < 5);\n\n assert_eq!(i, 4);\n assert!(v[..i].iter().all(|&x| x < 5));\n assert!(v[i..].iter().all(|&x| !(x < 5)));\n ```\n\n If all elements of the slice match the predicate, including if the slice\n is empty, then the length of the slice will be returned:\n\n ```\n let a = [2, 4, 8];\n assert_eq!(a.partition_point(|x| x < &100), a.len());\n let a: [i32; 0] = [];\n assert_eq!(a.partition_point(|x| x < &100), 0);\n ```\n\n If you want to insert an item to a sorted vector, while maintaining\n sort order:\n\n ```\n let mut s = vec![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55];\n let num = 42;\n let idx = s.partition_point(|&x| x <= num);\n s.insert(idx, num);\n assert_eq!(s, [0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 42, 55]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 11, kind: RigidTy(Bool) })])"
+    ]
+  },
+  "path": 1495,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:3207:5: 3218:6",
+  "src": "pub fn partition_point<P>(&self, mut pred: P) -> usize\n    where\n        P: FnMut(&T) -> bool,\n    {\n        let (front, back) = self.as_slices();\n\n        if let Some(true) = back.first().map(|v| pred(v)) {\n            back.partition_point(pred) + front.len()\n        } else {\n            front.partition_point(pred)\n        }\n    }",
+  "mir": "fn collections::vec_deque::VecDeque::<T, A>::partition_point(_1: &collections::vec_deque::VecDeque<T, A>, _2: P) -> usize {\n    let mut _0: usize;\n    let  _3: &[T];\n    let  _4: &[T];\n    let mut _5: (&[T], &[T]);\n    let mut _6: core::option::Option<bool>;\n    let mut _7: core::option::Option<&T>;\n    let mut _8: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:3213:46: 3213:49};\n    let mut _9: &mut P;\n    let mut _10: isize;\n    let mut _11: usize;\n    let mut _12: P;\n    let mut _13: usize;\n    let mut _14: (usize, bool);\n    let mut _15: P;\n    debug self => _1;\n    debug pred => _2;\n    debug front => _3;\n    debug back => _4;\n    bb0: {\n        StorageLive(_5);\n        _5 = collections::vec_deque::VecDeque::<T, A>::as_slices(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = (_5.0: &[T]);\n        _4 = (_5.1: &[T]);\n        StorageDead(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = core::slice::<impl [T]>::first(_4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &mut _2;\n        _8 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:3213:46: 3213:49}(move _9);\n        StorageDead(_9);\n        _6 = core::option::Option::<&T>::map::<bool, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:3213:46: 3213:49}>(move _7, move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageDead(_7);\n        _10 = discriminant(_6);\n        switchInt(move _10) -> [1: bb4, 0: bb8, otherwise: bb11];\n    }\n    bb4: {\n        switchInt(((_6 as variant#1).0: bool)) -> [0: bb8, otherwise: bb5];\n    }\n    bb5: {\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = move _2;\n        _11 = core::slice::<impl [T]>::partition_point::<P>(_4, move _12) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_12);\n        StorageLive(_13);\n        _13 = PtrMetadata(_3);\n        _14 = CheckedAdd(_11, _13);\n        assert(!move (_14.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _11, move _13) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _0 = move (_14.0: usize);\n        StorageDead(_13);\n        StorageDead(_11);\n        StorageDead(_6);\n        goto -> bb10;\n    }\n    bb8: {\n        StorageDead(_6);\n        StorageLive(_15);\n        _15 = move _2;\n        _0 = core::slice::<impl [T]>::partition_point::<P>(_3, move _15) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_15);\n        goto -> bb10;\n    }\n    bb10: {\n        return;\n    }\n    bb11: {\n        unreachable;\n    }\n}\n",
+  "doc": " Returns the index of the partition point according to the given predicate\n (the index of the first element of the second partition).\n\n The deque is assumed to be partitioned according to the given predicate.\n This means that all elements for which the predicate returns true are at the start of the deque\n and all elements for which the predicate returns false are at the end.\n For example, `[7, 15, 3, 5, 4, 12, 6]` is partitioned under the predicate `x % 2 != 0`\n (all odd numbers are at the start, all even at the end).\n\n If the deque is not partitioned, the returned result is unspecified and meaningless,\n as this method performs a kind of binary search.\n\n See also [`binary_search`], [`binary_search_by`], and [`binary_search_by_key`].\n\n [`binary_search`]: VecDeque::binary_search\n [`binary_search_by`]: VecDeque::binary_search_by\n [`binary_search_by_key`]: VecDeque::binary_search_by_key\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let deque: VecDeque<_> = [1, 2, 3, 3, 5, 6, 7].into();\n let i = deque.partition_point(|&x| x < 5);\n\n assert_eq!(i, 4);\n assert!(deque.iter().take(i).all(|&x| x < 5));\n assert!(deque.iter().skip(i).all(|&x| !(x < 5)));\n ```\n\n If you want to insert an item to a sorted deque, while maintaining\n sort order:\n\n ```\n use std::collections::VecDeque;\n\n let mut deque: VecDeque<_> = [0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55].into();\n let num = 42;\n let idx = deque.partition_point(|&x| x < num);\n deque.insert(idx, num);\n assert_eq!(deque, &[0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 42, 55]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

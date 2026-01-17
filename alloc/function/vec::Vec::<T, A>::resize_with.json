@@ -1,0 +1,85 @@
+{
+  "name": "vec::Vec::<T, A>::resize_with",
+  "safe": true,
+  "callees": {
+    "vec::Vec::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the vector, also referred to\n as its 'length'.\n\n # Examples\n\n ```\n let a = vec![1, 2, 3];\n assert_eq!(a.len(), 3);\n ```\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "core::iter::repeat_with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new iterator that repeats elements of type `A` endlessly by\n applying the provided closure, the repeater, `F: FnMut() -> A`.\n\n The `repeat_with()` function calls the repeater over and over again.\n\n Infinite iterators like `repeat_with()` are often used with adapters like\n [`Iterator::take()`], in order to make them finite.\n\n If the element type of the iterator you need implements [`Clone`], and\n it is OK to keep the source element in memory, you should instead use\n the [`repeat()`] function.\n\n An iterator produced by `repeat_with()` is not a [`DoubleEndedIterator`].\n If you need `repeat_with()` to return a [`DoubleEndedIterator`],\n please open a GitHub issue explaining your use case.\n\n [`repeat()`]: crate::iter::repeat\n\n # Examples\n\n Basic usage:\n\n ```\n use std::iter;\n\n // let's assume we have some value of a type that is not `Clone`\n // or which we don't want to have in memory just yet because it is expensive:\n #[derive(PartialEq, Debug)]\n struct Expensive;\n\n // a particular value forever:\n let mut things = iter::repeat_with(|| Expensive);\n\n assert_eq!(Some(Expensive), things.next());\n assert_eq!(Some(Expensive), things.next());\n assert_eq!(Some(Expensive), things.next());\n assert_eq!(Some(Expensive), things.next());\n assert_eq!(Some(Expensive), things.next());\n ```\n\n Using mutation and going finite:\n\n ```rust\n use std::iter;\n\n // From the zeroth to the third power of two:\n let mut curr = 1;\n let mut pow2 = iter::repeat_with(|| { let tmp = curr; curr *= 2; tmp })\n                     .take(4);\n\n assert_eq!(Some(1), pow2.next());\n assert_eq!(Some(2), pow2.next());\n assert_eq!(Some(4), pow2.next());\n assert_eq!(Some(8), pow2.next());\n\n // ... and now we're done\n assert_eq!(None, pow2.next());\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator that yields the first `n` elements, or fewer\n if the underlying iterator ends sooner.\n\n `take(n)` yields elements until `n` elements are yielded or the end of\n the iterator is reached (whichever happens first).\n The returned iterator is a prefix of length `n` if the original iterator\n contains at least `n` elements, otherwise it contains all of the\n (fewer than `n`) elements of the original iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter().take(2);\n\n assert_eq!(iter.next(), Some(1));\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), None);\n ```\n\n `take()` is often used with an infinite iterator, to make it finite:\n\n ```\n let mut iter = (0..).take(3);\n\n assert_eq!(iter.next(), Some(0));\n assert_eq!(iter.next(), Some(1));\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), None);\n ```\n\n If less than `n` elements are available,\n `take` will limit itself to the size of the underlying iterator:\n\n ```\n let v = [1, 2];\n let mut iter = v.into_iter().take(5);\n assert_eq!(iter.next(), Some(1));\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), None);\n ```\n\n Use [`by_ref`] to take from the iterator without consuming it, and then\n continue using the original iterator:\n\n ```\n let mut words = [\"hello\", \"world\", \"of\", \"Rust\"].into_iter();\n\n // Take the first two words.\n let hello_world: Vec<_> = words.by_ref().take(2).collect();\n assert_eq!(hello_world, vec![\"hello\", \"world\"]);\n\n // Collect the rest of the words.\n // We can only do this because we used `by_ref` earlier.\n let of_rust: Vec<_> = words.collect();\n assert_eq!(of_rust, vec![\"of\", \"Rust\"]);\n ```\n\n [`by_ref`]: Iterator::by_ref\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::extend_trusted": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "vec::Vec::<T, A>::truncate": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Shortens the vector, keeping the first `len` elements and dropping\n the rest.\n\n If `len` is greater or equal to the vector's current length, this has\n no effect.\n\n The [`drain`] method can emulate `truncate`, but causes the excess\n elements to be returned instead of dropped.\n\n Note that this method has no effect on the allocated capacity\n of the vector.\n\n # Examples\n\n Truncating a five element vector to two elements:\n\n ```\n let mut vec = vec![1, 2, 3, 4, 5];\n vec.truncate(2);\n assert_eq!(vec, [1, 2]);\n ```\n\n No truncation occurs when `len` is greater than the vector's current\n length:\n\n ```\n let mut vec = vec![1, 2, 3];\n vec.truncate(8);\n assert_eq!(vec, [1, 2, 3]);\n ```\n\n Truncating when `len == 0` is equivalent to calling the [`clear`]\n method.\n\n ```\n let mut vec = vec![1, 2, 3];\n vec.truncate(0);\n assert_eq!(vec, []);\n ```\n\n [`clear`]: Vec::clear\n [`drain`]: Vec::drain\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Ref",
+      "Deref",
+      "MutRef"
+    ],
+    "core::iter::RepeatWith": [
+      "Plain"
+    ],
+    "core::iter::Take": [
+      "Plain"
+    ]
+  },
+  "path": 2388,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:2974:5: 2984:6",
+  "src": "pub fn resize_with<F>(&mut self, new_len: usize, f: F)\n    where\n        F: FnMut() -> T,\n    {\n        let len = self.len();\n        if new_len > len {\n            self.extend_trusted(iter::repeat_with(f).take(new_len - len));\n        } else {\n            self.truncate(new_len);\n        }\n    }",
+  "mir": "fn vec::Vec::<T, A>::resize_with(_1: &mut vec::Vec<T, A>, _2: usize, _3: F) -> () {\n    let mut _0: ();\n    let  _4: usize;\n    let mut _5: &vec::Vec<T, A>;\n    let mut _6: bool;\n    let  _7: ();\n    let mut _8: core::iter::Take<core::iter::RepeatWith<F>>;\n    let mut _9: core::iter::RepeatWith<F>;\n    let mut _10: F;\n    let mut _11: usize;\n    let mut _12: (usize, bool);\n    let  _13: ();\n    let mut _14: bool;\n    debug self => _1;\n    debug new_len => _2;\n    debug f => _3;\n    debug len => _4;\n    bb0: {\n        _14 = false;\n        _14 = true;\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = vec::Vec::<T, A>::len(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageLive(_6);\n        _6 = Gt(_2, _4);\n        switchInt(move _6) -> [0: bb7, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _14 = false;\n        _10 = move _3;\n        _9 = core::iter::repeat_with::<T, F>(move _10) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        StorageLive(_11);\n        _12 = CheckedSub(_2, _4);\n        assert(!move (_12.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _2, _4) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _11 = move (_12.0: usize);\n        _8 = <core::iter::RepeatWith<F> as core::iter::Iterator>::take(move _9, move _11) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        StorageDead(_9);\n        _7 = vec::Vec::<T, A>::extend_trusted::<core::iter::Take<core::iter::RepeatWith<F>>>(_1, move _8) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_8);\n        goto -> bb9;\n    }\n    bb7: {\n        _13 = vec::Vec::<T, A>::truncate(_1, _2) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_6);\n        switchInt(_14) -> [0: bb10, otherwise: bb11];\n    }\n    bb10: {\n        return;\n    }\n    bb11: {\n        drop(_3) -> [return: bb10, unwind unreachable];\n    }\n}\n",
+  "doc": " Resizes the `Vec` in-place so that `len` is equal to `new_len`.\n\n If `new_len` is greater than `len`, the `Vec` is extended by the\n difference, with each additional slot filled with the result of\n calling the closure `f`. The return values from `f` will end up\n in the `Vec` in the order they have been generated.\n\n If `new_len` is less than `len`, the `Vec` is simply truncated.\n\n This method uses a closure to create new values on every push. If\n you'd rather [`Clone`] a given value, use [`Vec::resize`]. If you\n want to use the [`Default`] trait to generate values, you can\n pass [`Default::default`] as the second argument.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut vec = vec![1, 2, 3];\n vec.resize_with(5, Default::default);\n assert_eq!(vec, [1, 2, 3, 0, 0]);\n\n let mut vec = vec![];\n let mut p = 1;\n vec.resize_with(4, || { p *= 2; p });\n assert_eq!(vec, [2, 4, 8, 16]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

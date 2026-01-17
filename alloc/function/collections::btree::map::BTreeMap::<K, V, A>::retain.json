@@ -1,0 +1,57 @@
+{
+  "name": "collections::btree::map::BTreeMap::<K, V, A>::retain",
+  "safe": true,
+  "callees": {
+    "collections::btree::map::BTreeMap::<K, V, A>::extract_if": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator that visits elements (key-value pairs) in the specified range in\n ascending key order and uses a closure to determine if an element\n should be removed.\n\n If the closure returns `true`, the element is removed from the map and\n yielded. If the closure returns `false`, or panics, the element remains\n in the map and will not be yielded.\n\n The iterator also lets you mutate the value of each element in the\n closure, regardless of whether you choose to keep or remove it.\n\n If the returned `ExtractIf` is not exhausted, e.g. because it is dropped without iterating\n or the iteration short-circuits, then the remaining elements will be retained.\n Use `extract_if().for_each(drop)` if you do not need the returned iterator,\n or [`retain`] with a negated predicate if you also do not need to restrict the range.\n\n [`retain`]: BTreeMap::retain\n\n # Examples\n\n ```\n use std::collections::BTreeMap;\n\n // Splitting a map into even and odd keys, reusing the original map:\n let mut map: BTreeMap<i32, i32> = (0..8).map(|x| (x, x)).collect();\n let evens: BTreeMap<_, _> = map.extract_if(.., |k, _v| k % 2 == 0).collect();\n let odds = map;\n assert_eq!(evens.keys().copied().collect::<Vec<_>>(), [0, 2, 4, 6]);\n assert_eq!(odds.keys().copied().collect::<Vec<_>>(), [1, 3, 5, 7]);\n\n // Splitting a map into low and high halves, reusing the original map:\n let mut map: BTreeMap<i32, i32> = (0..8).map(|x| (x, x)).collect();\n let low: BTreeMap<_, _> = map.extract_if(0..4, |_k, _v| true).collect();\n let high = map;\n assert_eq!(low.keys().copied().collect::<Vec<_>>(), [0, 1, 2, 3]);\n assert_eq!(high.keys().copied().collect::<Vec<_>>(), [4, 5, 6, 7]);\n ```\n",
+      "adt": {
+        "collections::btree::map::BTreeMap": "MutableAsArgument",
+        "collections::btree::map::ExtractIf": "Constructor"
+      }
+    },
+    "core::iter::Iterator::for_each": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calls a closure on each element of an iterator.\n\n This is equivalent to using a [`for`] loop on the iterator, although\n `break` and `continue` are not possible from a closure. It's generally\n more idiomatic to use a `for` loop, but `for_each` may be more legible\n when processing items at the end of longer iterator chains. In some\n cases `for_each` may also be faster than a loop, because it will use\n internal iteration on adapters like `Chain`.\n\n [`for`]: ../../book/ch03-05-control-flow.html#looping-through-a-collection-with-for\n\n # Examples\n\n Basic usage:\n\n ```\n use std::sync::mpsc::channel;\n\n let (tx, rx) = channel();\n (0..5).map(|x| x * 2 + 1)\n       .for_each(move |x| tx.send(x).unwrap());\n\n let v: Vec<_> = rx.iter().collect();\n assert_eq!(v, vec![1, 3, 5, 7, 9]);\n ```\n\n For such a small example, a `for` loop may be cleaner, but `for_each`\n might be preferable to keep a functional style with longer iterators:\n\n ```\n (0..5).flat_map(|x| (x * 100)..(x * 110))\n       .enumerate()\n       .filter(|&(i, x)| (i + x) % 3 == 0)\n       .for_each(|(i, x)| println!(\"{i}:{x}\"));\n ```\n",
+      "adt": {}
+    },
+    "core::mem::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disposes of a value.\n\n This effectively does nothing for types which implement `Copy`, e.g.\n integers. Such values are copied and _then_ moved into the function, so the\n value persists after this function call.\n\n This function is not magic; it is literally defined as\n\n ```\n pub fn drop<T>(_x: T) {}\n ```\n\n Because `_x` is moved into the function, it is automatically [dropped][drop] before\n the function returns.\n\n [drop]: Drop\n\n # Examples\n\n Basic usage:\n\n ```\n let v = vec![1, 2, 3];\n\n drop(v); // explicitly drop the vector\n ```\n\n Since [`RefCell`] enforces the borrow rules at runtime, `drop` can\n release a [`RefCell`] borrow:\n\n ```\n use std::cell::RefCell;\n\n let x = RefCell::new(1);\n\n let mut mutable_borrow = x.borrow_mut();\n *mutable_borrow = 1;\n\n drop(mutable_borrow); // relinquish the mutable borrow on this slot\n\n let borrow = x.borrow();\n println!(\"{}\", *borrow);\n ```\n\n Integers and other types implementing [`Copy`] are unaffected by `drop`.\n\n ```\n # #![allow(dropping_copy_types)]\n #[derive(Copy, Clone)]\n struct Foo(u8);\n\n let x = 1;\n let y = Foo(2);\n drop(x); // a copy of `x` is moved and dropped\n drop(y); // a copy of `y` is moved and dropped\n\n println!(\"x: {}, y: {}\", x, y.0); // still available\n ```\n\n [`RefCell`]: crate::cell::RefCell\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::btree::map::BTreeMap": [
+      "MutRef"
+    ],
+    "collections::btree::map::ExtractIf": [
+      "Plain"
+    ]
+  },
+  "path": 631,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/map.rs:1172:5: 1178:6",
+  "src": "pub fn retain<F>(&mut self, mut f: F)\n    where\n        K: Ord,\n        F: FnMut(&K, &mut V) -> bool,\n    {\n        self.extract_if(.., |k, v| !f(k, v)).for_each(drop);\n    }",
+  "mir": "fn collections::btree::map::BTreeMap::<K, V, A>::retain(_1: &mut collections::btree::map::BTreeMap<K, V, A>, _2: F) -> () {\n    let mut _0: ();\n    let  _3: ();\n    let mut _4: collections::btree::map::ExtractIf<'_, K, V, core::ops::RangeFull, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/map.rs:1177:29: 1177:35}, A>;\n    let mut _5: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/map.rs:1177:29: 1177:35};\n    let mut _6: &mut F;\n    debug self => _1;\n    debug f => _2;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut _2;\n        _5 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/map.rs:1177:29: 1177:35}(move _6);\n        StorageDead(_6);\n        _4 = collections::btree::map::BTreeMap::<K, V, A>::extract_if::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/map.rs:1177:29: 1177:35}, core::ops::RangeFull>(_1, core::ops::RangeFull, move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = <collections::btree::map::ExtractIf<'_, K, V, core::ops::RangeFull, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/map.rs:1177:29: 1177:35}, A> as core::iter::Iterator>::for_each::<fn((K, V)) {core::mem::drop::<(K, V)>}>(move _4, core::mem::drop::<(K, V)>) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        drop(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": " Retains only the elements specified by the predicate.\n\n In other words, remove all pairs `(k, v)` for which `f(&k, &mut v)` returns `false`.\n The elements are visited in ascending key order.\n\n # Examples\n\n ```\n use std::collections::BTreeMap;\n\n let mut map: BTreeMap<i32, i32> = (0..8).map(|x| (x, x*10)).collect();\n // Keep only the elements with even-numbered keys.\n map.retain(|&k, _| k % 2 == 0);\n assert!(map.into_iter().eq(vec![(0, 0), (2, 20), (4, 40), (6, 60)]));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

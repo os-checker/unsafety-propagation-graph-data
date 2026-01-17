@@ -1,0 +1,113 @@
+{
+  "name": "core_simd::swizzle_dyn::<impl core_simd::vector::Simd<u8, N>>::swizzle_dyn",
+  "safe": true,
+  "callees": {
+    "core_simd::vector::Simd::<T, N>::to_array": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a SIMD vector to an array.\n",
+      "adt": {}
+    },
+    "iter::traits::collect::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::enumerate": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator which gives the current iteration count as well as\n the next value.\n\n The iterator returned yields pairs `(i, val)`, where `i` is the\n current index of iteration and `val` is the value returned by the\n iterator.\n\n `enumerate()` keeps its count as a [`usize`]. If you want to count by a\n different sized integer, the [`zip`] function provides similar\n functionality.\n\n # Overflow Behavior\n\n The method does no guarding against overflows, so enumerating more than\n [`usize::MAX`] elements either produces the wrong result or panics. If\n overflow checks are enabled, a panic is guaranteed.\n\n # Panics\n\n The returned iterator might panic if the to-be-returned index would\n overflow a [`usize`].\n\n [`zip`]: Iterator::zip\n\n # Examples\n\n ```\n let a = ['a', 'b', 'c'];\n\n let mut iter = a.into_iter().enumerate();\n\n assert_eq!(iter.next(), Some((0, 'a')));\n assert_eq!(iter.next(), Some((1, 'b')));\n assert_eq!(iter.next(), Some((2, 'c')));\n assert_eq!(iter.next(), None);\n ```\n",
+      "adt": {
+        "iter::adapters::enumerate::Enumerate": "Constructor"
+      }
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "ops::index::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "convert::Into::into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into the (usually inferred) input type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_simd::vector::Simd": [
+      "Plain",
+      "Ref"
+    ],
+    "array::iter::IntoIter": [
+      "Plain"
+    ],
+    "iter::adapters::enumerate::Enumerate": [
+      "Plain",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 25409, kind: RigidTy(Tuple([Ty { id: 47, kind: RigidTy(Uint(Usize)) }, Ty { id: 46, kind: RigidTy(Uint(U8)) }])) }), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 25409, kind: RigidTy(Tuple([Ty { id: 47, kind: RigidTy(Uint(Usize)) }, Ty { id: 46, kind: RigidTy(Uint(U8)) }])) }), Field(1, Ty { id: 46, kind: RigidTy(Uint(U8)) })])"
+    ]
+  },
+  "path": 12699,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/swizzle_dyn.rs:17:5: 107:6",
+  "src": "pub fn swizzle_dyn(self, idxs: Simd<u8, N>) -> Self {\n        #![allow(unused_imports, unused_unsafe)]\n        #[cfg(all(\n            any(target_arch = \"aarch64\", target_arch = \"arm64ec\"),\n            target_endian = \"little\"\n        ))]\n        use core::arch::aarch64::{uint8x8_t, vqtbl1q_u8, vtbl1_u8};\n        #[cfg(all(\n            target_arch = \"arm\",\n            target_feature = \"v7\",\n            target_feature = \"neon\",\n            target_endian = \"little\"\n        ))]\n        use core::arch::arm::{uint8x8_t, vtbl1_u8};\n        #[cfg(target_arch = \"wasm32\")]\n        use core::arch::wasm32 as wasm;\n        #[cfg(target_arch = \"wasm64\")]\n        use core::arch::wasm64 as wasm;\n        #[cfg(target_arch = \"x86\")]\n        use core::arch::x86;\n        #[cfg(target_arch = \"x86_64\")]\n        use core::arch::x86_64 as x86;\n        // SAFETY: Intrinsics covered by cfg\n        unsafe {\n            match N {\n                #[cfg(all(\n                    any(\n                        target_arch = \"aarch64\",\n                        target_arch = \"arm64ec\",\n                        all(target_arch = \"arm\", target_feature = \"v7\")\n                    ),\n                    target_feature = \"neon\",\n                    target_endian = \"little\"\n                ))]\n                8 => transize(vtbl1_u8, self, idxs),\n                #[cfg(target_feature = \"ssse3\")]\n                16 => transize(x86::_mm_shuffle_epi8, self, zeroing_idxs(idxs)),\n                #[cfg(target_feature = \"simd128\")]\n                16 => transize(wasm::i8x16_swizzle, self, idxs),\n                #[cfg(all(\n                    any(target_arch = \"aarch64\", target_arch = \"arm64ec\"),\n                    target_feature = \"neon\",\n                    target_endian = \"little\"\n                ))]\n                16 => transize(vqtbl1q_u8, self, idxs),\n                #[cfg(all(\n                    target_arch = \"arm\",\n                    target_feature = \"v7\",\n                    target_feature = \"neon\",\n                    target_endian = \"little\"\n                ))]\n                16 => transize(armv7_neon_swizzle_u8x16, self, idxs),\n                #[cfg(all(target_feature = \"avx2\", not(target_feature = \"avx512vbmi\")))]\n                32 => transize(avx2_pshufb, self, idxs),\n                #[cfg(all(target_feature = \"avx512vl\", target_feature = \"avx512vbmi\"))]\n                32 => {\n                    // Unlike vpshufb, vpermb doesn't zero out values in the result based on the index high bit\n                    let swizzler = |bytes, idxs| {\n                        let mask = x86::_mm256_cmp_epu8_mask::<{ x86::_MM_CMPINT_LT }>(\n                            idxs,\n                            Simd::<u8, 32>::splat(N as u8).into(),\n                        );\n                        x86::_mm256_maskz_permutexvar_epi8(mask, idxs, bytes)\n                    };\n                    transize(swizzler, self, idxs)\n                }\n                // Notable absence: avx512bw pshufb shuffle\n                #[cfg(all(target_feature = \"avx512vl\", target_feature = \"avx512vbmi\"))]\n                64 => {\n                    // Unlike vpshufb, vpermb doesn't zero out values in the result based on the index high bit\n                    let swizzler = |bytes, idxs| {\n                        let mask = x86::_mm512_cmp_epu8_mask::<{ x86::_MM_CMPINT_LT }>(\n                            idxs,\n                            Simd::<u8, 64>::splat(N as u8).into(),\n                        );\n                        x86::_mm512_maskz_permutexvar_epi8(mask, idxs, bytes)\n                    };\n                    transize(swizzler, self, idxs)\n                }\n                _ => {\n                    let mut array = [0; N];\n                    for (i, k) in idxs.to_array().into_iter().enumerate() {\n                        if (k as usize) < N {\n                            array[i] = self[k as usize];\n                        };\n                    }\n                    array.into()\n                }\n            }\n        }\n    }",
+  "mir": "fn core_simd::swizzle_dyn::<impl core_simd::vector::Simd<u8, N>>::swizzle_dyn(_1: core_simd::vector::Simd<u8, N>, _2: core_simd::vector::Simd<u8, N>) -> core_simd::vector::Simd<u8, N> {\n    let mut _0: core_simd::vector::Simd<u8, N>;\n    let mut _3: [u8; N];\n    let mut _4: iter::adapters::enumerate::Enumerate<array::iter::IntoIter<u8, N>>;\n    let mut _5: iter::adapters::enumerate::Enumerate<array::iter::IntoIter<u8, N>>;\n    let mut _6: array::iter::IntoIter<u8, N>;\n    let mut _7: [u8; N];\n    let mut _8: iter::adapters::enumerate::Enumerate<array::iter::IntoIter<u8, N>>;\n    let mut _9: option::Option<(usize, u8)>;\n    let mut _10: &mut iter::adapters::enumerate::Enumerate<array::iter::IntoIter<u8, N>>;\n    let mut _11: isize;\n    let  _12: usize;\n    let  _13: u8;\n    let mut _14: bool;\n    let mut _15: usize;\n    let mut _16: u8;\n    let mut _17: &u8;\n    let mut _18: &core_simd::vector::Simd<u8, N>;\n    let mut _19: usize;\n    let mut _20: bool;\n    let mut _21: [u8; N];\n    debug self => _1;\n    debug idxs => _2;\n    debug array => _3;\n    debug iter => _8;\n    debug i => _12;\n    debug k => _13;\n    bb0: {\n        StorageLive(_3);\n        _3 = [0_u8; N];\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = core_simd::vector::Simd::<u8, N>::to_array(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _6 = <[u8; N] as iter::traits::collect::IntoIterator>::into_iter(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = <array::iter::IntoIter<u8, N> as iter::traits::iterator::Iterator>::enumerate(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _4 = <iter::adapters::enumerate::Enumerate<array::iter::IntoIter<u8, N>> as iter::traits::collect::IntoIterator>::into_iter(move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageLive(_8);\n        _8 = move _4;\n        goto -> bb5;\n    }\n    bb5: {\n        StorageLive(_9);\n        _10 = &mut _8;\n        _9 = <iter::adapters::enumerate::Enumerate<array::iter::IntoIter<u8, N>> as iter::traits::iterator::Iterator>::next(_10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _11 = discriminant(_9);\n        switchInt(move _11) -> [0: bb9, 1: bb8, otherwise: bb7];\n    }\n    bb7: {\n        unreachable;\n    }\n    bb8: {\n        _12 = (((_9 as variant#1).0: (usize, u8)).0: usize);\n        _13 = (((_9 as variant#1).0: (usize, u8)).1: u8);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = _13 as usize;\n        _14 = Lt(move _15, N);\n        switchInt(move _14) -> [0: bb13, otherwise: bb10];\n    }\n    bb9: {\n        StorageDead(_9);\n        drop(_8) -> [return: bb15, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = &_1;\n        StorageLive(_19);\n        _19 = _13 as usize;\n        _17 = <core_simd::vector::Simd<u8, N> as ops::index::Index<usize>>::index(move _18, move _19) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _16 = (*_17);\n        StorageDead(_19);\n        StorageDead(_18);\n        _20 = Lt(_12, N);\n        assert(move _20, \"index out of bounds: the length is {} but the index is {}\", N, _12) -> [success: bb12, unwind unreachable];\n    }\n    bb12: {\n        _3[_12] = move _16;\n        StorageDead(_16);\n        StorageDead(_17);\n        goto -> bb14;\n    }\n    bb13: {\n        StorageDead(_15);\n        goto -> bb14;\n    }\n    bb14: {\n        StorageDead(_14);\n        StorageDead(_9);\n        goto -> bb5;\n    }\n    bb15: {\n        StorageDead(_8);\n        StorageDead(_4);\n        StorageLive(_21);\n        _21 = _3;\n        _0 = <[u8; N] as convert::Into<core_simd::vector::Simd<u8, N>>>::into(move _21) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_21);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Swizzle a vector of bytes according to the index vector.\n Indices within range select the appropriate byte.\n Indices \"out of bounds\" instead select 0.\n\n Note that the current implementation is selected during build-time\n of the standard library, so `cargo build -Zbuild-std` may be necessary\n to unlock better performance, especially for larger vectors.\n A planned compiler improvement will enable using `#[target_feature]` instead.\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "unused_imports"
+        },
+        "args": []
+      },
+      {
+        "tag": {
+          "typ": null,
+          "name": "unused_unsafe"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* unused_imports\n* unused_unsafe\n"
+    ]
+  }
+}

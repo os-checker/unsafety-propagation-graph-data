@@ -1,0 +1,27 @@
+{
+  "name": "ptr::const_ptr::<impl *const T>::wrapping_offset",
+  "safe": true,
+  "callees": {
+    "intrinsics::arith_offset": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calculates the offset from a pointer, potentially wrapping.\n\n This is implemented as an intrinsic to avoid converting to and from an\n integer, since the conversion inhibits certain optimizations.\n\n # Safety\n\n Unlike the `offset` intrinsic, this intrinsic does not restrict the\n resulting pointer to point into or at the end of an allocated\n object, and it wraps with two's complement arithmetic. The resulting\n value is not necessarily valid to be used to actually access memory.\n\n The stabilized version of this intrinsic is [`pointer::wrapping_offset`].\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1013,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/const_ptr.rs:463:5: 469:6",
+  "src": "pub const fn wrapping_offset(self, count: isize) -> *const T\n    where\n        T: Sized,\n    {\n        // SAFETY: the `arith_offset` intrinsic has no prerequisites to be called.\n        unsafe { intrinsics::arith_offset(self, count) }\n    }",
+  "mir": "fn ptr::const_ptr::<impl *const T>::wrapping_offset(_1: *const T, _2: isize) -> *const T {\n    let mut _0: *const T;\n    debug self => _1;\n    debug count => _2;\n    bb0: {\n        _0 = intrinsics::arith_offset::<T>(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Adds a signed offset to a pointer using wrapping arithmetic.\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n This operation itself is always safe, but using the resulting pointer is not.\n\n The resulting pointer \"remembers\" the [allocation] that `self` points to\n (this is called \"[Provenance](ptr/index.html#provenance)\").\n The pointer must not be used to read or write other allocations.\n\n In other words, `let z = x.wrapping_offset((y as isize) - (x as isize))` does *not* make `z`\n the same as `y` even if we assume `T` has size `1` and there is no overflow: `z` is still\n attached to the object `x` is attached to, and dereferencing it is Undefined Behavior unless\n `x` and `y` point into the same allocation.\n\n Compared to [`offset`], this method basically delays the requirement of staying within the\n same allocation: [`offset`] is immediate Undefined Behavior when crossing object\n boundaries; `wrapping_offset` produces a pointer but still leads to Undefined Behavior if a\n pointer is dereferenced when it is out-of-bounds of the object it is attached to. [`offset`]\n can be optimized better and is thus preferable in performance-sensitive code.\n\n The delayed check only considers the value of the pointer that was dereferenced, not the\n intermediate values used during the computation of the final result. For example,\n `x.wrapping_offset(o).wrapping_offset(o.wrapping_neg())` is always the same as `x`. In other\n words, leaving the allocation and then re-entering it later is permitted.\n\n [`offset`]: #method.offset\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n # use std::fmt::Write;\n // Iterate using a raw pointer in increments of two elements\n let data = [1u8, 2, 3, 4, 5];\n let mut ptr: *const u8 = data.as_ptr();\n let step = 2;\n let end_rounded_up = ptr.wrapping_offset(6);\n\n let mut out = String::new();\n while ptr != end_rounded_up {\n     unsafe {\n         write!(&mut out, \"{}, \", *ptr)?;\n     }\n     ptr = ptr.wrapping_offset(step);\n }\n assert_eq!(out.as_str(), \"1, 3, 5, \");\n # std::fmt::Result::Ok(())\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

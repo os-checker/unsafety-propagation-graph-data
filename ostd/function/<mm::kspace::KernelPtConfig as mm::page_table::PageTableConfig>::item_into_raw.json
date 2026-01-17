@@ -1,0 +1,104 @@
+{
+  "name": "<mm::kspace::KernelPtConfig as mm::page_table::PageTableConfig>::item_into_raw",
+  "safe": true,
+  "callees": {
+    "mm::page_prop::PrivilegedPageFlags::contains": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if all of the flags in `other` are contained within `self`.\n",
+      "adt": {
+        "mm::page_prop::PrivilegedPageFlags": "ImmutableAsArgument"
+      }
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "core::ops::BitOrAssign::bitor_assign": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the `|=` operation.\n\n # Examples\n\n ```\n let mut x = true;\n x |= false;\n assert_eq!(x, true);\n\n let mut x = false;\n x |= false;\n assert_eq!(x, false);\n\n let mut x: u8 = 5;\n x |= 1;\n assert_eq!(x, 5);\n\n let mut x: u8 = 5;\n x |= 2;\n assert_eq!(x, 7);\n ```\n",
+      "adt": {}
+    },
+    "mm::frame::Frame::<M>::map_level": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the map level of this page.\n\n This is the level of the page table entry that maps the frame,\n which determines the size of the frame.\n\n Currently, the level is always 1, which means the frame is a regular\n page frame.\n",
+      "adt": {
+        "mm::frame::Frame": "ImmutableAsArgument"
+      }
+    },
+    "mm::frame::Frame::<M>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forgets the handle to the frame.\n\n This will result in the frame being leaked without calling the custom dropper.\n\n A physical address to the frame is returned in case the frame needs to be\n restored using [`Frame::from_raw`] later. This is useful when some architectural\n data structures need to hold the frame handle such as the page table.\n",
+      "adt": {
+        "mm::frame::Frame": "ImmutableAsArgument"
+      }
+    },
+    "core::ops::SubAssign::sub_assign": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the `-=` operation.\n\n # Example\n\n ```\n let mut x: u32 = 12;\n x -= 1;\n assert_eq!(x, 11);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::kspace::MappedItem": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(1, Ty { id: 1, kind: RigidTy(Uint(U8)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(2, Ty { id: 1097, kind: RigidTy(Adt(AdtDef(DefId { id: 3471, name: \"mm::page_prop::PageProperty\" }), GenericArgs([]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 4757, kind: RigidTy(Adt(AdtDef(DefId { id: 3414, name: \"mm::frame::Frame\" }), GenericArgs([Type(Ty { id: 4180, kind: RigidTy(Dynamic([Binder { value: Trait(ExistentialTraitRef { def_id: TraitDef(DefId { id: 5105, name: \"mm::frame::meta::AnyFrameMeta\" }), generic_args: GenericArgs([]) }), bound_vars: [] }], Region { kind: ReErased })) })]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(1, Ty { id: 1097, kind: RigidTy(Adt(AdtDef(DefId { id: 3471, name: \"mm::page_prop::PageProperty\" }), GenericArgs([]))) })])"
+    ],
+    "mm::page_prop::PageProperty": [
+      "Plain",
+      "Unknown([Field(2, Ty { id: 1099, kind: RigidTy(Adt(AdtDef(DefId { id: 3473, name: \"mm::page_prop::PrivilegedPageFlags\" }), GenericArgs([]))) })])"
+    ],
+    "mm::page_prop::PrivilegedPageFlags": [
+      "Ref",
+      "MutRef"
+    ],
+    "mm::frame::Frame": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 2193,
+  "span": "ostd/src/mm/kspace/mod.rs:154:5: 169:6",
+  "src": "fn item_into_raw(item: Self::Item) -> (Paddr, PagingLevel, PageProperty) {\n        match item {\n            MappedItem::Tracked(frame, mut prop) => {\n                debug_assert!(!prop.priv_flags.contains(PrivilegedPageFlags::AVAIL1));\n                prop.priv_flags |= PrivilegedPageFlags::AVAIL1;\n                let level = frame.map_level();\n                let paddr = frame.into_raw();\n                (paddr, level, prop)\n            }\n            MappedItem::Untracked(pa, level, mut prop) => {\n                debug_assert!(!prop.priv_flags.contains(PrivilegedPageFlags::AVAIL1));\n                prop.priv_flags -= PrivilegedPageFlags::AVAIL1;\n                (pa, level, prop)\n            }\n        }\n    }",
+  "mir": "fn <mm::kspace::KernelPtConfig as mm::page_table::PageTableConfig>::item_into_raw(_1: mm::kspace::MappedItem) -> (usize, u8, mm::page_prop::PageProperty) {\n    let mut _0: (usize, u8, mm::page_prop::PageProperty);\n    let mut _2: isize;\n    let  _3: mm::frame::Frame<dyn mm::frame::meta::AnyFrameMeta>;\n    let mut _4: mm::page_prop::PageProperty;\n    let mut _5: bool;\n    let mut _6: &mm::page_prop::PrivilegedPageFlags;\n    let mut _7: !;\n    let  _8: ();\n    let mut _9: &mut mm::page_prop::PrivilegedPageFlags;\n    let  _10: u8;\n    let mut _11: &mm::frame::Frame<dyn mm::frame::meta::AnyFrameMeta>;\n    let  _12: usize;\n    let mut _13: mm::page_prop::PageProperty;\n    let  _14: usize;\n    let  _15: u8;\n    let mut _16: mm::page_prop::PageProperty;\n    let mut _17: bool;\n    let mut _18: &mm::page_prop::PrivilegedPageFlags;\n    let mut _19: !;\n    let  _20: ();\n    let mut _21: &mut mm::page_prop::PrivilegedPageFlags;\n    let mut _22: mm::page_prop::PageProperty;\n    debug item => _1;\n    debug frame => _3;\n    debug prop => _4;\n    debug level => _10;\n    debug paddr => _12;\n    debug pa => _14;\n    debug level => _15;\n    debug prop => _16;\n    bb0: {\n        _2 = discriminant(_1);\n        switchInt(move _2) -> [0: bb3, 1: bb2, otherwise: bb1];\n    }\n    bb1: {\n        unreachable;\n    }\n    bb2: {\n        _14 = ((_1 as variant#1).0: usize);\n        _15 = ((_1 as variant#1).1: u8);\n        StorageLive(_16);\n        _16 = ((_1 as variant#1).2: mm::page_prop::PageProperty);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = &(_16.2: mm::page_prop::PrivilegedPageFlags);\n        _17 = mm::page_prop::PrivilegedPageFlags::contains(move _18, mm::page_prop::PrivilegedPageFlags::AVAIL1) -> [return: bb10, unwind unreachable];\n    }\n    bb3: {\n        _3 = move ((_1 as variant#0).0: mm::frame::Frame<dyn mm::frame::meta::AnyFrameMeta>);\n        StorageLive(_4);\n        _4 = ((_1 as variant#0).1: mm::page_prop::PageProperty);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &(_4.2: mm::page_prop::PrivilegedPageFlags);\n        _5 = mm::page_prop::PrivilegedPageFlags::contains(move _6, mm::page_prop::PrivilegedPageFlags::AVAIL1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        switchInt(move _5) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_6);\n        _7 = core::panicking::panic(\"assertion failed: !prop.priv_flags.contains(PrivilegedPageFlags::AVAIL1)\") -> unwind unreachable;\n    }\n    bb6: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_9);\n        _9 = &mut (_4.2: mm::page_prop::PrivilegedPageFlags);\n        _8 = <mm::page_prop::PrivilegedPageFlags as core::ops::BitOrAssign>::bitor_assign(move _9, mm::page_prop::PrivilegedPageFlags::AVAIL1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_9);\n        StorageLive(_11);\n        _11 = &_3;\n        _10 = mm::frame::Frame::<dyn mm::frame::meta::AnyFrameMeta>::map_level(move _11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        _12 = mm::frame::Frame::<dyn mm::frame::meta::AnyFrameMeta>::into_raw(_3) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageLive(_13);\n        _13 = _4;\n        _0 = (_12, _10, move _13);\n        StorageDead(_13);\n        StorageDead(_4);\n        goto -> bb14;\n    }\n    bb10: {\n        switchInt(move _17) -> [0: bb12, otherwise: bb11];\n    }\n    bb11: {\n        StorageDead(_18);\n        _19 = core::panicking::panic(\"assertion failed: !prop.priv_flags.contains(PrivilegedPageFlags::AVAIL1)\") -> unwind unreachable;\n    }\n    bb12: {\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageLive(_21);\n        _21 = &mut (_16.2: mm::page_prop::PrivilegedPageFlags);\n        _20 = <mm::page_prop::PrivilegedPageFlags as core::ops::SubAssign>::sub_assign(move _21, mm::page_prop::PrivilegedPageFlags::AVAIL1) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_21);\n        StorageLive(_22);\n        _22 = _16;\n        _0 = (_14, _15, move _22);\n        StorageDead(_22);\n        StorageDead(_16);\n        goto -> bb14;\n    }\n    bb14: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

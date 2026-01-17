@@ -1,0 +1,86 @@
+{
+  "name": "<io::cursor::Cursor<T> as io::Read>::read_to_end",
+  "safe": true,
+  "callees": {
+    "io::cursor::Cursor::<T>::split": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Splits the underlying slice at the cursor position and returns them.\n\n # Examples\n\n ```\n #![feature(cursor_split)]\n use std::io::Cursor;\n\n let mut buff = Cursor::new(vec![1, 2, 3, 4, 5]);\n\n assert_eq!(buff.split(), ([].as_slice(), [1, 2, 3, 4, 5].as_slice()));\n\n buff.set_position(2);\n assert_eq!(buff.split(), ([1, 2].as_slice(), [3, 4, 5].as_slice()));\n\n buff.set_position(6);\n assert_eq!(buff.split(), ([1, 2, 3, 4, 5].as_slice(), [].as_slice()));\n ```\n",
+      "adt": {
+        "io::cursor::Cursor": "ImmutableAsArgument"
+      }
+    },
+    "alloc_crate::vec::Vec::<T, A>::try_reserve": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tries to reserve capacity for at least `additional` more elements to be inserted\n in the given `Vec<T>`. The collection may reserve more space to speculatively avoid\n frequent reallocations. After calling `try_reserve`, capacity will be\n greater than or equal to `self.len() + additional` if it returns\n `Ok(())`. Does nothing if capacity is already sufficient. This method\n preserves the contents even if an error occurs.\n\n # Errors\n\n If the capacity overflows, or the allocator reports a failure, then an error\n is returned.\n\n # Examples\n\n ```\n use std::collections::TryReserveError;\n\n fn process_data(data: &[u32]) -> Result<Vec<u32>, TryReserveError> {\n     let mut output = Vec::new();\n\n     // Pre-reserve the memory, exiting if we can't\n     output.try_reserve(data.len())?;\n\n     // Now we know this can't OOM in the middle of our complex work\n     output.extend(data.iter().map(|&val| {\n         val * 2 + 5 // very complicated\n     }));\n\n     Ok(output)\n }\n # process_data(&[1, 2, 3]).expect(\"why is the test harness OOMing on 12 bytes?\");\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::vec::Vec::<T, A>::extend_from_slice": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Clones and appends all elements in a slice to the `Vec`.\n\n Iterates over the slice `other`, clones each element, and then appends\n it to this `Vec`. The `other` slice is traversed in-order.\n\n Note that this function is the same as [`extend`],\n except that it also works with slice elements that are Clone but not Copy.\n If Rust gets specialization this function may be deprecated.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut vec = vec![1];\n vec.extend_from_slice(&[2, 3, 4]);\n assert_eq!(vec, [1, 2, 3, 4]);\n ```\n\n [`extend`]: Vec::extend\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "io::cursor::Cursor": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "alloc_crate::vec::Vec": [
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 3680, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 1482, kind: RigidTy(Adt(AdtDef(DefId { id: 5039, name: \"alloc_crate::collections::TryReserveError\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 1432,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/cursor.rs:381:5: 389:6",
+  "src": "fn read_to_end(&mut self, buf: &mut Vec<u8>) -> io::Result<usize> {\n        let content = Cursor::split(self).1;\n        let len = content.len();\n        buf.try_reserve(len)?;\n        buf.extend_from_slice(content);\n        self.pos += len as u64;\n\n        Ok(len)\n    }",
+  "mir": "fn <io::cursor::Cursor<T> as io::Read>::read_to_end(_1: &mut io::cursor::Cursor<T>, _2: &mut alloc_crate::vec::Vec<u8>) -> core::result::Result<usize, io::error::Error> {\n    let mut _0: core::result::Result<usize, io::error::Error>;\n    let  _3: &[u8];\n    let mut _4: (&[u8], &[u8]);\n    let mut _5: &io::cursor::Cursor<T>;\n    let  _6: usize;\n    let mut _7: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, alloc_crate::collections::TryReserveError>>;\n    let mut _8: core::result::Result<(), alloc_crate::collections::TryReserveError>;\n    let mut _9: isize;\n    let  _10: core::result::Result<core::convert::Infallible, alloc_crate::collections::TryReserveError>;\n    let  _11: ();\n    let mut _12: u64;\n    let mut _13: (u64, bool);\n    debug self => _1;\n    debug buf => _2;\n    debug content => _3;\n    debug len => _6;\n    debug residual => _10;\n    debug val => ();\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = io::cursor::Cursor::<T>::split(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = (_4.1: &[u8]);\n        StorageDead(_4);\n        _6 = PtrMetadata(_3);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = alloc_crate::vec::Vec::<u8>::try_reserve(_2, _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _7 = <core::result::Result<(), alloc_crate::collections::TryReserveError> as core::ops::Try>::branch(move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        _9 = discriminant(_7);\n        switchInt(move _9) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        StorageDead(_7);\n        _11 = alloc_crate::vec::Vec::<u8>::extend_from_slice(_2, _3) -> [return: bb8, unwind unreachable];\n    }\n    bb6: {\n        _10 = move ((_7 as variant#1).0: core::result::Result<core::convert::Infallible, alloc_crate::collections::TryReserveError>);\n        _0 = <core::result::Result<usize, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, alloc_crate::collections::TryReserveError>>>::from_residual(_10) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_7);\n        goto -> bb10;\n    }\n    bb8: {\n        StorageLive(_12);\n        _12 = _6 as u64;\n        _13 = CheckedAdd(((*_1).1: u64), _12);\n        assert(!move (_13.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).1: u64), move _12) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        ((*_1).1: u64) = move (_13.0: u64);\n        StorageDead(_12);\n        _0 = core::result::Result::Ok(_6);\n        goto -> bb10;\n    }\n    bb10: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

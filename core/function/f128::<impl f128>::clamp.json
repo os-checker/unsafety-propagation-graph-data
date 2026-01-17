@@ -1,0 +1,37 @@
+{
+  "name": "f128::<impl f128>::clamp",
+  "safe": true,
+  "callees": {
+    "intrinsics::likely": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Hints to the compiler that branch condition is likely to be true.\n Returns the value passed to it.\n\n Any use other than with `if` statements will probably not have an effect.\n\n Note that, unlike most intrinsics, this is safe to call;\n it does not require an `unsafe` block.\n Therefore, implementations must not require the user to uphold\n any safety invariants.\n\n This intrinsic does not have a stable counterpart.\n",
+      "adt": {}
+    },
+    "f128::<impl f128>::clamp::do_panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1549,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/f128.rs:1276:5: 1292:6",
+  "src": "pub const fn clamp(mut self, min: f128, max: f128) -> f128 {\n        const_assert!(\n            min <= max,\n            \"min > max, or either was NaN\",\n            \"min > max, or either was NaN. min = {min:?}, max = {max:?}\",\n            min: f128,\n            max: f128,\n        );\n\n        if self < min {\n            self = min;\n        }\n        if self > max {\n            self = max;\n        }\n        self\n    }",
+  "mir": "fn f128::<impl f128>::clamp(_1: f128, _2: f128, _3: f128) -> f128 {\n    let mut _0: f128;\n    let mut _4: bool;\n    let mut _5: bool;\n    let mut _6: !;\n    let mut _7: bool;\n    let mut _8: f128;\n    let mut _9: bool;\n    let mut _10: f128;\n    debug self => _1;\n    debug min => _2;\n    debug max => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = Le(_2, _3);\n        _4 = intrinsics::likely(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _4) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = _1;\n        _7 = Lt(move _8, _2);\n        switchInt(move _7) -> [0: bb5, otherwise: bb4];\n    }\n    bb3: {\n        StorageDead(_5);\n        _6 = f128::<impl f128>::clamp::do_panic(_2, _3) -> unwind unreachable;\n    }\n    bb4: {\n        StorageDead(_8);\n        _1 = _2;\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_8);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = _1;\n        _9 = Gt(move _10, _3);\n        switchInt(move _9) -> [0: bb8, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_10);\n        _1 = _3;\n        goto -> bb9;\n    }\n    bb8: {\n        StorageDead(_10);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_9);\n        _0 = _1;\n        return;\n    }\n}\n",
+  "doc": " Restrict a value to a certain interval unless it is NaN.\n\n Returns `max` if `self` is greater than `max`, and `min` if `self` is\n less than `min`. Otherwise this returns `self`.\n\n Note that this function returns NaN if the initial value was NaN as\n well. If the result is zero and among the three inputs `self`, `min`, and `max` there are\n zeros with different sign, either `0.0` or `-0.0` is returned non-deterministically.\n\n # Panics\n\n Panics if `min > max`, `min` is NaN, or `max` is NaN.\n\n # Examples\n\n ```\n #![feature(f128)]\n # // FIXME(f16_f128): remove when `{eq,gt,unord}tf` are available\n # #[cfg(all(target_arch = \"x86_64\", target_os = \"linux\"))] {\n\n assert!((-3.0f128).clamp(-2.0, 1.0) == -2.0);\n assert!((0.0f128).clamp(-2.0, 1.0) == 0.0);\n assert!((2.0f128).clamp(-2.0, 1.0) == 1.0);\n assert!((f128::NAN).clamp(-2.0, 1.0).is_nan());\n\n // These always returns zero, but the sign (which is ignored by `==`) is non-deterministic.\n assert!((0.0f128).clamp(-0.0, -0.0) == 0.0);\n assert!((1.0f128).clamp(-0.0, 0.0) == 0.0);\n // This is definitely a negative zero.\n assert!((-1.0f128).clamp(-0.0, 1.0).is_sign_negative());\n # }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

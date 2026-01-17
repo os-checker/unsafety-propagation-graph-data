@@ -1,0 +1,44 @@
+{
+  "name": "task::scheduler::LocalRunQueue::pick_next",
+  "safe": true,
+  "callees": {
+    "task::scheduler::LocalRunQueue::try_pick_next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tries to pick the next runnable task.\n\n This method instructs the local runqueue to pick the next runnable task on a best-effort basis.\n If such a task can be picked, then this task supersedes the current task and\n the new the method returns a reference to the new \"current\" task.\n If the \"old\" current task presents, then it is still runnable and thus remains in the runqueue.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain"
+    ],
+    "alloc::sync::Arc": [
+      "Ref"
+    ]
+  },
+  "path": "task::scheduler::LocalRunQueue::pick_next",
+  "span": "ostd/src/task/scheduler/mod.rs:354:5: 356:6",
+  "src": "fn pick_next(&mut self) -> &Arc<T> {\n        self.try_pick_next().unwrap()\n    }",
+  "mir": "fn task::scheduler::LocalRunQueue::pick_next(_1: &mut Self) -> &alloc::sync::Arc<T> {\n    let mut _0: &alloc::sync::Arc<T>;\n    let mut _2: core::option::Option<&alloc::sync::Arc<T>>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = <Self as task::scheduler::LocalRunQueue<T>>::try_pick_next(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = core::option::Option::<&alloc::sync::Arc<T>>::unwrap(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Picks the next runnable task.\n\n This method instructs the local runqueue to pick the next runnable task and replace the current one.\n A reference to the new \"current\" task will be returned by this method.\n If the \"old\" current task presents, then it is still runnable and thus remains in the runqueue.\n\n # Panics\n\n As explained in the type-level Rust doc,\n this method will only be invoked by OSTD after a call to `update_current` returns true.\n In case that this contract is broken by the caller,\n the implementer is free to exhibit any undesirable or incorrect behaviors, include panicking.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

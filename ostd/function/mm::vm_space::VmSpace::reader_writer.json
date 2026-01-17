@@ -1,0 +1,93 @@
+{
+  "name": "mm::vm_space::VmSpace::reader_writer",
+  "safe": true,
+  "callees": {
+    "arch::mm::current_page_table_paddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "mm::page_table::PageTable::<C>::root_paddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The physical address of the root page table.\n\n Obtaining the physical address of the root page table is safe, however, using it or\n providing it to the hardware will be unsafe since the page table node may be dropped,\n resulting in UAF.\n",
+      "adt": {
+        "mm::page_table::PageTable": "ImmutableAsArgument"
+      }
+    },
+    "core::num::<impl usize>::saturating_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Saturating integer addition. Computes `self + rhs`, saturating at\n the numeric bounds instead of overflowing.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    },
+    "mm::io::VmReader::<'_>::from_user_space": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `VmReader` from a pointer and a length, which represents\n a memory range in user space.\n\n # Safety\n\n The virtual address range `ptr..ptr + len` must be in user space.\n",
+      "adt": {
+        "mm::io::VmReader": "Constructor"
+      }
+    },
+    "mm::io::VmWriter::<'_>::from_user_space": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `VmWriter` from a pointer and a length, which represents\n a memory range in user space.\n\n The current context should be consistently associated with valid user space during the\n entire lifetime `'a`. This is for correct semantics and is not a safety requirement.\n\n # Safety\n\n `ptr` must be in user space for `len` bytes.\n",
+      "adt": {
+        "mm::io::VmWriter": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "mm::page_table::PageTable": [
+      "Ref"
+    ],
+    "mm::vm_space::VmSpace": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "error::Error": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "mm::io::VmReader": [
+      "Plain"
+    ],
+    "mm::io::VmWriter": [
+      "Plain"
+    ]
+  },
+  "path": 2502,
+  "span": "ostd/src/mm/vm_space.rs:207:5: 231:6",
+  "src": "pub fn reader_writer(\n        &self,\n        vaddr: Vaddr,\n        len: usize,\n    ) -> Result<(VmReader<'_, Fallible>, VmWriter<'_, Fallible>)> {\n        if current_page_table_paddr() != self.pt.root_paddr() {\n            return Err(Error::AccessDenied);\n        }\n\n        if vaddr.saturating_add(len) > MAX_USERSPACE_VADDR {\n            return Err(Error::AccessDenied);\n        }\n\n        // SAFETY: The memory range is in user space, as checked above.\n        let reader = unsafe { VmReader::<Fallible>::from_user_space(vaddr as *const u8, len) };\n\n        // `VmWriter` is neither `Sync` nor `Send`, so it will not live longer than the current\n        // task. This ensures that the correct page table is activated during the usage period of\n        // the `VmWriter`.\n        //\n        // SAFETY: The memory range is in user space, as checked above.\n        let writer = unsafe { VmWriter::<Fallible>::from_user_space(vaddr as *mut u8, len) };\n\n        Ok((reader, writer))\n    }",
+  "mir": "fn mm::vm_space::VmSpace::reader_writer(_1: &mm::vm_space::VmSpace, _2: usize, _3: usize) -> core::result::Result<(mm::io::VmReader<'_>, mm::io::VmWriter<'_>), error::Error> {\n    let mut _0: core::result::Result<(mm::io::VmReader<'_>, mm::io::VmWriter<'_>), error::Error>;\n    let mut _4: bool;\n    let mut _5: usize;\n    let mut _6: usize;\n    let mut _7: &mm::page_table::PageTable<mm::vm_space::UserPtConfig>;\n    let mut _8: error::Error;\n    let mut _9: bool;\n    let mut _10: usize;\n    let mut _11: error::Error;\n    let  _12: mm::io::VmReader<'_>;\n    let mut _13: *const u8;\n    let  _14: mm::io::VmWriter<'_>;\n    let mut _15: *mut u8;\n    let mut _16: (mm::io::VmReader<'_>, mm::io::VmWriter<'_>);\n    debug self => _1;\n    debug vaddr => _2;\n    debug len => _3;\n    debug reader => _12;\n    debug writer => _14;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = arch::mm::current_page_table_paddr() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).0: mm::page_table::PageTable<mm::vm_space::UserPtConfig>);\n        _6 = mm::page_table::PageTable::<mm::vm_space::UserPtConfig>::root_paddr(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _4 = Ne(move _5, move _6);\n        switchInt(move _4) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_8);\n        _8 = error::Error::AccessDenied;\n        _0 = core::result::Result::Err(move _8);\n        StorageDead(_8);\n        StorageDead(_4);\n        goto -> bb10;\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = core::num::<impl usize>::saturating_add(_2, _3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _9 = Gt(move _10, mm::kspace::MAX_USERSPACE_VADDR);\n        switchInt(move _9) -> [0: bb7, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_10);\n        StorageLive(_11);\n        _11 = error::Error::AccessDenied;\n        _0 = core::result::Result::Err(move _11);\n        StorageDead(_11);\n        StorageDead(_9);\n        goto -> bb10;\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_13);\n        _13 = _2 as *const u8;\n        _12 = mm::io::VmReader::<'_>::from_user_space(move _13, _3) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_13);\n        StorageLive(_15);\n        _15 = _2 as *mut u8;\n        _14 = mm::io::VmWriter::<'_>::from_user_space(move _15, _3) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_15);\n        StorageLive(_16);\n        _16 = (_12, _14);\n        _0 = core::result::Result::Ok(move _16);\n        StorageDead(_16);\n        goto -> bb10;\n    }\n    bb10: {\n        return;\n    }\n}\n",
+  "doc": " Creates a reader/writer pair to read data from and write data into the user space.\n\n Returns `Err` if this `VmSpace` doesn't belong to the user space of the current task\n or the `vaddr` and `len` do not represent a user space memory range.\n\n Users must ensure that no other page table is activated in the current task during the\n lifetime of the created `VmReader` and `VmWriter`. This guarantees that the `VmReader`\n and the `VmWriter` can operate correctly.\n\n This method is semantically equivalent to calling [`Self::reader`] and [`Self::writer`]\n separately, but it avoids double checking the validity of the memory region.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

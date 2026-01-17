@@ -1,0 +1,41 @@
+{
+  "name": "vec::Vec::<T, A>::as_non_null",
+  "safe": true,
+  "callees": {
+    "raw_vec::RawVec::<T, A>::non_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "raw_vec::RawVec": "ImmutableAsArgument",
+        "core::ptr::NonNull": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "raw_vec::RawVec": [
+      "Ref"
+    ],
+    "vec::Vec": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 2344,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:1841:5: 1843:6",
+  "src": "pub const fn as_non_null(&mut self) -> NonNull<T> {\n        self.buf.non_null()\n    }",
+  "mir": "fn vec::Vec::<T, A>::as_non_null(_1: &mut vec::Vec<T, A>) -> core::ptr::NonNull<T> {\n    let mut _0: core::ptr::NonNull<T>;\n    let mut _2: &raw_vec::RawVec<T, A>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = &((*_1).0: raw_vec::RawVec<T, A>);\n        _0 = raw_vec::RawVec::<T, A>::non_null(move _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns a `NonNull` pointer to the vector's buffer, or a dangling\n `NonNull` pointer valid for zero sized reads if the vector didn't allocate.\n\n The caller must ensure that the vector outlives the pointer this\n function returns, or else it will end up dangling.\n Modifying the vector may cause its buffer to be reallocated,\n which would also make any pointers to it invalid.\n\n This method guarantees that for the purpose of the aliasing model, this method\n does not materialize a reference to the underlying slice, and thus the returned pointer\n will remain valid when mixed with other calls to [`as_ptr`], [`as_mut_ptr`],\n and [`as_non_null`].\n Note that calling other methods that materialize references to the slice,\n or references to specific elements you are planning on accessing through this pointer,\n may still invalidate this pointer.\n See the second example below for how this guarantee can be used.\n\n # Examples\n\n ```\n #![feature(box_vec_non_null)]\n\n // Allocate vector big enough for 4 elements.\n let size = 4;\n let mut x: Vec<i32> = Vec::with_capacity(size);\n let x_ptr = x.as_non_null();\n\n // Initialize elements via raw pointer writes, then set length.\n unsafe {\n     for i in 0..size {\n         x_ptr.add(i).write(i as i32);\n     }\n     x.set_len(size);\n }\n assert_eq!(&*x, &[0, 1, 2, 3]);\n ```\n\n Due to the aliasing guarantee, the following code is legal:\n\n ```rust\n #![feature(box_vec_non_null)]\n\n unsafe {\n     let mut v = vec![0];\n     let ptr1 = v.as_non_null();\n     ptr1.write(1);\n     let ptr2 = v.as_non_null();\n     ptr2.write(2);\n     // Notably, the write to `ptr2` did *not* invalidate `ptr1`:\n     ptr1.write(3);\n }\n ```\n\n [`as_mut_ptr`]: Vec::as_mut_ptr\n [`as_ptr`]: Vec::as_ptr\n [`as_non_null`]: Vec::as_non_null\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "name": "<iter::adapters::zip::Zip<A, B> as iter::adapters::zip::ZipImpl<A, B>>::fold",
+  "safe": true,
+  "callees": {
+    "iter::adapters::zip::ZipImpl::size_hint": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "iter::traits::collect::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::adapters::zip::ZipImpl::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "ops::function::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "iter::adapters::zip::Zip": [
+      "Ref",
+      "Plain",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "ops::range::Range": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 14128,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/zip.rs:275:5: 290:6",
+  "src": "fn fold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc\n    where\n        F: FnMut(Acc, Self::Item) -> Acc,\n    {\n        let mut accum = init;\n        let len = ZipImpl::size_hint(&self).0;\n        for i in 0..len {\n            // SAFETY: since Self: TrustedRandomAccessNoCoerce we can trust the size-hint to\n            // calculate the length and then use that to do unchecked iteration.\n            // fold consumes the iterator so we don't need to fixup any state.\n            unsafe {\n                accum = f(accum, self.get_unchecked(i));\n            }\n        }\n        accum\n    }",
+  "mir": "fn <iter::adapters::zip::Zip<A, B> as iter::adapters::zip::ZipImpl<A, B>>::fold(_1: iter::adapters::zip::Zip<A, B>, _2: Acc, _3: F) -> Acc {\n    let mut _0: Acc;\n    let mut _4: Acc;\n    let  _5: usize;\n    let mut _6: (usize, option::Option<usize>);\n    let  _7: &iter::adapters::zip::Zip<A, B>;\n    let mut _8: ops::range::Range<usize>;\n    let mut _9: ops::range::Range<usize>;\n    let mut _10: ops::range::Range<usize>;\n    let mut _11: option::Option<usize>;\n    let mut _12: &mut ops::range::Range<usize>;\n    let mut _13: isize;\n    let  _14: usize;\n    let mut _15: Acc;\n    let mut _16: &mut F;\n    let mut _17: (Acc, (<A as iter::traits::iterator::Iterator>::Item, <B as iter::traits::iterator::Iterator>::Item));\n    let mut _18: Acc;\n    let mut _19: (<A as iter::traits::iterator::Iterator>::Item, <B as iter::traits::iterator::Iterator>::Item);\n    let mut _20: &mut iter::adapters::zip::Zip<A, B>;\n    debug self => _1;\n    debug init => _2;\n    debug f => _3;\n    debug accum => _4;\n    debug len => _5;\n    debug iter => _10;\n    debug i => _14;\n    bb0: {\n        StorageLive(_4);\n        _4 = move _2;\n        StorageLive(_6);\n        _7 = &_1;\n        _6 = <iter::adapters::zip::Zip<A, B> as iter::adapters::zip::ZipImpl<A, B>>::size_hint(_7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = (_6.0: usize);\n        StorageDead(_6);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = Range(0_usize, _5);\n        _8 = <ops::range::Range<usize> as iter::traits::collect::IntoIterator>::into_iter(move _9) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_9);\n        StorageLive(_10);\n        _10 = move _8;\n        goto -> bb3;\n    }\n    bb3: {\n        StorageLive(_11);\n        _12 = &mut _10;\n        _11 = <ops::range::Range<usize> as iter::traits::iterator::Iterator>::next(_12) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _13 = discriminant(_11);\n        switchInt(move _13) -> [0: bb7, 1: bb6, otherwise: bb5];\n    }\n    bb5: {\n        unreachable;\n    }\n    bb6: {\n        _14 = ((_11 as variant#1).0: usize);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &mut _3;\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = move _4;\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = &mut _1;\n        _19 = <iter::adapters::zip::Zip<A, B> as iter::adapters::zip::ZipImpl<A, B>>::get_unchecked(move _20, _14) -> [return: bb8, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_8);\n        _0 = move _4;\n        StorageDead(_4);\n        drop(_3) -> [return: bb10, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_20);\n        _17 = (move _18, move _19);\n        _15 = <F as ops::function::FnMut<(Acc, (<A as iter::traits::iterator::Iterator>::Item, <B as iter::traits::iterator::Iterator>::Item))>>::call_mut(move _16, move _17) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_19);\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageDead(_16);\n        _4 = move _15;\n        StorageDead(_15);\n        StorageDead(_11);\n        goto -> bb3;\n    }\n    bb10: {\n        drop(_1) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

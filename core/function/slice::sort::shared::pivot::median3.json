@@ -1,0 +1,27 @@
+{
+  "name": "slice::sort::shared::pivot::median3",
+  "safe": true,
+  "callees": {
+    "ops::function::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 16665,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/shared/pivot.rs:79:1: 94:2",
+  "src": "fn median3<T, F: FnMut(&T, &T) -> bool>(a: &T, b: &T, c: &T, is_less: &mut F) -> *const T {\n    // Compiler tends to make this branchless when sensible, and avoids the\n    // third comparison when not.\n    let x = is_less(a, b);\n    let y = is_less(a, c);\n    if x == y {\n        // If x=y=0 then b, c <= a. In this case we want to return max(b, c).\n        // If x=y=1 then a < b, c. In this case we want to return min(b, c).\n        // By toggling the outcome of b < c using XOR x we get this behavior.\n        let z = is_less(b, c);\n        if z ^ x { c } else { b }\n    } else {\n        // Either c <= a < b or b <= a < c, thus a is our median.\n        a\n    }\n}",
+  "mir": "fn slice::sort::shared::pivot::median3(_1: &T, _2: &T, _3: &T, _4: &mut F) -> *const T {\n    let mut _0: *const T;\n    let  _5: bool;\n    let mut _6: (&T, &T);\n    let  _7: bool;\n    let mut _8: (&T, &T);\n    let mut _9: bool;\n    let  _10: bool;\n    let mut _11: (&T, &T);\n    let mut _12: bool;\n    debug a => _1;\n    debug b => _2;\n    debug c => _3;\n    debug is_less => _4;\n    debug x => _5;\n    debug y => _7;\n    debug z => _10;\n    bb0: {\n        StorageLive(_6);\n        _6 = (_1, _2);\n        _5 = <F as ops::function::FnMut<(&T, &T)>>::call_mut(_4, move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        StorageLive(_8);\n        _8 = (_1, _3);\n        _7 = <F as ops::function::FnMut<(&T, &T)>>::call_mut(_4, move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        StorageLive(_9);\n        _9 = Eq(_5, _7);\n        switchInt(move _9) -> [0: bb8, otherwise: bb3];\n    }\n    bb3: {\n        StorageLive(_11);\n        _11 = (_2, _3);\n        _10 = <F as ops::function::FnMut<(&T, &T)>>::call_mut(_4, move _11) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_11);\n        StorageLive(_12);\n        _12 = BitXor(_10, _5);\n        switchInt(move _12) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        _0 = &raw const (*_3);\n        goto -> bb7;\n    }\n    bb6: {\n        _0 = &raw const (*_2);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageDead(_12);\n        goto -> bb9;\n    }\n    bb8: {\n        _0 = &raw const (*_1);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_9);\n        return;\n    }\n}\n",
+  "doc": " Calculates the median of 3 elements.\n\n SAFETY: a, b, c must be valid initialized elements.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

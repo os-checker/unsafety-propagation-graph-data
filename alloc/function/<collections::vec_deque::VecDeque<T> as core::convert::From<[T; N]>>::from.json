@@ -1,0 +1,92 @@
+{
+  "name": "<collections::vec_deque::VecDeque<T> as core::convert::From<[T; N]>>::from",
+  "safe": true,
+  "callees": {
+    "collections::vec_deque::VecDeque::<T>::with_capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an empty deque with space for at least `capacity` elements.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let deque: VecDeque<u32> = VecDeque::with_capacity(10);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "Constructor"
+      }
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "collections::vec_deque::VecDeque::<T, A>::ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Marginally more convenient\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "Plain",
+      "Ref",
+      "Unknown([Field(0, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(1, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 1439,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:3750:5: 3762:6",
+  "src": "fn from(arr: [T; N]) -> Self {\n        let mut deq = VecDeque::with_capacity(N);\n        let arr = ManuallyDrop::new(arr);\n        if !<T>::IS_ZST {\n            // SAFETY: VecDeque::with_capacity ensures that there is enough capacity.\n            unsafe {\n                ptr::copy_nonoverlapping(arr.as_ptr(), deq.ptr(), N);\n            }\n        }\n        deq.head = 0;\n        deq.len = N;\n        deq\n    }",
+  "mir": "fn <collections::vec_deque::VecDeque<T> as core::convert::From<[T; N]>>::from(_1: [T; N]) -> collections::vec_deque::VecDeque<T> {\n    let mut _0: collections::vec_deque::VecDeque<T>;\n    let mut _2: collections::vec_deque::VecDeque<T>;\n    let  _3: core::mem::ManuallyDrop<[T; N]>;\n    let  _4: ();\n    let mut _5: *const T;\n    let mut _6: &[T];\n    let  _7: &[T; N];\n    let mut _8: &core::mem::ManuallyDrop<[T; N]>;\n    let mut _9: *mut T;\n    let mut _10: &collections::vec_deque::VecDeque<T>;\n    debug arr => _1;\n    debug deq => _2;\n    debug arr => _3;\n    bb0: {\n        StorageLive(_2);\n        _2 = collections::vec_deque::VecDeque::<T>::with_capacity(N) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        _3 = core::mem::ManuallyDrop::<[T; N]>::new(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(<T as core::mem::SizedTypeProperties>::IS_ZST) -> [0: bb3, otherwise: bb8];\n    }\n    bb3: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_8);\n        _8 = &_3;\n        _7 = <core::mem::ManuallyDrop<[T; N]> as core::ops::Deref>::deref(move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _6 = _7 as &[T];\n        StorageDead(_8);\n        _5 = core::slice::<impl [T]>::as_ptr(move _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_2;\n        _9 = collections::vec_deque::VecDeque::<T>::ptr(move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        _4 = core::ptr::copy_nonoverlapping::<T>(move _5, move _9, N) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_9);\n        StorageDead(_5);\n        goto -> bb8;\n    }\n    bb8: {\n        (_2.0: usize) = 0_usize;\n        (_2.1: usize) = N;\n        _0 = move _2;\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Converts a `[T; N]` into a `VecDeque<T>`.\n\n ```\n use std::collections::VecDeque;\n\n let deq1 = VecDeque::from([1, 2, 3, 4]);\n let deq2: VecDeque<_> = [1, 2, 3, 4].into();\n assert_eq!(deq1, deq2);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

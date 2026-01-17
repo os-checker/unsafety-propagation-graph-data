@@ -1,0 +1,143 @@
+{
+  "name": "<thread::lifecycle::Packet<'scope, T> as core::ops::Drop>::drop",
+  "safe": true,
+  "callees": {
+    "core::cell::UnsafeCell::<T>::get_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to the underlying data.\n\n This call borrows the `UnsafeCell` mutably (at compile-time) which\n guarantees that we possess the only reference.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let mut c = UnsafeCell::new(5);\n *c.get_mut() += 1;\n\n assert_eq!(*c.get_mut(), 6);\n ```\n",
+      "adt": {}
+    },
+    "panic::catch_unwind": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Invokes a closure, capturing the cause of an unwinding panic if one occurs.\n\n This function will return `Ok` with the closure's result if the closure does\n not panic, and will return `Err(cause)` if the closure panics. The `cause`\n returned is the object with which panic was originally invoked.\n\n Rust functions that are expected to be called from foreign code that does\n not support unwinding (such as C compiled with `-fno-exceptions`) should be\n defined using `extern \"C\"`, which ensures that if the Rust code panics, it\n is automatically caught and the process is aborted. If this is the desired\n behavior, it is not necessary to use `catch_unwind` explicitly. This\n function should instead be used when more graceful error-handling is needed.\n\n It is **not** recommended to use this function for a general try/catch\n mechanism. The [`Result`] type is more appropriate to use for functions that\n can fail on a regular basis. Additionally, this function is not guaranteed\n to catch all panics, see the \"Notes\" section below.\n\n The closure provided is required to adhere to the [`UnwindSafe`] trait to\n ensure that all captured variables are safe to cross this boundary. The\n purpose of this bound is to encode the concept of [exception safety][rfc] in\n the type system. Most usage of this function should not need to worry about\n this bound as programs are naturally unwind safe without `unsafe` code. If\n it becomes a problem the [`AssertUnwindSafe`] wrapper struct can be used to\n quickly assert that the usage here is indeed unwind safe.\n\n [rfc]: https://github.com/rust-lang/rfcs/blob/master/text/1236-stabilize-catch-panic.md\n\n # Notes\n\n This function **might not catch all Rust panics**. A Rust panic is not\n always implemented via unwinding, but can be implemented by aborting the\n process as well. This function *only* catches unwinding panics, not those\n that abort the process.\n\n If a custom panic hook has been set, it will be invoked before the panic is\n caught, before unwinding.\n\n Although unwinding into Rust code with a foreign exception (e.g. an\n exception thrown from C++ code, or a `panic!` in Rust code compiled or\n linked with a different runtime) via an appropriate ABI (e.g. `\"C-unwind\"`)\n is permitted, catching such an exception using this function will have one\n of two behaviors, and it is unspecified which will occur:\n\n * The process aborts, after executing all destructors of `f` and the\n   functions it called.\n * The function returns a `Result::Err` containing an opaque type.\n\n Finally, be **careful in how you drop the result of this function**. If it\n is `Err`, it contains the panic payload, and dropping that may in turn\n panic!\n\n # Examples\n\n ```\n use std::panic;\n\n let result = panic::catch_unwind(|| {\n     println!(\"hello!\");\n });\n assert!(result.is_ok());\n\n let result = panic::catch_unwind(|| {\n     panic!(\"oh no!\");\n });\n assert!(result.is_err());\n ```\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "sys::stdio::unix::panic_output": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::option::Option": "Constructor",
+        "sys::stdio::unix::Stderr": "Constructor"
+      }
+    },
+    "core::fmt::Arguments::<'a>::from_str_nonconst": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "io::Write::write_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a formatted string into this writer, returning any error\n encountered.\n\n This method is primarily used to interface with the\n [`format_args!()`] macro, and it is rare that this should\n explicitly be called. The [`write!()`] macro should be favored to\n invoke this method instead.\n\n This function internally uses the [`write_all`] method on\n this trait and hence will continuously write data so long as no errors\n are received. This also means that partial writes are not indicated in\n this signature.\n\n [`write_all`]: Write::write_all\n\n # Errors\n\n This function will return any I/O error reported while formatting.\n\n # Examples\n\n ```no_run\n use std::io::prelude::*;\n use std::fs::File;\n\n fn main() -> std::io::Result<()> {\n     let mut buffer = File::create(\"foo.txt\")?;\n\n     // this call\n     write!(buffer, \"{:.*}\", 2, 1.234567)?;\n     // turns into this:\n     buffer.write_fmt(format_args!(\"{:.*}\", 2, 1.234567))?;\n     Ok(())\n }\n ```\n",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "core::fmt::Arguments": "ImmutableAsArgument"
+      }
+    },
+    "process::abort": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Terminates the process in an abnormal fashion.\n\n The function will never return and will immediately terminate the current\n process in a platform specific \"abnormal\" manner. As a consequence,\n no destructors on the current stack or any other thread's stack\n will be run, Rust IO buffers (eg, from `BufWriter`) will not be flushed,\n and C stdio buffers will (on most platforms) not be flushed.\n\n This is in contrast to the default behavior of [`panic!`] which unwinds\n the current thread's stack and calls all destructors.\n When `panic=\"abort\"` is set, either as an argument to `rustc` or in a\n crate's Cargo.toml, [`panic!`] and `abort` are similar. However,\n [`panic!`] will still call the [panic hook] while `abort` will not.\n\n If a clean shutdown is needed it is recommended to only call\n this function at a known point where there are no more destructors left\n to run.\n\n The process's termination will be similar to that from the C `abort()`\n function.  On Unix, the process will terminate with signal `SIGABRT`, which\n typically means that the shell prints \"Aborted\".\n\n # Examples\n\n ```no_run\n use std::process;\n\n fn main() {\n     println!(\"aborting\");\n\n     process::abort();\n\n     // execution never gets here\n }\n ```\n\n The `abort` function terminates the process, so the destructor will not\n get run on the example below:\n\n ```no_run\n use std::process;\n\n struct HasDrop;\n\n impl Drop for HasDrop {\n     fn drop(&mut self) {\n         println!(\"This will never be printed!\");\n     }\n }\n\n fn main() {\n     let _x = HasDrop;\n     process::abort();\n     // the destructor implemented for HasDrop will never get run\n }\n ```\n\n [panic hook]: crate::panic::set_hook\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "thread::scoped::ScopeData::decrement_num_running_threads": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "thread::scoped::ScopeData": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "core::cell::UnsafeCell": [
+      "MutRef"
+    ],
+    "thread::lifecycle::Packet": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "MutRef",
+      "Deref",
+      "Unknown([Deref, Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 789, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 396, kind: Param(ParamTy { index: 1, name: \"T\" }) }), Type(Ty { id: 10, kind: RigidTy(Adt(AdtDef(DefId { id: 4386, name: \"alloc_crate::boxed::Box\" }), GenericArgs([Type(Ty { id: 18, kind: RigidTy(Dynamic([Binder { value: Trait(ExistentialTraitRef { def_id: TraitDef(DefId { id: 4633, name: \"core::any::Any\" }), generic_args: GenericArgs([]) }), bound_vars: [] }, Binder { value: AutoTrait(TraitDef(DefId { id: 4634, name: \"core::marker::Send\" })), bound_vars: [] }], Region { kind: ReErased })) }), Type(Ty { id: 19, kind: RigidTy(Adt(AdtDef(DefId { id: 4635, name: \"alloc_crate::alloc::Global\" }), GenericArgs([]))) })]))) })]))) })])",
+      "Plain",
+      "Ref",
+      "Unknown([Deref, Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 506, kind: RigidTy(Adt(AdtDef(DefId { id: 4653, name: \"alloc_crate::sync::Arc\" }), GenericArgs([Type(Ty { id: 738, kind: RigidTy(Adt(AdtDef(DefId { id: 4670, name: \"thread::scoped::ScopeData\" }), GenericArgs([]))) }), Type(Ty { id: 19, kind: RigidTy(Adt(AdtDef(DefId { id: 4635, name: \"alloc_crate::alloc::Global\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "core::panic::AssertUnwindSafe": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "sys::stdio::unix::Stderr": [
+      "MutRef",
+      "Plain"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ],
+    "alloc_crate::sync::Arc": [
+      "Ref"
+    ],
+    "thread::scoped::ScopeData": [
+      "Ref"
+    ]
+  },
+  "path": 4506,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/lifecycle.rs:189:5: 217:6",
+  "src": "fn drop(&mut self) {\n        // If this packet was for a thread that ran in a scope, the thread\n        // panicked, and nobody consumed the panic payload, we make sure\n        // the scope function will panic.\n        let unhandled_panic = matches!(self.result.get_mut(), Some(Err(_)));\n        // Drop the result without causing unwinding.\n        // This is only relevant for threads that aren't join()ed, as\n        // join() will take the `result` and set it to None, such that\n        // there is nothing left to drop here.\n        // If this panics, we should handle that, because we're outside the\n        // outermost `catch_unwind` of our thread.\n        // We just abort in that case, since there's nothing else we can do.\n        // (And even if we tried to handle it somehow, we'd also need to handle\n        // the case where the panic payload we get out of it also panics on\n        // drop, and so on. See issue #86027.)\n        if let Err(_) = panic::catch_unwind(panic::AssertUnwindSafe(|| {\n            *self.result.get_mut() = None;\n        })) {\n            rtabort!(\"thread result panicked on drop\");\n        }\n        // Book-keeping so the scope knows when it's done.\n        if let Some(scope) = &self.scope {\n            // Now that there will be no more user code running on this thread\n            // that can use 'scope, mark the thread as 'finished'.\n            // It's important we only do this after the `result` has been dropped,\n            // since dropping it might still use things it borrowed from 'scope.\n            scope.decrement_num_running_threads(unhandled_panic);\n        }\n    }",
+  "mir": "fn <thread::lifecycle::Packet<'scope, T> as core::ops::Drop>::drop(_1: &mut thread::lifecycle::Packet<'_, T>) -> () {\n    let mut _0: ();\n    let  _2: bool;\n    let mut _3: &mut core::option::Option<core::result::Result<T, alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>>>;\n    let mut _4: &mut core::cell::UnsafeCell<core::option::Option<core::result::Result<T, alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>>>>;\n    let mut _5: isize;\n    let mut _6: isize;\n    let mut _7: core::result::Result<(), alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>>;\n    let mut _8: core::panic::AssertUnwindSafe<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/lifecycle.rs:204:69: 204:71}>;\n    let mut _9: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/lifecycle.rs:204:69: 204:71};\n    let mut _10: &mut core::cell::UnsafeCell<core::option::Option<core::result::Result<T, alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>>>>;\n    let mut _11: isize;\n    let mut _12: core::option::Option<sys::stdio::unix::Stderr>;\n    let mut _13: isize;\n    let mut _14: sys::stdio::unix::Stderr;\n    let mut _15: core::result::Result<(), io::error::Error>;\n    let mut _16: &mut sys::stdio::unix::Stderr;\n    let mut _17: core::fmt::Arguments<'_>;\n    let  _18: !;\n    let mut _19: &core::option::Option<alloc_crate::sync::Arc<thread::scoped::ScopeData>>;\n    let mut _20: isize;\n    let  _21: &alloc_crate::sync::Arc<thread::scoped::ScopeData>;\n    let  _22: ();\n    let  _23: &thread::scoped::ScopeData;\n    let mut _24: bool;\n    debug self => _1;\n    debug unhandled_panic => _2;\n    debug out => sys::stdio::unix::Stderr;\n    debug scope => _21;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &mut ((*_1).1: core::cell::UnsafeCell<core::option::Option<core::result::Result<T, alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>>>>);\n        _3 = core::cell::UnsafeCell::<core::option::Option<core::result::Result<T, alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>>>>::get_mut(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _6 = discriminant((*_3));\n        switchInt(move _6) -> [1: bb3, 0: bb2, otherwise: bb21];\n    }\n    bb2: {\n        _2 = false;\n        goto -> bb4;\n    }\n    bb3: {\n        _5 = discriminant((((*_3) as variant#1).0: core::result::Result<T, alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>>));\n        _2 = Eq(_5, 1_isize);\n        goto -> bb4;\n    }\n    bb4: {\n        StorageDead(_3);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &mut ((*_1).1: core::cell::UnsafeCell<core::option::Option<core::result::Result<T, alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>>>>);\n        _9 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/lifecycle.rs:204:69: 204:71}(move _10);\n        StorageDead(_10);\n        _8 = AssertUnwindSafe(move _9);\n        StorageDead(_9);\n        _7 = panic::catch_unwind::<core::panic::AssertUnwindSafe<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/lifecycle.rs:204:69: 204:71}>, ()>(move _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_8);\n        _11 = discriminant(_7);\n        switchInt(move _11) -> [1: bb6, 0: bb14, otherwise: bb21];\n    }\n    bb6: {\n        StorageLive(_12);\n        _12 = sys::stdio::unix::panic_output() -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _13 = discriminant(_12);\n        switchInt(move _13) -> [1: bb8, 0: bb12, otherwise: bb21];\n    }\n    bb8: {\n        StorageLive(_15);\n        _16 = &mut _14;\n        StorageLive(_17);\n        _17 = core::fmt::Arguments::<'_>::from_str_nonconst(\"fatal runtime error: thread result panicked on drop, aborting\\n\") -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _15 = <sys::stdio::unix::Stderr as io::Write>::write_fmt(_16, move _17) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_17);\n        drop(_15) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_15);\n        StorageDead(_12);\n        goto -> bb13;\n    }\n    bb12: {\n        StorageDead(_12);\n        goto -> bb13;\n    }\n    bb13: {\n        _18 = process::abort() -> unwind unreachable;\n    }\n    bb14: {\n        drop(_7) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_7);\n        StorageLive(_19);\n        _19 = &((*_1).0: core::option::Option<alloc_crate::sync::Arc<thread::scoped::ScopeData>>);\n        _20 = discriminant((*_19));\n        switchInt(move _20) -> [1: bb17, 0: bb16, otherwise: bb21];\n    }\n    bb16: {\n        StorageDead(_19);\n        goto -> bb20;\n    }\n    bb17: {\n        _21 = &(((*_19) as variant#1).0: alloc_crate::sync::Arc<thread::scoped::ScopeData>);\n        _23 = <alloc_crate::sync::Arc<thread::scoped::ScopeData> as core::ops::Deref>::deref(_21) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageLive(_24);\n        _24 = _2;\n        _22 = thread::scoped::ScopeData::decrement_num_running_threads(_23, move _24) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_24);\n        StorageDead(_19);\n        goto -> bb20;\n    }\n    bb20: {\n        StorageDead(_2);\n        return;\n    }\n    bb21: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "ptr::const_ptr::<impl *const T>::wrapping_byte_sub",
+  "safe": true,
+  "callees": {
+    "ptr::const_ptr::<impl *const T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::wrapping_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts an unsigned offset from a pointer using wrapping arithmetic.\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n This operation itself is always safe, but using the resulting pointer is not.\n\n The resulting pointer \"remembers\" the [allocation] that `self` points to; it must not\n be used to read or write other allocations.\n\n In other words, `let z = x.wrapping_sub((x as usize) - (y as usize))` does *not* make `z`\n the same as `y` even if we assume `T` has size `1` and there is no overflow: `z` is still\n attached to the object `x` is attached to, and dereferencing it is Undefined Behavior unless\n `x` and `y` point into the same allocation.\n\n Compared to [`sub`], this method basically delays the requirement of staying within the\n same allocation: [`sub`] is immediate Undefined Behavior when crossing object\n boundaries; `wrapping_sub` produces a pointer but still leads to Undefined Behavior if a\n pointer is dereferenced when it is out-of-bounds of the object it is attached to. [`sub`]\n can be optimized better and is thus preferable in performance-sensitive code.\n\n The delayed check only considers the value of the pointer that was dereferenced, not the\n intermediate values used during the computation of the final result. For example,\n `x.wrapping_add(o).wrapping_sub(o)` is always the same as `x`. In other words, leaving the\n allocation and then re-entering it later is permitted.\n\n [`sub`]: #method.sub\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n # use std::fmt::Write;\n // Iterate using a raw pointer in increments of two elements (backwards)\n let data = [1u8, 2, 3, 4, 5];\n let mut ptr: *const u8 = data.as_ptr();\n let start_rounded_down = ptr.wrapping_sub(2);\n ptr = ptr.wrapping_add(4);\n let step = 2;\n let mut out = String::new();\n while ptr != start_rounded_down {\n     unsafe {\n         write!(&mut out, \"{}, \", *ptr)?;\n     }\n     ptr = ptr.wrapping_sub(step);\n }\n assert_eq!(out, \"5, 3, 1, \");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::with_metadata_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Uses the address value in a new pointer of another type.\n\n This operation will ignore the address part of its `meta` operand and discard existing\n metadata of `self`. For pointers to a sized types (thin pointers), this has the same effect\n as a simple cast. For pointers to an unsized type (fat pointers) this recombines the address\n with new metadata such as slice lengths or `dyn`-vtable.\n\n The resulting pointer will have provenance of `self`. This operation is semantically the\n same as creating a new pointer with the data pointer value of `self` but the metadata of\n `meta`, being fat or thin depending on the `meta` operand.\n\n # Examples\n\n This function is primarily useful for enabling pointer arithmetic on potentially fat\n pointers. The pointer is cast to a sized pointee to utilize offset operations and then\n recombined with its own original metadata.\n\n ```\n #![feature(set_ptr_value)]\n # use core::fmt::Debug;\n let arr: [i32; 3] = [1, 2, 3];\n let mut ptr = arr.as_ptr() as *const dyn Debug;\n let thin = ptr as *const u8;\n unsafe {\n     ptr = thin.add(8).with_metadata_of(ptr);\n     # assert_eq!(*(ptr as *const i32), 3);\n     println!(\"{:?}\", &*ptr); // will print \"3\"\n }\n ```\n\n # *Incorrect* usage\n\n The provenance from pointers is *not* combined. The result must only be used to refer to the\n address allowed by `self`.\n\n ```rust,no_run\n #![feature(set_ptr_value)]\n let x = 0u32;\n let y = 1u32;\n\n let x = (&x) as *const u32;\n let y = (&y) as *const u32;\n\n let offset = (x as usize - y as usize) / 4;\n let bad = x.wrapping_add(offset).with_metadata_of(y);\n\n // This dereference is UB. The pointer only has provenance for `x` but points to `y`.\n println!(\"{:?}\", unsafe { &*bad });\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1012,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/const_ptr.rs:1152:5: 1154:6",
+  "src": "pub const fn wrapping_byte_sub(self, count: usize) -> Self {\n        self.cast::<u8>().wrapping_sub(count).with_metadata_of(self)\n    }",
+  "mir": "fn ptr::const_ptr::<impl *const T>::wrapping_byte_sub(_1: *const T, _2: usize) -> *const T {\n    let mut _0: *const T;\n    let mut _3: *const u8;\n    let mut _4: *const u8;\n    debug self => _1;\n    debug count => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ptr::const_ptr::<impl *const T>::cast::<u8>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = ptr::const_ptr::<impl *const u8>::wrapping_sub(move _4, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = ptr::const_ptr::<impl *const u8>::with_metadata_of::<T>(move _3, _1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Subtracts an unsigned offset in bytes from a pointer using wrapping arithmetic.\n\n `count` is in units of bytes.\n\n This is purely a convenience for casting to a `u8` pointer and\n using [wrapping_sub][pointer::wrapping_sub] on it. See that method for documentation.\n\n For non-`Sized` pointees this operation changes only the data pointer,\n leaving the metadata untouched.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

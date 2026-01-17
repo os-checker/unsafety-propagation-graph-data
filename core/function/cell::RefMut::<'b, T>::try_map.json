@@ -1,0 +1,64 @@
+{
+  "name": "cell::RefMut::<'b, T>::try_map",
+  "safe": true,
+  "callees": {
+    "ops::deref::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "ops::function::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "cell::RefMut": [
+      "MutRef",
+      "Plain",
+      "Unknown([Field(1, Ty { id: 5177, kind: RigidTy(Adt(AdtDef(DefId { id: 26100, name: \"cell::BorrowRefMut\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])"
+    ],
+    "result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 5259, kind: Param(ParamTy { index: 3, name: \"E\" }) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 2690, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 2679, kind: Param(ParamTy { index: 2, name: \"U\" }) }, Mut)) })])"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ],
+    "cell::BorrowRefMut": [
+      "Plain"
+    ]
+  },
+  "path": 4811,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell.rs:1929:5: 1943:6",
+  "src": "pub fn try_map<U: ?Sized, E>(\n        mut orig: RefMut<'b, T>,\n        f: impl FnOnce(&mut T) -> Result<&mut U, E>,\n    ) -> Result<RefMut<'b, U>, (Self, E)> {\n        // SAFETY: function holds onto an exclusive reference for the duration\n        // of its call through `orig`, and the pointer is only de-referenced\n        // inside of the function call never allowing the exclusive reference to\n        // escape.\n        match f(&mut *orig) {\n            Ok(value) => {\n                Ok(RefMut { value: NonNull::from(value), borrow: orig.borrow, marker: PhantomData })\n            }\n            Err(e) => Err((orig, e)),\n        }\n    }",
+  "mir": "fn cell::RefMut::<'b, T>::try_map(_1: cell::RefMut<'_, T>, _2: impl FnOnce(&mut T) -> Result<&mut U, E>) -> result::Result<cell::RefMut<'_, U>, (cell::RefMut<'_, T>, E)> {\n    let mut _0: result::Result<cell::RefMut<'_, U>, (cell::RefMut<'_, T>, E)>;\n    let mut _3: result::Result<&mut U, E>;\n    let mut _4: (&mut T,);\n    let mut _5: &mut T;\n    let mut _6: &mut cell::RefMut<'_, T>;\n    let mut _7: isize;\n    let  _8: &mut U;\n    let mut _9: cell::RefMut<'_, U>;\n    let mut _10: ptr::non_null::NonNull<U>;\n    let mut _11: cell::BorrowRefMut<'_>;\n    let  _12: E;\n    let mut _13: (cell::RefMut<'_, T>, E);\n    let mut _14: cell::RefMut<'_, T>;\n    debug orig => _1;\n    debug f => _2;\n    debug value => _8;\n    debug e => _12;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_6);\n        _6 = &mut _1;\n        _5 = <cell::RefMut<'_, T> as ops::deref::DerefMut>::deref_mut(move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        _4 = (_5);\n        _3 = <impl FnOnce(&mut T) -> Result<&mut U, E> as ops::function::FnOnce<(&mut T,)>>::call_once(_2, move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _7 = discriminant(_3);\n        switchInt(move _7) -> [0: bb5, 1: bb4, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _12 = move ((_3 as variant#1).0: E);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = move _1;\n        _13 = (move _14, _12);\n        StorageDead(_14);\n        _0 = result::Result::Err(move _13);\n        StorageDead(_13);\n        goto -> bb7;\n    }\n    bb5: {\n        _8 = move ((_3 as variant#0).0: &mut U);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = <ptr::non_null::NonNull<U> as convert::From<&mut U>>::from(_8) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_11);\n        _11 = move (_1.1: cell::BorrowRefMut<'_>);\n        _9 = RefMut(move _10, move _11, ZeroSized: marker::PhantomData<&mut U>);\n        StorageDead(_11);\n        StorageDead(_10);\n        _0 = result::Result::Ok(move _9);\n        StorageDead(_9);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Tries to makes a new `RefMut` for a component of the borrowed data.\n On failure, the original guard is returned alongside with the error\n returned by the closure.\n\n The `RefCell` is already mutably borrowed, so this cannot fail.\n\n This is an associated function that needs to be used as\n `RefMut::try_map(...)`. A method would interfere with methods of the same\n name on the contents of a `RefCell` used through `Deref`.\n\n # Examples\n\n ```\n #![feature(refcell_try_map)]\n use std::cell::{RefCell, RefMut};\n use std::str::{from_utf8_mut, Utf8Error};\n\n let c = RefCell::new(vec![0x68, 0x65, 0x6C, 0x6C, 0x6F]);\n {\n     let b1: RefMut<'_, Vec<u8>> = c.borrow_mut();\n     let b2: Result<RefMut<'_, str>, _> = RefMut::try_map(b1, |v| from_utf8_mut(v));\n     let mut b2 = b2.unwrap();\n     assert_eq!(&*b2, \"hello\");\n     b2.make_ascii_uppercase();\n }\n assert_eq!(*c.borrow(), \"HELLO\".as_bytes());\n\n let c = RefCell::new(vec![0xFF]);\n let b1: RefMut<'_, Vec<u8>> = c.borrow_mut();\n let b2: Result<_, (RefMut<'_, Vec<u8>>, Utf8Error)> = RefMut::try_map(b1, |v| from_utf8_mut(v));\n let (b3, e) = b2.unwrap_err();\n assert_eq!(*b3, vec![0xFF]);\n assert_eq!(e.valid_up_to(), 0);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

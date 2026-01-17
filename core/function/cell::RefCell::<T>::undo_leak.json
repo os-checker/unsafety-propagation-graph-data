@@ -1,0 +1,49 @@
+{
+  "name": "cell::RefCell::<T>::undo_leak",
+  "safe": true,
+  "callees": {
+    "cell::Cell::<T>::get_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to the underlying data.\n\n This call borrows `Cell` mutably (at compile-time) which guarantees\n that we possess the only reference.\n\n However be cautious: this method expects `self` to be mutable, which is\n generally not the case when using a `Cell`. If you require interior\n mutability by reference, consider using `RefCell` which provides\n run-time checked mutable borrows through its [`borrow_mut`] method.\n\n [`borrow_mut`]: RefCell::borrow_mut()\n\n # Examples\n\n ```\n use std::cell::Cell;\n\n let mut c = Cell::new(5);\n *c.get_mut() += 1;\n\n assert_eq!(c.get(), 6);\n ```\n",
+      "adt": {
+        "cell::Cell": "MutableAsArgument"
+      }
+    },
+    "cell::RefCell::<T>::get_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to the underlying data.\n\n Since this method borrows `RefCell` mutably, it is statically guaranteed\n that no borrows to the underlying data exist. The dynamic checks inherent\n in [`borrow_mut`] and most other methods of `RefCell` are therefore\n unnecessary. Note that this method does not reset the borrowing state if borrows were previously leaked\n (e.g., via [`forget()`] on a [`Ref`] or [`RefMut`]). For that purpose,\n consider using the unstable [`undo_leak`] method.\n\n This method can only be called if `RefCell` can be mutably borrowed,\n which in general is only the case directly after the `RefCell` has\n been created. In these situations, skipping the aforementioned dynamic\n borrowing checks may yield better ergonomics and runtime-performance.\n\n In most situations where `RefCell` is used, it can't be borrowed mutably.\n Use [`borrow_mut`] to get mutable access to the underlying data then.\n\n [`borrow_mut`]: RefCell::borrow_mut()\n [`forget()`]: mem::forget\n [`undo_leak`]: RefCell::undo_leak()\n\n # Examples\n\n ```\n use std::cell::RefCell;\n\n let mut c = RefCell::new(5);\n *c.get_mut() += 1;\n\n assert_eq!(c, RefCell::new(6));\n ```\n",
+      "adt": {
+        "cell::RefCell": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "cell::Cell": [
+      "MutRef"
+    ],
+    "cell::RefCell": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ]
+  },
+  "path": 4801,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell.rs:1335:5: 1338:6",
+  "src": "pub const fn undo_leak(&mut self) -> &mut T {\n        *self.borrow.get_mut() = UNUSED;\n        self.get_mut()\n    }",
+  "mir": "fn cell::RefCell::<T>::undo_leak(_1: &mut cell::RefCell<T>) -> &mut T {\n    let mut _0: &mut T;\n    let mut _2: &mut isize;\n    let mut _3: &mut cell::Cell<isize>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &mut ((*_1).0: cell::Cell<isize>);\n        _2 = cell::Cell::<isize>::get_mut(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        (*_2) = cell::UNUSED;\n        StorageDead(_2);\n        _0 = cell::RefCell::<T>::get_mut(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Undo the effect of leaked guards on the borrow state of the `RefCell`.\n\n This call is similar to [`get_mut`] but more specialized. It borrows `RefCell` mutably to\n ensure no borrows exist and then resets the state tracking shared borrows. This is relevant\n if some `Ref` or `RefMut` borrows have been leaked.\n\n [`get_mut`]: RefCell::get_mut()\n\n # Examples\n\n ```\n #![feature(cell_leak)]\n use std::cell::RefCell;\n\n let mut c = RefCell::new(0);\n std::mem::forget(c.borrow_mut());\n\n assert!(c.try_borrow().is_err());\n c.undo_leak();\n assert!(c.try_borrow().is_ok());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

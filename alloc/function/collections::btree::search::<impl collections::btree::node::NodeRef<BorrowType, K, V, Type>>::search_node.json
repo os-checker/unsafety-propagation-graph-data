@@ -1,0 +1,72 @@
+{
+  "name": "collections::btree::search::<impl collections::btree::node::NodeRef<BorrowType, K, V, Type>>::search_node",
+  "safe": true,
+  "callees": {
+    "collections::btree::search::<impl collections::btree::node::NodeRef<BorrowType, K, V, Type>>::find_key_index": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns either the KV index in the node at which the key (or an equivalent)\n exists, or the edge index where the key belongs, starting from a particular index.\n\n The result is meaningful only if the tree is ordered by key, like the tree\n in a `BTreeMap` is.\n\n # Safety\n `start_index` must be a valid edge index for the node.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "ImmutableAsArgument",
+        "collections::btree::search::IndexResult": "Constructor"
+      }
+    },
+    "collections::btree::node::Handle::<collections::btree::node::NodeRef<BorrowType, K, V, NodeType>, collections::btree::node::marker::Edge>::new_edge": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new handle to an edge in `node`.\n Unsafe because the caller must ensure that `idx <= node.len()`.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "Constructor",
+        "collections::btree::node::Handle": "Constructor"
+      }
+    },
+    "collections::btree::node::Handle::<collections::btree::node::NodeRef<BorrowType, K, V, NodeType>, collections::btree::node::marker::KV>::new_kv": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new handle to a key-value pair in `node`.\n Unsafe because the caller must ensure that `idx < node.len()`.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "Constructor",
+        "collections::btree::node::Handle": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "collections::btree::node::NodeRef": [
+      "Ref",
+      "Plain"
+    ],
+    "collections::btree::search::IndexResult": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "collections::btree::node::Handle": [
+      "Plain"
+    ],
+    "collections::btree::search::SearchResult": [
+      "Plain"
+    ]
+  },
+  "path": 996,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/search.rs:195:5: 207:6",
+  "src": "pub(super) fn search_node<Q: ?Sized>(\n        self,\n        key: &Q,\n    ) -> SearchResult<BorrowType, K, V, Type, Type>\n    where\n        Q: Ord,\n        K: Borrow<Q>,\n    {\n        match unsafe { self.find_key_index(key, 0) } {\n            IndexResult::KV(idx) => Found(unsafe { Handle::new_kv(self, idx) }),\n            IndexResult::Edge(idx) => GoDown(unsafe { Handle::new_edge(self, idx) }),\n        }\n    }",
+  "mir": "fn collections::btree::search::<impl collections::btree::node::NodeRef<BorrowType, K, V, Type>>::search_node(_1: collections::btree::node::NodeRef<BorrowType, K, V, Type>, _2: &Q) -> collections::btree::search::SearchResult<BorrowType, K, V, Type, Type> {\n    let mut _0: collections::btree::search::SearchResult<BorrowType, K, V, Type, Type>;\n    let mut _3: collections::btree::search::IndexResult;\n    let mut _4: &collections::btree::node::NodeRef<BorrowType, K, V, Type>;\n    let mut _5: isize;\n    let  _6: usize;\n    let mut _7: collections::btree::node::Handle<collections::btree::node::NodeRef<BorrowType, K, V, Type>, collections::btree::node::marker::KV>;\n    let  _8: usize;\n    let mut _9: collections::btree::node::Handle<collections::btree::node::NodeRef<BorrowType, K, V, Type>, collections::btree::node::marker::Edge>;\n    debug self => _1;\n    debug key => _2;\n    debug idx => _6;\n    debug idx => _8;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &_1;\n        _3 = collections::btree::search::<impl collections::btree::node::NodeRef<BorrowType, K, V, Type>>::find_key_index::<Q>(move _4, _2, 0_usize) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [0: bb4, 1: bb3, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        _8 = ((_3 as variant#1).0: usize);\n        StorageLive(_9);\n        _9 = collections::btree::node::Handle::<collections::btree::node::NodeRef<BorrowType, K, V, Type>, collections::btree::node::marker::Edge>::new_edge(_1, _8) -> [return: bb6, unwind unreachable];\n    }\n    bb4: {\n        _6 = ((_3 as variant#0).0: usize);\n        StorageLive(_7);\n        _7 = collections::btree::node::Handle::<collections::btree::node::NodeRef<BorrowType, K, V, Type>, collections::btree::node::marker::KV>::new_kv(_1, _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = collections::btree::search::SearchResult::Found(move _7);\n        StorageDead(_7);\n        goto -> bb7;\n    }\n    bb6: {\n        _0 = collections::btree::search::SearchResult::GoDown(move _9);\n        StorageDead(_9);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Looks up a given key in the node, without recursion.\n Returns a `Found` with the handle of the matching KV, if any. Otherwise,\n returns a `GoDown` with the handle of the edge where the key might be found\n (if the node is internal) or where the key can be inserted.\n\n The result is meaningful only if the tree is ordered by key, like the tree\n in a `BTreeMap` is.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

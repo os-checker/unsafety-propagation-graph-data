@@ -1,0 +1,116 @@
+{
+  "name": "util::id_set::IdSet",
+  "constructors": [
+    "util::id_set::IdSet::<I>::new_full",
+    "util::id_set::IdSet::<I>::new_empty",
+    "<util::id_set::IdSet<I> as core::convert::From<I>>::from",
+    "<util::id_set::IdSet<I> as core::default::Default>::default",
+    "util::id_set::AtomicIdSet::<I>::load",
+    "<util::id_set::IdSet<I> as core::clone::Clone>::clone"
+  ],
+  "access_self_as_arg": {
+    "read": [
+      "smp::inter_processor_call",
+      "smp::IpiSender::inter_processor_call",
+      "util::id_set::IdSet::<I>::contains",
+      "util::id_set::IdSet::<I>::count",
+      "util::id_set::IdSet::<I>::is_empty",
+      "util::id_set::IdSet::<I>::is_full",
+      "util::id_set::IdSet::<I>::iter",
+      "util::id_set::IdSet::<I>::iter_in",
+      "util::id_set::AtomicIdSet::<I>::store",
+      "<util::id_set::IdSet<I> as core::clone::Clone>::clone",
+      "<util::id_set::IdSet<I> as core::fmt::Debug>::fmt",
+      "<util::id_set::IdSet<I> as core::cmp::Eq>::assert_receiver_is_total_eq",
+      "<util::id_set::IdSet<I> as core::cmp::PartialEq>::eq"
+    ],
+    "write": [
+      "util::id_set::IdSet::<I>::add",
+      "util::id_set::IdSet::<I>::remove",
+      "util::id_set::IdSet::<I>::add_all",
+      "util::id_set::IdSet::<I>::clear"
+    ],
+    "other": [
+      "util::id_set::AtomicIdSet::<I>::new",
+      "<util::id_set::IdSet<I> as core::clone::Clone>::clone",
+      "util::id_set::AtomicIdSet::<I>::new"
+    ]
+  },
+  "access_self_as_locals": {
+    "read": [
+      "mm::tlb::TlbFlusher::<'a, G>::dispatch_tlb_flush",
+      "mm::tlb::TlbFlusher::<'a, G>::sync_tlb_flush",
+      "power::machine_halt",
+      "sync::rcu::monitor::GracePeriod::finish_grace_period",
+      "sync::rcu::monitor::GracePeriod::restart",
+      "task::scheduler::set_need_preempt"
+    ],
+    "write": [
+      "mm::tlb::TlbFlusher::<'a, G>::dispatch_tlb_flush",
+      "<util::id_set::IdSet<I> as core::convert::From<I>>::from"
+    ],
+    "other": [
+      "io::io_mem::IoMem::<SecuritySensitivity>::new",
+      "mm::dma::util::alloc_kva",
+      "mm::tlb::TlbFlusher::<'a, G>::new",
+      "mm::tlb::TlbFlusher::<'a, G>::dispatch_tlb_flush",
+      "mm::tlb::TlbFlusher::<'a, G>::sync_tlb_flush",
+      "mm::vm_space::VmSpace::new",
+      "power::machine_halt",
+      "sync::rcu::monitor::GracePeriod::new",
+      "sync::rcu::monitor::GracePeriod::finish_grace_period",
+      "sync::rcu::monitor::GracePeriod::restart",
+      "task::kernel_stack::KernelStack::new_with_guard_page",
+      "task::scheduler::set_need_preempt",
+      "util::id_set::IdSet::<I>::new_full",
+      "util::id_set::IdSet::<I>::new_empty",
+      "<util::id_set::IdSet<I> as core::convert::From<I>>::from",
+      "<util::id_set::IdSet<I> as core::default::Default>::default",
+      "util::id_set::AtomicIdSet::<I>::load"
+    ]
+  },
+  "access_field": [
+    {
+      "read": [],
+      "write": [
+        "util::id_set::IdSet::<I>::add",
+        "util::id_set::IdSet::<I>::remove",
+        "util::id_set::IdSet::<I>::contains",
+        "util::id_set::IdSet::<I>::count",
+        "util::id_set::IdSet::<I>::is_empty",
+        "util::id_set::IdSet::<I>::is_full",
+        "util::id_set::IdSet::<I>::add_all",
+        "util::id_set::IdSet::<I>::clear",
+        "util::id_set::IdSet::<I>::iter_in",
+        "util::id_set::AtomicIdSet::<I>::store",
+        "<util::id_set::IdSet<I> as core::clone::Clone>::clone",
+        "<util::id_set::IdSet<I> as core::fmt::Debug>::fmt",
+        "<util::id_set::IdSet<I> as core::cmp::PartialEq>::eq"
+      ],
+      "other": []
+    },
+    {
+      "read": [],
+      "write": [
+        "<util::id_set::IdSet<I> as core::clone::Clone>::clone",
+        "<util::id_set::IdSet<I> as core::fmt::Debug>::fmt",
+        "<util::id_set::IdSet<I> as core::cmp::PartialEq>::eq"
+      ],
+      "other": []
+    }
+  ],
+  "span": "ostd/src/util/id_set.rs:128:1: 128:20",
+  "src": "pub struct IdSet<I>",
+  "kind": "Struct",
+  "doc_adt": " A set of IDs.\n\n # Examples\n\n Assume that you have a type named `MyId`,\n which represents a set of IDs from 0 to 10 (exclusive).\n\n ```\n #[derive(Copy, Clone, Debug, Eq, PartialEq)]\n pub struct MyId(u32);\n\n // SAFETY: `MyId` maintains the 1:1 mapping invariant for 0..10.\n unsafe impl Id for MyId {\n     fn new_unchecked(raw_id: u32) -> Self { Self(raw_id) }\n     fn cardinality() -> u32 { 10 } // Fixed cardinality for this example\n }\n impl From<MyId> for u32 { fn from(id: MyId) -> u32 { id.0 } }\n ```\n\n Now you can use `IdSet<MyId>` as a container for `MyID`s.\n\n ```\n let mut my_id_set: IdSet<MyId> = IdSet::new_empty();\n\n let id0 = MyId::new(0);\n my_id_set.add(id0);\n assert!(my_id_set.contains(id0));\n assert_eq!(my_id_set.count(), 1);\n\n let id5 = MyId::new(5);\n my_id_set.add(id5);\n assert!(my_id_set.contains(id5));\n assert_eq!(my_id_set.count(), 2);\n\n my_id_set.remove(id0);\n assert!(!my_id_set.contains(id0));\n assert_eq!(my_id_set.count(), 1);\n\n let full_set = IdSet::<MyId>::new_full();\n assert_eq!(full_set.count(), 10);\n assert!(full_set.contains(MyId::new(9)));\n ```\n",
+  "variant_fields": {
+    "VariantIdx(None)-FieldIdx(Some(0))": {
+      "name": "bits",
+      "doc": ""
+    },
+    "VariantIdx(None)-FieldIdx(Some(1))": {
+      "name": "phantom",
+      "doc": ""
+    }
+  }
+}

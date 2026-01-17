@@ -1,0 +1,49 @@
+{
+  "name": "<slice::iter::Iter<'a, T> as iter::traits::iterator::Iterator>::size_hint",
+  "safe": true,
+  "callees": {
+    "ptr::const_ptr::<impl *const T>::addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::offset_from_unsigned": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calculates the distance between two pointers within the same allocation, *where it's known that\n `self` is equal to or greater than `origin`*. The returned value is in\n units of T: the distance in bytes is divided by `size_of::<T>()`.\n\n This computes the same value that [`offset_from`](#method.offset_from)\n would compute, but with the added precondition that the offset is\n guaranteed to be non-negative.  This method is equivalent to\n `usize::try_from(self.offset_from(origin)).unwrap_unchecked()`,\n but it provides slightly more information to the optimizer, which can\n sometimes allow it to optimize slightly better with some backends.\n\n This method can be though of as recovering the `count` that was passed\n to [`add`](#method.add) (or, with the parameters in the other order,\n to [`sub`](#method.sub)).  The following are all equivalent, assuming\n that their safety preconditions are met:\n ```rust\n # unsafe fn blah(ptr: std::ptr::NonNull<u32>, origin: std::ptr::NonNull<u32>, count: usize) -> bool { unsafe {\n ptr.offset_from_unsigned(origin) == count\n # &&\n origin.add(count) == ptr\n # &&\n ptr.sub(count) == origin\n # } }\n ```\n\n # Safety\n\n - The distance between the pointers must be non-negative (`self >= origin`)\n\n - *All* the safety conditions of [`offset_from`](#method.offset_from)\n   apply to this method as well; see it for the full details.\n\n Importantly, despite the return type of this method being able to represent\n a larger offset, it's still *not permitted* to pass pointers which differ\n by more than `isize::MAX` *bytes*.  As such, the result of this method will\n always be less than or equal to `isize::MAX as usize`.\n\n # Panics\n\n This function panics if `T` is a Zero-Sized Type (\"ZST\").\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let a = [0; 5];\n let ptr1: NonNull<u32> = NonNull::from(&a[1]);\n let ptr2: NonNull<u32> = NonNull::from(&a[3]);\n unsafe {\n     assert_eq!(ptr2.offset_from_unsigned(ptr1), 2);\n     assert_eq!(ptr1.add(2), ptr2);\n     assert_eq!(ptr2.sub(2), ptr1);\n     assert_eq!(ptr2.offset_from_unsigned(ptr2), 0);\n }\n\n // This would be incorrect, as the pointers are not correctly ordered:\n // ptr1.offset_from_unsigned(ptr2)\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::Iter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 16459,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter/macros.rs:218:13: 221:14",
+  "src": "fn size_hint(&self) -> (usize, Option<usize>) {\n                let exact = len!(self);\n                (exact, Some(exact))\n            }",
+  "mir": "fn <slice::iter::Iter<'a, T> as iter::traits::iterator::Iterator>::size_hint(_1: &slice::iter::Iter<'_, T>) -> (usize, option::Option<usize>) {\n    let mut _0: (usize, option::Option<usize>);\n    let  _2: usize;\n    let  _3: usize;\n    let mut _4: *const T;\n    let  _5: ptr::non_null::NonNull<T>;\n    let mut _6: *const T;\n    let mut _7: ptr::non_null::NonNull<T>;\n    let mut _8: usize;\n    let mut _9: option::Option<usize>;\n    let mut _10: usize;\n    debug self => _1;\n    debug exact => _2;\n    debug len => _3;\n    debug end => _5;\n    bb0: {\n        StorageLive(_2);\n        switchInt(<T as mem::SizedTypeProperties>::IS_ZST) -> [0: bb3, otherwise: bb1];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).1: *const T);\n        _3 = ptr::const_ptr::<impl *const T>::addr(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _2 = _3;\n        StorageDead(_3);\n        goto -> bb5;\n    }\n    bb3: {\n        StorageLive(_6);\n        _6 = ((*_1).1: *const T);\n        _5 = move _6 as ptr::non_null::NonNull<T>;\n        StorageDead(_6);\n        StorageLive(_7);\n        _7 = ((*_1).0: ptr::non_null::NonNull<T>);\n        _2 = ptr::non_null::NonNull::<T>::offset_from_unsigned(_5, move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageLive(_8);\n        _8 = _2;\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = _2;\n        _9 = option::Option::Some(move _10);\n        StorageDead(_10);\n        _0 = (move _8, move _9);\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

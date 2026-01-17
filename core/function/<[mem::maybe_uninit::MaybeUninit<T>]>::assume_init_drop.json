@@ -1,0 +1,47 @@
+{
+  "name": "<[mem::maybe_uninit::MaybeUninit<T>]>::assume_init_drop",
+  "safe": false,
+  "callees": {
+    "slice::<impl [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the slice has a length of 0.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n assert!(!a.is_empty());\n\n let b: &[i32] = &[];\n assert!(b.is_empty());\n ```\n",
+      "adt": {}
+    },
+    "ptr::drop_in_place": {
+      "safe": false,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unconditional_recursion"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unconditional_recursion\n"
+        ]
+      },
+      "doc": " Executes the destructor (if any) of the pointed-to value.\n\n This is almost the same as calling [`ptr::read`] and discarding\n the result, but has the following advantages:\n\n * It is *required* to use `drop_in_place` to drop unsized types like\n   trait objects, because they can't be read out onto the stack and\n   dropped normally.\n\n * It is friendlier to the optimizer to do this over [`ptr::read`] when\n   dropping manually allocated memory (e.g., in the implementations of\n   `Box`/`Rc`/`Vec`), as the compiler doesn't need to prove that it's\n   sound to elide the copy.\n\n * It can be used to drop [pinned] data when `T` is not `repr(packed)`\n   (pinned data must not be moved before it is dropped).\n\n Unaligned values cannot be dropped in place, they must be copied to an aligned\n location first using [`ptr::read_unaligned`]. For packed structs, this move is\n done automatically by the compiler. This means the fields of packed structs\n are not dropped in-place.\n\n [`ptr::read`]: self::read\n [`ptr::read_unaligned`]: self::read_unaligned\n [pinned]: crate::pin\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `to_drop` must be [valid] for both reads and writes.\n\n * `to_drop` must be properly aligned, even if `T` has size 0.\n\n * `to_drop` must be nonnull, even if `T` has size 0.\n\n * The value `to_drop` points to must be valid for dropping, which may mean\n   it must uphold additional invariants. These invariants depend on the type\n   of the value being dropped. For instance, when dropping a Box, the box's\n   pointer to the heap must be valid.\n\n * While `drop_in_place` is executing, the only way to access parts of\n   `to_drop` is through the `&mut self` references supplied to the\n   `Drop::drop` methods that `drop_in_place` invokes.\n\n Additionally, if `T` is not [`Copy`], using the pointed-to value after\n calling `drop_in_place` can cause undefined behavior. Note that `*to_drop =\n foo` counts as a use because it will cause the value to be dropped\n again. [`write()`] can be used to overwrite data without causing it to be\n dropped.\n\n [valid]: self#safety\n\n # Examples\n\n Manually remove the last item from a vector:\n\n ```\n use std::ptr;\n use std::rc::Rc;\n\n let last = Rc::new(1);\n let weak = Rc::downgrade(&last);\n\n let mut v = vec![Rc::new(0), last];\n\n unsafe {\n     // Get a raw pointer to the last element in `v`.\n     let ptr = &mut v[1] as *mut _;\n     // Shorten `v` to prevent the last item from being dropped. We do that first,\n     // to prevent issues if the `drop_in_place` below panics.\n     v.set_len(1);\n     // Without a call `drop_in_place`, the last item would never be dropped,\n     // and the memory it manages would be leaked.\n     ptr::drop_in_place(ptr);\n }\n\n assert_eq!(v, &[0.into()]);\n\n // Ensure that the last item was dropped.\n assert!(weak.upgrade().is_none());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1367,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/mem/maybe_uninit.rs:1469:5: 1479:6",
+  "src": "pub const unsafe fn assume_init_drop(&mut self)\n    where\n        T: [const] Destruct,\n    {\n        if !self.is_empty() {\n            // SAFETY: the caller must guarantee that every element of `self`\n            // is initialized and satisfies all invariants of `T`.\n            // Dropping the value in place is safe if that is the case.\n            unsafe { ptr::drop_in_place(self as *mut [MaybeUninit<T>] as *mut [T]) }\n        }\n    }",
+  "mir": "fn <[mem::maybe_uninit::MaybeUninit<T>]>::assume_init_drop(_1: &mut [mem::maybe_uninit::MaybeUninit<T>]) -> () {\n    let mut _0: ();\n    let mut _2: bool;\n    let mut _3: &[mem::maybe_uninit::MaybeUninit<T>];\n    let mut _4: *mut [T];\n    let mut _5: *mut [mem::maybe_uninit::MaybeUninit<T>];\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &(*_1);\n        _2 = slice::<impl [mem::maybe_uninit::MaybeUninit<T>]>::is_empty(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        goto -> bb5;\n    }\n    bb3: {\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &raw mut (*_1);\n        _4 = move _5 as *mut [T];\n        StorageDead(_5);\n        _0 = ptr::drop_in_place::<[T]>(move _4) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Drops the contained values in place.\n\n # Safety\n\n It is up to the caller to guarantee that every `MaybeUninit<T>` in the slice\n really is in an initialized state. Calling this when the content is not yet\n fully initialized causes undefined behavior.\n\n On top of that, all additional invariants of the type `T` must be\n satisfied, as the `Drop` implementation of `T` (or its members) may\n rely on this. For example, setting a `Vec<T>` to an invalid but\n non-null address makes it initialized (under the current implementation;\n this does not constitute a stable guarantee), because the only\n requirement the compiler knows about it is that the data pointer must be\n non-null. Dropping such a `Vec<T>` however will cause undefined\n behaviour.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

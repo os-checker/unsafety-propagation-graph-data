@@ -1,0 +1,40 @@
+{
+  "name": "path::Path::iter",
+  "safe": true,
+  "callees": {
+    "path::Path::components": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Produces an iterator over the [`Component`]s of the path.\n\n When parsing the path, there is a small amount of normalization:\n\n * Repeated separators are ignored, so `a/b` and `a//b` both have\n   `a` and `b` as components.\n\n * Occurrences of `.` are normalized away, except if they are at the\n   beginning of the path. For example, `a/./b`, `a/b/`, `a/b/.` and\n   `a/b` all have `a` and `b` as components, but `./a/b` starts with\n   an additional [`CurDir`] component.\n\n * Trailing separators are normalized away, so `/a/b` and `/a/b/` are equivalent.\n\n Note that no other normalization takes place; in particular, `a/c`\n and `a/b/../c` are distinct, to account for the possibility that `b`\n is a symbolic link (so its parent isn't `a`).\n\n # Examples\n\n ```\n use std::path::{Path, Component};\n use std::ffi::OsStr;\n\n let mut components = Path::new(\"/tmp/foo.txt\").components();\n\n assert_eq!(components.next(), Some(Component::RootDir));\n assert_eq!(components.next(), Some(Component::Normal(OsStr::new(\"tmp\"))));\n assert_eq!(components.next(), Some(Component::Normal(OsStr::new(\"foo.txt\"))));\n assert_eq!(components.next(), None)\n ```\n\n [`CurDir`]: Component::CurDir\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument",
+        "path::Components": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "path::Path": [
+      "Ref"
+    ],
+    "path::Components": [
+      "Plain"
+    ],
+    "path::Iter": [
+      "Plain"
+    ]
+  },
+  "path": 2440,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:3180:5: 3182:6",
+  "src": "pub fn iter(&self) -> Iter<'_> {\n        Iter { inner: self.components() }\n    }",
+  "mir": "fn path::Path::iter(_1: &path::Path) -> path::Iter<'_> {\n    let mut _0: path::Iter<'_>;\n    let mut _2: path::Components<'_>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = path::Path::components(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = Iter(move _2);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Produces an iterator over the path's components viewed as [`OsStr`]\n slices.\n\n For more information about the particulars of how the path is separated\n into components, see [`components`].\n\n [`components`]: Path::components\n\n # Examples\n\n ```\n use std::path::{self, Path};\n use std::ffi::OsStr;\n\n let mut it = Path::new(\"/tmp/foo.txt\").iter();\n assert_eq!(it.next(), Some(OsStr::new(&path::MAIN_SEPARATOR.to_string())));\n assert_eq!(it.next(), Some(OsStr::new(\"tmp\")));\n assert_eq!(it.next(), Some(OsStr::new(\"foo.txt\")));\n assert_eq!(it.next(), None)\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

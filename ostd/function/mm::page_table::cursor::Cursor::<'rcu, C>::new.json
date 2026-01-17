@@ -1,0 +1,81 @@
+{
+  "name": "mm::page_table::cursor::Cursor::<'rcu, C>::new",
+  "safe": true,
+  "callees": {
+    "mm::page_table::is_valid_range": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checks if the given range is covered by the valid range of the page table.\n",
+      "adt": {
+        "core::ops::Range": "ImmutableAsArgument"
+      }
+    },
+    "core::ops::Range::<Idx>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the range contains no items.\n\n # Examples\n\n ```\n assert!(!(3..5).is_empty());\n assert!( (3..3).is_empty());\n assert!( (3..2).is_empty());\n ```\n\n The range is empty if either side is incomparable:\n\n ```\n assert!(!(3.0..5.0).is_empty());\n assert!( (3.0..f32::NAN).is_empty());\n assert!( (f32::NAN..5.0).is_empty());\n ```\n",
+      "adt": {}
+    },
+    "core::num::<impl usize>::is_multiple_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if `self` is an integer multiple of `rhs`, and false otherwise.\n\n This function is equivalent to `self % rhs == 0`, except that it will not panic\n for `rhs == 0`. Instead, `0.is_multiple_of(0) == true`, and for any non-zero `n`,\n `n.is_multiple_of(0) == false`.\n\n # Examples\n\n ```\n\n ```\n",
+      "adt": {}
+    },
+    "mm::page_table::cursor::locking::lock_range": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::ops::Range": "ImmutableAsArgument",
+        "mm::page_table::PageTable": "ImmutableAsArgument",
+        "mm::page_table::cursor::Cursor": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::ops::Range": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ],
+    "mm::page_table::PageTableError": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "mm::page_table::PageTable": [
+      "Ref"
+    ],
+    "mm::page_table::cursor::Cursor": [
+      "Plain"
+    ]
+  },
+  "path": 2354,
+  "span": "ostd/src/mm/page_table/cursor/mod.rs:120:5: 136:6",
+  "src": "pub fn new(\n        pt: &'rcu PageTable<C>,\n        guard: &'rcu dyn InAtomicMode,\n        va: &Range<Vaddr>,\n    ) -> Result<Self, PageTableError> {\n        if !is_valid_range::<C>(va) || va.is_empty() {\n            return Err(PageTableError::InvalidVaddrRange(va.start, va.end));\n        }\n        if !va.start.is_multiple_of(C::BASE_PAGE_SIZE) || !va.end.is_multiple_of(C::BASE_PAGE_SIZE)\n        {\n            return Err(PageTableError::UnalignedVaddr);\n        }\n\n        const { assert!(C::NR_LEVELS as usize <= MAX_NR_LEVELS) };\n\n        Ok(locking::lock_range(pt, guard, va))\n    }",
+  "mir": "fn mm::page_table::cursor::Cursor::<'rcu, C>::new(_1: &mm::page_table::PageTable<C>, _2: &dyn task::atomic_mode::InAtomicMode, _3: &core::ops::Range<usize>) -> core::result::Result<mm::page_table::cursor::Cursor<'_, C>, mm::page_table::PageTableError> {\n    let mut _0: core::result::Result<mm::page_table::cursor::Cursor<'_, C>, mm::page_table::PageTableError>;\n    let mut _4: bool;\n    let mut _5: bool;\n    let mut _6: mm::page_table::PageTableError;\n    let mut _7: usize;\n    let mut _8: usize;\n    let mut _9: bool;\n    let mut _10: usize;\n    let mut _11: bool;\n    let mut _12: usize;\n    let mut _13: mm::page_table::PageTableError;\n    let mut _14: mm::page_table::cursor::Cursor<'_, C>;\n    debug pt => _1;\n    debug guard => _2;\n    debug va => _3;\n    bb0: {\n        StorageLive(_4);\n        _4 = mm::page_table::is_valid_range::<C>(_3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _4) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_5);\n        _5 = core::ops::Range::<usize>::is_empty(_3) -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        goto -> bb6;\n    }\n    bb4: {\n        switchInt(move _5) -> [0: bb7, otherwise: bb5];\n    }\n    bb5: {\n        goto -> bb6;\n    }\n    bb6: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = ((*_3).0: usize);\n        StorageLive(_8);\n        _8 = ((*_3).1: usize);\n        _6 = mm::page_table::PageTableError::InvalidVaddrRange(move _7, move _8);\n        StorageDead(_8);\n        StorageDead(_7);\n        _0 = core::result::Result::Err(move _6);\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_4);\n        goto -> bb16;\n    }\n    bb7: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = ((*_3).0: usize);\n        _9 = core::num::<impl usize>::is_multiple_of(move _10, <C as mm::PagingConstsTrait>::BASE_PAGE_SIZE) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        switchInt(move _9) -> [0: bb10, otherwise: bb9];\n    }\n    bb9: {\n        StorageDead(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = ((*_3).1: usize);\n        _11 = core::num::<impl usize>::is_multiple_of(move _12, <C as mm::PagingConstsTrait>::BASE_PAGE_SIZE) -> [return: bb11, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_10);\n        goto -> bb14;\n    }\n    bb11: {\n        switchInt(move _11) -> [0: bb13, otherwise: bb12];\n    }\n    bb12: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_9);\n        StorageLive(_14);\n        _14 = mm::page_table::cursor::locking::lock_range::<C>(_1, _2, _3) -> [return: bb15, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_12);\n        goto -> bb14;\n    }\n    bb14: {\n        StorageLive(_13);\n        _13 = mm::page_table::PageTableError::UnalignedVaddr;\n        _0 = core::result::Result::Err(move _13);\n        StorageDead(_13);\n        StorageDead(_11);\n        StorageDead(_9);\n        goto -> bb16;\n    }\n    bb15: {\n        _0 = core::result::Result::Ok(move _14);\n        StorageDead(_14);\n        goto -> bb16;\n    }\n    bb16: {\n        return;\n    }\n}\n",
+  "doc": " Creates a cursor claiming exclusive access over the given range.\n\n The cursor created will only be able to query or jump within the given\n range. Out-of-bound accesses will result in panics or errors as return values,\n depending on the access method.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

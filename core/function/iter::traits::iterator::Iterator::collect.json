@@ -1,0 +1,97 @@
+{
+  "name": "iter::traits::iterator::Iterator::collect",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::size_hint": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the bounds on the remaining length of the iterator.\n\n Specifically, `size_hint()` returns a tuple where the first element\n is the lower bound, and the second element is the upper bound.\n\n The second half of the tuple that is returned is an <code>[Option]<[usize]></code>.\n A [`None`] here means that either there is no known upper bound, or the\n upper bound is larger than [`usize`].\n\n # Implementation notes\n\n It is not enforced that an iterator implementation yields the declared\n number of elements. A buggy iterator may yield less than the lower bound\n or more than the upper bound of elements.\n\n `size_hint()` is primarily intended to be used for optimizations such as\n reserving space for the elements of the iterator, but must not be\n trusted to e.g., omit bounds checks in unsafe code. An incorrect\n implementation of `size_hint()` should not lead to memory safety\n violations.\n\n That said, the implementation should provide a correct estimation,\n because otherwise it would be a violation of the trait's protocol.\n\n The default implementation returns <code>(0, [None])</code> which is correct for any\n iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n let mut iter = a.iter();\n\n assert_eq!((3, Some(3)), iter.size_hint());\n let _ = iter.next();\n assert_eq!((2, Some(2)), iter.size_hint());\n ```\n\n A more complex example:\n\n ```\n // The even numbers in the range of zero to nine.\n let iter = (0..10).filter(|x| x % 2 == 0);\n\n // We might iterate from zero to ten times. Knowing that it's five\n // exactly wouldn't be possible without executing filter().\n assert_eq!((0, Some(10)), iter.size_hint());\n\n // Let's add five more numbers with chain()\n let iter = (0..10).filter(|x| x % 2 == 0).chain(15..20);\n\n // now both bounds are increased by five\n assert_eq!((5, Some(15)), iter.size_hint());\n ```\n\n Returning `None` for an upper bound:\n\n ```\n // an infinite iterator has no upper bound\n // and the maximum possible lower bound\n let iter = 0..;\n\n assert_eq!((usize::MAX, None), iter.size_hint());\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::is_none_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the option is a [`None`] or the value inside of it matches a predicate.\n\n # Examples\n\n ```\n let x: Option<u32> = Some(2);\n assert_eq!(x.is_none_or(|x| x > 1), true);\n\n let x: Option<u32> = Some(0);\n assert_eq!(x.is_none_or(|x| x > 1), false);\n\n let x: Option<u32> = None;\n assert_eq!(x.is_none_or(|x| x > 1), true);\n\n let x: Option<String> = Some(\"ownership\".to_string());\n assert_eq!(x.as_ref().is_none_or(|x| x.len() > 1), true);\n println!(\"still alive {:?}\", x);\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::collect::FromIterator::from_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a value from an iterator.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let five_fives = std::iter::repeat(5).take(5);\n\n let v = Vec::from_iter(five_fives);\n\n assert_eq!(v, vec![5, 5, 5, 5, 5]);\n ```\n",
+      "adt": {}
+    },
+    "fmt::rt::Argument::<'_>::new_debug": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "fmt::rt::Argument": "Constructor"
+      }
+    },
+    "fmt::Arguments::<'a>::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {
+        "fmt::Arguments": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Field(1, Ty { id: 518, kind: RigidTy(Adt(AdtDef(DefId { id: 24532, name: \"option::Option\" }), GenericArgs([Type(Ty { id: 47, kind: RigidTy(Uint(Usize)) })]))) })])",
+      "Unknown([Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "fmt::rt::Argument": [
+      "Plain"
+    ],
+    "fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": "iter::traits::iterator::Iterator::collect",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:2015:5: 2029:6",
+  "src": "fn collect<B: FromIterator<Self::Item>>(self) -> B\n    where\n        Self: Sized,\n    {\n        // This is too aggressive to turn on for everything all the time, but PR#137908\n        // accidentally noticed that some rustc iterators had malformed `size_hint`s,\n        // so this will help catch such things in debug-assertions-std runners,\n        // even if users won't actually ever see it.\n        if cfg!(debug_assertions) {\n            let hint = self.size_hint();\n            assert!(hint.1.is_none_or(|high| high >= hint.0), \"Malformed size_hint {hint:?}\");\n        }\n\n        FromIterator::from_iter(self)\n    }",
+  "mir": "fn iter::traits::iterator::Iterator::collect(_1: Self) -> B {\n    let mut _0: B;\n    let  _2: (usize, option::Option<usize>);\n    let mut _3: &Self;\n    let mut _4: bool;\n    let mut _5: option::Option<usize>;\n    let mut _6: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:2025:39: 2025:45};\n    let mut _7: &usize;\n    let  _8: !;\n    let mut _9: fmt::Arguments<'_>;\n    let  _10: (&(usize, option::Option<usize>),);\n    let mut _11: &(usize, option::Option<usize>);\n    let  _12: [fmt::rt::Argument<'_>; 1];\n    let mut _13: fmt::rt::Argument<'_>;\n    let mut _14: &[u8; 23];\n    let  _15: &[fmt::rt::Argument<'_>; 1];\n    let mut _16: Self;\n    let mut _17: &(usize, option::Option<usize>);\n    debug self => _1;\n    debug hint => _2;\n    debug args => _10;\n    debug args => _12;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &_1;\n        _2 = <Self as iter::traits::iterator::Iterator>::size_hint(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = (_2.1: option::Option<usize>);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &(_2.0: usize);\n        _6 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:2025:39: 2025:45}(move _7);\n        StorageDead(_7);\n        _4 = option::Option::<usize>::is_none_or::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:2025:39: 2025:45}>(move _5, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _4) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageDead(_2);\n        StorageLive(_16);\n        _16 = move _1;\n        _0 = <B as iter::traits::collect::FromIterator<<Self as iter::traits::iterator::Iterator>::Item>>::from_iter::<Self>(move _16) -> [return: bb7, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &_2;\n        _10 = (move _11);\n        StorageDead(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _17 = (_10.0: &(usize, option::Option<usize>));\n        _13 = fmt::rt::Argument::<'_>::new_debug::<(usize, option::Option<usize>)>(_17) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _12 = [move _13];\n        StorageDead(_13);\n        StorageLive(_14);\n        _14 = b\"\\x14Malformed size_hint \\xc0\\x00\";\n        _15 = &_12;\n        _9 = fmt::Arguments::<'_>::new::<23, 1>(move _14, _15) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_14);\n        _8 = panicking::panic_fmt(move _9) -> unwind unreachable;\n    }\n    bb7: {\n        StorageDead(_16);\n        return;\n    }\n}\n",
+  "doc": " Transforms an iterator into a collection.\n\n `collect()` can take anything iterable, and turn it into a relevant\n collection. This is one of the more powerful methods in the standard\n library, used in a variety of contexts.\n\n The most basic pattern in which `collect()` is used is to turn one\n collection into another. You take a collection, call [`iter`] on it,\n do a bunch of transformations, and then `collect()` at the end.\n\n `collect()` can also create instances of types that are not typical\n collections. For example, a [`String`] can be built from [`char`]s,\n and an iterator of [`Result<T, E>`][`Result`] items can be collected\n into `Result<Collection<T>, E>`. See the examples below for more.\n\n Because `collect()` is so general, it can cause problems with type\n inference. As such, `collect()` is one of the few times you'll see\n the syntax affectionately known as the 'turbofish': `::<>`. This\n helps the inference algorithm understand specifically which collection\n you're trying to collect into.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let doubled: Vec<i32> = a.iter()\n                          .map(|x| x * 2)\n                          .collect();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Note that we needed the `: Vec<i32>` on the left-hand side. This is because\n we could collect into, for example, a [`VecDeque<T>`] instead:\n\n [`VecDeque<T>`]: ../../std/collections/struct.VecDeque.html\n\n ```\n use std::collections::VecDeque;\n\n let a = [1, 2, 3];\n\n let doubled: VecDeque<i32> = a.iter().map(|x| x * 2).collect();\n\n assert_eq!(2, doubled[0]);\n assert_eq!(4, doubled[1]);\n assert_eq!(6, doubled[2]);\n ```\n\n Using the 'turbofish' instead of annotating `doubled`:\n\n ```\n let a = [1, 2, 3];\n\n let doubled = a.iter().map(|x| x * 2).collect::<Vec<i32>>();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Because `collect()` only cares about what you're collecting into, you can\n still use a partial type hint, `_`, with the turbofish:\n\n ```\n let a = [1, 2, 3];\n\n let doubled = a.iter().map(|x| x * 2).collect::<Vec<_>>();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Using `collect()` to make a [`String`]:\n\n ```\n let chars = ['g', 'd', 'k', 'k', 'n'];\n\n let hello: String = chars.into_iter()\n     .map(|x| x as u8)\n     .map(|x| (x + 1) as char)\n     .collect();\n\n assert_eq!(\"hello\", hello);\n ```\n\n If you have a list of [`Result<T, E>`][`Result`]s, you can use `collect()` to\n see if any of them failed:\n\n ```\n let results = [Ok(1), Err(\"nope\"), Ok(3), Err(\"bad\")];\n\n let result: Result<Vec<_>, &str> = results.into_iter().collect();\n\n // gives us the first error\n assert_eq!(Err(\"nope\"), result);\n\n let results = [Ok(1), Ok(3)];\n\n let result: Result<Vec<_>, &str> = results.into_iter().collect();\n\n // gives us the list of answers\n assert_eq!(Ok(vec![1, 3]), result);\n ```\n\n [`iter`]: Iterator::next\n [`String`]: ../../std/string/struct.String.html\n [`char`]: type@char\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

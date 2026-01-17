@@ -1,0 +1,33 @@
+{
+  "name": "core_simd::swizzle::<impl core_simd::vector::Simd<T, N>>::deinterleave",
+  "safe": true,
+  "callees": {
+    "core_simd::swizzle::Swizzle::concat_swizzle": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new vector from the elements of `first` and `second`.\n\n Lane `i` of the output is `concat[Self::INDEX[i]]`, where `concat` is the concatenation of\n `first` and `second`.\n",
+      "adt": {
+        "core_simd::vector::Simd": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core_simd::vector::Simd": [
+      "Plain"
+    ]
+  },
+  "path": 12664,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/swizzle.rs:421:5: 447:6",
+  "src": "pub fn deinterleave(self, other: Self) -> (Self, Self) {\n        const fn deinterleave<const N: usize>(second: bool) -> [usize; N] {\n            let mut idx = [0; N];\n            let mut i = 0;\n            while i < N {\n                idx[i] = i * 2 + second as usize;\n                i += 1;\n            }\n            idx\n        }\n\n        struct Even;\n        struct Odd;\n\n        impl<const N: usize> Swizzle<N> for Even {\n            const INDEX: [usize; N] = deinterleave::<N>(false);\n        }\n\n        impl<const N: usize> Swizzle<N> for Odd {\n            const INDEX: [usize; N] = deinterleave::<N>(true);\n        }\n\n        (\n            Even::concat_swizzle(self, other),\n            Odd::concat_swizzle(self, other),\n        )\n    }",
+  "mir": "fn core_simd::swizzle::<impl core_simd::vector::Simd<T, N>>::deinterleave(_1: core_simd::vector::Simd<T, N>, _2: core_simd::vector::Simd<T, N>) -> (core_simd::vector::Simd<T, N>, core_simd::vector::Simd<T, N>) {\n    let mut _0: (core_simd::vector::Simd<T, N>, core_simd::vector::Simd<T, N>);\n    let mut _3: core_simd::vector::Simd<T, N>;\n    let mut _4: core_simd::vector::Simd<T, N>;\n    debug self => _1;\n    debug other => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = <core_simd::swizzle::<impl core_simd::vector::Simd<T, N>>::deinterleave::Even as core_simd::swizzle::Swizzle<N>>::concat_swizzle::<T, N>(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = <core_simd::swizzle::<impl core_simd::vector::Simd<T, N>>::deinterleave::Odd as core_simd::swizzle::Swizzle<N>>::concat_swizzle::<T, N>(_1, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _0 = (move _3, move _4);\n        StorageDead(_4);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Deinterleave two vectors.\n\n The first result takes every other element of `self` and then `other`, starting with\n the first element.\n\n The second result takes every other element of `self` and then `other`, starting with\n the second element.\n\n The reverse of this operation is [`Simd::interleave`].\n\n ```\n # #![feature(portable_simd)]\n # #[cfg(feature = \"as_crate\")] use core_simd::simd;\n # #[cfg(not(feature = \"as_crate\"))] use core::simd;\n # use simd::Simd;\n let a = Simd::from_array([0, 4, 1, 5]);\n let b = Simd::from_array([2, 6, 3, 7]);\n let (x, y) = a.deinterleave(b);\n assert_eq!(x.to_array(), [0, 1, 2, 3]);\n assert_eq!(y.to_array(), [4, 5, 6, 7]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "name": "io::borrowed_buf::BorrowedBuf::<'data>::filled_mut",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::get_unchecked_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to an element or subslice, without doing\n bounds checking.\n\n For a safe alternative see [`get_mut`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used.\n\n You can think of this like `.get_mut(index).unwrap_unchecked()`.  It's\n UB to call `.get_unchecked_mut(len)`, even if you immediately convert\n to a pointer.  And it's UB to call `.get_unchecked_mut(..len + 1)`,\n `.get_unchecked_mut(..=len)`, or similar.\n\n [`get_mut`]: slice::get_mut\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n\n unsafe {\n     let elem = x.get_unchecked_mut(1);\n     *elem = 13;\n }\n assert_eq!(x, &[1, 13, 4]);\n ```\n",
+      "adt": {}
+    },
+    "<[mem::maybe_uninit::MaybeUninit<T>]>::assume_init_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable (unique) reference to the contained value.\n\n # Safety\n\n Calling this when the content is not yet fully initialized causes undefined\n behavior: it is up to the caller to guarantee that every `MaybeUninit<T>` in the\n slice really is in an initialized state. For instance, `.assume_init_mut()` cannot\n be used to initialize a `MaybeUninit` slice.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "io::borrowed_buf::BorrowedBuf": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "ops::range::RangeTo": [
+      "Plain"
+    ]
+  },
+  "path": 13590,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/io/borrowed_buf.rs:105:5: 111:6",
+  "src": "pub fn filled_mut(&mut self) -> &mut [u8] {\n        // SAFETY: We only slice the filled part of the buffer, which is always valid\n        unsafe {\n            let buf = self.buf.get_unchecked_mut(..self.filled);\n            buf.assume_init_mut()\n        }\n    }",
+  "mir": "fn io::borrowed_buf::BorrowedBuf::<'data>::filled_mut(_1: &mut io::borrowed_buf::BorrowedBuf<'_>) -> &mut [u8] {\n    let mut _0: &mut [u8];\n    let  _2: &mut [mem::maybe_uninit::MaybeUninit<u8>];\n    let mut _3: ops::range::RangeTo<usize>;\n    let mut _4: usize;\n    let mut _5: &mut [mem::maybe_uninit::MaybeUninit<u8>];\n    debug self => _1;\n    debug buf => _2;\n    bb0: {\n        _5 = ((*_1).0: &mut [mem::maybe_uninit::MaybeUninit<u8>]);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).1: usize);\n        _3 = RangeTo(move _4);\n        StorageDead(_4);\n        _2 = slice::<impl [mem::maybe_uninit::MaybeUninit<u8>]>::get_unchecked_mut::<ops::range::RangeTo<usize>>(_5, move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _0 = <[mem::maybe_uninit::MaybeUninit<u8>]>::assume_init_mut(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Returns a mutable reference to the filled portion of the buffer.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

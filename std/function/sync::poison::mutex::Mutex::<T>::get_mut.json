@@ -1,0 +1,67 @@
+{
+  "name": "sync::poison::mutex::Mutex::<T>::get_mut",
+  "safe": true,
+  "callees": {
+    "core::cell::UnsafeCell::<T>::get_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to the underlying data.\n\n This call borrows the `UnsafeCell` mutably (at compile-time) which\n guarantees that we possess the only reference.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let mut c = UnsafeCell::new(5);\n *c.get_mut() += 1;\n\n assert_eq!(*c.get_mut(), 6);\n ```\n",
+      "adt": {}
+    },
+    "sync::poison::Flag::borrow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checks the flag for an unguarded borrow, where we only care about existing poison.\n",
+      "adt": {
+        "sync::poison::Flag": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "sync::poison::map_result": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::cell::UnsafeCell": [
+      "MutRef"
+    ],
+    "sync::poison::mutex::Mutex": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "sync::poison::Flag": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 3218,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/mutex.rs:664:5: 667:6",
+  "src": "pub fn get_mut(&mut self) -> LockResult<&mut T> {\n        let data = self.data.get_mut();\n        poison::map_result(self.poison.borrow(), |()| data)\n    }",
+  "mir": "fn sync::poison::mutex::Mutex::<T>::get_mut(_1: &mut sync::poison::mutex::Mutex<T>) -> core::result::Result<&mut T, sync::poison::PoisonError<&mut T>> {\n    let mut _0: core::result::Result<&mut T, sync::poison::PoisonError<&mut T>>;\n    let  _2: &mut T;\n    let mut _3: &mut core::cell::UnsafeCell<T>;\n    let mut _4: core::result::Result<(), sync::poison::PoisonError<()>>;\n    let mut _5: &sync::poison::Flag;\n    let mut _6: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/mutex.rs:666:50: 666:54};\n    debug self => _1;\n    debug data => _2;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &mut ((*_1).2: core::cell::UnsafeCell<T>);\n        _2 = core::cell::UnsafeCell::<T>::get_mut(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = &((*_1).1: sync::poison::Flag);\n        _4 = sync::poison::Flag::borrow(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_6);\n        _6 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/mutex.rs:666:50: 666:54}(move _2);\n        _0 = sync::poison::map_result::<(), &mut T, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/mutex.rs:666:50: 666:54}>(core::result::Result::<(), sync::poison::PoisonError<()>>::Ok(()), move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns a mutable reference to the underlying data.\n\n Since this call borrows the `Mutex` mutably, no actual locking needs to\n take place -- the mutable borrow statically guarantees no new locks can be acquired\n while this reference exists. Note that this method does not clear any previous abandoned locks\n (e.g., via [`forget()`] on a [`MutexGuard`]).\n\n # Errors\n\n If another user of this mutex panicked while holding the mutex, then\n this call will return an error containing a mutable reference to the\n underlying data instead.\n\n # Examples\n\n ```\n use std::sync::Mutex;\n\n let mut mutex = Mutex::new(0);\n *mutex.get_mut().unwrap() = 10;\n assert_eq!(*mutex.lock().unwrap(), 10);\n ```\n\n [`forget()`]: mem::forget\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

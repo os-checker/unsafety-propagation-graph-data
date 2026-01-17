@@ -1,0 +1,105 @@
+{
+  "name": "<mm::vm_space::UserPtConfig as mm::page_table::PageTableConfig>::item_from_raw",
+  "safe": false,
+  "callees": {
+    "mm::page_prop::PrivilegedPageFlags::contains": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if all of the flags in `other` are contained within `self`.\n",
+      "adt": {
+        "mm::page_prop::PrivilegedPageFlags": "ImmutableAsArgument"
+      }
+    },
+    "core::panicking::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Internal function for `assert_eq!` and `assert_ne!` macros\n",
+      "adt": {}
+    },
+    "mm::vm_space::VmItem::new_untracked_io": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `VmItem` that maps an untracked I/O memory.\n",
+      "adt": {
+        "mm::vm_space::VmItem": "Constructor"
+      }
+    },
+    "mm::frame::Frame::<M>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Restores a forgotten [`Frame`] from a physical address.\n\n # Safety\n\n The caller should only restore a `Frame` that was previously forgotten using\n [`Frame::into_raw`].\n\n And the restoring operation should only be done once for a forgotten\n [`Frame`]. Otherwise double-free will happen.\n\n Also, the caller ensures that the usage of the frame is correct. There's\n no checking of the usage in this function.\n",
+      "adt": {
+        "mm::frame::Frame": "Constructor"
+      }
+    },
+    "mm::vm_space::VmItem::new_tracked": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `VmItem` that maps a tracked frame.\n",
+      "adt": {
+        "mm::vm_space::VmItem": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "mm::page_prop::PrivilegedPageFlags": [
+      "Ref"
+    ],
+    "mm::page_prop::PageProperty": [
+      "Unknown([Field(2, Ty { id: 1099, kind: RigidTy(Adt(AdtDef(DefId { id: 3473, name: \"mm::page_prop::PrivilegedPageFlags\" }), GenericArgs([]))) })])",
+      "Plain"
+    ],
+    "core::panicking::AssertKind": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "mm::vm_space::VmItem": [
+      "Plain"
+    ],
+    "mm::frame::Frame": [
+      "Plain"
+    ]
+  },
+  "path": 2485,
+  "span": "ostd/src/mm/vm_space.rs:720:5: 731:6",
+  "src": "unsafe fn item_from_raw(paddr: Paddr, level: PagingLevel, prop: PageProperty) -> Self::Item {\n        debug_assert_eq!(level, 1);\n        if prop.priv_flags.contains(PrivilegedPageFlags::AVAIL1) {\n            // AVAIL1 is set, this is I/O memory.\n            VmItem::new_untracked_io(paddr, prop)\n        } else {\n            // AVAIL1 is clear, this is tracked memory.\n            // SAFETY: The caller ensures safety.\n            let frame = unsafe { Frame::<dyn AnyUFrameMeta>::from_raw(paddr) };\n            VmItem::new_tracked(frame, prop)\n        }\n    }",
+  "mir": "fn <mm::vm_space::UserPtConfig as mm::page_table::PageTableConfig>::item_from_raw(_1: usize, _2: u8, _3: mm::page_prop::PageProperty) -> mm::vm_space::VmItem {\n    let mut _0: mm::vm_space::VmItem;\n    let mut _4: (&u8, &u8);\n    let mut _5: &u8;\n    let mut _6: &u8;\n    let  _7: &u8;\n    let  _8: &u8;\n    let mut _9: bool;\n    let mut _10: u8;\n    let mut _11: u8;\n    let  _12: core::panicking::AssertKind;\n    let  _13: !;\n    let mut _14: core::option::Option<core::fmt::Arguments<'_>>;\n    let mut _15: bool;\n    let mut _16: &mm::page_prop::PrivilegedPageFlags;\n    let  _17: mm::frame::Frame<dyn mm::frame::untyped::AnyUFrameMeta>;\n    debug paddr => _1;\n    debug level => _2;\n    debug prop => _3;\n    debug left_val => _7;\n    debug right_val => _8;\n    debug kind => _12;\n    debug frame => _17;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &_2;\n        StorageLive(_6);\n        _6 = <mm::vm_space::UserPtConfig as mm::page_table::PageTableConfig>::item_from_raw::promoted[0];\n        _4 = (move _5, move _6);\n        StorageDead(_6);\n        StorageDead(_5);\n        _7 = (_4.0: &u8);\n        _8 = (_4.1: &u8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = (*_7);\n        StorageLive(_11);\n        _11 = (*_8);\n        _9 = Eq(move _10, move _11);\n        switchInt(move _9) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_4);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &(_3.2: mm::page_prop::PrivilegedPageFlags);\n        _15 = mm::page_prop::PrivilegedPageFlags::contains(move _16, mm::page_prop::PrivilegedPageFlags::AVAIL1) -> [return: bb3, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_11);\n        StorageDead(_10);\n        _12 = core::panicking::AssertKind::Eq;\n        StorageLive(_14);\n        _14 = core::option::Option::None;\n        _13 = core::panicking::assert_failed::<u8, u8>(_12, _7, _8, move _14) -> unwind unreachable;\n    }\n    bb3: {\n        switchInt(move _15) -> [0: bb6, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_16);\n        _0 = mm::vm_space::VmItem::new_untracked_io(_1, _3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        goto -> bb9;\n    }\n    bb6: {\n        StorageDead(_16);\n        _17 = mm::frame::Frame::<dyn mm::frame::untyped::AnyUFrameMeta>::from_raw(_1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _0 = mm::vm_space::VmItem::new_tracked(_17, _3) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_15);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

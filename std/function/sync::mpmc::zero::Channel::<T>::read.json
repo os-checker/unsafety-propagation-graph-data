@@ -1,0 +1,131 @@
+{
+  "name": "sync::mpmc::zero::Channel::<T>::read",
+  "safe": false,
+  "callees": {
+    "core::ptr::mut_ptr::<impl *mut T>::is_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s = [1, 2, 3];\n let ptr: *mut u32 = s.as_mut_ptr();\n assert!(!ptr.is_null());\n ```\n",
+      "adt": {}
+    },
+    "core::cell::UnsafeCell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the wrapped value.\n\n This can be cast to a pointer of any kind. When creating references, you must uphold the\n aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and\n caveats.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let five = uc.get();\n ```\n",
+      "adt": {}
+    },
+    "sync::mpmc::zero::Packet::<T>::wait_ready": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Waits until the packet becomes ready for reading or writing.\n",
+      "adt": {
+        "sync::mpmc::zero::Packet": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::replace": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Replaces the value at `self` with `src`, returning the old\n value, without dropping either.\n\n See [`ptr::replace`] for safety concerns and examples.\n\n [`ptr::replace`]: crate::ptr::replace()\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicBool::store": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the bool.\n\n `store` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. Possible values are [`SeqCst`], [`Release`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Acquire`] or [`AcqRel`].\n\n # Examples\n\n ```\n use std::sync::atomic::{AtomicBool, Ordering};\n\n let some_bool = AtomicBool::new(true);\n\n some_bool.store(false, Ordering::Relaxed);\n assert_eq!(some_bool.load(Ordering::Relaxed), false);\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::boxed::Box::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a box from a raw pointer.\n\n After calling this function, the raw pointer is owned by the\n resulting `Box`. Specifically, the `Box` destructor will call\n the destructor of `T` and free the allocated memory. For this\n to be safe, the memory must have been allocated in accordance\n with the [memory layout] used by `Box` .\n\n # Safety\n\n This function is unsafe because improper use may lead to\n memory problems. For example, a double-free may occur if the\n function is called twice on the same raw pointer.\n\n The raw pointer must point to a block of memory allocated by the global allocator.\n\n The safety conditions are described in the [memory layout] section.\n\n # Examples\n\n Recreate a `Box` which was previously converted to a raw pointer\n using [`Box::into_raw`]:\n ```\n let x = Box::new(5);\n let ptr = Box::into_raw(x);\n let x = unsafe { Box::from_raw(ptr) };\n ```\n Manually create a `Box` from scratch by using the global allocator:\n ```\n use std::alloc::{alloc, Layout};\n\n unsafe {\n     let ptr = alloc(Layout::new::<i32>()) as *mut i32;\n     // In general .write is required to avoid attempting to destruct\n     // the (uninitialized) previous contents of `ptr`, though for this\n     // simple example `*ptr = 5` would have worked as well.\n     ptr.write(5);\n     let x = Box::from_raw(ptr);\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+      "adt": {}
+    },
+    "core::mem::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disposes of a value.\n\n This effectively does nothing for types which implement `Copy`, e.g.\n integers. Such values are copied and _then_ moved into the function, so the\n value persists after this function call.\n\n This function is not magic; it is literally defined as\n\n ```\n pub fn drop<T>(_x: T) {}\n ```\n\n Because `_x` is moved into the function, it is automatically [dropped][drop] before\n the function returns.\n\n [drop]: Drop\n\n # Examples\n\n Basic usage:\n\n ```\n let v = vec![1, 2, 3];\n\n drop(v); // explicitly drop the vector\n ```\n\n Since [`RefCell`] enforces the borrow rules at runtime, `drop` can\n release a [`RefCell`] borrow:\n\n ```\n use std::cell::RefCell;\n\n let x = RefCell::new(1);\n\n let mut mutable_borrow = x.borrow_mut();\n *mutable_borrow = 1;\n\n drop(mutable_borrow); // relinquish the mutable borrow on this slot\n\n let borrow = x.borrow();\n println!(\"{}\", *borrow);\n ```\n\n Integers and other types implementing [`Copy`] are unaffected by `drop`.\n\n ```\n # #![allow(dropping_copy_types)]\n #[derive(Copy, Clone)]\n struct Foo(u8);\n\n let x = 1;\n let y = Foo(2);\n drop(x); // a copy of `x` is moved and dropped\n drop(y); // a copy of `y` is moved and dropped\n\n println!(\"x: {}, y: {}\", x, y.0); // still available\n ```\n\n [`RefCell`]: crate::cell::RefCell\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::mpmc::select::Token": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::cell::UnsafeCell": [
+      "Ref"
+    ],
+    "sync::mpmc::zero::Packet": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::sync::atomic::AtomicBool": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "alloc_crate::boxed::Box": [
+      "Plain"
+    ],
+    "sync::mpmc::zero::Channel": [
+      "Ref"
+    ]
+  },
+  "path": 2928,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/zero.rs:114:5: 139:6",
+  "src": "pub(crate) unsafe fn read(&self, token: &mut Token) -> Result<T, ()> {\n        // If there is no packet, the channel is disconnected.\n        if token.zero.0.is_null() {\n            return Err(());\n        }\n\n        let packet = unsafe { &*(token.zero.0 as *const Packet<T>) };\n\n        if packet.on_stack {\n            // The message has been in the packet from the beginning, so there is no need to wait\n            // for it. However, after reading the message, we need to set `ready` to `true` in\n            // order to signal that the packet can be destroyed.\n            let msg = unsafe { packet.msg.get().replace(None) }.unwrap();\n            packet.ready.store(true, Ordering::Release);\n            Ok(msg)\n        } else {\n            // Wait until the message becomes available, then read it and destroy the\n            // heap-allocated packet.\n            packet.wait_ready();\n            unsafe {\n                let msg = packet.msg.get().replace(None).unwrap();\n                drop(Box::from_raw(token.zero.0 as *mut Packet<T>));\n                Ok(msg)\n            }\n        }\n    }",
+  "mir": "fn sync::mpmc::zero::Channel::<T>::read(_1: &sync::mpmc::zero::Channel<T>, _2: &mut sync::mpmc::select::Token) -> core::result::Result<T, ()> {\n    let mut _0: core::result::Result<T, ()>;\n    let mut _3: bool;\n    let mut _4: *mut ();\n    let  _5: &sync::mpmc::zero::Packet<T>;\n    let  _6: *const sync::mpmc::zero::Packet<T>;\n    let mut _7: *mut ();\n    let mut _8: bool;\n    let  _9: T;\n    let mut _10: core::option::Option<T>;\n    let mut _11: *mut core::option::Option<T>;\n    let mut _12: &core::cell::UnsafeCell<core::option::Option<T>>;\n    let mut _13: core::option::Option<T>;\n    let  _14: ();\n    let mut _15: &core::sync::atomic::AtomicBool;\n    let mut _16: core::sync::atomic::Ordering;\n    let  _17: ();\n    let  _18: T;\n    let mut _19: core::option::Option<T>;\n    let mut _20: *mut core::option::Option<T>;\n    let mut _21: &core::cell::UnsafeCell<core::option::Option<T>>;\n    let mut _22: core::option::Option<T>;\n    let  _23: ();\n    let mut _24: alloc_crate::boxed::Box<sync::mpmc::zero::Packet<T>>;\n    let mut _25: *mut sync::mpmc::zero::Packet<T>;\n    let mut _26: *mut ();\n    let mut _27: *const ();\n    let mut _28: usize;\n    let mut _29: usize;\n    let mut _30: usize;\n    let mut _31: bool;\n    let mut _32: *const ();\n    let mut _33: usize;\n    let mut _34: bool;\n    let mut _35: bool;\n    let mut _36: bool;\n    debug self => _1;\n    debug token => _2;\n    debug packet => _5;\n    debug msg => _9;\n    debug msg => _18;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = (((*_2).2: sync::mpmc::zero::ZeroToken).0: *mut ());\n        _3 = core::ptr::mut_ptr::<impl *mut ()>::is_null(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = core::result::Result::Err(());\n        StorageDead(_3);\n        goto -> bb17;\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = (((*_2).2: sync::mpmc::zero::ZeroToken).0: *mut ());\n        _6 = move _7 as *const sync::mpmc::zero::Packet<T>;\n        StorageDead(_7);\n        _27 = _6 as *const ();\n        _28 = _27 as usize;\n        _29 = Sub(<sync::mpmc::zero::Packet<T> as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _30 = BitAnd(_28, _29);\n        _31 = Eq(_30, 0_usize);\n        assert(_31, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<sync::mpmc::zero::Packet<T> as core::mem::SizedTypeProperties>::ALIGN, _28) -> [success: bb18, unwind unreachable];\n    }\n    bb4: {\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &((*_5).2: core::cell::UnsafeCell<core::option::Option<T>>);\n        _11 = core::cell::UnsafeCell::<core::option::Option<T>>::get(move _12) -> [return: bb6, unwind unreachable];\n    }\n    bb5: {\n        _17 = sync::mpmc::zero::Packet::<T>::wait_ready(_5) -> [return: bb10, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_12);\n        StorageLive(_13);\n        _13 = core::option::Option::None;\n        _10 = core::ptr::mut_ptr::<impl *mut core::option::Option<T>>::replace(move _11, move _13) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_13);\n        StorageDead(_11);\n        _9 = core::option::Option::<T>::unwrap(move _10) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_10);\n        StorageLive(_15);\n        _15 = &((*_5).1: core::sync::atomic::AtomicBool);\n        StorageLive(_16);\n        _16 = core::sync::atomic::Ordering::Release;\n        _14 = core::sync::atomic::AtomicBool::store(move _15, true, move _16) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_16);\n        StorageDead(_15);\n        _0 = core::result::Result::Ok(_9);\n        goto -> bb16;\n    }\n    bb10: {\n        StorageLive(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = &((*_5).2: core::cell::UnsafeCell<core::option::Option<T>>);\n        _20 = core::cell::UnsafeCell::<core::option::Option<T>>::get(move _21) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_21);\n        StorageLive(_22);\n        _22 = core::option::Option::None;\n        _19 = core::ptr::mut_ptr::<impl *mut core::option::Option<T>>::replace(move _20, move _22) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_22);\n        StorageDead(_20);\n        _18 = core::option::Option::<T>::unwrap(move _19) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_19);\n        StorageLive(_24);\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = (((*_2).2: sync::mpmc::zero::ZeroToken).0: *mut ());\n        _25 = move _26 as *mut sync::mpmc::zero::Packet<T>;\n        StorageDead(_26);\n        _24 = alloc_crate::boxed::Box::<sync::mpmc::zero::Packet<T>>::from_raw(move _25) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_25);\n        _23 = core::mem::drop::<alloc_crate::boxed::Box<sync::mpmc::zero::Packet<T>>>(move _24) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_24);\n        _0 = core::result::Result::Ok(_18);\n        goto -> bb16;\n    }\n    bb16: {\n        StorageDead(_8);\n        StorageDead(_6);\n        goto -> bb17;\n    }\n    bb17: {\n        return;\n    }\n    bb18: {\n        _32 = _6 as *const ();\n        _33 = _32 as usize;\n        _34 = Eq(_33, 0_usize);\n        _35 = BitAnd(_34, true);\n        _36 = Not(_35);\n        assert(_36, \"null pointer dereference occurred\") -> [success: bb19, unwind unreachable];\n    }\n    bb19: {\n        _5 = &(*_6);\n        StorageLive(_8);\n        _8 = ((*_5).0: bool);\n        switchInt(move _8) -> [0: bb5, otherwise: bb4];\n    }\n}\n",
+  "doc": " Reads a message from the packet.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

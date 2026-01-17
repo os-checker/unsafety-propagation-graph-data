@@ -1,0 +1,99 @@
+{
+  "name": "<ffi::c_str::CStr as ops::index::Index<ops::range::RangeFrom<usize>>>::index",
+  "safe": true,
+  "callees": {
+    "ffi::c_str::CStr::to_bytes_with_nul": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this C string to a byte slice containing the trailing 0 byte.\n\n This function is the equivalent of [`CStr::to_bytes`] except that it\n will retain the trailing nul terminator instead of chopping it off.\n\n > **Note**: This method is currently implemented as a 0-cost cast, but\n > it is planned to alter its definition in the future to perform the\n > length calculation whenever this method is called.\n\n # Examples\n\n ```\n assert_eq!(c\"foo\".to_bytes_with_nul(), b\"foo\\0\");\n ```\n",
+      "adt": {
+        "ffi::c_str::CStr": "ImmutableAsArgument"
+      }
+    },
+    "ops::index::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "ffi::c_str::CStr::from_bytes_with_nul_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Unsafely creates a C string wrapper from a byte slice.\n\n This function will cast the provided `bytes` to a `CStr` wrapper without\n performing any sanity checks.\n\n # Safety\n The provided slice **must** be nul-terminated and not contain any interior\n nul bytes.\n\n # Examples\n\n ```\n use std::ffi::CStr;\n\n let bytes = b\"Hello world!\\0\";\n\n let cstr = unsafe { CStr::from_bytes_with_nul_unchecked(bytes) };\n assert_eq!(cstr.to_bytes_with_nul(), bytes);\n ```\n",
+      "adt": {}
+    },
+    "fmt::rt::Argument::<'_>::new_display": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "fmt::rt::Argument": "Constructor"
+      }
+    },
+    "fmt::Arguments::<'a>::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {
+        "fmt::Arguments": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "ffi::c_str::CStr": [
+      "Ref"
+    ],
+    "ops::range::RangeFrom": [
+      "Unknown([Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Plain"
+    ],
+    "fmt::rt::Argument": [
+      "Plain"
+    ],
+    "fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 12840,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ffi/c_str.rs:690:5: 705:6",
+  "src": "fn index(&self, index: ops::RangeFrom<usize>) -> &CStr {\n        let bytes = self.to_bytes_with_nul();\n        // we need to manually check the starting index to account for the null\n        // byte, since otherwise we could get an empty string that doesn't end\n        // in a null.\n        if index.start < bytes.len() {\n            // SAFETY: Non-empty tail of a valid `CStr` is still a valid `CStr`.\n            unsafe { CStr::from_bytes_with_nul_unchecked(&bytes[index.start..]) }\n        } else {\n            panic!(\n                \"index out of bounds: the len is {} but the index is {}\",\n                bytes.len(),\n                index.start\n            );\n        }\n    }",
+  "mir": "fn <ffi::c_str::CStr as ops::index::Index<ops::range::RangeFrom<usize>>>::index(_1: &ffi::c_str::CStr, _2: ops::range::RangeFrom<usize>) -> &ffi::c_str::CStr {\n    let mut _0: &ffi::c_str::CStr;\n    let  _3: &[u8];\n    let mut _4: bool;\n    let mut _5: usize;\n    let mut _6: usize;\n    let  _7: &[u8];\n    let mut _8: ops::range::RangeFrom<usize>;\n    let mut _9: usize;\n    let  _10: !;\n    let mut _11: fmt::Arguments<'_>;\n    let  _12: (&usize, &usize);\n    let mut _13: &usize;\n    let  _14: usize;\n    let mut _15: &usize;\n    let  _16: [fmt::rt::Argument<'_>; 2];\n    let mut _17: fmt::rt::Argument<'_>;\n    let mut _18: fmt::rt::Argument<'_>;\n    let mut _19: &[u8; 55];\n    let  _20: &[fmt::rt::Argument<'_>; 2];\n    let mut _21: &usize;\n    let mut _22: &usize;\n    debug self => _1;\n    debug index => _2;\n    debug bytes => _3;\n    debug args => _12;\n    debug args => _16;\n    bb0: {\n        _3 = ffi::c_str::CStr::to_bytes_with_nul(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = (_2.0: usize);\n        StorageLive(_6);\n        _6 = PtrMetadata(_3);\n        _4 = Lt(move _5, move _6);\n        switchInt(move _4) -> [0: bb5, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = (_2.0: usize);\n        _8 = RangeFrom(move _9);\n        StorageDead(_9);\n        _7 = <[u8] as ops::index::Index<ops::range::RangeFrom<usize>>>::index(_3, move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        _0 = ffi::c_str::CStr::from_bytes_with_nul_unchecked(_7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        return;\n    }\n    bb5: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = PtrMetadata(_3);\n        _13 = &_14;\n        StorageLive(_15);\n        _15 = &(_2.0: usize);\n        _12 = (move _13, move _15);\n        StorageDead(_15);\n        StorageDead(_13);\n        StorageLive(_16);\n        StorageLive(_17);\n        _21 = (_12.0: &usize);\n        _17 = fmt::rt::Argument::<'_>::new_display::<usize>(_21) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_18);\n        _22 = (_12.1: &usize);\n        _18 = fmt::rt::Argument::<'_>::new_display::<usize>(_22) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _16 = [move _17, move _18];\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageLive(_19);\n        _19 = b\" index out of bounds: the len is \\xc0\\x12 but the index is \\xc0\\x00\";\n        _20 = &_16;\n        _11 = fmt::Arguments::<'_>::new::<55, 2>(move _19, _20) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_19);\n        _10 = panicking::panic_fmt(move _11) -> unwind unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

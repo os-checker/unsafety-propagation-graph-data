@@ -1,0 +1,59 @@
+{
+  "name": "<iter::adapters::flatten::FlattenCompat<I, U> as iter::traits::double_ended::DoubleEndedIterator>::next_back",
+  "safe": true,
+  "callees": {
+    "iter::traits::double_ended::DoubleEndedIterator::next_back": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Removes and returns an element from the end of the iterator.\n\n Returns `None` when there are no more elements.\n\n The [trait-level] docs contain more details.\n\n [trait-level]: DoubleEndedIterator\n\n # Examples\n\n Basic usage:\n\n ```\n let numbers = vec![1, 2, 3, 4, 5, 6];\n\n let mut iter = numbers.iter();\n\n assert_eq!(Some(&1), iter.next());\n assert_eq!(Some(&6), iter.next_back());\n assert_eq!(Some(&5), iter.next_back());\n assert_eq!(Some(&2), iter.next());\n assert_eq!(Some(&3), iter.next());\n assert_eq!(Some(&4), iter.next());\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next_back());\n ```\n\n # Remarks\n\n The elements yielded by `DoubleEndedIterator`'s methods may differ from\n the ones yielded by [`Iterator`]'s methods:\n\n ```\n let vec = vec![(1, 'a'), (1, 'b'), (1, 'c'), (2, 'a'), (2, 'b')];\n let uniq_by_fst_comp = || {\n     let mut seen = std::collections::HashSet::new();\n     vec.iter().copied().filter(move |x| seen.insert(x.0))\n };\n\n assert_eq!(uniq_by_fst_comp().last(), Some((2, 'a')));\n assert_eq!(uniq_by_fst_comp().next_back(), Some((2, 'b')));\n\n assert_eq!(\n     uniq_by_fst_comp().fold(vec![], |mut v, x| {v.push(x); v}),\n     vec![(1, 'a'), (2, 'a')]\n );\n assert_eq!(\n     uniq_by_fst_comp().rfold(vec![], |mut v, x| {v.push(x); v}),\n     vec![(2, 'b'), (1, 'c')]\n );\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::collect::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "iter::adapters::fuse::Fuse": [
+      "MutRef"
+    ],
+    "iter::adapters::flatten::FlattenCompat": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4671, kind: Alias(Projection, AliasTy { def_id: AliasDef(DefId { id: 25924, name: \"iter::traits::iterator::Iterator::Item\" }), args: GenericArgs([Type(Ty { id: 4656, kind: Param(ParamTy { index: 0, name: \"I\" }) })]) }) })])"
+    ]
+  },
+  "path": 13830,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/flatten.rs:917:5: 924:6",
+  "src": "fn next_back(&mut self) -> Option<U::Item> {\n        while let Some(inner) = self.iter.next_back() {\n            if let item @ Some(_) = inner.into_iter().next() {\n                return item;\n            }\n        }\n        None\n    }",
+  "mir": "fn <iter::adapters::flatten::FlattenCompat<I, U> as iter::traits::double_ended::DoubleEndedIterator>::next_back(_1: &mut iter::adapters::flatten::FlattenCompat<I, U>) -> option::Option<<U as iter::traits::iterator::Iterator>::Item> {\n    let mut _0: option::Option<<U as iter::traits::iterator::Iterator>::Item>;\n    let mut _2: option::Option<<I as iter::traits::iterator::Iterator>::Item>;\n    let mut _3: &mut iter::adapters::fuse::Fuse<I>;\n    let mut _4: isize;\n    let  _5: <I as iter::traits::iterator::Iterator>::Item;\n    let mut _6: option::Option<<U as iter::traits::iterator::Iterator>::Item>;\n    let mut _7: &mut U;\n    let mut _8: U;\n    let mut _9: isize;\n    let  _10: option::Option<<U as iter::traits::iterator::Iterator>::Item>;\n    debug self => _1;\n    debug inner => _5;\n    debug item => _10;\n    bb0: {\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &mut ((*_1).0: iter::adapters::fuse::Fuse<I>);\n        _2 = <iter::adapters::fuse::Fuse<I> as iter::traits::double_ended::DoubleEndedIterator>::next_back(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _4 = discriminant(_2);\n        switchInt(move _4) -> [1: bb3, 0: bb10, otherwise: bb13];\n    }\n    bb3: {\n        _5 = move ((_2 as variant#1).0: <I as iter::traits::iterator::Iterator>::Item);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = <<I as iter::traits::iterator::Iterator>::Item as iter::traits::collect::IntoIterator>::into_iter(_5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _7 = &mut _8;\n        _6 = <U as iter::traits::iterator::Iterator>::next(move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        _9 = discriminant(_6);\n        switchInt(move _9) -> [1: bb6, 0: bb7, otherwise: bb13];\n    }\n    bb6: {\n        StorageLive(_10);\n        _10 = move _6;\n        _0 = move _10;\n        StorageDead(_10);\n        drop(_8) -> [return: bb11, unwind unreachable];\n    }\n    bb7: {\n        drop(_6) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        drop(_8) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_8);\n        StorageDead(_6);\n        StorageDead(_2);\n        goto -> bb1;\n    }\n    bb10: {\n        StorageDead(_2);\n        _0 = option::Option::None;\n        goto -> bb12;\n    }\n    bb11: {\n        StorageDead(_8);\n        StorageDead(_6);\n        StorageDead(_2);\n        goto -> bb12;\n    }\n    bb12: {\n        return;\n    }\n    bb13: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

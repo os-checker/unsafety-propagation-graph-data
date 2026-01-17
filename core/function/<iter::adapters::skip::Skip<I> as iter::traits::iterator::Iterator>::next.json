@@ -1,0 +1,68 @@
+{
+  "name": "<iter::adapters::skip::Skip<I> as iter::traits::iterator::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "intrinsics::unlikely": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Hints to the compiler that branch condition is likely to be false.\n Returns the value passed to it.\n\n Any use other than with `if` statements will probably not have an effect.\n\n Note that, unlike most intrinsics, this is safe to call;\n it does not require an `unsafe` block.\n Therefore, implementations must not require the user to uphold\n any safety invariants.\n\n This intrinsic does not have a stable counterpart.\n",
+      "adt": {}
+    },
+    "mem::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Replaces `dest` with the default value of `T`, returning the previous `dest` value.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a passed value instead of the default value, see [`replace`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::take(&mut v);\n assert_eq!(vec![1, 2], old_v);\n assert!(v.is_empty());\n ```\n\n `take` allows taking ownership of a struct field by replacing it with an \"empty\" value.\n Without `take` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let buf = self.buf;\n         self.buf = Vec::new();\n         buf\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so it can't even clone and reset\n `self.buf`. But `take` can be used to disassociate the original value of `self.buf` from\n `self`, allowing it to be returned:\n\n ```\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         mem::take(&mut self.buf)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf.len(), 2);\n\n assert_eq!(buffer.get_and_reset(), vec![0, 1]);\n assert_eq!(buffer.buf.len(), 0);\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::nth": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the `n`th element of the iterator.\n\n Like most indexing operations, the count starts from zero, so `nth(0)`\n returns the first value, `nth(1)` the second, and so on.\n\n Note that all preceding elements, as well as the returned element, will be\n consumed from the iterator. That means that the preceding elements will be\n discarded, and also that calling `nth(0)` multiple times on the same iterator\n will return different elements.\n\n `nth()` will return [`None`] if `n` is greater than or equal to the length of the\n iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n assert_eq!(a.into_iter().nth(1), Some(2));\n ```\n\n Calling `nth()` multiple times doesn't rewind the iterator:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n assert_eq!(iter.nth(1), Some(2));\n assert_eq!(iter.nth(1), None);\n ```\n\n Returning `None` if there are less than `n + 1` elements:\n\n ```\n let a = [1, 2, 3];\n assert_eq!(a.into_iter().nth(10), None);\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "iter::adapters::skip::Skip": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 14038,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/skip.rs:40:5: 46:6",
+  "src": "fn next(&mut self) -> Option<I::Item> {\n        if unlikely(self.n > 0) {\n            self.iter.nth(crate::mem::take(&mut self.n))\n        } else {\n            self.iter.next()\n        }\n    }",
+  "mir": "fn <iter::adapters::skip::Skip<I> as iter::traits::iterator::Iterator>::next(_1: &mut iter::adapters::skip::Skip<I>) -> option::Option<<I as iter::traits::iterator::Iterator>::Item> {\n    let mut _0: option::Option<<I as iter::traits::iterator::Iterator>::Item>;\n    let mut _2: bool;\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: &mut I;\n    let mut _6: usize;\n    let mut _7: &mut usize;\n    let mut _8: &mut I;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).1: usize);\n        _3 = Gt(move _4, 0_usize);\n        StorageDead(_4);\n        _2 = intrinsics::unlikely(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb5, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = &mut ((*_1).0: I);\n        StorageLive(_6);\n        _7 = &mut ((*_1).1: usize);\n        _6 = mem::take::<usize>(_7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _0 = <I as iter::traits::iterator::Iterator>::nth(move _5, move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_5);\n        goto -> bb7;\n    }\n    bb5: {\n        StorageDead(_3);\n        StorageLive(_8);\n        _8 = &mut ((*_1).0: I);\n        _0 = <I as iter::traits::iterator::Iterator>::next(move _8) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_8);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

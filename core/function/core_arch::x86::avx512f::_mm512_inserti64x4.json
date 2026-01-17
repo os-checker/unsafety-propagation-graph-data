@@ -1,0 +1,46 @@
+{
+  "name": "core_arch::x86::avx512f::_mm512_inserti64x4",
+  "safe": false,
+  "callees": {
+    "core_arch::x86::avx512f::_mm512_castsi256_si512": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Cast vector of type __m256i to type __m512i; the upper 256 bits of the result are undefined. This intrinsic is only used for compilation and does not generate any instructions, thus it has zero latency.\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_castsi256_si512&expand=633)\n",
+      "adt": {
+        "core_arch::x86::__m512i": "Constructor"
+      }
+    },
+    "intrinsics::simd::simd_shuffle": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Shuffles two vectors by const indices.\n\n `T` must be a vector.\n\n `U` must be a **const** vector of `u32`s. This means it must either refer to a named\n const or be given as an inline const expression (`const { ... }`).\n\n `V` must be a vector with the same element type as `T` and the same length as `U`.\n\n Returns a new vector such that element `i` is selected from `xy[idx[i]]`, where `xy`\n is the concatenation of `x` and `y`. It is a compile-time error if `idx[i]` is out-of-bounds\n of `xy`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_arch::x86::__m256i": [
+      "Plain"
+    ],
+    "core_arch::x86::__m512i": [
+      "Plain"
+    ]
+  },
+  "path": 8430,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../stdarch/crates/core_arch/src/x86/avx512f.rs:25623:1: 25632:2",
+  "src": "pub fn _mm512_inserti64x4<const IMM8: i32>(a: __m512i, b: __m256i) -> __m512i {\n    unsafe {\n        static_assert_uimm_bits!(IMM8, 1);\n        let b = _mm512_castsi256_si512(b);\n        match IMM8 & 0b1 {\n            0 => simd_shuffle!(a, b, [8, 9, 10, 11, 4, 5, 6, 7]),\n            _ => simd_shuffle!(a, b, [0, 1, 2, 3, 8, 9, 10, 11]),\n        }\n    }\n}",
+  "mir": "fn core_arch::x86::avx512f::_mm512_inserti64x4(_1: core_arch::x86::__m512i, _2: core_arch::x86::__m256i) -> core_arch::x86::__m512i {\n    let mut _0: core_arch::x86::__m512i;\n    let  _3: core_arch::x86::__m512i;\n    let mut _4: i32;\n    debug a => _1;\n    debug b => _2;\n    debug b => _3;\n    bb0: {\n        _3 = core_arch::x86::avx512f::_mm512_castsi256_si512(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = BitAnd(IMM8, 1_i32);\n        switchInt(_4) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        _0 = intrinsics::simd::simd_shuffle::<core_arch::x86::__m512i, core_arch::macros::SimdShuffleIdx<8>, core_arch::x86::__m512i>(_1, _3, core_arch::x86::avx512f::_mm512_inserti64x4::<IMM8>::{constant#2}) -> [return: bb5, unwind unreachable];\n    }\n    bb3: {\n        _0 = intrinsics::simd::simd_shuffle::<core_arch::x86::__m512i, core_arch::macros::SimdShuffleIdx<8>, core_arch::x86::__m512i>(_1, _3, core_arch::x86::avx512f::_mm512_inserti64x4::<IMM8>::{constant#1}) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        goto -> bb6;\n    }\n    bb5: {\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Copy a to dst, then insert 256 bits (composed of 4 packed 64-bit integers) from b into dst at the location specified by imm8.\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_inserti64x4&expand=3186)\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

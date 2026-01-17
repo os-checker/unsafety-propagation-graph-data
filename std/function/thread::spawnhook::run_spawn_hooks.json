@@ -1,0 +1,111 @@
+{
+  "name": "thread::spawnhook::run_spawn_hooks",
+  "safe": true,
+  "callees": {
+    "thread::local::LocalKey::<T>::try_with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires a reference to the value in this TLS key.\n\n This will lazily initialize the value if this thread has not referenced\n this key yet. If the key has been destroyed (which may happen if this is called\n in a destructor), this function will return an [`AccessError`].\n\n # Panics\n\n This function will still `panic!()` if the key is uninitialized and the\n key's initializer panics.\n\n # Examples\n\n ```\n thread_local! {\n     pub static STATIC: String = String::from(\"I am\");\n }\n\n assert_eq!(\n     STATIC.try_with(|original_value| format!(\"{original_value} initialized\")),\n     Ok(String::from(\"I am initialized\")),\n );\n ```\n",
+      "adt": {
+        "thread::local::LocalKey": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::option::Option::<T>::as_deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts from `Option<T>` (or `&Option<T>`) to `Option<&T::Target>`.\n\n Leaves the original Option in-place, creating a new one with a reference\n to the original one, additionally coercing the contents via [`Deref`].\n\n # Examples\n\n ```\n let x: Option<String> = Some(\"hey\".to_owned());\n assert_eq!(x.as_deref(), Some(\"hey\"));\n\n let x: Option<String> = None;\n assert_eq!(x.as_deref(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::successors": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator which, starting from an initial item,\n computes each successive item from the preceding one.\n\n This iterator stores an optional item (`Option<T>`) and a successor closure (`impl FnMut(&T) -> Option<T>`).\n Its `next` method returns the stored optional item and\n if it is `Some(val)` calls the stored closure on `&val` to compute and store its successor.\n The iterator will apply the closure successively to the stored option's value until the option is `None`.\n This also means that once the stored option is `None` it will remain `None`,\n as the closure will not be called again, so the created iterator is a [`FusedIterator`].\n The iterator's items will be the initial item and all of its successors as calculated by the successor closure.\n\n ```\n use std::iter::successors;\n\n let powers_of_10 = successors(Some(1_u16), |n| n.checked_mul(10));\n assert_eq!(powers_of_10.collect::<Vec<_>>(), &[1, 10, 100, 1_000, 10_000]);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes a closure and creates an iterator which calls that closure on each\n element.\n\n `map()` transforms one iterator into another, by means of its argument:\n something that implements [`FnMut`]. It produces a new iterator which\n calls this closure on each element of the original iterator.\n\n If you are good at thinking in types, you can think of `map()` like this:\n If you have an iterator that gives you elements of some type `A`, and\n you want an iterator of some other type `B`, you can use `map()`,\n passing a closure that takes an `A` and returns a `B`.\n\n `map()` is conceptually similar to a [`for`] loop. However, as `map()` is\n lazy, it is best used when you're already working with other iterators.\n If you're doing some sort of looping for a side effect, it's considered\n more idiomatic to use [`for`] than `map()`.\n\n [`for`]: ../../book/ch03-05-control-flow.html#looping-through-a-collection-with-for\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.iter().map(|x| 2 * x);\n\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), Some(6));\n assert_eq!(iter.next(), None);\n ```\n\n If you're doing some sort of side effect, prefer [`for`] to `map()`:\n\n ```\n # #![allow(unused_must_use)]\n // don't do this:\n (0..5).map(|x| println!(\"{x}\"));\n\n // it won't even execute, as it is lazy. Rust will warn you about this.\n\n // Instead, use a for-loop:\n for x in 0..5 {\n     println!(\"{x}\");\n }\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::collect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Transforms an iterator into a collection.\n\n `collect()` can take anything iterable, and turn it into a relevant\n collection. This is one of the more powerful methods in the standard\n library, used in a variety of contexts.\n\n The most basic pattern in which `collect()` is used is to turn one\n collection into another. You take a collection, call [`iter`] on it,\n do a bunch of transformations, and then `collect()` at the end.\n\n `collect()` can also create instances of types that are not typical\n collections. For example, a [`String`] can be built from [`char`]s,\n and an iterator of [`Result<T, E>`][`Result`] items can be collected\n into `Result<Collection<T>, E>`. See the examples below for more.\n\n Because `collect()` is so general, it can cause problems with type\n inference. As such, `collect()` is one of the few times you'll see\n the syntax affectionately known as the 'turbofish': `::<>`. This\n helps the inference algorithm understand specifically which collection\n you're trying to collect into.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let doubled: Vec<i32> = a.iter()\n                          .map(|x| x * 2)\n                          .collect();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Note that we needed the `: Vec<i32>` on the left-hand side. This is because\n we could collect into, for example, a [`VecDeque<T>`] instead:\n\n [`VecDeque<T>`]: ../../std/collections/struct.VecDeque.html\n\n ```\n use std::collections::VecDeque;\n\n let a = [1, 2, 3];\n\n let doubled: VecDeque<i32> = a.iter().map(|x| x * 2).collect();\n\n assert_eq!(2, doubled[0]);\n assert_eq!(4, doubled[1]);\n assert_eq!(6, doubled[2]);\n ```\n\n Using the 'turbofish' instead of annotating `doubled`:\n\n ```\n let a = [1, 2, 3];\n\n let doubled = a.iter().map(|x| x * 2).collect::<Vec<i32>>();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Because `collect()` only cares about what you're collecting into, you can\n still use a partial type hint, `_`, with the turbofish:\n\n ```\n let a = [1, 2, 3];\n\n let doubled = a.iter().map(|x| x * 2).collect::<Vec<_>>();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Using `collect()` to make a [`String`]:\n\n ```\n let chars = ['g', 'd', 'k', 'k', 'n'];\n\n let hello: String = chars.into_iter()\n     .map(|x| x as u8)\n     .map(|x| (x + 1) as char)\n     .collect();\n\n assert_eq!(\"hello\", hello);\n ```\n\n If you have a list of [`Result<T, E>`][`Result`]s, you can use `collect()` to\n see if any of them failed:\n\n ```\n let results = [Ok(1), Err(\"nope\"), Ok(3), Err(\"bad\")];\n\n let result: Result<Vec<_>, &str> = results.into_iter().collect();\n\n // gives us the first error\n assert_eq!(Err(\"nope\"), result);\n\n let results = [Ok(1), Ok(3)];\n\n let result: Result<Vec<_>, &str> = results.into_iter().collect();\n\n // gives us the list of answers\n assert_eq!(Ok(vec![1, 3]), result);\n ```\n\n [`iter`]: Iterator::next\n [`String`]: ../../std/string/struct.String.html\n [`char`]: type@char\n",
+      "adt": {}
+    },
+    "core::default::Default::default": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the \"default value\" for a type.\n\n Default values are often some kind of initial value, identity value, or anything else that\n may make sense as a default.\n\n # Examples\n\n Using built-in default values:\n\n ```\n let i: i8 = Default::default();\n let (x, y): (Option<String>, f64) = Default::default();\n let (a, b, (c, d)): (i32, u32, (bool, bool)) = Default::default();\n ```\n\n Making your own:\n\n ```\n # #[allow(dead_code)]\n enum Kind {\n     A,\n     B,\n     C,\n }\n\n impl Default for Kind {\n     fn default() -> Self { Kind::A }\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "thread::local::LocalKey": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 921, kind: RigidTy(Adt(AdtDef(DefId { id: 4757, name: \"thread::spawnhook::SpawnHooks\" }), GenericArgs([]))) })])"
+    ],
+    "thread::spawnhook::SpawnHooks": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 909, kind: RigidTy(Adt(AdtDef(DefId { id: 4387, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 918, kind: RigidTy(Adt(AdtDef(DefId { id: 4653, name: \"alloc_crate::sync::Arc\" }), GenericArgs([Type(Ty { id: 913, kind: RigidTy(Adt(AdtDef(DefId { id: 4756, name: \"thread::spawnhook::SpawnHook\" }), GenericArgs([]))) }), Type(Ty { id: 19, kind: RigidTy(Adt(AdtDef(DefId { id: 4635, name: \"alloc_crate::alloc::Global\" }), GenericArgs([]))) })]))) })]))) })])"
+    ],
+    "core::option::Option": [
+      "Ref",
+      "Plain"
+    ],
+    "core::iter::Successors": [
+      "Plain"
+    ],
+    "thread::thread::Thread": [
+      "Ref"
+    ],
+    "core::iter::Map": [
+      "Plain"
+    ],
+    "alloc_crate::vec::Vec": [
+      "Plain"
+    ],
+    "thread::spawnhook::ChildSpawnHooks": [
+      "Plain"
+    ]
+  },
+  "path": 4549,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:113:1: 133:2",
+  "src": "pub(super) fn run_spawn_hooks(thread: &Thread) -> ChildSpawnHooks {\n    // Get a snapshot of the spawn hooks.\n    // (Increments the refcount to the first node.)\n    if let Ok(hooks) = SPAWN_HOOKS.try_with(|hooks| {\n        let snapshot = hooks.take();\n        hooks.set(snapshot.clone());\n        snapshot\n    }) {\n        // Iterate over the hooks, run them, and collect the results in a vector.\n        let to_run: Vec<_> = iter::successors(hooks.first.as_deref(), |hook| hook.next.as_deref())\n            .map(|hook| (hook.hook)(thread))\n            .collect();\n        // Pass on the snapshot of the hooks and the results to the new thread,\n        // which will then run SpawnHookResults::run().\n        ChildSpawnHooks { hooks, to_run }\n    } else {\n        // TLS has been destroyed. Skip running the hooks.\n        // See https://github.com/rust-lang/rust/issues/138696\n        ChildSpawnHooks::default()\n    }\n}",
+  "mir": "fn thread::spawnhook::run_spawn_hooks(_1: &thread::thread::Thread) -> thread::spawnhook::ChildSpawnHooks {\n    let mut _0: thread::spawnhook::ChildSpawnHooks;\n    let mut _2: core::result::Result<thread::spawnhook::SpawnHooks, thread::local::AccessError>;\n    let mut _3: &thread::local::LocalKey<core::cell::Cell<thread::spawnhook::SpawnHooks>>;\n    let mut _4: isize;\n    let  _5: thread::spawnhook::SpawnHooks;\n    let  _6: alloc_crate::vec::Vec<alloc_crate::boxed::Box<dyn core::ops::FnOnce() + core::marker::Send>>;\n    let mut _7: core::iter::Map<core::iter::Successors<&thread::spawnhook::SpawnHook, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:122:71: 122:77}>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:123:18: 123:24}>;\n    let mut _8: core::iter::Successors<&thread::spawnhook::SpawnHook, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:122:71: 122:77}>;\n    let mut _9: core::option::Option<&thread::spawnhook::SpawnHook>;\n    let mut _10: &core::option::Option<alloc_crate::sync::Arc<thread::spawnhook::SpawnHook>>;\n    let mut _11: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:123:18: 123:24};\n    debug thread => _1;\n    debug hooks => _5;\n    debug to_run => _6;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = thread::spawnhook::run_spawn_hooks::promoted[0];\n        _2 = thread::local::LocalKey::<core::cell::Cell<thread::spawnhook::SpawnHooks>>::try_with::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:116:45: 116:52}, thread::spawnhook::SpawnHooks>(move _3, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:116:45: 116:52}) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _4 = discriminant(_2);\n        switchInt(move _4) -> [0: bb2, 1: bb8, otherwise: bb9];\n    }\n    bb2: {\n        _5 = move ((_2 as variant#0).0: thread::spawnhook::SpawnHooks);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &(_5.0: core::option::Option<alloc_crate::sync::Arc<thread::spawnhook::SpawnHook>>);\n        _9 = core::option::Option::<alloc_crate::sync::Arc<thread::spawnhook::SpawnHook>>::as_deref(move _10) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        _8 = core::iter::successors::<&thread::spawnhook::SpawnHook, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:122:71: 122:77}>(move _9, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:122:71: 122:77}) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_9);\n        StorageLive(_11);\n        _11 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:123:18: 123:24}(_1);\n        _7 = <core::iter::Successors<&thread::spawnhook::SpawnHook, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:122:71: 122:77}> as core::iter::Iterator>::map::<alloc_crate::boxed::Box<dyn core::ops::FnOnce() + core::marker::Send>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:123:18: 123:24}>(move _8, move _11) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        StorageDead(_8);\n        _6 = <core::iter::Map<core::iter::Successors<&thread::spawnhook::SpawnHook, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:122:71: 122:77}>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/spawnhook.rs:123:18: 123:24}> as core::iter::Iterator>::collect::<alloc_crate::vec::Vec<alloc_crate::boxed::Box<dyn core::ops::FnOnce() + core::marker::Send>>>(move _7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_7);\n        _0 = ChildSpawnHooks(_5, _6);\n        StorageDead(_2);\n        goto -> bb7;\n    }\n    bb7: {\n        return;\n    }\n    bb8: {\n        StorageDead(_2);\n        _0 = <thread::spawnhook::ChildSpawnHooks as core::default::Default>::default() -> [return: bb7, unwind unreachable];\n    }\n    bb9: {\n        unreachable;\n    }\n}\n",
+  "doc": " Runs all the spawn hooks.\n\n Called on the parent thread.\n\n Returns the functions to be called on the newly spawned thread.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

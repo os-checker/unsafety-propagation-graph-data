@@ -1,0 +1,37 @@
+{
+  "name": "arch::mm::enable_essential_features",
+  "safe": true,
+  "callees": {
+    "arch::mm::pat::configure_pat": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Programs the PAT MSR so that write-combining mappings use the\n correct memory type.\n",
+      "adt": {}
+    },
+    "x86_64::registers::model_specific::x86_64::<impl x86_64::registers::control::Efer>::update": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Update EFER flags.\n\n Preserves the value of reserved fields.\n\n ## Safety\n\n Unsafe because it's possible to break memory\n safety with wrong flags, e.g. by disabling long mode.\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1318,
+  "span": "ostd/src/arch/x86/mm/mod.rs:315:1: 328:2",
+  "src": "pub(super) fn enable_essential_features() {\n    // Page Attribute Table (PAT) has been available since Pentium III (1999)\n    // and is ubiquitous in modern 64-bit CPUs. Therefore, we assume that all\n    // x86-64 CPUs should have PAT support. Otherwise, we should check\n    // `cpu::extension::has_extensions(IsaExtensions::PAT)` before programming it.\n    configure_pat();\n\n    unsafe {\n        // Enable non-executable page protection.\n        Efer::update(|efer| {\n            *efer |= EferFlags::NO_EXECUTE_ENABLE;\n        });\n    }\n}",
+  "mir": "fn arch::mm::enable_essential_features() -> () {\n    let mut _0: ();\n    let  _1: ();\n    let  _2: ();\n    bb0: {\n        _1 = arch::mm::pat::configure_pat() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = x86_64::registers::model_specific::x86_64::<impl x86_64::registers::control::Efer>::update::<{closure@ostd/src/arch/x86/mm/mod.rs:324:22: 324:28}>(ZeroSized: {closure@ostd/src/arch/x86/mm/mod.rs:324:22: 324:28}) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Enables memory-management essential features for the x86 MMU.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

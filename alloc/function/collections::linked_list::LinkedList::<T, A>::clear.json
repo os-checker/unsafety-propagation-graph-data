@@ -1,0 +1,60 @@
+{
+  "name": "collections::linked_list::LinkedList::<T, A>::clear",
+  "safe": true,
+  "callees": {
+    "core::option::Option::<T>::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes the value out of the option, leaving a [`None`] in its place.\n\n # Examples\n\n ```\n let mut x = Some(2);\n let y = x.take();\n assert_eq!(x, None);\n assert_eq!(y, Some(2));\n\n let mut x: Option<u32> = None;\n let y = x.take();\n assert_eq!(x, None);\n assert_eq!(y, None);\n ```\n",
+      "adt": {}
+    },
+    "core::mem::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Replaces `dest` with the default value of `T`, returning the previous `dest` value.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a passed value instead of the default value, see [`replace`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::take(&mut v);\n assert_eq!(vec![1, 2], old_v);\n assert!(v.is_empty());\n ```\n\n `take` allows taking ownership of a struct field by replacing it with an \"empty\" value.\n Without `take` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let buf = self.buf;\n         self.buf = Vec::new();\n         buf\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so it can't even clone and reset\n `self.buf`. But `take` can be used to disassociate the original value of `self.buf` from\n `self`, allowing it to be returned:\n\n ```\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         mem::take(&mut self.buf)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf.len(), 2);\n\n assert_eq!(buffer.get_and_reset(), vec![0, 1]);\n assert_eq!(buffer.buf.len(), 0);\n ```\n",
+      "adt": {}
+    },
+    "core::mem::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disposes of a value.\n\n This effectively does nothing for types which implement `Copy`, e.g.\n integers. Such values are copied and _then_ moved into the function, so the\n value persists after this function call.\n\n This function is not magic; it is literally defined as\n\n ```\n pub fn drop<T>(_x: T) {}\n ```\n\n Because `_x` is moved into the function, it is automatically [dropped][drop] before\n the function returns.\n\n [drop]: Drop\n\n # Examples\n\n Basic usage:\n\n ```\n let v = vec![1, 2, 3];\n\n drop(v); // explicitly drop the vector\n ```\n\n Since [`RefCell`] enforces the borrow rules at runtime, `drop` can\n release a [`RefCell`] borrow:\n\n ```\n use std::cell::RefCell;\n\n let x = RefCell::new(1);\n\n let mut mutable_borrow = x.borrow_mut();\n *mutable_borrow = 1;\n\n drop(mutable_borrow); // relinquish the mutable borrow on this slot\n\n let borrow = x.borrow();\n println!(\"{}\", *borrow);\n ```\n\n Integers and other types implementing [`Copy`] are unaffected by `drop`.\n\n ```\n # #![allow(dropping_copy_types)]\n #[derive(Copy, Clone)]\n struct Foo(u8);\n\n let x = 1;\n let y = Foo(2);\n drop(x); // a copy of `x` is moved and dropped\n drop(y); // a copy of `y` is moved and dropped\n\n println!(\"x: {}, y: {}\", x, y.0); // still available\n ```\n\n [`RefCell`]: crate::cell::RefCell\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "MutRef",
+      "Plain"
+    ],
+    "collections::linked_list::LinkedList": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 1278,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/linked_list.rs:685:5: 695:6",
+  "src": "pub fn clear(&mut self) {\n        // We need to drop the nodes while keeping self.alloc\n        // We can do this by moving (head, tail, len) into a new list that borrows self.alloc\n        drop(LinkedList {\n            head: self.head.take(),\n            tail: self.tail.take(),\n            len: mem::take(&mut self.len),\n            alloc: &self.alloc,\n            marker: PhantomData,\n        });\n    }",
+  "mir": "fn collections::linked_list::LinkedList::<T, A>::clear(_1: &mut collections::linked_list::LinkedList<T, A>) -> () {\n    let mut _0: ();\n    let  _2: ();\n    let mut _3: collections::linked_list::LinkedList<T, &A>;\n    let mut _4: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>;\n    let mut _5: &mut core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>;\n    let mut _6: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>;\n    let mut _7: &mut core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>;\n    let mut _8: usize;\n    let mut _9: &mut usize;\n    let mut _10: &A;\n    debug self => _1;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &mut ((*_1).0: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>);\n        _4 = core::option::Option::<core::ptr::NonNull<collections::linked_list::Node<T>>>::take(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &mut ((*_1).1: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>);\n        _6 = core::option::Option::<core::ptr::NonNull<collections::linked_list::Node<T>>>::take(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        StorageLive(_8);\n        _9 = &mut ((*_1).2: usize);\n        _8 = core::mem::take::<usize>(_9) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_10);\n        _10 = &((*_1).3: A);\n        _3 = LinkedList(move _4, move _6, move _8, move _10, ZeroSized: core::marker::PhantomData<boxed::Box<collections::linked_list::Node<T>, &A>>);\n        StorageDead(_10);\n        StorageDead(_8);\n        StorageDead(_6);\n        StorageDead(_4);\n        _2 = core::mem::drop::<collections::linked_list::LinkedList<T, &A>>(move _3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Removes all elements from the `LinkedList`.\n\n This operation should compute in *O*(*n*) time.\n\n # Examples\n\n ```\n use std::collections::LinkedList;\n\n let mut dl = LinkedList::new();\n\n dl.push_front(2);\n dl.push_front(1);\n assert_eq!(dl.len(), 2);\n assert_eq!(dl.front(), Some(&1));\n\n dl.clear();\n assert_eq!(dl.len(), 0);\n assert_eq!(dl.front(), None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

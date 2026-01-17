@@ -1,0 +1,69 @@
+{
+  "name": "ffi::va_list::VaListImpl::<'f>::with_copy",
+  "safe": false,
+  "callees": {
+    "clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "ffi::va_list::VaListImpl::<'f>::as_va_list": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a [`VaListImpl`] into a [`VaList`] that is binary-compatible with C's `va_list`.\n",
+      "adt": {
+        "ffi::va_list::VaListImpl": "MutableAsArgument",
+        "ffi::va_list::VaList": "Constructor"
+      }
+    },
+    "ops::function::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "intrinsics::va_end": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Destroy the arglist `ap` after initialization with `va_start` or `va_copy`.\n\n # Safety\n\n `ap` must not be used to access variable arguments after this call.\n\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ffi::va_list::VaListImpl": [
+      "Ref",
+      "Plain",
+      "MutRef"
+    ],
+    "ffi::va_list::VaList": [
+      "Plain"
+    ]
+  },
+  "path": 12881,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ffi/va_list.rs:263:5: 274:6",
+  "src": "pub unsafe fn with_copy<F, R>(&self, f: F) -> R\n    where\n        F: for<'copy> FnOnce(VaList<'copy, 'f>) -> R,\n    {\n        let mut ap = self.clone();\n        let ret = f(ap.as_va_list());\n        // SAFETY: the caller must uphold the safety contract for `va_end`.\n        unsafe {\n            va_end(&mut ap);\n        }\n        ret\n    }",
+  "mir": "fn ffi::va_list::VaListImpl::<'f>::with_copy(_1: &ffi::va_list::VaListImpl<'_>, _2: F) -> R {\n    let mut _0: R;\n    let mut _3: ffi::va_list::VaListImpl<'_>;\n    let mut _4: (ffi::va_list::VaList<'_, '_>,);\n    let mut _5: ffi::va_list::VaList<'_, '_>;\n    let mut _6: &mut ffi::va_list::VaListImpl<'_>;\n    let  _7: ();\n    let mut _8: &mut ffi::va_list::VaListImpl<'_>;\n    debug self => _1;\n    debug f => _2;\n    debug ap => _3;\n    debug ret => _0;\n    bb0: {\n        StorageLive(_3);\n        _3 = <ffi::va_list::VaListImpl<'_> as clone::Clone>::clone(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut _3;\n        _5 = ffi::va_list::VaListImpl::<'_>::as_va_list(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _4 = (move _5);\n        _0 = <F as ops::function::FnOnce<(ffi::va_list::VaList<'_, '_>,)>>::call_once(_2, move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _8 = &mut _3;\n        _7 = intrinsics::va_end(_8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        drop(_3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Copies the `va_list` at the current location.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

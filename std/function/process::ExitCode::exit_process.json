@@ -1,0 +1,51 @@
+{
+  "name": "process::ExitCode::exit_process",
+  "safe": true,
+  "callees": {
+    "process::ExitCode::to_i32": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Converts an `ExitCode` into an i32\n",
+      "adt": {}
+    },
+    "process::exit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Terminates the current process with the specified exit code.\n\n This function will never return and will immediately terminate the current\n process. The exit code is passed through to the underlying OS and will be\n available for consumption by another process.\n\n Note that because this function never returns, and that it terminates the\n process, no destructors on the current stack or any other thread's stack\n will be run. If a clean shutdown is needed it is recommended to only call\n this function at a known point where there are no more destructors left\n to run; or, preferably, simply return a type implementing [`Termination`]\n (such as [`ExitCode`] or `Result`) from the `main` function and avoid this\n function altogether:\n\n ```\n # use std::io::Error as MyError;\n fn main() -> Result<(), MyError> {\n     // ...\n     Ok(())\n }\n ```\n\n In its current implementation, this function will execute exit handlers registered with `atexit`\n as well as other platform-specific exit handlers (e.g. `fini` sections of ELF shared objects).\n This means that Rust requires that all exit handlers are safe to execute at any time. In\n particular, if an exit handler cleans up some state that might be concurrently accessed by other\n threads, it is required that the exit handler performs suitable synchronization with those\n threads. (The alternative to this requirement would be to not run exit handlers at all, which is\n considered undesirable. Note that returning from `main` also calls `exit`, so making `exit` an\n unsafe operation is not an option.)\n\n ## Platform-specific behavior\n\n **Unix**: On Unix-like platforms, it is unlikely that all 32 bits of `exit`\n will be visible to a parent process inspecting the exit code. On most\n Unix-like platforms, only the eight least-significant bits are considered.\n\n For example, the exit code for this example will be `0` on Linux, but `256`\n on Windows:\n\n ```no_run\n use std::process;\n\n process::exit(0x0100);\n ```\n\n ### Safe interop with C code\n\n On Unix, this function is currently implemented using the `exit` C function [`exit`][C-exit]. As\n of C23, the C standard does not permit multiple threads to call `exit` concurrently. Rust\n mitigates this with a lock, but if C code calls `exit`, that can still cause undefined behavior.\n Note that returning from `main` is equivalent to calling `exit`.\n\n Therefore, it is undefined behavior to have two concurrent threads perform the following\n without synchronization:\n - One thread calls Rust's `exit` function or returns from Rust's `main` function\n - Another thread calls the C function `exit` or `quick_exit`, or returns from C's `main` function\n\n Note that if a binary contains multiple copies of the Rust runtime (e.g., when combining\n multiple `cdylib` or `staticlib`), they each have their own separate lock, so from the\n perspective of code running in one of the Rust runtimes, the \"outside\" Rust code is basically C\n code, and concurrent `exit` again causes undefined behavior.\n\n Individual C implementations might provide more guarantees than the standard and permit concurrent\n calls to `exit`; consult the documentation of your C implementation for details.\n\n For some of the on-going discussion to make `exit` thread-safe in C, see:\n - [Rust issue #126600](https://github.com/rust-lang/rust/issues/126600)\n - [Austin Group Bugzilla (for POSIX)](https://austingroupbugs.net/view.php?id=1845)\n - [GNU C library Bugzilla](https://sourceware.org/bugzilla/show_bug.cgi?id=31997)\n\n [C-exit]: https://en.cppreference.com/w/c/program/exit\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "process::ExitCode": [
+      "Plain"
+    ]
+  },
+  "path": 2664,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/process.rs:2165:5: 2167:6",
+  "src": "pub fn exit_process(self) -> ! {\n        exit(self.to_i32())\n    }",
+  "mir": "fn process::ExitCode::exit_process(_1: process::ExitCode) -> ! {\n    let mut _0: !;\n    let mut _2: i32;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = process::ExitCode::to_i32(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = process::exit(move _2) -> unwind unreachable;\n    }\n}\n",
+  "doc": " Exit the current process with the given `ExitCode`.\n\n Note that this has the same caveats as [`process::exit()`][exit], namely that this function\n terminates the process immediately, so no destructors on the current stack or any other\n thread's stack will be run. Also see those docs for some important notes on interop with C\n code. If a clean shutdown is needed, it is recommended to simply return this ExitCode from\n the `main` function, as demonstrated in the [type documentation](#examples).\n\n # Differences from `process::exit()`\n\n `process::exit()` accepts any `i32` value as the exit code for the process; however, there\n are platforms that only use a subset of that value (see [`process::exit` platform-specific\n behavior][exit#platform-specific-behavior]). `ExitCode` exists because of this; only\n `ExitCode`s that are supported by a majority of our platforms can be created, so those\n problems don't exist (as much) with this method.\n\n # Examples\n\n ```\n #![feature(exitcode_exit_method)]\n # use std::process::ExitCode;\n # use std::fmt;\n # enum UhOhError { GenericProblem, Specific, WithCode { exit_code: ExitCode, _x: () } }\n # impl fmt::Display for UhOhError {\n #     fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result { unimplemented!() }\n # }\n // there's no way to gracefully recover from an UhOhError, so we just\n // print a message and exit\n fn handle_unrecoverable_error(err: UhOhError) -> ! {\n     eprintln!(\"UH OH! {err}\");\n     let code = match err {\n         UhOhError::GenericProblem => ExitCode::FAILURE,\n         UhOhError::Specific => ExitCode::from(3),\n         UhOhError::WithCode { exit_code, .. } => exit_code,\n     };\n     code.exit_process()\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

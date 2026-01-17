@@ -1,0 +1,180 @@
+{
+  "name": "mm::io::VmReader::<'_>::read_val",
+  "safe": true,
+  "callees": {
+    "mm::io::VmReader::<'_, Fallibility>::remain": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of bytes for the remaining data.\n",
+      "adt": {
+        "mm::io::VmReader": "ImmutableAsArgument"
+      }
+    },
+    "core::mem::size_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of a type in bytes.\n\n More specifically, this is the offset in bytes between successive elements\n in an array with that item type including alignment padding. Thus, for any\n type `T` and length `n`, `[T; n]` has a size of `n * size_of::<T>()`.\n\n In general, the size of a type is not stable across compilations, but\n specific types such as primitives are.\n\n The following table gives the size for primitives.\n\n Type | `size_of::<Type>()`\n ---- | ---------------\n () | 0\n bool | 1\n u8 | 1\n u16 | 2\n u32 | 4\n u64 | 8\n u128 | 16\n i8 | 1\n i16 | 2\n i32 | 4\n i64 | 8\n i128 | 16\n f32 | 4\n f64 | 8\n char | 4\n\n Furthermore, `usize` and `isize` have the same size.\n\n The types [`*const T`], `&T`, [`Box<T>`], [`Option<&T>`], and `Option<Box<T>>` all have\n the same size. If `T` is `Sized`, all of those types have the same size as `usize`.\n\n The mutability of a pointer does not change its size. As such, `&T` and `&mut T`\n have the same size. Likewise for `*const T` and `*mut T`.\n\n # Size of `#[repr(C)]` items\n\n The `C` representation for items has a defined layout. With this layout,\n the size of items is also stable as long as all fields have a stable size.\n\n ## Size of Structs\n\n For `struct`s, the size is determined by the following algorithm.\n\n For each field in the struct ordered by declaration order:\n\n 1. Add the size of the field.\n 2. Round up the current size to the nearest multiple of the next field's [alignment].\n\n Finally, round the size of the struct to the nearest multiple of its [alignment].\n The alignment of the struct is usually the largest alignment of all its\n fields; this can be changed with the use of `repr(align(N))`.\n\n Unlike `C`, zero sized structs are not rounded up to one byte in size.\n\n ## Size of Enums\n\n Enums that carry no data other than the discriminant have the same size as C enums\n on the platform they are compiled for.\n\n ## Size of Unions\n\n The size of a union is the size of its largest field.\n\n Unlike `C`, zero sized unions are not rounded up to one byte in size.\n\n # Examples\n\n ```\n // Some primitives\n assert_eq!(4, size_of::<i32>());\n assert_eq!(8, size_of::<f64>());\n assert_eq!(0, size_of::<()>());\n\n // Some arrays\n assert_eq!(8, size_of::<[i32; 2]>());\n assert_eq!(12, size_of::<[i32; 3]>());\n assert_eq!(0, size_of::<[i32; 0]>());\n\n\n // Pointer size equality\n assert_eq!(size_of::<&i32>(), size_of::<*const i32>());\n assert_eq!(size_of::<&i32>(), size_of::<Box<i32>>());\n assert_eq!(size_of::<&i32>(), size_of::<Option<&i32>>());\n assert_eq!(size_of::<Box<i32>>(), size_of::<Option<Box<i32>>>());\n ```\n\n Using `#[repr(C)]`.\n\n ```\n #[repr(C)]\n struct FieldStruct {\n     first: u8,\n     second: u16,\n     third: u8\n }\n\n // The size of the first field is 1, so add 1 to the size. Size is 1.\n // The alignment of the second field is 2, so add 1 to the size for padding. Size is 2.\n // The size of the second field is 2, so add 2 to the size. Size is 4.\n // The alignment of the third field is 1, so add 0 to the size for padding. Size is 4.\n // The size of the third field is 1, so add 1 to the size. Size is 5.\n // Finally, the alignment of the struct is 2 (because the largest alignment amongst its\n // fields is 2), so add 1 to the size for padding. Size is 6.\n assert_eq!(6, size_of::<FieldStruct>());\n\n #[repr(C)]\n struct TupleStruct(u8, u16, u8);\n\n // Tuple structs follow the same rules.\n assert_eq!(6, size_of::<TupleStruct>());\n\n // Note that reordering the fields can lower the size. We can remove both padding bytes\n // by putting `third` before `second`.\n #[repr(C)]\n struct FieldStructOptimized {\n     first: u8,\n     third: u8,\n     second: u16\n }\n\n assert_eq!(4, size_of::<FieldStructOptimized>());\n\n // Union size is the size of the largest field.\n #[repr(C)]\n union ExampleUnion {\n     smaller: u8,\n     larger: u16\n }\n\n assert_eq!(2, size_of::<ExampleUnion>());\n ```\n\n [alignment]: align_of\n [`*const T`]: primitive@pointer\n [`Box<T>`]: ../../std/boxed/struct.Box.html\n [`Option<&T>`]: crate::option::Option\n\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::uninit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `MaybeUninit<T>` in an uninitialized state.\n\n Note that dropping a `MaybeUninit<T>` will never call `T`'s drop code.\n It is your responsibility to make sure `T` gets dropped if it got initialized.\n\n See the [type-level documentation][MaybeUninit] for some examples.\n\n # Example\n\n ```\n use std::mem::MaybeUninit;\n\n let v: MaybeUninit<String> = MaybeUninit::uninit();\n ```\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<Vec<u32>>`.\n // This is okay because we initialized it.\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n x_vec.push(3);\n assert_eq!(x_vec.len(), 4);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "mm::io::VmWriter::<'a, mm::io::Infallible>::from_kernel_space": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `VmWriter` from a pointer and a length, which represents\n a memory range in kernel space.\n\n # Safety\n\n `ptr` must be [valid] for writes of `len` bytes during the entire lifetime `a`.\n\n [valid]: crate::mm::io#safety\n",
+      "adt": {
+        "mm::io::VmWriter": "Constructor"
+      }
+    },
+    "mm::io::FallibleVmRead::read_fallible": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads all data into the writer until one of the three conditions is met:\n 1. The reader has no remaining data.\n 2. The writer has no available space.\n 3. The reader/writer encounters some error.\n\n On success, the number of bytes read is returned;\n On error, both the error and the number of bytes read so far are returned.\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::map_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<T, F>` by applying a function to a\n contained [`Err`] value, leaving an [`Ok`] value untouched.\n\n This function can be used to pass through a successful result while handling\n an error.\n\n\n # Examples\n\n ```\n fn stringify(x: u32) -> String { format!(\"error code: {x}\") }\n\n let x: Result<u32, u32> = Ok(2);\n assert_eq!(x.map_err(stringify), Ok(2));\n\n let x: Result<u32, u32> = Err(13);\n assert_eq!(x.map_err(stringify), Err(\"error code: 13\".to_string()));\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "mm::io::VmWriter::<'_, Fallibility>::has_avail": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns if it has available space to write.\n",
+      "adt": {
+        "mm::io::VmWriter": "ImmutableAsArgument"
+      }
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::assume_init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the value from the `MaybeUninit<T>` container. This is a great way\n to ensure that the data will get dropped, because the resulting `T` is\n subject to the usual drop handling.\n\n # Safety\n\n It is up to the caller to guarantee that the `MaybeUninit<T>` really is in an initialized\n state. Calling this when the content is not yet fully initialized causes immediate undefined\n behavior. The [type-level documentation][inv] contains more information about\n this initialization invariant.\n\n [inv]: #initialization-invariant\n\n On top of that, remember that most types have additional invariants beyond merely\n being considered initialized at the type level. For example, a `1`-initialized [`Vec<T>`]\n is considered initialized (under the current implementation; this does not constitute\n a stable guarantee) because the only requirement the compiler knows about it\n is that the data pointer must be non-null. Creating such a `Vec<T>` does not cause\n *immediate* undefined behavior, but will cause undefined behavior with most\n safe operations (including dropping it).\n\n [`Vec<T>`]: ../../std/vec/struct.Vec.html\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<bool>::uninit();\n x.write(true);\n let x_init = unsafe { x.assume_init() };\n assert_eq!(x_init, true);\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let x = MaybeUninit::<Vec<u32>>::uninit();\n let x_init = unsafe { x.assume_init() };\n // `x` had not been initialized yet, so this last line caused undefined behavior. ⚠️\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::io::VmReader": [
+      "Ref",
+      "Deref",
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "error::Error": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::mem::MaybeUninit": [
+      "Plain",
+      "MutRef"
+    ],
+    "mm::io::VmWriter": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 1912, kind: RigidTy(Adt(AdtDef(DefId { id: 2763, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 31, kind: RigidTy(Adt(AdtDef(DefId { id: 3443, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 979, kind: RigidTy(Adt(AdtDef(DefId { id: 3864, name: \"error::Error\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 2131,
+  "span": "ostd/src/mm/io.rs:571:5: 600:6",
+  "src": "pub fn read_val<T: Pod>(&mut self) -> Result<T> {\n        if self.remain() < size_of::<T>() {\n            return Err(Error::InvalidArgs);\n        }\n\n        let mut val = MaybeUninit::<T>::uninit();\n\n        // SAFETY:\n        // - The memory range points to typed memory.\n        // - The validity requirements for write accesses are met because the pointer is converted\n        //   from a mutable pointer where the underlying storage outlives the temporary lifetime\n        //   and no other Rust references to the same storage exist during the lifetime.\n        // - The type, i.e., `T`, is plain-old-data.\n        let mut writer =\n            unsafe { VmWriter::from_kernel_space(val.as_mut_ptr().cast(), size_of::<T>()) };\n        self.read_fallible(&mut writer)\n            .map_err(|(err, copied_len)| {\n                // The `copied_len` is the number of bytes read so far.\n                // So the `cursor` can be moved back to the original position.\n                self.cursor = self.cursor.wrapping_sub(copied_len);\n                err\n            })?;\n        debug_assert!(!writer.has_avail());\n\n        // SAFETY:\n        // - `self.read_fallible` has initialized all the bytes in `val`.\n        // - The type is plain-old-data.\n        let val_inited = unsafe { val.assume_init() };\n        Ok(val_inited)\n    }",
+  "mir": "fn mm::io::VmReader::<'_>::read_val(_1: &mut mm::io::VmReader<'_>) -> core::result::Result<T, error::Error> {\n    let mut _0: core::result::Result<T, error::Error>;\n    let mut _2: bool;\n    let mut _3: usize;\n    let mut _4: &mm::io::VmReader<'_>;\n    let mut _5: usize;\n    let mut _6: error::Error;\n    let mut _7: core::mem::MaybeUninit<T>;\n    let mut _8: mm::io::VmWriter<'_, mm::io::Infallible>;\n    let mut _9: *mut u8;\n    let mut _10: *mut T;\n    let mut _11: &mut core::mem::MaybeUninit<T>;\n    let mut _12: usize;\n    let mut _13: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, error::Error>, usize>;\n    let mut _14: core::result::Result<usize, error::Error>;\n    let mut _15: core::result::Result<usize, (error::Error, usize)>;\n    let mut _16: &mut mm::io::VmWriter<'_, mm::io::Infallible>;\n    let mut _17: {closure@ostd/src/mm/io.rs:587:22: 587:41};\n    let mut _18: &mut *const u8;\n    let mut _19: isize;\n    let  _20: core::result::Result<core::convert::Infallible, error::Error>;\n    let  _21: usize;\n    let mut _22: bool;\n    let mut _23: &mm::io::VmWriter<'_, mm::io::Infallible>;\n    let mut _24: !;\n    let  _25: T;\n    let mut _26: core::mem::MaybeUninit<T>;\n    debug self => _1;\n    debug val => _7;\n    debug writer => _8;\n    debug residual => _20;\n    debug val => _21;\n    debug val_inited => _25;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &(*_1);\n        _3 = mm::io::VmReader::<'_>::remain(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = core::mem::size_of::<T>() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _2 = Lt(move _3, move _5);\n        switchInt(move _2) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageLive(_6);\n        _6 = error::Error::InvalidArgs;\n        _0 = core::result::Result::Err(move _6);\n        StorageDead(_6);\n        StorageDead(_2);\n        goto -> bb21;\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageDead(_2);\n        StorageLive(_7);\n        _7 = core::mem::MaybeUninit::<T>::uninit() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &mut _7;\n        _10 = core::mem::MaybeUninit::<T>::as_mut_ptr(move _11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        _9 = core::ptr::mut_ptr::<impl *mut T>::cast::<u8>(move _10) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageLive(_12);\n        _12 = core::mem::size_of::<T>() -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _8 = mm::io::VmWriter::<'_, mm::io::Infallible>::from_kernel_space(move _9, move _12) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_12);\n        StorageDead(_9);\n        StorageLive(_13);\n        StorageLive(_14);\n        StorageLive(_15);\n        _16 = &mut _8;\n        _15 = <mm::io::VmReader<'_> as mm::io::FallibleVmRead<mm::io::Infallible>>::read_fallible(_1, _16) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = &mut ((*_1).0: *const u8);\n        _17 = {closure@ostd/src/mm/io.rs:587:22: 587:41}(move _18);\n        StorageDead(_18);\n        _14 = core::result::Result::<usize, (error::Error, usize)>::map_err::<error::Error, {closure@ostd/src/mm/io.rs:587:22: 587:41}>(move _15, move _17) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_17);\n        StorageDead(_15);\n        _13 = <core::result::Result<usize, error::Error> as core::ops::Try>::branch(move _14) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_14);\n        _19 = discriminant(_13);\n        switchInt(move _19) -> [0: bb14, 1: bb15, otherwise: bb13];\n    }\n    bb13: {\n        unreachable;\n    }\n    bb14: {\n        StorageLive(_21);\n        _21 = ((_13 as variant#0).0: usize);\n        StorageDead(_21);\n        StorageDead(_13);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = &_8;\n        _22 = mm::io::VmWriter::<'_, mm::io::Infallible>::has_avail(move _23) -> [return: bb17, unwind unreachable];\n    }\n    bb15: {\n        _20 = ((_13 as variant#1).0: core::result::Result<core::convert::Infallible, error::Error>);\n        _0 = <core::result::Result<T, error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, error::Error>>>::from_residual(_20) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_13);\n        StorageDead(_8);\n        StorageDead(_7);\n        goto -> bb21;\n    }\n    bb17: {\n        switchInt(move _22) -> [0: bb19, otherwise: bb18];\n    }\n    bb18: {\n        StorageDead(_23);\n        _24 = core::panicking::panic(\"assertion failed: !writer.has_avail()\") -> unwind unreachable;\n    }\n    bb19: {\n        StorageDead(_23);\n        StorageDead(_22);\n        StorageLive(_26);\n        _26 = _7;\n        _25 = core::mem::MaybeUninit::<T>::assume_init(move _26) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_26);\n        _0 = core::result::Result::Ok(_25);\n        StorageDead(_8);\n        StorageDead(_7);\n        goto -> bb21;\n    }\n    bb21: {\n        return;\n    }\n}\n",
+  "doc": " Reads a value of `Pod` type.\n\n If the length of the `Pod` type exceeds `self.remain()`,\n or the value can not be read completely,\n this method will return `Err`.\n\n If the memory read failed, this method will return `Err`\n and the current reader's cursor remains pointing to\n the original starting position.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

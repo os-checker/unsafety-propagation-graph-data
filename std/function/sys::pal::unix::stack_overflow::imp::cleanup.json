@@ -1,0 +1,64 @@
+{
+  "name": "sys::pal::unix::stack_overflow::imp::cleanup",
+  "safe": false,
+  "callees": {
+    "core::sync::atomic::AtomicPtr::<T>::load": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads a value from the pointer.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n use std::sync::atomic::{AtomicPtr, Ordering};\n\n let ptr = &mut 5;\n let some_ptr = AtomicPtr::new(ptr);\n\n let value = some_ptr.load(Ordering::Relaxed);\n ```\n",
+      "adt": {}
+    },
+    "sys::pal::unix::stack_overflow::imp::drop_handler": {
+      "safe": false,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unsafe_op_in_unsafe_fn"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unsafe_op_in_unsafe_fn\n"
+        ]
+      },
+      "doc": " # Safety\n Must be called\n - only with our handler or nullptr\n - only when done with our altstack\n This disables the alternate signal stack!\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicPtr": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 3956,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/stack_overflow.rs:196:5: 203:6",
+  "src": "pub unsafe fn cleanup() {\n        if cfg!(panic = \"immediate-abort\") {\n            return;\n        }\n        // FIXME: I probably cause more bugs than I'm worth!\n        // see https://github.com/rust-lang/rust/issues/111272\n        unsafe { drop_handler(MAIN_ALTSTACK.load(Ordering::Relaxed)) };\n    }",
+  "mir": "fn sys::pal::unix::stack_overflow::imp::cleanup() -> () {\n    let mut _0: ();\n    let  _1: ();\n    let mut _2: *mut libc::c_void;\n    let mut _3: &core::sync::atomic::AtomicPtr<libc::c_void>;\n    let mut _4: core::sync::atomic::Ordering;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = {alloc345: &core::sync::atomic::AtomicPtr<libc::c_void>};\n        StorageLive(_4);\n        _4 = core::sync::atomic::Ordering::Relaxed;\n        _2 = core::sync::atomic::AtomicPtr::<libc::c_void>::load(move _3, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageDead(_3);\n        _1 = sys::pal::unix::stack_overflow::imp::drop_handler(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " # Safety\n Must be called only once\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "unsafe_op_in_unsafe_fn"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* unsafe_op_in_unsafe_fn\n"
+    ]
+  }
+}

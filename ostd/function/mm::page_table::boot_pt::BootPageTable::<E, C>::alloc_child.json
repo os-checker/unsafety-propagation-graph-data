@@ -1,0 +1,171 @@
+{
+  "name": "mm::page_table::boot_pt::BootPageTable::<E, C>::alloc_child",
+  "safe": true,
+  "callees": {
+    "mm::frame::meta::is_initialized": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns whether the global frame allocator is initialized.\n",
+      "adt": {}
+    },
+    "mm::frame::allocator::FrameAllocOptions::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates new options for allocating the specified number of frames.\n",
+      "adt": {
+        "mm::frame::allocator::FrameAllocOptions": "Constructor"
+      }
+    },
+    "mm::frame::allocator::FrameAllocOptions::zeroed": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets whether the allocated frames should be initialized with zeros.\n\n If `zeroed` is `true`, the allocated frames are filled with zeros.\n If not, the allocated frames will contain sensitive data and the caller\n should clear them before sharing them with other components.\n\n By default, the frames are zero-initialized.\n",
+      "adt": {
+        "mm::frame::allocator::FrameAllocOptions": "MutableAsArgument"
+      }
+    },
+    "mm::frame::allocator::FrameAllocOptions::alloc_frame_with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates a single frame with additional metadata.\n",
+      "adt": {
+        "mm::frame::allocator::FrameAllocOptions": "ImmutableAsArgument",
+        "core::result::Result": "Constructor",
+        "mm::frame::Frame": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    },
+    "mm::frame::Frame::<M>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forgets the handle to the frame.\n\n This will result in the frame being leaked without calling the custom dropper.\n\n A physical address to the frame is returned in case the frame needs to be\n restored using [`Frame::from_raw`] later. This is useful when some architectural\n data structures need to hold the frame handle such as the page table.\n",
+      "adt": {
+        "mm::frame::Frame": "ImmutableAsArgument"
+      }
+    },
+    "core::alloc::Layout::from_size_align": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `Layout` from a given `size` and `align`,\n or returns `LayoutError` if any of the following conditions\n are not met:\n\n * `align` must not be zero,\n\n * `align` must be a power of two,\n\n * `size`, when rounded up to the nearest multiple of `align`,\n   must not overflow `isize` (i.e., the rounded value must be\n   less than or equal to `isize::MAX`).\n",
+      "adt": {}
+    },
+    "mm::frame::allocator::early_alloc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates a contiguous range of frames in the early boot phase.\n\n The early allocated frames will not be reclaimable, until the metadata is\n initialized by [`super::meta::init`]. Then we can use [`Frame::from_raw`]\n to free the frames.\n\n # Panics\n\n This function panics if:\n  - it is called before [`init_early_allocator`],\n  - or if is called after [`init`].\n",
+      "adt": {
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "mm::kspace::paddr_to_vaddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Convert physical address to virtual address using offset, only available inside `ostd`\n",
+      "adt": {}
+    },
+    "core::ptr::write_bytes": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets `count * size_of::<T>()` bytes of memory starting at `dst` to\n `val`.\n\n `write_bytes` is similar to C's [`memset`], but sets `count *\n size_of::<T>()` bytes to `val`.\n\n [`memset`]: https://en.cppreference.com/w/c/string/byte/memset\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * `dst` must be properly aligned.\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointer must be properly aligned.\n\n Additionally, note that changing `*dst` in this way can easily lead to undefined behavior (UB)\n later if the written bytes are not a valid representation of some `T`. For instance, the\n following is an **incorrect** use of this function:\n\n ```rust,no_run\n unsafe {\n     let mut value: u8 = 0;\n     let ptr: *mut bool = &mut value as *mut u8 as *mut bool;\n     let _bool = ptr.read(); // This is fine, `ptr` points to a valid `bool`.\n     ptr.write_bytes(42u8, 1); // This function itself does not cause UB...\n     let _bool = ptr.read(); // ...but it makes this operation UB! ⚠️\n }\n ```\n\n [valid]: crate::ptr#safety\n\n # Examples\n\n Basic usage:\n\n ```\n use std::ptr;\n\n let mut vec = vec![0u32; 4];\n unsafe {\n     let vec_ptr = vec.as_mut_ptr();\n     ptr::write_bytes(vec_ptr, 0xfe, 2);\n }\n assert_eq!(vec, [0xfefefefe, 0xfefefefe, 0, 0]);\n ```\n",
+      "adt": {}
+    },
+    "mm::page_table::PageTableEntryTrait::new_pt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new PTE that maps to a child page table.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::frame::allocator::FrameAllocOptions": [
+      "Plain",
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "mm::frame::Frame": [
+      "Plain"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "mm::page_table::boot_pt::BootPageTable": [
+      "MutRef"
+    ]
+  },
+  "path": 2330,
+  "span": "ostd/src/mm/page_table/boot_pt.rs:254:5: 273:6",
+  "src": "fn alloc_child(&mut self) -> E {\n        let frame_paddr = if frame::meta::is_initialized() {\n            let frame = FrameAllocOptions::new()\n                .zeroed(false)\n                .alloc_frame_with(EarlyAllocatedFrameMeta)\n                .unwrap();\n            frame.into_raw()\n        } else {\n            allocator::early_alloc(\n                Layout::from_size_align(C::BASE_PAGE_SIZE, C::BASE_PAGE_SIZE).unwrap(),\n            )\n            .unwrap()\n        };\n\n        // Zero it out.\n        let vaddr = paddr_to_vaddr(frame_paddr) as *mut u8;\n        unsafe { core::ptr::write_bytes(vaddr, 0, PAGE_SIZE) };\n\n        E::new_pt(frame_paddr)\n    }",
+  "mir": "fn mm::page_table::boot_pt::BootPageTable::<E, C>::alloc_child(_1: &mut mm::page_table::boot_pt::BootPageTable<E, C>) -> E {\n    let mut _0: E;\n    let  _2: usize;\n    let mut _3: bool;\n    let  _4: mm::frame::Frame<mm::frame::allocator::EarlyAllocatedFrameMeta>;\n    let mut _5: core::result::Result<mm::frame::Frame<mm::frame::allocator::EarlyAllocatedFrameMeta>, error::Error>;\n    let mut _6: &mm::frame::allocator::FrameAllocOptions;\n    let  _7: &mut mm::frame::allocator::FrameAllocOptions;\n    let mut _8: &mut mm::frame::allocator::FrameAllocOptions;\n    let mut _9: mm::frame::allocator::FrameAllocOptions;\n    let mut _10: core::option::Option<usize>;\n    let mut _11: core::alloc::Layout;\n    let mut _12: core::result::Result<core::alloc::Layout, core::alloc::LayoutError>;\n    let  _13: *mut u8;\n    let mut _14: usize;\n    let mut _15: usize;\n    let  _16: ();\n    let mut _17: usize;\n    debug self => _1;\n    debug frame_paddr => _2;\n    debug frame => _4;\n    debug vaddr => _13;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = mm::frame::meta::is_initialized() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb8, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = mm::frame::allocator::FrameAllocOptions::new() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _8 = &mut _9;\n        _7 = mm::frame::allocator::FrameAllocOptions::zeroed(move _8, false) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _6 = &(*_7);\n        StorageDead(_8);\n        _5 = mm::frame::allocator::FrameAllocOptions::alloc_frame_with::<mm::frame::allocator::EarlyAllocatedFrameMeta>(move _6, mm::frame::allocator::EarlyAllocatedFrameMeta) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        _4 = core::result::Result::<mm::frame::Frame<mm::frame::allocator::EarlyAllocatedFrameMeta>, error::Error>::unwrap(move _5) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_5);\n        StorageDead(_9);\n        StorageDead(_7);\n        _2 = mm::frame::Frame::<mm::frame::allocator::EarlyAllocatedFrameMeta>::into_raw(_4) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        goto -> bb13;\n    }\n    bb8: {\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = core::alloc::Layout::from_size_align(<C as mm::PagingConstsTrait>::BASE_PAGE_SIZE, <C as mm::PagingConstsTrait>::BASE_PAGE_SIZE) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _11 = core::result::Result::<core::alloc::Layout, core::alloc::LayoutError>::unwrap(move _12) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_12);\n        _10 = mm::frame::allocator::early_alloc(move _11) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_11);\n        _2 = core::option::Option::<usize>::unwrap(move _10) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_10);\n        goto -> bb13;\n    }\n    bb13: {\n        StorageDead(_3);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = _2;\n        _14 = mm::kspace::paddr_to_vaddr(move _15) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_15);\n        _13 = move _14 as *mut u8;\n        StorageDead(_14);\n        _16 = core::ptr::write_bytes::<u8>(_13, 0_u8, mm::PAGE_SIZE) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageLive(_17);\n        _17 = _2;\n        _0 = <E as mm::page_table::PageTableEntryTrait>::new_pt(move _17) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_17);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

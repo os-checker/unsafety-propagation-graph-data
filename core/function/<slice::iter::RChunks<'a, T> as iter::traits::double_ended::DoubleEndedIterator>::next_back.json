@@ -1,0 +1,46 @@
+{
+  "name": "<slice::iter::RChunks<'a, T> as iter::traits::double_ended::DoubleEndedIterator>::next_back",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the slice has a length of 0.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n assert!(!a.is_empty());\n\n let b: &[i32] = &[];\n assert!(b.is_empty());\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::split_at_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one slice into two at an index, without doing bounds checking.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n For a safe alternative see [`split_at`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used. The caller has to ensure that\n `0 <= mid <= self.len()`.\n\n [`split_at`]: slice::split_at\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let v = ['a', 'b', 'c'];\n\n unsafe {\n    let (left, right) = v.split_at_unchecked(0);\n    assert_eq!(left, []);\n    assert_eq!(right, ['a', 'b', 'c']);\n }\n\n unsafe {\n     let (left, right) = v.split_at_unchecked(2);\n     assert_eq!(left, ['a', 'b']);\n     assert_eq!(right, ['c']);\n }\n\n unsafe {\n     let (left, right) = v.split_at_unchecked(3);\n     assert_eq!(left, ['a', 'b', 'c']);\n     assert_eq!(right, []);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::RChunks": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 16504,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:2372:5: 2383:6",
+  "src": "fn next_back(&mut self) -> Option<&'a [T]> {\n        if self.v.is_empty() {\n            None\n        } else {\n            let remainder = self.v.len() % self.chunk_size;\n            let chunksz = if remainder != 0 { remainder } else { self.chunk_size };\n            // SAFETY: similar to Chunks::next_back\n            let (fst, snd) = unsafe { self.v.split_at_unchecked(chunksz) };\n            self.v = snd;\n            Some(fst)\n        }\n    }",
+  "mir": "fn <slice::iter::RChunks<'a, T> as iter::traits::double_ended::DoubleEndedIterator>::next_back(_1: &mut slice::iter::RChunks<'_, T>) -> option::Option<&[T]> {\n    let mut _0: option::Option<&[T]>;\n    let mut _2: bool;\n    let  _3: usize;\n    let mut _4: usize;\n    let mut _5: usize;\n    let mut _6: bool;\n    let  _7: usize;\n    let  _8: &[T];\n    let  _9: &[T];\n    let mut _10: (&[T], &[T]);\n    let mut _11: usize;\n    let mut _12: &[T];\n    let mut _13: &[T];\n    let mut _14: &[T];\n    debug self => _1;\n    debug remainder => _3;\n    debug chunksz => _7;\n    debug fst => _8;\n    debug snd => _9;\n    bb0: {\n        StorageLive(_2);\n        _12 = ((*_1).0: &[T]);\n        _2 = slice::<impl [T]>::is_empty(_12) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        _0 = option::Option::None;\n        goto -> bb9;\n    }\n    bb3: {\n        StorageLive(_4);\n        _13 = ((*_1).0: &[T]);\n        _4 = PtrMetadata(_13);\n        StorageLive(_5);\n        _5 = ((*_1).1: usize);\n        _6 = Eq(_5, 0_usize);\n        assert(!move _6, \"attempt to calculate the remainder of `{}` with a divisor of zero\", _4) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _3 = Rem(move _4, move _5);\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_7);\n        switchInt(_3) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        _7 = _3;\n        goto -> bb7;\n    }\n    bb6: {\n        _7 = ((*_1).1: usize);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageLive(_10);\n        _14 = ((*_1).0: &[T]);\n        StorageLive(_11);\n        _11 = _7;\n        _10 = slice::<impl [T]>::split_at_unchecked(_14, move _11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        _8 = (_10.0: &[T]);\n        _9 = (_10.1: &[T]);\n        StorageDead(_10);\n        ((*_1).0: &[T]) = _9;\n        _0 = option::Option::Some(_8);\n        StorageDead(_7);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

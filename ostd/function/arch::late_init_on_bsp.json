@@ -1,0 +1,259 @@
+{
+  "name": "arch::late_init_on_bsp",
+  "safe": false,
+  "callees": {
+    "arch::trap::init_on_cpu": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Initializes interrupt handling on x86_64.\n\n This function will:\n - Switch to a new, CPU-local [GDT].\n - Switch to a new, CPU-local [TSS].\n - Switch to a new, global [IDT].\n - Enable the [`syscall`] instruction.\n\n [GDT]: https://wiki.osdev.org/GDT\n [IDT]: https://wiki.osdev.org/IDT\n [TSS]: https://wiki.osdev.org/Task_State_Segment\n [`syscall`]: https://www.felixcloutier.com/x86/syscall\n\n # Safety\n\n On the current CPU, this function must be called\n - only once and\n - before any trap can occur.\n",
+      "adt": {}
+    },
+    "arch::io::construct_io_mem_allocator_builder": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Initializes the allocatable MMIO area based on the x86-64 memory distribution map.\n\n In x86-64, the available physical memory area is divided into two regions below 32 bits (Low memory)\n and above (High memory). The area from the top of low memory to 0xffff_ffff and the area after the\n top of high memory are available MMIO areas.\n\n This memory layout is documented in Intel's datasheets. The MMIO area is defined by specific\n registers that are configured by the BIOS and locked down, preventing the OS from reconfiguring\n them. For the details, one can read the \"Processor Configuration Register Definitions and\n Address Ranges\" section in the \"10th Generation Intel(R) Processor Families\" datasheet\n (<https://www.intel.com/content/dam/www/public/us/en/documents/datasheets/10th-gen-core-families-datasheet-vol-2-datasheet.pdf>).\n However, note that these specifics may differ between CPU generations and those manufactured by\n other vendors.\n\n # Safety\n\n 1. This function must be called only once in the boot context of the\n    bootstrapping processor.\n 2. This function must be called after the kernel page table is activated on\n    the bootstrapping processor.\n",
+      "adt": {
+        "io::io_mem::allocator::IoMemAllocatorBuilder": "Constructor"
+      }
+    },
+    "arch::kernel::apic::init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::io_mem::allocator::IoMemAllocatorBuilder": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::expect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Instead, prefer to use pattern matching and handle the [`Err`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`].\n\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message including the\n passed message, and the content of the [`Err`].\n\n\n # Examples\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.expect(\"Testing expect\"); // panics with `Testing expect: emergency failure`\n ```\n\n # Recommended Message Style\n\n We recommend that `expect` messages are used to describe the reason you\n _expect_ the `Result` should be `Ok`.\n\n ```should_panic\n let path = std::env::var(\"IMPORTANT_PATH\")\n     .expect(\"env variable `IMPORTANT_PATH` should be set by `wrapper_script.sh`\");\n ```\n\n **Hint**: If you're having trouble remembering how to phrase expect\n error messages remember to focus on the word \"should\" as in \"env\n variable should be set by blah\" or \"the given binary should be available\n and executable by the current user\".\n\n For more detail on expect message styles and the reasoning behind our recommendation please\n refer to the section on [\"Common Message\n Styles\"](../../std/error/index.html#common-message-styles) in the\n [`std::error`](../../std/error/index.html) module docs.\n",
+      "adt": {}
+    },
+    "arch::irq::chip::init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::io_mem::allocator::IoMemAllocatorBuilder": "ImmutableAsArgument"
+      }
+    },
+    "arch::irq::ipi::init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Initializes global IPI state.\n",
+      "adt": {}
+    },
+    "arch::kernel::tsc::init_tsc_freq": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "arch::timer::init_on_bsp": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Initializes the timer state and enable timer interrupts on BSP.\n",
+      "adt": {}
+    },
+    "boot::smp::boot_all_aps": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Boots all application processors.\n\n This function should be called late in the system startup. The system must at\n least ensure that the scheduler, ACPI table, memory allocation, and IPI module\n have been initialized.\n\n # Safety\n\n This function can only be called in the boot context of the BSP where APs have\n not yet been booted.\n",
+      "adt": {}
+    },
+    "tdx_guest::tdx_is_enabled": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "arch::iommu::init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::io_mem::allocator::IoMemAllocatorBuilder": "ImmutableAsArgument",
+        "core::result::Result": "Constructor",
+        "arch::iommu::IommuError": "Constructor"
+      }
+    },
+    "core::cmp::PartialOrd::le": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests less than or equal to (for `self` and `other`) and is used by the\n `<=` operator.\n\n # Examples\n\n ```\n assert_eq!(1.0 <= 1.0, true);\n assert_eq!(1.0 <= 2.0, true);\n assert_eq!(2.0 <= 1.0, false);\n ```\n",
+      "adt": {}
+    },
+    "log::max_level": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the current maximum log level.\n\n The [`log!`], [`error!`], [`warn!`], [`info!`], [`debug!`], and [`trace!`] macros check\n this value and discard any message logged at a higher level. The maximum\n log level is set by the [`set_max_level`] function.\n\n [`log!`]: macro.log.html\n [`error!`]: macro.error.html\n [`warn!`]: macro.warn.html\n [`info!`]: macro.info.html\n [`debug!`]: macro.debug.html\n [`trace!`]: macro.trace.html\n [`set_max_level`]: fn.set_max_level.html\n",
+      "adt": {}
+    },
+    "core::fmt::rt::Argument::<'_>::new_debug": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "log::__private_api::loc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "log::__private_api::log": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "io::init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Initializes the static allocator based on builder.\n\n # Safety\n\n User must ensure that:\n\n 1. All the memory that belong to the system device have been removed\n    by calling the `remove` function.\n\n 2. All the port I/O regions belonging to the system device are defined\n    using the macros `sensitive_io_port` and `reserve_io_port_range`.\n\n 3. `MAX_IO_PORT` defined in `crate::arch::io` is guaranteed not to\n    exceed the maximum value specified by architecture.\n",
+      "adt": {}
+    },
+    "arch::kernel::acpi::init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "arch::power::init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "io::io_mem::allocator::IoMemAllocatorBuilder": [
+      "Plain",
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 1217, kind: RigidTy(Adt(AdtDef(DefId { id: 3534, name: \"arch::iommu::IommuError\" }), GenericArgs([]))) })])"
+    ],
+    "arch::iommu::IommuError": [
+      "Plain",
+      "Ref",
+      "Unknown([Field(0, Ty { id: 2964, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 1217, kind: RigidTy(Adt(AdtDef(DefId { id: 3534, name: \"arch::iommu::IommuError\" }), GenericArgs([]))) }, Not)) })])"
+    ],
+    "log::Level": [
+      "Plain",
+      "Ref"
+    ],
+    "log::LevelFilter": [
+      "Ref",
+      "Plain"
+    ],
+    "core::fmt::rt::Argument": [
+      "Plain"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ],
+    "core::panic::Location": [
+      "Ref"
+    ]
+  },
+  "path": 1558,
+  "span": "ostd/src/arch/x86/mod.rs:62:1: 96:2",
+  "src": "pub(crate) unsafe fn late_init_on_bsp() {\n    // SAFETY: This is only called once on this BSP in the boot context.\n    unsafe { trap::init_on_cpu() };\n\n    // SAFETY: The caller ensures that this function is only called once on BSP,\n    // after the kernel page table is activated.\n    let io_mem_builder = unsafe { io::construct_io_mem_allocator_builder() };\n\n    kernel::apic::init(&io_mem_builder).expect(\"APIC doesn't exist\");\n    irq::chip::init(&io_mem_builder);\n    irq::ipi::init();\n\n    kernel::tsc::init_tsc_freq();\n    timer::init_on_bsp();\n\n    // SAFETY: We're on the BSP and we're ready to boot all APs.\n    unsafe { crate::boot::smp::boot_all_aps() };\n\n    if_tdx_enabled!({\n    } else {\n        match iommu::init(&io_mem_builder) {\n            Ok(_) => {}\n            Err(err) => log::warn!(\"IOMMU initialization error:{:?}\", err),\n        }\n    });\n\n    // SAFETY:\n    // 1. All the system device memory have been removed from the builder.\n    // 2. All the port I/O regions belonging to the system device are defined using the macros.\n    // 3. `MAX_IO_PORT` defined in `crate::arch::io` is the maximum value specified by x86-64.\n    unsafe { crate::io::init(io_mem_builder) };\n\n    kernel::acpi::init();\n    power::init();\n}",
+  "mir": "fn arch::late_init_on_bsp() -> () {\n    let mut _0: ();\n    let  _1: ();\n    let  _2: io::io_mem::allocator::IoMemAllocatorBuilder;\n    let  _3: ();\n    let mut _4: core::result::Result<(), arch::kernel::apic::ApicInitError>;\n    let  _5: &io::io_mem::allocator::IoMemAllocatorBuilder;\n    let mut _6: &str;\n    let  _7: ();\n    let  _8: &io::io_mem::allocator::IoMemAllocatorBuilder;\n    let  _9: ();\n    let  _10: ();\n    let  _11: ();\n    let  _12: ();\n    let mut _13: bool;\n    let mut _14: core::result::Result<(), arch::iommu::IommuError>;\n    let  _15: &io::io_mem::allocator::IoMemAllocatorBuilder;\n    let mut _16: isize;\n    let  _17: arch::iommu::IommuError;\n    let  _18: log::Level;\n    let mut _19: bool;\n    let mut _20: &log::Level;\n    let mut _21: &log::LevelFilter;\n    let mut _22: bool;\n    let mut _23: &log::Level;\n    let mut _24: &log::LevelFilter;\n    let  _25: log::LevelFilter;\n    let  _26: ();\n    let mut _27: core::fmt::Arguments<'_>;\n    let  _28: (&arch::iommu::IommuError,);\n    let mut _29: &arch::iommu::IommuError;\n    let  _30: [core::fmt::rt::Argument<'_>; 1];\n    let mut _31: core::fmt::rt::Argument<'_>;\n    let mut _32: &[u8; 30];\n    let  _33: &[core::fmt::rt::Argument<'_>; 1];\n    let  _34: &(&str, &str, &core::panic::Location<'_>);\n    let  _35: (&str, &str, &core::panic::Location<'_>);\n    let mut _36: &str;\n    let  _37: &core::panic::Location<'_>;\n    let  _38: ();\n    let  _39: ();\n    let  _40: ();\n    let mut _41: &arch::iommu::IommuError;\n    debug io_mem_builder => _2;\n    debug err => _17;\n    debug lvl => _18;\n    debug args => _28;\n    debug args => _30;\n    bb0: {\n        _1 = arch::trap::init_on_cpu() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = arch::io::construct_io_mem_allocator_builder() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_4);\n        _5 = &_2;\n        _4 = arch::kernel::apic::init(_5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_6);\n        _6 = \"APIC doesn't exist\";\n        _3 = core::result::Result::<(), arch::kernel::apic::ApicInitError>::expect(move _4, move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_4);\n        _8 = &_2;\n        _7 = arch::irq::chip::init(_8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _9 = arch::irq::ipi::init() -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _10 = arch::kernel::tsc::init_tsc_freq() -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _11 = arch::timer::init_on_bsp() -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _12 = boot::smp::boot_all_aps() -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageLive(_13);\n        _13 = tdx_guest::tdx_is_enabled() -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        switchInt(move _13) -> [0: bb11, otherwise: bb28];\n    }\n    bb11: {\n        StorageLive(_14);\n        _15 = &_2;\n        _14 = arch::iommu::init(_15) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        _16 = discriminant(_14);\n        switchInt(move _16) -> [0: bb27, 1: bb14, otherwise: bb13];\n    }\n    bb13: {\n        unreachable;\n    }\n    bb14: {\n        StorageLive(_17);\n        _17 = move ((_14 as variant#1).0: arch::iommu::IommuError);\n        _18 = log::Level::Warn;\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = &_18;\n        StorageLive(_21);\n        _21 = arch::late_init_on_bsp::promoted[0];\n        _19 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _20, move _21) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        switchInt(move _19) -> [0: bb25, otherwise: bb16];\n    }\n    bb16: {\n        StorageDead(_21);\n        StorageDead(_20);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = &_18;\n        StorageLive(_24);\n        StorageLive(_25);\n        _25 = log::max_level() -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        _24 = &_25;\n        _22 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _23, move _24) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        switchInt(move _22) -> [0: bb24, otherwise: bb19];\n    }\n    bb19: {\n        StorageDead(_25);\n        StorageDead(_24);\n        StorageDead(_23);\n        StorageLive(_27);\n        StorageLive(_28);\n        StorageLive(_29);\n        _29 = &_17;\n        _28 = (move _29);\n        StorageDead(_29);\n        StorageLive(_30);\n        StorageLive(_31);\n        _41 = (_28.0: &arch::iommu::IommuError);\n        _31 = core::fmt::rt::Argument::<'_>::new_debug::<arch::iommu::IommuError>(_41) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        _30 = [move _31];\n        StorageDead(_31);\n        StorageLive(_32);\n        _32 = b\"\\x1bIOMMU initialization error:\\xc0\\x00\";\n        _33 = &_30;\n        _27 = core::fmt::Arguments::<'_>::new::<30, 1>(move _32, _33) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_32);\n        StorageLive(_35);\n        StorageLive(_36);\n        _36 = \"ostd::arch\";\n        _37 = log::__private_api::loc() -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        _35 = (move _36, \"ostd::arch\", _37);\n        StorageDead(_36);\n        _34 = &_35;\n        _26 = log::__private_api::log::<'_, (), log::__private_api::GlobalLogger>(log::__private_api::GlobalLogger, move _27, _18, _34, ()) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_27);\n        StorageDead(_35);\n        StorageDead(_30);\n        StorageDead(_28);\n        goto -> bb26;\n    }\n    bb24: {\n        StorageDead(_25);\n        StorageDead(_24);\n        StorageDead(_23);\n        goto -> bb26;\n    }\n    bb25: {\n        StorageDead(_21);\n        StorageDead(_20);\n        goto -> bb26;\n    }\n    bb26: {\n        StorageDead(_22);\n        StorageDead(_19);\n        StorageDead(_17);\n        goto -> bb27;\n    }\n    bb27: {\n        StorageDead(_14);\n        goto -> bb28;\n    }\n    bb28: {\n        StorageDead(_13);\n        _38 = io::init(_2) -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        _39 = arch::kernel::acpi::init() -> [return: bb30, unwind unreachable];\n    }\n    bb30: {\n        _40 = arch::power::init() -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        return;\n    }\n}\n",
+  "doc": " Architecture-specific initialization on the bootstrapping processor.\n\n It should be called when the heap and frame allocators are available.\n\n # Safety\n\n 1. This function must be called only once in the boot context of the\n    bootstrapping processor.\n 2. This function must be called after the kernel page table is activated on\n    the bootstrapping processor.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "sys::thread_local::guard::key::enable::run",
+  "safe": false,
+  "callees": {
+    "sys::thread_local::destructors::list::run": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The [`guard`] module contains platform-specific functions which will run this\n function on thread exit if [`guard::enable`] has been called.\n\n # Safety\n\n May only be run on thread exit to guarantee that there are no live references\n to TLS variables while they are destroyed.\n",
+      "adt": {}
+    },
+    "rt::thread_cleanup": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Clean up the thread-local runtime state. This *should* be run after all other\n code managed by the Rust runtime, but will not cause UB if that condition is\n not fulfilled. Also note that this function is not guaranteed to be run, but\n skipping it will cause leaks and therefore is to be avoided.\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 4385,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/thread_local/guard/key.rs:20:5: 30:6",
+  "src": "unsafe extern \"C\" fn run(_: *mut u8) {\n        unsafe {\n            destructors::run();\n            // On platforms with `__cxa_thread_atexit_impl`, `destructors::run`\n            // does nothing on newer systems as the TLS destructors are\n            // registered with the system. But because all of those platforms\n            // call the destructors of TLS keys after the registered ones, this\n            // function will still be run last (at the time of writing).\n            crate::rt::thread_cleanup();\n        }\n    }",
+  "mir": "fn sys::thread_local::guard::key::enable::run(_1: *mut u8) -> () {\n    let mut _0: ();\n    let  _2: ();\n    let  _3: ();\n    bb0: {\n        _2 = sys::thread_local::destructors::list::run() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = rt::thread_cleanup() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

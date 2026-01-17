@@ -1,0 +1,159 @@
+{
+  "name": "io::copy::stack_buffer_copy",
+  "safe": true,
+  "callees": {
+    "core::mem::MaybeUninit::<T>::uninit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `MaybeUninit<T>` in an uninitialized state.\n\n Note that dropping a `MaybeUninit<T>` will never call `T`'s drop code.\n It is your responsibility to make sure `T` gets dropped if it got initialized.\n\n See the [type-level documentation][MaybeUninit] for some examples.\n\n # Example\n\n ```\n use std::mem::MaybeUninit;\n\n let v: MaybeUninit<String> = MaybeUninit::uninit();\n ```\n",
+      "adt": {}
+    },
+    "core::convert::Into::into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "core::io::BorrowedBuf::<'data>::unfilled": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a cursor over the unfilled part of the buffer.\n",
+      "adt": {}
+    },
+    "io::Read::read_buf": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Pull some bytes from this source into the specified buffer.\n\n This is equivalent to the [`read`](Read::read) method, except that it is passed a [`BorrowedCursor`] rather than `[u8]` to allow use\n with uninitialized buffers. The new data will be appended to any existing contents of `buf`.\n\n The default implementation delegates to `read`.\n\n This method makes it possible to return both data and an error but it is advised against.\n",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "io::error::Error": "Constructor"
+      }
+    },
+    "io::error::Error::is_interrupted": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::error::Error": "ImmutableAsArgument"
+      }
+    },
+    "core::io::BorrowedBuf::<'data>::filled": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a shared reference to the filled portion of the buffer.\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the slice has a length of 0.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n assert!(!a.is_empty());\n\n let b: &[i32] = &[];\n assert!(b.is_empty());\n ```\n",
+      "adt": {}
+    },
+    "io::Write::write_all": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to write an entire buffer into this writer.\n\n This method will continuously call [`write`] until there is no more data\n to be written or an error of non-[`ErrorKind::Interrupted`] kind is\n returned. This method will not return until the entire buffer has been\n successfully written or such an error occurs. The first error that is\n not of [`ErrorKind::Interrupted`] kind generated from this method will be\n returned.\n\n If the buffer contains no data, this will never call [`write`].\n\n # Errors\n\n This function will return the first error of\n non-[`ErrorKind::Interrupted`] kind that [`write`] returns.\n\n [`write`]: Write::write\n\n # Examples\n\n ```no_run\n use std::io::prelude::*;\n use std::fs::File;\n\n fn main() -> std::io::Result<()> {\n     let mut buffer = File::create(\"foo.txt\")?;\n\n     buffer.write_all(b\"some bytes\")?;\n     Ok(())\n }\n ```\n",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "io::error::Error": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::io::BorrowedBuf::<'data>::clear": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Clears the buffer, resetting the filled region to empty.\n\n The contents of the buffer are not modified.\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::mem::MaybeUninit": [
+      "Plain"
+    ],
+    "core::io::BorrowedBuf": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "core::io::BorrowedCursor": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })])"
+    ],
+    "io::error::Error": [
+      "Ref",
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 1402,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/copy.rs:258:1: 284:2",
+  "src": "fn stack_buffer_copy<R: Read + ?Sized, W: Write + ?Sized>(\n    reader: &mut R,\n    writer: &mut W,\n) -> Result<u64> {\n    let buf: &mut [_] = &mut [MaybeUninit::uninit(); DEFAULT_BUF_SIZE];\n    let mut buf: BorrowedBuf<'_> = buf.into();\n\n    let mut len = 0;\n\n    loop {\n        match reader.read_buf(buf.unfilled()) {\n            Ok(()) => {}\n            Err(e) if e.is_interrupted() => continue,\n            Err(e) => return Err(e),\n        };\n\n        if buf.filled().is_empty() {\n            break;\n        }\n\n        len += buf.filled().len() as u64;\n        writer.write_all(buf.filled())?;\n        buf.clear();\n    }\n\n    Ok(len)\n}",
+  "mir": "fn io::copy::stack_buffer_copy(_1: &mut R, _2: &mut W) -> core::result::Result<u64, io::error::Error> {\n    let mut _0: core::result::Result<u64, io::error::Error>;\n    let  _3: &mut [core::mem::MaybeUninit<u8>];\n    let mut _4: &mut [core::mem::MaybeUninit<u8>; 8192];\n    let mut _5: [core::mem::MaybeUninit<u8>; 8192];\n    let mut _6: core::mem::MaybeUninit<u8>;\n    let mut _7: core::io::BorrowedBuf<'_>;\n    let mut _8: u64;\n    let mut _9: core::result::Result<(), io::error::Error>;\n    let mut _10: core::io::BorrowedCursor<'_>;\n    let mut _11: &mut core::io::BorrowedBuf<'_>;\n    let mut _12: isize;\n    let  _13: io::error::Error;\n    let  _14: &io::error::Error;\n    let mut _15: bool;\n    let  _16: io::error::Error;\n    let mut _17: bool;\n    let  _18: &[u8];\n    let mut _19: &core::io::BorrowedBuf<'_>;\n    let mut _20: u64;\n    let mut _21: usize;\n    let  _22: &[u8];\n    let mut _23: &core::io::BorrowedBuf<'_>;\n    let mut _24: (u64, bool);\n    let mut _25: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>>;\n    let mut _26: core::result::Result<(), io::error::Error>;\n    let  _27: &[u8];\n    let mut _28: &core::io::BorrowedBuf<'_>;\n    let mut _29: isize;\n    let  _30: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _31: &mut core::io::BorrowedBuf<'_>;\n    let mut _32: &mut core::io::BorrowedBuf<'_>;\n    let mut _33: u64;\n    debug reader => _1;\n    debug writer => _2;\n    debug buf => _3;\n    debug buf => _7;\n    debug len => _8;\n    debug e => _13;\n    debug e => _14;\n    debug e => _16;\n    debug residual => _30;\n    debug val => ();\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = core::mem::MaybeUninit::<u8>::uninit() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = [move _6; 8192];\n        StorageDead(_6);\n        _4 = &mut _5;\n        _3 = _4 as &mut [core::mem::MaybeUninit<u8>];\n        StorageLive(_7);\n        _7 = <&mut [core::mem::MaybeUninit<u8>] as core::convert::Into<core::io::BorrowedBuf<'_>>>::into(_3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_8);\n        _8 = 0_u64;\n        goto -> bb3;\n    }\n    bb3: {\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &mut _7;\n        _10 = core::io::BorrowedBuf::<'_>::unfilled(move _11) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_11);\n        _9 = <R as io::Read>::read_buf(_1, move _10) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_10);\n        _12 = discriminant(_9);\n        switchInt(move _12) -> [0: bb8, 1: bb7, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        _14 = &((_9 as variant#1).0: io::error::Error);\n        StorageLive(_15);\n        _15 = io::error::Error::is_interrupted(_14) -> [return: bb9, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_9);\n        StorageLive(_17);\n        StorageLive(_19);\n        _19 = &_7;\n        _18 = core::io::BorrowedBuf::<'_>::filled(move _19) -> [return: bb12, unwind unreachable];\n    }\n    bb9: {\n        switchInt(move _15) -> [0: bb11, otherwise: bb10];\n    }\n    bb10: {\n        StorageDead(_15);\n        StorageLive(_13);\n        _13 = move ((_9 as variant#1).0: io::error::Error);\n        drop(_13) -> [return: bb25, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_15);\n        _16 = move ((_9 as variant#1).0: io::error::Error);\n        _0 = core::result::Result::Err(_16);\n        StorageDead(_9);\n        goto -> bb26;\n    }\n    bb12: {\n        StorageDead(_19);\n        _17 = core::slice::<impl [u8]>::is_empty(_18) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        switchInt(move _17) -> [0: bb15, otherwise: bb14];\n    }\n    bb14: {\n        StorageDead(_17);\n        StorageLive(_33);\n        _33 = _8;\n        _0 = core::result::Result::Ok(move _33);\n        StorageDead(_33);\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_5);\n        goto -> bb27;\n    }\n    bb15: {\n        StorageDead(_17);\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_23);\n        _23 = &_7;\n        _22 = core::io::BorrowedBuf::<'_>::filled(move _23) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_23);\n        _21 = PtrMetadata(_22);\n        _20 = move _21 as u64;\n        StorageDead(_21);\n        _24 = CheckedAdd(_8, _20);\n        assert(!move (_24.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _8, move _20) -> [success: bb17, unwind unreachable];\n    }\n    bb17: {\n        _8 = move (_24.0: u64);\n        StorageDead(_20);\n        StorageLive(_25);\n        StorageLive(_26);\n        StorageLive(_28);\n        _28 = &_7;\n        _27 = core::io::BorrowedBuf::<'_>::filled(move _28) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_28);\n        _26 = <W as io::Write>::write_all(_2, _27) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        _25 = <core::result::Result<(), io::error::Error> as core::ops::Try>::branch(move _26) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_26);\n        _29 = discriminant(_25);\n        switchInt(move _29) -> [0: bb21, 1: bb22, otherwise: bb6];\n    }\n    bb21: {\n        StorageDead(_25);\n        StorageLive(_31);\n        StorageLive(_32);\n        _32 = &mut _7;\n        _31 = core::io::BorrowedBuf::<'_>::clear(move _32) -> [return: bb24, unwind unreachable];\n    }\n    bb22: {\n        _30 = move ((_25 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<u64, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_30) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_25);\n        goto -> bb26;\n    }\n    bb24: {\n        StorageDead(_32);\n        StorageDead(_31);\n        goto -> bb3;\n    }\n    bb25: {\n        StorageDead(_13);\n        StorageDead(_9);\n        goto -> bb3;\n    }\n    bb26: {\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_5);\n        goto -> bb27;\n    }\n    bb27: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

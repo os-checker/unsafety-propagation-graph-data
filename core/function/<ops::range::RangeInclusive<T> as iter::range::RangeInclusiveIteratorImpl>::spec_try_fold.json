@@ -1,0 +1,123 @@
+{
+  "name": "<ops::range::RangeInclusive<T> as iter::range::RangeInclusiveIteratorImpl>::spec_try_fold",
+  "safe": true,
+  "callees": {
+    "ops::range::RangeInclusive::<Idx>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the range contains no items.\n\n # Examples\n\n ```\n assert!(!(3..=5).is_empty());\n assert!(!(3..=3).is_empty());\n assert!( (3..=2).is_empty());\n ```\n\n The range is empty if either side is incomparable:\n\n ```\n assert!(!(3.0..=5.0).is_empty());\n assert!( (3.0..=f32::NAN).is_empty());\n assert!( (f32::NAN..=5.0).is_empty());\n ```\n\n This method returns `true` after iteration has finished:\n\n ```\n let mut r = 3..=5;\n for _ in r.by_ref() {}\n // Precise field values are unspecified here\n assert!(r.is_empty());\n ```\n",
+      "adt": {
+        "ops::range::RangeInclusive": "ImmutableAsArgument"
+      }
+    },
+    "ops::try_trait::Try::from_output": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from its `Output` type.\n\n This should be implemented consistently with the `branch` method\n such that applying the `?` operator will get back the original value:\n `Try::from_output(x).branch() --> ControlFlow::Continue(x)`.\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::Try;\n\n assert_eq!(<Result<_, String> as Try>::from_output(3), Ok(3));\n assert_eq!(<Option<_> as Try>::from_output(4), Some(4));\n assert_eq!(\n     <std::ops::ControlFlow<String, _> as Try>::from_output(5),\n     std::ops::ControlFlow::Continue(5),\n );\n\n # fn make_question_mark_work() -> Option<()> {\n assert_eq!(Option::from_output(4)?, 4);\n # None }\n # make_question_mark_work();\n\n // This is used, for example, on the accumulator in `try_fold`:\n let r = std::iter::empty().try_fold(4, |_, ()| -> Option<_> { unreachable!() });\n assert_eq!(r, Some(4));\n ```\n",
+      "adt": {}
+    },
+    "cmp::PartialOrd::lt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests less than (for `self` and `other`) and is used by the `<` operator.\n\n # Examples\n\n ```\n assert_eq!(1.0 < 1.0, false);\n assert_eq!(1.0 < 2.0, true);\n assert_eq!(2.0 < 1.0, false);\n ```\n",
+      "adt": {}
+    },
+    "iter::range::Step::forward_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the value that would be obtained by taking the *successor*\n of `self` `count` times.\n\n # Safety\n\n It is undefined behavior for this operation to overflow the\n range of values supported by `Self`. If you cannot guarantee that this\n will not overflow, use `forward` or `forward_checked` instead.\n\n # Invariants\n\n For any `a`:\n\n * if there exists `b` such that `b > a`, it is safe to call `Step::forward_unchecked(a, 1)`\n * if there exists `b`, `n` such that `steps_between(&a, &b) == Some(n)`,\n   it is safe to call `Step::forward_unchecked(a, m)` for any `m <= n`.\n   * Corollary: `Step::forward_unchecked(a, 0)` is always safe.\n\n For any `a` and `n`, where no overflow occurs:\n\n * `Step::forward_unchecked(a, n)` is equivalent to `Step::forward(a, n)`\n",
+      "adt": {}
+    },
+    "mem::replace": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Moves `src` into the referenced `dest`, returning the previous `dest` value.\n\n Neither value is dropped.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a default value, see [`take`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::replace(&mut v, vec![3, 4, 5]);\n assert_eq!(vec![1, 2], old_v);\n assert_eq!(vec![3, 4, 5], v);\n ```\n\n `replace` allows consumption of a struct field by replacing it with another value.\n Without `replace` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let t = self.buf[i];\n         self.buf[i] = v;\n         t\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so we can't even clone `self.buf[i]` to\n avoid the move. But `replace` can be used to disassociate the original value at that index from\n `self`, allowing it to be returned:\n\n ```\n # #![allow(dead_code)]\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         mem::replace(&mut self.buf[i], v)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf[0], 0);\n\n assert_eq!(buffer.replace_index(0, 2), 0);\n assert_eq!(buffer.buf[0], 2);\n ```\n",
+      "adt": {}
+    },
+    "ops::function::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "cmp::PartialEq::eq": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests for `self` and `other` values to be equal, and is used by `==`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ops::range::RangeInclusive": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "MutRef"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 1017, kind: Param(ParamTy { index: 1, name: \"B\" }) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 6420, kind: Alias(Projection, AliasTy { def_id: AliasDef(DefId { id: 25500, name: \"ops::try_trait::Try::Residual\" }), args: GenericArgs([Type(Ty { id: 3390, kind: Param(ParamTy { index: 3, name: \"R\" }) })]) }) })])"
+    ]
+  },
+  "path": 15567,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/range.rs:1173:5: 1199:6",
+  "src": "fn spec_try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R\n    where\n        Self: Sized,\n        F: FnMut(B, T) -> R,\n        R: Try<Output = B>,\n    {\n        if self.is_empty() {\n            return try { init };\n        }\n\n        let mut accum = init;\n\n        while self.start < self.end {\n            // SAFETY: just checked precondition\n            let n = unsafe { Step::forward_unchecked(self.start, 1) };\n            let n = mem::replace(&mut self.start, n);\n            accum = f(accum, n)?;\n        }\n\n        self.exhausted = true;\n\n        if self.start == self.end {\n            accum = f(accum, self.start)?;\n        }\n\n        try { accum }\n    }",
+  "mir": "fn <ops::range::RangeInclusive<T> as iter::range::RangeInclusiveIteratorImpl>::spec_try_fold(_1: &mut ops::range::RangeInclusive<T>, _2: B, _3: F) -> R {\n    let mut _0: R;\n    let mut _4: bool;\n    let mut _5: &ops::range::RangeInclusive<T>;\n    let mut _6: B;\n    let mut _7: bool;\n    let mut _8: &T;\n    let mut _9: &T;\n    let  _10: T;\n    let mut _11: T;\n    let  _12: T;\n    let mut _13: &mut T;\n    let mut _14: ops::control_flow::ControlFlow<<R as ops::try_trait::Try>::Residual, B>;\n    let mut _15: R;\n    let mut _16: &mut F;\n    let mut _17: (B, T);\n    let mut _18: B;\n    let mut _19: isize;\n    let  _20: <R as ops::try_trait::Try>::Residual;\n    let  _21: B;\n    let mut _22: bool;\n    let mut _23: &T;\n    let mut _24: &T;\n    let mut _25: ops::control_flow::ControlFlow<<R as ops::try_trait::Try>::Residual, B>;\n    let mut _26: R;\n    let mut _27: &mut F;\n    let mut _28: (B, T);\n    let mut _29: B;\n    let mut _30: T;\n    let mut _31: isize;\n    let  _32: <R as ops::try_trait::Try>::Residual;\n    let  _33: B;\n    let mut _34: B;\n    debug self => _1;\n    debug init => _2;\n    debug f => _3;\n    debug accum => _6;\n    debug n => _10;\n    debug n => _12;\n    debug residual => _20;\n    debug val => _21;\n    debug residual => _32;\n    debug val => _33;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = ops::range::RangeInclusive::<T>::is_empty(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _4) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_5);\n        _0 = <R as ops::try_trait::Try>::from_output(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        goto -> bb28;\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = _2;\n        goto -> bb5;\n    }\n    bb5: {\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &((*_1).0: T);\n        StorageLive(_9);\n        _9 = &((*_1).1: T);\n        _7 = <T as cmp::PartialOrd>::lt(move _8, move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        switchInt(move _7) -> [0: bb16, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_11);\n        _11 = ((*_1).0: T);\n        _10 = <T as iter::range::Step>::forward_unchecked(move _11, 1_usize) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        _13 = &mut ((*_1).0: T);\n        _12 = mem::replace::<T>(_13, _10) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &mut _3;\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = move _6;\n        _17 = (move _18, _12);\n        _15 = <F as ops::function::FnMut<(B, T)>>::call_mut(move _16, move _17) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageDead(_16);\n        _14 = <R as ops::try_trait::Try>::branch(move _15) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_15);\n        _19 = discriminant(_14);\n        switchInt(move _19) -> [0: bb13, 1: bb14, otherwise: bb12];\n    }\n    bb12: {\n        unreachable;\n    }\n    bb13: {\n        _21 = move ((_14 as variant#0).0: B);\n        _6 = _21;\n        StorageDead(_14);\n        StorageDead(_7);\n        goto -> bb5;\n    }\n    bb14: {\n        _20 = move ((_14 as variant#1).0: <R as ops::try_trait::Try>::Residual);\n        _0 = <R as ops::try_trait::FromResidual>::from_residual(_20) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_14);\n        StorageDead(_7);\n        goto -> bb27;\n    }\n    bb16: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_7);\n        ((*_1).2: bool) = true;\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = &((*_1).0: T);\n        StorageLive(_24);\n        _24 = &((*_1).1: T);\n        _22 = <T as cmp::PartialEq>::eq(move _23, move _24) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        switchInt(move _22) -> [0: bb24, otherwise: bb18];\n    }\n    bb18: {\n        StorageDead(_24);\n        StorageDead(_23);\n        StorageLive(_25);\n        StorageLive(_26);\n        StorageLive(_27);\n        _27 = &mut _3;\n        StorageLive(_28);\n        StorageLive(_29);\n        _29 = move _6;\n        StorageLive(_30);\n        _30 = ((*_1).0: T);\n        _28 = (move _29, move _30);\n        _26 = <F as ops::function::FnMut<(B, T)>>::call_mut(move _27, move _28) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_30);\n        StorageDead(_29);\n        StorageDead(_28);\n        StorageDead(_27);\n        _25 = <R as ops::try_trait::Try>::branch(move _26) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_26);\n        _31 = discriminant(_25);\n        switchInt(move _31) -> [0: bb21, 1: bb22, otherwise: bb12];\n    }\n    bb21: {\n        _33 = move ((_25 as variant#0).0: B);\n        _6 = _33;\n        StorageDead(_25);\n        goto -> bb25;\n    }\n    bb22: {\n        _32 = move ((_25 as variant#1).0: <R as ops::try_trait::Try>::Residual);\n        _0 = <R as ops::try_trait::FromResidual>::from_residual(_32) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_25);\n        StorageDead(_22);\n        goto -> bb27;\n    }\n    bb24: {\n        StorageDead(_24);\n        StorageDead(_23);\n        goto -> bb25;\n    }\n    bb25: {\n        StorageDead(_22);\n        StorageLive(_34);\n        _34 = move _6;\n        _0 = <R as ops::try_trait::Try>::from_output(move _34) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_34);\n        StorageDead(_6);\n        drop(_3) -> [return: bb29, unwind unreachable];\n    }\n    bb27: {\n        StorageDead(_6);\n        goto -> bb28;\n    }\n    bb28: {\n        drop(_3) -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

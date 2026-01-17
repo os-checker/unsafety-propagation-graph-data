@@ -1,0 +1,37 @@
+{
+  "name": "net::parser::Parser::<'a>::read_number",
+  "safe": true,
+  "callees": {
+    "net::parser::Parser::<'a>::read_atomically": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Run a parser, and restore the pre-parse state if it fails.\n",
+      "adt": {
+        "option::Option": "Constructor",
+        "net::parser::Parser": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain"
+    ],
+    "net::parser::Parser": [
+      "MutRef"
+    ]
+  },
+  "path": 14628,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/net/parser.rs:109:5: 158:6",
+  "src": "fn read_number<T: ReadNumberHelper + TryFrom<u32>>(\n        &mut self,\n        radix: u32,\n        max_digits: Option<usize>,\n        allow_zero_prefix: bool,\n    ) -> Option<T> {\n        self.read_atomically(move |p| {\n            let mut digit_count = 0;\n            let has_leading_zero = p.peek_char() == Some('0');\n\n            // If max_digits.is_some(), then we are parsing a `u8` or `u16` and\n            // don't need to use checked arithmetic since it fits within a `u32`.\n            let result = if let Some(max_digits) = max_digits {\n                // u32::MAX = 4_294_967_295u32, which is 10 digits long.\n                // `max_digits` must be less than 10 to not overflow a `u32`.\n                debug_assert!(max_digits < 10);\n\n                let mut result = 0_u32;\n                while let Some(digit) = p.read_atomically(|p| p.read_char()?.to_digit(radix)) {\n                    result *= radix;\n                    result += digit;\n                    digit_count += 1;\n\n                    if digit_count > max_digits {\n                        return None;\n                    }\n                }\n\n                result.try_into().ok()\n            } else {\n                let mut result = T::ZERO;\n\n                while let Some(digit) = p.read_atomically(|p| p.read_char()?.to_digit(radix)) {\n                    result = result.checked_mul(radix)?;\n                    result = result.checked_add(digit)?;\n                    digit_count += 1;\n                }\n\n                Some(result)\n            };\n\n            if digit_count == 0 {\n                None\n            } else if !allow_zero_prefix && has_leading_zero && digit_count > 1 {\n                None\n            } else {\n                result\n            }\n        })\n    }",
+  "mir": "fn net::parser::Parser::<'a>::read_number(_1: &mut net::parser::Parser<'_>, _2: u32, _3: option::Option<usize>, _4: bool) -> option::Option<T> {\n    let mut _0: option::Option<T>;\n    let mut _5: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/net/parser.rs:115:30: 115:38};\n    debug self => _1;\n    debug radix => _2;\n    debug max_digits => _3;\n    debug allow_zero_prefix => _4;\n    bb0: {\n        StorageLive(_5);\n        _5 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/net/parser.rs:115:30: 115:38}(_3, _2, _4);\n        _0 = net::parser::Parser::<'_>::read_atomically::<T, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/net/parser.rs:115:30: 115:38}>(_1, move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

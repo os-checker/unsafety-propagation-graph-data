@@ -1,0 +1,81 @@
+{
+  "name": "arch::power::qemu_isa_debug::init",
+  "safe": true,
+  "callees": {
+    "io::io_port::IoPort::<T, A>::acquire": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires an `IoPort` instance for the given range.\n\n This method will mark all ports in the PIO range as occupied.\n",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "io::io_port::IoPort": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    },
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    },
+    "arch::power::qemu_isa_debug::try_exit_qemu": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "power::inject_poweroff_handler": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Injects a handler that can power off the system.\n\n The function may be called only once; subsequent calls take no effect.\n\n Note that, depending on the specific architecture, OSTD may already have a built-in handler. If\n so, calling this function outside of OSTD will never take effect. Currently, it happens in\n  - x86_64: If a QEMU hypervisor is detected;\n  - riscv64: Always;\n  - loongarch64: Never.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ],
+    "io::io_port::IoPort": [
+      "Plain",
+      "Ref"
+    ],
+    "spin::once::Once": [
+      "Ref"
+    ]
+  },
+  "path": 1397,
+  "span": "ostd/src/arch/x86/power.rs:39:5: 46:6",
+  "src": "pub(super) fn init() {\n        const DEBUG_EXIT_PORT_NUM: u16 = 0xF4;\n\n        let debug_exit_port = IoPort::acquire(DEBUG_EXIT_PORT_NUM).unwrap();\n\n        DEBUG_EXIT_PORT.call_once(|| debug_exit_port);\n        inject_poweroff_handler(try_exit_qemu);\n    }",
+  "mir": "fn arch::power::qemu_isa_debug::init() -> () {\n    let mut _0: ();\n    let  _1: io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>;\n    let mut _2: core::result::Result<io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>, error::Error>;\n    let  _3: &io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>;\n    let mut _4: &spin::once::Once<io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>>;\n    let mut _5: {closure@ostd/src/arch/x86/power.rs:44:35: 44:37};\n    let  _6: ();\n    let mut _7: fn(power::ExitCode);\n    debug debug_exit_port => _1;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        _2 = io::io_port::IoPort::<u32, x86_64::instructions::port::WriteOnlyAccess>::acquire(arch::power::qemu_isa_debug::init::DEBUG_EXIT_PORT_NUM) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _1 = core::result::Result::<io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>, error::Error>::unwrap(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = {alloc503: &spin::once::Once<io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>>};\n        StorageLive(_5);\n        _5 = {closure@ostd/src/arch/x86/power.rs:44:35: 44:37}(move _1);\n        _3 = spin::once::Once::<io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>>::call_once::<{closure@ostd/src/arch/x86/power.rs:44:35: 44:37}>(move _4, move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_7);\n        _7 = arch::power::qemu_isa_debug::try_exit_qemu as fn(power::ExitCode);\n        _6 = power::inject_poweroff_handler(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

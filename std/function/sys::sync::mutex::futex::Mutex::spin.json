@@ -1,0 +1,48 @@
+{
+  "name": "sys::sync::mutex::futex::Mutex::spin",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicU32::load": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads a value from the atomic integer.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering of this operation.\n Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.load(Ordering::Relaxed), 5);\n ```\n",
+      "adt": {}
+    },
+    "core::hint::spin_loop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Emits a machine instruction to signal the processor that it is running in\n a busy-wait spin-loop (\"spin lock\").\n\n Upon receiving the spin-loop signal the processor can optimize its behavior by,\n for example, saving power or switching hyper-threads.\n\n This function is different from [`thread::yield_now`] which directly\n yields to the system's scheduler, whereas `spin_loop` does not interact\n with the operating system.\n\n A common use case for `spin_loop` is implementing bounded optimistic\n spinning in a CAS loop in synchronization primitives. To avoid problems\n like priority inversion, it is strongly recommended that the spin loop is\n terminated after a finite amount of iterations and an appropriate blocking\n syscall is made.\n\n **Note**: On platforms that do not support receiving spin-loop hints this\n function does not do anything at all.\n\n # Examples\n\n ```ignore-wasm\n use std::sync::atomic::{AtomicBool, Ordering};\n use std::sync::Arc;\n use std::{hint, thread};\n\n // A shared atomic value that threads will use to coordinate\n let live = Arc::new(AtomicBool::new(false));\n\n // In a background thread we'll eventually set the value\n let bg_work = {\n     let live = live.clone();\n     thread::spawn(move || {\n         // Do some work, then make the value live\n         do_some_work();\n         live.store(true, Ordering::Release);\n     })\n };\n\n // Back on our current thread, we wait for the value to be set\n while !live.load(Ordering::Acquire) {\n     // The spin loop is a hint to the CPU that we're waiting, but probably\n     // not for very long\n     hint::spin_loop();\n }\n\n // The value is now set\n # fn do_some_work() {}\n do_some_work();\n bg_work.join()?;\n # Ok::<(), Box<dyn core::any::Any + Send + 'static>>(())\n ```\n\n [`thread::yield_now`]: ../../std/thread/fn.yield_now.html\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicU32": [
+      "Ref"
+    ],
+    "sys::sync::mutex::futex::Mutex": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 4279,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/sync/mutex/futex.rs:68:5: 84:6",
+  "src": "fn spin(&self) -> State {\n        let mut spin = 100;\n        loop {\n            // We only use `load` (and not `swap` or `compare_exchange`)\n            // while spinning, to be easier on the caches.\n            let state = self.futex.load(Relaxed);\n\n            // We stop spinning when the mutex is UNLOCKED,\n            // but also when it's CONTENDED.\n            if state != LOCKED || spin == 0 {\n                return state;\n            }\n\n            crate::hint::spin_loop();\n            spin -= 1;\n        }\n    }",
+  "mir": "fn sys::sync::mutex::futex::Mutex::spin(_1: &sys::sync::mutex::futex::Mutex) -> u32 {\n    let mut _0: u32;\n    let mut _2: i32;\n    let mut _3: &core::sync::atomic::AtomicU32;\n    let mut _4: core::sync::atomic::Ordering;\n    let mut _5: bool;\n    let mut _6: i32;\n    let  _7: ();\n    let mut _8: (i32, bool);\n    debug self => _1;\n    debug spin => _2;\n    debug state => _0;\n    bb0: {\n        StorageLive(_2);\n        _2 = 100_i32;\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_3);\n        _3 = &((*_1).0: core::sync::atomic::AtomicU32);\n        StorageLive(_4);\n        _4 = core::sync::atomic::Ordering::Relaxed;\n        _0 = core::sync::atomic::AtomicU32::load(move _3, move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = Ne(_0, sys::sync::mutex::futex::LOCKED);\n        switchInt(move _5) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        goto -> bb6;\n    }\n    bb4: {\n        StorageLive(_6);\n        _6 = _2;\n        switchInt(move _6) -> [0: bb5, otherwise: bb7];\n    }\n    bb5: {\n        StorageDead(_6);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_5);\n        StorageDead(_2);\n        return;\n    }\n    bb7: {\n        StorageDead(_6);\n        StorageDead(_5);\n        _7 = core::hint::spin_loop() -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _8 = CheckedSub(_2, 1_i32);\n        assert(!move (_8.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _2, 1_i32) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        _2 = move (_8.0: i32);\n        goto -> bb1;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

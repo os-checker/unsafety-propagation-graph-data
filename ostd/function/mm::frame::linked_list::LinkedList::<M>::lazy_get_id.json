@@ -1,0 +1,112 @@
+{
+  "name": "mm::frame::linked_list::LinkedList::<M>::lazy_get_id",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicU64::fetch_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds to the current value, returning the previous value.\n\n This operation wraps around on overflow.\n\n `fetch_add` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n assert_eq!(foo.fetch_add(10, Ordering::SeqCst), 0);\n assert_eq!(foo.load(Ordering::SeqCst), 10);\n ```\n",
+      "adt": {}
+    },
+    "core::cmp::PartialOrd::le": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests less than or equal to (for `self` and `other`) and is used by the\n `<=` operator.\n\n # Examples\n\n ```\n assert_eq!(1.0 <= 1.0, true);\n assert_eq!(1.0 <= 2.0, true);\n assert_eq!(2.0 <= 1.0, false);\n ```\n",
+      "adt": {}
+    },
+    "log::max_level": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the current maximum log level.\n\n The [`log!`], [`error!`], [`warn!`], [`info!`], [`debug!`], and [`trace!`] macros check\n this value and discard any message logged at a higher level. The maximum\n log level is set by the [`set_max_level`] function.\n\n [`log!`]: macro.log.html\n [`error!`]: macro.error.html\n [`warn!`]: macro.warn.html\n [`info!`]: macro.info.html\n [`debug!`]: macro.debug.html\n [`trace!`]: macro.trace.html\n [`set_max_level`]: fn.set_max_level.html\n",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {}
+    },
+    "log::__private_api::loc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "log::__private_api::log": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "panic::abort": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Aborts the system.\n\n This function will first attempt to power off the system. If that fails, it will halt all CPUs.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::frame::linked_list::LinkedList": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "MutRef"
+    ],
+    "core::sync::atomic::AtomicU64": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "log::Level": [
+      "Plain",
+      "Ref"
+    ],
+    "log::LevelFilter": [
+      "Ref",
+      "Plain"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ],
+    "core::panic::Location": [
+      "Ref"
+    ]
+  },
+  "path": 1955,
+  "span": "ostd/src/mm/frame/linked_list.rs:201:5: 218:6",
+  "src": "fn lazy_get_id(&mut self) -> u64 {\n        // FIXME: Self-incrementing IDs may overflow, while `core::pin::Pin`\n        // is not compatible with locks. Think about a better solution.\n        static LIST_ID_ALLOCATOR: AtomicU64 = AtomicU64::new(1);\n        const MAX_LIST_ID: u64 = i64::MAX as u64;\n\n        if self.list_id == 0 {\n            let id = LIST_ID_ALLOCATOR.fetch_add(1, Ordering::Relaxed);\n            if id >= MAX_LIST_ID {\n                log::error!(\"The frame list ID allocator has exhausted.\");\n                abort();\n            }\n            self.list_id = id;\n            id\n        } else {\n            self.list_id\n        }\n    }",
+  "mir": "fn mm::frame::linked_list::LinkedList::<M>::lazy_get_id(_1: &mut mm::frame::linked_list::LinkedList<M>) -> u64 {\n    let mut _0: u64;\n    let mut _2: u64;\n    let  _3: u64;\n    let mut _4: &core::sync::atomic::AtomicU64;\n    let mut _5: core::sync::atomic::Ordering;\n    let mut _6: bool;\n    let  _7: log::Level;\n    let mut _8: bool;\n    let mut _9: &log::Level;\n    let mut _10: &log::LevelFilter;\n    let mut _11: bool;\n    let mut _12: &log::Level;\n    let mut _13: &log::LevelFilter;\n    let  _14: log::LevelFilter;\n    let  _15: ();\n    let mut _16: core::fmt::Arguments<'_>;\n    let  _17: &(&str, &str, &core::panic::Location<'_>);\n    let  _18: (&str, &str, &core::panic::Location<'_>);\n    let mut _19: &str;\n    let  _20: &core::panic::Location<'_>;\n    let  _21: !;\n    debug self => _1;\n    debug id => _3;\n    debug lvl => _7;\n    bb0: {\n        StorageLive(_2);\n        _2 = ((*_1).3: u64);\n        switchInt(move _2) -> [0: bb1, otherwise: bb16];\n    }\n    bb1: {\n        StorageDead(_2);\n        StorageLive(_4);\n        _4 = {alloc1184: &core::sync::atomic::AtomicU64};\n        StorageLive(_5);\n        _5 = core::sync::atomic::Ordering::Relaxed;\n        _3 = core::sync::atomic::AtomicU64::fetch_add(move _4, 1_u64, move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = Ge(_3, mm::frame::linked_list::LinkedList::<M>::lazy_get_id::MAX_LIST_ID);\n        switchInt(move _6) -> [0: bb15, otherwise: bb3];\n    }\n    bb3: {\n        _7 = log::Level::Error;\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &_7;\n        StorageLive(_10);\n        _10 = mm::frame::linked_list::LinkedList::<M>::lazy_get_id::promoted[0];\n        _8 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _9, move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        switchInt(move _8) -> [0: bb13, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &_7;\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = log::max_level() -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _13 = &_14;\n        _11 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _12, move _13) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        switchInt(move _11) -> [0: bb12, otherwise: bb8];\n    }\n    bb8: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageLive(_16);\n        _16 = core::fmt::Arguments::<'_>::from_str(\"The frame list ID allocator has exhausted.\") -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = \"ostd::mm::frame::linked_list\";\n        _20 = log::__private_api::loc() -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _18 = (move _19, \"ostd::mm::frame::linked_list\", _20);\n        StorageDead(_19);\n        _17 = &_18;\n        _15 = log::__private_api::log::<'_, (), log::__private_api::GlobalLogger>(log::__private_api::GlobalLogger, move _16, _7, _17, ()) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_16);\n        StorageDead(_18);\n        goto -> bb14;\n    }\n    bb12: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_12);\n        goto -> bb14;\n    }\n    bb13: {\n        StorageDead(_10);\n        StorageDead(_9);\n        goto -> bb14;\n    }\n    bb14: {\n        StorageDead(_11);\n        StorageDead(_8);\n        _21 = panic::abort() -> unwind unreachable;\n    }\n    bb15: {\n        StorageDead(_6);\n        ((*_1).3: u64) = _3;\n        _0 = _3;\n        goto -> bb17;\n    }\n    bb16: {\n        StorageDead(_2);\n        _0 = ((*_1).3: u64);\n        goto -> bb17;\n    }\n    bb17: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

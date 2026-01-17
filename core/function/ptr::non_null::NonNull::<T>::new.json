@@ -1,0 +1,46 @@
+{
+  "name": "ptr::non_null::NonNull::<T>::new",
+  "safe": true,
+  "callees": {
+    "ptr::mut_ptr::<impl *mut T>::is_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s = [1, 2, 3];\n let ptr: *mut u32 = s.as_mut_ptr();\n assert!(!ptr.is_null());\n ```\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `NonNull`.\n\n # Safety\n\n `ptr` must be non-null.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = unsafe { NonNull::new_unchecked(&mut x as *mut _) };\n ```\n\n *Incorrect* usage of this function:\n\n ```rust,no_run\n use std::ptr::NonNull;\n\n // NEVER DO THAT!!! This is undefined behavior. ⚠️\n let ptr = unsafe { NonNull::<u32>::new_unchecked(std::ptr::null_mut()) };\n ```\n",
+      "adt": {
+        "ptr::non_null::NonNull": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 16026,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/non_null.rs:270:5: 277:6",
+  "src": "pub const fn new(ptr: *mut T) -> Option<Self> {\n        if !ptr.is_null() {\n            // SAFETY: The pointer is already checked and is not null\n            Some(unsafe { Self::new_unchecked(ptr) })\n        } else {\n            None\n        }\n    }",
+  "mir": "fn ptr::non_null::NonNull::<T>::new(_1: *mut T) -> option::Option<ptr::non_null::NonNull<T>> {\n    let mut _0: option::Option<ptr::non_null::NonNull<T>>;\n    let mut _2: bool;\n    let mut _3: ptr::non_null::NonNull<T>;\n    debug ptr => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = ptr::mut_ptr::<impl *mut T>::is_null(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        _0 = option::Option::None;\n        goto -> bb5;\n    }\n    bb3: {\n        StorageLive(_3);\n        _3 = ptr::non_null::NonNull::<T>::new_unchecked(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _0 = option::Option::Some(move _3);\n        StorageDead(_3);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Creates a new `NonNull` if `ptr` is non-null.\n\n # Panics during const evaluation\n\n This method will panic during const evaluation if the pointer cannot be\n determined to be null or not. See [`is_null`] for more information.\n\n [`is_null`]: ../primitive.pointer.html#method.is_null-1\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::<u32>::new(&mut x as *mut _).expect(\"ptr is null!\");\n\n if let Some(ptr) = NonNull::<u32>::new(std::ptr::null_mut()) {\n     unreachable!();\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "<slice::iter::ChunksExactMut<'a, T> as iter::traits::iterator::Iterator>::__iterator_get_unchecked",
+  "safe": false,
+  "callees": {
+    "ptr::mut_ptr::<impl *mut [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n This is equivalent to casting `self` to `*mut T`, but more type-safe.\n\n # Examples\n\n ```rust\n #![feature(slice_ptr_get)]\n use std::ptr;\n\n let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);\n assert_eq!(slice.as_mut_ptr(), ptr::null_mut());\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "slice::raw::from_raw_parts_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the same functionality as [`from_raw_parts`], except that a\n mutable slice is returned.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for both reads and writes for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be accessed through any other pointer\n   (not derived from the return value) for the duration of lifetime `'a`.\n   Both read and write accesses are forbidden.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::ChunksExactMut": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ]
+  },
+  "path": 16409,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:2089:5: 2093:6",
+  "src": "unsafe fn __iterator_get_unchecked(&mut self, idx: usize) -> Self::Item {\n        let start = idx * self.chunk_size;\n        // SAFETY: see comments for `Chunks::__iterator_get_unchecked` and `self.v`.\n        unsafe { from_raw_parts_mut(self.v.as_mut_ptr().add(start), self.chunk_size) }\n    }",
+  "mir": "fn <slice::iter::ChunksExactMut<'a, T> as iter::traits::iterator::Iterator>::__iterator_get_unchecked(_1: &mut slice::iter::ChunksExactMut<'_, T>, _2: usize) -> &mut [T] {\n    let mut _0: &mut [T];\n    let  _3: usize;\n    let mut _4: usize;\n    let mut _5: (usize, bool);\n    let mut _6: *mut T;\n    let mut _7: *mut T;\n    let mut _8: *mut [T];\n    let mut _9: usize;\n    debug self => _1;\n    debug idx => _2;\n    debug start => _3;\n    bb0: {\n        StorageLive(_4);\n        _4 = ((*_1).2: usize);\n        _5 = CheckedMul(_2, _4);\n        assert(!move (_5.1: bool), \"attempt to compute `{} * {}`, which would overflow\", _2, move _4) -> [success: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = move (_5.0: usize);\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = ((*_1).0: *mut [T]);\n        _7 = ptr::mut_ptr::<impl *mut [T]>::as_mut_ptr(move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        _6 = ptr::mut_ptr::<impl *mut T>::add(move _7, _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageLive(_9);\n        _9 = ((*_1).2: usize);\n        _0 = slice::raw::from_raw_parts_mut::<'_, T>(move _6, move _9) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_9);\n        StorageDead(_6);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "name": "arch::timer::apic::timer_callback",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the inner value if the [`Once`] has been initialized.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::expect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n # Panics\n\n Panics if the value is a [`None`] with a custom panic message provided by\n `msg`.\n\n # Examples\n\n ```\n let x = Some(\"value\");\n assert_eq!(x.expect(\"fruits are healthy\"), \"value\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n x.expect(\"fruits are healthy\"); // panics with `fruits are healthy`\n ```\n\n # Recommended Message Style\n\n We recommend that `expect` messages are used to describe the reason you\n _expect_ the `Option` should be `Some`.\n\n ```should_panic\n # let slice: &[u8] = &[];\n let item = slice.get(0)\n     .expect(\"slice should not be empty\");\n ```\n\n **Hint**: If you're having trouble remembering how to phrase expect\n error messages remember to focus on the word \"should\" as in \"env\n variable should be set by blah\" or \"the given binary should be available\n and executable by the current user\".\n\n For more detail on expect message styles and the reasoning behind our\n recommendation please refer to the section on [\"Common Message\n Styles\"](../../std/error/index.html#common-message-styles) in the [`std::error`](../../std/error/index.html) module docs.\n",
+      "adt": {}
+    },
+    "arch::read_tsc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the current value of the processor's time-stamp counter (TSC).\n",
+      "adt": {}
+    },
+    "core::ops::Add::add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the `+` operation.\n\n # Example\n\n ```\n assert_eq!(12 + 1, 13);\n ```\n",
+      "adt": {}
+    },
+    "x86::msr::wrmsr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Write 64 bits to msr register.\n\n # Safety\n Needs CPL 0.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "arch::timer::apic::Config": [
+      "Ref",
+      "Deref",
+      "Unknown([Deref, Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 59, kind: RigidTy(Uint(U64)) })])"
+    ]
+  },
+  "path": 1509,
+  "span": "ostd/src/arch/x86/timer/apic.rs:42:1: 53:2",
+  "src": "pub(super) fn timer_callback() {\n    use x86::msr::{IA32_TSC_DEADLINE, wrmsr};\n\n    match CONFIG.get().expect(\"ACPI timer config is not initialized\") {\n        Config::DeadlineMode { tsc_interval } => {\n            let tsc_value = crate::arch::read_tsc();\n            let next_tsc_value = tsc_interval + tsc_value;\n            unsafe { wrmsr(IA32_TSC_DEADLINE, next_tsc_value) };\n        }\n        Config::PeriodicMode { .. } => {}\n    }\n}",
+  "mir": "fn arch::timer::apic::timer_callback() -> () {\n    let mut _0: ();\n    let mut _1: &arch::timer::apic::Config;\n    let mut _2: core::option::Option<&arch::timer::apic::Config>;\n    let mut _3: &spin::once::Once<arch::timer::apic::Config>;\n    let mut _4: &str;\n    let mut _5: isize;\n    let  _6: &u64;\n    let  _7: u64;\n    let  _8: u64;\n    let  _9: ();\n    debug tsc_interval => _6;\n    debug tsc_value => _7;\n    debug next_tsc_value => _8;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = {alloc538: &spin::once::Once<arch::timer::apic::Config>};\n        _2 = spin::once::Once::<arch::timer::apic::Config>::get(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_4);\n        _4 = \"ACPI timer config is not initialized\";\n        _1 = core::option::Option::<&arch::timer::apic::Config>::expect(move _2, move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_2);\n        _5 = discriminant((*_1));\n        switchInt(move _5) -> [0: bb4, 1: bb8, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _6 = &(((*_1) as variant#0).0: u64);\n        _7 = arch::read_tsc() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _8 = <&u64 as core::ops::Add<u64>>::add(_6, _7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _9 = x86::msr::wrmsr(x86::msr::IA32_TSC_DEADLINE, _8) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        goto -> bb8;\n    }\n    bb8: {\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": " A callback that needs to be called on timer interrupt.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

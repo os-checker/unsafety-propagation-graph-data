@@ -1,0 +1,144 @@
+{
+  "name": "io::buffered::bufwriter::BufWriter::<W>::flush_buf",
+  "safe": true,
+  "callees": {
+    "io::buffered::bufwriter::BufWriter::<W>::flush_buf::BufGuard::<'a>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "alloc_crate::vec::Vec": "MutableAsArgument",
+        "io::buffered::bufwriter::BufWriter<W>::flush_buf::BufGuard": "Constructor"
+      }
+    },
+    "io::buffered::bufwriter::BufWriter::<W>::flush_buf::BufGuard::<'a>::done": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " true if all of the bytes have been written\n",
+      "adt": {
+        "io::buffered::bufwriter::BufWriter<W>::flush_buf::BufGuard": "ImmutableAsArgument"
+      }
+    },
+    "io::buffered::bufwriter::BufWriter::<W>::flush_buf::BufGuard::<'a>::remaining": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The unwritten part of the buffer\n",
+      "adt": {
+        "io::buffered::bufwriter::BufWriter<W>::flush_buf::BufGuard": "ImmutableAsArgument"
+      }
+    },
+    "io::Write::write": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a buffer into this writer, returning how many bytes were written.\n\n This function will attempt to write the entire contents of `buf`, but\n the entire write might not succeed, or the write may also generate an\n error. Typically, a call to `write` represents one attempt to write to\n any wrapped object.\n\n Calls to `write` are not guaranteed to block waiting for data to be\n written, and a write which would otherwise block can be indicated through\n an [`Err`] variant.\n\n If this method consumed `n > 0` bytes of `buf` it must return [`Ok(n)`].\n If the return value is `Ok(n)` then `n` must satisfy `n <= buf.len()`.\n A return value of `Ok(0)` typically means that the underlying object is\n no longer able to accept bytes and will likely not be able to in the\n future as well, or that the buffer provided is empty.\n\n # Errors\n\n Each call to `write` may generate an I/O error indicating that the\n operation could not be completed. If an error is returned then no bytes\n in the buffer were written to this writer.\n\n It is **not** considered an error if the entire buffer could not be\n written to this writer.\n\n An error of the [`ErrorKind::Interrupted`] kind is non-fatal and the\n write operation should be retried if there is nothing else to do.\n\n # Examples\n\n ```no_run\n use std::io::prelude::*;\n use std::fs::File;\n\n fn main() -> std::io::Result<()> {\n     let mut buffer = File::create(\"foo.txt\")?;\n\n     // Writes some prefix of the byte string, not necessarily all of it.\n     buffer.write(b\"some bytes\")?;\n     Ok(())\n }\n ```\n\n [`Ok(n)`]: Ok\n",
+      "adt": {}
+    },
+    "io::error::Error::is_interrupted": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::error::Error": "ImmutableAsArgument"
+      }
+    },
+    "io::buffered::bufwriter::BufWriter::<W>::flush_buf::BufGuard::<'a>::consume": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Flag some bytes as removed from the front of the buffer\n",
+      "adt": {
+        "io::buffered::bufwriter::BufWriter<W>::flush_buf::BufGuard": "MutableAsArgument"
+      }
+    },
+    "io::error::Error::from_static_message": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Creates a new I/O error from a known kind of error as well as a constant\n message.\n\n This function does not allocate.\n\n You should not use this directly, and instead use the `const_error!`\n macro: `io::const_error!(ErrorKind::Something, \"some_message\")`.\n\n This function should maybe change to `from_static_message<const MSG: &'static\n str>(kind: ErrorKind)` in the future, when const generics allow that.\n",
+      "adt": {
+        "io::error::Error": "Constructor"
+      }
+    },
+    "core::hint::must_use": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An identity function that causes an `unused_must_use` warning to be\n triggered if the given value is not used (returned, stored in a variable,\n etc) by the caller.\n\n This is primarily intended for use in macro-generated code, in which a\n [`#[must_use]` attribute][must_use] either on a type or a function would not\n be convenient.\n\n [must_use]: https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute\n\n # Example\n\n ```\n #![feature(hint_must_use)]\n\n use core::fmt;\n\n pub struct Error(/* ... */);\n\n #[macro_export]\n macro_rules! make_error {\n     ($($args:expr),*) => {\n         core::hint::must_use({\n             let error = $crate::make_error(core::format_args!($($args),*));\n             error\n         })\n     };\n }\n\n // Implementation detail of make_error! macro.\n #[doc(hidden)]\n pub fn make_error(args: fmt::Arguments<'_>) -> Error {\n     Error(/* ... */)\n }\n\n fn demo() -> Option<Error> {\n     if true {\n         // Oops, meant to write `return Some(make_error!(\"...\"));`\n         Some(make_error!(\"...\"));\n     }\n     None\n }\n #\n # // Make rustdoc not wrap the whole snippet in fn main, so that $crate::make_error works\n # fn main() {}\n ```\n\n In the above example, we'd like an `unused_must_use` lint to apply to the\n value created by `make_error!`. However, neither `#[must_use]` on a struct\n nor `#[must_use]` on a function is appropriate here, so the macro expands\n using `core::hint::must_use` instead.\n\n - We wouldn't want `#[must_use]` on the `struct Error` because that would\n   make the following unproblematic code trigger a warning:\n\n   ```\n   # struct Error;\n   #\n   fn f(arg: &str) -> Result<(), Error>\n   # { Ok(()) }\n\n   #[test]\n   fn t() {\n       // Assert that `f` returns error if passed an empty string.\n       // A value of type `Error` is unused here but that's not a problem.\n       f(\"\").unwrap_err();\n   }\n   ```\n\n - Using `#[must_use]` on `fn make_error` can't help because the return value\n   *is* used, as the right-hand side of a `let` statement. The `let`\n   statement looks useless but is in fact necessary for ensuring that\n   temporaries within the `format_args` expansion are not kept alive past the\n   creation of the `Error`, as keeping them alive past that point can cause\n   autotrait issues in async code:\n\n   ```\n   # #![feature(hint_must_use)]\n   #\n   # struct Error;\n   #\n   # macro_rules! make_error {\n   #     ($($args:expr),*) => {\n   #         core::hint::must_use({\n   #             // If `let` isn't used, then `f()` produces a non-Send future.\n   #             let error = make_error(core::format_args!($($args),*));\n   #             error\n   #         })\n   #     };\n   # }\n   #\n   # fn make_error(args: core::fmt::Arguments<'_>) -> Error {\n   #     Error\n   # }\n   #\n   async fn f() {\n       // Using `let` inside the make_error expansion causes temporaries like\n       // `unsync()` to drop at the semicolon of that `let` statement, which\n       // is prior to the await point. They would otherwise stay around until\n       // the semicolon on *this* statement, which is after the await point,\n       // and the enclosing Future would not implement Send.\n       log(make_error!(\"look: {:p}\", unsync())).await;\n   }\n\n   async fn log(error: Error) {/* ... */}\n\n   // Returns something without a Sync impl.\n   fn unsync() -> *const () {\n       0 as *const ()\n   }\n   #\n   # fn test() {\n   #     fn assert_send(_: impl Send) {}\n   #     assert_send(f());\n   # }\n   ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc_crate::vec::Vec": [
+      "MutRef"
+    ],
+    "io::buffered::bufwriter::BufWriter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "MutRef"
+    ],
+    "io::buffered::bufwriter::BufWriter<W>::flush_buf::BufGuard": [
+      "Plain",
+      "Ref",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })])"
+    ],
+    "io::error::Error": [
+      "Ref",
+      "Plain"
+    ]
+  },
+  "path": 1344,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/buffered/bufwriter.rs:195:5: 252:6",
+  "src": "pub(in crate::io) fn flush_buf(&mut self) -> io::Result<()> {\n        /// Helper struct to ensure the buffer is updated after all the writes\n        /// are complete. It tracks the number of written bytes and drains them\n        /// all from the front of the buffer when dropped.\n        struct BufGuard<'a> {\n            buffer: &'a mut Vec<u8>,\n            written: usize,\n        }\n\n        impl<'a> BufGuard<'a> {\n            fn new(buffer: &'a mut Vec<u8>) -> Self {\n                Self { buffer, written: 0 }\n            }\n\n            /// The unwritten part of the buffer\n            fn remaining(&self) -> &[u8] {\n                &self.buffer[self.written..]\n            }\n\n            /// Flag some bytes as removed from the front of the buffer\n            fn consume(&mut self, amt: usize) {\n                self.written += amt;\n            }\n\n            /// true if all of the bytes have been written\n            fn done(&self) -> bool {\n                self.written >= self.buffer.len()\n            }\n        }\n\n        impl Drop for BufGuard<'_> {\n            fn drop(&mut self) {\n                if self.written > 0 {\n                    self.buffer.drain(..self.written);\n                }\n            }\n        }\n\n        let mut guard = BufGuard::new(&mut self.buf);\n        while !guard.done() {\n            self.panicked = true;\n            let r = self.inner.write(guard.remaining());\n            self.panicked = false;\n\n            match r {\n                Ok(0) => {\n                    return Err(io::const_error!(\n                        ErrorKind::WriteZero,\n                        \"failed to write the buffered data\",\n                    ));\n                }\n                Ok(n) => guard.consume(n),\n                Err(ref e) if e.is_interrupted() => {}\n                Err(e) => return Err(e),\n            }\n        }\n        Ok(())\n    }",
+  "mir": "fn io::buffered::bufwriter::BufWriter::<W>::flush_buf(_1: &mut io::buffered::bufwriter::BufWriter<W>) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let mut _2: io::buffered::bufwriter::BufWriter<W>::flush_buf::BufGuard<'_>;\n    let mut _3: &mut alloc_crate::vec::Vec<u8>;\n    let mut _4: ();\n    let mut _5: bool;\n    let mut _6: &io::buffered::bufwriter::BufWriter<W>::flush_buf::BufGuard<'_>;\n    let  _7: core::result::Result<usize, io::error::Error>;\n    let mut _8: &mut W;\n    let  _9: &[u8];\n    let mut _10: &io::buffered::bufwriter::BufWriter<W>::flush_buf::BufGuard<'_>;\n    let mut _11: isize;\n    let mut _12: io::error::Error;\n    let mut _13: io::error::Error;\n    let  _14: usize;\n    let mut _15: &mut io::buffered::bufwriter::BufWriter<W>::flush_buf::BufGuard<'_>;\n    let  _16: &io::error::Error;\n    let  _17: &&io::error::Error;\n    let mut _18: bool;\n    let  _19: io::error::Error;\n    let mut _20: &io::error::Error;\n    let mut _21: bool;\n    let mut _22: isize;\n    debug self => _1;\n    debug guard => _2;\n    debug r => _7;\n    debug n => _14;\n    debug e => _16;\n    debug e => _17;\n    debug e => _19;\n    bb0: {\n        _21 = false;\n        StorageLive(_2);\n        _3 = &mut ((*_1).0: alloc_crate::vec::Vec<u8>);\n        _2 = io::buffered::bufwriter::BufWriter::<W>::flush_buf::BufGuard::<'_>::new(_3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        goto -> bb2;\n    }\n    bb2: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &_2;\n        _5 = io::buffered::bufwriter::BufWriter::<W>::flush_buf::BufGuard::<'_>::done(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _5) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_5);\n        _0 = core::result::Result::Ok(());\n        drop(_2) -> [return: bb19, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        ((*_1).1: bool) = true;\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &mut ((*_1).2: W);\n        StorageLive(_10);\n        _10 = &_2;\n        _9 = io::buffered::bufwriter::BufWriter::<W>::flush_buf::BufGuard::<'_>::remaining(move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        _7 = <W as io::Write>::write(move _8, _9) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _21 = true;\n        StorageDead(_8);\n        ((*_1).1: bool) = false;\n        _11 = discriminant(_7);\n        switchInt(move _11) -> [0: bb9, 1: bb10, otherwise: bb8];\n    }\n    bb8: {\n        unreachable;\n    }\n    bb9: {\n        switchInt(((_7 as variant#0).0: usize)) -> [0: bb12, otherwise: bb11];\n    }\n    bb10: {\n        StorageLive(_17);\n        StorageLive(_16);\n        _16 = &((_7 as variant#1).0: io::error::Error);\n        _17 = &_16;\n        StorageLive(_18);\n        _20 = (*_17);\n        _18 = io::error::Error::is_interrupted(_20) -> [return: bb16, unwind unreachable];\n    }\n    bb11: {\n        _14 = ((_7 as variant#0).0: usize);\n        StorageLive(_15);\n        _15 = &mut _2;\n        _4 = io::buffered::bufwriter::BufWriter::<W>::flush_buf::BufGuard::<'_>::consume(move _15, _14) -> [return: bb15, unwind unreachable];\n    }\n    bb12: {\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = io::error::Error::from_static_message(io::buffered::bufwriter::BufWriter::<W>::flush_buf::{constant#0}) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        _12 = core::hint::must_use::<io::error::Error>(move _13) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_13);\n        _0 = core::result::Result::Err(move _12);\n        StorageDead(_12);\n        goto -> bb20;\n    }\n    bb15: {\n        StorageDead(_15);\n        goto -> bb26;\n    }\n    bb16: {\n        switchInt(move _18) -> [0: bb18, otherwise: bb17];\n    }\n    bb17: {\n        StorageDead(_18);\n        StorageDead(_16);\n        StorageDead(_17);\n        goto -> bb26;\n    }\n    bb18: {\n        StorageDead(_18);\n        StorageDead(_16);\n        StorageDead(_17);\n        _21 = false;\n        _19 = move ((_7 as variant#1).0: io::error::Error);\n        _0 = core::result::Result::Err(_19);\n        goto -> bb20;\n    }\n    bb19: {\n        StorageDead(_2);\n        goto -> bb22;\n    }\n    bb20: {\n        _21 = false;\n        StorageDead(_7);\n        StorageDead(_5);\n        drop(_2) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_2);\n        goto -> bb22;\n    }\n    bb22: {\n        return;\n    }\n    bb23: {\n        _21 = false;\n        StorageDead(_7);\n        StorageDead(_5);\n        goto -> bb2;\n    }\n    bb24: {\n        switchInt(_21) -> [0: bb23, otherwise: bb25];\n    }\n    bb25: {\n        drop(((_7 as variant#1).0: io::error::Error)) -> [return: bb23, unwind unreachable];\n    }\n    bb26: {\n        _22 = discriminant(_7);\n        switchInt(move _22) -> [1: bb24, 0: bb23, otherwise: bb8];\n    }\n}\n",
+  "doc": " Send data in our local buffer into the inner writer, looping as\n necessary until either it's all been sent or an error occurs.\n\n Because all the data in the buffer has been reported to our owner as\n \"successfully written\" (by returning nonzero success values from\n `write`), any 0-length writes from `inner` must be reported as i/o\n errors from this method.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "name": "collections::btree::node::NodeRef::<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal>::from_new_internal",
+  "safe": true,
+  "callees": {
+    "boxed::Box::<T, A>::into_non_null_with_allocator": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the `Box`, returning a wrapped `NonNull` pointer and the allocator.\n\n The pointer will be properly aligned.\n\n After calling this function, the caller is responsible for the\n memory previously managed by the `Box`. In particular, the\n caller should properly destroy `T` and release the memory, taking\n into account the [memory layout] used by `Box`. The easiest way to\n do this is to convert the `NonNull` pointer back into a `Box` with the\n [`Box::from_non_null_in`] function, allowing the `Box` destructor to\n perform the cleanup.\n\n Note: this is an associated function, which means that you have\n to call it as `Box::into_non_null_with_allocator(b)` instead of\n `b.into_non_null_with_allocator()`. This is so that there is no\n conflict with a method on the inner type.\n\n # Examples\n Converting the `NonNull` pointer back into a `Box` with\n [`Box::from_non_null_in`] for automatic cleanup:\n ```\n #![feature(allocator_api, box_vec_non_null)]\n\n use std::alloc::System;\n\n let x = Box::new_in(String::from(\"Hello\"), System);\n let (non_null, alloc) = Box::into_non_null_with_allocator(x);\n let x = unsafe { Box::from_non_null_in(non_null, alloc) };\n ```\n Manual cleanup by explicitly running the destructor and deallocating\n the memory:\n ```\n #![feature(allocator_api, box_vec_non_null)]\n\n use std::alloc::{Allocator, Layout, System};\n\n let x = Box::new_in(String::from(\"Hello\"), System);\n let (non_null, alloc) = Box::into_non_null_with_allocator(x);\n unsafe {\n     non_null.drop_in_place();\n     alloc.deallocate(non_null.cast::<u8>(), Layout::new::<String>());\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+      "adt": {
+        "core::ptr::NonNull": "Constructor"
+      }
+    },
+    "core::convert::Into::into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"null pointer\");\n\n let casted_ptr = ptr.cast::<i8>();\n let raw_ptr: *mut i8 = casted_ptr.as_ptr();\n ```\n",
+      "adt": {}
+    },
+    "collections::btree::node::NodeRef::<collections::btree::node::marker::Owned, K, V, Type>::borrow_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably borrows the owned root node. Unlike `reborrow_mut`, this is safe\n because the return value cannot be used to destroy the root, and there\n cannot be other references to the tree.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "Constructor"
+      }
+    },
+    "collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'a>, K, V, collections::btree::node::marker::Internal>::correct_all_childrens_parent_links": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::btree::node::NodeRef": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "boxed::Box": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 4295, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 4324, kind: RigidTy(Adt(AdtDef(DefId { id: 4049, name: \"collections::btree::node::InternalNode\" }), GenericArgs([Type(Ty { id: 2376, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 2377, kind: Param(ParamTy { index: 1, name: \"V\" }) })]))) })]))) })])",
+      "Unknown([Field(1, Ty { id: 881, kind: Param(ParamTy { index: 2, name: \"A\" }) })])"
+    ],
+    "core::num::NonZero": [
+      "Plain"
+    ],
+    "collections::btree::node::NodeRef": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 969,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/node.rs:244:5: 253:6",
+  "src": "fn from_new_internal<A: Allocator + Clone>(\n        internal: Box<InternalNode<K, V>, A>,\n        height: NonZero<usize>,\n    ) -> Self {\n        // The allocator must be dropped, not leaked.  See also `BTreeMap::alloc`.\n        let (node, _alloc) = Box::into_non_null_with_allocator(internal);\n        let mut this = NodeRef { height: height.into(), node: node.cast(), _marker: PhantomData };\n        this.borrow_mut().correct_all_childrens_parent_links();\n        this\n    }",
+  "mir": "fn collections::btree::node::NodeRef::<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal>::from_new_internal(_1: boxed::Box<collections::btree::node::InternalNode<K, V>, A>, _2: core::num::NonZero<usize>) -> collections::btree::node::NodeRef<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal> {\n    let mut _0: collections::btree::node::NodeRef<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal>;\n    let  _3: core::ptr::NonNull<collections::btree::node::InternalNode<K, V>>;\n    let  _4: A;\n    let mut _5: (core::ptr::NonNull<collections::btree::node::InternalNode<K, V>>, A);\n    let mut _6: collections::btree::node::NodeRef<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal>;\n    let mut _7: usize;\n    let mut _8: core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>;\n    let  _9: ();\n    let mut _10: &mut collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>;\n    let mut _11: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>;\n    let mut _12: &mut collections::btree::node::NodeRef<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal>;\n    debug internal => _1;\n    debug height => _2;\n    debug node => _3;\n    debug _alloc => _4;\n    debug this => _6;\n    bb0: {\n        StorageLive(_5);\n        _5 = boxed::Box::<collections::btree::node::InternalNode<K, V>, A>::into_non_null_with_allocator(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = (_5.0: core::ptr::NonNull<collections::btree::node::InternalNode<K, V>>);\n        StorageLive(_4);\n        _4 = move (_5.1: A);\n        StorageDead(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = <core::num::NonZero<usize> as core::convert::Into<usize>>::into(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_8);\n        _8 = core::ptr::NonNull::<collections::btree::node::InternalNode<K, V>>::cast::<collections::btree::node::LeafNode<K, V>>(_3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = NodeRef(move _7, move _8, core::marker::PhantomData::<(collections::btree::node::marker::Owned, collections::btree::node::marker::Internal)>);\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &mut _6;\n        _11 = collections::btree::node::NodeRef::<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal>::borrow_mut(move _12) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _10 = &mut _11;\n        StorageDead(_12);\n        _9 = collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>::correct_all_childrens_parent_links(move _10) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_10);\n        StorageDead(_11);\n        _0 = move _6;\n        StorageDead(_6);\n        drop(_4) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Creates a new internal (height > 0) `NodeRef` from an existing internal node\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

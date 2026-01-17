@@ -1,0 +1,92 @@
+{
+  "name": "<io::Lines<B> as core::iter::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "alloc_crate::string::String::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new empty `String`.\n\n Given that the `String` is empty, this will not allocate any initial\n buffer. While that means that this initial operation is very\n inexpensive, it may cause excessive allocation later when you add\n data. If you have an idea of how much data the `String` will hold,\n consider the [`with_capacity`] method to prevent excessive\n re-allocation.\n\n [`with_capacity`]: String::with_capacity\n\n # Examples\n\n ```\n let s = String::new();\n ```\n",
+      "adt": {}
+    },
+    "io::BufRead::read_line": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads all bytes until a newline (the `0xA` byte) is reached, and append\n them to the provided `String` buffer.\n\n Previous content of the buffer will be preserved. To avoid appending to\n the buffer, you need to [`clear`] it first.\n\n This function will read bytes from the underlying stream until the\n newline delimiter (the `0xA` byte) or EOF is found. Once found, all bytes\n up to, and including, the delimiter (if found) will be appended to\n `buf`.\n\n If successful, this function will return the total number of bytes read.\n\n If this function returns [`Ok(0)`], the stream has reached EOF.\n\n This function is blocking and should be used carefully: it is possible for\n an attacker to continuously send bytes without ever sending a newline\n or EOF. You can use [`take`] to limit the maximum number of bytes read.\n\n [`Ok(0)`]: Ok\n [`clear`]: String::clear\n [`take`]: crate::io::Read::take\n\n # Errors\n\n This function has the same error semantics as [`read_until`] and will\n also return an error if the read bytes are not valid UTF-8. If an I/O\n error is encountered then `buf` may contain some bytes already read in\n the event that all data read so far was valid UTF-8.\n\n [`read_until`]: BufRead::read_until\n\n # Examples\n\n [`std::io::Cursor`][`Cursor`] is a type that implements `BufRead`. In\n this example, we use [`Cursor`] to read all the lines in a byte slice:\n\n ```\n use std::io::{self, BufRead};\n\n let mut cursor = io::Cursor::new(b\"foo\\nbar\");\n let mut buf = String::new();\n\n // cursor is at 'f'\n let num_bytes = cursor.read_line(&mut buf)\n     .expect(\"reading from cursor won't fail\");\n assert_eq!(num_bytes, 4);\n assert_eq!(buf, \"foo\\n\");\n buf.clear();\n\n // cursor is at 'b'\n let num_bytes = cursor.read_line(&mut buf)\n     .expect(\"reading from cursor won't fail\");\n assert_eq!(num_bytes, 3);\n assert_eq!(buf, \"bar\");\n buf.clear();\n\n // cursor is at EOF\n let num_bytes = cursor.read_line(&mut buf)\n     .expect(\"reading from cursor won't fail\");\n assert_eq!(num_bytes, 0);\n assert_eq!(buf, \"\");\n ```\n",
+      "adt": {
+        "alloc_crate::string::String": "MutableAsArgument",
+        "core::result::Result": "Constructor",
+        "io::error::Error": "Constructor"
+      }
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::str::<impl str>::ends_with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the given pattern matches a suffix of this\n string slice.\n\n Returns `false` if it does not.\n\n The [pattern] can be a `&str`, [`char`], a slice of [`char`]s, or a\n function or closure that determines if a character matches.\n\n [`char`]: prim@char\n [pattern]: self::pattern\n\n # Examples\n\n ```\n let bananas = \"bananas\";\n\n assert!(bananas.ends_with(\"anas\"));\n assert!(!bananas.ends_with(\"nana\"));\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::string::String::pop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Removes the last character from the string buffer and returns it.\n\n Returns [`None`] if this `String` is empty.\n\n # Examples\n\n ```\n let mut s = String::from(\"abč\");\n\n assert_eq!(s.pop(), Some('č'));\n assert_eq!(s.pop(), Some('b'));\n assert_eq!(s.pop(), Some('a'));\n\n assert_eq!(s.pop(), None);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc_crate::string::String": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "io::Lines": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })])"
+    ],
+    "io::error::Error": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 1778,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/mod.rs:3357:5: 3372:6",
+  "src": "fn next(&mut self) -> Option<Result<String>> {\n        let mut buf = String::new();\n        match self.buf.read_line(&mut buf) {\n            Ok(0) => None,\n            Ok(_n) => {\n                if buf.ends_with('\\n') {\n                    buf.pop();\n                    if buf.ends_with('\\r') {\n                        buf.pop();\n                    }\n                }\n                Some(Ok(buf))\n            }\n            Err(e) => Some(Err(e)),\n        }\n    }",
+  "mir": "fn <io::Lines<B> as core::iter::Iterator>::next(_1: &mut io::Lines<B>) -> core::option::Option<core::result::Result<alloc_crate::string::String, io::error::Error>> {\n    let mut _0: core::option::Option<core::result::Result<alloc_crate::string::String, io::error::Error>>;\n    let mut _2: alloc_crate::string::String;\n    let mut _3: core::result::Result<usize, io::error::Error>;\n    let mut _4: &mut B;\n    let mut _5: &mut alloc_crate::string::String;\n    let mut _6: isize;\n    let  _7: usize;\n    let mut _8: bool;\n    let  _9: &str;\n    let mut _10: &alloc_crate::string::String;\n    let  _11: core::option::Option<char>;\n    let mut _12: &mut alloc_crate::string::String;\n    let mut _13: bool;\n    let  _14: &str;\n    let mut _15: &alloc_crate::string::String;\n    let  _16: core::option::Option<char>;\n    let mut _17: &mut alloc_crate::string::String;\n    let mut _18: core::result::Result<alloc_crate::string::String, io::error::Error>;\n    let mut _19: alloc_crate::string::String;\n    let  _20: io::error::Error;\n    let mut _21: core::result::Result<alloc_crate::string::String, io::error::Error>;\n    let mut _22: bool;\n    debug self => _1;\n    debug buf => _2;\n    debug _n => _7;\n    debug e => _20;\n    bb0: {\n        _22 = false;\n        StorageLive(_2);\n        _2 = alloc_crate::string::String::new() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _22 = true;\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &mut ((*_1).0: B);\n        _5 = &mut _2;\n        _3 = <B as io::BufRead>::read_line(move _4, _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _6 = discriminant(_3);\n        switchInt(move _6) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        switchInt(((_3 as variant#0).0: usize)) -> [0: bb7, otherwise: bb6];\n    }\n    bb5: {\n        _20 = move ((_3 as variant#1).0: io::error::Error);\n        StorageLive(_21);\n        _21 = core::result::Result::Err(_20);\n        _0 = core::option::Option::Some(move _21);\n        StorageDead(_21);\n        goto -> bb21;\n    }\n    bb6: {\n        StorageLive(_7);\n        _7 = ((_3 as variant#0).0: usize);\n        StorageLive(_8);\n        StorageLive(_10);\n        _10 = &_2;\n        _9 = <alloc_crate::string::String as core::ops::Deref>::deref(move _10) -> [return: bb8, unwind unreachable];\n    }\n    bb7: {\n        _0 = core::option::Option::None;\n        goto -> bb21;\n    }\n    bb8: {\n        StorageDead(_10);\n        _8 = core::str::<impl str>::ends_with::<char>(_9, '\\n') -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        switchInt(move _8) -> [0: bb18, otherwise: bb10];\n    }\n    bb10: {\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &mut _2;\n        _11 = alloc_crate::string::String::pop(move _12) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageLive(_13);\n        StorageLive(_15);\n        _15 = &_2;\n        _14 = <alloc_crate::string::String as core::ops::Deref>::deref(move _15) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_15);\n        _13 = core::str::<impl str>::ends_with::<char>(_14, '\\r') -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        switchInt(move _13) -> [0: bb16, otherwise: bb14];\n    }\n    bb14: {\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &mut _2;\n        _16 = alloc_crate::string::String::pop(move _17) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_17);\n        StorageDead(_16);\n        goto -> bb17;\n    }\n    bb16: {\n        goto -> bb17;\n    }\n    bb17: {\n        StorageDead(_13);\n        goto -> bb19;\n    }\n    bb18: {\n        goto -> bb19;\n    }\n    bb19: {\n        StorageDead(_8);\n        StorageLive(_18);\n        StorageLive(_19);\n        _22 = false;\n        _19 = move _2;\n        _18 = core::result::Result::Ok(move _19);\n        StorageDead(_19);\n        _0 = core::option::Option::Some(move _18);\n        StorageDead(_18);\n        StorageDead(_7);\n        goto -> bb21;\n    }\n    bb20: {\n        _22 = false;\n        StorageDead(_2);\n        return;\n    }\n    bb21: {\n        StorageDead(_3);\n        switchInt(_22) -> [0: bb20, otherwise: bb22];\n    }\n    bb22: {\n        drop(_2) -> [return: bb20, unwind unreachable];\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

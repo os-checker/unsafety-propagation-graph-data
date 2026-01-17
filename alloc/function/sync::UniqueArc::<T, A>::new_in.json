@@ -1,0 +1,92 @@
+{
+  "name": "sync::UniqueArc::<T, A>::new_in",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicUsize::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new atomic integer.\n\n # Examples\n\n ```\n\n ```\n",
+      "adt": {}
+    },
+    "boxed::Box::<T, A>::new_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory in the given allocator then places `x` into it.\n\n This doesn't actually allocate if `T` is zero-sized.\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let five = Box::new_in(5, System);\n ```\n",
+      "adt": {
+        "boxed::Box": "Constructor"
+      }
+    },
+    "boxed::Box::<T, A>::into_unique": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": "",
+      "adt": {
+        "core::ptr::Unique": "Constructor"
+      }
+    },
+    "core::convert::Into::into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into the (usually inferred) input type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicUsize": [
+      "Plain"
+    ],
+    "sync::ArcInner": [
+      "Plain"
+    ],
+    "boxed::Box": [
+      "Plain"
+    ],
+    "core::ptr::Unique": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 9445, kind: RigidTy(Adt(AdtDef(DefId { id: 2645, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 9335, kind: RigidTy(Adt(AdtDef(DefId { id: 5664, name: \"sync::ArcInner\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })]))) })])",
+      "Unknown([Field(1, Ty { id: 21, kind: Param(ParamTy { index: 1, name: \"A\" }) })])"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "sync::UniqueArc": [
+      "Plain"
+    ]
+  },
+  "path": 2147,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:4732:5: 4744:6",
+  "src": "pub fn new_in(data: T, alloc: A) -> Self {\n        let (ptr, alloc) = Box::into_unique(Box::new_in(\n            ArcInner {\n                strong: atomic::AtomicUsize::new(0),\n                // keep one weak reference so if all the weak pointers that are created are dropped\n                // the UniqueArc still stays valid.\n                weak: atomic::AtomicUsize::new(1),\n                data,\n            },\n            alloc,\n        ));\n        Self { ptr: ptr.into(), _marker: PhantomData, _marker2: PhantomData, alloc }\n    }",
+  "mir": "fn sync::UniqueArc::<T, A>::new_in(_1: T, _2: A) -> sync::UniqueArc<T, A> {\n    let mut _0: sync::UniqueArc<T, A>;\n    let  _3: core::ptr::Unique<sync::ArcInner<T>>;\n    let  _4: A;\n    let mut _5: (core::ptr::Unique<sync::ArcInner<T>>, A);\n    let mut _6: boxed::Box<sync::ArcInner<T>, A>;\n    let mut _7: sync::ArcInner<T>;\n    let mut _8: core::sync::atomic::AtomicUsize;\n    let mut _9: core::sync::atomic::AtomicUsize;\n    let mut _10: core::ptr::NonNull<sync::ArcInner<T>>;\n    debug data => _1;\n    debug alloc => _2;\n    debug ptr => _3;\n    debug alloc => _4;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = core::sync::atomic::AtomicUsize::new(0_usize) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_9);\n        _9 = core::sync::atomic::AtomicUsize::new(1_usize) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _7 = ArcInner(move _8, move _9, _1);\n        StorageDead(_9);\n        StorageDead(_8);\n        _6 = boxed::Box::<sync::ArcInner<T>, A>::new_in(move _7, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        _5 = boxed::Box::<sync::ArcInner<T>, A>::into_unique(move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        _3 = (_5.0: core::ptr::Unique<sync::ArcInner<T>>);\n        _4 = move (_5.1: A);\n        StorageDead(_5);\n        StorageLive(_10);\n        _10 = <core::ptr::Unique<sync::ArcInner<T>> as core::convert::Into<core::ptr::NonNull<sync::ArcInner<T>>>>::into(_3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = UniqueArc(move _10, ZeroSized: core::marker::PhantomData<sync::ArcInner<T>>, ZeroSized: core::marker::PhantomData<*mut T>, _4);\n        StorageDead(_10);\n        return;\n    }\n}\n",
+  "doc": " Creates a new `UniqueArc` in the provided allocator.\n\n Weak references to this `UniqueArc` can be created with [`UniqueArc::downgrade`]. Upgrading\n these weak references will fail before the `UniqueArc` has been converted into an [`Arc`].\n After converting the `UniqueArc` into an [`Arc`], any weak references created beforehand will\n point to the new [`Arc`].\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

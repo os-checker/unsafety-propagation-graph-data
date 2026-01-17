@@ -1,0 +1,42 @@
+{
+  "name": "iter::traits::double_ended::DoubleEndedIterator::rfold",
+  "safe": true,
+  "callees": {
+    "iter::traits::double_ended::DoubleEndedIterator::next_back": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Removes and returns an element from the end of the iterator.\n\n Returns `None` when there are no more elements.\n\n The [trait-level] docs contain more details.\n\n [trait-level]: DoubleEndedIterator\n\n # Examples\n\n Basic usage:\n\n ```\n let numbers = vec![1, 2, 3, 4, 5, 6];\n\n let mut iter = numbers.iter();\n\n assert_eq!(Some(&1), iter.next());\n assert_eq!(Some(&6), iter.next_back());\n assert_eq!(Some(&5), iter.next_back());\n assert_eq!(Some(&2), iter.next());\n assert_eq!(Some(&3), iter.next());\n assert_eq!(Some(&4), iter.next());\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next_back());\n ```\n\n # Remarks\n\n The elements yielded by `DoubleEndedIterator`'s methods may differ from\n the ones yielded by [`Iterator`]'s methods:\n\n ```\n let vec = vec![(1, 'a'), (1, 'b'), (1, 'c'), (2, 'a'), (2, 'b')];\n let uniq_by_fst_comp = || {\n     let mut seen = std::collections::HashSet::new();\n     vec.iter().copied().filter(move |x| seen.insert(x.0))\n };\n\n assert_eq!(uniq_by_fst_comp().last(), Some((2, 'a')));\n assert_eq!(uniq_by_fst_comp().next_back(), Some((2, 'b')));\n\n assert_eq!(\n     uniq_by_fst_comp().fold(vec![], |mut v, x| {v.push(x); v}),\n     vec![(1, 'a'), (2, 'a')]\n );\n assert_eq!(\n     uniq_by_fst_comp().rfold(vec![], |mut v, x| {v.push(x); v}),\n     vec![(2, 'b'), (1, 'c')]\n );\n ```\n",
+      "adt": {}
+    },
+    "ops::function::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 5683, kind: Alias(Projection, AliasTy { def_id: AliasDef(DefId { id: 25924, name: \"iter::traits::iterator::Iterator::Item\" }), args: GenericArgs([Type(Ty { id: 42, kind: Param(ParamTy { index: 0, name: \"Self\" }) })]) }) })])"
+    ]
+  },
+  "path": "iter::traits::double_ended::DoubleEndedIterator::rfold",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/double_ended.rs:301:5: 311:6",
+  "src": "fn rfold<B, F>(mut self, init: B, mut f: F) -> B\n    where\n        Self: Sized,\n        F: FnMut(B, Self::Item) -> B,\n    {\n        let mut accum = init;\n        while let Some(x) = self.next_back() {\n            accum = f(accum, x);\n        }\n        accum\n    }",
+  "mir": "fn iter::traits::double_ended::DoubleEndedIterator::rfold(_1: Self, _2: B, _3: F) -> B {\n    let mut _0: B;\n    let mut _4: B;\n    let mut _5: option::Option<<Self as iter::traits::iterator::Iterator>::Item>;\n    let mut _6: &mut Self;\n    let mut _7: isize;\n    let  _8: <Self as iter::traits::iterator::Iterator>::Item;\n    let mut _9: B;\n    let mut _10: &mut F;\n    let mut _11: (B, <Self as iter::traits::iterator::Iterator>::Item);\n    let mut _12: B;\n    debug self => _1;\n    debug init => _2;\n    debug f => _3;\n    debug accum => _4;\n    debug x => _8;\n    bb0: {\n        StorageLive(_4);\n        _4 = move _2;\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut _1;\n        _5 = <Self as iter::traits::double_ended::DoubleEndedIterator>::next_back(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _7 = discriminant(_5);\n        switchInt(move _7) -> [1: bb3, 0: bb5, otherwise: bb8];\n    }\n    bb3: {\n        _8 = move ((_5 as variant#1).0: <Self as iter::traits::iterator::Iterator>::Item);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &mut _3;\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = move _4;\n        _11 = (move _12, _8);\n        _9 = <F as ops::function::FnMut<(B, <Self as iter::traits::iterator::Iterator>::Item)>>::call_mut(move _10, move _11) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        _4 = move _9;\n        StorageDead(_9);\n        StorageDead(_5);\n        goto -> bb1;\n    }\n    bb5: {\n        StorageDead(_5);\n        _0 = move _4;\n        StorageDead(_4);\n        drop(_3) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        drop(_1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        return;\n    }\n    bb8: {\n        unreachable;\n    }\n}\n",
+  "doc": " An iterator method that reduces the iterator's elements to a single,\n final value, starting from the back.\n\n This is the reverse version of [`Iterator::fold()`]: it takes elements\n starting from the back of the iterator.\n\n `rfold()` takes two arguments: an initial value, and a closure with two\n arguments: an 'accumulator', and an element. The closure returns the value that\n the accumulator should have for the next iteration.\n\n The initial value is the value the accumulator will have on the first\n call.\n\n After applying this closure to every element of the iterator, `rfold()`\n returns the accumulator.\n\n This operation is sometimes called 'reduce' or 'inject'.\n\n Folding is useful whenever you have a collection of something, and want\n to produce a single value from it.\n\n Note: `rfold()` combines elements in a *right-associative* fashion. For associative\n operators like `+`, the order the elements are combined in is not important, but for non-associative\n operators like `-` the order will affect the final result.\n For a *left-associative* version of `rfold()`, see [`Iterator::fold()`].\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n // the sum of all of the elements of a\n let sum = a.iter()\n            .rfold(0, |acc, &x| acc + x);\n\n assert_eq!(sum, 6);\n ```\n\n This example demonstrates the right-associative nature of `rfold()`:\n it builds a string, starting with an initial value\n and continuing with each element from the back until the front:\n\n ```\n let numbers = [1, 2, 3, 4, 5];\n\n let zero = \"0\".to_string();\n\n let result = numbers.iter().rfold(zero, |acc, &x| {\n     format!(\"({x} + {acc})\")\n });\n\n assert_eq!(result, \"(1 + (2 + (3 + (4 + (5 + 0)))))\");\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

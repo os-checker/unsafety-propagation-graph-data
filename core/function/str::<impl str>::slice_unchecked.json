@@ -1,0 +1,31 @@
+{
+  "name": "str::<impl str>::slice_unchecked",
+  "safe": false,
+  "callees": {
+    "slice::index::SliceIndex::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a pointer to the output at this location, without\n performing any bounds checking.\n\n Calling this method with an out-of-bounds index or a dangling `slice` pointer\n is *[undefined behavior]* even if the resulting pointer is not used.\n\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ops::range::Range": [
+      "Plain"
+    ]
+  },
+  "path": 3124,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/str/mod.rs:757:5: 762:6",
+  "src": "pub unsafe fn slice_unchecked(&self, begin: usize, end: usize) -> &str {\n        // SAFETY: the caller must uphold the safety contract for `get_unchecked`;\n        // the slice is dereferenceable because `self` is a safe reference.\n        // The returned pointer is safe because impls of `SliceIndex` have to guarantee that it is.\n        unsafe { &*(begin..end).get_unchecked(self) }\n    }",
+  "mir": "fn str::<impl str>::slice_unchecked(_1: &str, _2: usize, _3: usize) -> &str {\n    let mut _0: &str;\n    let  _4: *const str;\n    let mut _5: ops::range::Range<usize>;\n    let mut _6: *const str;\n    debug self => _1;\n    debug begin => _2;\n    debug end => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = Range(_2, _3);\n        StorageLive(_6);\n        _6 = &raw const (*_1);\n        _4 = <ops::range::Range<usize> as slice::index::SliceIndex<str>>::get_unchecked(move _5, move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        StorageDead(_5);\n        _0 = &(*_4);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Creates a string slice from another string slice, bypassing safety\n checks.\n\n This is generally not recommended, use with caution! For a safe\n alternative see [`str`] and [`Index`].\n\n [`Index`]: crate::ops::Index\n\n This new slice goes from `begin` to `end`, including `begin` but\n excluding `end`.\n\n To get a mutable string slice instead, see the\n [`slice_mut_unchecked`] method.\n\n [`slice_mut_unchecked`]: str::slice_mut_unchecked\n\n # Safety\n\n Callers of this function are responsible that three preconditions are\n satisfied:\n\n * `begin` must not exceed `end`.\n * `begin` and `end` must be byte positions within the string slice.\n * `begin` and `end` must lie on UTF-8 sequence boundaries.\n\n # Examples\n\n ```\n let s = \"Löwe 老虎 Léopard\";\n\n unsafe {\n     assert_eq!(\"Löwe 老虎 Léopard\", s.slice_unchecked(0, 21));\n }\n\n let s = \"Hello, world!\";\n\n unsafe {\n     assert_eq!(\"world\", s.slice_unchecked(7, 12));\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "name": "sync::nonpoison::mutex::Mutex::<T>::replace",
+  "safe": true,
+  "callees": {
+    "sync::nonpoison::mutex::Mutex::<T>::lock": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires a mutex, blocking the current thread until it is able to do so.\n\n This function will block the local thread until it is available to acquire\n the mutex. Upon returning, the thread is the only thread with the lock\n held. An RAII guard is returned to allow scoped unlock of the lock. When\n the guard goes out of scope, the mutex will be unlocked.\n\n The exact behavior on locking a mutex in the thread which already holds\n the lock is left unspecified. However, this function will not return on\n the second call (it might panic or deadlock, for example).\n\n # Panics\n\n This function might panic when called if the lock is already held by\n the current thread.\n\n # Examples\n\n ```\n #![feature(nonpoison_mutex)]\n\n use std::sync::{Arc, nonpoison::Mutex};\n use std::thread;\n\n let mutex = Arc::new(Mutex::new(0));\n let c_mutex = Arc::clone(&mutex);\n\n thread::spawn(move || {\n     *c_mutex.lock() = 10;\n }).join().expect(\"thread::spawn failed\");\n assert_eq!(*mutex.lock(), 10);\n ```\n",
+      "adt": {
+        "sync::nonpoison::mutex::Mutex": "ImmutableAsArgument",
+        "sync::nonpoison::mutex::MutexGuard": "Constructor"
+      }
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "core::mem::replace": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Moves `src` into the referenced `dest`, returning the previous `dest` value.\n\n Neither value is dropped.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a default value, see [`take`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::replace(&mut v, vec![3, 4, 5]);\n assert_eq!(vec![1, 2], old_v);\n assert_eq!(vec![3, 4, 5], v);\n ```\n\n `replace` allows consumption of a struct field by replacing it with another value.\n Without `replace` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let t = self.buf[i];\n         self.buf[i] = v;\n         t\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so we can't even clone `self.buf[i]` to\n avoid the move. But `replace` can be used to disassociate the original value at that index from\n `self`, allowing it to be returned:\n\n ```\n # #![allow(dead_code)]\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         mem::replace(&mut self.buf[i], v)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf[0], 0);\n\n assert_eq!(buffer.replace_index(0, 2), 0);\n assert_eq!(buffer.buf[0], 2);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::nonpoison::mutex::Mutex": [
+      "Ref"
+    ],
+    "sync::nonpoison::mutex::MutexGuard": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 3080,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/nonpoison/mutex.rs:244:5: 247:6",
+  "src": "pub fn replace(&self, value: T) -> T {\n        let mut guard = self.lock();\n        mem::replace(&mut *guard, value)\n    }",
+  "mir": "fn sync::nonpoison::mutex::Mutex::<T>::replace(_1: &sync::nonpoison::mutex::Mutex<T>, _2: T) -> T {\n    let mut _0: T;\n    let mut _3: sync::nonpoison::mutex::MutexGuard<'_, T>;\n    let mut _4: &mut T;\n    let mut _5: &mut sync::nonpoison::mutex::MutexGuard<'_, T>;\n    debug self => _1;\n    debug value => _2;\n    debug guard => _3;\n    bb0: {\n        StorageLive(_3);\n        _3 = sync::nonpoison::mutex::Mutex::<T>::lock(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = &mut _3;\n        _4 = <sync::nonpoison::mutex::MutexGuard<'_, T> as core::ops::DerefMut>::deref_mut(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _0 = core::mem::replace::<T>(_4, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        drop(_3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Replaces the contained value with `value`, and returns the old contained value.\n\n # Examples\n\n ```\n #![feature(nonpoison_mutex)]\n #![feature(lock_value_accessors)]\n\n use std::sync::nonpoison::Mutex;\n\n let mut mutex = Mutex::new(7);\n\n assert_eq!(mutex.replace(11), 7);\n assert_eq!(mutex.get_cloned(), 11);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

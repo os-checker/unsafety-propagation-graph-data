@@ -1,0 +1,72 @@
+{
+  "name": "cell::RefMut::<'b, T>::map_split",
+  "safe": true,
+  "callees": {
+    "cell::BorrowRefMut::<'b>::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "cell::BorrowRefMut": "Constructor"
+      }
+    },
+    "ops::deref::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "ops::function::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "cell::BorrowRefMut": [
+      "Ref",
+      "Plain"
+    ],
+    "cell::RefMut": [
+      "Unknown([Field(1, Ty { id: 5177, kind: RigidTy(Adt(AdtDef(DefId { id: 26100, name: \"cell::BorrowRefMut\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])",
+      "MutRef",
+      "Plain"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 4810,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell.rs:1972:5: 1985:6",
+  "src": "pub fn map_split<U: ?Sized, V: ?Sized, F>(\n        mut orig: RefMut<'b, T>,\n        f: F,\n    ) -> (RefMut<'b, U>, RefMut<'b, V>)\n    where\n        F: FnOnce(&mut T) -> (&mut U, &mut V),\n    {\n        let borrow = orig.borrow.clone();\n        let (a, b) = f(&mut *orig);\n        (\n            RefMut { value: NonNull::from(a), borrow, marker: PhantomData },\n            RefMut { value: NonNull::from(b), borrow: orig.borrow, marker: PhantomData },\n        )\n    }",
+  "mir": "fn cell::RefMut::<'b, T>::map_split(_1: cell::RefMut<'_, T>, _2: F) -> (cell::RefMut<'_, U>, cell::RefMut<'_, V>) {\n    let mut _0: (cell::RefMut<'_, U>, cell::RefMut<'_, V>);\n    let  _3: cell::BorrowRefMut<'_>;\n    let mut _4: &cell::BorrowRefMut<'_>;\n    let  _5: &mut U;\n    let  _6: &mut V;\n    let mut _7: (&mut U, &mut V);\n    let mut _8: (&mut T,);\n    let mut _9: &mut T;\n    let mut _10: &mut cell::RefMut<'_, T>;\n    let mut _11: cell::RefMut<'_, U>;\n    let mut _12: ptr::non_null::NonNull<U>;\n    let mut _13: cell::RefMut<'_, V>;\n    let mut _14: ptr::non_null::NonNull<V>;\n    let mut _15: cell::BorrowRefMut<'_>;\n    debug orig => _1;\n    debug f => _2;\n    debug borrow => _3;\n    debug a => _5;\n    debug b => _6;\n    bb0: {\n        StorageLive(_4);\n        _4 = &(_1.1: cell::BorrowRefMut<'_>);\n        _3 = cell::BorrowRefMut::<'_>::clone(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_10);\n        _10 = &mut _1;\n        _9 = <cell::RefMut<'_, T> as ops::deref::DerefMut>::deref_mut(move _10) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_10);\n        _8 = (_9);\n        _7 = <F as ops::function::FnOnce<(&mut T,)>>::call_once(_2, move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        _5 = move (_7.0: &mut U);\n        _6 = move (_7.1: &mut V);\n        StorageDead(_7);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = <ptr::non_null::NonNull<U> as convert::From<&mut U>>::from(_5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _11 = RefMut(move _12, _3, ZeroSized: marker::PhantomData<&mut U>);\n        StorageDead(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = <ptr::non_null::NonNull<V> as convert::From<&mut V>>::from(_6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_15);\n        _15 = move (_1.1: cell::BorrowRefMut<'_>);\n        _13 = RefMut(move _14, move _15, ZeroSized: marker::PhantomData<&mut V>);\n        StorageDead(_15);\n        StorageDead(_14);\n        _0 = (move _11, move _13);\n        StorageDead(_13);\n        StorageDead(_11);\n        return;\n    }\n}\n",
+  "doc": " Splits a `RefMut` into multiple `RefMut`s for different components of the\n borrowed data.\n\n The underlying `RefCell` will remain mutably borrowed until both\n returned `RefMut`s go out of scope.\n\n The `RefCell` is already mutably borrowed, so this cannot fail.\n\n This is an associated function that needs to be used as\n `RefMut::map_split(...)`. A method would interfere with methods of the\n same name on the contents of a `RefCell` used through `Deref`.\n\n # Examples\n\n ```\n use std::cell::{RefCell, RefMut};\n\n let cell = RefCell::new([1, 2, 3, 4]);\n let borrow = cell.borrow_mut();\n let (mut begin, mut end) = RefMut::map_split(borrow, |slice| slice.split_at_mut(2));\n assert_eq!(*begin, [1, 2]);\n assert_eq!(*end, [3, 4]);\n begin.copy_from_slice(&[4, 3]);\n end.copy_from_slice(&[2, 1]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

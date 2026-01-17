@@ -1,0 +1,60 @@
+{
+  "name": "net::tcp::TcpStream::connect_timeout",
+  "safe": true,
+  "callees": {
+    "sys::net::connection::socket::TcpStream::connect_timeout": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::net::SocketAddr": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<U, E>` by applying a function to a\n contained [`Ok`] value, leaving an [`Err`] value untouched.\n\n This function can be used to compose the results of two functions.\n\n # Examples\n\n Print the numbers on each line of a string multiplied by two.\n\n ```\n let line = \"1\\n2\\n3\\n4\\n\";\n\n for num in line.lines() {\n     match num.parse::<i32>().map(|i| i * 2) {\n         Ok(n) => println!(\"{n}\"),\n         Err(..) => {}\n     }\n }\n ```\n",
+      "adt": {}
+    },
+    "net::tcp::TcpStream": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " A TCP stream between a local and a remote socket.\n\n After creating a `TcpStream` by either [`connect`]ing to a remote host or\n [`accept`]ing a connection on a [`TcpListener`], data can be transmitted\n by [reading] and [writing] to it.\n\n The connection will be closed when the value is dropped. The reading and writing\n portions of the connection can also be shut down individually with the [`shutdown`]\n method.\n\n The Transmission Control Protocol is specified in [IETF RFC 793].\n\n [`accept`]: TcpListener::accept\n [`connect`]: TcpStream::connect\n [IETF RFC 793]: https://tools.ietf.org/html/rfc793\n [reading]: Read\n [`shutdown`]: TcpStream::shutdown\n [writing]: Write\n\n # Examples\n\n ```no_run\n use std::io::prelude::*;\n use std::net::TcpStream;\n\n fn main() -> std::io::Result<()> {\n     let mut stream = TcpStream::connect(\"127.0.0.1:34254\")?;\n\n     stream.write(&[1])?;\n     stream.read(&mut [0; 128])?;\n     Ok(())\n } // the stream is closed here\n ```\n\n # Platform-specific Behavior\n\n On Unix, writes to the underlying socket in `SOCK_STREAM` mode are made with\n `MSG_NOSIGNAL` flag. This suppresses the emission of the  `SIGPIPE` signal when writing\n to disconnected socket. In some cases, getting a `SIGPIPE` would trigger process termination.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::net::SocketAddr": [
+      "Ref"
+    ],
+    "core::time::Duration": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1946,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/net/tcp.rs:185:5: 187:6",
+  "src": "pub fn connect_timeout(addr: &SocketAddr, timeout: Duration) -> io::Result<TcpStream> {\n        net_imp::TcpStream::connect_timeout(addr, timeout).map(TcpStream)\n    }",
+  "mir": "fn net::tcp::TcpStream::connect_timeout(_1: &core::net::SocketAddr, _2: core::time::Duration) -> core::result::Result<net::tcp::TcpStream, io::error::Error> {\n    let mut _0: core::result::Result<net::tcp::TcpStream, io::error::Error>;\n    let mut _3: core::result::Result<sys::net::connection::socket::TcpStream, io::error::Error>;\n    debug addr => _1;\n    debug timeout => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = sys::net::connection::socket::TcpStream::connect_timeout(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = core::result::Result::<sys::net::connection::socket::TcpStream, io::error::Error>::map::<net::tcp::TcpStream, fn(sys::net::connection::socket::TcpStream) -> net::tcp::TcpStream {net::tcp::TcpStream}>(move _3, net::tcp::TcpStream) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Opens a TCP connection to a remote host with a timeout.\n\n Unlike `connect`, `connect_timeout` takes a single [`SocketAddr`] since\n timeout must be applied to individual addresses.\n\n It is an error to pass a zero `Duration` to this function.\n\n Unlike other methods on `TcpStream`, this does not correspond to a\n single system call. It instead calls `connect` in nonblocking mode and\n then uses an OS-specific mechanism to await the completion of the\n connection request.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

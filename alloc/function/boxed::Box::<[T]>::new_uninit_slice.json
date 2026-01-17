@@ -1,0 +1,49 @@
+{
+  "name": "boxed::Box::<[T]>::new_uninit_slice",
+  "safe": true,
+  "callees": {
+    "raw_vec::RawVec::<T>::with_capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a `RawVec` (on the system heap) with exactly the\n capacity and alignment requirements for a `[T; capacity]`. This is\n equivalent to calling `RawVec::new` when `capacity` is `0` or `T` is\n zero-sized. Note that if `T` is zero-sized this means you will\n *not* get a `RawVec` with the requested capacity.\n\n Non-fallible version of `try_with_capacity`\n\n # Panics\n\n Panics if the requested capacity exceeds `isize::MAX` bytes.\n\n # Aborts\n\n Aborts on OOM.\n",
+      "adt": {
+        "raw_vec::RawVec": "Constructor"
+      }
+    },
+    "raw_vec::RawVec::<T, A>::into_box": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts the entire buffer into `Box<[MaybeUninit<T>]>` with the specified `len`.\n\n Note that this will correctly reconstitute any `cap` changes\n that may have been performed. (See description of type for details.)\n\n # Safety\n\n * `len` must be greater than or equal to the most recently requested capacity, and\n * `len` must be less than or equal to `self.capacity()`.\n\n Note, that the requested capacity and `self.capacity()` could differ, as\n an allocator could overallocate and return a greater memory block than requested.\n",
+      "adt": {
+        "raw_vec::RawVec": "ImmutableAsArgument",
+        "boxed::Box": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "raw_vec::RawVec": [
+      "Plain"
+    ],
+    "boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 378,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed.rs:875:5: 877:6",
+  "src": "pub fn new_uninit_slice(len: usize) -> Box<[mem::MaybeUninit<T>]> {\n        unsafe { RawVec::with_capacity(len).into_box(len) }\n    }",
+  "mir": "fn boxed::Box::<[T]>::new_uninit_slice(_1: usize) -> boxed::Box<[core::mem::MaybeUninit<T>]> {\n    let mut _0: boxed::Box<[core::mem::MaybeUninit<T>]>;\n    let mut _2: raw_vec::RawVec<T>;\n    debug len => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = raw_vec::RawVec::<T>::with_capacity(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = raw_vec::RawVec::<T>::into_box(move _2, _1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Constructs a new boxed slice with uninitialized contents.\n\n # Examples\n\n ```\n let mut values = Box::<[u32]>::new_uninit_slice(3);\n // Deferred initialization:\n values[0].write(1);\n values[1].write(2);\n values[2].write(3);\n let values = unsafe { values.assume_init() };\n\n assert_eq!(*values, [1, 2, 3])\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

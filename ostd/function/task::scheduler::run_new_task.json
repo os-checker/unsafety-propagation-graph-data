@@ -1,0 +1,106 @@
+{
+  "name": "task::scheduler::run_new_task",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::is_completed": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checks whether the value has been initialized.\n\n This is done using [`Acquire`](core::sync::atomic::Ordering::Acquire) ordering, and\n therefore it is safe to access the value directly via\n [`get_unchecked`](Self::get_unchecked) if this returns true.\n",
+      "adt": {}
+    },
+    "task::scheduler::fifo_scheduler::init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "spin::once::Once::<T, R>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the inner value if the [`Once`] has been initialized.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "task::scheduler::Scheduler::enqueue": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Enqueues a runnable task.\n\n The scheduler implementer can perform load-balancing or some time accounting work here.\n\n The newly-enqueued task may have a higher priority than the currently running one on a CPU\n and thus should preempt the latter.\n In this case, this method returns the ID of that CPU.\n",
+      "adt": {}
+    },
+    "task::scheduler::set_need_preempt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "cpu::id::CpuId": "ImmutableAsArgument"
+      }
+    },
+    "task::scheduler::might_preempt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Preempts the current task.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 2350, kind: RigidTy(Adt(AdtDef(DefId { id: 4216, name: \"cpu::id::CpuId\" }), GenericArgs([]))) })])"
+    ],
+    "task::scheduler::EnqueueFlags": [
+      "Plain"
+    ],
+    "alloc::sync::Arc": [
+      "Plain"
+    ],
+    "cpu::id::CpuId": [
+      "Plain"
+    ]
+  },
+  "path": 2823,
+  "span": "ostd/src/task/scheduler/mod.rs:473:1: 489:2",
+  "src": "pub(super) fn run_new_task(runnable: Arc<Task>) {\n    // FIXME: remove this check for `SCHEDULER`.\n    // Currently OSTD cannot know whether its user has injected a scheduler.\n    if !SCHEDULER.is_completed() {\n        fifo_scheduler::init();\n    }\n\n    let preempt_cpu = SCHEDULER\n        .get()\n        .unwrap()\n        .enqueue(runnable, EnqueueFlags::Spawn);\n    if let Some(preempt_cpu_id) = preempt_cpu {\n        set_need_preempt(preempt_cpu_id);\n    }\n\n    might_preempt();\n}",
+  "mir": "fn task::scheduler::run_new_task(_1: alloc::sync::Arc<task::Task>) -> () {\n    let mut _0: ();\n    let mut _2: bool;\n    let mut _3: &spin::once::Once<&dyn task::scheduler::Scheduler>;\n    let  _4: ();\n    let  _5: core::option::Option<cpu::id::CpuId>;\n    let  _6: &&dyn task::scheduler::Scheduler;\n    let mut _7: core::option::Option<&&dyn task::scheduler::Scheduler>;\n    let mut _8: &spin::once::Once<&dyn task::scheduler::Scheduler>;\n    let mut _9: task::scheduler::EnqueueFlags;\n    let mut _10: isize;\n    let  _11: cpu::id::CpuId;\n    let  _12: ();\n    let  _13: ();\n    let mut _14: &dyn task::scheduler::Scheduler;\n    debug runnable => _1;\n    debug preempt_cpu => _5;\n    debug preempt_cpu_id => _11;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = {alloc1526: &spin::once::Once<&dyn task::scheduler::Scheduler>};\n        _2 = spin::once::Once::<&dyn task::scheduler::Scheduler>::is_completed(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        goto -> bb4;\n    }\n    bb3: {\n        StorageDead(_3);\n        _4 = task::scheduler::fifo_scheduler::init() -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_2);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = {alloc1526: &spin::once::Once<&dyn task::scheduler::Scheduler>};\n        _7 = spin::once::Once::<&dyn task::scheduler::Scheduler>::get(move _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_8);\n        _6 = core::option::Option::<&&dyn task::scheduler::Scheduler>::unwrap(move _7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _14 = (*_6);\n        StorageDead(_7);\n        StorageLive(_9);\n        _9 = task::scheduler::EnqueueFlags::Spawn;\n        _5 = <dyn task::scheduler::Scheduler as task::scheduler::Scheduler>::enqueue(_14, _1, move _9) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_9);\n        StorageDead(_6);\n        _10 = discriminant(_5);\n        switchInt(move _10) -> [1: bb8, 0: bb10, otherwise: bb12];\n    }\n    bb8: {\n        _11 = ((_5 as variant#1).0: cpu::id::CpuId);\n        _12 = task::scheduler::set_need_preempt(_11) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        goto -> bb10;\n    }\n    bb10: {\n        _13 = task::scheduler::might_preempt() -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_5);\n        return;\n    }\n    bb12: {\n        unreachable;\n    }\n}\n",
+  "doc": " Enqueues a newly built task.\n\n Note that the new task is not guaranteed to run at once.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

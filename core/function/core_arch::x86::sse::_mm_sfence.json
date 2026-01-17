@@ -1,0 +1,27 @@
+{
+  "name": "core_arch::x86::sse::_mm_sfence",
+  "safe": false,
+  "callees": {
+    "core_arch::x86::sse::sfence": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 11638,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../stdarch/crates/core_arch/src/x86/sse.rs:1448:1: 1450:2",
+  "src": "pub fn _mm_sfence() {\n    unsafe { sfence() }\n}",
+  "mir": "fn core_arch::x86::sse::_mm_sfence() -> () {\n    let mut _0: ();\n    bb0: {\n        _0 = core_arch::x86::sse::sfence() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Performs a serializing operation on all non-temporal (\"streaming\") store instructions that\n were issued by the current thread prior to this instruction.\n\n Guarantees that every non-temporal store instruction that precedes this fence, in program order, is\n ordered before any load or store instruction which follows the fence in\n synchronization order.\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_sfence)\n (but note that Intel is only documenting the hardware-level concerns related to this\n instruction; the Intel documentation does not take into account the extra concerns that arise\n because the Rust memory model is different from the x86 memory model.)\n\n # Safety of non-temporal stores\n\n After using any non-temporal store intrinsic, but before any other access to the memory that the\n intrinsic mutates, a call to `_mm_sfence` must be performed on the thread that used the\n intrinsic.\n\n Non-temporal stores behave very different from regular stores. For the purpose of the Rust\n memory model, these stores are happening asynchronously in a background thread. This means a\n non-temporal store can cause data races with other accesses, even other accesses on the same\n thread. It also means that cross-thread synchronization does not work as expected: let's say the\n intrinsic is called on thread T1, and T1 performs synchronization with some other thread T2. The\n non-temporal store acts as if it happened not in T1 but in a different thread T3, and T2 has not\n synchronized with T3! Calling `_mm_sfence` makes the current thread wait for and synchronize\n with all the non-temporal stores previously started on this thread, which means in particular\n that subsequent synchronization with other threads will then work as intended again.\n\n The general pattern to use non-temporal stores correctly is to call `_mm_sfence` before your\n code jumps back to code outside your library. This ensures all stores inside your function\n are synchronized-before the return, and thus transitively synchronized-before everything\n the caller does after your function returns.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

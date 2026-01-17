@@ -1,0 +1,94 @@
+{
+  "name": "<ops::index_range::IndexRange as iter::traits::iterator::Iterator>::try_fold",
+  "safe": true,
+  "callees": {
+    "ops::index_range::IndexRange::assume_range": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "ops::index_range::IndexRange": "ImmutableAsArgument"
+      }
+    },
+    "ops::index_range::IndexRange::next_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " # Safety\n - Can only be called when `start < end`, aka when `len > 0`.\n",
+      "adt": {
+        "ops::index_range::IndexRange": "MutableAsArgument"
+      }
+    },
+    "ops::function::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::Try::from_output": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from its `Output` type.\n\n This should be implemented consistently with the `branch` method\n such that applying the `?` operator will get back the original value:\n `Try::from_output(x).branch() --> ControlFlow::Continue(x)`.\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::Try;\n\n assert_eq!(<Result<_, String> as Try>::from_output(3), Ok(3));\n assert_eq!(<Option<_> as Try>::from_output(4), Some(4));\n assert_eq!(\n     <std::ops::ControlFlow<String, _> as Try>::from_output(5),\n     std::ops::ControlFlow::Continue(5),\n );\n\n # fn make_question_mark_work() -> Option<()> {\n assert_eq!(Option::from_output(4)?, 4);\n # None }\n # make_question_mark_work();\n\n // This is used, for example, on the accumulator in `try_fold`:\n let r = std::iter::empty().try_fold(4, |_, ()| -> Option<_> { unreachable!() });\n assert_eq!(r, Some(4));\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ops::index_range::IndexRange": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 3241, kind: Param(ParamTy { index: 0, name: \"B\" }) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 3395, kind: Alias(Projection, AliasTy { def_id: AliasDef(DefId { id: 25500, name: \"ops::try_trait::Try::Residual\" }), args: GenericArgs([Type(Ty { id: 3292, kind: Param(ParamTy { index: 2, name: \"R\" }) })]) }) })])"
+    ]
+  },
+  "path": 15461,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:157:5: 173:6",
+  "src": "fn try_fold<B, F, R>(&mut self, mut accum: B, mut f: F) -> R\n    where\n        Self: Sized,\n        F: FnMut(B, Self::Item) -> R,\n        R: Try<Output = B>,\n    {\n        // `Range` needs to check `start < end`, but thanks to our type invariant\n        // we can loop on the stricter `start != end`.\n\n        self.assume_range();\n        while self.start != self.end {\n            // SAFETY: We just checked that the range is non-empty\n            let i = unsafe { self.next_unchecked() };\n            accum = f(accum, i)?;\n        }\n        try { accum }\n    }",
+  "mir": "fn <ops::index_range::IndexRange as iter::traits::iterator::Iterator>::try_fold(_1: &mut ops::index_range::IndexRange, _2: B, _3: F) -> R {\n    let mut _0: R;\n    let  _4: ();\n    let mut _5: &ops::index_range::IndexRange;\n    let mut _6: bool;\n    let mut _7: usize;\n    let mut _8: usize;\n    let  _9: usize;\n    let mut _10: ops::control_flow::ControlFlow<<R as ops::try_trait::Try>::Residual, B>;\n    let mut _11: R;\n    let mut _12: &mut F;\n    let mut _13: (B, usize);\n    let mut _14: B;\n    let mut _15: isize;\n    let  _16: <R as ops::try_trait::Try>::Residual;\n    let  _17: B;\n    let mut _18: B;\n    debug self => _1;\n    debug accum => _2;\n    debug f => _3;\n    debug i => _9;\n    debug residual => _16;\n    debug val => _17;\n    bb0: {\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = ops::index_range::IndexRange::assume_range(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        goto -> bb2;\n    }\n    bb2: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = ((*_1).0: usize);\n        StorageLive(_8);\n        _8 = ((*_1).1: usize);\n        _6 = Ne(move _7, move _8);\n        switchInt(move _6) -> [0: bb11, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageDead(_7);\n        _9 = ops::index_range::IndexRange::next_unchecked(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &mut _3;\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = move _2;\n        _13 = (move _14, _9);\n        _11 = <F as ops::function::FnMut<(B, usize)>>::call_mut(move _12, move _13) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_12);\n        _10 = <R as ops::try_trait::Try>::branch(move _11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        _15 = discriminant(_10);\n        switchInt(move _15) -> [0: bb8, 1: bb9, otherwise: bb7];\n    }\n    bb7: {\n        unreachable;\n    }\n    bb8: {\n        _17 = move ((_10 as variant#0).0: B);\n        _2 = _17;\n        StorageDead(_10);\n        StorageDead(_6);\n        goto -> bb2;\n    }\n    bb9: {\n        _16 = move ((_10 as variant#1).0: <R as ops::try_trait::Try>::Residual);\n        _0 = <R as ops::try_trait::FromResidual>::from_residual(_16) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_10);\n        StorageDead(_6);\n        drop(_3) -> [return: bb13, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageLive(_18);\n        _18 = move _2;\n        _0 = <R as ops::try_trait::Try>::from_output(move _18) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_18);\n        drop(_3) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

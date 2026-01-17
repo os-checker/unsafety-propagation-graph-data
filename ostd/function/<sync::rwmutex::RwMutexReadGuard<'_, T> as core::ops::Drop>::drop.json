@@ -1,0 +1,58 @@
+{
+  "name": "<sync::rwmutex::RwMutexReadGuard<'_, T> as core::ops::Drop>::drop",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicUsize::fetch_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts from the current value, returning the previous value.\n\n This operation wraps around on overflow.\n\n `fetch_sub` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n assert_eq!(foo.fetch_sub(10, Ordering::SeqCst), 20);\n assert_eq!(foo.load(Ordering::SeqCst), 10);\n ```\n",
+      "adt": {}
+    },
+    "sync::wait::WaitQueue::wake_one": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wakes up one waiting thread, if there is one at the point of time when this method is\n called, returning whether such a thread was woken up.\n",
+      "adt": {
+        "sync::wait::WaitQueue": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "sync::rwmutex::RwMutex": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ],
+    "sync::rwmutex::RwMutexReadGuard": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "sync::wait::WaitQueue": [
+      "Ref"
+    ]
+  },
+  "path": 2703,
+  "span": "ostd/src/sync/rwmutex.rs:238:5: 243:6",
+  "src": "fn drop(&mut self) {\n        // When there are no readers, wake up a waiting writer.\n        if self.inner.lock.fetch_sub(READER, Release) == READER {\n            self.inner.queue.wake_one();\n        }\n    }",
+  "mir": "fn <sync::rwmutex::RwMutexReadGuard<'_, T> as core::ops::Drop>::drop(_1: &mut sync::rwmutex::RwMutexReadGuard<'_, T>) -> () {\n    let mut _0: ();\n    let mut _2: bool;\n    let mut _3: usize;\n    let mut _4: &core::sync::atomic::AtomicUsize;\n    let mut _5: core::sync::atomic::Ordering;\n    let  _6: bool;\n    let mut _7: &sync::wait::WaitQueue;\n    let mut _8: &sync::rwmutex::RwMutex<T>;\n    let mut _9: &sync::rwmutex::RwMutex<T>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _8 = ((*_1).0: &sync::rwmutex::RwMutex<T>);\n        _4 = &((*_8).0: core::sync::atomic::AtomicUsize);\n        StorageLive(_5);\n        _5 = core::sync::atomic::Ordering::Release;\n        _3 = core::sync::atomic::AtomicUsize::fetch_sub(move _4, sync::rwmutex::READER, move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _2 = Eq(move _3, sync::rwmutex::READER);\n        switchInt(move _2) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_6);\n        StorageLive(_7);\n        _9 = ((*_1).0: &sync::rwmutex::RwMutex<T>);\n        _7 = &((*_9).1: sync::wait::WaitQueue);\n        _6 = sync::wait::WaitQueue::wake_one(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageDead(_6);\n        goto -> bb5;\n    }\n    bb4: {\n        StorageDead(_3);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

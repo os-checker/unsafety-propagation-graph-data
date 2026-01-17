@@ -1,0 +1,56 @@
+{
+  "name": "option::Option::<T>::take_if",
+  "safe": true,
+  "callees": {
+    "option::Option::<T>::as_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts from `&mut Option<T>` to `Option<&mut T>`.\n\n # Examples\n\n ```\n let mut x = Some(2);\n match x.as_mut() {\n     Some(v) => *v = 42,\n     None => {},\n }\n assert_eq!(x, Some(42));\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::map_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the provided default result (if none),\n or applies a function to the contained value (if any).\n\n Arguments passed to `map_or` are eagerly evaluated; if you are passing\n the result of a function call, it is recommended to use [`map_or_else`],\n which is lazily evaluated.\n\n [`map_or_else`]: Option::map_or_else\n\n # Examples\n\n ```\n let x = Some(\"foo\");\n assert_eq!(x.map_or(42, |v| v.len()), 3);\n\n let x: Option<&str> = None;\n assert_eq!(x.map_or(42, |v| v.len()), 42);\n ```\n",
+      "adt": {}
+    },
+    "option::Option::<T>::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes the value out of the option, leaving a [`None`] in its place.\n\n # Examples\n\n ```\n let mut x = Some(2);\n let y = x.take();\n assert_eq!(x, None);\n assert_eq!(y, Some(2));\n\n let mut x: Option<u32> = None;\n let y = x.take();\n assert_eq!(x, None);\n assert_eq!(y, None);\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "MutRef",
+      "Plain"
+    ]
+  },
+  "path": 15758,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:1873:5: 1878:6",
+  "src": "pub const fn take_if<P>(&mut self, predicate: P) -> Option<T>\n    where\n        P: [const] FnOnce(&mut T) -> bool + [const] Destruct,\n    {\n        if self.as_mut().map_or(false, predicate) { self.take() } else { None }\n    }",
+  "mir": "fn option::Option::<T>::take_if(_1: &mut option::Option<T>, _2: P) -> option::Option<T> {\n    let mut _0: option::Option<T>;\n    let mut _3: bool;\n    let mut _4: option::Option<&mut T>;\n    debug self => _1;\n    debug predicate => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = option::Option::<T>::as_mut(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = option::Option::<&mut T>::map_or::<bool, P>(move _4, false, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _3) -> [0: bb5, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_4);\n        _0 = option::Option::<T>::take(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_4);\n        _0 = option::Option::None;\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Takes the value out of the option, but only if the predicate evaluates to\n `true` on a mutable reference to the value.\n\n In other words, replaces `self` with `None` if the predicate returns `true`.\n This method operates similar to [`Option::take`] but conditional.\n\n # Examples\n\n ```\n let mut x = Some(42);\n\n let prev = x.take_if(|v| if *v == 42 {\n     *v += 1;\n     false\n } else {\n     false\n });\n assert_eq!(x, Some(43));\n assert_eq!(prev, None);\n\n let prev = x.take_if(|v| *v == 43);\n assert_eq!(x, None);\n assert_eq!(prev, Some(43));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

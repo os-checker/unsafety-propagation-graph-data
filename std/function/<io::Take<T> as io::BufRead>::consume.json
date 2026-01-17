@@ -1,0 +1,43 @@
+{
+  "name": "<io::Take<T> as io::BufRead>::consume",
+  "safe": true,
+  "callees": {
+    "core::cmp::min": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the minimum of two values.\n\n Returns the first argument if the comparison determines them to be equal.\n\n Internally uses an alias to [`Ord::min`].\n\n # Examples\n\n ```\n use std::cmp;\n\n assert_eq!(cmp::min(1, 2), 1);\n assert_eq!(cmp::min(2, 2), 2);\n ```\n ```\n use std::cmp::{self, Ordering};\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(cmp::min(Equal(\"v1\"), Equal(\"v2\")).0, \"v1\");\n ```\n",
+      "adt": {}
+    },
+    "io::BufRead::consume": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Marks the given `amount` of additional bytes from the internal buffer as having been read.\n Subsequent calls to `read` only return bytes that have not been marked as read.\n\n This is a lower-level method and is meant to be used together with [`fill_buf`],\n which can be used to fill the internal buffer via `Read` methods.\n\n It is a logic error if `amount` exceeds the number of unread bytes in the internal buffer, which is returned by [`fill_buf`].\n\n # Examples\n\n Since `consume()` is meant to be used with [`fill_buf`],\n that method's example includes an example of `consume()`.\n\n [`fill_buf`]: BufRead::fill_buf\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "io::Take": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ]
+  },
+  "path": 1784,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/mod.rs:3118:5: 3123:6",
+  "src": "fn consume(&mut self, amt: usize) {\n        // Don't let callers reset the limit by passing an overlarge value\n        let amt = cmp::min(amt as u64, self.limit) as usize;\n        self.limit -= amt as u64;\n        self.inner.consume(amt);\n    }",
+  "mir": "fn <io::Take<T> as io::BufRead>::consume(_1: &mut io::Take<T>, _2: usize) -> () {\n    let mut _0: ();\n    let  _3: usize;\n    let mut _4: u64;\n    let mut _5: u64;\n    let mut _6: u64;\n    let mut _7: u64;\n    let mut _8: (u64, bool);\n    let  _9: ();\n    let mut _10: &mut T;\n    debug self => _1;\n    debug amt => _2;\n    debug amt => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = _2 as u64;\n        StorageLive(_6);\n        _6 = ((*_1).2: u64);\n        _4 = core::cmp::min::<u64>(move _5, move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        StorageDead(_5);\n        _3 = move _4 as usize;\n        StorageDead(_4);\n        StorageLive(_7);\n        _7 = _3 as u64;\n        _8 = CheckedSub(((*_1).2: u64), _7);\n        assert(!move (_8.1: bool), \"attempt to compute `{} - {}`, which would overflow\", ((*_1).2: u64), move _7) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        ((*_1).2: u64) = move (_8.0: u64);\n        StorageDead(_7);\n        StorageLive(_10);\n        _10 = &mut ((*_1).0: T);\n        _9 = <T as io::BufRead>::consume(move _10, _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

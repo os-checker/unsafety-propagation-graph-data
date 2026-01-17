@@ -1,0 +1,88 @@
+{
+  "name": "sync::Arc::<T>::new",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicUsize::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new atomic integer.\n\n # Examples\n\n ```\n\n ```\n",
+      "adt": {}
+    },
+    "boxed::Box::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory on the heap and then places `x` into it.\n\n This doesn't actually allocate if `T` is zero-sized.\n\n # Examples\n\n ```\n let five = Box::new(5);\n ```\n",
+      "adt": {
+        "boxed::Box": "Constructor"
+      }
+    },
+    "boxed::Box::<T, A>::leak": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes and leaks the `Box`, returning a mutable reference,\n `&'a mut T`.\n\n Note that the type `T` must outlive the chosen lifetime `'a`. If the type\n has only static references, or none at all, then this may be chosen to be\n `'static`.\n\n This function is mainly useful for data that lives for the remainder of\n the program's life. Dropping the returned reference will cause a memory\n leak. If this is not acceptable, the reference should first be wrapped\n with the [`Box::from_raw`] function producing a `Box`. This `Box` can\n then be dropped which will properly destroy `T` and release the\n allocated memory.\n\n Note: this is an associated function, which means that you have\n to call it as `Box::leak(b)` instead of `b.leak()`. This\n is so that there is no conflict with a method on the inner type.\n\n # Examples\n\n Simple usage:\n\n ```\n let x = Box::new(41);\n let static_ref: &'static mut usize = Box::leak(x);\n *static_ref += 1;\n assert_eq!(*static_ref, 42);\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # drop(unsafe { Box::from_raw(static_ref) });\n ```\n\n Unsized data:\n\n ```\n let x = vec![1, 2, 3].into_boxed_slice();\n let static_ref = Box::leak(x);\n static_ref[0] = 4;\n assert_eq!(*static_ref, [4, 2, 3]);\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # drop(unsafe { Box::from_raw(static_ref) });\n ```\n",
+      "adt": {}
+    },
+    "core::convert::Into::into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "sync::Arc::<T>::from_inner": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::Arc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicUsize": [
+      "Plain"
+    ],
+    "sync::ArcInner": [
+      "Plain",
+      "MutRef"
+    ],
+    "boxed::Box": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "sync::Arc": [
+      "Plain"
+    ]
+  },
+  "path": 2083,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:419:5: 428:6",
+  "src": "pub fn new(data: T) -> Arc<T> {\n        // Start the weak pointer count as 1 which is the weak pointer that's\n        // held by all the strong pointers (kinda), see std/rc.rs for more info\n        let x: Box<_> = Box::new(ArcInner {\n            strong: atomic::AtomicUsize::new(1),\n            weak: atomic::AtomicUsize::new(1),\n            data,\n        });\n        unsafe { Self::from_inner(Box::leak(x).into()) }\n    }",
+  "mir": "fn sync::Arc::<T>::new(_1: T) -> sync::Arc<T> {\n    let mut _0: sync::Arc<T>;\n    let  _2: boxed::Box<sync::ArcInner<T>>;\n    let mut _3: sync::ArcInner<T>;\n    let mut _4: core::sync::atomic::AtomicUsize;\n    let mut _5: core::sync::atomic::AtomicUsize;\n    let mut _6: core::ptr::NonNull<sync::ArcInner<T>>;\n    let mut _7: &mut sync::ArcInner<T>;\n    debug data => _1;\n    debug x => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = core::sync::atomic::AtomicUsize::new(1_usize) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = core::sync::atomic::AtomicUsize::new(1_usize) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = ArcInner(move _4, move _5, _1);\n        StorageDead(_5);\n        StorageDead(_4);\n        _2 = boxed::Box::<sync::ArcInner<T>>::new(move _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        StorageLive(_6);\n        _7 = boxed::Box::<sync::ArcInner<T>>::leak::<'_>(_2) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _6 = <&mut sync::ArcInner<T> as core::convert::Into<core::ptr::NonNull<sync::ArcInner<T>>>>::into(_7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = sync::Arc::<T>::from_inner(move _6) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_6);\n        return;\n    }\n}\n",
+  "doc": " Constructs a new `Arc<T>`.\n\n # Examples\n\n ```\n use std::sync::Arc;\n\n let five = Arc::new(5);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

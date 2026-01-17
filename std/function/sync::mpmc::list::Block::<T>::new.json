@@ -1,0 +1,41 @@
+{
+  "name": "sync::mpmc::list::Block::<T>::new",
+  "safe": true,
+  "callees": {
+    "alloc_crate::boxed::Box::<T>::new_zeroed": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new `Box` with uninitialized contents, with the memory\n being filled with `0` bytes.\n\n See [`MaybeUninit::zeroed`][zeroed] for examples of correct and incorrect usage\n of this method.\n\n # Examples\n\n ```\n let zero = Box::<u32>::new_zeroed();\n let zero = unsafe { zero.assume_init() };\n\n assert_eq!(*zero, 0)\n ```\n\n [zeroed]: mem::MaybeUninit::zeroed\n",
+      "adt": {}
+    },
+    "alloc_crate::boxed::Box::<core::mem::MaybeUninit<T>, A>::assume_init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to `Box<T, A>`.\n\n # Safety\n\n As with [`MaybeUninit::assume_init`],\n it is up to the caller to guarantee that the value\n really is in an initialized state.\n Calling this when the content is not yet fully initialized\n causes immediate undefined behavior.\n\n [`MaybeUninit::assume_init`]: mem::MaybeUninit::assume_init\n\n # Examples\n\n ```\n let mut five = Box::<u32>::new_uninit();\n // Deferred initialization:\n five.write(5);\n let five: Box<u32> = unsafe { five.assume_init() };\n\n assert_eq!(*five, 5)\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc_crate::boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 2842,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/list.rs:66:5: 74:6",
+  "src": "fn new() -> Box<Block<T>> {\n        // SAFETY: This is safe because:\n        //  [1] `Block::next` (Atomic<*mut _>) may be safely zero initialized.\n        //  [2] `Block::slots` (Array) may be safely zero initialized because of [3, 4].\n        //  [3] `Slot::msg` (UnsafeCell) may be safely zero initialized because it\n        //       holds a MaybeUninit.\n        //  [4] `Slot::state` (Atomic<usize>) may be safely zero initialized.\n        unsafe { Box::new_zeroed().assume_init() }\n    }",
+  "mir": "fn sync::mpmc::list::Block::<T>::new() -> alloc_crate::boxed::Box<sync::mpmc::list::Block<T>> {\n    let mut _0: alloc_crate::boxed::Box<sync::mpmc::list::Block<T>>;\n    let mut _1: alloc_crate::boxed::Box<core::mem::MaybeUninit<sync::mpmc::list::Block<T>>>;\n    bb0: {\n        StorageLive(_1);\n        _1 = alloc_crate::boxed::Box::<sync::mpmc::list::Block<T>>::new_zeroed() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = alloc_crate::boxed::Box::<core::mem::MaybeUninit<sync::mpmc::list::Block<T>>>::assume_init(move _1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": " Creates an empty block.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

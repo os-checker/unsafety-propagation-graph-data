@@ -1,0 +1,60 @@
+{
+  "name": "thread::thread::Thread::park",
+  "safe": false,
+  "callees": {
+    "core::pin::Pin::<Ptr>::as_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a shared reference to the pinned value this [`Pin`] points to.\n\n This is a generic method to go from `&Pin<Pointer<T>>` to `Pin<&T>`.\n It is safe because, as part of the contract of `Pin::new_unchecked`,\n the pointee cannot move after `Pin<Pointer<T>>` got created.\n \"Malicious\" implementations of `Pointer::Deref` are likewise\n ruled out by the contract of `Pin::new_unchecked`.\n",
+      "adt": {}
+    },
+    "thread::thread::Inner::parker": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::pin::Pin": "Constructor"
+      }
+    },
+    "sys::sync::thread_parking::futex::Parker::park": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::pin::Pin": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "core::pin::Pin": [
+      "Ref",
+      "Plain"
+    ],
+    "thread::thread::Thread": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ]
+  },
+  "path": 4575,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/thread.rs:120:5: 122:6",
+  "src": "pub(crate) unsafe fn park(&self) {\n        unsafe { self.inner.as_ref().parker().park() }\n    }",
+  "mir": "fn thread::thread::Thread::park(_1: &thread::thread::Thread) -> () {\n    let mut _0: ();\n    let mut _2: core::pin::Pin<&sys::sync::thread_parking::futex::Parker>;\n    let mut _3: core::pin::Pin<&thread::thread::Inner>;\n    let mut _4: &core::pin::Pin<alloc_crate::sync::Arc<thread::thread::Inner, alloc::System>>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &((*_1).0: core::pin::Pin<alloc_crate::sync::Arc<thread::thread::Inner, alloc::System>>);\n        _3 = core::pin::Pin::<alloc_crate::sync::Arc<thread::thread::Inner, alloc::System>>::as_ref(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = thread::thread::Inner::parker(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = sys::sync::thread_parking::futex::Parker::park(move _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Like the public [`park`], but callable on any handle. This is used to\n allow parking in TLS destructors.\n\n # Safety\n May only be called from the thread to which this handle belongs.\n\n [`park`]: super::park\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

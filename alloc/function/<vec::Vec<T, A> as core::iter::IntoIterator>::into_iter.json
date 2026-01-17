@@ -1,0 +1,145 @@
+{
+  "name": "<vec::Vec<T, A> as core::iter::IntoIterator>::into_iter",
+  "safe": true,
+  "callees": {
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::allocator": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the underlying allocator.\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `src` without moving it. This leaves the\n memory in `src` unchanged.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads.\n\n * `src` must be properly aligned. Use [`read_unaligned`] if this is not the\n   case.\n\n * `src` must point to a properly initialized value of type `T`.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n # Examples\n\n Basic usage:\n\n ```\n let x = 12;\n let y = &x as *const i32;\n\n unsafe {\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n\n ## Ownership of the Returned Value\n\n `read` creates a bitwise copy of `T`, regardless of whether `T` is [`Copy`].\n If `T` is not [`Copy`], using both the returned value and the value at\n `*src` can violate memory safety. Note that assigning to `*src` counts as a\n use because it will attempt to drop the value at `*src`.\n\n [`write()`] can be used to overwrite data without causing it to be dropped.\n\n ```\n use std::ptr;\n\n let mut s = String::from(\"foo\");\n unsafe {\n     // `s2` now points to the same underlying memory as `s`.\n     let mut s2: String = ptr::read(&s);\n\n     assert_eq!(s2, \"foo\");\n\n     // Assigning to `s2` causes its original value to be dropped. Beyond\n     // this point, `s` must no longer be used, as the underlying memory has\n     // been freed.\n     s2 = String::default();\n     assert_eq!(s2, \"\");\n\n     // Assigning to `s` would cause the old value to be dropped again,\n     // resulting in undefined behavior.\n     // s = String::from(\"bar\"); // ERROR\n\n     // `ptr::write` can be used to overwrite a value without dropping it.\n     ptr::write(&mut s, String::from(\"bar\"));\n }\n\n assert_eq!(s, \"bar\");\n ```\n\n [valid]: self#safety\n",
+      "adt": {}
+    },
+    "raw_vec::RawVec::<T, A>::non_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "raw_vec::RawVec": "ImmutableAsArgument",
+        "core::ptr::NonNull": "Constructor"
+      }
+    },
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the vector, also referred to\n as its 'length'.\n\n # Examples\n\n ```\n let a = vec![1, 2, 3];\n assert_eq!(a.len(), 3);\n ```\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::wrapping_byte_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds an unsigned offset in bytes to a pointer using wrapping arithmetic.\n\n `count` is in units of bytes.\n\n This is purely a convenience for casting to a `u8` pointer and\n using [wrapping_add][pointer::wrapping_add] on it. See that method for documentation.\n\n For non-`Sized` pointees this operation changes only the data pointer,\n leaving the metadata untouched.\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "raw_vec::RawVec::<T, A>::capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the capacity of the allocation.\n\n This will always be `usize::MAX` if `T` is zero-sized.\n",
+      "adt": {
+        "raw_vec::RawVec": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Plain",
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "raw_vec::RawVec": [
+      "Ref"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "vec::into_iter::IntoIter": [
+      "Plain"
+    ]
+  },
+  "path": 2331,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:3750:5: 3764:6",
+  "src": "fn into_iter(self) -> Self::IntoIter {\n        unsafe {\n            let me = ManuallyDrop::new(self);\n            let alloc = ManuallyDrop::new(ptr::read(me.allocator()));\n            let buf = me.buf.non_null();\n            let begin = buf.as_ptr();\n            let end = if T::IS_ZST {\n                begin.wrapping_byte_add(me.len())\n            } else {\n                begin.add(me.len()) as *const T\n            };\n            let cap = me.buf.capacity();\n            IntoIter { buf, phantom: PhantomData, cap, alloc, ptr: buf, end }\n        }\n    }",
+  "mir": "fn <vec::Vec<T, A> as core::iter::IntoIterator>::into_iter(_1: vec::Vec<T, A>) -> vec::into_iter::IntoIter<T, A> {\n    let mut _0: vec::into_iter::IntoIter<T, A>;\n    let  _2: core::mem::ManuallyDrop<vec::Vec<T, A>>;\n    let  _3: core::mem::ManuallyDrop<A>;\n    let mut _4: A;\n    let mut _5: *const A;\n    let  _6: &A;\n    let  _7: &vec::Vec<T, A>;\n    let mut _8: &core::mem::ManuallyDrop<vec::Vec<T, A>>;\n    let  _9: core::ptr::NonNull<T>;\n    let mut _10: &raw_vec::RawVec<T, A>;\n    let  _11: &vec::Vec<T, A>;\n    let mut _12: &core::mem::ManuallyDrop<vec::Vec<T, A>>;\n    let  _13: *mut T;\n    let  _14: *const T;\n    let mut _15: *mut T;\n    let mut _16: usize;\n    let  _17: &vec::Vec<T, A>;\n    let mut _18: &core::mem::ManuallyDrop<vec::Vec<T, A>>;\n    let mut _19: *const T;\n    let mut _20: *mut T;\n    let mut _21: usize;\n    let  _22: &vec::Vec<T, A>;\n    let mut _23: &core::mem::ManuallyDrop<vec::Vec<T, A>>;\n    let  _24: usize;\n    let mut _25: &raw_vec::RawVec<T, A>;\n    let  _26: &vec::Vec<T, A>;\n    let mut _27: &core::mem::ManuallyDrop<vec::Vec<T, A>>;\n    let mut _28: *const T;\n    debug self => _1;\n    debug me => _2;\n    debug alloc => _3;\n    debug buf => _9;\n    debug begin => _13;\n    debug end => _14;\n    debug cap => _24;\n    bb0: {\n        StorageLive(_2);\n        _2 = core::mem::ManuallyDrop::<vec::Vec<T, A>>::new(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_8);\n        _8 = &_2;\n        _7 = <core::mem::ManuallyDrop<vec::Vec<T, A>> as core::ops::Deref>::deref(move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        _6 = vec::Vec::<T, A>::allocator(_7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _5 = &raw const (*_6);\n        _4 = core::ptr::read::<A>(move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        _3 = core::mem::ManuallyDrop::<A>::new(move _4) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_4);\n        StorageDead(_6);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &_2;\n        _11 = <core::mem::ManuallyDrop<vec::Vec<T, A>> as core::ops::Deref>::deref(move _12) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_12);\n        _10 = &((*_11).0: raw_vec::RawVec<T, A>);\n        _9 = raw_vec::RawVec::<T, A>::non_null(move _10) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageDead(_11);\n        _13 = core::ptr::NonNull::<T>::as_ptr(_9) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageLive(_14);\n        switchInt(<T as core::mem::SizedTypeProperties>::IS_ZST) -> [0: bb13, otherwise: bb9];\n    }\n    bb9: {\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_18);\n        _18 = &_2;\n        _17 = <core::mem::ManuallyDrop<vec::Vec<T, A>> as core::ops::Deref>::deref(move _18) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_18);\n        _16 = vec::Vec::<T, A>::len(_17) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _15 = core::ptr::mut_ptr::<impl *mut T>::wrapping_byte_add(_13, move _16) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_16);\n        _14 = move _15 as *const T;\n        StorageDead(_15);\n        goto -> bb17;\n    }\n    bb13: {\n        StorageLive(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_23);\n        _23 = &_2;\n        _22 = <core::mem::ManuallyDrop<vec::Vec<T, A>> as core::ops::Deref>::deref(move _23) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_23);\n        _21 = vec::Vec::<T, A>::len(_22) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        _20 = core::ptr::mut_ptr::<impl *mut T>::add(_13, move _21) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        _19 = move _20 as *const T;\n        StorageDead(_21);\n        StorageDead(_20);\n        _14 = move _19;\n        StorageDead(_19);\n        goto -> bb17;\n    }\n    bb17: {\n        StorageLive(_25);\n        StorageLive(_26);\n        StorageLive(_27);\n        _27 = &_2;\n        _26 = <core::mem::ManuallyDrop<vec::Vec<T, A>> as core::ops::Deref>::deref(move _27) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_27);\n        _25 = &((*_26).0: raw_vec::RawVec<T, A>);\n        _24 = raw_vec::RawVec::<T, A>::capacity(move _25) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_25);\n        StorageDead(_26);\n        StorageLive(_28);\n        _28 = _14;\n        _0 = IntoIter(_9, ZeroSized: core::marker::PhantomData<T>, _24, _3, _9, move _28);\n        StorageDead(_28);\n        StorageDead(_14);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Creates a consuming iterator, that is, one that moves each value out of\n the vector (from start to end). The vector cannot be used after calling\n this.\n\n # Examples\n\n ```\n let v = vec![\"a\".to_string(), \"b\".to_string()];\n let mut v_iter = v.into_iter();\n\n let first_element: Option<String> = v_iter.next();\n\n assert_eq!(first_element, Some(\"a\".to_string()));\n assert_eq!(v_iter.next(), Some(\"b\".to_string()));\n assert_eq!(v_iter.next(), None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

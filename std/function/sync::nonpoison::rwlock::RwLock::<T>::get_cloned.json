@@ -1,0 +1,58 @@
+{
+  "name": "sync::nonpoison::rwlock::RwLock::<T>::get_cloned",
+  "safe": true,
+  "callees": {
+    "sync::nonpoison::rwlock::RwLock::<T>::read": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Locks this `RwLock` with shared read access, blocking the current thread\n until it can be acquired.\n\n The calling thread will be blocked until there are no more writers which\n hold the lock. There may be other readers currently inside the lock when\n this method returns. This method does not provide any guarantees with\n respect to the ordering of whether contentious readers or writers will\n acquire the lock first.\n\n Returns an RAII guard which will release this thread's shared access\n once it is dropped.\n\n # Panics\n\n This function might panic when called if the lock is already held by the current thread.\n\n # Examples\n\n ```\n #![feature(nonpoison_rwlock)]\n\n use std::sync::Arc;\n use std::sync::nonpoison::RwLock;\n use std::thread;\n\n let lock = Arc::new(RwLock::new(1));\n let c_lock = Arc::clone(&lock);\n\n let n = lock.read();\n assert_eq!(*n, 1);\n\n thread::spawn(move || {\n     let r = c_lock.read();\n }).join().unwrap();\n ```\n",
+      "adt": {
+        "sync::nonpoison::rwlock::RwLock": "ImmutableAsArgument",
+        "sync::nonpoison::rwlock::RwLockReadGuard": "Constructor"
+      }
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::nonpoison::rwlock::RwLock": [
+      "Ref"
+    ],
+    "sync::nonpoison::rwlock::RwLockReadGuard": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 3114,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/nonpoison/rwlock.rs:226:5: 231:6",
+  "src": "pub fn get_cloned(&self) -> T\n    where\n        T: Clone,\n    {\n        self.read().clone()\n    }",
+  "mir": "fn sync::nonpoison::rwlock::RwLock::<T>::get_cloned(_1: &sync::nonpoison::rwlock::RwLock<T>) -> T {\n    let mut _0: T;\n    let  _2: &T;\n    let mut _3: &sync::nonpoison::rwlock::RwLockReadGuard<'_, T>;\n    let  _4: sync::nonpoison::rwlock::RwLockReadGuard<'_, T>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = sync::nonpoison::rwlock::RwLock::<T>::read(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = &_4;\n        _2 = <sync::nonpoison::rwlock::RwLockReadGuard<'_, T> as core::ops::Deref>::deref(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = <T as core::clone::Clone>::clone(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        drop(_4) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Returns the contained value by cloning it.\n\n # Examples\n\n ```\n #![feature(nonpoison_rwlock)]\n #![feature(lock_value_accessors)]\n\n use std::sync::nonpoison::RwLock;\n\n let mut lock = RwLock::new(7);\n\n assert_eq!(lock.get_cloned(), 7);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

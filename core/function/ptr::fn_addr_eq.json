@@ -1,0 +1,27 @@
+{
+  "name": "ptr::fn_addr_eq",
+  "safe": true,
+  "callees": {
+    "marker::FnPtr::addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the address of the function pointer.\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 16071,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:2487:1: 2489:2",
+  "src": "pub fn fn_addr_eq<T: FnPtr, U: FnPtr>(f: T, g: U) -> bool {\n    f.addr() == g.addr()\n}",
+  "mir": "fn ptr::fn_addr_eq(_1: T, _2: U) -> bool {\n    let mut _0: bool;\n    let mut _3: *const ();\n    let mut _4: *const ();\n    debug f => _1;\n    debug g => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = <T as marker::FnPtr>::addr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = <U as marker::FnPtr>::addr(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _0 = Eq(move _3, move _4);\n        StorageDead(_4);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Compares the *addresses* of the two function pointers for equality.\n\n This is the same as `f == g`, but using this function makes clear that the potentially\n surprising semantics of function pointer comparison are involved.\n\n There are **very few guarantees** about how functions are compiled and they have no intrinsic\n “identity”; in particular, this comparison:\n\n * May return `true` unexpectedly, in cases where functions are equivalent.\n\n   For example, the following program is likely (but not guaranteed) to print `(true, true)`\n   when compiled with optimization:\n\n   ```\n   let f: fn(i32) -> i32 = |x| x;\n   let g: fn(i32) -> i32 = |x| x + 0;  // different closure, different body\n   let h: fn(u32) -> u32 = |x| x + 0;  // different signature too\n   dbg!(std::ptr::fn_addr_eq(f, g), std::ptr::fn_addr_eq(f, h)); // not guaranteed to be equal\n   ```\n\n * May return `false` in any case.\n\n   This is particularly likely with generic functions but may happen with any function.\n   (From an implementation perspective, this is possible because functions may sometimes be\n   processed more than once by the compiler, resulting in duplicate machine code.)\n\n Despite these false positives and false negatives, this comparison can still be useful.\n Specifically, if\n\n * `T` is the same type as `U`, `T` is a [subtype] of `U`, or `U` is a [subtype] of `T`, and\n * `ptr::fn_addr_eq(f, g)` returns true,\n\n then calling `f` and calling `g` will be equivalent.\n\n\n # Examples\n\n ```\n use std::ptr;\n\n fn a() { println!(\"a\"); }\n fn b() { println!(\"b\"); }\n assert!(!ptr::fn_addr_eq(a as fn(), b as fn()));\n ```\n\n [subtype]: https://doc.rust-lang.org/reference/subtyping.html\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

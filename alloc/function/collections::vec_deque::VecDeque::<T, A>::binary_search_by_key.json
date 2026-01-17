@@ -1,0 +1,37 @@
+{
+  "name": "collections::vec_deque::VecDeque::<T, A>::binary_search_by_key",
+  "safe": true,
+  "callees": {
+    "collections::vec_deque::VecDeque::<T, A>::binary_search_by": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Binary searches this `VecDeque` with a comparator function.\n\n The comparator function should return an order code that indicates\n whether its argument is `Less`, `Equal` or `Greater` the desired\n target.\n If the `VecDeque` is not sorted or if the comparator function does not\n implement an order consistent with the sort order of the underlying\n `VecDeque`, the returned result is unspecified and meaningless.\n\n If the value is found then [`Result::Ok`] is returned, containing the\n index of the matching element. If there are multiple matches, then any\n one of the matches could be returned. If the value is not found then\n [`Result::Err`] is returned, containing the index where a matching\n element could be inserted while maintaining sorted order.\n\n See also [`binary_search`], [`binary_search_by_key`], and [`partition_point`].\n\n [`binary_search`]: VecDeque::binary_search\n [`binary_search_by_key`]: VecDeque::binary_search_by_key\n [`partition_point`]: VecDeque::partition_point\n\n # Examples\n\n Looks up a series of four elements. The first is found, with a\n uniquely determined position; the second and third are not\n found; the fourth could match any position in `[1, 4]`.\n\n ```\n use std::collections::VecDeque;\n\n let deque: VecDeque<_> = [0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55].into();\n\n assert_eq!(deque.binary_search_by(|x| x.cmp(&13)),  Ok(9));\n assert_eq!(deque.binary_search_by(|x| x.cmp(&4)),   Err(7));\n assert_eq!(deque.binary_search_by(|x| x.cmp(&100)), Err(13));\n let r = deque.binary_search_by(|x| x.cmp(&1));\n assert!(matches!(r, Ok(1..=4)));\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1461,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:3155:5: 3161:6",
+  "src": "pub fn binary_search_by_key<'a, B, F>(&'a self, b: &B, mut f: F) -> Result<usize, usize>\n    where\n        F: FnMut(&'a T) -> B,\n        B: Ord,\n    {\n        self.binary_search_by(|k| f(k).cmp(b))\n    }",
+  "mir": "fn collections::vec_deque::VecDeque::<T, A>::binary_search_by_key(_1: &collections::vec_deque::VecDeque<T, A>, _2: &B, _3: F) -> core::result::Result<usize, usize> {\n    let mut _0: core::result::Result<usize, usize>;\n    let mut _4: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:3160:31: 3160:34};\n    let mut _5: &mut F;\n    debug self => _1;\n    debug b => _2;\n    debug f => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &mut _3;\n        _4 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:3160:31: 3160:34}(move _5, _2);\n        StorageDead(_5);\n        _0 = collections::vec_deque::VecDeque::<T, A>::binary_search_by::<'_, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:3160:31: 3160:34}>(_1, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        drop(_3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Binary searches this `VecDeque` with a key extraction function.\n\n Assumes that the deque is sorted by the key, for instance with\n [`make_contiguous().sort_by_key()`] using the same key extraction function.\n If the deque is not sorted by the key, the returned result is\n unspecified and meaningless.\n\n If the value is found then [`Result::Ok`] is returned, containing the\n index of the matching element. If there are multiple matches, then any\n one of the matches could be returned. If the value is not found then\n [`Result::Err`] is returned, containing the index where a matching\n element could be inserted while maintaining sorted order.\n\n See also [`binary_search`], [`binary_search_by`], and [`partition_point`].\n\n [`make_contiguous().sort_by_key()`]: VecDeque::make_contiguous\n [`binary_search`]: VecDeque::binary_search\n [`binary_search_by`]: VecDeque::binary_search_by\n [`partition_point`]: VecDeque::partition_point\n\n # Examples\n\n Looks up a series of four elements in a slice of pairs sorted by\n their second elements. The first is found, with a uniquely\n determined position; the second and third are not found; the\n fourth could match any position in `[1, 4]`.\n\n ```\n use std::collections::VecDeque;\n\n let deque: VecDeque<_> = [(0, 0), (2, 1), (4, 1), (5, 1),\n          (3, 1), (1, 2), (2, 3), (4, 5), (5, 8), (3, 13),\n          (1, 21), (2, 34), (4, 55)].into();\n\n assert_eq!(deque.binary_search_by_key(&13, |&(a, b)| b),  Ok(9));\n assert_eq!(deque.binary_search_by_key(&4, |&(a, b)| b),   Err(7));\n assert_eq!(deque.binary_search_by_key(&100, |&(a, b)| b), Err(13));\n let r = deque.binary_search_by_key(&1, |&(a, b)| b);\n assert!(matches!(r, Ok(1..=4)));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

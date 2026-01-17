@@ -1,0 +1,85 @@
+{
+  "name": "arch::cpu::context::enable_essential_features",
+  "safe": true,
+  "callees": {
+    "arch::cpu::extension::has_extensions": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checks if the specified set of ISA extensions are available.\n",
+      "adt": {}
+    },
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    },
+    "x86_64::registers::control::x86_64::<impl x86_64::registers::control::Cr0>::read": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Read the current set of CR0 flags.\n",
+      "adt": {}
+    },
+    "core::ops::BitOr::bitor": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the `|` operation.\n\n # Examples\n\n ```\n assert_eq!(true | false, true);\n assert_eq!(false | false, false);\n assert_eq!(5u8 | 1u8, 5);\n assert_eq!(5u8 | 2u8, 7);\n ```\n",
+      "adt": {}
+    },
+    "x86_64::registers::control::_::<impl x86_64::registers::control::Cr0Flags>::remove": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The intersection of a source flags value with the complement of a target flags value (`&!`).\n\n This method is not equivalent to `self & !other` when `other` has unknown bits set.\n `remove` won't truncate `other`, but the `!` operator will.\n",
+      "adt": {}
+    },
+    "x86_64::registers::control::x86_64::<impl x86_64::registers::control::Cr0>::write": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Write CR0 flags.\n\n Preserves the value of reserved fields.\n\n ## Safety\n\n This function is unsafe because it's possible to violate memory\n safety through it, e.g. by disabling paging.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "x86_64::registers::control::Cr0Flags": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 221,
+  "span": "ostd/src/arch/x86/cpu/context/mod.rs:650:1: 674:2",
+  "src": "pub(in crate::arch) fn enable_essential_features() {\n    use super::extension::{IsaExtensions, has_extensions};\n\n    if has_extensions(IsaExtensions::XSAVE) {\n        XSTATE_MAX_FEATURES.call_once(|| super::cpuid::query_xstate_max_features().unwrap());\n        XSAVE_AREA_SIZE.call_once(|| {\n            let xsave_area_size = super::cpuid::query_xsave_area_size().unwrap() as usize;\n            assert!(xsave_area_size <= MAX_XSAVE_AREA_SIZE);\n            xsave_area_size\n        });\n    }\n\n    // We now assume that all x86-64 CPUs should have the FPU. Otherwise, we should check\n    // `has_extensions(IsaExtensions::FPU)` here.\n    {\n        let mut cr0 = Cr0::read();\n        cr0.remove(Cr0Flags::TASK_SWITCHED | Cr0Flags::EMULATE_COPROCESSOR);\n\n        unsafe {\n            Cr0::write(cr0);\n            // Flush out any pending x87 state.\n            core::arch::asm!(\"fninit\");\n        }\n    }\n}",
+  "mir": "fn arch::cpu::context::enable_essential_features() -> () {\n    let mut _0: ();\n    let mut _1: bool;\n    let  _2: &u64;\n    let mut _3: &spin::once::Once<u64>;\n    let  _4: &usize;\n    let mut _5: &spin::once::Once<usize>;\n    let mut _6: x86_64::registers::control::Cr0Flags;\n    let  _7: ();\n    let mut _8: &mut x86_64::registers::control::Cr0Flags;\n    let mut _9: x86_64::registers::control::Cr0Flags;\n    let  _10: ();\n    let mut _11: x86_64::registers::control::Cr0Flags;\n    debug cr0 => _6;\n    bb0: {\n        StorageLive(_1);\n        _1 = arch::cpu::extension::has_extensions(arch::cpu::extension::IsaExtensions::XSAVE) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _1) -> [0: bb5, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = {alloc24: &spin::once::Once<u64>};\n        _2 = spin::once::Once::<u64>::call_once::<{closure@ostd/src/arch/x86/cpu/context/mod.rs:654:39: 654:41}>(move _3, ZeroSized: {closure@ostd/src/arch/x86/cpu/context/mod.rs:654:39: 654:41}) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        StorageDead(_2);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = {alloc41: &spin::once::Once<usize>};\n        _4 = spin::once::Once::<usize>::call_once::<{closure@ostd/src/arch/x86/cpu/context/mod.rs:655:35: 655:37}>(move _5, ZeroSized: {closure@ostd/src/arch/x86/cpu/context/mod.rs:655:35: 655:37}) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_4);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_1);\n        StorageLive(_6);\n        _6 = x86_64::registers::control::x86_64::<impl x86_64::registers::control::Cr0>::read() -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_8);\n        _8 = &mut _6;\n        StorageLive(_9);\n        _9 = <x86_64::registers::control::Cr0Flags as core::ops::BitOr>::bitor(x86_64::registers::control::Cr0Flags::TASK_SWITCHED, x86_64::registers::control::Cr0Flags::EMULATE_COPROCESSOR) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _7 = x86_64::registers::control::_::<impl x86_64::registers::control::Cr0Flags>::remove(move _8, move _9) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_11);\n        _11 = _6;\n        _10 = x86_64::registers::control::x86_64::<impl x86_64::registers::control::Cr0>::write(move _11) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_11);\n        InlineAsm -> [goto: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_6);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

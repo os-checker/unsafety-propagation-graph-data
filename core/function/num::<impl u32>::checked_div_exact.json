@@ -1,0 +1,41 @@
+{
+  "name": "num::<impl u32>::checked_div_exact",
+  "safe": true,
+  "callees": {
+    "intrinsics::unlikely": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Hints to the compiler that branch condition is likely to be false.\n Returns the value passed to it.\n\n Any use other than with `if` statements will probably not have an effect.\n\n Note that, unlike most intrinsics, this is safe to call;\n it does not require an `unsafe` block.\n Therefore, implementations must not require the user to uphold\n any safety invariants.\n\n This intrinsic does not have a stable counterpart.\n",
+      "adt": {}
+    },
+    "intrinsics::exact_div": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an exact division, resulting in undefined behavior where\n `x % y != 0` or `y == 0` or `x == T::MIN && y == -1`\n\n This intrinsic does not have a stable counterpart.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 3652,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/uint_macros.rs:1319:9: 1332:10",
+  "src": "pub const fn checked_div_exact(self, rhs: Self) -> Option<Self> {\n            if intrinsics::unlikely(rhs == 0) {\n                None\n            } else {\n                // SAFETY: division by zero is checked above\n                unsafe {\n                    if intrinsics::unlikely(intrinsics::unchecked_rem(self, rhs) != 0) {\n                        None\n                    } else {\n                        Some(intrinsics::exact_div(self, rhs))\n                    }\n                }\n            }\n        }",
+  "mir": "fn num::<impl u32>::checked_div_exact(_1: u32, _2: u32) -> option::Option<u32> {\n    let mut _0: option::Option<u32>;\n    let mut _3: bool;\n    let mut _4: bool;\n    let mut _5: bool;\n    let mut _6: bool;\n    let mut _7: u32;\n    let mut _8: u32;\n    debug self => _1;\n    debug rhs => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = Eq(_2, 0_u32);\n        _3 = intrinsics::unlikely(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = option::Option::None;\n        goto -> bb9;\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = Rem(_1, _2);\n        _6 = Ne(move _7, 0_u32);\n        StorageDead(_7);\n        _5 = intrinsics::unlikely(move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        switchInt(move _5) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_6);\n        _0 = option::Option::None;\n        goto -> bb8;\n    }\n    bb6: {\n        StorageDead(_6);\n        StorageLive(_8);\n        _8 = intrinsics::exact_div::<u32>(_1, _2) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _0 = option::Option::Some(move _8);\n        StorageDead(_8);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageDead(_5);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Checked integer division without remainder. Computes `self / rhs`,\n returning `None` if `rhs == 0` or if `self % rhs != 0`.\n\n # Examples\n\n ```\n #![feature(exact_div)]\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

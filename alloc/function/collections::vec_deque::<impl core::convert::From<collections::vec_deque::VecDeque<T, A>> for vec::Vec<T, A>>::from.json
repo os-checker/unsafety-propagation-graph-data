@@ -1,0 +1,157 @@
+{
+  "name": "collections::vec_deque::<impl core::convert::From<collections::vec_deque::VecDeque<T, A>> for vec::Vec<T, A>>::from",
+  "safe": true,
+  "callees": {
+    "collections::vec_deque::VecDeque::<T, A>::make_contiguous": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Rearranges the internal storage of this deque so it is one contiguous\n slice, which is then returned.\n\n This method does not allocate and does not change the order of the\n inserted elements. As it returns a mutable slice, this can be used to\n sort a deque.\n\n Once the internal storage is contiguous, the [`as_slices`] and\n [`as_mut_slices`] methods will return the entire contents of the\n deque in a single slice.\n\n [`as_slices`]: VecDeque::as_slices\n [`as_mut_slices`]: VecDeque::as_mut_slices\n\n # Examples\n\n Sorting the content of a deque.\n\n ```\n use std::collections::VecDeque;\n\n let mut buf = VecDeque::with_capacity(15);\n\n buf.push_back(2);\n buf.push_back(1);\n buf.push_front(3);\n\n // sorting the deque\n buf.make_contiguous().sort();\n assert_eq!(buf.as_slices(), (&[1, 2, 3] as &[_], &[] as &[_]));\n\n // sorting it in reverse order\n buf.make_contiguous().sort_by(|a, b| b.cmp(a));\n assert_eq!(buf.as_slices(), (&[3, 2, 1] as &[_], &[] as &[_]));\n ```\n\n Getting immutable access to the contiguous slice.\n\n ```rust\n use std::collections::VecDeque;\n\n let mut buf = VecDeque::new();\n\n buf.push_back(2);\n buf.push_back(1);\n buf.push_front(3);\n\n buf.make_contiguous();\n if let (slice, &[]) = buf.as_slices() {\n     // we can now be sure that `slice` contains all elements of the deque,\n     // while still having immutable access to `buf`.\n     assert_eq!(buf.len(), slice.len());\n     assert_eq!(slice, &[3, 2, 1] as &[_]);\n }\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "raw_vec::RawVec::<T, A>::ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a raw pointer to the start of the allocation. Note that this is\n `Unique::dangling()` if `capacity == 0` or `T` is zero-sized. In the former case, you must\n be careful.\n",
+      "adt": {
+        "raw_vec::RawVec": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the deque.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut deque = VecDeque::new();\n assert_eq!(deque.len(), 0);\n deque.push_back(1);\n assert_eq!(deque.len(), 1);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements the deque can hold without\n reallocating.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let buf: VecDeque<i32> = VecDeque::with_capacity(10);\n assert!(buf.capacity() >= 10);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::allocator": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the underlying allocator.\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `src` without moving it. This leaves the\n memory in `src` unchanged.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads.\n\n * `src` must be properly aligned. Use [`read_unaligned`] if this is not the\n   case.\n\n * `src` must point to a properly initialized value of type `T`.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n # Examples\n\n Basic usage:\n\n ```\n let x = 12;\n let y = &x as *const i32;\n\n unsafe {\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n\n ## Ownership of the Returned Value\n\n `read` creates a bitwise copy of `T`, regardless of whether `T` is [`Copy`].\n If `T` is not [`Copy`], using both the returned value and the value at\n `*src` can violate memory safety. Note that assigning to `*src` counts as a\n use because it will attempt to drop the value at `*src`.\n\n [`write()`] can be used to overwrite data without causing it to be dropped.\n\n ```\n use std::ptr;\n\n let mut s = String::from(\"foo\");\n unsafe {\n     // `s2` now points to the same underlying memory as `s`.\n     let mut s2: String = ptr::read(&s);\n\n     assert_eq!(s2, \"foo\");\n\n     // Assigning to `s2` causes its original value to be dropped. Beyond\n     // this point, `s` must no longer be used, as the underlying memory has\n     // been freed.\n     s2 = String::default();\n     assert_eq!(s2, \"\");\n\n     // Assigning to `s` would cause the old value to be dropped again,\n     // resulting in undefined behavior.\n     // s = String::from(\"bar\"); // ERROR\n\n     // `ptr::write` can be used to overwrite a value without dropping it.\n     ptr::write(&mut s, String::from(\"bar\"));\n }\n\n assert_eq!(s, \"bar\");\n ```\n\n [valid]: self#safety\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::copy": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination may overlap.\n\n If the source and destination will *never* overlap,\n [`copy_nonoverlapping`] can be used instead.\n\n `copy` is semantically equivalent to C's [`memmove`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n Copying takes place as if the bytes were copied from `src`\n to a temporary array and then copied from the array to `dst`.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memmove`]: https://en.cppreference.com/w/c/string/byte/memmove\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes, and must remain valid even\n   when `src` is read for `count * size_of::<T>()` bytes. (This means if the memory ranges\n   overlap, the `dst` pointer must not be invalidated by `src` reads.)\n\n * Both `src` and `dst` must be properly aligned.\n\n Like [`read`], `copy` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using both the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Efficiently create a Rust vector from an unsafe buffer:\n\n ```\n use std::ptr;\n\n /// # Safety\n ///\n /// * `ptr` must be correctly aligned for its type and non-zero.\n /// * `ptr` must be valid for reads of `elts` contiguous elements of type `T`.\n /// * Those elements must not be used after calling this function unless `T: Copy`.\n # #[allow(dead_code)]\n unsafe fn from_buf_raw<T>(ptr: *const T, elts: usize) -> Vec<T> {\n     let mut dst = Vec::with_capacity(elts);\n\n     // SAFETY: Our precondition ensures the source is aligned and valid,\n     // and `Vec::with_capacity` ensures that we have usable space to write them.\n     unsafe { ptr::copy(ptr, dst.as_mut_ptr(), elts); }\n\n     // SAFETY: We created it with this much capacity earlier,\n     // and the previous `copy` has initialized these elements.\n     unsafe { dst.set_len(elts); }\n     dst\n }\n ```\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::from_raw_parts_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a `Vec<T, A>` directly from a pointer, a length, a capacity,\n and an allocator.\n\n # Safety\n\n This is highly unsafe, due to the number of invariants that aren't\n checked:\n\n * `ptr` must be [*currently allocated*] via the given allocator `alloc`.\n * `T` needs to have the same alignment as what `ptr` was allocated with.\n   (`T` having a less strict alignment is not sufficient, the alignment really\n   needs to be equal to satisfy the [`dealloc`] requirement that memory must be\n   allocated and deallocated with the same layout.)\n * The size of `T` times the `capacity` (ie. the allocated size in bytes) needs\n   to be the same size as the pointer was allocated with. (Because similar to\n   alignment, [`dealloc`] must be called with the same layout `size`.)\n * `length` needs to be less than or equal to `capacity`.\n * The first `length` values must be properly initialized values of type `T`.\n * `capacity` needs to [*fit*] the layout size that the pointer was allocated with.\n * The allocated size in bytes must be no larger than `isize::MAX`.\n   See the safety documentation of [`pointer::offset`].\n\n These requirements are always upheld by any `ptr` that has been allocated\n via `Vec<T, A>`. Other allocation sources are allowed if the invariants are\n upheld.\n\n Violating these may cause problems like corrupting the allocator's\n internal data structures. For example it is **not** safe\n to build a `Vec<u8>` from a pointer to a C `char` array with length `size_t`.\n It's also not safe to build one from a `Vec<u16>` and its length, because\n the allocator cares about the alignment, and these two types have different\n alignments. The buffer was allocated with alignment 2 (for `u16`), but after\n turning it into a `Vec<u8>` it'll be deallocated with alignment 1.\n\n The ownership of `ptr` is effectively transferred to the\n `Vec<T>` which may then deallocate, reallocate or change the\n contents of memory pointed to by the pointer at will. Ensure\n that nothing else uses the pointer after calling this\n function.\n\n [`String`]: crate::string::String\n [`dealloc`]: crate::alloc::GlobalAlloc::dealloc\n [*currently allocated*]: crate::alloc::Allocator#currently-allocated-memory\n [*fit*]: crate::alloc::Allocator#memory-fitting\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n use std::ptr;\n\n let mut v = Vec::with_capacity_in(3, System);\n v.push(1);\n v.push(2);\n v.push(3);\n\n // Deconstruct the vector into parts.\n let (p, len, cap, alloc) = v.into_raw_parts_with_alloc();\n\n unsafe {\n     // Overwrite memory with 4, 5, 6\n     for i in 0..len {\n         ptr::write(p.add(i), 4 + i);\n     }\n\n     // Put everything back together into a Vec\n     let rebuilt = Vec::from_raw_parts_in(p, len, cap, alloc.clone());\n     assert_eq!(rebuilt, [4, 5, 6]);\n }\n ```\n\n Using memory that was allocated elsewhere:\n\n ```rust\n #![feature(allocator_api)]\n\n use std::alloc::{AllocError, Allocator, Global, Layout};\n\n fn main() {\n     let layout = Layout::array::<u32>(16).expect(\"overflow cannot happen\");\n\n     let vec = unsafe {\n         let mem = match Global.allocate(layout) {\n             Ok(mem) => mem.cast::<u32>().as_ptr(),\n             Err(AllocError) => return,\n         };\n\n         mem.write(1_000_000);\n\n         Vec::from_raw_parts_in(mem, 1, 16, Global)\n     };\n\n     assert_eq!(vec, &[1_000_000]);\n     assert_eq!(vec.capacity(), 16);\n }\n ```\n",
+      "adt": {
+        "vec::Vec": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "MutRef",
+      "Plain",
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "raw_vec::RawVec": [
+      "Ref"
+    ],
+    "vec::Vec": [
+      "Plain"
+    ]
+  },
+  "path": 2322,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:3721:5: 3736:6",
+  "src": "fn from(mut other: VecDeque<T, A>) -> Self {\n        other.make_contiguous();\n\n        unsafe {\n            let other = ManuallyDrop::new(other);\n            let buf = other.buf.ptr();\n            let len = other.len();\n            let cap = other.capacity();\n            let alloc = ptr::read(other.allocator());\n\n            if other.head != 0 {\n                ptr::copy(buf.add(other.head), buf, len);\n            }\n            Vec::from_raw_parts_in(buf, len, cap, alloc)\n        }\n    }",
+  "mir": "fn collections::vec_deque::<impl core::convert::From<collections::vec_deque::VecDeque<T, A>> for vec::Vec<T, A>>::from(_1: collections::vec_deque::VecDeque<T, A>) -> vec::Vec<T, A> {\n    let mut _0: vec::Vec<T, A>;\n    let  _2: &mut [T];\n    let mut _3: &mut collections::vec_deque::VecDeque<T, A>;\n    let  _4: core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>>;\n    let mut _5: collections::vec_deque::VecDeque<T, A>;\n    let  _6: *mut T;\n    let mut _7: &raw_vec::RawVec<T, A>;\n    let  _8: &collections::vec_deque::VecDeque<T, A>;\n    let mut _9: &core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>>;\n    let  _10: usize;\n    let  _11: &collections::vec_deque::VecDeque<T, A>;\n    let mut _12: &core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>>;\n    let  _13: usize;\n    let  _14: &collections::vec_deque::VecDeque<T, A>;\n    let mut _15: &core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>>;\n    let  _16: A;\n    let mut _17: *const A;\n    let  _18: &A;\n    let  _19: &collections::vec_deque::VecDeque<T, A>;\n    let mut _20: &core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>>;\n    let mut _21: usize;\n    let mut _22: &collections::vec_deque::VecDeque<T, A>;\n    let mut _23: &core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>>;\n    let  _24: ();\n    let mut _25: *const T;\n    let mut _26: *mut T;\n    let mut _27: usize;\n    let mut _28: &collections::vec_deque::VecDeque<T, A>;\n    let mut _29: &core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>>;\n    debug other => _1;\n    debug other => _4;\n    debug buf => _6;\n    debug len => _10;\n    debug cap => _13;\n    debug alloc => _16;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &mut _1;\n        _2 = collections::vec_deque::VecDeque::<T, A>::make_contiguous(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageDead(_2);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = move _1;\n        _4 = core::mem::ManuallyDrop::<collections::vec_deque::VecDeque<T, A>>::new(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &_4;\n        _8 = <core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>> as core::ops::Deref>::deref(move _9) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_9);\n        _7 = &((*_8).2: raw_vec::RawVec<T, A>);\n        _6 = raw_vec::RawVec::<T, A>::ptr(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        StorageDead(_8);\n        StorageLive(_12);\n        _12 = &_4;\n        _11 = <core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>> as core::ops::Deref>::deref(move _12) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        _10 = collections::vec_deque::VecDeque::<T, A>::len(_11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_15);\n        _15 = &_4;\n        _14 = <core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>> as core::ops::Deref>::deref(move _15) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_15);\n        _13 = collections::vec_deque::VecDeque::<T, A>::capacity(_14) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageLive(_17);\n        StorageLive(_18);\n        StorageLive(_20);\n        _20 = &_4;\n        _19 = <core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>> as core::ops::Deref>::deref(move _20) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_20);\n        _18 = collections::vec_deque::VecDeque::<T, A>::allocator(_19) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _17 = &raw const (*_18);\n        _16 = core::ptr::read::<A>(move _17) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_17);\n        StorageDead(_18);\n        StorageLive(_21);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = &_4;\n        _22 = <core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>> as core::ops::Deref>::deref(move _23) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_23);\n        _21 = ((*_22).0: usize);\n        switchInt(move _21) -> [0: bb17, otherwise: bb13];\n    }\n    bb13: {\n        StorageDead(_22);\n        StorageDead(_21);\n        StorageLive(_25);\n        StorageLive(_26);\n        StorageLive(_27);\n        StorageLive(_28);\n        StorageLive(_29);\n        _29 = &_4;\n        _28 = <core::mem::ManuallyDrop<collections::vec_deque::VecDeque<T, A>> as core::ops::Deref>::deref(move _29) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_29);\n        _27 = ((*_28).0: usize);\n        _26 = core::ptr::mut_ptr::<impl *mut T>::add(_6, move _27) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        _25 = move _26 as *const T;\n        StorageDead(_27);\n        StorageDead(_26);\n        _24 = core::ptr::copy::<T>(move _25, _6, _10) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_25);\n        StorageDead(_28);\n        goto -> bb18;\n    }\n    bb17: {\n        StorageDead(_22);\n        StorageDead(_21);\n        goto -> bb18;\n    }\n    bb18: {\n        _0 = vec::Vec::<T, A>::from_raw_parts_in(_6, _10, _13, _16) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Turn a [`VecDeque<T>`] into a [`Vec<T>`].\n\n [`Vec<T>`]: crate::vec::Vec\n [`VecDeque<T>`]: crate::collections::VecDeque\n\n This never needs to re-allocate, but does need to do *O*(*n*) data movement if\n the circular buffer doesn't happen to be at the beginning of the allocation.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n // This one is *O*(1).\n let deque: VecDeque<_> = (1..5).collect();\n let ptr = deque.as_slices().0.as_ptr();\n let vec = Vec::from(deque);\n assert_eq!(vec, [1, 2, 3, 4]);\n assert_eq!(vec.as_ptr(), ptr);\n\n // This one needs data rearranging.\n let mut deque: VecDeque<_> = (1..5).collect();\n deque.push_front(9);\n deque.push_front(8);\n let ptr = deque.as_slices().1.as_ptr();\n let vec = Vec::from(deque);\n assert_eq!(vec, [8, 9, 1, 2, 3, 4]);\n assert_eq!(vec.as_ptr(), ptr);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

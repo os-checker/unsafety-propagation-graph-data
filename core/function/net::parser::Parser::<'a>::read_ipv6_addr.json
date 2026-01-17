@@ -1,0 +1,37 @@
+{
+  "name": "net::parser::Parser::<'a>::read_ipv6_addr",
+  "safe": true,
+  "callees": {
+    "net::parser::Parser::<'a>::read_atomically": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Run a parser, and restore the pre-parse state if it fails.\n",
+      "adt": {
+        "net::parser::Parser": "MutableAsArgument",
+        "option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "net::parser::Parser": [
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 14627,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/net/parser.rs:178:5: 242:6",
+  "src": "fn read_ipv6_addr(&mut self) -> Option<Ipv6Addr> {\n        /// Read a chunk of an IPv6 address into `groups`. Returns the number\n        /// of groups read, along with a bool indicating if an embedded\n        /// trailing IPv4 address was read. Specifically, read a series of\n        /// colon-separated IPv6 groups (0x0000 - 0xFFFF), with an optional\n        /// trailing embedded IPv4 address.\n        fn read_groups(p: &mut Parser<'_>, groups: &mut [u16]) -> (usize, bool) {\n            let limit = groups.len();\n\n            for (i, slot) in groups.iter_mut().enumerate() {\n                // Try to read a trailing embedded IPv4 address. There must be\n                // at least two groups left.\n                if i < limit - 1 {\n                    let ipv4 = p.read_separator(':', i, |p| p.read_ipv4_addr());\n\n                    if let Some(v4_addr) = ipv4 {\n                        let [one, two, three, four] = v4_addr.octets();\n                        groups[i + 0] = u16::from_be_bytes([one, two]);\n                        groups[i + 1] = u16::from_be_bytes([three, four]);\n                        return (i + 2, true);\n                    }\n                }\n\n                let group = p.read_separator(':', i, |p| p.read_number(16, Some(4), true));\n\n                match group {\n                    Some(g) => *slot = g,\n                    None => return (i, false),\n                }\n            }\n            (groups.len(), false)\n        }\n\n        self.read_atomically(|p| {\n            // Read the front part of the address; either the whole thing, or up\n            // to the first ::\n            let mut head = [0; 8];\n            let (head_size, head_ipv4) = read_groups(p, &mut head);\n\n            if head_size == 8 {\n                return Some(head.into());\n            }\n\n            // IPv4 part is not allowed before `::`\n            if head_ipv4 {\n                return None;\n            }\n\n            // Read `::` if previous code parsed less than 8 groups.\n            // `::` indicates one or more groups of 16 bits of zeros.\n            p.read_given_char(':')?;\n            p.read_given_char(':')?;\n\n            // Read the back part of the address. The :: must contain at least one\n            // set of zeroes, so our max length is 7.\n            let mut tail = [0; 7];\n            let limit = 8 - (head_size + 1);\n            let (tail_size, _) = read_groups(p, &mut tail[..limit]);\n\n            // Concat the head and tail of the IP address\n            head[(8 - tail_size)..8].copy_from_slice(&tail[..tail_size]);\n\n            Some(head.into())\n        })\n    }",
+  "mir": "fn net::parser::Parser::<'a>::read_ipv6_addr(_1: &mut net::parser::Parser<'_>) -> option::Option<net::ip_addr::Ipv6Addr> {\n    let mut _0: option::Option<net::ip_addr::Ipv6Addr>;\n    debug self => _1;\n    bb0: {\n        _0 = net::parser::Parser::<'_>::read_atomically::<net::ip_addr::Ipv6Addr, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/net/parser.rs:211:30: 211:33}>(_1, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/net/parser.rs:211:30: 211:33}) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Reads an IPv6 address.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

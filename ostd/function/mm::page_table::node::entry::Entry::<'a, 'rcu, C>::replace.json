@@ -1,0 +1,151 @@
+{
+  "name": "mm::page_table::node::entry::Entry::<'a, 'rcu, C>::replace",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "mm::page_table::node::<impl mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>::level": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "mm::frame::Frame": "ImmutableAsArgument"
+      }
+    },
+    "core::panicking::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Internal function for `assert_eq!` and `assert_ne!` macros\n",
+      "adt": {}
+    },
+    "mm::page_table::node::child::Child::<C>::from_pte": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " # Safety\n\n The provided PTE must be the output of [`Self::into_pte`], and the PTE:\n  - must not be used to created a [`Child`] twice;\n  - must not be referenced by a living [`ChildRef`].\n\n The level must match the original level of the child.\n",
+      "adt": {
+        "mm::page_table::node::child::Child": "Constructor"
+      }
+    },
+    "mm::page_table::node::child::Child::<C>::is_none": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns whether the child is not present.\n",
+      "adt": {
+        "mm::page_table::node::child::Child": "MutableAsArgument"
+      }
+    },
+    "mm::page_table::node::PageTableGuard::<'rcu, C>::nr_children_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the mutable reference to the number of valid PTEs in the node.\n",
+      "adt": {
+        "mm::page_table::node::PageTableGuard": "MutableAsArgument"
+      }
+    },
+    "mm::page_table::node::child::Child::<C>::into_pte": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "mm::page_table::node::PageTableGuard::<'rcu, C>::write_pte": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a page table entry at a given index.\n\n This operation will leak the old child if the old PTE is present.\n\n # Safety\n\n The caller must ensure that:\n  1. The index must be within the bound;\n  2. The PTE must represent a [`Child`] in the same [`PageTableConfig`]\n     and at the right paging level (`self.level() - 1`).\n  3. The page table node will have the ownership of the [`Child`]\n     after this method.\n",
+      "adt": {
+        "mm::page_table::node::PageTableGuard": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "mm::page_table::node::child::Child": [
+      "Ref",
+      "Plain",
+      "Deref",
+      "Unknown([Deref, Downcast(VariantIdx(1, ThreadLocalIndex)), Field(1, Ty { id: 1, kind: RigidTy(Uint(U8)) })])",
+      "Unknown([Deref, Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 5508, kind: RigidTy(Adt(AdtDef(DefId { id: 5361, name: \"sync::rcu::RcuDrop\" }), GenericArgs([Type(Ty { id: 5483, kind: RigidTy(Adt(AdtDef(DefId { id: 3414, name: \"mm::frame::Frame\" }), GenericArgs([Type(Ty { id: 5484, kind: RigidTy(Adt(AdtDef(DefId { id: 5364, name: \"mm::page_table::node::PageTablePageMeta\" }), GenericArgs([Type(Ty { id: 5469, kind: Param(ParamTy { index: 2, name: \"C\" }) })]))) })]))) })]))) })])"
+    ],
+    "mm::page_table::node::PageTableGuard": [
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "mm::page_table::node::entry::Entry": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "mm::frame::frame_ref::FrameRef": [
+      "Ref"
+    ],
+    "sync::rcu::RcuDrop": [
+      "Ref"
+    ],
+    "mm::frame::Frame": [
+      "Ref"
+    ],
+    "core::panicking::AssertKind": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 2389,
+  "span": "ostd/src/mm/page_table/node/entry.rs:92:5: 123:6",
+  "src": "pub(in crate::mm) fn replace(&mut self, new_child: Child<C>) -> Child<C> {\n        match &new_child {\n            Child::PageTable(node) => {\n                assert_eq!(node.level(), self.node.level() - 1);\n            }\n            Child::Frame(_, level, _) => {\n                assert_eq!(*level, self.node.level());\n            }\n            Child::None => {}\n        }\n\n        // SAFETY:\n        //  - The PTE is not referenced by other `ChildRef`s (since we have `&mut self`).\n        //  - The level matches the current node.\n        let old_child = unsafe { Child::from_pte(self.pte, self.node.level()) };\n\n        if old_child.is_none() && !new_child.is_none() {\n            *self.node.nr_children_mut() += 1;\n        } else if !old_child.is_none() && new_child.is_none() {\n            *self.node.nr_children_mut() -= 1;\n        }\n\n        self.pte = new_child.into_pte();\n\n        // SAFETY:\n        //  1. The index is within the bounds.\n        //  2. The new PTE is a child in `C` and at the correct paging level.\n        //  3. The ownership of the child is passed to the page table node.\n        unsafe { self.node.write_pte(self.idx, self.pte) };\n\n        old_child\n    }",
+  "mir": "fn mm::page_table::node::entry::Entry::<'a, 'rcu, C>::replace(_1: &mut mm::page_table::node::entry::Entry<'_, '_, C>, _2: mm::page_table::node::child::Child<C>) -> mm::page_table::node::child::Child<C> {\n    let mut _0: mm::page_table::node::child::Child<C>;\n    let mut _3: &mm::page_table::node::child::Child<C>;\n    let mut _4: isize;\n    let  _5: &sync::rcu::RcuDrop<mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>;\n    let mut _6: (&u8, &u8);\n    let mut _7: &u8;\n    let  _8: u8;\n    let  _9: &mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>;\n    let mut _10: &u8;\n    let  _11: u8;\n    let mut _12: u8;\n    let  _13: &mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>;\n    let  _14: &mm::frame::frame_ref::FrameRef<'_, mm::page_table::node::PageTablePageMeta<C>>;\n    let mut _15: &mm::page_table::node::PageTableGuard<'_, C>;\n    let mut _16: (u8, bool);\n    let  _17: &u8;\n    let  _18: &u8;\n    let mut _19: bool;\n    let mut _20: u8;\n    let mut _21: u8;\n    let  _22: core::panicking::AssertKind;\n    let  _23: !;\n    let mut _24: core::option::Option<core::fmt::Arguments<'_>>;\n    let  _25: &u8;\n    let mut _26: (&u8, &u8);\n    let mut _27: &u8;\n    let  _28: u8;\n    let  _29: &mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>;\n    let  _30: &mm::frame::frame_ref::FrameRef<'_, mm::page_table::node::PageTablePageMeta<C>>;\n    let mut _31: &mm::page_table::node::PageTableGuard<'_, C>;\n    let  _32: &u8;\n    let  _33: &u8;\n    let mut _34: bool;\n    let mut _35: u8;\n    let mut _36: u8;\n    let  _37: core::panicking::AssertKind;\n    let  _38: !;\n    let mut _39: core::option::Option<core::fmt::Arguments<'_>>;\n    let mut _40: <C as mm::page_table::PageTableConfig>::E;\n    let mut _41: u8;\n    let  _42: &mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>;\n    let  _43: &mm::frame::frame_ref::FrameRef<'_, mm::page_table::node::PageTablePageMeta<C>>;\n    let mut _44: &mm::page_table::node::PageTableGuard<'_, C>;\n    let mut _45: bool;\n    let mut _46: &mm::page_table::node::child::Child<C>;\n    let mut _47: bool;\n    let mut _48: &mm::page_table::node::child::Child<C>;\n    let mut _49: &mut u16;\n    let mut _50: (u16, bool);\n    let mut _51: bool;\n    let mut _52: &mm::page_table::node::child::Child<C>;\n    let mut _53: bool;\n    let mut _54: &mm::page_table::node::child::Child<C>;\n    let mut _55: &mut u16;\n    let mut _56: (u16, bool);\n    let mut _57: <C as mm::page_table::PageTableConfig>::E;\n    let  _58: ();\n    let mut _59: usize;\n    let mut _60: <C as mm::page_table::PageTableConfig>::E;\n    let mut _61: &mut mm::page_table::node::PageTableGuard<'_, C>;\n    let mut _62: &mut mm::page_table::node::PageTableGuard<'_, C>;\n    let mut _63: &mut mm::page_table::node::PageTableGuard<'_, C>;\n    let mut _64: &mut mm::page_table::node::PageTableGuard<'_, C>;\n    let mut _65: &mut mm::page_table::node::PageTableGuard<'_, C>;\n    let mut _66: &mut mm::page_table::node::PageTableGuard<'_, C>;\n    debug self => _1;\n    debug new_child => _2;\n    debug node => _5;\n    debug left_val => _17;\n    debug right_val => _18;\n    debug kind => _22;\n    debug level => _25;\n    debug left_val => _32;\n    debug right_val => _33;\n    debug kind => _37;\n    debug old_child => _0;\n    bb0: {\n        StorageLive(_3);\n        _3 = &_2;\n        _4 = discriminant((*_3));\n        switchInt(move _4) -> [0: bb3, 1: bb2, 2: bb17, otherwise: bb1];\n    }\n    bb1: {\n        unreachable;\n    }\n    bb2: {\n        _25 = &(((*_3) as variant#1).1: u8);\n        StorageLive(_26);\n        StorageLive(_27);\n        StorageLive(_28);\n        StorageLive(_31);\n        _61 = ((*_1).2: &mut mm::page_table::node::PageTableGuard<'_, C>);\n        _31 = &(*_61);\n        _30 = <mm::page_table::node::PageTableGuard<'_, C> as core::ops::Deref>::deref(move _31) -> [return: bb12, unwind unreachable];\n    }\n    bb3: {\n        _5 = &(((*_3) as variant#0).0: sync::rcu::RcuDrop<mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _9 = <sync::rcu::RcuDrop<mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>> as core::ops::Deref>::deref(_5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _8 = mm::page_table::node::<impl mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>::level(_9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _7 = &_8;\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_15);\n        _62 = ((*_1).2: &mut mm::page_table::node::PageTableGuard<'_, C>);\n        _15 = &(*_62);\n        _14 = <mm::page_table::node::PageTableGuard<'_, C> as core::ops::Deref>::deref(move _15) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _13 = <mm::frame::frame_ref::FrameRef<'_, mm::page_table::node::PageTablePageMeta<C>> as core::ops::Deref>::deref(_14) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_15);\n        _12 = mm::page_table::node::<impl mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>::level(_13) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _16 = CheckedSub(_12, 1_u8);\n        assert(!move (_16.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _12, 1_u8) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        _11 = move (_16.0: u8);\n        StorageDead(_12);\n        _10 = &_11;\n        _6 = (move _7, move _10);\n        StorageDead(_10);\n        StorageDead(_7);\n        _17 = (_6.0: &u8);\n        _18 = (_6.1: &u8);\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = (*_17);\n        StorageLive(_21);\n        _21 = (*_18);\n        _19 = Eq(move _20, move _21);\n        switchInt(move _19) -> [0: bb11, otherwise: bb10];\n    }\n    bb10: {\n        StorageDead(_21);\n        StorageDead(_20);\n        StorageDead(_19);\n        StorageDead(_11);\n        StorageDead(_8);\n        StorageDead(_6);\n        goto -> bb17;\n    }\n    bb11: {\n        StorageDead(_21);\n        StorageDead(_20);\n        _22 = core::panicking::AssertKind::Eq;\n        StorageLive(_24);\n        _24 = core::option::Option::None;\n        _23 = core::panicking::assert_failed::<u8, u8>(_22, _17, _18, move _24) -> unwind unreachable;\n    }\n    bb12: {\n        _29 = <mm::frame::frame_ref::FrameRef<'_, mm::page_table::node::PageTablePageMeta<C>> as core::ops::Deref>::deref(_30) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_31);\n        _28 = mm::page_table::node::<impl mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>::level(_29) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        _27 = &_28;\n        _26 = (_25, move _27);\n        StorageDead(_27);\n        _32 = (_26.0: &u8);\n        _33 = (_26.1: &u8);\n        StorageLive(_34);\n        StorageLive(_35);\n        _35 = (*_32);\n        StorageLive(_36);\n        _36 = (*_33);\n        _34 = Eq(move _35, move _36);\n        switchInt(move _34) -> [0: bb16, otherwise: bb15];\n    }\n    bb15: {\n        StorageDead(_36);\n        StorageDead(_35);\n        StorageDead(_34);\n        StorageDead(_28);\n        StorageDead(_26);\n        goto -> bb17;\n    }\n    bb16: {\n        StorageDead(_36);\n        StorageDead(_35);\n        _37 = core::panicking::AssertKind::Eq;\n        StorageLive(_39);\n        _39 = core::option::Option::None;\n        _38 = core::panicking::assert_failed::<u8, u8>(_37, _32, _33, move _39) -> unwind unreachable;\n    }\n    bb17: {\n        StorageDead(_3);\n        StorageLive(_40);\n        _40 = ((*_1).0: <C as mm::page_table::PageTableConfig>::E);\n        StorageLive(_41);\n        StorageLive(_44);\n        _63 = ((*_1).2: &mut mm::page_table::node::PageTableGuard<'_, C>);\n        _44 = &(*_63);\n        _43 = <mm::page_table::node::PageTableGuard<'_, C> as core::ops::Deref>::deref(move _44) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        _42 = <mm::frame::frame_ref::FrameRef<'_, mm::page_table::node::PageTablePageMeta<C>> as core::ops::Deref>::deref(_43) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_44);\n        _41 = mm::page_table::node::<impl mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>::level(_42) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        _0 = mm::page_table::node::child::Child::<C>::from_pte(move _40, move _41) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_41);\n        StorageDead(_40);\n        StorageLive(_45);\n        StorageLive(_46);\n        _46 = &_0;\n        _45 = mm::page_table::node::child::Child::<C>::is_none(move _46) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        switchInt(move _45) -> [0: bb29, otherwise: bb23];\n    }\n    bb23: {\n        StorageDead(_46);\n        StorageLive(_47);\n        StorageLive(_48);\n        _48 = &_2;\n        _47 = mm::page_table::node::child::Child::<C>::is_none(move _48) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        switchInt(move _47) -> [0: bb26, otherwise: bb25];\n    }\n    bb25: {\n        StorageDead(_48);\n        goto -> bb30;\n    }\n    bb26: {\n        StorageDead(_48);\n        StorageLive(_49);\n        _64 = ((*_1).2: &mut mm::page_table::node::PageTableGuard<'_, C>);\n        _49 = mm::page_table::node::PageTableGuard::<'_, C>::nr_children_mut(_64) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        _50 = CheckedAdd((*_49), 1_u16);\n        assert(!move (_50.1: bool), \"attempt to compute `{} + {}`, which would overflow\", (*_49), 1_u16) -> [success: bb28, unwind unreachable];\n    }\n    bb28: {\n        (*_49) = move (_50.0: u16);\n        StorageDead(_49);\n        goto -> bb40;\n    }\n    bb29: {\n        StorageDead(_46);\n        goto -> bb30;\n    }\n    bb30: {\n        StorageLive(_51);\n        StorageLive(_52);\n        _52 = &_0;\n        _51 = mm::page_table::node::child::Child::<C>::is_none(move _52) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        switchInt(move _51) -> [0: bb33, otherwise: bb32];\n    }\n    bb32: {\n        StorageDead(_52);\n        goto -> bb39;\n    }\n    bb33: {\n        StorageDead(_52);\n        StorageLive(_53);\n        StorageLive(_54);\n        _54 = &_2;\n        _53 = mm::page_table::node::child::Child::<C>::is_none(move _54) -> [return: bb34, unwind unreachable];\n    }\n    bb34: {\n        switchInt(move _53) -> [0: bb38, otherwise: bb35];\n    }\n    bb35: {\n        StorageDead(_54);\n        StorageLive(_55);\n        _65 = ((*_1).2: &mut mm::page_table::node::PageTableGuard<'_, C>);\n        _55 = mm::page_table::node::PageTableGuard::<'_, C>::nr_children_mut(_65) -> [return: bb36, unwind unreachable];\n    }\n    bb36: {\n        _56 = CheckedSub((*_55), 1_u16);\n        assert(!move (_56.1: bool), \"attempt to compute `{} - {}`, which would overflow\", (*_55), 1_u16) -> [success: bb37, unwind unreachable];\n    }\n    bb37: {\n        (*_55) = move (_56.0: u16);\n        StorageDead(_55);\n        goto -> bb39;\n    }\n    bb38: {\n        StorageDead(_54);\n        goto -> bb39;\n    }\n    bb39: {\n        StorageDead(_53);\n        StorageDead(_51);\n        goto -> bb40;\n    }\n    bb40: {\n        StorageDead(_47);\n        StorageDead(_45);\n        StorageLive(_57);\n        _57 = mm::page_table::node::child::Child::<C>::into_pte(_2) -> [return: bb41, unwind unreachable];\n    }\n    bb41: {\n        ((*_1).0: <C as mm::page_table::PageTableConfig>::E) = move _57;\n        StorageDead(_57);\n        _66 = ((*_1).2: &mut mm::page_table::node::PageTableGuard<'_, C>);\n        StorageLive(_59);\n        _59 = ((*_1).1: usize);\n        StorageLive(_60);\n        _60 = ((*_1).0: <C as mm::page_table::PageTableConfig>::E);\n        _58 = mm::page_table::node::PageTableGuard::<'_, C>::write_pte(_66, move _59, move _60) -> [return: bb42, unwind unreachable];\n    }\n    bb42: {\n        StorageDead(_60);\n        StorageDead(_59);\n        return;\n    }\n}\n",
+  "doc": " Replaces the entry with a new child.\n\n The old child is returned.\n\n # Panics\n\n The method panics if the level of the new child does not match the\n current node.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "rc::Rc::<T, A>::decrement_strong_count_in",
+  "safe": false,
+  "callees": {
+    "rc::Rc::<T, A>::from_raw_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs an `Rc<T, A>` from a raw pointer in the provided allocator.\n\n The raw pointer must have been previously returned by a call to [`Rc<U,\n A>::into_raw`][into_raw] with the following requirements:\n\n * If `U` is sized, it must have the same size and alignment as `T`. This\n   is trivially true if `U` is `T`.\n * If `U` is unsized, its data pointer must have the same size and\n   alignment as `T`. This is trivially true if `Rc<U>` was constructed\n   through `Rc<T>` and then converted to `Rc<U>` through an [unsized\n   coercion].\n\n Note that if `U` or `U`'s data pointer is not `T` but has the same size\n and alignment, this is basically like transmuting references of\n different types. See [`mem::transmute`][transmute] for more information\n on what restrictions apply in this case.\n\n The raw pointer must point to a block of memory allocated by `alloc`\n\n The user of `from_raw` has to make sure a specific value of `T` is only\n dropped once.\n\n This function is unsafe because improper use may lead to memory unsafety,\n even if the returned `Rc<T>` is never accessed.\n\n [into_raw]: Rc::into_raw\n [transmute]: core::mem::transmute\n [unsized coercion]: https://doc.rust-lang.org/reference/type-coercions.html#unsized-coercions\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::rc::Rc;\n use std::alloc::System;\n\n let x = Rc::new_in(\"hello\".to_owned(), System);\n let (x_ptr, _alloc) = Rc::into_raw_with_allocator(x);\n\n unsafe {\n     // Convert back to an `Rc` to prevent leak.\n     let x = Rc::from_raw_in(x_ptr, System);\n     assert_eq!(&*x, \"hello\");\n\n     // Further calls to `Rc::from_raw(x_ptr)` would be memory-unsafe.\n }\n\n // The memory was freed when `x` went out of scope above, so `x_ptr` is now dangling!\n ```\n\n Convert a slice back into its original array:\n\n ```\n #![feature(allocator_api)]\n\n use std::rc::Rc;\n use std::alloc::System;\n\n let x: Rc<[u32], _> = Rc::new_in([1, 2, 3], System);\n let x_ptr: *const [u32] = Rc::into_raw_with_allocator(x).0;\n\n unsafe {\n     let x: Rc<[u32; 3], _> = Rc::from_raw_in(x_ptr.cast::<[u32; 3]>(), System);\n     assert_eq!(&*x, &[1, 2, 3]);\n }\n ```\n",
+      "adt": {
+        "rc::Rc": "Constructor"
+      }
+    },
+    "core::mem::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disposes of a value.\n\n This effectively does nothing for types which implement `Copy`, e.g.\n integers. Such values are copied and _then_ moved into the function, so the\n value persists after this function call.\n\n This function is not magic; it is literally defined as\n\n ```\n pub fn drop<T>(_x: T) {}\n ```\n\n Because `_x` is moved into the function, it is automatically [dropped][drop] before\n the function returns.\n\n [drop]: Drop\n\n # Examples\n\n Basic usage:\n\n ```\n let v = vec![1, 2, 3];\n\n drop(v); // explicitly drop the vector\n ```\n\n Since [`RefCell`] enforces the borrow rules at runtime, `drop` can\n release a [`RefCell`] borrow:\n\n ```\n use std::cell::RefCell;\n\n let x = RefCell::new(1);\n\n let mut mutable_borrow = x.borrow_mut();\n *mutable_borrow = 1;\n\n drop(mutable_borrow); // relinquish the mutable borrow on this slot\n\n let borrow = x.borrow();\n println!(\"{}\", *borrow);\n ```\n\n Integers and other types implementing [`Copy`] are unaffected by `drop`.\n\n ```\n # #![allow(dropping_copy_types)]\n #[derive(Copy, Clone)]\n struct Foo(u8);\n\n let x = 1;\n let y = Foo(2);\n drop(x); // a copy of `x` is moved and dropped\n drop(y); // a copy of `y` is moved and dropped\n\n println!(\"x: {}, y: {}\", x, y.0); // still available\n ```\n\n [`RefCell`]: crate::cell::RefCell\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "rc::Rc": [
+      "Plain"
+    ]
+  },
+  "path": 1737,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:1880:5: 1882:6",
+  "src": "pub unsafe fn decrement_strong_count_in(ptr: *const T, alloc: A) {\n        unsafe { drop(Rc::from_raw_in(ptr, alloc)) };\n    }",
+  "mir": "fn rc::Rc::<T, A>::decrement_strong_count_in(_1: *const T, _2: A) -> () {\n    let mut _0: ();\n    let  _3: ();\n    let mut _4: rc::Rc<T, A>;\n    debug ptr => _1;\n    debug alloc => _2;\n    bb0: {\n        StorageLive(_4);\n        _4 = rc::Rc::<T, A>::from_raw_in(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = core::mem::drop::<rc::Rc<T, A>>(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Decrements the strong reference count on the `Rc<T>` associated with the\n provided pointer by one.\n\n # Safety\n\n The pointer must have been obtained through `Rc::into_raw`and must satisfy the\n same layout requirements specified in [`Rc::from_raw_in`][from_raw_in].\n The associated `Rc` instance must be valid (i.e. the strong count must be at\n least 1) when invoking this method, and `ptr` must point to a block of memory\n allocated by `alloc`. This method can be used to release the final `Rc` and\n backing storage, but **should not** be called after the final `Rc` has been released.\n\n [from_raw_in]: Rc::from_raw_in\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::rc::Rc;\n use std::alloc::System;\n\n let five = Rc::new_in(5, System);\n\n unsafe {\n     let (ptr, _alloc) = Rc::into_raw_with_allocator(five);\n     Rc::increment_strong_count_in(ptr, System);\n\n     let five = Rc::from_raw_in(ptr, System);\n     assert_eq!(2, Rc::strong_count(&five));\n     Rc::decrement_strong_count_in(ptr, System);\n     assert_eq!(1, Rc::strong_count(&five));\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "name": "slice::rotate::ptr_rotate_memmove",
+  "safe": false,
+  "callees": {
+    "mem::maybe_uninit::MaybeUninit::<T>::uninit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `MaybeUninit<T>` in an uninitialized state.\n\n Note that dropping a `MaybeUninit<T>` will never call `T`'s drop code.\n It is your responsibility to make sure `T` gets dropped if it got initialized.\n\n See the [type-level documentation][MaybeUninit] for some examples.\n\n # Example\n\n ```\n use std::mem::MaybeUninit;\n\n let v: MaybeUninit<String> = MaybeUninit::uninit();\n ```\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "Constructor"
+      }
+    },
+    "mem::maybe_uninit::MaybeUninit::<T>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<Vec<u32>>`.\n // This is okay because we initialized it.\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n x_vec.push(3);\n assert_eq!(x_vec.len(), 4);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "MutableAsArgument"
+      }
+    },
+    "ptr::mut_ptr::<impl *mut T>::sub": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts an unsigned offset from a pointer.\n\n This can only move the pointer backward (or not move it). If you need to move forward or\n backward depending on the value, then you might want [`offset`](#method.offset) instead\n which takes a signed offset.\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n If any of the following conditions are violated, the result is Undefined Behavior:\n\n * The offset in bytes, `count * size_of::<T>()`, computed on mathematical integers (without\n   \"wrapping around\"), must fit in an `isize`.\n\n * If the computed offset is non-zero, then `self` must be [derived from][crate::ptr#provenance] a pointer to some\n   [allocation], and the entire memory range between `self` and the result must be in\n   bounds of that allocation. In particular, this range must not \"wrap around\" the edge\n   of the address space.\n\n Allocations can never be larger than `isize::MAX` bytes, so if the computed offset\n stays in bounds of the allocation, it is guaranteed to satisfy the first requirement.\n This implies, for instance, that `vec.as_ptr().add(vec.len())` (for `vec: Vec<T>`) is always\n safe.\n\n Consider using [`wrapping_sub`] instead if these constraints are\n difficult to satisfy. The only advantage of this method is that it\n enables more aggressive compiler optimizations.\n\n [`wrapping_sub`]: #method.wrapping_sub\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n let s: &str = \"123\";\n\n unsafe {\n     let end: *const u8 = s.as_ptr().add(3);\n     assert_eq!('3', *end.sub(1) as char);\n     assert_eq!('2', *end.sub(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "ptr::copy": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination may overlap.\n\n If the source and destination will *never* overlap,\n [`copy_nonoverlapping`] can be used instead.\n\n `copy` is semantically equivalent to C's [`memmove`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n Copying takes place as if the bytes were copied from `src`\n to a temporary array and then copied from the array to `dst`.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memmove`]: https://en.cppreference.com/w/c/string/byte/memmove\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes, and must remain valid even\n   when `src` is read for `count * size_of::<T>()` bytes. (This means if the memory ranges\n   overlap, the `dst` pointer must not be invalidated by `src` reads.)\n\n * Both `src` and `dst` must be properly aligned.\n\n Like [`read`], `copy` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using both the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Efficiently create a Rust vector from an unsafe buffer:\n\n ```\n use std::ptr;\n\n /// # Safety\n ///\n /// * `ptr` must be correctly aligned for its type and non-zero.\n /// * `ptr` must be valid for reads of `elts` contiguous elements of type `T`.\n /// * Those elements must not be used after calling this function unless `T: Copy`.\n # #[allow(dead_code)]\n unsafe fn from_buf_raw<T>(ptr: *const T, elts: usize) -> Vec<T> {\n     let mut dst = Vec::with_capacity(elts);\n\n     // SAFETY: Our precondition ensures the source is aligned and valid,\n     // and `Vec::with_capacity` ensures that we have usable space to write them.\n     unsafe { ptr::copy(ptr, dst.as_mut_ptr(), elts); }\n\n     // SAFETY: We created it with this much capacity earlier,\n     // and the previous `copy` has initialized these elements.\n     unsafe { dst.set_len(elts); }\n     dst\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mem::maybe_uninit::MaybeUninit": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 16650,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/rotate.rs:49:1: 83:2",
+  "src": "const unsafe fn ptr_rotate_memmove<T>(left: usize, mid: *mut T, right: usize) {\n    // The `[T; 0]` here is to ensure this is appropriately aligned for T\n    let mut rawarray = MaybeUninit::<(BufType, [T; 0])>::uninit();\n    let buf = rawarray.as_mut_ptr() as *mut T;\n    // SAFETY: `mid-left <= mid-left+right < mid+right`\n    let dim = unsafe { mid.sub(left).add(right) };\n    if left <= right {\n        // SAFETY:\n        //\n        // 1) The `if` condition about the sizes ensures `[mid-left; left]` will fit in\n        //    `buf` without overflow and `buf` was created just above and so cannot be\n        //    overlapped with any value of `[mid-left; left]`\n        // 2) [mid-left, mid+right) are all valid for reading and writing and we don't care\n        //    about overlaps here.\n        // 3) The `if` condition about `left <= right` ensures writing `left` elements to\n        //    `dim = mid-left+right` is valid because:\n        //    - `buf` is valid and `left` elements were written in it in 1)\n        //    - `dim+left = mid-left+right+left = mid+right` and we write `[dim, dim+left)`\n        unsafe {\n            // 1)\n            ptr::copy_nonoverlapping(mid.sub(left), buf, left);\n            // 2)\n            ptr::copy(mid, mid.sub(left), right);\n            // 3)\n            ptr::copy_nonoverlapping(buf, dim, left);\n        }\n    } else {\n        // SAFETY: same reasoning as above but with `left` and `right` reversed\n        unsafe {\n            ptr::copy_nonoverlapping(mid, buf, right);\n            ptr::copy(mid.sub(left), dim, left);\n            ptr::copy_nonoverlapping(buf, mid.sub(left), right);\n        }\n    }\n}",
+  "mir": "fn slice::rotate::ptr_rotate_memmove(_1: usize, _2: *mut T, _3: usize) -> () {\n    let mut _0: ();\n    let mut _4: mem::maybe_uninit::MaybeUninit<([usize; 32], [T; 0])>;\n    let  _5: *mut T;\n    let mut _6: *mut ([usize; 32], [T; 0]);\n    let mut _7: &mut mem::maybe_uninit::MaybeUninit<([usize; 32], [T; 0])>;\n    let  _8: *mut T;\n    let mut _9: *mut T;\n    let mut _10: bool;\n    let  _11: ();\n    let mut _12: *const T;\n    let mut _13: *mut T;\n    let  _14: ();\n    let mut _15: *const T;\n    let mut _16: *mut T;\n    let  _17: ();\n    let mut _18: *const T;\n    let  _19: ();\n    let mut _20: *const T;\n    let  _21: ();\n    let mut _22: *const T;\n    let mut _23: *mut T;\n    let  _24: ();\n    let mut _25: *const T;\n    let mut _26: *mut T;\n    debug left => _1;\n    debug mid => _2;\n    debug right => _3;\n    debug rawarray => _4;\n    debug buf => _5;\n    debug dim => _8;\n    bb0: {\n        StorageLive(_4);\n        _4 = mem::maybe_uninit::MaybeUninit::<([usize; 32], [T; 0])>::uninit() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &mut _4;\n        _6 = mem::maybe_uninit::MaybeUninit::<([usize; 32], [T; 0])>::as_mut_ptr(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = move _6 as *mut T;\n        StorageDead(_6);\n        StorageLive(_9);\n        _9 = ptr::mut_ptr::<impl *mut T>::sub(_2, _1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _8 = ptr::mut_ptr::<impl *mut T>::add(move _9, _3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_9);\n        StorageLive(_10);\n        _10 = Le(_1, _3);\n        switchInt(move _10) -> [0: bb11, otherwise: bb5];\n    }\n    bb5: {\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = ptr::mut_ptr::<impl *mut T>::sub(_2, _1) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _12 = move _13 as *const T;\n        StorageDead(_13);\n        _11 = ptr::copy_nonoverlapping::<T>(move _12, _5, _1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        StorageLive(_15);\n        _15 = _2 as *const T;\n        StorageLive(_16);\n        _16 = ptr::mut_ptr::<impl *mut T>::sub(_2, _1) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _14 = ptr::copy::<T>(move _15, move _16, _3) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_16);\n        StorageDead(_15);\n        StorageLive(_18);\n        _18 = _5 as *const T;\n        _17 = ptr::copy_nonoverlapping::<T>(move _18, _8, _1) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_18);\n        goto -> bb17;\n    }\n    bb11: {\n        StorageLive(_20);\n        _20 = _2 as *const T;\n        _19 = ptr::copy_nonoverlapping::<T>(move _20, _5, _3) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_20);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = ptr::mut_ptr::<impl *mut T>::sub(_2, _1) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        _22 = move _23 as *const T;\n        StorageDead(_23);\n        _21 = ptr::copy::<T>(move _22, _8, _1) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_22);\n        StorageLive(_25);\n        _25 = _5 as *const T;\n        StorageLive(_26);\n        _26 = ptr::mut_ptr::<impl *mut T>::sub(_2, _1) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        _24 = ptr::copy_nonoverlapping::<T>(move _25, move _26, _3) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_26);\n        StorageDead(_25);\n        goto -> bb17;\n    }\n    bb17: {\n        StorageDead(_10);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Algorithm 1 is used if `min(left, right)` is small enough to fit onto a stack buffer. The\n `min(left, right)` elements are copied onto the buffer, `memmove` is applied to the others, and\n the ones on the buffer are moved back into the hole on the opposite side of where they\n originated.\n\n # Safety\n\n The specified range must be valid for reading and writing.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

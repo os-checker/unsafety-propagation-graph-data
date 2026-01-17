@@ -1,0 +1,104 @@
+{
+  "name": "sync::Arc::<T, A>::new_in",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicUsize::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new atomic integer.\n\n # Examples\n\n ```\n\n ```\n",
+      "adt": {}
+    },
+    "boxed::Box::<T, A>::new_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory in the given allocator then places `x` into it.\n\n This doesn't actually allocate if `T` is zero-sized.\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let five = Box::new_in(5, System);\n ```\n",
+      "adt": {
+        "boxed::Box": "Constructor"
+      }
+    },
+    "boxed::Box::<T, A>::into_unique": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": "",
+      "adt": {
+        "core::ptr::Unique": "Constructor"
+      }
+    },
+    "core::convert::Into::into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "sync::Arc::<T, A>::from_inner_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::Arc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicUsize": [
+      "Plain"
+    ],
+    "sync::ArcInner": [
+      "Plain"
+    ],
+    "boxed::Box": [
+      "Plain"
+    ],
+    "core::ptr::Unique": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 9445, kind: RigidTy(Adt(AdtDef(DefId { id: 2645, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 9335, kind: RigidTy(Adt(AdtDef(DefId { id: 5664, name: \"sync::ArcInner\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })]))) })])",
+      "Unknown([Field(1, Ty { id: 21, kind: Param(ParamTy { index: 1, name: \"A\" }) })])"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "sync::Arc": [
+      "Plain"
+    ]
+  },
+  "path": 2086,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:760:5: 773:6",
+  "src": "pub fn new_in(data: T, alloc: A) -> Arc<T, A> {\n        // Start the weak pointer count as 1 which is the weak pointer that's\n        // held by all the strong pointers (kinda), see std/rc.rs for more info\n        let x = Box::new_in(\n            ArcInner {\n                strong: atomic::AtomicUsize::new(1),\n                weak: atomic::AtomicUsize::new(1),\n                data,\n            },\n            alloc,\n        );\n        let (ptr, alloc) = Box::into_unique(x);\n        unsafe { Self::from_inner_in(ptr.into(), alloc) }\n    }",
+  "mir": "fn sync::Arc::<T, A>::new_in(_1: T, _2: A) -> sync::Arc<T, A> {\n    let mut _0: sync::Arc<T, A>;\n    let  _3: boxed::Box<sync::ArcInner<T>, A>;\n    let mut _4: sync::ArcInner<T>;\n    let mut _5: core::sync::atomic::AtomicUsize;\n    let mut _6: core::sync::atomic::AtomicUsize;\n    let  _7: core::ptr::Unique<sync::ArcInner<T>>;\n    let  _8: A;\n    let mut _9: (core::ptr::Unique<sync::ArcInner<T>>, A);\n    let mut _10: core::ptr::NonNull<sync::ArcInner<T>>;\n    debug data => _1;\n    debug alloc => _2;\n    debug x => _3;\n    debug ptr => _7;\n    debug alloc => _8;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = core::sync::atomic::AtomicUsize::new(1_usize) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        _6 = core::sync::atomic::AtomicUsize::new(1_usize) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = ArcInner(move _5, move _6, _1);\n        StorageDead(_6);\n        StorageDead(_5);\n        _3 = boxed::Box::<sync::ArcInner<T>, A>::new_in(move _4, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageLive(_9);\n        _9 = boxed::Box::<sync::ArcInner<T>, A>::into_unique(_3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _7 = (_9.0: core::ptr::Unique<sync::ArcInner<T>>);\n        _8 = move (_9.1: A);\n        StorageDead(_9);\n        StorageLive(_10);\n        _10 = <core::ptr::Unique<sync::ArcInner<T>> as core::convert::Into<core::ptr::NonNull<sync::ArcInner<T>>>>::into(_7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = sync::Arc::<T, A>::from_inner_in(move _10, _8) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        return;\n    }\n}\n",
+  "doc": " Constructs a new `Arc<T>` in the provided allocator.\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::sync::Arc;\n use std::alloc::System;\n\n let five = Arc::new_in(5, System);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

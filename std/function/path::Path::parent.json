@@ -1,0 +1,62 @@
+{
+  "name": "path::Path::parent",
+  "safe": true,
+  "callees": {
+    "path::Path::components": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Produces an iterator over the [`Component`]s of the path.\n\n When parsing the path, there is a small amount of normalization:\n\n * Repeated separators are ignored, so `a/b` and `a//b` both have\n   `a` and `b` as components.\n\n * Occurrences of `.` are normalized away, except if they are at the\n   beginning of the path. For example, `a/./b`, `a/b/`, `a/b/.` and\n   `a/b` all have `a` and `b` as components, but `./a/b` starts with\n   an additional [`CurDir`] component.\n\n * Trailing separators are normalized away, so `/a/b` and `/a/b/` are equivalent.\n\n Note that no other normalization takes place; in particular, `a/c`\n and `a/b/../c` are distinct, to account for the possibility that `b`\n is a symbolic link (so its parent isn't `a`).\n\n # Examples\n\n ```\n use std::path::{Path, Component};\n use std::ffi::OsStr;\n\n let mut components = Path::new(\"/tmp/foo.txt\").components();\n\n assert_eq!(components.next(), Some(Component::RootDir));\n assert_eq!(components.next(), Some(Component::Normal(OsStr::new(\"tmp\"))));\n assert_eq!(components.next(), Some(Component::Normal(OsStr::new(\"foo.txt\"))));\n assert_eq!(components.next(), None)\n ```\n\n [`CurDir`]: Component::CurDir\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument",
+        "path::Components": "Constructor"
+      }
+    },
+    "core::iter::DoubleEndedIterator::next_back": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Removes and returns an element from the end of the iterator.\n\n Returns `None` when there are no more elements.\n\n The [trait-level] docs contain more details.\n\n [trait-level]: DoubleEndedIterator\n\n # Examples\n\n Basic usage:\n\n ```\n let numbers = vec![1, 2, 3, 4, 5, 6];\n\n let mut iter = numbers.iter();\n\n assert_eq!(Some(&1), iter.next());\n assert_eq!(Some(&6), iter.next_back());\n assert_eq!(Some(&5), iter.next_back());\n assert_eq!(Some(&2), iter.next());\n assert_eq!(Some(&3), iter.next());\n assert_eq!(Some(&4), iter.next());\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next_back());\n ```\n\n # Remarks\n\n The elements yielded by `DoubleEndedIterator`'s methods may differ from\n the ones yielded by [`Iterator`]'s methods:\n\n ```\n let vec = vec![(1, 'a'), (1, 'b'), (1, 'c'), (2, 'a'), (2, 'b')];\n let uniq_by_fst_comp = || {\n     let mut seen = std::collections::HashSet::new();\n     vec.iter().copied().filter(move |x| seen.insert(x.0))\n };\n\n assert_eq!(uniq_by_fst_comp().last(), Some((2, 'a')));\n assert_eq!(uniq_by_fst_comp().next_back(), Some((2, 'b')));\n\n assert_eq!(\n     uniq_by_fst_comp().fold(vec![], |mut v, x| {v.push(x); v}),\n     vec![(1, 'a'), (2, 'a')]\n );\n assert_eq!(\n     uniq_by_fst_comp().rfold(vec![], |mut v, x| {v.push(x); v}),\n     vec![(2, 'b'), (1, 'c')]\n );\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::and_then": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns [`None`] if the option is [`None`], otherwise calls `f` with the\n wrapped value and returns the result.\n\n Some languages call this operation flatmap.\n\n # Examples\n\n ```\n fn sq_then_to_string(x: u32) -> Option<String> {\n     x.checked_mul(x).map(|sq| sq.to_string())\n }\n\n assert_eq!(Some(2).and_then(sq_then_to_string), Some(4.to_string()));\n assert_eq!(Some(1_000_000).and_then(sq_then_to_string), None); // overflowed!\n assert_eq!(None.and_then(sq_then_to_string), None);\n ```\n\n Often used to chain fallible operations that may return [`None`].\n\n ```\n let arr_2d = [[\"A0\", \"A1\"], [\"B0\", \"B1\"]];\n\n let item_0_1 = arr_2d.get(0).and_then(|row| row.get(1));\n assert_eq!(item_0_1, Some(&\"A1\"));\n\n let item_2_0 = arr_2d.get(2).and_then(|row| row.get(0));\n assert_eq!(item_2_0, None);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "path::Path": [
+      "Ref"
+    ],
+    "path::Components": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 2445,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:2592:5: 2601:6",
+  "src": "pub fn parent(&self) -> Option<&Path> {\n        let mut comps = self.components();\n        let comp = comps.next_back();\n        comp.and_then(|p| match p {\n            Component::Normal(_) | Component::CurDir | Component::ParentDir => {\n                Some(comps.as_path())\n            }\n            _ => None,\n        })\n    }",
+  "mir": "fn path::Path::parent(_1: &path::Path) -> core::option::Option<&path::Path> {\n    let mut _0: core::option::Option<&path::Path>;\n    let mut _2: path::Components<'_>;\n    let  _3: core::option::Option<path::Component<'_>>;\n    let mut _4: &mut path::Components<'_>;\n    let mut _5: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:2595:23: 2595:26};\n    let mut _6: &path::Components<'_>;\n    debug self => _1;\n    debug comps => _2;\n    debug comp => _3;\n    bb0: {\n        StorageLive(_2);\n        _2 = path::Path::components(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = &mut _2;\n        _3 = <path::Components<'_> as core::iter::DoubleEndedIterator>::next_back(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &_2;\n        _5 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:2595:23: 2595:26}(move _6);\n        StorageDead(_6);\n        _0 = core::option::Option::<path::Component<'_>>::and_then::<&path::Path, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:2595:23: 2595:26}>(_3, move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns the `Path` without its final component, if there is one.\n\n This means it returns `Some(\"\")` for relative paths with one component.\n\n Returns [`None`] if the path terminates in a root or prefix, or if it's\n the empty string.\n\n # Examples\n\n ```\n use std::path::Path;\n\n let path = Path::new(\"/foo/bar\");\n let parent = path.parent().unwrap();\n assert_eq!(parent, Path::new(\"/foo\"));\n\n let grand_parent = parent.parent().unwrap();\n assert_eq!(grand_parent, Path::new(\"/\"));\n assert_eq!(grand_parent.parent(), None);\n\n let relative_path = Path::new(\"foo/bar\");\n let parent = relative_path.parent();\n assert_eq!(parent, Some(Path::new(\"foo\")));\n let grand_parent = parent.and_then(Path::parent);\n assert_eq!(grand_parent, Some(Path::new(\"\")));\n let great_grand_parent = grand_parent.and_then(Path::parent);\n assert_eq!(great_grand_parent, None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

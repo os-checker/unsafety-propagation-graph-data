@@ -1,0 +1,37 @@
+{
+  "name": "ptr::mut_ptr::<impl *mut T>::with_metadata_of",
+  "safe": true,
+  "callees": {
+    "ptr::metadata::metadata": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the metadata component of a pointer.\n\n Values of type `*mut T`, `&T`, or `&mut T` can be passed directly to this function\n as they implicitly coerce to `*const T`.\n\n # Example\n\n ```\n #![feature(ptr_metadata)]\n\n assert_eq!(std::ptr::metadata(\"foo\"), 3_usize);\n ```\n",
+      "adt": {}
+    },
+    "ptr::metadata::from_raw_parts_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the same functionality as [`from_raw_parts`], except that a\n raw `*mut` pointer is returned, as opposed to a raw `*const` pointer.\n\n See the documentation of [`from_raw_parts`] for more details.\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1079,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mut_ptr.rs:113:5: 118:6",
+  "src": "pub const fn with_metadata_of<U>(self, meta: *const U) -> *mut U\n    where\n        U: PointeeSized,\n    {\n        from_raw_parts_mut::<U>(self as *mut (), metadata(meta))\n    }",
+  "mir": "fn ptr::mut_ptr::<impl *mut T>::with_metadata_of(_1: *mut T, _2: *const U) -> *mut U {\n    let mut _0: *mut U;\n    let mut _3: *mut ();\n    let mut _4: <U as ptr::metadata::Pointee>::Metadata;\n    debug self => _1;\n    debug meta => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = _1 as *mut ();\n        StorageLive(_4);\n        _4 = ptr::metadata::metadata::<U>(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = ptr::metadata::from_raw_parts_mut::<U, ()>(move _3, move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Uses the address value in a new pointer of another type.\n\n This operation will ignore the address part of its `meta` operand and discard existing\n metadata of `self`. For pointers to a sized types (thin pointers), this has the same effect\n as a simple cast. For pointers to an unsized type (fat pointers) this recombines the address\n with new metadata such as slice lengths or `dyn`-vtable.\n\n The resulting pointer will have provenance of `self`. This operation is semantically the\n same as creating a new pointer with the data pointer value of `self` but the metadata of\n `meta`, being fat or thin depending on the `meta` operand.\n\n # Examples\n\n This function is primarily useful for enabling pointer arithmetic on potentially fat\n pointers. The pointer is cast to a sized pointee to utilize offset operations and then\n recombined with its own original metadata.\n\n ```\n #![feature(set_ptr_value)]\n # use core::fmt::Debug;\n let mut arr: [i32; 3] = [1, 2, 3];\n let mut ptr = arr.as_mut_ptr() as *mut dyn Debug;\n let thin = ptr as *mut u8;\n unsafe {\n     ptr = thin.add(8).with_metadata_of(ptr);\n     # assert_eq!(*(ptr as *mut i32), 3);\n     println!(\"{:?}\", &*ptr); // will print \"3\"\n }\n ```\n\n # *Incorrect* usage\n\n The provenance from pointers is *not* combined. The result must only be used to refer to the\n address allowed by `self`.\n\n ```rust,no_run\n #![feature(set_ptr_value)]\n let mut x = 0u32;\n let mut y = 1u32;\n\n let x = (&mut x) as *mut u32;\n let y = (&mut y) as *mut u32;\n\n let offset = (x as usize - y as usize) / 4;\n let bad = x.wrapping_add(offset).with_metadata_of(y);\n\n // This dereference is UB. The pointer only has provenance for `x` but points to `y`.\n println!(\"{:?}\", unsafe { &*bad });\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

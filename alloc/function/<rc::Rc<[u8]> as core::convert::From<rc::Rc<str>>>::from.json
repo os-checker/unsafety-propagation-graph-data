@@ -1,0 +1,45 @@
+{
+  "name": "<rc::Rc<[u8]> as core::convert::From<rc::Rc<str>>>::from",
+  "safe": true,
+  "callees": {
+    "rc::Rc::<T>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the `Rc`, returning the wrapped pointer.\n\n To avoid a memory leak the pointer must be converted back to an `Rc` using\n [`Rc::from_raw`].\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let x = Rc::new(\"hello\".to_owned());\n let x_ptr = Rc::into_raw(x);\n assert_eq!(unsafe { &*x_ptr }, \"hello\");\n # // Prevent leaks for Miri.\n # drop(unsafe { Rc::from_raw(x_ptr) });\n ```\n",
+      "adt": {
+        "rc::Rc": "ImmutableAsArgument"
+      }
+    },
+    "rc::Rc::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs an `Rc<T>` from a raw pointer.\n\n The raw pointer must have been previously returned by a call to\n [`Rc<U>::into_raw`][into_raw] with the following requirements:\n\n * If `U` is sized, it must have the same size and alignment as `T`. This\n   is trivially true if `U` is `T`.\n * If `U` is unsized, its data pointer must have the same size and\n   alignment as `T`. This is trivially true if `Rc<U>` was constructed\n   through `Rc<T>` and then converted to `Rc<U>` through an [unsized\n   coercion].\n\n Note that if `U` or `U`'s data pointer is not `T` but has the same size\n and alignment, this is basically like transmuting references of\n different types. See [`mem::transmute`][transmute] for more information\n on what restrictions apply in this case.\n\n The raw pointer must point to a block of memory allocated by the global allocator\n\n The user of `from_raw` has to make sure a specific value of `T` is only\n dropped once.\n\n This function is unsafe because improper use may lead to memory unsafety,\n even if the returned `Rc<T>` is never accessed.\n\n [into_raw]: Rc::into_raw\n [transmute]: core::mem::transmute\n [unsized coercion]: https://doc.rust-lang.org/reference/type-coercions.html#unsized-coercions\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let x = Rc::new(\"hello\".to_owned());\n let x_ptr = Rc::into_raw(x);\n\n unsafe {\n     // Convert back to an `Rc` to prevent leak.\n     let x = Rc::from_raw(x_ptr);\n     assert_eq!(&*x, \"hello\");\n\n     // Further calls to `Rc::from_raw(x_ptr)` would be memory-unsafe.\n }\n\n // The memory was freed when `x` went out of scope above, so `x_ptr` is now dangling!\n ```\n\n Convert a slice back into its original array:\n\n ```\n use std::rc::Rc;\n\n let x: Rc<[u32]> = Rc::new([1, 2, 3]);\n let x_ptr: *const [u32] = Rc::into_raw(x);\n\n unsafe {\n     let x: Rc<[u32; 3]> = Rc::from_raw(x_ptr.cast::<[u32; 3]>());\n     assert_eq!(&*x, &[1, 2, 3]);\n }\n ```\n",
+      "adt": {
+        "rc::Rc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "rc::Rc": [
+      "Plain"
+    ]
+  },
+  "path": 1716,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:3041:5: 3044:6",
+  "src": "fn from(rc: Rc<str>) -> Self {\n        // SAFETY: `str` has the same layout as `[u8]`.\n        unsafe { Rc::from_raw(Rc::into_raw(rc) as *const [u8]) }\n    }",
+  "mir": "fn <rc::Rc<[u8]> as core::convert::From<rc::Rc<str>>>::from(_1: rc::Rc<str>) -> rc::Rc<[u8]> {\n    let mut _0: rc::Rc<[u8]>;\n    let mut _2: *const [u8];\n    let mut _3: *const str;\n    debug rc => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = rc::Rc::<str>::into_raw(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = move _3 as *const [u8];\n        StorageDead(_3);\n        _0 = rc::Rc::<[u8]>::from_raw(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Converts a reference-counted string slice into a byte slice.\n\n # Example\n\n ```\n # use std::rc::Rc;\n let string: Rc<str> = Rc::from(\"eggplant\");\n let bytes: Rc<[u8]> = Rc::from(string);\n assert_eq!(\"eggplant\".as_bytes(), bytes.as_ref());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

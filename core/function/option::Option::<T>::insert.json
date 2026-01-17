@@ -1,0 +1,45 @@
+{
+  "name": "option::Option::<T>::insert",
+  "safe": true,
+  "callees": {
+    "option::Option::<T>::as_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts from `&mut Option<T>` to `Option<&mut T>`.\n\n # Examples\n\n ```\n let mut x = Some(2);\n match x.as_mut() {\n     Some(v) => *v = 42,\n     None => {},\n }\n assert_eq!(x, Some(42));\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::unwrap_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value,\n without checking that the value is not [`None`].\n\n # Safety\n\n Calling this method on [`None`] is *[undefined behavior]*.\n\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(unsafe { x.unwrap_unchecked() }, \"air\");\n ```\n\n ```no_run\n let x: Option<&str> = None;\n assert_eq!(unsafe { x.unwrap_unchecked() }, \"air\"); // Undefined behavior!\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Deref",
+      "MutRef"
+    ]
+  },
+  "path": 15738,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:1722:5: 1730:6",
+  "src": "pub const fn insert(&mut self, value: T) -> &mut T\n    where\n        T: [const] Destruct,\n    {\n        *self = Some(value);\n\n        // SAFETY: the code above just filled the option\n        unsafe { self.as_mut().unwrap_unchecked() }\n    }",
+  "mir": "fn option::Option::<T>::insert(_1: &mut option::Option<T>, _2: T) -> &mut T {\n    let mut _0: &mut T;\n    let mut _3: option::Option<T>;\n    let mut _4: option::Option<&mut T>;\n    debug self => _1;\n    debug value => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = option::Option::Some(_2);\n        drop((*_1)) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        (*_1) = move _3;\n        StorageDead(_3);\n        StorageLive(_4);\n        _4 = option::Option::<T>::as_mut(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _0 = option::Option::<&mut T>::unwrap_unchecked(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Inserts `value` into the option, then returns a mutable reference to it.\n\n If the option already contains a value, the old value is dropped.\n\n See also [`Option::get_or_insert`], which doesn't update the value if\n the option already contains [`Some`].\n\n # Example\n\n ```\n let mut opt = None;\n let val = opt.insert(1);\n assert_eq!(*val, 1);\n assert_eq!(opt.unwrap(), 1);\n let val = opt.insert(2);\n assert_eq!(*val, 2);\n *val = 3;\n assert_eq!(opt.unwrap(), 3);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

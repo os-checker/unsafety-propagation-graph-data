@@ -1,0 +1,131 @@
+{
+  "name": "collections::btree::node::Handle::<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'a>, K, V, collections::btree::node::marker::Internal>, collections::btree::node::marker::Edge>::insert_fit",
+  "safe": true,
+  "callees": {
+    "collections::btree::node::NodeRef::<BorrowType, K, V, Type>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Finds the length of the node. This is the number of keys or values.\n The number of edges is `len() + 1`.\n Note that, despite being safe, calling this function can have the side effect\n of invalidating mutable references that unsafe code has created.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "ImmutableAsArgument"
+      }
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'a>, K, V, Type>::key_area_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Borrows exclusive access to an element of the key storage area.\n\n # Safety\n `index` is in bounds of 0..CAPACITY\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "MutableAsArgument"
+      }
+    },
+    "collections::btree::node::slice_insert": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Inserts a value into a slice of initialized elements followed by one uninitialized element.\n\n # Safety\n The slice has more than `idx` elements.\n",
+      "adt": {}
+    },
+    "collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'a>, K, V, Type>::val_area_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Borrows exclusive access to an element or slice of the node's value storage area.\n\n # Safety\n `index` is in bounds of 0..CAPACITY\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "MutableAsArgument"
+      }
+    },
+    "collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'a>, K, V, collections::btree::node::marker::Internal>::edge_area_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Borrows exclusive access to an element or slice of the node's storage area for edge contents.\n\n # Safety\n `index` is in bounds of 0..CAPACITY + 1\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "MutableAsArgument"
+      }
+    },
+    "collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'a>, K, V, Type>::len_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Borrows exclusive access to the length of the node.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "MutableAsArgument"
+      }
+    },
+    "collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'a>, K, V, collections::btree::node::marker::Internal>::correct_childrens_parent_links": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " # Safety\n Every item returned by `range` is a valid edge index for the node.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "collections::btree::node::NodeRef": [
+      "Ref",
+      "Unknown([Field(0, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])",
+      "MutRef",
+      "Unknown([Field(1, Ty { id: 4365, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 4367, kind: RigidTy(Adt(AdtDef(DefId { id: 4043, name: \"collections::btree::node::LeafNode\" }), GenericArgs([Type(Ty { id: 2435, kind: Param(ParamTy { index: 1, name: \"K\" }) }), Type(Ty { id: 2436, kind: Param(ParamTy { index: 2, name: \"V\" }) })]))) })]))) })])",
+      "Plain"
+    ],
+    "collections::btree::node::Handle": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "core::ops::RangeTo": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "core::ops::Range": [
+      "Plain"
+    ]
+  },
+  "path": 889,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/node.rs:1002:5: 1015:6",
+  "src": "fn insert_fit(&mut self, key: K, val: V, edge: Root<K, V>) {\n        debug_assert!(self.node.len() < CAPACITY);\n        debug_assert!(edge.height == self.node.height - 1);\n        let new_len = self.node.len() + 1;\n\n        unsafe {\n            slice_insert(self.node.key_area_mut(..new_len), self.idx, key);\n            slice_insert(self.node.val_area_mut(..new_len), self.idx, val);\n            slice_insert(self.node.edge_area_mut(..new_len + 1), self.idx + 1, edge.node);\n            *self.node.len_mut() = new_len as u16;\n\n            self.node.correct_childrens_parent_links(self.idx + 1..new_len + 1);\n        }\n    }",
+  "mir": "fn collections::btree::node::Handle::<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'a>, K, V, collections::btree::node::marker::Internal>, collections::btree::node::marker::Edge>::insert_fit(_1: &mut collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>, collections::btree::node::marker::Edge>, _2: K, _3: V, _4: collections::btree::node::NodeRef<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::LeafOrInternal>) -> () {\n    let mut _0: ();\n    let mut _5: bool;\n    let mut _6: usize;\n    let mut _7: &collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>;\n    let mut _8: !;\n    let mut _9: bool;\n    let mut _10: usize;\n    let mut _11: usize;\n    let mut _12: usize;\n    let mut _13: (usize, bool);\n    let mut _14: !;\n    let  _15: usize;\n    let mut _16: usize;\n    let mut _17: &collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>;\n    let mut _18: (usize, bool);\n    let  _19: ();\n    let mut _20: &mut [core::mem::MaybeUninit<K>];\n    let mut _21: &mut collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>;\n    let mut _22: core::ops::RangeTo<usize>;\n    let mut _23: usize;\n    let  _24: ();\n    let mut _25: &mut [core::mem::MaybeUninit<V>];\n    let mut _26: &mut collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>;\n    let mut _27: core::ops::RangeTo<usize>;\n    let mut _28: usize;\n    let  _29: ();\n    let mut _30: &mut [core::mem::MaybeUninit<core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>>];\n    let mut _31: &mut collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>;\n    let mut _32: core::ops::RangeTo<usize>;\n    let mut _33: usize;\n    let mut _34: (usize, bool);\n    let mut _35: usize;\n    let mut _36: usize;\n    let mut _37: (usize, bool);\n    let mut _38: core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>;\n    let mut _39: &mut u16;\n    let mut _40: &mut collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>;\n    let  _41: ();\n    let mut _42: &mut collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>;\n    let mut _43: core::ops::Range<usize>;\n    let mut _44: usize;\n    let mut _45: usize;\n    let mut _46: (usize, bool);\n    let mut _47: usize;\n    let mut _48: (usize, bool);\n    debug self => _1;\n    debug key => _2;\n    debug val => _3;\n    debug edge => _4;\n    debug new_len => _15;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).0: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>);\n        _6 = collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>::len(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        _5 = Lt(move _6, collections::btree::node::CAPACITY);\n        switchInt(move _5) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = (_4.0: usize);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = (((*_1).0: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>).0: usize);\n        _13 = CheckedSub(_12, 1_usize);\n        assert(!move (_13.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _12, 1_usize) -> [success: bb4, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _8 = core::panicking::panic(\"assertion failed: self.node.len() < CAPACITY\") -> unwind unreachable;\n    }\n    bb4: {\n        _11 = move (_13.0: usize);\n        StorageDead(_12);\n        _9 = Eq(move _10, move _11);\n        switchInt(move _9) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &((*_1).0: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>);\n        _16 = collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>::len(move _17) -> [return: bb7, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        StorageDead(_10);\n        _14 = core::panicking::panic(\"assertion failed: edge.height == self.node.height - 1\") -> unwind unreachable;\n    }\n    bb7: {\n        StorageDead(_17);\n        _18 = CheckedAdd(_16, 1_usize);\n        assert(!move (_18.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _16, 1_usize) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _15 = move (_18.0: usize);\n        StorageDead(_16);\n        StorageLive(_21);\n        _21 = &mut ((*_1).0: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>);\n        StorageLive(_22);\n        _22 = RangeTo(_15);\n        _20 = collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>::key_area_mut::<core::ops::RangeTo<usize>, [core::mem::MaybeUninit<K>]>(move _21, move _22) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_22);\n        StorageDead(_21);\n        StorageLive(_23);\n        _23 = ((*_1).1: usize);\n        _19 = collections::btree::node::slice_insert::<K>(_20, move _23, _2) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_23);\n        StorageLive(_26);\n        _26 = &mut ((*_1).0: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>);\n        StorageLive(_27);\n        _27 = RangeTo(_15);\n        _25 = collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>::val_area_mut::<core::ops::RangeTo<usize>, [core::mem::MaybeUninit<V>]>(move _26, move _27) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_27);\n        StorageDead(_26);\n        StorageLive(_28);\n        _28 = ((*_1).1: usize);\n        _24 = collections::btree::node::slice_insert::<V>(_25, move _28, _3) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_28);\n        StorageLive(_31);\n        _31 = &mut ((*_1).0: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>);\n        StorageLive(_32);\n        StorageLive(_33);\n        _34 = CheckedAdd(_15, 1_usize);\n        assert(!move (_34.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _15, 1_usize) -> [success: bb13, unwind unreachable];\n    }\n    bb13: {\n        _33 = move (_34.0: usize);\n        _32 = RangeTo(move _33);\n        StorageDead(_33);\n        _30 = collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>::edge_area_mut::<core::ops::RangeTo<usize>, [core::mem::MaybeUninit<core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>>]>(move _31, move _32) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_32);\n        StorageDead(_31);\n        StorageLive(_35);\n        StorageLive(_36);\n        _36 = ((*_1).1: usize);\n        _37 = CheckedAdd(_36, 1_usize);\n        assert(!move (_37.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _36, 1_usize) -> [success: bb15, unwind unreachable];\n    }\n    bb15: {\n        _35 = move (_37.0: usize);\n        StorageDead(_36);\n        StorageLive(_38);\n        _38 = (_4.1: core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>);\n        _29 = collections::btree::node::slice_insert::<core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>>(_30, move _35, move _38) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_38);\n        StorageDead(_35);\n        StorageLive(_39);\n        StorageLive(_40);\n        _40 = &mut ((*_1).0: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>);\n        _39 = collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>::len_mut(move _40) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_40);\n        (*_39) = _15 as u16;\n        StorageDead(_39);\n        StorageLive(_42);\n        _42 = &mut ((*_1).0: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>);\n        StorageLive(_43);\n        StorageLive(_44);\n        StorageLive(_45);\n        _45 = ((*_1).1: usize);\n        _46 = CheckedAdd(_45, 1_usize);\n        assert(!move (_46.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _45, 1_usize) -> [success: bb18, unwind unreachable];\n    }\n    bb18: {\n        _44 = move (_46.0: usize);\n        StorageDead(_45);\n        StorageLive(_47);\n        _48 = CheckedAdd(_15, 1_usize);\n        assert(!move (_48.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _15, 1_usize) -> [success: bb19, unwind unreachable];\n    }\n    bb19: {\n        _47 = move (_48.0: usize);\n        _43 = Range(move _44, move _47);\n        StorageDead(_47);\n        StorageDead(_44);\n        _41 = collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>::correct_childrens_parent_links::<core::ops::Range<usize>>(move _42, move _43) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_43);\n        StorageDead(_42);\n        return;\n    }\n}\n",
+  "doc": " Inserts a new key-value pair and an edge that will go to the right of that new pair\n between this edge and the key-value pair to the right of this edge. This method assumes\n that there is enough space in the node for the new pair to fit.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

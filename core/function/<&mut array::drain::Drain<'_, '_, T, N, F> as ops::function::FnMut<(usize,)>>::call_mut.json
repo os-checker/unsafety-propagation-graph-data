@@ -1,0 +1,68 @@
+{
+  "name": "<&mut array::drain::Drain<'_, '_, T, N, F> as ops::function::FnMut<(usize,)>>::call_mut",
+  "safe": true,
+  "callees": {
+    "mem::conjure_zst": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a fresh instance of the inhabited ZST type `T`.\n\n Prefer this to [`zeroed`] or [`uninitialized`] or [`transmute_copy`]\n in places where you know that `T` is zero-sized, but don't have a bound\n (such as [`Default`]) that would allow you to instantiate it using safe code.\n\n If you're not sure whether `T` is an inhabited ZST, then you should be\n using [`MaybeUninit`], not this function.\n\n # Panics\n\n If `size_of::<T>() != 0`.\n\n # Safety\n\n - `T` must be *[inhabited]*, i.e. possible to construct. This means that types\n   like zero-variant enums and [`!`] are unsound to conjure.\n - You must use the value only in ways which do not violate any *safety*\n   invariants of the type.\n\n While it's easy to create a *valid* instance of an inhabited ZST, since having\n no bits in its representation means there's only one possible value, that\n doesn't mean that it's always *sound* to do so.\n\n For example, a library could design zero-sized tokens that are `!Default + !Clone`, limiting\n their creation to functions that initialize some state or establish a scope. Conjuring such a\n token could break invariants and lead to unsoundness.\n\n # Examples\n\n ```\n #![feature(mem_conjure_zst)]\n use std::mem::conjure_zst;\n\n assert_eq!(unsafe { conjure_zst::<()>() }, ());\n assert_eq!(unsafe { conjure_zst::<[i32; 0]>() }, []);\n ```\n\n [inhabited]: https://doc.rust-lang.org/reference/glossary.html#inhabited\n",
+      "adt": {}
+    },
+    "ops::function::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds an offset to a pointer (convenience for `.offset(count as isize)`).\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n If any of the following conditions are violated, the result is Undefined Behavior:\n\n * The computed offset, `count * size_of::<T>()` bytes, must not overflow `isize`.\n\n * If the computed offset is non-zero, then `self` must be derived from a pointer to some\n   [allocation], and the entire memory range between `self` and the result must be in\n   bounds of that allocation. In particular, this range must not \"wrap around\" the edge\n   of the address space.\n\n Allocations can never be larger than `isize::MAX` bytes, so if the computed offset\n stays in bounds of the allocation, it is guaranteed to satisfy the first requirement.\n This implies, for instance, that `vec.as_ptr().add(vec.len())` (for `vec: Vec<T>`) is always\n safe.\n\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let s: &str = \"123\";\n let ptr: NonNull<u8> = NonNull::new(s.as_ptr().cast_mut()).unwrap();\n\n unsafe {\n     println!(\"{}\", ptr.add(1).read() as char);\n     println!(\"{}\", ptr.add(2).read() as char);\n }\n ```\n",
+      "adt": {
+        "ptr::non_null::NonNull": "Constructor"
+      }
+    },
+    "ptr::non_null::NonNull::<T>::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `self` without moving it. This leaves the\n memory in `self` unchanged.\n\n See [`ptr::read`] for safety concerns and examples.\n\n [`ptr::read`]: crate::ptr::read()\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "array::drain::Drain": [
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 318,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/array/drain.rs:72:5: 88:6",
+  "src": "extern \"rust-call\" fn call_mut(\n        &mut self,\n        (_ /* ignore argument */,): (usize,),\n    ) -> Self::Output {\n        if T::IS_ZST {\n            // its UB to call this more than N times, so returning more ZSTs is valid.\n            // SAFETY: its a ZST? we conjur.\n            (self.f)(unsafe { conjure_zst::<T>() })\n        } else {\n            // increment before moving; if `f` panics, we drop the rest.\n            let p = self.ptr;\n            // SAFETY: caller guarantees never called more than N times (see `Drain::new`)\n            self.ptr = unsafe { self.ptr.add(1) };\n            // SAFETY: we are allowed to move this.\n            (self.f)(unsafe { p.read() })\n        }\n    }",
+  "mir": "fn <&mut array::drain::Drain<'_, '_, T, N, F> as ops::function::FnMut<(usize,)>>::call_mut(_1: &mut &mut array::drain::Drain<'_, '_, T, N, F>, _2: (usize,)) -> U {\n    let mut _0: U;\n    let mut _3: (T,);\n    let mut _4: T;\n    let  _5: ptr::non_null::NonNull<T>;\n    let mut _6: ptr::non_null::NonNull<T>;\n    let mut _7: ptr::non_null::NonNull<T>;\n    let mut _8: (T,);\n    let mut _9: T;\n    let mut _10: &mut array::drain::Drain<'_, '_, T, N, F>;\n    let mut _11: &mut F;\n    let mut _12: &mut array::drain::Drain<'_, '_, T, N, F>;\n    let mut _13: &mut array::drain::Drain<'_, '_, T, N, F>;\n    let mut _14: &mut array::drain::Drain<'_, '_, T, N, F>;\n    let mut _15: &mut array::drain::Drain<'_, '_, T, N, F>;\n    let mut _16: &mut F;\n    debug self => _1;\n    debug p => _5;\n    bb0: {\n        switchInt(<T as mem::SizedTypeProperties>::IS_ZST) -> [0: bb4, otherwise: bb1];\n    }\n    bb1: {\n        _10 = (*_1);\n        _11 = ((*_10).2: &mut F);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = mem::conjure_zst::<T>() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = (move _4);\n        _0 = <F as ops::function::FnMut<(T,)>>::call_mut(_11, move _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb8;\n    }\n    bb4: {\n        _12 = (*_1);\n        _5 = ((*_12).0: ptr::non_null::NonNull<T>);\n        StorageLive(_6);\n        StorageLive(_7);\n        _13 = (*_1);\n        _7 = ((*_13).0: ptr::non_null::NonNull<T>);\n        _6 = ptr::non_null::NonNull::<T>::add(move _7, 1_usize) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        _14 = (*_1);\n        ((*_14).0: ptr::non_null::NonNull<T>) = move _6;\n        StorageDead(_6);\n        _15 = (*_1);\n        _16 = ((*_15).2: &mut F);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = ptr::non_null::NonNull::<T>::read(_5) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _8 = (move _9);\n        _0 = <F as ops::function::FnMut<(T,)>>::call_mut(_16, move _8) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_9);\n        StorageDead(_8);\n        goto -> bb8;\n    }\n    bb8: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

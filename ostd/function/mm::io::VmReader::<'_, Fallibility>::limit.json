@@ -1,0 +1,47 @@
+{
+  "name": "mm::io::VmReader::<'_, Fallibility>::limit",
+  "safe": true,
+  "callees": {
+    "mm::io::VmReader::<'_, Fallibility>::remain": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of bytes for the remaining data.\n",
+      "adt": {
+        "mm::io::VmReader": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::const_ptr::<impl *const T>::wrapping_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds an unsigned offset to a pointer using wrapping arithmetic.\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n This operation itself is always safe, but using the resulting pointer is not.\n\n The resulting pointer \"remembers\" the [allocation] that `self` points to; it must not\n be used to read or write other allocations.\n\n In other words, `let z = x.wrapping_add((y as usize) - (x as usize))` does *not* make `z`\n the same as `y` even if we assume `T` has size `1` and there is no overflow: `z` is still\n attached to the object `x` is attached to, and dereferencing it is Undefined Behavior unless\n `x` and `y` point into the same allocation.\n\n Compared to [`add`], this method basically delays the requirement of staying within the\n same allocation: [`add`] is immediate Undefined Behavior when crossing object\n boundaries; `wrapping_add` produces a pointer but still leads to Undefined Behavior if a\n pointer is dereferenced when it is out-of-bounds of the object it is attached to. [`add`]\n can be optimized better and is thus preferable in performance-sensitive code.\n\n The delayed check only considers the value of the pointer that was dereferenced, not the\n intermediate values used during the computation of the final result. For example,\n `x.wrapping_add(o).wrapping_sub(o)` is always the same as `x`. In other words, leaving the\n allocation and then re-entering it later is permitted.\n\n [`add`]: #method.add\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n # use std::fmt::Write;\n // Iterate using a raw pointer in increments of two elements\n let data = [1u8, 2, 3, 4, 5];\n let mut ptr: *const u8 = data.as_ptr();\n let step = 2;\n let end_rounded_up = ptr.wrapping_add(6);\n\n let mut out = String::new();\n while ptr != end_rounded_up {\n     unsafe {\n         write!(&mut out, \"{}, \", *ptr)?;\n     }\n     ptr = ptr.wrapping_add(step);\n }\n assert_eq!(out, \"1, 3, 5, \");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::io::VmReader": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ]
+  },
+  "path": 2128,
+  "span": "ostd/src/mm/io.rs:653:5: 659:6",
+  "src": "pub fn limit(&mut self, max_remain: usize) -> &mut Self {\n        if max_remain < self.remain() {\n            self.end = self.cursor.wrapping_add(max_remain);\n        }\n\n        self\n    }",
+  "mir": "fn mm::io::VmReader::<'_, Fallibility>::limit(_1: &mut mm::io::VmReader<'_, Fallibility>, _2: usize) -> &mut mm::io::VmReader<'_, Fallibility> {\n    let mut _0: &mut mm::io::VmReader<'_, Fallibility>;\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: &mm::io::VmReader<'_, Fallibility>;\n    let mut _6: *const u8;\n    let mut _7: *const u8;\n    debug self => _1;\n    debug max_remain => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = mm::io::VmReader::<'_, Fallibility>::remain(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = Lt(_2, move _4);\n        switchInt(move _3) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = ((*_1).0: *const u8);\n        _6 = core::ptr::const_ptr::<impl *const u8>::wrapping_add(move _7, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        ((*_1).1: *const u8) = move _6;\n        StorageDead(_6);\n        goto -> bb5;\n    }\n    bb4: {\n        StorageDead(_4);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_3);\n        _0 = _1;\n        return;\n    }\n}\n",
+  "doc": " Limits the length of remaining data.\n\n This method ensures the post condition of `self.remain() <= max_remain`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "sys::pal::unix::os::exit",
+  "safe": true,
+  "callees": {
+    "sys::exit_guard::unique_thread_exit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mitigation for <https://github.com/rust-lang/rust/issues/126600>\n\n On glibc, `libc::exit` has been observed to not always be thread-safe.\n It is currently unclear whether that is a glibc bug or allowed by the standard.\n To mitigate this problem, we ensure that only one\n Rust thread calls `libc::exit` (or returns from `main`) by calling this function before\n calling `libc::exit` (or returning from `main`).\n\n Technically, this is not enough to ensure soundness, since other code directly calling\n `libc::exit` will still race with this.\n\n *This function does not itself call `libc::exit`.* This is so it can also be used\n to guard returning from `main`.\n\n This function will return only the first time it is called in a process.\n\n * If it is called again on the same thread as the first call, it will abort.\n * If it is called again on a different thread, it will wait in a loop\n   (waiting for the process to exit).\n",
+      "adt": {}
+    },
+    "libc::exit": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 3914,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/os.rs:666:1: 669:2",
+  "src": "pub fn exit(code: i32) -> ! {\n    crate::sys::exit_guard::unique_thread_exit();\n    unsafe { libc::exit(code as c_int) }\n}",
+  "mir": "fn sys::pal::unix::os::exit(_1: i32) -> ! {\n    let mut _0: !;\n    let  _2: ();\n    debug code => _1;\n    bb0: {\n        _2 = sys::exit_guard::unique_thread_exit() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = libc::exit(_1) -> unwind unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

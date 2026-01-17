@@ -1,0 +1,47 @@
+{
+  "name": "future::join::MaybeDone::<F>::take_output",
+  "safe": true,
+  "callees": {
+    "mem::replace": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Moves `src` into the referenced `dest`, returning the previous `dest` value.\n\n Neither value is dropped.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a default value, see [`take`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::replace(&mut v, vec![3, 4, 5]);\n assert_eq!(vec![1, 2], old_v);\n assert_eq!(vec![3, 4, 5], v);\n ```\n\n `replace` allows consumption of a struct field by replacing it with another value.\n Without `replace` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let t = self.buf[i];\n         self.buf[i] = v;\n         t\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so we can't even clone `self.buf[i]` to\n avoid the move. But `replace` can be used to disassociate the original value at that index from\n `self`, allowing it to be returned:\n\n ```\n # #![allow(dead_code)]\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         mem::replace(&mut self.buf[i], v)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf[0], 0);\n\n assert_eq!(buffer.replace_index(0, 2), 0);\n assert_eq!(buffer.buf[0], 2);\n ```\n",
+      "adt": {}
+    },
+    "panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "future::join::MaybeDone": [
+      "Deref",
+      "Plain",
+      "MutRef",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 10084, kind: Alias(Projection, AliasTy { def_id: AliasDef(DefId { id: 27478, name: \"future::future::Future::Output\" }), args: GenericArgs([Type(Ty { id: 467, kind: Param(ParamTy { index: 0, name: \"F\" }) })]) }) })])"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 13112,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/future/join.rs:162:5: 170:6",
+  "src": "pub fn take_output(&mut self) -> Option<F::Output> {\n        match *self {\n            MaybeDone::Done(_) => match mem::replace(self, Self::Taken) {\n                MaybeDone::Done(val) => Some(val),\n                _ => unreachable!(),\n            },\n            _ => None,\n        }\n    }",
+  "mir": "fn future::join::MaybeDone::<F>::take_output(_1: &mut future::join::MaybeDone<F>) -> option::Option<<F as future::future::Future>::Output> {\n    let mut _0: option::Option<<F as future::future::Future>::Output>;\n    let mut _2: isize;\n    let mut _3: future::join::MaybeDone<F>;\n    let mut _4: future::join::MaybeDone<F>;\n    let mut _5: isize;\n    let  _6: <F as future::future::Future>::Output;\n    let mut _7: !;\n    let mut _8: isize;\n    debug self => _1;\n    debug val => _6;\n    bb0: {\n        _2 = discriminant((*_1));\n        switchInt(move _2) -> [1: bb2, otherwise: bb1];\n    }\n    bb1: {\n        _0 = option::Option::None;\n        goto -> bb6;\n    }\n    bb2: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = future::join::MaybeDone::Taken;\n        _3 = mem::replace::<future::join::MaybeDone<F>>(_1, move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [1: bb5, otherwise: bb4];\n    }\n    bb4: {\n        _7 = panicking::panic(\"internal error: entered unreachable code\") -> unwind unreachable;\n    }\n    bb5: {\n        _6 = move ((_3 as variant#1).0: <F as future::future::Future>::Output);\n        _0 = option::Option::Some(_6);\n        _8 = discriminant(_3);\n        switchInt(move _8) -> [1: bb7, otherwise: bb8];\n    }\n    bb6: {\n        return;\n    }\n    bb7: {\n        StorageDead(_3);\n        goto -> bb6;\n    }\n    bb8: {\n        drop(_3) -> [return: bb7, unwind unreachable];\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

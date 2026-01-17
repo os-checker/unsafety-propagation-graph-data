@@ -1,0 +1,63 @@
+{
+  "name": "ptr::swap_nonoverlapping::precondition_check",
+  "safe": true,
+  "callees": {
+    "ub_checks::maybe_is_aligned_and_not_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checks whether `ptr` is properly aligned with respect to the given alignment, and\n if `is_zst == false`, that `ptr` is not null.\n\n In `const` this is approximate and can fail spuriously. It is primarily intended\n for `assert_unsafe_precondition!` with `check_language_ub`, in which case the\n check is anyway not executed in `const`.\n",
+      "adt": {}
+    },
+    "ub_checks::maybe_is_nonoverlapping": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checks whether the regions of memory starting at `src` and `dst` of size\n `count * size` do *not* overlap.\n\n Note that in const-eval this function just returns `true` and therefore must\n only be used with `assert_unsafe_precondition!`, similar to `is_aligned_and_not_null`.\n",
+      "adt": {}
+    },
+    "fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "panicking::panic_nounwind_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Like `panic_fmt`, but for non-unwinding panics.\n\n Has to be a separate function so that it can carry the `rustc_nounwind` attribute.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 16078,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ub_checks.rs:68:13: 75:14",
+  "src": "const fn precondition_check($($name:$ty),*) {\n                if !$e {\n                    let msg = concat!(\"unsafe precondition(s) violated: \", $message,\n                        \"\\n\\nThis indicates a bug in the program. \\\n                        This Undefined Behavior check is optional, and cannot be relied on for safety.\");\n                    ::core::panicking::panic_nounwind_fmt(::core::fmt::Arguments::from_str(msg), false);\n                }\n            }",
+  "mir": "fn ptr::swap_nonoverlapping::precondition_check(_1: *mut (), _2: *mut (), _3: usize, _4: usize, _5: usize) -> () {\n    let mut _0: ();\n    let mut _6: bool;\n    let  _7: bool;\n    let mut _8: bool;\n    let mut _9: *const ();\n    let mut _10: bool;\n    let mut _11: bool;\n    let mut _12: *const ();\n    let mut _13: bool;\n    let mut _14: *const ();\n    let mut _15: *const ();\n    let  _16: !;\n    let mut _17: fmt::Arguments<'_>;\n    let mut _18: &str;\n    debug x => _1;\n    debug y => _2;\n    debug size => _3;\n    debug align => _4;\n    debug count => _5;\n    debug zero_size => _7;\n    debug msg => \"unsafe precondition(s) violated: ptr::swap_nonoverlapping requires that both pointer arguments are aligned and non-null and the specified memory ranges do not overlap\\n\\nThis indicates a bug in the program. This Undefined Behavior check is optional, and cannot be relied on for safety.\";\n    bb0: {\n        StorageLive(_6);\n        StorageLive(_7);\n        switchInt(_3) -> [0: bb1, otherwise: bb2];\n    }\n    bb1: {\n        _7 = true;\n        goto -> bb3;\n    }\n    bb2: {\n        _7 = Eq(_5, 0_usize);\n        goto -> bb3;\n    }\n    bb3: {\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = _1 as *const ();\n        StorageLive(_10);\n        _10 = _7;\n        _8 = ub_checks::maybe_is_aligned_and_not_null(move _9, _4, move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        switchInt(move _8) -> [0: bb9, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = _2 as *const ();\n        StorageLive(_13);\n        _13 = _7;\n        _11 = ub_checks::maybe_is_aligned_and_not_null(move _12, _4, move _13) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        switchInt(move _11) -> [0: bb8, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageLive(_14);\n        _14 = _1 as *const ();\n        StorageLive(_15);\n        _15 = _2 as *const ();\n        _6 = ub_checks::maybe_is_nonoverlapping(move _14, move _15, _3, _5) -> [return: bb11, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_13);\n        StorageDead(_12);\n        goto -> bb10;\n    }\n    bb9: {\n        StorageDead(_10);\n        StorageDead(_9);\n        goto -> bb10;\n    }\n    bb10: {\n        _6 = false;\n        goto -> bb12;\n    }\n    bb11: {\n        StorageDead(_15);\n        StorageDead(_14);\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_11);\n        StorageDead(_8);\n        StorageDead(_7);\n        switchInt(move _6) -> [0: bb13, otherwise: bb15];\n    }\n    bb13: {\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = \"unsafe precondition(s) violated: ptr::swap_nonoverlapping requires that both pointer arguments are aligned and non-null and the specified memory ranges do not overlap\\n\\nThis indicates a bug in the program. This Undefined Behavior check is optional, and cannot be relied on for safety.\";\n        _17 = fmt::Arguments::<'_>::from_str(move _18) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_18);\n        _16 = panicking::panic_nounwind_fmt(move _17, false) -> unwind unreachable;\n    }\n    bb15: {\n        StorageDead(_6);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

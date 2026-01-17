@@ -1,0 +1,88 @@
+{
+  "name": "arch::trap::idt::init_on_cpu",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    },
+    "core::mem::size_of_val": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of the pointed-to value in bytes.\n\n This is usually the same as [`size_of::<T>()`]. However, when `T` *has* no\n statically-known size, e.g., a slice [`[T]`][slice] or a [trait object],\n then `size_of_val` can be used to get the dynamically-known size.\n\n [trait object]: ../../book/ch17-02-trait-objects.html\n\n # Examples\n\n ```\n assert_eq!(4, size_of_val(&5i32));\n\n let x: [u8; 13] = [0; 13];\n let y: &[u8] = &x;\n assert_eq!(13, size_of_val(y));\n ```\n\n [`size_of::<T>()`]: size_of\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "x86_64::VirtAddr::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new canonical virtual address.\n\n This function performs sign extension of bit 47 to make the address canonical.\n\n ## Panics\n\n This function panics if the bits in the range 48 to 64 contain data (i.e. are not null and no sign extension).\n",
+      "adt": {}
+    },
+    "x86_64::instructions::tables::lidt": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Load an IDT.\n\n Use the\n [`InterruptDescriptorTable`](crate::structures::idt::InterruptDescriptorTable) struct for a high-level\n interface to loading an IDT.\n\n ## Safety\n\n This function is unsafe because the caller must ensure that the given\n `DescriptorTablePointer` points to a valid IDT and that loading this\n IDT is safe.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "x86_64::VirtAddr": [
+      "Plain"
+    ],
+    "x86_64::structures::DescriptorTablePointer": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 1535,
+  "span": "ostd/src/arch/x86/trap/idt.rs:31:1: 66:2",
+  "src": "pub(super) fn init_on_cpu() {\n    let idt = *GLOBAL_IDT.call_once(|| {\n        let idt = Box::leak(Box::new([const { Entry::missing() }; NUM_INTERRUPTS]));\n\n        // SAFETY: The vector array is properly initialized, lives for `'static`, and will never be\n        // mutated. So it's always fine to create an immutable borrow to it.\n        let vectors = unsafe { &VECTORS };\n\n        // Initialize the IDT entries.\n        for (intr_no, &handler) in vectors.iter().enumerate() {\n            let handler = VirtAddr::new(handler as u64);\n\n            let entry = &mut idt[intr_no];\n            // SAFETY: The handler defined in `trap.S` has a correct signature to handle the\n            // corresponding exception or interrupt.\n            let opt = unsafe { entry.set_handler_addr(handler) };\n\n            // Enable `int3` and `into` in the userspace.\n            if intr_no == 3 || intr_no == 4 {\n                opt.set_privilege_level(PrivilegeLevel::Ring3);\n            }\n        }\n\n        idt\n    });\n\n    let idtr = DescriptorTablePointer {\n        limit: (size_of_val(idt) - 1) as u16,\n        base: VirtAddr::new(idt.as_ptr().addr() as u64),\n    };\n    // SAFETY: The IDT is valid to load because:\n    //  - It lives for `'static`.\n    //  - It contains correct entries at correct indexes: all handlers are defined in `trap.S` with\n    //    correct handler signatures.\n    unsafe { lidt(&idtr) };\n}",
+  "mir": "fn arch::trap::idt::init_on_cpu() -> () {\n    let mut _0: ();\n    let  _1: &[x86_64::structures::idt::Entry<()>];\n    let mut _2: &&[x86_64::structures::idt::Entry<()>];\n    let mut _3: &spin::once::Once<&[x86_64::structures::idt::Entry<()>]>;\n    let  _4: x86_64::structures::DescriptorTablePointer;\n    let mut _5: u16;\n    let mut _6: usize;\n    let mut _7: usize;\n    let mut _8: (usize, bool);\n    let mut _9: x86_64::VirtAddr;\n    let mut _10: u64;\n    let mut _11: usize;\n    let mut _12: *const x86_64::structures::idt::Entry<()>;\n    let  _13: ();\n    let  _14: &x86_64::structures::DescriptorTablePointer;\n    debug idt => _1;\n    debug idtr => _4;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = {alloc627: &spin::once::Once<&[x86_64::structures::idt::Entry<()>]>};\n        _2 = spin::once::Once::<&[x86_64::structures::idt::Entry<()>]>::call_once::<{closure@ostd/src/arch/x86/trap/idt.rs:32:37: 32:39}>(move _3, ZeroSized: {closure@ostd/src/arch/x86/trap/idt.rs:32:37: 32:39}) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _1 = (*_2);\n        StorageDead(_2);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = core::mem::size_of_val::<[x86_64::structures::idt::Entry<()>]>(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _8 = CheckedSub(_7, 1_usize);\n        assert(!move (_8.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _7, 1_usize) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = move (_8.0: usize);\n        StorageDead(_7);\n        _5 = move _6 as u16;\n        StorageDead(_6);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = core::slice::<impl [x86_64::structures::idt::Entry<()>]>::as_ptr(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _11 = core::ptr::const_ptr::<impl *const x86_64::structures::idt::Entry<()>>::addr(move _12) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        _10 = move _11 as u64;\n        StorageDead(_11);\n        _9 = x86_64::VirtAddr::new(move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        _4 = DescriptorTablePointer(move _5, move _9);\n        StorageDead(_9);\n        StorageDead(_5);\n        _14 = &_4;\n        _13 = x86_64::instructions::tables::lidt(_14) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Initializes and loads the IDT.\n\n The caller should only call this method once in the boot context for each available processor.\n This is not a safety requirement, however, because calling this method again will do nothing\n more than load the same IDT.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

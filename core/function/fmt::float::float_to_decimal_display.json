@@ -1,0 +1,88 @@
+{
+  "name": "fmt::float::float_to_decimal_display",
+  "safe": true,
+  "callees": {
+    "fmt::Formatter::<'a>::sign_plus": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Determines if the `+` flag was specified.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Foo(i32);\n\n impl fmt::Display for Foo {\n     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {\n         if formatter.sign_plus() {\n             write!(formatter,\n                    \"Foo({}{})\",\n                    if self.0 < 0 { '-' } else { '+' },\n                    self.0.abs())\n         } else {\n             write!(formatter, \"Foo({})\", self.0)\n         }\n     }\n }\n\n assert_eq!(format!(\"{:+}\", Foo(23)), \"Foo(+23)\");\n assert_eq!(format!(\"{:+}\", Foo(-23)), \"Foo(-23)\");\n assert_eq!(format!(\"{}\", Foo(23)), \"Foo(23)\");\n ```\n",
+      "adt": {
+        "fmt::Formatter": "ImmutableAsArgument"
+      }
+    },
+    "fmt::FormattingOptions::get_precision": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the current precision.\n",
+      "adt": {
+        "fmt::FormattingOptions": "ImmutableAsArgument",
+        "option::Option": "Constructor"
+      }
+    },
+    "fmt::float::float_to_decimal_common_exact": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "fmt::Formatter": "MutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    },
+    "fmt::float::float_to_decimal_common_shortest": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "fmt::Formatter": "MutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "fmt::Formatter": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "num::flt2dec::Sign": [
+      "Plain"
+    ],
+    "fmt::FormattingOptions": [
+      "Ref"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 136, kind: RigidTy(Uint(U16)) })])"
+    ],
+    "result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 12942,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/float.rs:81:1: 97:2",
+  "src": "fn float_to_decimal_display<T>(fmt: &mut Formatter<'_>, num: &T) -> Result\nwhere\n    T: flt2dec::DecodableFloat,\n{\n    let force_sign = fmt.sign_plus();\n    let sign = match force_sign {\n        false => flt2dec::Sign::Minus,\n        true => flt2dec::Sign::MinusPlus,\n    };\n\n    if let Some(precision) = fmt.options.get_precision() {\n        float_to_decimal_common_exact(fmt, num, sign, precision)\n    } else {\n        let min_precision = 0;\n        float_to_decimal_common_shortest(fmt, num, sign, min_precision)\n    }\n}",
+  "mir": "fn fmt::float::float_to_decimal_display(_1: &mut fmt::Formatter<'_>, _2: &T) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    let  _3: bool;\n    let mut _4: &fmt::Formatter<'_>;\n    let  _5: num::flt2dec::Sign;\n    let mut _6: option::Option<u16>;\n    let mut _7: &fmt::FormattingOptions;\n    let mut _8: isize;\n    let  _9: u16;\n    let mut _10: num::flt2dec::Sign;\n    let mut _11: num::flt2dec::Sign;\n    let mut _12: u16;\n    debug fmt => _1;\n    debug num => _2;\n    debug force_sign => _3;\n    debug sign => _5;\n    debug precision => _9;\n    debug min_precision => 0_u16;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &(*_1);\n        _3 = fmt::Formatter::<'_>::sign_plus(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_5);\n        switchInt(_3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        _5 = num::flt2dec::Sign::MinusPlus;\n        goto -> bb4;\n    }\n    bb3: {\n        _5 = num::flt2dec::Sign::Minus;\n        goto -> bb4;\n    }\n    bb4: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).0: fmt::FormattingOptions);\n        _6 = fmt::FormattingOptions::get_precision(move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        _8 = discriminant(_6);\n        switchInt(move _8) -> [1: bb6, 0: bb8, otherwise: bb11];\n    }\n    bb6: {\n        _9 = ((_6 as variant#1).0: u16);\n        StorageLive(_10);\n        _10 = _5;\n        _0 = fmt::float::float_to_decimal_common_exact::<T>(_1, _2, move _10, _9) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageDead(_6);\n        goto -> bb10;\n    }\n    bb8: {\n        StorageDead(_6);\n        StorageLive(_11);\n        _11 = _5;\n        StorageLive(_12);\n        _12 = 0_u16;\n        _0 = fmt::float::float_to_decimal_common_shortest::<T>(_1, _2, move _11, move _12) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_12);\n        StorageDead(_11);\n        goto -> bb10;\n    }\n    bb10: {\n        StorageDead(_5);\n        StorageDead(_3);\n        return;\n    }\n    bb11: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

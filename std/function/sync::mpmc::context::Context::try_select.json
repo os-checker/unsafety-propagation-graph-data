@@ -1,0 +1,91 @@
+{
+  "name": "sync::mpmc::context::Context::try_select",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::convert::Into::into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicUsize::compare_exchange": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer if the current value is the same as\n the `current` value.\n\n The return value is a result indicating whether the new value was written and\n containing the previous value. On success this value is guaranteed to be equal to\n `current`.\n\n `compare_exchange` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. `success` describes the required ordering for the\n read-modify-write operation that takes place if the comparison with `current` succeeds.\n `failure` describes the required ordering for the load operation that takes place when\n the comparison fails. Using [`Acquire`] as success ordering makes the store part\n of this operation [`Relaxed`], and using [`Release`] makes the successful load\n [`Relaxed`]. The failure ordering can only be [`SeqCst`], [`Acquire`] or [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.compare_exchange(5, 10,\n                                      Ordering::Acquire,\n                                      Ordering::Relaxed),\n            Ok(5));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n\n assert_eq!(some_var.compare_exchange(6, 12,\n                                      Ordering::SeqCst,\n                                      Ordering::Acquire),\n            Err(10));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n\n # Considerations\n\n `compare_exchange` is a [compare-and-swap operation] and thus exhibits the usual downsides\n of CAS operations. In particular, a load of the value followed by a successful\n `compare_exchange` with the previous load *does not ensure* that other threads have not\n changed the value in the interim! This is usually important when the *equality* check in\n the `compare_exchange` is being used to check the *identity* of a value, but equality\n does not necessarily imply identity. This is a particularly common case for pointers, as\n a pointer holding the same address does not imply that the same object exists at that\n address! In this case, `compare_exchange` can lead to the [ABA problem].\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<U, E>` by applying a function to a\n contained [`Ok`] value, leaving an [`Err`] value untouched.\n\n This function can be used to compose the results of two functions.\n\n # Examples\n\n Print the numbers on each line of a string multiplied by two.\n\n ```\n let line = \"1\\n2\\n3\\n4\\n\";\n\n for num in line.lines() {\n     match num.parse::<i32>().map(|i| i * 2) {\n         Ok(n) => println!(\"{n}\"),\n         Err(..) => {}\n     }\n }\n ```\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::map_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<T, F>` by applying a function to a\n contained [`Err`] value, leaving an [`Ok`] value untouched.\n\n This function can be used to pass through a successful result while handling\n an error.\n\n\n # Examples\n\n ```\n fn stringify(x: u32) -> String { format!(\"error code: {x}\") }\n\n let x: Result<u32, u32> = Ok(2);\n assert_eq!(x.map_err(stringify), Ok(2));\n\n let x: Result<u32, u32> = Err(13);\n assert_eq!(x.map_err(stringify), Err(\"error code: 13\".to_string()));\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc_crate::sync::Arc": [
+      "Ref"
+    ],
+    "sync::mpmc::context::Context": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "sync::mpmc::context::Inner": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "sync::mpmc::select::Selected": [
+      "Plain"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 2810,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/context.rs:89:5: 100:6",
+  "src": "pub fn try_select(&self, select: Selected) -> Result<(), Selected> {\n        self.inner\n            .select\n            .compare_exchange(\n                Selected::Waiting.into(),\n                select.into(),\n                Ordering::AcqRel,\n                Ordering::Acquire,\n            )\n            .map(|_| ())\n            .map_err(|e| e.into())\n    }",
+  "mir": "fn sync::mpmc::context::Context::try_select(_1: &sync::mpmc::context::Context, _2: sync::mpmc::select::Selected) -> core::result::Result<(), sync::mpmc::select::Selected> {\n    let mut _0: core::result::Result<(), sync::mpmc::select::Selected>;\n    let mut _3: core::result::Result<(), usize>;\n    let mut _4: core::result::Result<usize, usize>;\n    let mut _5: &core::sync::atomic::AtomicUsize;\n    let  _6: &sync::mpmc::context::Inner;\n    let mut _7: &alloc_crate::sync::Arc<sync::mpmc::context::Inner>;\n    let mut _8: usize;\n    let mut _9: sync::mpmc::select::Selected;\n    let mut _10: usize;\n    let mut _11: core::sync::atomic::Ordering;\n    let mut _12: core::sync::atomic::Ordering;\n    debug self => _1;\n    debug select => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).0: alloc_crate::sync::Arc<sync::mpmc::context::Inner>);\n        _6 = <alloc_crate::sync::Arc<sync::mpmc::context::Inner> as core::ops::Deref>::deref(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        _5 = &((*_6).0: core::sync::atomic::AtomicUsize);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = sync::mpmc::select::Selected::Waiting;\n        _8 = <sync::mpmc::select::Selected as core::convert::Into<usize>>::into(move _9) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_9);\n        StorageLive(_10);\n        _10 = <sync::mpmc::select::Selected as core::convert::Into<usize>>::into(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_11);\n        _11 = core::sync::atomic::Ordering::AcqRel;\n        StorageLive(_12);\n        _12 = core::sync::atomic::Ordering::Acquire;\n        _4 = core::sync::atomic::AtomicUsize::compare_exchange(move _5, move _8, move _10, move _11, move _12) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_8);\n        StorageDead(_5);\n        _3 = core::result::Result::<usize, usize>::map::<(), {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/context.rs:98:18: 98:21}>(move _4, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/context.rs:98:18: 98:21}) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_4);\n        _0 = core::result::Result::<(), usize>::map_err::<sync::mpmc::select::Selected, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/context.rs:99:22: 99:25}>(move _3, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/context.rs:99:22: 99:25}) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_6);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Attempts to select an operation.\n\n On failure, the previously selected operation is returned.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

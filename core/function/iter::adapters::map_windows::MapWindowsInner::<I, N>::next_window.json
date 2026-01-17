@@ -1,0 +1,151 @@
+{
+  "name": "iter::adapters::map_windows::MapWindowsInner::<I, N>::next_window",
+  "safe": true,
+  "callees": {
+    "option::Option::<T>::as_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts from `&mut Option<T>` to `Option<&mut T>`.\n\n # Examples\n\n ```\n let mut x = Some(2);\n match x.as_mut() {\n     Some(v) => *v = 42,\n     None => {},\n }\n assert_eq!(x, Some(42));\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::adapters::map_windows::Buffer::<T, N>::try_from_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "option::Option": "Constructor",
+        "iter::adapters::map_windows::Buffer": "Constructor"
+      }
+    },
+    "iter::adapters::map_windows::Buffer::<T, N>::push": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Pushes a new item `next` to the back, and pops the front-most one.\n\n All the elements will be shifted to the front end when pushing reaches\n the back end.\n",
+      "adt": {
+        "iter::adapters::map_windows::Buffer": "MutableAsArgument"
+      }
+    },
+    "option::Option::<T>::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes the value out of the option, leaving a [`None`] in its place.\n\n # Examples\n\n ```\n let mut x = Some(2);\n let y = x.take();\n assert_eq!(x, None);\n assert_eq!(y, Some(2));\n\n let mut x: Option<u32> = None;\n let y = x.take();\n assert_eq!(x, None);\n assert_eq!(y, None);\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::as_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts from `&Option<T>` to `Option<&T>`.\n\n # Examples\n\n Calculates the length of an <code>Option<[String]></code> as an <code>Option<[usize]></code>\n without moving the [`String`]. The [`map`] method takes the `self` argument by value,\n consuming the original, so this technique uses `as_ref` to first take an `Option` to a\n reference to the value inside the original.\n\n [`map`]: Option::map\n [String]: ../../std/string/struct.String.html \"String\"\n [`String`]: ../../std/string/struct.String.html \"String\"\n\n ```\n let text: Option<String> = Some(\"Hello, world!\".to_string());\n // First, cast `Option<String>` to `Option<&String>` with `as_ref`,\n // then consume *that* with `map`, leaving `text` on the stack.\n let text_length: Option<usize> = text.as_ref().map(|s| s.len());\n println!(\"still can print text: {text:?}\");\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).\n\n # Examples\n\n Calculates the length of an <code>Option<[String]></code> as an\n <code>Option<[usize]></code>, consuming the original:\n\n [String]: ../../std/string/struct.String.html \"String\"\n ```\n let maybe_some_string = Some(String::from(\"Hello, World!\"));\n // `Option::map` takes self *by value*, consuming `maybe_some_string`\n let maybe_some_len = maybe_some_string.map(|s| s.len());\n assert_eq!(maybe_some_len, Some(13));\n\n let x: Option<&str> = None;\n assert_eq!(x.map(|s| s.len()), None);\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "iter::adapters::map_windows::Buffer::<T, N>::as_array_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "iter::adapters::map_windows::Buffer": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "MutRef",
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4671, kind: Alias(Projection, AliasTy { def_id: AliasDef(DefId { id: 25924, name: \"iter::traits::iterator::Iterator::Item\" }), args: GenericArgs([Type(Ty { id: 4656, kind: Param(ParamTy { index: 0, name: \"I\" }) })]) }) })])",
+      "Ref"
+    ],
+    "iter::adapters::map_windows::MapWindowsInner": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 4668, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 4656, kind: Param(ParamTy { index: 0, name: \"I\" }) }, Mut)) })])"
+    ],
+    "iter::adapters::map_windows::Buffer": [
+      "MutRef"
+    ]
+  },
+  "path": 13965,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/map_windows.rs:70:5: 89:6",
+  "src": "fn next_window(&mut self) -> Option<&[I::Item; N]> {\n        let iter = self.iter.as_mut()?;\n        match self.buffer {\n            // It is the first time to advance. We collect\n            // the first `N` items from `self.iter` to initialize `self.buffer`.\n            None => self.buffer = Buffer::try_from_iter(iter),\n            Some(ref mut buffer) => match iter.next() {\n                None => {\n                    // Fuse the inner iterator since it yields a `None`.\n                    self.iter.take();\n                    self.buffer.take();\n                }\n                // Advance the iterator. We first call `next` before changing our buffer\n                // at all. This means that if `next` panics, our invariant is upheld and\n                // our `Drop` impl drops the correct elements.\n                Some(item) => buffer.push(item),\n            },\n        }\n        self.buffer.as_ref().map(Buffer::as_array_ref)\n    }",
+  "mir": "fn iter::adapters::map_windows::MapWindowsInner::<I, N>::next_window(_1: &mut iter::adapters::map_windows::MapWindowsInner<I, N>) -> option::Option<&[<I as iter::traits::iterator::Iterator>::Item; N]> {\n    let mut _0: option::Option<&[<I as iter::traits::iterator::Iterator>::Item; N]>;\n    let mut _2: ops::control_flow::ControlFlow<option::Option<convert::Infallible>, &mut I>;\n    let mut _3: option::Option<&mut I>;\n    let mut _4: &mut option::Option<I>;\n    let mut _5: isize;\n    let  _6: &mut I;\n    let  _7: ();\n    let mut _8: isize;\n    let mut _9: option::Option<iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>;\n    let  _10: &mut iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>;\n    let mut _11: option::Option<<I as iter::traits::iterator::Iterator>::Item>;\n    let mut _12: isize;\n    let  _13: option::Option<I>;\n    let mut _14: &mut option::Option<I>;\n    let  _15: option::Option<iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>;\n    let mut _16: &mut option::Option<iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>;\n    let  _17: <I as iter::traits::iterator::Iterator>::Item;\n    let mut _18: option::Option<&iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>;\n    let mut _19: &option::Option<iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>;\n    debug self => _1;\n    debug iter => _6;\n    debug residual => option::Option::<convert::Infallible>::None;\n    debug val => _6;\n    debug buffer => _10;\n    debug item => _17;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &mut ((*_1).0: option::Option<I>);\n        _3 = option::Option::<I>::as_mut(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = <option::Option<&mut I> as ops::try_trait::Try>::branch(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _5 = discriminant(_2);\n        switchInt(move _5) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _6 = move ((_2 as variant#0).0: &mut I);\n        StorageDead(_2);\n        _8 = discriminant(((*_1).1: option::Option<iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>));\n        switchInt(move _8) -> [0: bb8, 1: bb7, otherwise: bb3];\n    }\n    bb5: {\n        _0 = <option::Option<&[<I as iter::traits::iterator::Iterator>::Item; N]> as ops::try_trait::FromResidual<option::Option<convert::Infallible>>>::from_residual(option::Option::<convert::Infallible>::None) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_2);\n        goto -> bb23;\n    }\n    bb7: {\n        _10 = &mut ((((*_1).1: option::Option<iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>) as variant#1).0: iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>);\n        StorageLive(_11);\n        _11 = <I as iter::traits::iterator::Iterator>::next(_6) -> [return: bb11, unwind unreachable];\n    }\n    bb8: {\n        StorageLive(_9);\n        _9 = iter::adapters::map_windows::Buffer::<<I as iter::traits::iterator::Iterator>::Item, N>::try_from_iter::<I>(_6) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        drop(((*_1).1: option::Option<iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>)) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        ((*_1).1: option::Option<iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>) = move _9;\n        StorageDead(_9);\n        goto -> bb20;\n    }\n    bb11: {\n        _12 = discriminant(_11);\n        switchInt(move _12) -> [0: bb13, 1: bb12, otherwise: bb3];\n    }\n    bb12: {\n        _17 = move ((_11 as variant#1).0: <I as iter::traits::iterator::Iterator>::Item);\n        _7 = iter::adapters::map_windows::Buffer::<<I as iter::traits::iterator::Iterator>::Item, N>::push(_10, _17) -> [return: bb18, unwind unreachable];\n    }\n    bb13: {\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = &mut ((*_1).0: option::Option<I>);\n        _13 = option::Option::<I>::take(move _14) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_14);\n        drop(_13) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_13);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &mut ((*_1).1: option::Option<iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>);\n        _15 = option::Option::<iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>::take(move _16) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_16);\n        drop(_15) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_15);\n        goto -> bb19;\n    }\n    bb18: {\n        goto -> bb19;\n    }\n    bb19: {\n        StorageDead(_11);\n        goto -> bb20;\n    }\n    bb20: {\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = &((*_1).1: option::Option<iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>);\n        _18 = option::Option::<iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>::as_ref(move _19) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_19);\n        _0 = option::Option::<&iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>>::map::<&[<I as iter::traits::iterator::Iterator>::Item; N], for<'a> fn(&'a iter::adapters::map_windows::Buffer<<I as iter::traits::iterator::Iterator>::Item, N>) -> &'a [<I as iter::traits::iterator::Iterator>::Item; N] {iter::adapters::map_windows::Buffer::<<I as iter::traits::iterator::Iterator>::Item, N>::as_array_ref}>(move _18, iter::adapters::map_windows::Buffer::<<I as iter::traits::iterator::Iterator>::Item, N>::as_array_ref) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_18);\n        goto -> bb23;\n    }\n    bb23: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

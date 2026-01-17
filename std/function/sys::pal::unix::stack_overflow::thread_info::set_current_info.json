@@ -1,0 +1,114 @@
+{
+  "name": "sys::pal::unix::stack_overflow::thread_info::set_current_info",
+  "safe": true,
+  "callees": {
+    "thread::current::current_os_id": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the OS thread ID of the thread that invokes it, if available. If not, return the Rust\n thread ID.\n\n We use a `u64` to all possible platform IDs without excess `cfg`; most use `int`, some use a\n pointer, and Apple uses `uint64_t`. This is a \"best effort\" approach for diagnostics and is\n allowed to fall back to a non-OS ID (such as the Rust thread ID) or a non-unique ID (such as a\n PID) if the thread ID cannot be retrieved.\n",
+      "adt": {}
+    },
+    "thread::current::with_current_name": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Run a function with the current thread's name.\n\n Modulo thread local accesses, this function is safe to call from signal\n handlers and in similar circumstances where allocations are not possible.\n",
+      "adt": {}
+    },
+    "sys::pal::unix::os::errno_location": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n [without_provenance]: without_provenance_mut\n",
+      "adt": {}
+    },
+    "sync::poison::mutex::Mutex::<T>::lock": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires a mutex, blocking the current thread until it is able to do so.\n\n This function will block the local thread until it is available to acquire\n the mutex. Upon returning, the thread is the only thread with the lock\n held. An RAII guard is returned to allow scoped unlock of the lock. When\n the guard goes out of scope, the mutex will be unlocked.\n\n The exact behavior on locking a mutex in the thread which already holds\n the lock is left unspecified. However, this function will not return on\n the second call (it might panic or deadlock, for example).\n\n # Errors\n\n If another user of this mutex panicked while holding the mutex, then\n this call will return an error once the mutex is acquired. The acquired\n mutex guard will be contained in the returned error.\n\n # Panics\n\n This function might panic when called if the lock is already held by\n the current thread.\n\n # Examples\n\n ```\n use std::sync::{Arc, Mutex};\n use std::thread;\n\n let mutex = Arc::new(Mutex::new(0));\n let c_mutex = Arc::clone(&mutex);\n\n thread::spawn(move || {\n     *c_mutex.lock().unwrap() = 10;\n }).join().expect(\"thread::spawn failed\");\n assert_eq!(*mutex.lock().unwrap(), 10);\n ```\n",
+      "adt": {
+        "sync::poison::mutex::Mutex": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "sys::pal::unix::stack_overflow::thread_info::spin_lock_in_setup": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::pal::unix::stack_overflow::thread_info::UnlockOnDrop": "Constructor"
+      }
+    },
+    "alloc_crate::collections::BTreeMap::<K, V, A>::insert": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Inserts a key-value pair into the map.\n\n If the map did not have this key present, `None` is returned.\n\n If the map did have this key present, the value is updated, and the old\n value is returned. The key is not updated, though; this matters for\n types that can be `==` without being identical. See the [module-level\n documentation] for more.\n\n [module-level documentation]: index.html#insert-and-complex-keys\n\n # Examples\n\n ```\n use std::collections::BTreeMap;\n\n let mut map = BTreeMap::new();\n assert_eq!(map.insert(37, \"a\"), None);\n assert_eq!(map.is_empty(), false);\n\n map.insert(37, \"b\");\n assert_eq!(map.insert(37, \"c\"), Some(\"b\"));\n assert_eq!(map[&37], \"c\");\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain"
+    ],
+    "sync::poison::mutex::Mutex": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "sys::pal::unix::stack_overflow::thread_info::UnlockOnDrop": [
+      "Plain"
+    ],
+    "alloc_crate::collections::BTreeMap": [
+      "MutRef"
+    ],
+    "sys::pal::unix::stack_overflow::thread_info::ThreadInfo": [
+      "Plain"
+    ],
+    "core::ops::Range": [
+      "Plain"
+    ]
+  },
+  "path": 3973,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/stack_overflow/thread_info.rs:112:1: 123:2",
+  "src": "pub fn set_current_info(guard_page_range: Range<usize>) {\n    let tid = crate::thread::current_os_id();\n    let name = crate::thread::with_current_name(|name| name.map(Box::from));\n\n    let this = errno_location().addr();\n    let _lock_guard = LOCK.lock();\n    let _spin_guard = spin_lock_in_setup(this);\n\n    // SAFETY: we own the spin lock, so `THREAD_INFO` cannot be aliased.\n    let thread_info = unsafe { &mut *(&raw mut THREAD_INFO) };\n    thread_info.insert(this, ThreadInfo { tid, name, guard_page_range });\n}",
+  "mir": "fn sys::pal::unix::stack_overflow::thread_info::set_current_info(_1: core::ops::Range<usize>) -> () {\n    let mut _0: ();\n    let  _2: u64;\n    let  _3: core::option::Option<alloc_crate::boxed::Box<str>>;\n    let  _4: usize;\n    let mut _5: *mut i32;\n    let  _6: core::result::Result<sync::poison::mutex::MutexGuard<'_, ()>, sync::poison::PoisonError<sync::poison::mutex::MutexGuard<'_, ()>>>;\n    let mut _7: &sync::poison::mutex::Mutex<()>;\n    let  _8: sys::pal::unix::stack_overflow::thread_info::UnlockOnDrop;\n    let mut _9: &mut alloc_crate::collections::BTreeMap<usize, sys::pal::unix::stack_overflow::thread_info::ThreadInfo>;\n    let mut _10: *mut alloc_crate::collections::BTreeMap<usize, sys::pal::unix::stack_overflow::thread_info::ThreadInfo>;\n    let  _11: core::option::Option<sys::pal::unix::stack_overflow::thread_info::ThreadInfo>;\n    let mut _12: sys::pal::unix::stack_overflow::thread_info::ThreadInfo;\n    let mut _13: *const ();\n    let mut _14: usize;\n    let mut _15: usize;\n    let mut _16: usize;\n    let mut _17: bool;\n    let mut _18: *const ();\n    let mut _19: usize;\n    let mut _20: bool;\n    let mut _21: bool;\n    let mut _22: bool;\n    debug guard_page_range => _1;\n    debug tid => _2;\n    debug name => _3;\n    debug this => _4;\n    debug _lock_guard => _6;\n    debug _spin_guard => sys::pal::unix::stack_overflow::thread_info::UnlockOnDrop;\n    debug thread_info => _9;\n    bb0: {\n        _2 = thread::current::current_os_id() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = thread::current::with_current_name::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/stack_overflow/thread_info.rs:114:49: 114:55}, core::option::Option<alloc_crate::boxed::Box<str>>>(ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/stack_overflow/thread_info.rs:114:49: 114:55}) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_5);\n        _5 = sys::pal::unix::os::errno_location() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _4 = core::ptr::mut_ptr::<impl *mut i32>::addr(move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = {alloc323: &sync::poison::mutex::Mutex<()>};\n        _6 = sync::poison::mutex::Mutex::<()>::lock(move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        _8 = sys::pal::unix::stack_overflow::thread_info::spin_lock_in_setup(_4) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_10);\n        _10 = {alloc336: *mut alloc_crate::collections::BTreeMap<usize, sys::pal::unix::stack_overflow::thread_info::ThreadInfo>};\n        _13 = _10 as *const ();\n        _14 = _13 as usize;\n        _15 = Sub(<alloc_crate::collections::BTreeMap<usize, sys::pal::unix::stack_overflow::thread_info::ThreadInfo> as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _16 = BitAnd(_14, _15);\n        _17 = Eq(_16, 0_usize);\n        assert(_17, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<alloc_crate::collections::BTreeMap<usize, sys::pal::unix::stack_overflow::thread_info::ThreadInfo> as core::mem::SizedTypeProperties>::ALIGN, _14) -> [success: bb11, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        drop(_11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        StorageDead(_10);\n        drop(_8) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        drop(_6) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_6);\n        return;\n    }\n    bb11: {\n        _18 = _10 as *const ();\n        _19 = _18 as usize;\n        _20 = Eq(_19, 0_usize);\n        _21 = BitAnd(_20, true);\n        _22 = Not(_21);\n        assert(_22, \"null pointer dereference occurred\") -> [success: bb12, unwind unreachable];\n    }\n    bb12: {\n        _9 = &mut (*_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = ThreadInfo(_2, _3, _1);\n        _11 = alloc_crate::collections::BTreeMap::<usize, sys::pal::unix::stack_overflow::thread_info::ThreadInfo>::insert(_9, _4, move _12) -> [return: bb7, unwind unreachable];\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

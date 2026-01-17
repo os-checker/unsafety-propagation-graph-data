@@ -1,0 +1,100 @@
+{
+  "name": "collections::linked_list::LinkedList::<T, A>::push_front_mut",
+  "safe": true,
+  "callees": {
+    "collections::linked_list::Node::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::linked_list::Node": "Constructor"
+      }
+    },
+    "boxed::Box::<T, A>::new_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory in the given allocator then places `x` into it.\n\n This doesn't actually allocate if `T` is zero-sized.\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let five = Box::new_in(5, System);\n ```\n",
+      "adt": {
+        "boxed::Box": "Constructor"
+      }
+    },
+    "boxed::Box::<T, A>::leak": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes and leaks the `Box`, returning a mutable reference,\n `&'a mut T`.\n\n Note that the type `T` must outlive the chosen lifetime `'a`. If the type\n has only static references, or none at all, then this may be chosen to be\n `'static`.\n\n This function is mainly useful for data that lives for the remainder of\n the program's life. Dropping the returned reference will cause a memory\n leak. If this is not acceptable, the reference should first be wrapped\n with the [`Box::from_raw`] function producing a `Box`. This `Box` can\n then be dropped which will properly destroy `T` and release the\n allocated memory.\n\n Note: this is an associated function, which means that you have\n to call it as `Box::leak(b)` instead of `b.leak()`. This\n is so that there is no conflict with a method on the inner type.\n\n # Examples\n\n Simple usage:\n\n ```\n let x = Box::new(41);\n let static_ref: &'static mut usize = Box::leak(x);\n *static_ref += 1;\n assert_eq!(*static_ref, 42);\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # drop(unsafe { Box::from_raw(static_ref) });\n ```\n\n Unsized data:\n\n ```\n let x = vec![1, 2, 3].into_boxed_slice();\n let static_ref = Box::leak(x);\n static_ref[0] = 4;\n assert_eq!(*static_ref, [4, 2, 3]);\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # drop(unsafe { Box::from_raw(static_ref) });\n ```\n",
+      "adt": {}
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "collections::linked_list::LinkedList::<T, A>::push_front_node": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds the given node to the front of the list.\n\n # Safety\n `node` must point to a valid node that was boxed and leaked using the list's allocator.\n This method takes ownership of the node, so the pointer should not be used again.\n",
+      "adt": {
+        "collections::linked_list::LinkedList": "MutableAsArgument"
+      }
+    },
+    "core::ptr::NonNull::<T>::as_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a unique reference to the value. If the value may be uninitialized, [`as_uninit_mut`]\n must be used instead.\n\n For the shared counterpart see [`as_ref`].\n\n [`as_uninit_mut`]: NonNull::as_uninit_mut\n [`as_ref`]: NonNull::as_ref\n\n # Safety\n\n When calling this method, you have to ensure that\n the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let mut ptr = NonNull::new(&mut x).expect(\"null pointer\");\n\n let x_ref = unsafe { ptr.as_mut() };\n assert_eq!(*x_ref, 0);\n *x_ref += 2;\n assert_eq!(*x_ref, 2);\n ```\n\n [the module documentation]: crate::ptr#safety\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::linked_list::Node": [
+      "Plain",
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))"
+    ],
+    "collections::linked_list::LinkedList": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "MutRef"
+    ],
+    "boxed::Box": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 1302,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/linked_list.rs:868:5: 876:6",
+  "src": "pub fn push_front_mut(&mut self, elt: T) -> &mut T {\n        let node = Box::new_in(Node::new(elt), &self.alloc);\n        let mut node_ptr = NonNull::from(Box::leak(node));\n        // SAFETY: node_ptr is a unique pointer to a node we boxed with self.alloc and leaked\n        unsafe {\n            self.push_front_node(node_ptr);\n            &mut node_ptr.as_mut().element\n        }\n    }",
+  "mir": "fn collections::linked_list::LinkedList::<T, A>::push_front_mut(_1: &mut collections::linked_list::LinkedList<T, A>, _2: T) -> &mut T {\n    let mut _0: &mut T;\n    let  _3: boxed::Box<collections::linked_list::Node<T>, &A>;\n    let mut _4: collections::linked_list::Node<T>;\n    let mut _5: &A;\n    let mut _6: core::ptr::NonNull<collections::linked_list::Node<T>>;\n    let mut _7: &mut collections::linked_list::Node<T>;\n    let  _8: ();\n    let mut _9: core::ptr::NonNull<collections::linked_list::Node<T>>;\n    let mut _10: &mut collections::linked_list::Node<T>;\n    let mut _11: &mut core::ptr::NonNull<collections::linked_list::Node<T>>;\n    debug self => _1;\n    debug elt => _2;\n    debug node => _3;\n    debug node_ptr => _6;\n    bb0: {\n        StorageLive(_4);\n        _4 = collections::linked_list::Node::<T>::new(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = &((*_1).3: A);\n        _3 = boxed::Box::<collections::linked_list::Node<T>, &A>::new_in(move _4, move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = boxed::Box::<collections::linked_list::Node<T>, &A>::leak::<'_>(_3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = <core::ptr::NonNull<collections::linked_list::Node<T>> as core::convert::From<&mut collections::linked_list::Node<T>>>::from(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        StorageLive(_9);\n        _9 = _6;\n        _8 = collections::linked_list::LinkedList::<T, A>::push_front_node(_1, move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &mut _6;\n        _10 = core::ptr::NonNull::<collections::linked_list::Node<T>>::as_mut::<'_>(move _11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        _0 = &mut ((*_10).2: T);\n        StorageDead(_10);\n        StorageDead(_6);\n        return;\n    }\n}\n",
+  "doc": " Adds an element to the front of the list, returning a reference to it.\n\n This operation should compute in *O*(1) time.\n\n # Examples\n\n ```\n #![feature(push_mut)]\n use std::collections::LinkedList;\n\n let mut dl = LinkedList::from([1, 2, 3]);\n\n let ptr = dl.push_front_mut(2);\n *ptr += 4;\n assert_eq!(dl.front().unwrap(), &6);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "name": "sync::rwlock::RwLock::<T, G>::read",
+  "safe": true,
+  "callees": {
+    "sync::rwlock::RwLock::<T, G>::try_read": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to acquire a read lock.\n\n This function will never spin-wait and will return immediately.\n",
+      "adt": {
+        "sync::rwlock::RwLock": "ImmutableAsArgument",
+        "core::option::Option": "Constructor",
+        "sync::rwlock::RwLockReadGuard": "Constructor"
+      }
+    },
+    "core::hint::spin_loop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Emits a machine instruction to signal the processor that it is running in\n a busy-wait spin-loop (\"spin lock\").\n\n Upon receiving the spin-loop signal the processor can optimize its behavior by,\n for example, saving power or switching hyper-threads.\n\n This function is different from [`thread::yield_now`] which directly\n yields to the system's scheduler, whereas `spin_loop` does not interact\n with the operating system.\n\n A common use case for `spin_loop` is implementing bounded optimistic\n spinning in a CAS loop in synchronization primitives. To avoid problems\n like priority inversion, it is strongly recommended that the spin loop is\n terminated after a finite amount of iterations and an appropriate blocking\n syscall is made.\n\n **Note**: On platforms that do not support receiving spin-loop hints this\n function does not do anything at all.\n\n # Examples\n\n ```ignore-wasm\n use std::sync::atomic::{AtomicBool, Ordering};\n use std::sync::Arc;\n use std::{hint, thread};\n\n // A shared atomic value that threads will use to coordinate\n let live = Arc::new(AtomicBool::new(false));\n\n // In a background thread we'll eventually set the value\n let bg_work = {\n     let live = live.clone();\n     thread::spawn(move || {\n         // Do some work, then make the value live\n         do_some_work();\n         live.store(true, Ordering::Release);\n     })\n };\n\n // Back on our current thread, we wait for the value to be set\n while !live.load(Ordering::Acquire) {\n     // The spin loop is a hint to the CPU that we're waiting, but probably\n     // not for very long\n     hint::spin_loop();\n }\n\n // The value is now set\n # fn do_some_work() {}\n do_some_work();\n bg_work.join()?;\n # Ok::<(), Box<dyn core::any::Any + Send + 'static>>(())\n ```\n\n [`thread::yield_now`]: ../../std/thread/fn.yield_now.html\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::rwlock::RwLock": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 6945, kind: RigidTy(Adt(AdtDef(DefId { id: 4853, name: \"sync::rwlock::RwLockReadGuard\" }), GenericArgs([Lifetime(Region { kind: ReErased }), Type(Ty { id: 44, kind: Param(ParamTy { index: 0, name: \"T\" }) }), Type(Ty { id: 1110, kind: Param(ParamTy { index: 1, name: \"G\" }) })]))) })])"
+    ],
+    "sync::rwlock::RwLockReadGuard": [
+      "Plain"
+    ]
+  },
+  "path": 2666,
+  "span": "ostd/src/sync/rwlock.rs:133:5: 141:6",
+  "src": "pub fn read(&self) -> RwLockReadGuard<'_, T, G> {\n        loop {\n            if let Some(readguard) = self.try_read() {\n                return readguard;\n            } else {\n                core::hint::spin_loop();\n            }\n        }\n    }",
+  "mir": "fn sync::rwlock::RwLock::<T, G>::read(_1: &sync::rwlock::RwLock<T, G>) -> sync::rwlock::RwLockReadGuard<'_, T, G> {\n    let mut _0: sync::rwlock::RwLockReadGuard<'_, T, G>;\n    let mut _2: core::option::Option<sync::rwlock::RwLockReadGuard<'_, T, G>>;\n    let mut _3: isize;\n    let  _4: ();\n    debug self => _1;\n    debug readguard => _0;\n    bb0: {\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_2);\n        _2 = sync::rwlock::RwLock::<T, G>::try_read(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = discriminant(_2);\n        switchInt(move _3) -> [1: bb3, 0: bb4, otherwise: bb5];\n    }\n    bb3: {\n        _0 = move ((_2 as variant#1).0: sync::rwlock::RwLockReadGuard<'_, T, G>);\n        StorageDead(_2);\n        return;\n    }\n    bb4: {\n        StorageDead(_2);\n        _4 = core::hint::spin_loop() -> [return: bb1, unwind unreachable];\n    }\n    bb5: {\n        unreachable;\n    }\n}\n",
+  "doc": " Acquires a read lock and spin-wait until it can be acquired.\n\n The calling thread will spin-wait until there are no writers or\n upgrading upreaders present. There is no guarantee for the order\n in which other readers or writers waiting simultaneously will\n obtain the lock.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

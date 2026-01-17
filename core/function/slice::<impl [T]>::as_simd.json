@@ -1,0 +1,54 @@
+{
+  "name": "slice::<impl [T]>::as_simd",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::align_to": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Transmutes the slice to a slice of another type, ensuring alignment of the types is\n maintained.\n\n This method splits the slice into three distinct slices: prefix, correctly aligned middle\n slice of a new type, and the suffix slice. The middle part will be as big as possible under\n the given alignment constraint and element size.\n\n This method has no purpose when either input element `T` or output element `U` are\n zero-sized and will return the original slice without splitting anything.\n\n # Safety\n\n This method is essentially a `transmute` with respect to the elements in the returned\n middle slice, so all the usual caveats pertaining to `transmute::<T, U>` also apply here.\n\n # Examples\n\n Basic usage:\n\n ```\n unsafe {\n     let bytes: [u8; 7] = [1, 2, 3, 4, 5, 6, 7];\n     let (prefix, shorts, suffix) = bytes.align_to::<u16>();\n     // less_efficient_algorithm_for_bytes(prefix);\n     // more_efficient_algorithm_for_aligned_shorts(shorts);\n     // less_efficient_algorithm_for_bytes(suffix);\n }\n ```\n",
+      "adt": {}
+    },
+    "panicking::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Internal function for `assert_eq!` and `assert_ne!` macros\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "panicking::AssertKind": [
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 1240,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:4225:5: 4239:6",
+  "src": "pub fn as_simd<const LANES: usize>(&self) -> (&[T], &[Simd<T, LANES>], &[T])\n    where\n        Simd<T, LANES>: AsRef<[T; LANES]>,\n        T: simd::SimdElement,\n        simd::LaneCount<LANES>: simd::SupportedLaneCount,\n    {\n        // These are expected to always match, as vector types are laid out like\n        // arrays per <https://llvm.org/docs/LangRef.html#vector-type>, but we\n        // might as well double-check since it'll optimize away anyhow.\n        assert_eq!(size_of::<Simd<T, LANES>>(), size_of::<[T; LANES]>());\n\n        // SAFETY: The simd types have the same layout as arrays, just with\n        // potentially-higher alignment, so the de-facto transmutes are sound.\n        unsafe { self.align_to() }\n    }",
+  "mir": "fn slice::<impl [T]>::as_simd(_1: &[T]) -> (&[T], &[core_simd::vector::Simd<T, LANES>], &[T]) {\n    let mut _0: (&[T], &[core_simd::vector::Simd<T, LANES>], &[T]);\n    let mut _2: (&usize, &usize);\n    let mut _3: &usize;\n    let mut _4: &usize;\n    let  _5: &usize;\n    let  _6: &usize;\n    let mut _7: bool;\n    let mut _8: usize;\n    let mut _9: usize;\n    let  _10: panicking::AssertKind;\n    let  _11: !;\n    let mut _12: option::Option<fmt::Arguments<'_>>;\n    debug self => _1;\n    debug left_val => _5;\n    debug right_val => _6;\n    debug kind => _10;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = slice::<impl [T]>::as_simd::<LANES>::promoted[1];\n        StorageLive(_4);\n        _4 = slice::<impl [T]>::as_simd::<LANES>::promoted[0];\n        _2 = (move _3, move _4);\n        StorageDead(_4);\n        StorageDead(_3);\n        _5 = (_2.0: &usize);\n        _6 = (_2.1: &usize);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = (*_5);\n        StorageLive(_9);\n        _9 = (*_6);\n        _7 = Eq(move _8, move _9);\n        switchInt(move _7) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_2);\n        _0 = slice::<impl [T]>::align_to::<core_simd::vector::Simd<T, LANES>>(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_9);\n        StorageDead(_8);\n        _10 = panicking::AssertKind::Eq;\n        StorageLive(_12);\n        _12 = option::Option::None;\n        _11 = panicking::assert_failed::<usize, usize>(_10, _5, _6, move _12) -> unwind unreachable;\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": " Splits a slice into a prefix, a middle of aligned SIMD types, and a suffix.\n\n This is a safe wrapper around [`slice::align_to`], so inherits the same\n guarantees as that method.\n\n # Panics\n\n This will panic if the size of the SIMD type is different from\n `LANES` times that of the scalar.\n\n At the time of writing, the trait restrictions on `Simd<T, LANES>` keeps\n that from ever happening, as only power-of-two numbers of lanes are\n supported.  It's possible that, in the future, those restrictions might\n be lifted in a way that would make it possible to see panics from this\n method for something like `LANES == 3`.\n\n # Examples\n\n ```\n #![feature(portable_simd)]\n use core::simd::prelude::*;\n\n let short = &[1, 2, 3];\n let (prefix, middle, suffix) = short.as_simd::<4>();\n assert_eq!(middle, []); // Not enough elements for anything in the middle\n\n // They might be split in any possible way between prefix and suffix\n let it = prefix.iter().chain(suffix).copied();\n assert_eq!(it.collect::<Vec<_>>(), vec![1, 2, 3]);\n\n fn basic_simd_sum(x: &[f32]) -> f32 {\n     use std::ops::Add;\n     let (prefix, middle, suffix) = x.as_simd();\n     let sums = f32x4::from_array([\n         prefix.iter().copied().sum(),\n         0.0,\n         0.0,\n         suffix.iter().copied().sum(),\n     ]);\n     let sums = middle.iter().copied().fold(sums, f32x4::add);\n     sums.reduce_sum()\n }\n\n let numbers: Vec<f32> = (1..101).map(|x| x as _).collect();\n assert_eq!(basic_simd_sum(&numbers[1..99]), 4949.0);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

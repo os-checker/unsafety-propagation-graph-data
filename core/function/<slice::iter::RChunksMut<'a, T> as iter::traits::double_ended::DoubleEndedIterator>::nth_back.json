@@ -1,0 +1,66 @@
+{
+  "name": "<slice::iter::RChunksMut<'a, T> as iter::traits::double_ended::DoubleEndedIterator>::nth_back",
+  "safe": true,
+  "callees": {
+    "iter::traits::exact_size::ExactSizeIterator::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the exact remaining length of the iterator.\n\n The implementation ensures that the iterator will return exactly `len()`\n more times a [`Some(T)`] value, before returning [`None`].\n This method has a default implementation, so you usually should not\n implement it directly. However, if you can provide a more efficient\n implementation, you can do so. See the [trait-level] docs for an\n example.\n\n This function has the same safety guarantees as the\n [`Iterator::size_hint`] function.\n\n [trait-level]: ExactSizeIterator\n [`Some(T)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n // a finite range knows exactly how many times it will iterate\n let mut range = 0..5;\n\n assert_eq!(5, range.len());\n let _ = range.next();\n assert_eq!(4, range.len());\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of a raw slice.\n\n The returned value is the number of **elements**, not the number of bytes.\n\n This function is safe, even when the raw slice cannot be cast to a slice\n reference because the pointer is null or unaligned.\n\n # Examples\n\n ```rust\n use std::ptr;\n\n let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);\n assert_eq!(slice.len(), 3);\n ```\n",
+      "adt": {}
+    },
+    "num::<impl usize>::saturating_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Saturating integer subtraction. Computes `self - rhs`, saturating\n at the numeric bounds instead of overflowing.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::split_at_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable raw slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.\n\n # Safety\n\n `mid` must be [in-bounds] of the underlying [allocation].\n Which means `self` must be dereferenceable and span a single allocation\n that is at least `mid * size_of::<T>()` bytes long. Not upholding these\n requirements is *[undefined behavior]* even if the resulting pointers are not used.\n\n Since `len` being in-bounds it is not a safety invariant of `*mut [T]` the\n safety requirements of this method are the same as for [`split_at_mut_unchecked`].\n The explicit bounds check is only as useful as `len` is correct.\n\n [`split_at_mut_unchecked`]: #method.split_at_mut_unchecked\n [in-bounds]: #method.add\n [allocation]: crate::ptr#allocation\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n #![feature(raw_slice_split)]\n #![feature(slice_ptr_get)]\n\n let mut v = [1, 0, 3, 0, 5, 6];\n let ptr = &mut v as *mut [_];\n unsafe {\n     let (left, right) = ptr.split_at_mut(2);\n     assert_eq!(&*left, [1, 0]);\n     assert_eq!(&*right, [3, 0, 5, 6]);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::RChunksMut": [
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 16543,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:2558:5: 2576:6",
+  "src": "fn nth_back(&mut self, n: usize) -> Option<Self::Item> {\n        let len = self.len();\n        if n < len {\n            // can't underflow because `n < len`\n            let offset_from_end = (len - 1 - n) * self.chunk_size;\n            let end = self.v.len() - offset_from_end;\n            let start = end.saturating_sub(self.chunk_size);\n            // SAFETY: The self.v contract ensures that any split_at_mut is valid.\n            let (tmp, tail) = unsafe { self.v.split_at_mut(end) };\n            // SAFETY: The self.v contract ensures that any split_at_mut is valid.\n            let (_, nth_back) = unsafe { tmp.split_at_mut(start) };\n            self.v = tail;\n            // SAFETY: Nothing else points to or will point to the contents of this slice.\n            Some(unsafe { &mut *nth_back })\n        } else {\n            self.v = &mut [];\n            None\n        }\n    }",
+  "mir": "fn <slice::iter::RChunksMut<'a, T> as iter::traits::double_ended::DoubleEndedIterator>::nth_back(_1: &mut slice::iter::RChunksMut<'_, T>, _2: usize) -> option::Option<&mut [T]> {\n    let mut _0: option::Option<&mut [T]>;\n    let  _3: usize;\n    let mut _4: &&mut slice::iter::RChunksMut<'_, T>;\n    let mut _5: bool;\n    let  _6: usize;\n    let mut _7: usize;\n    let mut _8: usize;\n    let mut _9: (usize, bool);\n    let mut _10: (usize, bool);\n    let mut _11: usize;\n    let mut _12: (usize, bool);\n    let  _13: usize;\n    let mut _14: usize;\n    let mut _15: *mut [T];\n    let mut _16: (usize, bool);\n    let  _17: usize;\n    let mut _18: usize;\n    let  _19: *mut [T];\n    let  _20: *mut [T];\n    let mut _21: (*mut [T], *mut [T]);\n    let mut _22: *mut [T];\n    let  _23: *mut [T];\n    let mut _24: (*mut [T], *mut [T]);\n    let mut _25: &mut [T];\n    let mut _26: *mut [T; 0];\n    let mut _27: &mut [T; 0];\n    debug self => _1;\n    debug n => _2;\n    debug len => _3;\n    debug offset_from_end => _6;\n    debug end => _13;\n    debug start => _17;\n    debug tmp => _19;\n    debug tail => _20;\n    debug nth_back => _23;\n    bb0: {\n        StorageLive(_4);\n        _4 = &_1;\n        _3 = <&mut slice::iter::RChunksMut<'_, T> as iter::traits::exact_size::ExactSizeIterator>::len(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = Lt(_2, _3);\n        switchInt(move _5) -> [0: bb11, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_7);\n        StorageLive(_8);\n        _9 = CheckedSub(_3, 1_usize);\n        assert(!move (_9.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _3, 1_usize) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _8 = move (_9.0: usize);\n        _10 = CheckedSub(_8, _2);\n        assert(!move (_10.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _8, _2) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _7 = move (_10.0: usize);\n        StorageDead(_8);\n        StorageLive(_11);\n        _11 = ((*_1).1: usize);\n        _12 = CheckedMul(_7, _11);\n        assert(!move (_12.1: bool), \"attempt to compute `{} * {}`, which would overflow\", move _7, move _11) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _6 = move (_12.0: usize);\n        StorageDead(_11);\n        StorageDead(_7);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = ((*_1).0: *mut [T]);\n        _14 = ptr::mut_ptr::<impl *mut [T]>::len(move _15) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_15);\n        _16 = CheckedSub(_14, _6);\n        assert(!move (_16.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _14, _6) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _13 = move (_16.0: usize);\n        StorageDead(_14);\n        StorageLive(_18);\n        _18 = ((*_1).1: usize);\n        _17 = num::<impl usize>::saturating_sub(_13, move _18) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_18);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = ((*_1).0: *mut [T]);\n        _21 = ptr::mut_ptr::<impl *mut [T]>::split_at_mut(move _22, _13) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_22);\n        _19 = (_21.0: *mut [T]);\n        _20 = (_21.1: *mut [T]);\n        StorageDead(_21);\n        StorageLive(_24);\n        _24 = ptr::mut_ptr::<impl *mut [T]>::split_at_mut(_19, _17) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageLive(_23);\n        _23 = (_24.1: *mut [T]);\n        StorageDead(_24);\n        ((*_1).0: *mut [T]) = _20;\n        _25 = &mut (*_23);\n        _0 = option::Option::Some(_25);\n        StorageDead(_23);\n        goto -> bb12;\n    }\n    bb11: {\n        StorageLive(_26);\n        StorageLive(_27);\n        _27 = <slice::iter::RChunksMut<'_, T> as iter::traits::double_ended::DoubleEndedIterator>::nth_back::promoted[0];\n        _26 = &raw mut (*_27);\n        ((*_1).0: *mut [T]) = move _26 as *mut [T];\n        StorageDead(_26);\n        StorageDead(_27);\n        _0 = option::Option::None;\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

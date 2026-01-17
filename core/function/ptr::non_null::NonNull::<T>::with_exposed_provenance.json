@@ -1,0 +1,66 @@
+{
+  "name": "ptr::non_null::NonNull::<T>::with_exposed_provenance",
+  "safe": true,
+  "callees": {
+    "num::nonzero::NonZero::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained value as a primitive type.\n",
+      "adt": {}
+    },
+    "ptr::with_exposed_provenance_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "fuzzy_provenance_casts"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* fuzzy_provenance_casts\n"
+        ]
+      },
+      "doc": " Converts an address back to a mutable pointer, picking up some previously 'exposed'\n [provenance][crate::ptr#provenance].\n\n This is fully equivalent to `addr as *mut T`. The provenance of the returned pointer is that\n of *some* pointer that was previously exposed by passing it to\n [`expose_provenance`][pointer::expose_provenance], or a `ptr as usize` cast. In addition, memory\n which is outside the control of the Rust abstract machine (MMIO registers, for example) is\n always considered to be accessible with an exposed provenance, so long as this memory is disjoint\n from memory that will be used by the abstract machine such as the stack, heap, and statics.\n\n The exact provenance that gets picked is not specified. The compiler will do its best to pick\n the \"right\" provenance for you (whatever that may be), but currently we cannot provide any\n guarantees about which provenance the resulting pointer will have -- and therefore there\n is no definite specification for which memory the resulting pointer may access.\n\n If there is *no* previously 'exposed' provenance that justifies the way the returned pointer\n will be used, the program has undefined behavior. In particular, the aliasing rules still apply:\n pointers and references that have been invalidated due to aliasing accesses cannot be used\n anymore, even if they have been exposed!\n\n Due to its inherent ambiguity, this operation may not be supported by tools that help you to\n stay conformant with the Rust memory model. It is recommended to use [Strict\n Provenance][self#strict-provenance] APIs such as [`with_addr`][pointer::with_addr] wherever\n possible.\n\n On most platforms this will produce a value with the same bytes as the address. Platforms\n which need to store additional information in a pointer may not support this operation,\n since it is generally not possible to actually *compute* which provenance the returned\n pointer has to pick up.\n\n This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `NonNull`.\n\n # Safety\n\n `ptr` must be non-null.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = unsafe { NonNull::new_unchecked(&mut x as *mut _) };\n ```\n\n *Incorrect* usage of this function:\n\n ```rust,no_run\n use std::ptr::NonNull;\n\n // NEVER DO THAT!!! This is undefined behavior. ⚠️\n let ptr = unsafe { NonNull::<u32>::new_unchecked(std::ptr::null_mut()) };\n ```\n",
+      "adt": {
+        "ptr::non_null::NonNull": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "num::nonzero::NonZero": [
+      "Plain"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 16041,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/non_null.rs:144:5: 150:6",
+  "src": "pub fn with_exposed_provenance(addr: NonZero<usize>) -> Self {\n        // SAFETY: we know `addr` is non-zero.\n        unsafe {\n            let ptr = crate::ptr::with_exposed_provenance_mut(addr.get());\n            NonNull::new_unchecked(ptr)\n        }\n    }",
+  "mir": "fn ptr::non_null::NonNull::<T>::with_exposed_provenance(_1: num::nonzero::NonZero<usize>) -> ptr::non_null::NonNull<T> {\n    let mut _0: ptr::non_null::NonNull<T>;\n    let  _2: *mut T;\n    let mut _3: usize;\n    debug addr => _1;\n    debug ptr => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = num::nonzero::NonZero::<usize>::get(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = ptr::with_exposed_provenance_mut::<T>(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = ptr::non_null::NonNull::<T>::new_unchecked(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": " Converts an address back to a mutable pointer, picking up some previously 'exposed'\n [provenance][crate::ptr#provenance].\n\n For more details, see the equivalent method on a raw pointer, [`ptr::with_exposed_provenance_mut`].\n\n This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

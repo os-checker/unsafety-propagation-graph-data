@@ -1,0 +1,58 @@
+{
+  "name": "irq::level::enter",
+  "safe": true,
+  "callees": {
+    "cpu::local::cell::CpuLocalCell::<T>::add_assign": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds a value to the per-CPU object in a single instruction.\n\n This operation wraps on overflow/underflow.\n\n Note that this memory operation will not be elided or reordered by the\n compiler since it is a black-box.\n",
+      "adt": {
+        "cpu::local::cell::CpuLocalCell": "MutableAsArgument"
+      }
+    },
+    "core::ops::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "cpu::local::cell::CpuLocalCell::<T>::sub_assign": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts a value to the per-CPU object in a single instruction.\n\n This operation wraps on overflow/underflow.\n\n Note that this memory operation will not be elided or reordered by the\n compiler since it is a black-box.\n",
+      "adt": {
+        "cpu::local::cell::CpuLocalCell": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "cpu::PrivilegeLevel": [
+      "Plain"
+    ],
+    "cpu::local::cell::CpuLocalCell": [
+      "Ref"
+    ]
+  },
+  "path": 1806,
+  "span": "ostd/src/irq/level.rs:83:1: 97:2",
+  "src": "pub(super) fn enter<F: FnOnce()>(f: F, cpu_priv_at_irq: PrivilegeLevel) {\n    let increment = {\n        let bit_0 = match cpu_priv_at_irq {\n            PrivilegeLevel::Kernel => 0,\n            PrivilegeLevel::User => 1,\n        };\n        let bit_1 = 0b10;\n        bit_1 | bit_0\n    };\n    INTERRUPT_LEVEL.add_assign(increment);\n\n    f();\n\n    INTERRUPT_LEVEL.sub_assign(increment);\n}",
+  "mir": "fn irq::level::enter(_1: F, _2: cpu::PrivilegeLevel) -> () {\n    let mut _0: ();\n    let  _3: u8;\n    let  _4: u8;\n    let mut _5: u8;\n    let mut _6: u8;\n    let mut _7: u8;\n    let  _8: ();\n    let mut _9: &cpu::local::cell::CpuLocalCell<u8>;\n    let  _10: ();\n    let  _11: ();\n    let mut _12: &cpu::local::cell::CpuLocalCell<u8>;\n    debug f => _1;\n    debug cpu_priv_at_irq => _2;\n    debug increment => _3;\n    debug bit_0 => _4;\n    debug bit_1 => 2_u8;\n    bb0: {\n        StorageLive(_4);\n        _5 = discriminant(_2);\n        switchInt(move _5) -> [0: bb2, 1: bb3, otherwise: bb1];\n    }\n    bb1: {\n        unreachable;\n    }\n    bb2: {\n        _4 = 1_u8;\n        goto -> bb4;\n    }\n    bb3: {\n        _4 = 0_u8;\n        goto -> bb4;\n    }\n    bb4: {\n        StorageLive(_6);\n        _6 = 2_u8;\n        StorageLive(_7);\n        _7 = _4;\n        _3 = BitOr(move _6, move _7);\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_4);\n        StorageLive(_9);\n        _9 = {alloc863: &cpu::local::cell::CpuLocalCell<u8>};\n        _8 = cpu::local::cell::CpuLocalCell::<u8>::add_assign(move _9, _3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        _10 = <F as core::ops::FnOnce<()>>::call_once(_1, ()) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_12);\n        _12 = {alloc863: &cpu::local::cell::CpuLocalCell<u8>};\n        _11 = cpu::local::cell::CpuLocalCell::<u8>::sub_assign(move _12, _3) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        return;\n    }\n}\n",
+  "doc": " Enters the scope of interrupt handling,\n increasing the interrupt level by one.\n\n The `cpu_priv_at_irq` argument specifies the CPU privilege level of\n the code interrupted by the IRQ.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

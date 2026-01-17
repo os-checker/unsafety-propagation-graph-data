@@ -1,0 +1,84 @@
+{
+  "name": "sync::rwarc::RwArc::<T>::get",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicUsize::load": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads a value from the atomic integer.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering of this operation.\n Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.load(Ordering::Relaxed), 5);\n ```\n",
+      "adt": {}
+    },
+    "core::sync::atomic::fence": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An atomic fence.\n\n Fences create synchronization between themselves and atomic operations or fences in other\n threads. To achieve this, a fence prevents the compiler and CPU from reordering certain types of\n memory operations around it.\n\n There are 3 different ways to use an atomic fence:\n\n - atomic - fence synchronization: an atomic operation with (at least) [`Release`] ordering\n   semantics synchronizes with a fence with (at least) [`Acquire`] ordering semantics.\n - fence - atomic synchronization: a fence with (at least) [`Release`] ordering semantics\n   synchronizes with an atomic operation with (at least) [`Acquire`] ordering semantics.\n - fence - fence synchronization: a fence with (at least) [`Release`] ordering semantics\n   synchronizes with a fence with (at least) [`Acquire`] ordering semantics.\n\n These 3 ways complement the regular, fence-less, atomic - atomic synchronization.\n\n ## Atomic - Fence\n\n An atomic operation on one thread will synchronize with a fence on another thread when:\n\n -   on thread 1:\n     -   an atomic operation 'X' with (at least) [`Release`] ordering semantics on some atomic\n         object 'm',\n\n -   is paired on thread 2 with:\n     -   an atomic read 'Y' with any order on 'm',\n     -   followed by a fence 'B' with (at least) [`Acquire`] ordering semantics.\n\n This provides a happens-before dependence between X and B.\n\n ```text\n     Thread 1                                          Thread 2\n\n m.store(3, Release); X ---------\n                                |\n                                |\n                                -------------> Y  if m.load(Relaxed) == 3 {\n                                               B      fence(Acquire);\n                                                      ...\n                                                  }\n ```\n\n ## Fence - Atomic\n\n A fence on one thread will synchronize with an atomic operation on another thread when:\n\n -   on thread:\n     -   a fence 'A' with (at least) [`Release`] ordering semantics,\n     -   followed by an atomic write 'X' with any ordering on some atomic object 'm',\n\n -   is paired on thread 2 with:\n     -   an atomic operation 'Y' with (at least) [`Acquire`] ordering semantics.\n\n This provides a happens-before dependence between A and Y.\n\n ```text\n     Thread 1                                          Thread 2\n\n fence(Release);      A\n m.store(3, Relaxed); X ---------\n                                |\n                                |\n                                -------------> Y  if m.load(Acquire) == 3 {\n                                                      ...\n                                                  }\n ```\n\n ## Fence - Fence\n\n A fence on one thread will synchronize with a fence on another thread when:\n\n -   on thread 1:\n     -   a fence 'A' which has (at least) [`Release`] ordering semantics,\n     -   followed by an atomic write 'X' with any ordering on some atomic object 'm',\n\n -   is paired on thread 2 with:\n     -   an atomic read 'Y' with any ordering on 'm',\n     -   followed by a fence 'B' with (at least) [`Acquire`] ordering semantics.\n\n This provides a happens-before dependence between A and B.\n\n ```text\n     Thread 1                                          Thread 2\n\n fence(Release);      A --------------\n m.store(3, Relaxed); X ---------    |\n                                |    |\n                                |    |\n                                -------------> Y  if m.load(Relaxed) == 3 {\n                                     |-------> B      fence(Acquire);\n                                                      ...\n                                                  }\n ```\n\n ## Mandatory Atomic\n\n Note that in the examples above, it is crucial that the access to `m` are atomic. Fences cannot\n be used to establish synchronization between non-atomic accesses in different threads. However,\n thanks to the happens-before relationship, any non-atomic access that happen-before the atomic\n operation or fence with (at least) [`Release`] ordering semantics are now also properly\n synchronized with any non-atomic accesses that happen-after the atomic operation or fence with\n (at least) [`Acquire`] ordering semantics.\n\n ## Memory Ordering\n\n A fence which has [`SeqCst`] ordering, in addition to having both [`Acquire`] and [`Release`]\n semantics, participates in the global program order of the other [`SeqCst`] operations and/or\n fences.\n\n Accepts [`Acquire`], [`Release`], [`AcqRel`] and [`SeqCst`] orderings.\n\n # Panics\n\n Panics if `order` is [`Relaxed`].\n\n # Examples\n\n ```\n use std::sync::atomic::AtomicBool;\n use std::sync::atomic::fence;\n use std::sync::atomic::Ordering;\n\n // A mutual exclusion primitive based on spinlock.\n pub struct Mutex {\n     flag: AtomicBool,\n }\n\n impl Mutex {\n     pub fn new() -> Mutex {\n         Mutex {\n             flag: AtomicBool::new(false),\n         }\n     }\n\n     pub fn lock(&self) {\n         // Wait until the old value is `false`.\n         while self\n             .flag\n             .compare_exchange_weak(false, true, Ordering::Relaxed, Ordering::Relaxed)\n             .is_err()\n         {}\n         // This fence synchronizes-with store in `unlock`.\n         fence(Ordering::Acquire);\n     }\n\n     pub fn unlock(&self) {\n         self.flag.store(false, Ordering::Release);\n     }\n }\n ```\n",
+      "adt": {}
+    },
+    "sync::rwlock::RwLock::<T, G>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the underlying data.\n\n This method is safe, but it's up to the caller to ensure that access to the data behind it\n is still safe.\n",
+      "adt": {
+        "sync::rwlock::RwLock": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "alloc::sync::Arc": [
+      "Ref"
+    ],
+    "sync::rwarc::RwArc": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "sync::rwarc::Inner": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "sync::rwlock::RwLock": [
+      "Ref"
+    ]
+  },
+  "path": 2655,
+  "span": "ostd/src/sync/rwarc.rs:62:5: 75:6",
+  "src": "pub fn get(&mut self) -> Option<&T> {\n        if self.0.num_rw.load(Ordering::Relaxed) > 1 {\n            return None;\n        }\n\n        // This will synchronize with `RwArc::drop` to make sure its changes are visible to us.\n        fence(Ordering::Acquire);\n\n        let data_ptr = self.0.data.as_ptr();\n\n        // SAFETY: The data is valid. During the lifetime, no one will be able to create a mutable\n        // reference to the data, so it's okay to create an immutable reference like the one below.\n        Some(unsafe { &*data_ptr })\n    }",
+  "mir": "fn sync::rwarc::RwArc::<T>::get(_1: &mut sync::rwarc::RwArc<T>) -> core::option::Option<&T> {\n    let mut _0: core::option::Option<&T>;\n    let mut _2: bool;\n    let mut _3: usize;\n    let mut _4: &core::sync::atomic::AtomicUsize;\n    let  _5: &sync::rwarc::Inner<T>;\n    let mut _6: &alloc::sync::Arc<sync::rwarc::Inner<T>>;\n    let mut _7: core::sync::atomic::Ordering;\n    let  _8: ();\n    let mut _9: core::sync::atomic::Ordering;\n    let  _10: *mut T;\n    let mut _11: &sync::rwlock::RwLock<T>;\n    let  _12: &sync::rwarc::Inner<T>;\n    let mut _13: &alloc::sync::Arc<sync::rwarc::Inner<T>>;\n    let  _14: &T;\n    debug self => _1;\n    debug data_ptr => _10;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &((*_1).0: alloc::sync::Arc<sync::rwarc::Inner<T>>);\n        _5 = <alloc::sync::Arc<sync::rwarc::Inner<T>> as core::ops::Deref>::deref(move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        _4 = &((*_5).1: core::sync::atomic::AtomicUsize);\n        StorageLive(_7);\n        _7 = core::sync::atomic::Ordering::Relaxed;\n        _3 = core::sync::atomic::AtomicUsize::load(move _4, move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        StorageDead(_4);\n        _2 = Gt(move _3, 1_usize);\n        switchInt(move _2) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_3);\n        _0 = core::option::Option::None;\n        StorageDead(_2);\n        goto -> bb8;\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageDead(_2);\n        StorageLive(_9);\n        _9 = core::sync::atomic::Ordering::Acquire;\n        _8 = core::sync::atomic::fence(move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &((*_1).0: alloc::sync::Arc<sync::rwarc::Inner<T>>);\n        _12 = <alloc::sync::Arc<sync::rwarc::Inner<T>> as core::ops::Deref>::deref(move _13) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_13);\n        _11 = &((*_12).0: sync::rwlock::RwLock<T>);\n        _10 = sync::rwlock::RwLock::<T>::as_ptr(move _11) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_11);\n        StorageDead(_12);\n        _14 = &(*_10);\n        _0 = core::option::Option::Some(_14);\n        StorageDead(_10);\n        goto -> bb8;\n    }\n    bb8: {\n        return;\n    }\n}\n",
+  "doc": " Returns an immutable reference if no other `RwArc` points to the same allocation.\n\n This method is cheap because it does not acquire a lock.\n\n It's still sound because:\n - The mutable reference to `self` and the condition ensure that we are exclusively\n   accessing the unique `RwArc` instance for the particular allocation.\n - There may be any number of [`RoArc`]s pointing to the same allocation, but they may only\n   produce immutable references to the underlying data.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

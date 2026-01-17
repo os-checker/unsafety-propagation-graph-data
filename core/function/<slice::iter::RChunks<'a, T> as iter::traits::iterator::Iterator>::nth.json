@@ -1,0 +1,72 @@
+{
+  "name": "<slice::iter::RChunks<'a, T> as iter::traits::iterator::Iterator>::nth",
+  "safe": true,
+  "callees": {
+    "num::<impl usize>::checked_mul": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checked integer multiplication. Computes `self * rhs`, returning\n `None` if overflow occurred.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "ops::index::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "num::<impl usize>::saturating_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Saturating integer subtraction. Computes `self - rhs`, saturating\n at the numeric bounds instead of overflowing.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::split_at": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.  For a non-panicking alternative see\n [`split_at_checked`](slice::split_at_checked).\n\n # Examples\n\n ```\n let v = ['a', 'b', 'c'];\n\n {\n    let (left, right) = v.split_at(0);\n    assert_eq!(left, []);\n    assert_eq!(right, ['a', 'b', 'c']);\n }\n\n {\n     let (left, right) = v.split_at(2);\n     assert_eq!(left, ['a', 'b']);\n     assert_eq!(right, ['c']);\n }\n\n {\n     let (left, right) = v.split_at(3);\n     assert_eq!(left, ['a', 'b', 'c']);\n     assert_eq!(right, []);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::RChunks": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "ops::range::RangeTo": [
+      "Plain"
+    ]
+  },
+  "path": 16510,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:2335:5: 2348:6",
+  "src": "fn nth(&mut self, n: usize) -> Option<Self::Item> {\n        if let Some(end) = n.checked_mul(self.chunk_size)\n            && end < self.v.len()\n        {\n            let end = self.v.len() - end;\n            let rest = &self.v[..end];\n            let (rest, chunk) = rest.split_at(end.saturating_sub(self.chunk_size));\n            self.v = rest;\n            Some(chunk)\n        } else {\n            self.v = &self.v[..0]; // cheaper than &[]\n            None\n        }\n    }",
+  "mir": "fn <slice::iter::RChunks<'a, T> as iter::traits::iterator::Iterator>::nth(_1: &mut slice::iter::RChunks<'_, T>, _2: usize) -> option::Option<&[T]> {\n    let mut _0: option::Option<&[T]>;\n    let mut _3: option::Option<usize>;\n    let mut _4: usize;\n    let mut _5: isize;\n    let  _6: usize;\n    let mut _7: bool;\n    let mut _8: usize;\n    let  _9: usize;\n    let mut _10: usize;\n    let mut _11: (usize, bool);\n    let  _12: &[T];\n    let mut _13: ops::range::RangeTo<usize>;\n    let  _14: &[T];\n    let  _15: &[T];\n    let mut _16: (&[T], &[T]);\n    let mut _17: usize;\n    let mut _18: usize;\n    let  _19: &[T];\n    let mut _20: ops::range::RangeTo<usize>;\n    let mut _21: &[T];\n    let mut _22: &[T];\n    let mut _23: &[T];\n    let mut _24: &[T];\n    debug self => _1;\n    debug n => _2;\n    debug end => _6;\n    debug end => _9;\n    debug rest => _12;\n    debug rest => _14;\n    debug chunk => _15;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).1: usize);\n        _3 = num::<impl usize>::checked_mul(_2, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [1: bb2, 0: bb9, otherwise: bb12];\n    }\n    bb2: {\n        _6 = ((_3 as variant#1).0: usize);\n        StorageLive(_7);\n        StorageLive(_8);\n        _21 = ((*_1).0: &[T]);\n        _8 = PtrMetadata(_21);\n        _7 = Lt(_6, move _8);\n        switchInt(move _7) -> [0: bb8, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageLive(_10);\n        _22 = ((*_1).0: &[T]);\n        _10 = PtrMetadata(_22);\n        _11 = CheckedSub(_10, _6);\n        assert(!move (_11.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _10, _6) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _9 = move (_11.0: usize);\n        StorageDead(_10);\n        _23 = ((*_1).0: &[T]);\n        StorageLive(_13);\n        _13 = RangeTo(_9);\n        _12 = <[T] as ops::index::Index<ops::range::RangeTo<usize>>>::index(_23, move _13) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_13);\n        StorageLive(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = ((*_1).1: usize);\n        _17 = num::<impl usize>::saturating_sub(_9, move _18) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_18);\n        _16 = slice::<impl [T]>::split_at(_12, move _17) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_17);\n        _14 = (_16.0: &[T]);\n        _15 = (_16.1: &[T]);\n        StorageDead(_16);\n        ((*_1).0: &[T]) = _14;\n        _0 = option::Option::Some(_15);\n        StorageDead(_3);\n        goto -> bb11;\n    }\n    bb8: {\n        StorageDead(_8);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_3);\n        _24 = ((*_1).0: &[T]);\n        StorageLive(_20);\n        _20 = RangeTo(0_usize);\n        _19 = <[T] as ops::index::Index<ops::range::RangeTo<usize>>>::index(_24, move _20) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_20);\n        ((*_1).0: &[T]) = _19;\n        _0 = option::Option::None;\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_7);\n        return;\n    }\n    bb12: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

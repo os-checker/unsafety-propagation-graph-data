@@ -1,0 +1,69 @@
+{
+  "name": "<slice::iter::RChunksExactMut<'a, T> as iter::traits::iterator::Iterator>::nth",
+  "safe": true,
+  "callees": {
+    "num::<impl usize>::checked_mul": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checked integer multiplication. Computes `self * rhs`, returning\n `None` if overflow occurred.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of a raw slice.\n\n The returned value is the number of **elements**, not the number of bytes.\n\n This function is safe, even when the raw slice cannot be cast to a slice\n reference because the pointer is null or unaligned.\n\n # Examples\n\n ```rust\n use std::ptr;\n\n let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);\n assert_eq!(slice.len(), 3);\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::split_at_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable raw slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.\n\n # Safety\n\n `mid` must be [in-bounds] of the underlying [allocation].\n Which means `self` must be dereferenceable and span a single allocation\n that is at least `mid * size_of::<T>()` bytes long. Not upholding these\n requirements is *[undefined behavior]* even if the resulting pointers are not used.\n\n Since `len` being in-bounds it is not a safety invariant of `*mut [T]` the\n safety requirements of this method are the same as for [`split_at_mut_unchecked`].\n The explicit bounds check is only as useful as `len` is correct.\n\n [`split_at_mut_unchecked`]: #method.split_at_mut_unchecked\n [in-bounds]: #method.add\n [allocation]: crate::ptr#allocation\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n #![feature(raw_slice_split)]\n #![feature(slice_ptr_get)]\n\n let mut v = [1, 0, 3, 0, 5, 6];\n let ptr = &mut v as *mut [_];\n unsafe {\n     let (left, right) = ptr.split_at_mut(2);\n     assert_eq!(&*left, [1, 0]);\n     assert_eq!(&*right, [3, 0, 5, 6]);\n }\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::RChunksExactMut": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ]
+  },
+  "path": 16536,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:2868:5: 2881:6",
+  "src": "fn nth(&mut self, n: usize) -> Option<&'a mut [T]> {\n        if let Some(end) = n.checked_mul(self.chunk_size)\n            && end < self.v.len()\n        {\n            let idx = self.v.len() - end;\n            // SAFETY: The self.v contract ensures that any split_at_mut is valid.\n            let (fst, _) = unsafe { self.v.split_at_mut(idx) };\n            self.v = fst;\n            self.next()\n        } else {\n            self.v = &mut [];\n            None\n        }\n    }",
+  "mir": "fn <slice::iter::RChunksExactMut<'a, T> as iter::traits::iterator::Iterator>::nth(_1: &mut slice::iter::RChunksExactMut<'_, T>, _2: usize) -> option::Option<&mut [T]> {\n    let mut _0: option::Option<&mut [T]>;\n    let mut _3: option::Option<usize>;\n    let mut _4: usize;\n    let mut _5: isize;\n    let  _6: usize;\n    let mut _7: bool;\n    let mut _8: usize;\n    let mut _9: *mut [T];\n    let  _10: usize;\n    let mut _11: usize;\n    let mut _12: *mut [T];\n    let mut _13: (usize, bool);\n    let  _14: *mut [T];\n    let mut _15: (*mut [T], *mut [T]);\n    let mut _16: *mut [T];\n    let mut _17: *mut [T; 0];\n    let mut _18: &mut [T; 0];\n    debug self => _1;\n    debug n => _2;\n    debug end => _6;\n    debug idx => _10;\n    debug fst => _14;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).2: usize);\n        _3 = num::<impl usize>::checked_mul(_2, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [1: bb2, 0: bb10, otherwise: bb12];\n    }\n    bb2: {\n        _6 = ((_3 as variant#1).0: usize);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = ((*_1).0: *mut [T]);\n        _8 = ptr::mut_ptr::<impl *mut [T]>::len(move _9) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_9);\n        _7 = Lt(_6, move _8);\n        switchInt(move _7) -> [0: bb9, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_8);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = ((*_1).0: *mut [T]);\n        _11 = ptr::mut_ptr::<impl *mut [T]>::len(move _12) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        _13 = CheckedSub(_11, _6);\n        assert(!move (_13.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _11, _6) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _10 = move (_13.0: usize);\n        StorageDead(_11);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = ((*_1).0: *mut [T]);\n        _15 = ptr::mut_ptr::<impl *mut [T]>::split_at_mut(move _16, _10) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_16);\n        _14 = (_15.0: *mut [T]);\n        StorageDead(_15);\n        ((*_1).0: *mut [T]) = _14;\n        _0 = <slice::iter::RChunksExactMut<'_, T> as iter::traits::iterator::Iterator>::next(_1) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_3);\n        goto -> bb11;\n    }\n    bb9: {\n        StorageDead(_8);\n        goto -> bb10;\n    }\n    bb10: {\n        StorageDead(_3);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = <slice::iter::RChunksExactMut<'_, T> as iter::traits::iterator::Iterator>::nth::promoted[0];\n        _17 = &raw mut (*_18);\n        ((*_1).0: *mut [T]) = move _17 as *mut [T];\n        StorageDead(_17);\n        StorageDead(_18);\n        _0 = option::Option::None;\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_7);\n        return;\n    }\n    bb12: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

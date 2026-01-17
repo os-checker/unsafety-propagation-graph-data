@@ -1,0 +1,53 @@
+{
+  "name": "<ptr::metadata::DynMetadata<Dyn> as cmp::PartialEq>::eq",
+  "safe": true,
+  "callees": {
+    "ptr::metadata::DynMetadata::<Dyn>::vtable_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " When `DynMetadata` appears as the metadata field of a wide pointer, the rustc_middle layout\n computation does magic and the resulting layout is *not* a `FieldsShape::Aggregate`, instead\n it is a `FieldsShape::Primitive`. This means that the same type can have different layout\n depending on whether it appears as the metadata field of a wide pointer or as a stand-alone\n type, which understandably confuses codegen and leads to ICEs when trying to project to a\n field of `DynMetadata`. To work around that issue, we use `transmute` instead of using a\n field projection.\n",
+      "adt": {}
+    },
+    "ptr::eq": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "ambiguous_wide_pointer_comparisons"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* ambiguous_wide_pointer_comparisons\n"
+        ]
+      },
+      "doc": " Compares raw pointers for equality.\n\n This is the same as using the `==` operator, but less generic:\n the arguments have to be `*const T` raw pointers,\n not anything that implements `PartialEq`.\n\n This can be used to compare `&T` references (which coerce to `*const T` implicitly)\n by their address rather than comparing the values they point to\n (which is what the `PartialEq for &T` implementation does).\n\n When comparing wide pointers, both the address and the metadata are tested for equality.\n However, note that comparing trait object pointers (`*const dyn Trait`) is unreliable: pointers\n to values of the same underlying type can compare inequal (because vtables are duplicated in\n multiple codegen units), and pointers to values of *different* underlying type can compare equal\n (since identical vtables can be deduplicated within a codegen unit).\n\n # Examples\n\n ```\n use std::ptr;\n\n let five = 5;\n let other_five = 5;\n let five_ref = &five;\n let same_five_ref = &five;\n let other_five_ref = &other_five;\n\n assert!(five_ref == same_five_ref);\n assert!(ptr::eq(five_ref, same_five_ref));\n\n assert!(five_ref == other_five_ref);\n assert!(!ptr::eq(five_ref, other_five_ref));\n ```\n\n Slices are also compared by their length (fat pointers):\n\n ```\n let a = [1, 2, 3];\n assert!(std::ptr::eq(&a[..3], &a[..3]));\n assert!(!std::ptr::eq(&a[..2], &a[..3]));\n assert!(!std::ptr::eq(&a[0..2], &a[1..3]));\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ptr::metadata::DynMetadata": [
+      "Plain",
+      "Deref",
+      "Ref"
+    ]
+  },
+  "path": 15962,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/metadata.rs:242:5: 244:6",
+  "src": "fn eq(&self, other: &Self) -> bool {\n        crate::ptr::eq::<VTable>(self.vtable_ptr(), other.vtable_ptr())\n    }",
+  "mir": "fn <ptr::metadata::DynMetadata<Dyn> as cmp::PartialEq>::eq(_1: &ptr::metadata::DynMetadata<Dyn>, _2: &ptr::metadata::DynMetadata<Dyn>) -> bool {\n    let mut _0: bool;\n    let mut _3: *const ptr::metadata::VTable;\n    let mut _4: ptr::metadata::DynMetadata<Dyn>;\n    let mut _5: *const ptr::metadata::VTable;\n    let mut _6: ptr::metadata::DynMetadata<Dyn>;\n    debug self => _1;\n    debug other => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = (*_1);\n        _3 = ptr::metadata::DynMetadata::<Dyn>::vtable_ptr(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = (*_2);\n        _5 = ptr::metadata::DynMetadata::<Dyn>::vtable_ptr(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _0 = ptr::eq::<ptr::metadata::VTable>(move _3, move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

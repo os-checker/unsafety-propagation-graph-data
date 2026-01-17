@@ -1,0 +1,33 @@
+{
+  "name": "io::BufRead::skip_until",
+  "safe": true,
+  "callees": {
+    "io::skip_until": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": "io::BufRead::skip_until",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/mod.rs:2534:5: 2536:6",
+  "src": "fn skip_until(&mut self, byte: u8) -> Result<usize> {\n        skip_until(self, byte)\n    }",
+  "mir": "fn io::BufRead::skip_until(_1: &mut Self, _2: u8) -> core::result::Result<usize, io::error::Error> {\n    let mut _0: core::result::Result<usize, io::error::Error>;\n    debug self => _1;\n    debug byte => _2;\n    bb0: {\n        _0 = io::skip_until::<Self>(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Skips all bytes until the delimiter `byte` or EOF is reached.\n\n This function will read (and discard) bytes from the underlying stream until the\n delimiter or EOF is found.\n\n If successful, this function will return the total number of bytes read,\n including the delimiter byte if found.\n\n This is useful for efficiently skipping data such as NUL-terminated strings\n in binary file formats without buffering.\n\n This function is blocking and should be used carefully: it is possible for\n an attacker to continuously send bytes without ever sending the delimiter\n or EOF.\n\n # Errors\n\n This function will ignore all instances of [`ErrorKind::Interrupted`] and\n will otherwise return any errors returned by [`fill_buf`].\n\n If an I/O error is encountered then all bytes read so far will be\n present in `buf` and its length will have been adjusted appropriately.\n\n [`fill_buf`]: BufRead::fill_buf\n\n # Examples\n\n [`std::io::Cursor`][`Cursor`] is a type that implements `BufRead`. In\n this example, we use [`Cursor`] to read some NUL-terminated information\n about Ferris from a binary string, skipping the fun fact:\n\n ```\n use std::io::{self, BufRead};\n\n let mut cursor = io::Cursor::new(b\"Ferris\\0Likes long walks on the beach\\0Crustacean\\0!\");\n\n // read name\n let mut name = Vec::new();\n let num_bytes = cursor.read_until(b'\\0', &mut name)\n     .expect(\"reading from cursor won't fail\");\n assert_eq!(num_bytes, 7);\n assert_eq!(name, b\"Ferris\\0\");\n\n // skip fun fact\n let num_bytes = cursor.skip_until(b'\\0')\n     .expect(\"reading from cursor won't fail\");\n assert_eq!(num_bytes, 30);\n\n // read animal type\n let mut animal = Vec::new();\n let num_bytes = cursor.read_until(b'\\0', &mut animal)\n     .expect(\"reading from cursor won't fail\");\n assert_eq!(num_bytes, 11);\n assert_eq!(animal, b\"Crustacean\\0\");\n\n // reach EOF\n let num_bytes = cursor.skip_until(b'\\0')\n     .expect(\"reading from cursor won't fail\");\n assert_eq!(num_bytes, 1);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

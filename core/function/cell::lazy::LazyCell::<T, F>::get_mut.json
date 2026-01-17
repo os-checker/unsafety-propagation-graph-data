@@ -1,0 +1,45 @@
+{
+  "name": "cell::lazy::LazyCell::<T, F>::get_mut",
+  "safe": true,
+  "callees": {
+    "cell::UnsafeCell::<T>::get_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to the underlying data.\n\n This call borrows the `UnsafeCell` mutably (at compile-time) which\n guarantees that we possess the only reference.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let mut c = UnsafeCell::new(5);\n *c.get_mut() += 1;\n\n assert_eq!(*c.get_mut(), 6);\n ```\n",
+      "adt": {
+        "cell::UnsafeCell": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "cell::UnsafeCell": [
+      "MutRef"
+    ],
+    "cell::lazy::LazyCell": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "cell::lazy::State": [
+      "MutRef",
+      "Deref",
+      "Unknown([Deref, Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) })])"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 4691,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell/lazy.rs:280:5: 286:6",
+  "src": "pub fn get_mut(this: &mut LazyCell<T, F>) -> Option<&mut T> {\n        let state = this.state.get_mut();\n        match state {\n            State::Init(data) => Some(data),\n            _ => None,\n        }\n    }",
+  "mir": "fn cell::lazy::LazyCell::<T, F>::get_mut(_1: &mut cell::lazy::LazyCell<T, F>) -> option::Option<&mut T> {\n    let mut _0: option::Option<&mut T>;\n    let  _2: &mut cell::lazy::State<T, F>;\n    let mut _3: &mut cell::UnsafeCell<cell::lazy::State<T, F>>;\n    let mut _4: isize;\n    let  _5: &mut T;\n    debug this => _1;\n    debug state => _2;\n    debug data => _5;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &mut ((*_1).0: cell::UnsafeCell<cell::lazy::State<T, F>>);\n        _2 = cell::UnsafeCell::<cell::lazy::State<T, F>>::get_mut(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _4 = discriminant((*_2));\n        switchInt(move _4) -> [1: bb3, otherwise: bb2];\n    }\n    bb2: {\n        _0 = option::Option::None;\n        goto -> bb4;\n    }\n    bb3: {\n        _5 = &mut (((*_2) as variant#1).0: T);\n        _0 = option::Option::Some(_5);\n        goto -> bb4;\n    }\n    bb4: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns a mutable reference to the value if initialized. Otherwise (if uninitialized or\n poisoned), returns `None`.\n\n # Examples\n\n ```\n #![feature(lazy_get)]\n\n use std::cell::LazyCell;\n\n let mut lazy = LazyCell::new(|| 92);\n\n assert_eq!(LazyCell::get_mut(&mut lazy), None);\n let _ = LazyCell::force(&lazy);\n *LazyCell::get_mut(&mut lazy).unwrap() = 44;\n assert_eq!(*lazy, 44);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

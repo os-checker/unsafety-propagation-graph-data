@@ -1,0 +1,121 @@
+{
+  "name": "<*const T as fmt::Pointer>::fmt",
+  "safe": true,
+  "callees": {
+    "unit::IsUnit::is_unit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::expose_provenance": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Exposes the [\"provenance\"][crate::ptr#provenance] part of the pointer for future use in\n [`with_exposed_provenance`] and returns the \"address\" portion.\n\n This is equivalent to `self as usize`, which semantically discards provenance information.\n Furthermore, this (like the `as` cast) has the implicit side-effect of marking the\n provenance as 'exposed', so on platforms that support it you can later call\n [`with_exposed_provenance`] to reconstitute the original pointer including its provenance.\n\n Due to its inherent ambiguity, [`with_exposed_provenance`] may not be supported by tools\n that help you to stay conformant with the Rust memory model. It is recommended to use\n [Strict Provenance][crate::ptr#strict-provenance] APIs such as [`with_addr`][pointer::with_addr]\n wherever possible, in which case [`addr`][pointer::addr] should be used instead of `expose_provenance`.\n\n On most platforms this will produce a value with the same bytes as the original pointer,\n because all the bytes are dedicated to describing the address. Platforms which need to store\n additional information in the pointer may not support this operation, since the 'expose'\n side-effect which is required for [`with_exposed_provenance`] to work is typically not\n available.\n\n This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.\n\n [`with_exposed_provenance`]: with_exposed_provenance\n",
+      "adt": {}
+    },
+    "fmt::pointer_fmt_inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Since the formatting will be identical for all pointer types, uses a\n non-monomorphized implementation for the actual formatting to reduce the\n amount of codegen work needed.\n\n This uses `ptr_addr: usize` and not `ptr: *const ()` to be able to use this for\n `fn(...) -> ...` without using [problematic] \"Oxford Casts\".\n\n [problematic]: https://github.com/rust-lang/rust/issues/95489\n",
+      "adt": {
+        "fmt::Formatter": "MutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    },
+    "fmt::Formatter::<'a>::debug_struct": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a [`DebugStruct`] builder designed to assist with creation of\n [`fmt::Debug`] implementations for structs.\n\n [`fmt::Debug`]: self::Debug\n\n # Examples\n\n ```rust\n use std::fmt;\n use std::net::Ipv4Addr;\n\n struct Foo {\n     bar: i32,\n     baz: String,\n     addr: Ipv4Addr,\n }\n\n impl fmt::Debug for Foo {\n     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {\n         fmt.debug_struct(\"Foo\")\n             .field(\"bar\", &self.bar)\n             .field(\"baz\", &self.baz)\n             .field(\"addr\", &format_args!(\"{}\", self.addr))\n             .finish()\n     }\n }\n\n assert_eq!(\n     \"Foo { bar: 10, baz: \\\"Hello World\\\", addr: 127.0.0.1 }\",\n     format!(\"{:?}\", Foo {\n         bar: 10,\n         baz: \"Hello World\".to_string(),\n         addr: Ipv4Addr::new(127, 0, 0, 1),\n     })\n );\n ```\n",
+      "adt": {
+        "fmt::Formatter": "MutableAsArgument",
+        "fmt::builders::DebugStruct": "Constructor"
+      }
+    },
+    "fmt::builders::DebugStruct::<'a, 'b>::field_with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds a new field to the generated struct output.\n\n This method is equivalent to [`DebugStruct::field`], but formats the\n value using a provided closure rather than by calling [`Debug::fmt`].\n",
+      "adt": {
+        "fmt::builders::DebugStruct": "MutableAsArgument"
+      }
+    },
+    "ptr::metadata::metadata": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the metadata component of a pointer.\n\n Values of type `*mut T`, `&T`, or `&mut T` can be passed directly to this function\n as they implicitly coerce to `*const T`.\n\n # Example\n\n ```\n #![feature(ptr_metadata)]\n\n assert_eq!(std::ptr::metadata(\"foo\"), 3_usize);\n ```\n",
+      "adt": {}
+    },
+    "fmt::builders::DebugStruct::<'a, 'b>::field": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds a new field to the generated struct output.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Bar {\n     bar: i32,\n     another: String,\n }\n\n impl fmt::Debug for Bar {\n     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {\n         fmt.debug_struct(\"Bar\")\n            .field(\"bar\", &self.bar) // We add `bar` field.\n            .field(\"another\", &self.another) // We add `another` field.\n            // We even add a field which doesn't exist (because why not?).\n            .field(\"nonexistent_field\", &1)\n            .finish() // We're good to go!\n     }\n }\n\n assert_eq!(\n     format!(\"{:?}\", Bar { bar: 10, another: \"Hello World\".to_string() }),\n     r#\"Bar { bar: 10, another: \"Hello World\", nonexistent_field: 1 }\"#,\n );\n ```\n",
+      "adt": {
+        "fmt::builders::DebugStruct": "MutableAsArgument"
+      }
+    },
+    "fmt::builders::DebugStruct::<'a, 'b>::finish": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Finishes output and returns any error encountered.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Bar {\n     bar: i32,\n     baz: String,\n }\n\n impl fmt::Debug for Bar {\n     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {\n         fmt.debug_struct(\"Bar\")\n            .field(\"bar\", &self.bar)\n            .field(\"baz\", &self.baz)\n            .finish() // You need to call it to \"finish\" the\n                      // struct formatting.\n     }\n }\n\n assert_eq!(\n     format!(\"{:?}\", Bar { bar: 10, baz: \"Hello World\".to_string() }),\n     r#\"Bar { bar: 10, baz: \"Hello World\" }\"#,\n );\n ```\n",
+      "adt": {
+        "result::Result": "Constructor",
+        "fmt::builders::DebugStruct": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "fmt::Formatter": [
+      "MutRef"
+    ],
+    "result::Result": [
+      "Plain"
+    ],
+    "fmt::builders::DebugStruct": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 971,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:2991:5: 3000:6",
+  "src": "fn fmt(&self, f: &mut Formatter<'_>) -> Result {\n        if <<T as core::ptr::Pointee>::Metadata as core::unit::IsUnit>::is_unit() {\n            pointer_fmt_inner(self.expose_provenance(), f)\n        } else {\n            f.debug_struct(\"Pointer\")\n                .field_with(\"addr\", |f| pointer_fmt_inner(self.expose_provenance(), f))\n                .field(\"metadata\", &core::ptr::metadata(*self))\n                .finish()\n        }\n    }",
+  "mir": "fn <*const T as fmt::Pointer>::fmt(_1: &*const T, _2: &mut fmt::Formatter<'_>) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: *const T;\n    let mut _6: &mut fmt::builders::DebugStruct<'_, '_>;\n    let mut _7: &mut fmt::builders::DebugStruct<'_, '_>;\n    let mut _8: &mut fmt::builders::DebugStruct<'_, '_>;\n    let mut _9: fmt::builders::DebugStruct<'_, '_>;\n    let mut _10: &str;\n    let mut _11: &str;\n    let mut _12: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:2996:37: 2996:40};\n    let mut _13: &str;\n    let mut _14: &dyn fmt::Debug;\n    let  _15: &<T as ptr::metadata::Pointee>::Metadata;\n    let  _16: <T as ptr::metadata::Pointee>::Metadata;\n    let mut _17: *const T;\n    debug self => _1;\n    debug f => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = <<T as ptr::metadata::Pointee>::Metadata as unit::IsUnit>::is_unit() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb5, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = (*_1);\n        _4 = ptr::const_ptr::<impl *const T>::expose_provenance(move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        _0 = fmt::pointer_fmt_inner(move _4, _2) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        goto -> bb11;\n    }\n    bb5: {\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = \"Pointer\";\n        _9 = fmt::Formatter::<'_>::debug_struct(_2, move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _8 = &mut _9;\n        StorageDead(_10);\n        StorageLive(_11);\n        _11 = \"addr\";\n        StorageLive(_12);\n        _12 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:2996:37: 2996:40}(_1);\n        _7 = fmt::builders::DebugStruct::<'_, '_>::field_with::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:2996:37: 2996:40}>(move _8, move _11, move _12) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_8);\n        StorageLive(_13);\n        _13 = \"metadata\";\n        StorageLive(_14);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = (*_1);\n        _16 = ptr::metadata::metadata::<T>(move _17) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_17);\n        _15 = &_16;\n        _14 = _15 as &dyn fmt::Debug;\n        _6 = fmt::builders::DebugStruct::<'_, '_>::field(_7, move _13, move _14) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_14);\n        StorageDead(_13);\n        _0 = fmt::builders::DebugStruct::<'_, '_>::finish(_6) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_16);\n        StorageDead(_9);\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "raw_vec::handle_error",
+  "safe": true,
+  "callees": {
+    "collections::TryReserveError::kind": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Details about the allocation that caused the error\n",
+      "adt": {
+        "collections::TryReserveError": "ImmutableAsArgument",
+        "collections::TryReserveErrorKind": "Constructor"
+      }
+    },
+    "alloc::handle_alloc_error": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Signals a memory allocation error.\n\n Callers of memory allocation APIs wishing to cease execution\n in response to an allocation error are encouraged to call this function,\n rather than directly invoking [`panic!`] or similar.\n\n This function is guaranteed to diverge (not return normally with a value), but depending on\n global configuration, it may either panic (resulting in unwinding or aborting as per\n configuration for all panics), or abort the process (with no unwinding).\n\n The default behavior is:\n\n  * If the binary links against `std` (typically the case), then\n   print a message to standard error and abort the process.\n   This behavior can be replaced with [`set_alloc_error_hook`] and [`take_alloc_error_hook`].\n   Future versions of Rust may panic by default instead.\n\n * If the binary does not link against `std` (all of its crates are marked\n   [`#![no_std]`][no_std]), then call [`panic!`] with a message.\n   [The panic handler] applies as to any panic.\n\n [`set_alloc_error_hook`]: ../../std/alloc/fn.set_alloc_error_hook.html\n [`take_alloc_error_hook`]: ../../std/alloc/fn.take_alloc_error_hook.html\n [The panic handler]: https://doc.rust-lang.org/reference/runtime.html#the-panic_handler-attribute\n [no_std]: https://doc.rust-lang.org/reference/names/preludes.html#the-no_std-attribute\n",
+      "adt": {}
+    },
+    "raw_vec::capacity_overflow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::TryReserveError": [
+      "Ref",
+      "Plain"
+    ],
+    "collections::TryReserveErrorKind": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 24, kind: RigidTy(Adt(AdtDef(DefId { id: 2588, name: \"core::alloc::Layout\" }), GenericArgs([]))) })])"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ]
+  },
+  "path": 1631,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/raw_vec/mod.rs:844:1: 849:2",
+  "src": "fn handle_error(e: TryReserveError) -> ! {\n    match e.kind() {\n        CapacityOverflow => capacity_overflow(),\n        AllocError { layout, .. } => handle_alloc_error(layout),\n    }\n}",
+  "mir": "fn raw_vec::handle_error(_1: collections::TryReserveError) -> ! {\n    let mut _0: !;\n    let mut _2: collections::TryReserveErrorKind;\n    let mut _3: &collections::TryReserveError;\n    let mut _4: isize;\n    let  _5: core::alloc::Layout;\n    debug e => _1;\n    debug layout => _5;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &_1;\n        _2 = collections::TryReserveError::kind(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _4 = discriminant(_2);\n        switchInt(move _4) -> [0: bb4, 1: bb3, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        _5 = ((_2 as variant#1).0: core::alloc::Layout);\n        _0 = alloc::handle_alloc_error(_5) -> unwind unreachable;\n    }\n    bb4: {\n        _0 = raw_vec::capacity_overflow() -> unwind unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

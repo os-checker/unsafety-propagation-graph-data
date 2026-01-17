@@ -1,0 +1,91 @@
+{
+  "name": "<panic::PanicHookInfo<'_> as core::fmt::Display>::fmt",
+  "safe": true,
+  "callees": {
+    "core::fmt::Formatter::<'a>::write_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes some data to the underlying buffer contained within this\n formatter.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Foo;\n\n impl fmt::Display for Foo {\n     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {\n         formatter.write_str(\"Foo\")\n         // This is equivalent to:\n         // write!(formatter, \"Foo\")\n     }\n }\n\n assert_eq!(format!(\"{Foo}\"), \"Foo\");\n assert_eq!(format!(\"{Foo:0>8}\"), \"Foo\");\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::fmt::Display::fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n use std::fmt;\n\n struct Position {\n     longitude: f32,\n     latitude: f32,\n }\n\n impl fmt::Display for Position {\n     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n         write!(f, \"({}, {})\", self.longitude, self.latitude)\n     }\n }\n\n assert_eq!(\n     \"(1.987, 2.983)\",\n     format!(\"{}\", Position { longitude: 1.987, latitude: 2.983, }),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "panic::PanicHookInfo::<'a>::payload_as_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the payload associated with the panic, if it is a string.\n\n This returns the payload if it is of type `&'static str` or `String`.\n\n A invocation of the `panic!()` macro in Rust 2021 or later will always result in a\n panic payload where `payload_as_str` returns `Some`.\n\n Only an invocation of [`panic_any`]\n (or, in Rust 2018 and earlier, `panic!(x)` where `x` is something other than a string)\n can result in a panic payload where `payload_as_str` returns `None`.\n\n # Example\n\n ```should_panic\n std::panic::set_hook(Box::new(|panic_info| {\n     if let Some(s) = panic_info.payload_as_str() {\n         println!(\"panic occurred: {s:?}\");\n     } else {\n         println!(\"panic occurred\");\n     }\n }));\n\n panic!(\"Normal panic\");\n ```\n",
+      "adt": {
+        "panic::PanicHookInfo": "ImmutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::fmt::Formatter": [
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain"
+    ],
+    "core::panic::Location": [
+      "Ref"
+    ],
+    "panic::PanicHookInfo": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 7, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 17, kind: RigidTy(Str) }, Not)) })])"
+    ]
+  },
+  "path": 2274,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panic.rs:200:5: 208:6",
+  "src": "fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {\n        formatter.write_str(\"panicked at \")?;\n        self.location.fmt(formatter)?;\n        if let Some(payload) = self.payload_as_str() {\n            formatter.write_str(\":\\n\")?;\n            formatter.write_str(payload)?;\n        }\n        Ok(())\n    }",
+  "mir": "fn <panic::PanicHookInfo<'_> as core::fmt::Display>::fmt(_1: &panic::PanicHookInfo<'_>, _2: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error> {\n    let mut _0: core::result::Result<(), core::fmt::Error>;\n    let mut _3: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, core::fmt::Error>>;\n    let mut _4: core::result::Result<(), core::fmt::Error>;\n    let mut _5: &str;\n    let mut _6: isize;\n    let mut _7: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, core::fmt::Error>>;\n    let mut _8: core::result::Result<(), core::fmt::Error>;\n    let mut _9: isize;\n    let mut _10: core::option::Option<&str>;\n    let mut _11: isize;\n    let  _12: &str;\n    let mut _13: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, core::fmt::Error>>;\n    let mut _14: core::result::Result<(), core::fmt::Error>;\n    let mut _15: &str;\n    let mut _16: isize;\n    let mut _17: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, core::fmt::Error>>;\n    let mut _18: core::result::Result<(), core::fmt::Error>;\n    let mut _19: isize;\n    let mut _20: &core::panic::Location<'_>;\n    debug self => _1;\n    debug formatter => _2;\n    debug residual => core::result::Result::<core::convert::Infallible, core::fmt::Error>::Err(core::fmt::Error);\n    debug val => ();\n    debug residual => core::result::Result::<core::convert::Infallible, core::fmt::Error>::Err(core::fmt::Error);\n    debug val => ();\n    debug payload => _12;\n    debug residual => core::result::Result::<core::convert::Infallible, core::fmt::Error>::Err(core::fmt::Error);\n    debug val => ();\n    debug residual => core::result::Result::<core::convert::Infallible, core::fmt::Error>::Err(core::fmt::Error);\n    debug val => ();\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = \"panicked at \";\n        _4 = core::fmt::Formatter::<'_>::write_str(_2, move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = <core::result::Result<(), core::fmt::Error> as core::ops::Try>::branch(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _6 = discriminant(_3);\n        switchInt(move _6) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        StorageDead(_3);\n        StorageLive(_7);\n        StorageLive(_8);\n        _20 = ((*_1).1: &core::panic::Location<'_>);\n        _8 = <core::panic::Location<'_> as core::fmt::Display>::fmt(_20, _2) -> [return: bb7, unwind unreachable];\n    }\n    bb5: {\n        _0 = <core::result::Result<(), core::fmt::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, core::fmt::Error>>>::from_residual(core::result::Result::<core::convert::Infallible, core::fmt::Error>::Err(core::fmt::Error)) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_3);\n        goto -> bb27;\n    }\n    bb7: {\n        _7 = <core::result::Result<(), core::fmt::Error> as core::ops::Try>::branch(move _8) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_8);\n        _9 = discriminant(_7);\n        switchInt(move _9) -> [0: bb9, 1: bb10, otherwise: bb3];\n    }\n    bb9: {\n        StorageDead(_7);\n        StorageLive(_10);\n        _10 = panic::PanicHookInfo::<'_>::payload_as_str(_1) -> [return: bb12, unwind unreachable];\n    }\n    bb10: {\n        _0 = <core::result::Result<(), core::fmt::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, core::fmt::Error>>>::from_residual(core::result::Result::<core::convert::Infallible, core::fmt::Error>::Err(core::fmt::Error)) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_7);\n        goto -> bb27;\n    }\n    bb12: {\n        _11 = discriminant(_10);\n        switchInt(move _11) -> [1: bb13, 0: bb24, otherwise: bb3];\n    }\n    bb13: {\n        _12 = ((_10 as variant#1).0: &str);\n        StorageLive(_13);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = \":\\n\";\n        _14 = core::fmt::Formatter::<'_>::write_str(_2, move _15) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_15);\n        _13 = <core::result::Result<(), core::fmt::Error> as core::ops::Try>::branch(move _14) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_14);\n        _16 = discriminant(_13);\n        switchInt(move _16) -> [0: bb16, 1: bb17, otherwise: bb3];\n    }\n    bb16: {\n        StorageDead(_13);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = core::fmt::Formatter::<'_>::write_str(_2, _12) -> [return: bb19, unwind unreachable];\n    }\n    bb17: {\n        _0 = <core::result::Result<(), core::fmt::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, core::fmt::Error>>>::from_residual(core::result::Result::<core::convert::Infallible, core::fmt::Error>::Err(core::fmt::Error)) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_13);\n        goto -> bb26;\n    }\n    bb19: {\n        _17 = <core::result::Result<(), core::fmt::Error> as core::ops::Try>::branch(move _18) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_18);\n        _19 = discriminant(_17);\n        switchInt(move _19) -> [0: bb21, 1: bb22, otherwise: bb3];\n    }\n    bb21: {\n        StorageDead(_17);\n        StorageDead(_10);\n        goto -> bb25;\n    }\n    bb22: {\n        _0 = <core::result::Result<(), core::fmt::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, core::fmt::Error>>>::from_residual(core::result::Result::<core::convert::Infallible, core::fmt::Error>::Err(core::fmt::Error)) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_17);\n        goto -> bb26;\n    }\n    bb24: {\n        StorageDead(_10);\n        goto -> bb25;\n    }\n    bb25: {\n        _0 = core::result::Result::Ok(());\n        goto -> bb27;\n    }\n    bb26: {\n        StorageDead(_10);\n        goto -> bb27;\n    }\n    bb27: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

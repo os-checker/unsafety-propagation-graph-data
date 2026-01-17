@@ -1,0 +1,71 @@
+{
+  "name": "iter::traits::exact_size::ExactSizeIterator::len",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::size_hint": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the bounds on the remaining length of the iterator.\n\n Specifically, `size_hint()` returns a tuple where the first element\n is the lower bound, and the second element is the upper bound.\n\n The second half of the tuple that is returned is an <code>[Option]<[usize]></code>.\n A [`None`] here means that either there is no known upper bound, or the\n upper bound is larger than [`usize`].\n\n # Implementation notes\n\n It is not enforced that an iterator implementation yields the declared\n number of elements. A buggy iterator may yield less than the lower bound\n or more than the upper bound of elements.\n\n `size_hint()` is primarily intended to be used for optimizations such as\n reserving space for the elements of the iterator, but must not be\n trusted to e.g., omit bounds checks in unsafe code. An incorrect\n implementation of `size_hint()` should not lead to memory safety\n violations.\n\n That said, the implementation should provide a correct estimation,\n because otherwise it would be a violation of the trait's protocol.\n\n The default implementation returns <code>(0, [None])</code> which is correct for any\n iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n let mut iter = a.iter();\n\n assert_eq!((3, Some(3)), iter.size_hint());\n let _ = iter.next();\n assert_eq!((2, Some(2)), iter.size_hint());\n ```\n\n A more complex example:\n\n ```\n // The even numbers in the range of zero to nine.\n let iter = (0..10).filter(|x| x % 2 == 0);\n\n // We might iterate from zero to ten times. Knowing that it's five\n // exactly wouldn't be possible without executing filter().\n assert_eq!((0, Some(10)), iter.size_hint());\n\n // Let's add five more numbers with chain()\n let iter = (0..10).filter(|x| x % 2 == 0).chain(15..20);\n\n // now both bounds are increased by five\n assert_eq!((5, Some(15)), iter.size_hint());\n ```\n\n Returning `None` for an upper bound:\n\n ```\n // an infinite iterator has no upper bound\n // and the maximum possible lower bound\n let iter = 0..;\n\n assert_eq!((usize::MAX, None), iter.size_hint());\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "cmp::PartialEq::eq": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests for `self` and `other` values to be equal, and is used by `==`.\n",
+      "adt": {}
+    },
+    "panicking::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Internal function for `assert_eq!` and `assert_ne!` macros\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(1, Ty { id: 518, kind: RigidTy(Adt(AdtDef(DefId { id: 24532, name: \"option::Option\" }), GenericArgs([Type(Ty { id: 47, kind: RigidTy(Uint(Usize)) })]))) })])",
+      "Ref",
+      "Unknown([Field(0, Ty { id: 5430, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 518, kind: RigidTy(Adt(AdtDef(DefId { id: 24532, name: \"option::Option\" }), GenericArgs([Type(Ty { id: 47, kind: RigidTy(Uint(Usize)) })]))) }, Not)) })])",
+      "Unknown([Field(1, Ty { id: 5430, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 518, kind: RigidTy(Adt(AdtDef(DefId { id: 24532, name: \"option::Option\" }), GenericArgs([Type(Ty { id: 47, kind: RigidTy(Uint(Usize)) })]))) }, Not)) })])"
+    ],
+    "panicking::AssertKind": [
+      "Plain"
+    ]
+  },
+  "path": "iter::traits::exact_size::ExactSizeIterator::len",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/exact_size.rs:116:5: 124:6",
+  "src": "fn len(&self) -> usize {\n        let (lower, upper) = self.size_hint();\n        // Note: This assertion is overly defensive, but it checks the invariant\n        // guaranteed by the trait. If this trait were rust-internal,\n        // we could use debug_assert!; assert_eq! will check all Rust user\n        // implementations too.\n        assert_eq!(upper, Some(lower));\n        lower\n    }",
+  "mir": "fn iter::traits::exact_size::ExactSizeIterator::len(_1: &Self) -> usize {\n    let mut _0: usize;\n    let  _2: option::Option<usize>;\n    let mut _3: (usize, option::Option<usize>);\n    let mut _4: (&option::Option<usize>, &option::Option<usize>);\n    let mut _5: &option::Option<usize>;\n    let mut _6: &option::Option<usize>;\n    let  _7: option::Option<usize>;\n    let  _8: &option::Option<usize>;\n    let  _9: &option::Option<usize>;\n    let mut _10: bool;\n    let  _11: panicking::AssertKind;\n    let  _12: !;\n    let mut _13: option::Option<fmt::Arguments<'_>>;\n    debug self => _1;\n    debug lower => _0;\n    debug upper => _2;\n    debug left_val => _8;\n    debug right_val => _9;\n    debug kind => _11;\n    bb0: {\n        StorageLive(_3);\n        _3 = <Self as iter::traits::iterator::Iterator>::size_hint(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = (_3.0: usize);\n        StorageLive(_2);\n        _2 = (_3.1: option::Option<usize>);\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &_2;\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = option::Option::Some(_0);\n        _6 = &_7;\n        _4 = (move _5, move _6);\n        StorageDead(_6);\n        StorageDead(_5);\n        _8 = (_4.0: &option::Option<usize>);\n        _9 = (_4.1: &option::Option<usize>);\n        StorageLive(_10);\n        _10 = <option::Option<usize> as cmp::PartialEq>::eq(_8, _9) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _10) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_10);\n        StorageDead(_7);\n        StorageDead(_4);\n        StorageDead(_2);\n        return;\n    }\n    bb4: {\n        _11 = panicking::AssertKind::Eq;\n        StorageLive(_13);\n        _13 = option::Option::None;\n        _12 = panicking::assert_failed::<option::Option<usize>, option::Option<usize>>(_11, _8, _9, move _13) -> unwind unreachable;\n    }\n}\n",
+  "doc": " Returns the exact remaining length of the iterator.\n\n The implementation ensures that the iterator will return exactly `len()`\n more times a [`Some(T)`] value, before returning [`None`].\n This method has a default implementation, so you usually should not\n implement it directly. However, if you can provide a more efficient\n implementation, you can do so. See the [trait-level] docs for an\n example.\n\n This function has the same safety guarantees as the\n [`Iterator::size_hint`] function.\n\n [trait-level]: ExactSizeIterator\n [`Some(T)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n // a finite range knows exactly how many times it will iterate\n let mut range = 0..5;\n\n assert_eq!(5, range.len());\n let _ = range.next();\n assert_eq!(4, range.len());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

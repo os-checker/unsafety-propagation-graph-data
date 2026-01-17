@@ -1,0 +1,50 @@
+{
+  "name": "sync::atomic::AtomicPtr::<T>::load",
+  "safe": true,
+  "callees": {
+    "cell::UnsafeCell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the wrapped value.\n\n This can be cast to a pointer of any kind. When creating references, you must uphold the\n aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and\n caveats.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let five = uc.get();\n ```\n",
+      "adt": {
+        "cell::UnsafeCell": "MutableAsArgument"
+      }
+    },
+    "sync::atomic::atomic_load": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "cell::UnsafeCell": [
+      "Ref"
+    ],
+    "sync::atomic::AtomicPtr": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "sync::atomic::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 17381,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/sync/atomic.rs:1725:5: 1728:6",
+  "src": "pub fn load(&self, order: Ordering) -> *mut T {\n        // SAFETY: data races are prevented by atomic intrinsics.\n        unsafe { atomic_load(self.p.get(), order) }\n    }",
+  "mir": "fn sync::atomic::AtomicPtr::<T>::load(_1: &sync::atomic::AtomicPtr<T>, _2: sync::atomic::Ordering) -> *mut T {\n    let mut _0: *mut T;\n    let mut _3: *const *mut T;\n    let mut _4: *mut *mut T;\n    let mut _5: &cell::UnsafeCell<*mut T>;\n    debug self => _1;\n    debug order => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_1).0: cell::UnsafeCell<*mut T>);\n        _4 = cell::UnsafeCell::<*mut T>::get(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = move _4 as *const *mut T;\n        StorageDead(_5);\n        StorageDead(_4);\n        _0 = sync::atomic::atomic_load::<*mut T>(move _3, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Loads a value from the pointer.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n use std::sync::atomic::{AtomicPtr, Ordering};\n\n let ptr = &mut 5;\n let some_ptr = AtomicPtr::new(ptr);\n\n let value = some_ptr.load(Ordering::Relaxed);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

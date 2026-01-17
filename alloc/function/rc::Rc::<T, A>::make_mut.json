@@ -1,0 +1,233 @@
+{
+  "name": "rc::Rc::<T, A>::make_mut",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::mem::size_of_val": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of the pointed-to value in bytes.\n\n This is usually the same as [`size_of::<T>()`]. However, when `T` *has* no\n statically-known size, e.g., a slice [`[T]`][slice] or a [trait object],\n then `size_of_val` can be used to get the dynamically-known size.\n\n [trait object]: ../../book/ch17-02-trait-objects.html\n\n # Examples\n\n ```\n assert_eq!(4, size_of_val(&5i32));\n\n let x: [u8; 13] = [0; 13];\n let y: &[u8] = &x;\n assert_eq!(13, size_of_val(y));\n ```\n\n [`size_of::<T>()`]: size_of\n",
+      "adt": {}
+    },
+    "rc::Rc::<T, A>::strong_count": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the number of strong (`Rc`) pointers to this allocation.\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let five = Rc::new(5);\n let _also_five = Rc::clone(&five);\n\n assert_eq!(2, Rc::strong_count(&five));\n ```\n",
+      "adt": {
+        "rc::Rc": "ImmutableAsArgument"
+      }
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "rc::Rc::<T, A>::clone_from_ref_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new `Rc<T>` with a clone of `value` in the provided allocator.\n\n # Examples\n\n ```\n #![feature(clone_from_ref)]\n #![feature(allocator_api)]\n use std::rc::Rc;\n use std::alloc::System;\n\n let hello: Rc<str, System> = Rc::clone_from_ref_in(\"hello\", System);\n ```\n",
+      "adt": {
+        "rc::Rc": "Constructor"
+      }
+    },
+    "rc::Rc::<T, A>::weak_count": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the number of [`Weak`] pointers to this allocation.\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let five = Rc::new(5);\n let _weak_five = Rc::downgrade(&five);\n\n assert_eq!(1, Rc::weak_count(&five));\n ```\n",
+      "adt": {
+        "rc::Rc": "ImmutableAsArgument"
+      }
+    },
+    "rc::UniqueRcUninit::<T, A>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates a RcInner with layout suitable to contain `for_value` or a clone of it.\n",
+      "adt": {
+        "rc::UniqueRcUninit": "Constructor"
+      }
+    },
+    "core::ptr::from_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a reference to a raw pointer.\n\n For `r: &T`, `from_ref(r)` is equivalent to `r as *const T` (except for the caveat noted below),\n but is a bit safer since it will never silently change type or mutability, in particular if the\n code is refactored.\n\n The caller must ensure that the pointee outlives the pointer this function returns, or else it\n will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to is never\n written to (except inside an `UnsafeCell`) using this pointer or any pointer derived from it. If\n you need to mutate the pointee, use [`from_mut`]. Specifically, to turn a mutable reference `m:\n &mut T` into `*const T`, prefer `from_mut(m).cast_const()` to obtain a pointer that can later be\n used for mutation.\n\n ## Interaction with lifetime extension\n\n Note that this has subtle interactions with the rules for lifetime extension of temporaries in\n tail expressions. This code is valid, albeit in a non-obvious way:\n ```rust\n # type T = i32;\n # fn foo() -> T { 42 }\n // The temporary holding the return value of `foo` has its lifetime extended,\n // because the surrounding expression involves no function call.\n let p = &foo() as *const T;\n unsafe { p.read() };\n ```\n Naively replacing the cast with `from_ref` is not valid:\n ```rust,no_run\n # use std::ptr;\n # type T = i32;\n # fn foo() -> T { 42 }\n // The temporary holding the return value of `foo` does *not* have its lifetime extended,\n // because the surrounding expression involves a function call.\n let p = ptr::from_ref(&foo());\n unsafe { p.read() }; // UB! Reading from a dangling pointer ⚠️\n ```\n The recommended way to write this code is to avoid relying on lifetime extension\n when raw pointers are involved:\n ```rust\n # use std::ptr;\n # type T = i32;\n # fn foo() -> T { 42 }\n let x = foo();\n let p = ptr::from_ref(&x);\n unsafe { p.read() };\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "rc::UniqueRcUninit::<T, A>::data_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the pointer to be written into to initialize the [`Rc`].\n",
+      "adt": {
+        "rc::UniqueRcUninit": "MutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "core::ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "rc::Rc::<T, A>::inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "rc::Rc": "ImmutableAsArgument"
+      }
+    },
+    "rc::RcInnerPtr::dec_strong": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "rc::RcInnerPtr::dec_weak": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "rc::UniqueRcUninit::<T, A>::into_rc": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Upgrade this into a normal [`Rc`].\n\n # Safety\n\n The data must have been initialized (by writing to [`Self::data_ptr()`]).\n",
+      "adt": {
+        "rc::Rc": "Constructor",
+        "rc::UniqueRcUninit": "MutableAsArgument"
+      }
+    },
+    "core::ptr::write": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Overwrites a memory location with the given value without reading or\n dropping the old value.\n\n `write` does not drop the contents of `dst`. This is safe, but it could leak\n allocations or resources, so care should be taken not to overwrite an object\n that should be dropped.\n\n Additionally, it does not drop `src`. Semantically, `src` is moved into the\n location pointed to by `dst`.\n\n This is appropriate for initializing uninitialized memory, or overwriting\n memory that has previously been [`read`] from.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `dst` must be [valid] for writes.\n\n * `dst` must be properly aligned. Use [`write_unaligned`] if this is not the\n   case.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n [valid]: self#safety\n\n # Examples\n\n Basic usage:\n\n ```\n let mut x = 0;\n let y = &mut x as *mut i32;\n let z = 12;\n\n unsafe {\n     std::ptr::write(y, z);\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::as_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a unique reference to the value. If the value may be uninitialized, [`as_uninit_mut`]\n must be used instead.\n\n For the shared counterpart see [`as_ref`].\n\n [`as_uninit_mut`]: NonNull::as_uninit_mut\n [`as_ref`]: NonNull::as_ref\n\n # Safety\n\n When calling this method, you have to ensure that\n the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let mut ptr = NonNull::new(&mut x).expect(\"null pointer\");\n\n let x_ref = unsafe { ptr.as_mut() };\n assert_eq!(*x_ref, 0);\n *x_ref += 2;\n assert_eq!(*x_ref, 2);\n ```\n\n [the module documentation]: crate::ptr#safety\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "rc::Rc": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "Plain",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "rc::UniqueRcUninit": [
+      "Plain",
+      "MutRef"
+    ],
+    "rc::RcInner": [
+      "Ref",
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))"
+    ],
+    "core::ptr::NonNull": [
+      "MutRef"
+    ]
+  },
+  "path": 1761,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2065:5: 2102:6",
+  "src": "pub fn make_mut(this: &mut Self) -> &mut T {\n        let size_of_val = size_of_val::<T>(&**this);\n\n        if Rc::strong_count(this) != 1 {\n            // Gotta clone the data, there are other Rcs.\n            *this = Rc::clone_from_ref_in(&**this, this.alloc.clone());\n        } else if Rc::weak_count(this) != 0 {\n            // Can just steal the data, all that's left is Weaks\n\n            // We don't need panic-protection like the above branch does, but we might as well\n            // use the same mechanism.\n            let mut in_progress: UniqueRcUninit<T, A> =\n                UniqueRcUninit::new(&**this, this.alloc.clone());\n            unsafe {\n                // Initialize `in_progress` with move of **this.\n                // We have to express this in terms of bytes because `T: ?Sized`; there is no\n                // operation that just copies a value based on its `size_of_val()`.\n                ptr::copy_nonoverlapping(\n                    ptr::from_ref(&**this).cast::<u8>(),\n                    in_progress.data_ptr().cast::<u8>(),\n                    size_of_val,\n                );\n\n                this.inner().dec_strong();\n                // Remove implicit strong-weak ref (no need to craft a fake\n                // Weak here -- we know other Weaks can clean up for us)\n                this.inner().dec_weak();\n                // Replace `this` with newly constructed Rc that has the moved data.\n                ptr::write(this, in_progress.into_rc());\n            }\n        }\n        // This unsafety is ok because we're guaranteed that the pointer\n        // returned is the *only* pointer that will ever be returned to T. Our\n        // reference count is guaranteed to be 1 at this point, and we required\n        // the `Rc<T>` itself to be `mut`, so we're returning the only possible\n        // reference to the allocation.\n        unsafe { &mut this.ptr.as_mut().value }\n    }",
+  "mir": "fn rc::Rc::<T, A>::make_mut(_1: &mut rc::Rc<T, A>) -> &mut T {\n    let mut _0: &mut T;\n    let  _2: usize;\n    let  _3: &T;\n    let mut _4: &rc::Rc<T, A>;\n    let mut _5: usize;\n    let mut _6: &rc::Rc<T, A>;\n    let mut _7: rc::Rc<T, A>;\n    let  _8: &T;\n    let mut _9: &rc::Rc<T, A>;\n    let mut _10: A;\n    let mut _11: &A;\n    let mut _12: usize;\n    let mut _13: &rc::Rc<T, A>;\n    let mut _14: rc::UniqueRcUninit<T, A>;\n    let  _15: &T;\n    let mut _16: &rc::Rc<T, A>;\n    let mut _17: A;\n    let mut _18: &A;\n    let  _19: ();\n    let mut _20: *const u8;\n    let mut _21: *const T;\n    let  _22: &T;\n    let mut _23: &rc::Rc<T, A>;\n    let mut _24: *mut u8;\n    let mut _25: *mut T;\n    let mut _26: &mut rc::UniqueRcUninit<T, A>;\n    let  _27: ();\n    let  _28: &rc::RcInner<T>;\n    let mut _29: &rc::Rc<T, A>;\n    let  _30: ();\n    let  _31: &rc::RcInner<T>;\n    let mut _32: &rc::Rc<T, A>;\n    let  _33: ();\n    let mut _34: *mut rc::Rc<T, A>;\n    let mut _35: rc::Rc<T, A>;\n    let mut _36: rc::UniqueRcUninit<T, A>;\n    let mut _37: &mut rc::RcInner<T>;\n    let mut _38: &mut core::ptr::NonNull<rc::RcInner<T>>;\n    debug this => _1;\n    debug size_of_val => _2;\n    debug in_progress => _14;\n    bb0: {\n        StorageLive(_4);\n        _4 = &(*_1);\n        _3 = <rc::Rc<T, A> as core::ops::Deref>::deref(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = core::mem::size_of_val::<T>(_3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &(*_1);\n        _5 = rc::Rc::<T, A>::strong_count(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        switchInt(move _5) -> [1: bb9, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageLive(_7);\n        StorageLive(_9);\n        _9 = &(*_1);\n        _8 = <rc::Rc<T, A> as core::ops::Deref>::deref(move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &((*_1).2: A);\n        _10 = <A as core::clone::Clone>::clone(move _11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        _7 = rc::Rc::<T, A>::clone_from_ref_in(_8, move _10) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_10);\n        drop((*_1)) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        (*_1) = move _7;\n        StorageDead(_7);\n        goto -> bb29;\n    }\n    bb9: {\n        StorageDead(_5);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &(*_1);\n        _12 = rc::Rc::<T, A>::weak_count(move _13) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_13);\n        switchInt(move _12) -> [0: bb27, otherwise: bb11];\n    }\n    bb11: {\n        StorageDead(_12);\n        StorageLive(_14);\n        StorageLive(_16);\n        _16 = &(*_1);\n        _15 = <rc::Rc<T, A> as core::ops::Deref>::deref(move _16) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = &((*_1).2: A);\n        _17 = <A as core::clone::Clone>::clone(move _18) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_18);\n        _14 = rc::UniqueRcUninit::<T, A>::new(_15, move _17) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_17);\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_23);\n        _23 = &(*_1);\n        _22 = <rc::Rc<T, A> as core::ops::Deref>::deref(move _23) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_23);\n        _21 = core::ptr::from_ref::<T>(_22) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        _20 = core::ptr::const_ptr::<impl *const T>::cast::<u8>(move _21) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_21);\n        StorageLive(_24);\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = &mut _14;\n        _25 = rc::UniqueRcUninit::<T, A>::data_ptr(move _26) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_26);\n        _24 = core::ptr::mut_ptr::<impl *mut T>::cast::<u8>(move _25) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_25);\n        _19 = core::ptr::copy_nonoverlapping::<u8>(move _20, move _24, _2) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_24);\n        StorageDead(_20);\n        StorageLive(_29);\n        _29 = &(*_1);\n        _28 = rc::Rc::<T, A>::inner(move _29) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_29);\n        _27 = <rc::RcInner<T> as rc::RcInnerPtr>::dec_strong(_28) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageLive(_32);\n        _32 = &(*_1);\n        _31 = rc::Rc::<T, A>::inner(move _32) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_32);\n        _30 = <rc::RcInner<T> as rc::RcInnerPtr>::dec_weak(_31) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        StorageLive(_34);\n        _34 = &raw mut (*_1);\n        StorageLive(_35);\n        StorageLive(_36);\n        _36 = move _14;\n        _35 = rc::UniqueRcUninit::<T, A>::into_rc(move _36) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_36);\n        _33 = core::ptr::write::<rc::Rc<T, A>>(move _34, move _35) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_35);\n        StorageDead(_34);\n        StorageDead(_14);\n        goto -> bb28;\n    }\n    bb27: {\n        StorageDead(_12);\n        goto -> bb28;\n    }\n    bb28: {\n        goto -> bb29;\n    }\n    bb29: {\n        StorageLive(_37);\n        StorageLive(_38);\n        _38 = &mut ((*_1).0: core::ptr::NonNull<rc::RcInner<T>>);\n        _37 = core::ptr::NonNull::<rc::RcInner<T>>::as_mut::<'_>(move _38) -> [return: bb30, unwind unreachable];\n    }\n    bb30: {\n        StorageDead(_38);\n        _0 = &mut ((*_37).2: T);\n        StorageDead(_37);\n        return;\n    }\n}\n",
+  "doc": " Makes a mutable reference into the given `Rc`.\n\n If there are other `Rc` pointers to the same allocation, then `make_mut` will\n [`clone`] the inner value to a new allocation to ensure unique ownership.  This is also\n referred to as clone-on-write.\n\n However, if there are no other `Rc` pointers to this allocation, but some [`Weak`]\n pointers, then the [`Weak`] pointers will be disassociated and the inner value will not\n be cloned.\n\n See also [`get_mut`], which will fail rather than cloning the inner value\n or disassociating [`Weak`] pointers.\n\n [`clone`]: Clone::clone\n [`get_mut`]: Rc::get_mut\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let mut data = Rc::new(5);\n\n *Rc::make_mut(&mut data) += 1;         // Won't clone anything\n let mut other_data = Rc::clone(&data); // Won't clone inner data\n *Rc::make_mut(&mut data) += 1;         // Clones inner data\n *Rc::make_mut(&mut data) += 1;         // Won't clone anything\n *Rc::make_mut(&mut other_data) *= 2;   // Won't clone anything\n\n // Now `data` and `other_data` point to different allocations.\n assert_eq!(*data, 8);\n assert_eq!(*other_data, 12);\n ```\n\n [`Weak`] pointers will be disassociated:\n\n ```\n use std::rc::Rc;\n\n let mut data = Rc::new(75);\n let weak = Rc::downgrade(&data);\n\n assert!(75 == *data);\n assert!(75 == *weak.upgrade().unwrap());\n\n *Rc::make_mut(&mut data) += 1;\n\n assert!(76 == *data);\n assert!(weak.upgrade().is_none());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

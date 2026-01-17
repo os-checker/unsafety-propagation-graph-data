@@ -1,0 +1,96 @@
+{
+  "name": "collections::binary_heap::BinaryHeap::<T, A>::into_sorted_vec",
+  "safe": true,
+  "callees": {
+    "collections::binary_heap::BinaryHeap::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of the binary heap.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::collections::BinaryHeap;\n let heap = BinaryHeap::from([1, 3]);\n\n assert_eq!(heap.len(), 2);\n ```\n",
+      "adt": {
+        "collections::binary_heap::BinaryHeap": "ImmutableAsArgument"
+      }
+    },
+    "vec::Vec::<T, A>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw mutable pointer to the vector's buffer, or a dangling\n raw pointer valid for zero sized reads if the vector didn't allocate.\n\n The caller must ensure that the vector outlives the pointer this\n function returns, or else it will end up dangling.\n Modifying the vector may cause its buffer to be reallocated,\n which would also make any pointers to it invalid.\n\n This method guarantees that for the purpose of the aliasing model, this method\n does not materialize a reference to the underlying slice, and thus the returned pointer\n will remain valid when mixed with other calls to [`as_ptr`], [`as_mut_ptr`],\n and [`as_non_null`].\n Note that calling other methods that materialize references to the slice,\n or references to specific elements you are planning on accessing through this pointer,\n may still invalidate this pointer.\n See the second example below for how this guarantee can be used.\n\n The method also guarantees that, as long as `T` is not zero-sized and the capacity is\n nonzero, the pointer may be passed into [`dealloc`] with a layout of\n `Layout::array::<T>(capacity)` in order to deallocate the backing memory. If this is done,\n be careful not to run the destructor of the `Vec`, as dropping it will result in\n double-frees. Wrapping the `Vec` in a [`ManuallyDrop`] is the typical way to achieve this.\n\n # Examples\n\n ```\n // Allocate vector big enough for 4 elements.\n let size = 4;\n let mut x: Vec<i32> = Vec::with_capacity(size);\n let x_ptr = x.as_mut_ptr();\n\n // Initialize elements via raw pointer writes, then set length.\n unsafe {\n     for i in 0..size {\n         *x_ptr.add(i) = i as i32;\n     }\n     x.set_len(size);\n }\n assert_eq!(&*x, &[0, 1, 2, 3]);\n ```\n\n Due to the aliasing guarantee, the following code is legal:\n\n ```rust\n unsafe {\n     let mut v = vec![0];\n     let ptr1 = v.as_mut_ptr();\n     ptr1.write(1);\n     let ptr2 = v.as_mut_ptr();\n     ptr2.write(2);\n     // Notably, the write to `ptr2` did *not* invalidate `ptr1`:\n     ptr1.write(3);\n }\n ```\n\n Deallocating a vector using [`Box`] (which uses [`dealloc`] internally):\n\n ```\n use std::mem::{ManuallyDrop, MaybeUninit};\n\n let mut v = ManuallyDrop::new(vec![0, 1, 2]);\n let ptr = v.as_mut_ptr();\n let capacity = v.capacity();\n let slice_ptr: *mut [MaybeUninit<i32>] =\n     std::ptr::slice_from_raw_parts_mut(ptr.cast(), capacity);\n drop(unsafe { Box::from_raw(slice_ptr) });\n ```\n\n [`as_mut_ptr`]: Vec::as_mut_ptr\n [`as_ptr`]: Vec::as_ptr\n [`as_non_null`]: Vec::as_non_null\n [`dealloc`]: crate::alloc::GlobalAlloc::dealloc\n [`ManuallyDrop`]: core::mem::ManuallyDrop\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::swap": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Swaps the values at two mutable locations of the same type, without\n deinitializing either.\n\n But for the following exceptions, this function is semantically\n equivalent to [`mem::swap`]:\n\n * It operates on raw pointers instead of references. When references are\n   available, [`mem::swap`] should be preferred.\n\n * The two pointed-to values may overlap. If the values do overlap, then the\n   overlapping region of memory from `x` will be used. This is demonstrated\n   in the second example below.\n\n * The operation is \"untyped\" in the sense that data may be uninitialized or otherwise violate\n   the requirements of `T`. The initialization state is preserved exactly.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * Both `x` and `y` must be [valid] for both reads and writes. They must remain valid even when the\n   other pointer is written. (This means if the memory ranges overlap, the two pointers must not\n   be subject to aliasing restrictions relative to each other.)\n\n * Both `x` and `y` must be properly aligned.\n\n Note that even if `T` has size `0`, the pointers must be properly aligned.\n\n [valid]: self#safety\n\n # Examples\n\n Swapping two non-overlapping regions:\n\n ```\n use std::ptr;\n\n let mut array = [0, 1, 2, 3];\n\n let (x, y) = array.split_at_mut(2);\n let x = x.as_mut_ptr().cast::<[u32; 2]>(); // this is `array[0..2]`\n let y = y.as_mut_ptr().cast::<[u32; 2]>(); // this is `array[2..4]`\n\n unsafe {\n     ptr::swap(x, y);\n     assert_eq!([2, 3, 0, 1], array);\n }\n ```\n\n Swapping two overlapping regions:\n\n ```\n use std::ptr;\n\n let mut array: [i32; 4] = [0, 1, 2, 3];\n\n let array_ptr: *mut i32 = array.as_mut_ptr();\n\n let x = array_ptr as *mut [i32; 3]; // this is `array[0..3]`\n let y = unsafe { array_ptr.add(1) } as *mut [i32; 3]; // this is `array[1..4]`\n\n unsafe {\n     ptr::swap(x, y);\n     // The indices `1..3` of the slice overlap between `x` and `y`.\n     // Reasonable results would be for to them be `[2, 3]`, so that indices `0..3` are\n     // `[1, 2, 3]` (matching `y` before the `swap`); or for them to be `[0, 1]`\n     // so that indices `1..4` are `[0, 1, 2]` (matching `x` before the `swap`).\n     // This implementation is defined to make the latter choice.\n     assert_eq!([1, 0, 1, 2], array);\n }\n ```\n",
+      "adt": {}
+    },
+    "collections::binary_heap::BinaryHeap::<T, A>::sift_down_range": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Take an element at `pos` and move it down the heap,\n while its children are larger.\n\n Returns the new position of the element.\n\n # Safety\n\n The caller must guarantee that `pos < end <= self.len()`.\n",
+      "adt": {
+        "collections::binary_heap::BinaryHeap": "MutableAsArgument"
+      }
+    },
+    "collections::binary_heap::BinaryHeap::<T, A>::into_vec": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the `BinaryHeap` and returns the underlying vector\n in arbitrary order.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::collections::BinaryHeap;\n let heap = BinaryHeap::from([1, 2, 3, 4, 5, 6, 7]);\n let vec = heap.into_vec();\n\n // Will print in some order\n for x in vec {\n     println!(\"{x}\");\n }\n ```\n",
+      "adt": {
+        "vec::Vec": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "collections::binary_heap::BinaryHeap": [
+      "Ref",
+      "Plain",
+      "Unknown([Field(0, Ty { id: 642, kind: RigidTy(Adt(AdtDef(DefId { id: 2824, name: \"vec::Vec\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) }), Type(Ty { id: 21, kind: Param(ParamTy { index: 1, name: \"A\" }) })]))) })])",
+      "MutRef"
+    ],
+    "vec::Vec": [
+      "MutRef",
+      "Plain"
+    ]
+  },
+  "path": 451,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/binary_heap/mod.rs:711:5: 729:6",
+  "src": "pub fn into_sorted_vec(mut self) -> Vec<T, A> {\n        let mut end = self.len();\n        while end > 1 {\n            end -= 1;\n            // SAFETY: `end` goes from `self.len() - 1` to 1 (both included),\n            //  so it's always a valid index to access.\n            //  It is safe to access index 0 (i.e. `ptr`), because\n            //  1 <= end < self.len(), which means self.len() >= 2.\n            unsafe {\n                let ptr = self.data.as_mut_ptr();\n                ptr::swap(ptr, ptr.add(end));\n            }\n            // SAFETY: `end` goes from `self.len() - 1` to 1 (both included) so:\n            //  0 < 1 <= end <= self.len() - 1 < self.len()\n            //  Which means 0 < end and end < self.len().\n            unsafe { self.sift_down_range(0, end) };\n        }\n        self.into_vec()\n    }",
+  "mir": "fn collections::binary_heap::BinaryHeap::<T, A>::into_sorted_vec(_1: collections::binary_heap::BinaryHeap<T, A>) -> vec::Vec<T, A> {\n    let mut _0: vec::Vec<T, A>;\n    let mut _2: usize;\n    let mut _3: &collections::binary_heap::BinaryHeap<T, A>;\n    let mut _4: bool;\n    let mut _5: usize;\n    let mut _6: (usize, bool);\n    let  _7: *mut T;\n    let mut _8: &mut vec::Vec<T, A>;\n    let  _9: ();\n    let mut _10: *mut T;\n    let mut _11: usize;\n    let  _12: usize;\n    let mut _13: &mut collections::binary_heap::BinaryHeap<T, A>;\n    let mut _14: usize;\n    let mut _15: collections::binary_heap::BinaryHeap<T, A>;\n    debug self => _1;\n    debug end => _2;\n    debug ptr => _7;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &_1;\n        _2 = collections::binary_heap::BinaryHeap::<T, A>::len(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        goto -> bb2;\n    }\n    bb2: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = _2;\n        _4 = Gt(move _5, 1_usize);\n        switchInt(move _4) -> [0: bb9, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_5);\n        _6 = CheckedSub(_2, 1_usize);\n        assert(!move (_6.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _2, 1_usize) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _2 = move (_6.0: usize);\n        StorageLive(_8);\n        _8 = &mut (_1.0: vec::Vec<T, A>);\n        _7 = vec::Vec::<T, A>::as_mut_ptr(move _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_8);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = _2;\n        _10 = core::ptr::mut_ptr::<impl *mut T>::add(_7, move _11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        _9 = core::ptr::swap::<T>(_7, move _10) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &mut _1;\n        StorageLive(_14);\n        _14 = _2;\n        _12 = collections::binary_heap::BinaryHeap::<T, A>::sift_down_range(move _13, 0_usize, move _14) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageDead(_4);\n        goto -> bb2;\n    }\n    bb9: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_15);\n        _15 = move _1;\n        _0 = collections::binary_heap::BinaryHeap::<T, A>::into_vec(move _15) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_15);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Consumes the `BinaryHeap` and returns a vector in sorted\n (ascending) order.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::collections::BinaryHeap;\n\n let mut heap = BinaryHeap::from([1, 2, 4, 5, 7]);\n heap.push(6);\n heap.push(3);\n\n let vec = heap.into_sorted_vec();\n assert_eq!(vec, [1, 2, 3, 4, 5, 6, 7]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

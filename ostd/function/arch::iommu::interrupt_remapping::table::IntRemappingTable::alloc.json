@@ -1,0 +1,95 @@
+{
+  "name": "arch::iommu::interrupt_remapping::table::IntRemappingTable::alloc",
+  "safe": true,
+  "callees": {
+    "sync::spin::SpinLock::<T, G>::lock": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the spin lock.\n",
+      "adt": {
+        "sync::spin::SpinLock": "ImmutableAsArgument",
+        "sync::spin::SpinLockGuard": "Constructor"
+      }
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "id_alloc::IdAlloc::alloc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates and returns a new `id`.\n\n If allocation is not possible, it returns `None`.\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::spin::SpinLock": [
+      "Ref"
+    ],
+    "arch::iommu::interrupt_remapping::table::IntRemappingTable": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(4)))",
+      "Ref"
+    ],
+    "sync::spin::SpinLockGuard": [
+      "Plain",
+      "MutRef"
+    ],
+    "id_alloc::IdAlloc": [
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "arch::iommu::interrupt_remapping::IrtEntryHandle": [
+      "Plain"
+    ]
+  },
+  "path": 653,
+  "span": "ostd/src/arch/x86/iommu/interrupt_remapping/table.rs:36:5: 42:6",
+  "src": "pub fn alloc(&'static self) -> Option<IrtEntryHandle> {\n        let index = self.allocator.lock().alloc()?;\n        Some(IrtEntryHandle {\n            index: index as u16,\n            table: self,\n        })\n    }",
+  "mir": "fn arch::iommu::interrupt_remapping::table::IntRemappingTable::alloc(_1: &arch::iommu::interrupt_remapping::table::IntRemappingTable) -> core::option::Option<arch::iommu::interrupt_remapping::IrtEntryHandle> {\n    let mut _0: core::option::Option<arch::iommu::interrupt_remapping::IrtEntryHandle>;\n    let mut _2: core::ops::ControlFlow<core::option::Option<core::convert::Infallible>, usize>;\n    let mut _3: core::option::Option<usize>;\n    let mut _4: &mut id_alloc::IdAlloc;\n    let mut _5: &mut sync::spin::SpinLockGuard<'_, id_alloc::IdAlloc, sync::guard::LocalIrqDisabled>;\n    let mut _6: sync::spin::SpinLockGuard<'_, id_alloc::IdAlloc, sync::guard::LocalIrqDisabled>;\n    let mut _7: &sync::spin::SpinLock<id_alloc::IdAlloc, sync::guard::LocalIrqDisabled>;\n    let mut _8: isize;\n    let  _9: usize;\n    let mut _10: arch::iommu::interrupt_remapping::IrtEntryHandle;\n    let mut _11: u16;\n    debug self => _1;\n    debug index => _9;\n    debug residual => core::option::Option::<core::convert::Infallible>::None;\n    debug val => _9;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).4: sync::spin::SpinLock<id_alloc::IdAlloc, sync::guard::LocalIrqDisabled>);\n        _6 = sync::spin::SpinLock::<id_alloc::IdAlloc, sync::guard::LocalIrqDisabled>::lock(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = &mut _6;\n        _4 = <sync::spin::SpinLockGuard<'_, id_alloc::IdAlloc, sync::guard::LocalIrqDisabled> as core::ops::DerefMut>::deref_mut(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        StorageDead(_5);\n        _3 = id_alloc::IdAlloc::alloc(_4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _2 = <core::option::Option<usize> as core::ops::Try>::branch(move _3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_3);\n        _8 = discriminant(_2);\n        switchInt(move _8) -> [0: bb6, 1: bb7, otherwise: bb5];\n    }\n    bb5: {\n        unreachable;\n    }\n    bb6: {\n        _9 = ((_2 as variant#0).0: usize);\n        drop(_6) -> [return: bb9, unwind unreachable];\n    }\n    bb7: {\n        _0 = <core::option::Option<arch::iommu::interrupt_remapping::IrtEntryHandle> as core::ops::FromResidual<core::option::Option<core::convert::Infallible>>>::from_residual(core::option::Option::<core::convert::Infallible>::None) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        drop(_6) -> [return: bb10, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_6);\n        StorageDead(_2);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = _9 as u16;\n        _10 = IrtEntryHandle(move _11, _1);\n        StorageDead(_11);\n        _0 = core::option::Option::Some(move _10);\n        StorageDead(_10);\n        goto -> bb11;\n    }\n    bb10: {\n        StorageDead(_6);\n        StorageDead(_2);\n        goto -> bb11;\n    }\n    bb11: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

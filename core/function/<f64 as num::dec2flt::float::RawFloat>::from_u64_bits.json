@@ -1,0 +1,37 @@
+{
+  "name": "<f64 as num::dec2flt::float::RawFloat>::from_u64_bits",
+  "safe": true,
+  "callees": {
+    "f64::<impl f64>::from_bits": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unnecessary_transmutes"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unnecessary_transmutes\n"
+        ]
+      },
+      "doc": " Raw transmutation from `u64`.\n\n This is currently identical to `transmute::<u64, f64>(v)` on all platforms.\n It turns out this is incredibly portable, for two reasons:\n\n * Floats and Ints have the same endianness on all supported platforms.\n * IEEE 754 very precisely specifies the bit layout of floats.\n\n However there is one caveat: prior to the 2008 version of IEEE 754, how\n to interpret the NaN signaling bit wasn't actually specified. Most platforms\n (notably x86 and ARM) picked the interpretation that was ultimately\n standardized in 2008, but some didn't (notably MIPS). As a result, all\n signaling NaNs on MIPS are quiet NaNs on x86, and vice-versa.\n\n Rather than trying to preserve signaling-ness cross-platform, this\n implementation favors preserving the exact bits. This means that\n any payloads encoded in NaNs will be preserved even if the result of\n this method is sent over the network from an x86 machine to a MIPS one.\n\n If the results of this method are only manipulated by the same\n architecture that produced them, then there is no portability concern.\n\n If the input isn't NaN, then there is no portability concern.\n\n If you don't care about signaling-ness (very likely), then there is no\n portability concern.\n\n Note that this function is distinct from `as` casting, which attempts to\n preserve the *numeric* value, and not the bitwise value.\n\n # Examples\n\n ```\n let v = f64::from_bits(0x4029000000000000);\n assert_eq!(v, 12.5);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1784,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/dec2flt/float.rs:333:5: 335:6",
+  "src": "fn from_u64_bits(v: u64) -> Self {\n        f64::from_bits(v)\n    }",
+  "mir": "fn <f64 as num::dec2flt::float::RawFloat>::from_u64_bits(_1: u64) -> f64 {\n    let mut _0: f64;\n    debug v => _1;\n    bb0: {\n        _0 = f64::<impl f64>::from_bits(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

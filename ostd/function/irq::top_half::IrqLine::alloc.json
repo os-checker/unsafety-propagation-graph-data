@@ -1,0 +1,100 @@
+{
+  "name": "irq::top_half::IrqLine::alloc",
+  "safe": true,
+  "callees": {
+    "irq::top_half::get_or_init_allocator": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "sync::spin::SpinLock::<T, G>::lock": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the spin lock.\n",
+      "adt": {
+        "sync::spin::SpinLock": "ImmutableAsArgument",
+        "sync::spin::SpinLockGuard": "Constructor"
+      }
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "id_alloc::IdAlloc::alloc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates and returns a new `id`.\n\n If allocation is not possible, it returns `None`.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).\n\n # Examples\n\n Calculates the length of an <code>Option<[String]></code> as an\n <code>Option<[usize]></code>, consuming the original:\n\n [String]: ../../std/string/struct.String.html \"String\"\n ```\n let maybe_some_string = Some(String::from(\"Hello, World!\"));\n // `Option::map` takes self *by value*, consuming `maybe_some_string`\n let maybe_some_len = maybe_some_string.map(|s| s.len());\n assert_eq!(maybe_some_len, Some(13));\n\n let x: Option<&str> = None;\n assert_eq!(x.map(|s| s.len()), None);\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::ok_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Transforms the `Option<T>` into a [`Result<T, E>`], mapping [`Some(v)`] to\n [`Ok(v)`] and [`None`] to [`Err(err)`].\n\n Arguments passed to `ok_or` are eagerly evaluated; if you are passing the\n result of a function call, it is recommended to use [`ok_or_else`], which is\n lazily evaluated.\n\n [`Ok(v)`]: Ok\n [`Err(err)`]: Err\n [`Some(v)`]: Some\n [`ok_or_else`]: Option::ok_or_else\n\n # Examples\n\n ```\n let x = Some(\"foo\");\n assert_eq!(x.ok_or(0), Ok(\"foo\"));\n\n let x: Option<&str> = None;\n assert_eq!(x.ok_or(0), Err(0));\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::spin::SpinLock": [
+      "Ref"
+    ],
+    "sync::spin::SpinLockGuard": [
+      "Plain",
+      "MutRef"
+    ],
+    "id_alloc::IdAlloc": [
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "error::Error": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1831,
+  "span": "ostd/src/irq/top_half.rs:43:5: 49:6",
+  "src": "pub fn alloc() -> Result<Self> {\n        get_or_init_allocator()\n            .lock()\n            .alloc()\n            .map(|id| Self::new(id as u8))\n            .ok_or(Error::NotEnoughResources)\n    }",
+  "mir": "fn irq::top_half::IrqLine::alloc() -> core::result::Result<irq::top_half::IrqLine, error::Error> {\n    let mut _0: core::result::Result<irq::top_half::IrqLine, error::Error>;\n    let mut _1: core::option::Option<irq::top_half::IrqLine>;\n    let mut _2: core::option::Option<usize>;\n    let mut _3: &mut id_alloc::IdAlloc;\n    let mut _4: &mut sync::spin::SpinLockGuard<'_, id_alloc::IdAlloc, sync::guard::PreemptDisabled>;\n    let mut _5: sync::spin::SpinLockGuard<'_, id_alloc::IdAlloc, sync::guard::PreemptDisabled>;\n    let  _6: &sync::spin::SpinLock<id_alloc::IdAlloc>;\n    let mut _7: error::Error;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        StorageLive(_4);\n        StorageLive(_5);\n        _6 = irq::top_half::get_or_init_allocator() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = sync::spin::SpinLock::<id_alloc::IdAlloc>::lock(_6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = &mut _5;\n        _3 = <sync::spin::SpinLockGuard<'_, id_alloc::IdAlloc, sync::guard::PreemptDisabled> as core::ops::DerefMut>::deref_mut(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _2 = id_alloc::IdAlloc::alloc(_3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _1 = core::option::Option::<usize>::map::<irq::top_half::IrqLine, {closure@ostd/src/irq/top_half.rs:47:18: 47:22}>(move _2, ZeroSized: {closure@ostd/src/irq/top_half.rs:47:18: 47:22}) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_2);\n        StorageLive(_7);\n        _7 = error::Error::NotEnoughResources;\n        _0 = core::option::Option::<irq::top_half::IrqLine>::ok_or::<error::Error>(move _1, move _7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_7);\n        drop(_5) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_5);\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": " Allocates an available IRQ line.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

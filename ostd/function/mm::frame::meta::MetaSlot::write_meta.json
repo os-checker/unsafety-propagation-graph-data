@@ -1,0 +1,83 @@
+{
+  "name": "mm::frame::meta::MetaSlot::write_meta",
+  "safe": false,
+  "callees": {
+    "core::cell::UnsafeCell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the wrapped value.\n\n This can be cast to a pointer of any kind. When creating references, you must uphold the\n aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and\n caveats.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let five = uc.get();\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::metadata": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the metadata component of a pointer.\n\n Values of type `*mut T`, `&T`, or `&mut T` can be passed directly to this function\n as they implicitly coerce to `*const T`.\n\n # Example\n\n ```\n #![feature(ptr_metadata)]\n\n assert_eq!(std::ptr::metadata(\"foo\"), 3_usize);\n ```\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::write": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets the value of the `MaybeUninit<T>`.\n\n This overwrites any previous value without dropping it, so be careful\n not to use this twice unless you want to skip running the destructor.\n For your convenience, this also returns a mutable reference to the\n (now safely initialized) contents of `self`.\n\n As the content is stored inside a `ManuallyDrop`, the destructor is not\n run for the inner data if the MaybeUninit leaves scope without a call to\n [`assume_init`], [`assume_init_drop`], or similar. Code that receives\n the mutable reference returned by this function needs to keep this in\n mind. The safety model of Rust regards leaks as safe, but they are\n usually still undesirable. This being said, the mutable reference\n behaves like any other mutable reference would, so assigning a new value\n to it will drop the old content.\n\n [`assume_init`]: Self::assume_init\n [`assume_init_drop`]: Self::assume_init_drop\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u8>>::uninit();\n\n {\n     let hello = x.write((&b\"Hello, world!\").to_vec());\n     // Setting hello does not leak prior allocations, but drops them\n     *hello = (&b\"Hello\").to_vec();\n     hello[0] = 'h' as u8;\n }\n // x is initialized now:\n let s = unsafe { x.assume_init() };\n assert_eq!(b\"hello\", s.as_slice());\n ```\n\n This usage of the method causes a leak:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<String>::uninit();\n\n x.write(\"Hello\".to_string());\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n // This leaks the contained string:\n x.write(\"hello\".to_string());\n // x is initialized now:\n let s = unsafe { x.assume_init() };\n ```\n\n This method can be used to avoid unsafe in some cases. The example below\n shows a part of an implementation of a fixed sized arena that lends out\n pinned references.\n With `write`, we can avoid the need to write through a raw pointer:\n\n ```rust\n use core::pin::Pin;\n use core::mem::MaybeUninit;\n\n struct PinArena<T> {\n     memory: Box<[MaybeUninit<T>]>,\n     len: usize,\n }\n\n impl <T> PinArena<T> {\n     pub fn capacity(&self) -> usize {\n         self.memory.len()\n     }\n     pub fn push(&mut self, val: T) -> Pin<&mut T> {\n         if self.len >= self.capacity() {\n             panic!(\"Attempted to push to a full pin arena!\");\n         }\n         let ref_ = self.memory[self.len].write(val);\n         self.len += 1;\n         unsafe { Pin::new_unchecked(ref_) }\n     }\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::write": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Overwrites a memory location with the given value without reading or\n dropping the old value.\n\n See [`ptr::write`] for safety concerns and examples.\n\n [`ptr::write`]: crate::ptr::write()\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::cell::UnsafeCell": [
+      "Ref"
+    ],
+    "mm::frame::meta::MetaSlot": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::mem::MaybeUninit": [
+      "MutRef"
+    ],
+    "core::ptr::DynMetadata": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 1987,
+  "span": "ostd/src/mm/frame/meta.rs:368:5: 383:6",
+  "src": "pub(super) unsafe fn write_meta<M: AnyFrameMeta>(&self, metadata: M) {\n        const { assert!(size_of::<M>() <= FRAME_METADATA_MAX_SIZE) };\n        const { assert!(align_of::<M>() <= FRAME_METADATA_MAX_ALIGN) };\n\n        // SAFETY: Caller ensures that the access to the fields are exclusive.\n        let vtable_ptr = unsafe { &mut *self.vtable_ptr.get() };\n        vtable_ptr.write(core::ptr::metadata(&metadata as &dyn AnyFrameMeta));\n\n        let ptr = self.storage.get();\n        // SAFETY:\n        // 1. `ptr` points to the metadata storage.\n        // 2. The size and the alignment of the metadata storage is large enough to hold `M`\n        //    (guaranteed by the const assertions above).\n        // 3. We have exclusive access to the metadata storage (guaranteed by the caller).\n        unsafe { ptr.cast::<M>().write(metadata) };\n    }",
+  "mir": "fn mm::frame::meta::MetaSlot::write_meta(_1: &mm::frame::meta::MetaSlot, _2: M) -> () {\n    let mut _0: ();\n    let mut _3: &mut core::mem::MaybeUninit<core::ptr::DynMetadata<dyn mm::frame::meta::AnyFrameMeta>>;\n    let mut _4: *mut core::mem::MaybeUninit<core::ptr::DynMetadata<dyn mm::frame::meta::AnyFrameMeta>>;\n    let mut _5: &core::cell::UnsafeCell<core::mem::MaybeUninit<core::ptr::DynMetadata<dyn mm::frame::meta::AnyFrameMeta>>>;\n    let  _6: &mut core::ptr::DynMetadata<dyn mm::frame::meta::AnyFrameMeta>;\n    let mut _7: core::ptr::DynMetadata<dyn mm::frame::meta::AnyFrameMeta>;\n    let mut _8: *const dyn mm::frame::meta::AnyFrameMeta;\n    let  _9: &dyn mm::frame::meta::AnyFrameMeta;\n    let  _10: &M;\n    let  _11: *mut [u8; 40];\n    let mut _12: &core::cell::UnsafeCell<[u8; 40]>;\n    let  _13: ();\n    let mut _14: *mut M;\n    let mut _15: M;\n    debug self => _1;\n    debug metadata => _2;\n    debug vtable_ptr => _3;\n    debug ptr => _11;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_1).2: core::cell::UnsafeCell<core::mem::MaybeUninit<core::ptr::DynMetadata<dyn mm::frame::meta::AnyFrameMeta>>>);\n        _4 = core::cell::UnsafeCell::<core::mem::MaybeUninit<core::ptr::DynMetadata<dyn mm::frame::meta::AnyFrameMeta>>>::get(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = &mut (*_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _10 = &_2;\n        _9 = _10 as &dyn mm::frame::meta::AnyFrameMeta;\n        _8 = &raw const (*_9);\n        _7 = core::ptr::metadata::<dyn mm::frame::meta::AnyFrameMeta>(move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        _6 = core::mem::MaybeUninit::<core::ptr::DynMetadata<dyn mm::frame::meta::AnyFrameMeta>>::write(_3, move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageDead(_9);\n        StorageDead(_6);\n        StorageLive(_12);\n        _12 = &((*_1).0: core::cell::UnsafeCell<[u8; 40]>);\n        _11 = core::cell::UnsafeCell::<[u8; 40]>::get(move _12) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_12);\n        StorageLive(_14);\n        _14 = core::ptr::mut_ptr::<impl *mut [u8; 40]>::cast::<M>(_11) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_15);\n        _15 = move _2;\n        _13 = core::ptr::mut_ptr::<impl *mut M>::write(move _14, move _15) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_15);\n        StorageDead(_14);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Writes the metadata to the slot without reading or dropping the previous value.\n\n # Safety\n\n The caller should have exclusive access to the metadata slot's fields.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

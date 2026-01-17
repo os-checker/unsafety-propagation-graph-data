@@ -1,0 +1,33 @@
+{
+  "name": "intrinsics::contract_check_ensures",
+  "safe": true,
+  "callees": {
+    "intrinsics::contract_check_ensures::runtime": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 1393, kind: RigidTy(Adt(AdtDef(DefId { id: 24532, name: \"option::Option\" }), GenericArgs([Type(Ty { id: 1389, kind: Param(ParamTy { index: 0, name: \"C\" }) })]))) })])",
+      "Unknown([Field(1, Ty { id: 1394, kind: Param(ParamTy { index: 1, name: \"Ret\" }) })])"
+    ]
+  },
+  "path": 13398,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/intrinsics/mod.rs:2709:1: 2731:2",
+  "src": "pub const fn contract_check_ensures<C: Fn(&Ret) -> bool + Copy, Ret>(\n    cond: Option<C>,\n    ret: Ret,\n) -> Ret {\n    const_eval_select!(\n        @capture[C: Fn(&Ret) -> bool + Copy, Ret] { cond: Option<C>, ret: Ret } -> Ret :\n        if const {\n            // Do nothing\n            ret\n        } else {\n            match cond {\n                crate::option::Option::Some(cond) => {\n                    if !cond(&ret) {\n                        // Emit no unwind panic in case this was a safety requirement.\n                        crate::panicking::panic_nounwind(\"failed ensures check\");\n                    }\n                },\n                crate::option::Option::None => {},\n            }\n            ret\n        }\n    )\n}",
+  "mir": "fn intrinsics::contract_check_ensures(_1: option::Option<C>, _2: Ret) -> Ret {\n    let mut _0: Ret;\n    let mut _3: (option::Option<C>, Ret);\n    debug cond => _1;\n    debug ret => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = (_1, _2);\n        _0 = intrinsics::contract_check_ensures::runtime::<C, Ret>(move (_3.0: option::Option<C>), move (_3.1: Ret)) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Check if the post-condition `cond` has been met.\n\n By default, if `contract_checks` is enabled, this will panic with no unwind if the condition\n returns false.\n\n If `cond` is `None`, then no postcondition checking is performed.\n\n Note that this function is a no-op during constant evaluation.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

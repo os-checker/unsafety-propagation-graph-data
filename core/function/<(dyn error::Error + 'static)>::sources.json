@@ -1,0 +1,23 @@
+{
+  "name": "<(dyn error::Error + 'static)>::sources",
+  "safe": true,
+  "callees": {},
+  "adts": {
+    "option::Option": [
+      "Plain"
+    ],
+    "error::Source": [
+      "Plain"
+    ]
+  },
+  "path": 943,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/error.rs:367:5: 381:6",
+  "src": "pub fn sources(&self) -> Source<'_> {\n        // You may think this method would be better in the `Error` trait, and you'd be right.\n        // Unfortunately that doesn't work, not because of the dyn-incompatibility rules but\n        // because we save a reference to `self` in `Source`s below as a trait object.\n        // If this method was declared in `Error`, then `self` would have the type `&T` where\n        // `T` is some concrete type which implements `Error`. We would need to coerce `self`\n        // to have type `&dyn Error`, but that requires that `Self` has a known size\n        // (i.e., `Self: Sized`). We can't put that bound on `Error` since that would forbid\n        // `Error` trait objects, and we can't put that bound on the method because that means\n        // the method can't be called on trait objects (we'd also need the `'static` bound,\n        // but that isn't allowed because methods with bounds on `Self` other than `Sized` are\n        // dyn-incompatible). Requiring an `Unsize` bound is not backwards compatible.\n\n        Source { current: Some(self) }\n    }",
+  "mir": "fn <(dyn error::Error + 'static)>::sources(_1: &dyn error::Error) -> error::Source<'_> {\n    let mut _0: error::Source<'_>;\n    let mut _2: option::Option<&dyn error::Error>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = option::Option::Some(_1);\n        _0 = Source(move _2);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns an iterator starting with the current error and continuing with\n recursively calling [`Error::source`].\n\n If you want to omit the current error and only use its sources,\n use `skip(1)`.\n\n # Examples\n\n ```\n #![feature(error_iter)]\n use std::error::Error;\n use std::fmt;\n\n #[derive(Debug)]\n struct A;\n\n #[derive(Debug)]\n struct B(Option<Box<dyn Error + 'static>>);\n\n impl fmt::Display for A {\n     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n         write!(f, \"A\")\n     }\n }\n\n impl fmt::Display for B {\n     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n         write!(f, \"B\")\n     }\n }\n\n impl Error for A {}\n\n impl Error for B {\n     fn source(&self) -> Option<&(dyn Error + 'static)> {\n         self.0.as_ref().map(|e| e.as_ref())\n     }\n }\n\n let b = B(Some(Box::new(A)));\n\n // let err : Box<Error> = b.into(); // or\n let err = &b as &dyn Error;\n\n let mut iter = err.sources();\n\n assert_eq!(\"B\".to_string(), iter.next().unwrap().to_string());\n assert_eq!(\"A\".to_string(), iter.next().unwrap().to_string());\n assert!(iter.next().is_none());\n assert!(iter.next().is_none());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

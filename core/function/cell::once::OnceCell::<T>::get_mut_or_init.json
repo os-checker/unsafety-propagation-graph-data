@@ -1,0 +1,38 @@
+{
+  "name": "cell::once::OnceCell::<T>::get_mut_or_init",
+  "safe": true,
+  "callees": {
+    "cell::once::OnceCell::<T>::get_mut_or_try_init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the mutable reference of the contents of the cell, initializing\n it to `f()` if the cell was uninitialized. If the cell was uninitialized\n and `f()` failed, an error is returned.\n\n # Panics\n\n If `f()` panics, the panic is propagated to the caller, and the cell\n remains uninitialized.\n\n # Examples\n\n ```\n #![feature(once_cell_get_mut)]\n\n use std::cell::OnceCell;\n\n let mut cell: OnceCell<u32> = OnceCell::new();\n\n // Failed attempts to initialize the cell do not change its contents\n assert!(cell.get_mut_or_try_init(|| \"not a number!\".parse()).is_err());\n assert!(cell.get().is_none());\n\n let value = cell.get_mut_or_try_init(|| \"1234\".parse());\n assert_eq!(value, Ok(&mut 1234));\n\n let Ok(value) = value else { return; };\n *value += 2;\n assert_eq!(cell.get(), Some(&1236))\n ```\n",
+      "adt": {
+        "cell::once::OnceCell": "MutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "cell::once::OnceCell": [
+      "MutRef"
+    ],
+    "result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 1178, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) }, Mut)) })])"
+    ]
+  },
+  "path": 4706,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell/once.rs:199:5: 206:6",
+  "src": "pub fn get_mut_or_init<F>(&mut self, f: F) -> &mut T\n    where\n        F: FnOnce() -> T,\n    {\n        match self.get_mut_or_try_init(|| Ok::<T, !>(f())) {\n            Ok(val) => val,\n        }\n    }",
+  "mir": "fn cell::once::OnceCell::<T>::get_mut_or_init(_1: &mut cell::once::OnceCell<T>, _2: F) -> &mut T {\n    let mut _0: &mut T;\n    let mut _3: result::Result<&mut T, !>;\n    let mut _4: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell/once.rs:203:40: 203:42};\n    debug self => _1;\n    debug f => _2;\n    debug val => _0;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell/once.rs:203:40: 203:42}(move _2);\n        _3 = cell::once::OnceCell::<T>::get_mut_or_try_init::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell/once.rs:203:40: 203:42}, !>(_1, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _0 = move ((_3 as variant#0).0: &mut T);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Gets the mutable reference of the contents of the cell,\n initializing it to `f()` if the cell was uninitialized.\n\n # Panics\n\n If `f()` panics, the panic is propagated to the caller, and the cell\n remains uninitialized.\n\n # Examples\n\n ```\n #![feature(once_cell_get_mut)]\n\n use std::cell::OnceCell;\n\n let mut cell = OnceCell::new();\n let value = cell.get_mut_or_init(|| 92);\n assert_eq!(*value, 92);\n\n *value += 2;\n assert_eq!(*value, 94);\n\n let value = cell.get_mut_or_init(|| unreachable!());\n assert_eq!(*value, 94);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,173 @@
+{
+  "name": "slice::sort::stable::quicksort::quicksort",
+  "safe": true,
+  "callees": {
+    "slice::sort::shared::smallsort::StableSmallSortTypeImpl::small_sort_threshold": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " For which input length <= return value of this function, is it valid to call `small_sort`.\n",
+      "adt": {}
+    },
+    "slice::sort::shared::smallsort::StableSmallSortTypeImpl::small_sort": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sorts `v` using strategies optimized for small sizes.\n",
+      "adt": {}
+    },
+    "slice::sort::stable::drift::sort": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sorts `v` based on comparison function `is_less`. If `eager_sort` is true,\n it will only do small-sorts and physical merges, ensuring O(N * log(N))\n worst-case complexity. `scratch.len()` must be at least\n `max(v.len() - v.len() / 2, SMALL_SORT_GENERAL_SCRATCH_LEN)` otherwise the implementation may abort.\n Fully ascending and descending inputs will be sorted with exactly N - 1\n comparisons.\n\n This is the main loop for driftsort, which uses powersort's heuristic to\n determine in which order to merge runs, see below for details.\n",
+      "adt": {}
+    },
+    "slice::sort::shared::pivot::choose_pivot": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Selects a pivot from `v`. Algorithm taken from glidesort by Orson Peters.\n\n This chooses a pivot by sampling an adaptive amount of points, approximating\n the quality of a median of sqrt(n) elements.\n",
+      "adt": {}
+    },
+    "ptr::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `src` without moving it. This leaves the\n memory in `src` unchanged.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads.\n\n * `src` must be properly aligned. Use [`read_unaligned`] if this is not the\n   case.\n\n * `src` must point to a properly initialized value of type `T`.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n # Examples\n\n Basic usage:\n\n ```\n let x = 12;\n let y = &x as *const i32;\n\n unsafe {\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n\n ## Ownership of the Returned Value\n\n `read` creates a bitwise copy of `T`, regardless of whether `T` is [`Copy`].\n If `T` is not [`Copy`], using both the returned value and the value at\n `*src` can violate memory safety. Note that assigning to `*src` counts as a\n use because it will attempt to drop the value at `*src`.\n\n [`write()`] can be used to overwrite data without causing it to be dropped.\n\n ```\n use std::ptr;\n\n let mut s = String::from(\"foo\");\n unsafe {\n     // `s2` now points to the same underlying memory as `s`.\n     let mut s2: String = ptr::read(&s);\n\n     assert_eq!(s2, \"foo\");\n\n     // Assigning to `s2` causes its original value to be dropped. Beyond\n     // this point, `s` must no longer be used, as the underlying memory has\n     // been freed.\n     s2 = String::default();\n     assert_eq!(s2, \"\");\n\n     // Assigning to `s` would cause the old value to be dropped again,\n     // resulting in undefined behavior.\n     // s = String::from(\"bar\"); // ERROR\n\n     // `ptr::write` can be used to overwrite a value without dropping it.\n     ptr::write(&mut s, String::from(\"bar\"));\n }\n\n assert_eq!(s, \"bar\");\n ```\n\n [valid]: self#safety\n",
+      "adt": {}
+    },
+    "mem::manually_drop::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {
+        "mem::manually_drop::ManuallyDrop": "Constructor"
+      }
+    },
+    "slice::sort::stable::quicksort::has_direct_interior_mutability": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "ops::deref::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "bool::<impl bool>::then_some": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `Some(t)` if the `bool` is [`true`](../std/keyword.true.html),\n or `None` otherwise.\n\n Arguments passed to `then_some` are eagerly evaluated; if you are\n passing the result of a function call, it is recommended to use\n [`then`], which is lazily evaluated.\n\n [`then`]: bool::then\n\n # Examples\n\n ```\n assert_eq!(false.then_some(0), None);\n assert_eq!(true.then_some(0), Some(0));\n ```\n\n ```\n let mut a = 0;\n let mut function_with_side_effects = || { a += 1; };\n\n true.then_some(function_with_side_effects());\n false.then_some(function_with_side_effects());\n\n // `a` is incremented twice because the value passed to `then_some` is\n // evaluated eagerly.\n assert_eq!(a, 2);\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "ops::function::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "slice::sort::stable::quicksort::stable_partition": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Partitions `v` using pivot `p = v[pivot_pos]` and returns the number of\n elements less than `p`. The relative order of elements that compare < p and\n those that compare >= p is preserved - it is a stable partition.\n\n If `is_less` is not a strict total order or panics, `scratch.len() < v.len()`,\n or `pivot_pos >= v.len()`, the result and `v`'s state is sound but unspecified.\n",
+      "adt": {}
+    },
+    "ops::index::IndexMut::index_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the mutable indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::split_at_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.  For a non-panicking alternative see\n [`split_at_mut_checked`](slice::split_at_mut_checked).\n\n # Examples\n\n ```\n let mut v = [1, 0, 3, 0, 5, 6];\n let (left, right) = v.split_at_mut(2);\n assert_eq!(left, [1, 0]);\n assert_eq!(right, [3, 0, 5, 6]);\n left[1] = 2;\n right[1] = 4;\n assert_eq!(v, [1, 2, 3, 4, 5, 6]);\n ```\n",
+      "adt": {}
+    },
+    "slice::sort::stable::quicksort::quicksort": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sorts `v` recursively using quicksort.\n `scratch.len()` must be at least `max(v.len() - v.len() / 2, SMALL_SORT_GENERAL_SCRATCH_LEN)`\n otherwise the implementation may abort.\n\n `limit` when initialized with `c*log(v.len())` for some c ensures we do not\n overflow the stack or go quadratic.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mem::manually_drop::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 1094, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) }, Not)) })])"
+    ],
+    "ops::range::RangeFrom": [
+      "Plain"
+    ]
+  },
+  "path": 16715,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/stable/quicksort.rs:16:1: 78:2",
+  "src": "pub fn quicksort<T, F: FnMut(&T, &T) -> bool>(\n    mut v: &mut [T],\n    scratch: &mut [MaybeUninit<T>],\n    mut limit: u32,\n    mut left_ancestor_pivot: Option<&T>,\n    is_less: &mut F,\n) {\n    loop {\n        let len = v.len();\n\n        if len <= T::small_sort_threshold() {\n            T::small_sort(v, scratch, is_less);\n            return;\n        }\n\n        if limit == 0 {\n            // We have had too many bad pivots, switch to O(n log n) fallback\n            // algorithm. In our case that is driftsort in eager mode.\n            crate::slice::sort::stable::drift::sort(v, scratch, true, is_less);\n            return;\n        }\n        limit -= 1;\n\n        let pivot_pos = choose_pivot(v, is_less);\n\n        // SAFETY: We only access the temporary copy for Freeze types, otherwise\n        // self-modifications via `is_less` would not be observed and this would\n        // be unsound. Our temporary copy does not escape this scope.\n        let pivot_copy = unsafe { ManuallyDrop::new(ptr::read(&v[pivot_pos])) };\n        let pivot_ref = (!has_direct_interior_mutability::<T>()).then_some(&*pivot_copy);\n\n        // We choose a pivot, and check if this pivot is equal to our left\n        // ancestor. If true, we do a partition putting equal elements on the\n        // left and do not recurse on it. This gives O(n log k) sorting for k\n        // distinct values, a strategy borrowed from pdqsort. For types with\n        // interior mutability we can't soundly create a temporary copy of the\n        // ancestor pivot, and use left_partition_len == 0 as our method for\n        // detecting when we re-use a pivot, which means we do at most three\n        // partition operations with pivot p instead of the optimal two.\n        let mut perform_equal_partition = false;\n        if let Some(la_pivot) = left_ancestor_pivot {\n            perform_equal_partition = !is_less(la_pivot, &v[pivot_pos]);\n        }\n\n        let mut left_partition_len = 0;\n        if !perform_equal_partition {\n            left_partition_len = stable_partition(v, scratch, pivot_pos, false, is_less);\n            perform_equal_partition = left_partition_len == 0;\n        }\n\n        if perform_equal_partition {\n            let mid_eq = stable_partition(v, scratch, pivot_pos, true, &mut |a, b| !is_less(b, a));\n            v = &mut v[mid_eq..];\n            left_ancestor_pivot = None;\n            continue;\n        }\n\n        // Process left side with the next loop iter, right side with recursion.\n        let (left, right) = v.split_at_mut(left_partition_len);\n        quicksort(right, scratch, limit, pivot_ref, is_less);\n        v = left;\n    }\n}",
+  "mir": "fn slice::sort::stable::quicksort::quicksort(_1: &mut [T], _2: &mut [mem::maybe_uninit::MaybeUninit<T>], _3: u32, _4: option::Option<&T>, _5: &mut F) -> () {\n    let mut _0: ();\n    let  _6: usize;\n    let mut _7: &[T];\n    let mut _8: bool;\n    let mut _9: usize;\n    let  _10: ();\n    let mut _11: &mut [T];\n    let mut _12: u32;\n    let  _13: ();\n    let mut _14: &mut [T];\n    let mut _15: (u32, bool);\n    let  _16: usize;\n    let mut _17: &[T];\n    let  _18: mem::manually_drop::ManuallyDrop<T>;\n    let mut _19: T;\n    let mut _20: *const T;\n    let  _21: &T;\n    let mut _22: *const [T];\n    let mut _23: usize;\n    let mut _24: bool;\n    let  _25: option::Option<&T>;\n    let mut _26: bool;\n    let mut _27: bool;\n    let  _28: &T;\n    let mut _29: &mem::manually_drop::ManuallyDrop<T>;\n    let mut _30: bool;\n    let mut _31: isize;\n    let  _32: &T;\n    let mut _33: bool;\n    let mut _34: (&T, &T);\n    let  _35: &T;\n    let mut _36: *const [T];\n    let mut _37: usize;\n    let mut _38: bool;\n    let mut _39: usize;\n    let mut _40: bool;\n    let mut _41: usize;\n    let mut _42: &mut [T];\n    let mut _43: usize;\n    let mut _44: bool;\n    let  _45: usize;\n    let mut _46: &mut [T];\n    let mut _47: &mut {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/stable/quicksort.rs:67:77: 67:83};\n    let mut _48: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/stable/quicksort.rs:67:77: 67:83};\n    let mut _49: &mut [T];\n    let mut _50: &mut [T];\n    let mut _51: ops::range::RangeFrom<usize>;\n    let mut _52: option::Option<&T>;\n    let  _53: &mut [T];\n    let  _54: &mut [T];\n    let mut _55: (&mut [T], &mut [T]);\n    let mut _56: &mut [T];\n    let mut _57: usize;\n    let  _58: ();\n    let mut _59: u32;\n    debug v => _1;\n    debug scratch => _2;\n    debug limit => _3;\n    debug left_ancestor_pivot => _4;\n    debug is_less => _5;\n    debug len => _6;\n    debug pivot_pos => _16;\n    debug pivot_copy => _18;\n    debug pivot_ref => _25;\n    debug perform_equal_partition => _30;\n    debug la_pivot => _32;\n    debug left_partition_len => _39;\n    debug mid_eq => _45;\n    debug left => _53;\n    debug right => _54;\n    bb0: {\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_7);\n        _7 = &(*_1);\n        _6 = PtrMetadata(move _7);\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = <T as slice::sort::shared::smallsort::StableSmallSortTypeImpl>::small_sort_threshold() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _8 = Le(_6, move _9);\n        switchInt(move _8) -> [0: bb5, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_9);\n        StorageLive(_11);\n        _11 = _1;\n        _10 = <T as slice::sort::shared::smallsort::StableSmallSortTypeImpl>::small_sort::<F>(move _11, _2, _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_11);\n        StorageDead(_8);\n        goto -> bb30;\n    }\n    bb5: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_12);\n        _12 = _3;\n        switchInt(move _12) -> [0: bb6, otherwise: bb7];\n    }\n    bb6: {\n        StorageDead(_12);\n        StorageLive(_14);\n        _14 = _1;\n        _13 = slice::sort::stable::drift::sort::<T, F>(move _14, _2, true, _5) -> [return: bb8, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        _15 = CheckedSub(_3, 1_u32);\n        assert(!move (_15.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _3, 1_u32) -> [success: bb9, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_14);\n        goto -> bb30;\n    }\n    bb9: {\n        _3 = move (_15.0: u32);\n        StorageLive(_17);\n        _17 = &(*_1);\n        _16 = slice::sort::shared::pivot::choose_pivot::<T, F>(move _17, _5) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        _22 = &raw const (fake) (*_1);\n        _23 = PtrMetadata(move _22);\n        _24 = Lt(_16, _23);\n        assert(move _24, \"index out of bounds: the length is {} but the index is {}\", move _23, _16) -> [success: bb11, unwind unreachable];\n    }\n    bb11: {\n        _21 = &(*_1)[_16];\n        _20 = &raw const (*_21);\n        _19 = ptr::read::<T>(move _20) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_20);\n        _18 = mem::manually_drop::ManuallyDrop::<T>::new(move _19) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_21);\n        StorageDead(_19);\n        StorageLive(_26);\n        StorageLive(_27);\n        _27 = slice::sort::stable::quicksort::has_direct_interior_mutability::<T>() -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        _26 = Not(move _27);\n        StorageDead(_27);\n        StorageLive(_29);\n        _29 = &_18;\n        _28 = <mem::manually_drop::ManuallyDrop<T> as ops::deref::Deref>::deref(move _29) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_29);\n        _25 = bool::<impl bool>::then_some::<&T>(move _26, _28) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_26);\n        StorageLive(_30);\n        _30 = false;\n        _31 = discriminant(_4);\n        switchInt(move _31) -> [1: bb17, 0: bb20, otherwise: bb31];\n    }\n    bb17: {\n        _32 = ((_4 as variant#1).0: &T);\n        StorageLive(_33);\n        StorageLive(_34);\n        _36 = &raw const (fake) (*_1);\n        _37 = PtrMetadata(move _36);\n        _38 = Lt(_16, _37);\n        assert(move _38, \"index out of bounds: the length is {} but the index is {}\", move _37, _16) -> [success: bb18, unwind unreachable];\n    }\n    bb18: {\n        _35 = &(*_1)[_16];\n        _34 = (_32, _35);\n        _33 = <F as ops::function::FnMut<(&T, &T)>>::call_mut(_5, move _34) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_34);\n        _30 = Not(move _33);\n        StorageDead(_33);\n        goto -> bb20;\n    }\n    bb20: {\n        StorageLive(_39);\n        _39 = 0_usize;\n        StorageLive(_40);\n        _40 = _30;\n        switchInt(move _40) -> [0: bb21, otherwise: bb23];\n    }\n    bb21: {\n        StorageLive(_41);\n        StorageLive(_42);\n        _42 = _1;\n        _41 = slice::sort::stable::quicksort::stable_partition::<T, F>(move _42, _2, _16, false, _5) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_42);\n        _39 = move _41;\n        StorageDead(_41);\n        StorageLive(_43);\n        _43 = _39;\n        _30 = Eq(move _43, 0_usize);\n        StorageDead(_43);\n        goto -> bb23;\n    }\n    bb23: {\n        StorageDead(_40);\n        StorageLive(_44);\n        _44 = _30;\n        switchInt(move _44) -> [0: bb27, otherwise: bb24];\n    }\n    bb24: {\n        StorageLive(_46);\n        _46 = _1;\n        StorageLive(_48);\n        _48 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/stable/quicksort.rs:67:77: 67:83}(_5);\n        _47 = &mut _48;\n        _45 = slice::sort::stable::quicksort::stable_partition::<T, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/stable/quicksort.rs:67:77: 67:83}>(move _46, _2, _16, true, _47) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_46);\n        StorageDead(_48);\n        StorageLive(_50);\n        _50 = _1;\n        StorageLive(_51);\n        _51 = RangeFrom(_45);\n        _49 = <[T] as ops::index::IndexMut<ops::range::RangeFrom<usize>>>::index_mut(move _50, move _51) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_51);\n        StorageDead(_50);\n        _1 = _49;\n        StorageLive(_52);\n        _52 = option::Option::None;\n        _4 = move _52;\n        StorageDead(_52);\n        StorageDead(_44);\n        StorageDead(_39);\n        StorageDead(_30);\n        StorageDead(_18);\n        goto -> bb1;\n    }\n    bb27: {\n        StorageDead(_44);\n        StorageLive(_55);\n        StorageLive(_56);\n        _56 = _1;\n        StorageLive(_57);\n        _57 = _39;\n        _55 = slice::<impl [T]>::split_at_mut(move _56, move _57) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        StorageDead(_57);\n        StorageDead(_56);\n        _53 = move (_55.0: &mut [T]);\n        _54 = move (_55.1: &mut [T]);\n        StorageDead(_55);\n        StorageLive(_59);\n        _59 = _3;\n        _58 = slice::sort::stable::quicksort::quicksort::<T, F>(_54, _2, move _59, _25, _5) -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        StorageDead(_59);\n        _1 = _53;\n        StorageDead(_39);\n        StorageDead(_30);\n        StorageDead(_18);\n        goto -> bb1;\n    }\n    bb30: {\n        return;\n    }\n    bb31: {\n        unreachable;\n    }\n}\n",
+  "doc": " Sorts `v` recursively using quicksort.\n `scratch.len()` must be at least `max(v.len() - v.len() / 2, SMALL_SORT_GENERAL_SCRATCH_LEN)`\n otherwise the implementation may abort.\n\n `limit` when initialized with `c*log(v.len())` for some c ensures we do not\n overflow the stack or go quadratic.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

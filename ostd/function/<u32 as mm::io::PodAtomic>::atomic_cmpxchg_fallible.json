@@ -1,0 +1,34 @@
+{
+  "name": "<u32 as mm::io::PodAtomic>::atomic_cmpxchg_fallible",
+  "safe": false,
+  "callees": {
+    "arch::mm::util::__atomic_cmpxchg_fallible": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Atomically compares and exchanges a 32-bit integer value. This function works with\n exception handling and can recover from page fault.\n Returns the previous value or `!0u64` if failed to update.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "error::Error": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 96,
+  "span": "ostd/src/mm/io.rs:1083:5: 1091:6",
+  "src": "unsafe fn atomic_cmpxchg_fallible(ptr: *mut Self, old_val: Self, new_val: Self) -> Result<u32> {\n        // SAFETY: The safety is upheld by the caller.\n        let result = unsafe { __atomic_cmpxchg_fallible(ptr, old_val, new_val) };\n        if result == !0 {\n            Err(Error::PageFault)\n        } else {\n            Ok(result as Self)\n        }\n    }",
+  "mir": "fn <u32 as mm::io::PodAtomic>::atomic_cmpxchg_fallible(_1: *mut u32, _2: u32, _3: u32) -> core::result::Result<u32, error::Error> {\n    let mut _0: core::result::Result<u32, error::Error>;\n    let  _4: u64;\n    let mut _5: bool;\n    let mut _6: u64;\n    let mut _7: error::Error;\n    let mut _8: u32;\n    debug ptr => _1;\n    debug old_val => _2;\n    debug new_val => _3;\n    debug result => _4;\n    bb0: {\n        _4 = arch::mm::util::__atomic_cmpxchg_fallible(_1, _2, _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = Not(0_u64);\n        _5 = Eq(_4, move _6);\n        switchInt(move _5) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageLive(_7);\n        _7 = error::Error::PageFault;\n        _0 = core::result::Result::Err(move _7);\n        StorageDead(_7);\n        goto -> bb4;\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageLive(_8);\n        _8 = _4 as u32;\n        _0 = core::result::Result::Ok(move _8);\n        StorageDead(_8);\n        goto -> bb4;\n    }\n    bb4: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

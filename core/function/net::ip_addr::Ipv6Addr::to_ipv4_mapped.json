@@ -1,0 +1,51 @@
+{
+  "name": "net::ip_addr::Ipv6Addr::to_ipv4_mapped",
+  "safe": true,
+  "callees": {
+    "net::ip_addr::Ipv6Addr::octets": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the sixteen eight-bit integers the IPv6 address consists of.\n\n ```\n use std::net::Ipv6Addr;\n\n assert_eq!(Ipv6Addr::new(0xff00, 0, 0, 0, 0, 0, 0, 0).octets(),\n            [0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);\n ```\n",
+      "adt": {
+        "net::ip_addr::Ipv6Addr": "ImmutableAsArgument"
+      }
+    },
+    "net::ip_addr::Ipv4Addr::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new IPv4 address from four eight-bit octets.\n\n The result will represent the IP address `a`.`b`.`c`.`d`.\n\n # Examples\n\n ```\n use std::net::Ipv4Addr;\n\n let addr = Ipv4Addr::new(127, 0, 0, 1);\n ```\n",
+      "adt": {
+        "net::ip_addr::Ipv4Addr": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "net::ip_addr::Ipv6Addr": [
+      "Ref"
+    ],
+    "option::Option": [
+      "Plain"
+    ],
+    "net::ip_addr::Ipv4Addr": [
+      "Plain"
+    ]
+  },
+  "path": 14580,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/net/ip_addr.rs:1936:5: 1943:6",
+  "src": "pub const fn to_ipv4_mapped(&self) -> Option<Ipv4Addr> {\n        match self.octets() {\n            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, a, b, c, d] => {\n                Some(Ipv4Addr::new(a, b, c, d))\n            }\n            _ => None,\n        }\n    }",
+  "mir": "fn net::ip_addr::Ipv6Addr::to_ipv4_mapped(_1: &net::ip_addr::Ipv6Addr) -> option::Option<net::ip_addr::Ipv4Addr> {\n    let mut _0: option::Option<net::ip_addr::Ipv4Addr>;\n    let mut _2: [u8; 16];\n    let  _3: u8;\n    let  _4: u8;\n    let  _5: u8;\n    let  _6: u8;\n    let mut _7: net::ip_addr::Ipv4Addr;\n    debug self => _1;\n    debug a => _3;\n    debug b => _4;\n    debug c => _5;\n    debug d => _6;\n    bb0: {\n        StorageLive(_2);\n        _2 = net::ip_addr::Ipv6Addr::octets(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(_2[0 of 16]) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        _0 = option::Option::None;\n        goto -> bb16;\n    }\n    bb3: {\n        switchInt(_2[1 of 16]) -> [0: bb4, otherwise: bb2];\n    }\n    bb4: {\n        switchInt(_2[2 of 16]) -> [0: bb5, otherwise: bb2];\n    }\n    bb5: {\n        switchInt(_2[3 of 16]) -> [0: bb6, otherwise: bb2];\n    }\n    bb6: {\n        switchInt(_2[4 of 16]) -> [0: bb7, otherwise: bb2];\n    }\n    bb7: {\n        switchInt(_2[5 of 16]) -> [0: bb8, otherwise: bb2];\n    }\n    bb8: {\n        switchInt(_2[6 of 16]) -> [0: bb9, otherwise: bb2];\n    }\n    bb9: {\n        switchInt(_2[7 of 16]) -> [0: bb10, otherwise: bb2];\n    }\n    bb10: {\n        switchInt(_2[8 of 16]) -> [0: bb11, otherwise: bb2];\n    }\n    bb11: {\n        switchInt(_2[9 of 16]) -> [0: bb12, otherwise: bb2];\n    }\n    bb12: {\n        switchInt(_2[10 of 16]) -> [255: bb13, otherwise: bb2];\n    }\n    bb13: {\n        switchInt(_2[11 of 16]) -> [255: bb14, otherwise: bb2];\n    }\n    bb14: {\n        _3 = _2[12 of 16];\n        _4 = _2[13 of 16];\n        _5 = _2[14 of 16];\n        _6 = _2[15 of 16];\n        StorageLive(_7);\n        _7 = net::ip_addr::Ipv4Addr::new(_3, _4, _5, _6) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        _0 = option::Option::Some(move _7);\n        StorageDead(_7);\n        goto -> bb16;\n    }\n    bb16: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Converts this address to an [`IPv4` address] if it's an [IPv4-mapped] address,\n as defined in [IETF RFC 4291 section 2.5.5.2], otherwise returns [`None`].\n\n `::ffff:a.b.c.d` becomes `a.b.c.d`.\n All addresses *not* starting with `::ffff` will return `None`.\n\n [`IPv4` address]: Ipv4Addr\n [IPv4-mapped]: Ipv6Addr\n [IETF RFC 4291 section 2.5.5.2]: https://tools.ietf.org/html/rfc4291#section-2.5.5.2\n\n # Examples\n\n ```\n use std::net::{Ipv4Addr, Ipv6Addr};\n\n assert_eq!(Ipv6Addr::new(0xff00, 0, 0, 0, 0, 0, 0, 0).to_ipv4_mapped(), None);\n assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff).to_ipv4_mapped(),\n            Some(Ipv4Addr::new(192, 10, 2, 255)));\n assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1).to_ipv4_mapped(), None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

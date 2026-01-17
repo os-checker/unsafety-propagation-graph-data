@@ -1,0 +1,141 @@
+{
+  "name": "power::machine_halt",
+  "safe": true,
+  "callees": {
+    "core::cmp::PartialOrd::le": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests less than or equal to (for `self` and `other`) and is used by the\n `<=` operator.\n\n # Examples\n\n ```\n assert_eq!(1.0 <= 1.0, true);\n assert_eq!(1.0 <= 2.0, true);\n assert_eq!(2.0 <= 1.0, false);\n ```\n",
+      "adt": {}
+    },
+    "log::max_level": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the current maximum log level.\n\n The [`log!`], [`error!`], [`warn!`], [`info!`], [`debug!`], and [`trace!`] macros check\n this value and discard any message logged at a higher level. The maximum\n log level is set by the [`set_max_level`] function.\n\n [`log!`]: macro.log.html\n [`error!`]: macro.error.html\n [`warn!`]: macro.warn.html\n [`info!`]: macro.info.html\n [`debug!`]: macro.debug.html\n [`trace!`]: macro.trace.html\n [`set_max_level`]: fn.set_max_level.html\n",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {}
+    },
+    "log::__private_api::loc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "log::__private_api::log": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "spin::once::Once::<T, R>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the inner value if the [`Once`] has been initialized.\n",
+      "adt": {}
+    },
+    "util::id_set::IdSet::<I>::new_full": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `IdSet` with all IDs in the system.\n",
+      "adt": {
+        "util::id_set::IdSet": "Constructor"
+      }
+    },
+    "smp::IpiSender::inter_processor_call": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Executes a function on other processors.\n\n See [`inter_processor_call`] for details. The purpose of exporting this\n method is to enable callers to check whether [`IPI_SENDER`] has been\n initialized.\n",
+      "adt": {
+        "smp::IpiSender": "ImmutableAsArgument",
+        "util::id_set::IdSet": "ImmutableAsArgument"
+      }
+    },
+    "arch::irq::ops::disable_local_and_halt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disables local IRQs and halts the CPU forever.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "log::Level": [
+      "Plain",
+      "Ref"
+    ],
+    "log::LevelFilter": [
+      "Ref",
+      "Plain"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ],
+    "core::panic::Location": [
+      "Ref"
+    ],
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 6025, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 6024, kind: RigidTy(Adt(AdtDef(DefId { id: 5517, name: \"smp::IpiSender\" }), GenericArgs([]))) }, Not)) })])"
+    ],
+    "smp::IpiSender": [
+      "Ref"
+    ],
+    "util::id_set::IdSet": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 2528,
+  "span": "ostd/src/power.rs:85:1: 94:2",
+  "src": "fn machine_halt() -> ! {\n    log::error!(\"Halting the machine...\");\n\n    // TODO: `inter_processor_call` may panic again (e.g., if there is an out-of-memory error). We\n    // should find a way to make it panic-free.\n    if let Some(ipi_sender) = crate::smp::IPI_SENDER.get() {\n        ipi_sender.inter_processor_call(&CpuSet::new_full(), || disable_local_and_halt());\n    }\n    disable_local_and_halt();\n}",
+  "mir": "fn power::machine_halt() -> ! {\n    let mut _0: !;\n    let  _1: log::Level;\n    let mut _2: bool;\n    let mut _3: &log::Level;\n    let mut _4: &log::LevelFilter;\n    let mut _5: bool;\n    let mut _6: &log::Level;\n    let mut _7: &log::LevelFilter;\n    let  _8: log::LevelFilter;\n    let  _9: ();\n    let mut _10: core::fmt::Arguments<'_>;\n    let  _11: &(&str, &str, &core::panic::Location<'_>);\n    let  _12: (&str, &str, &core::panic::Location<'_>);\n    let mut _13: &str;\n    let  _14: &core::panic::Location<'_>;\n    let mut _15: core::option::Option<&smp::IpiSender>;\n    let mut _16: &spin::once::Once<smp::IpiSender>;\n    let mut _17: isize;\n    let  _18: &smp::IpiSender;\n    let  _19: ();\n    let  _20: &util::id_set::IdSet<cpu::id::CpuId>;\n    let  _21: util::id_set::IdSet<cpu::id::CpuId>;\n    let mut _22: fn();\n    let  _23: !;\n    debug lvl => _1;\n    debug ipi_sender => _18;\n    bb0: {\n        _1 = log::Level::Error;\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &_1;\n        StorageLive(_4);\n        _4 = power::machine_halt::promoted[0];\n        _2 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _3, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb10, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &_1;\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = log::max_level() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _7 = &_8;\n        _5 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _6, move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        switchInt(move _5) -> [0: bb9, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageLive(_10);\n        _10 = core::fmt::Arguments::<'_>::from_str(\"Halting the machine...\") -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = \"ostd::power\";\n        _14 = log::__private_api::loc() -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _12 = (move _13, \"ostd::power\", _14);\n        StorageDead(_13);\n        _11 = &_12;\n        _9 = log::__private_api::log::<'_, (), log::__private_api::GlobalLogger>(log::__private_api::GlobalLogger, move _10, _1, _11, ()) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_10);\n        StorageDead(_12);\n        goto -> bb11;\n    }\n    bb9: {\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_6);\n        goto -> bb11;\n    }\n    bb10: {\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_5);\n        StorageDead(_2);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = {alloc1417: &spin::once::Once<smp::IpiSender>};\n        _15 = spin::once::Once::<smp::IpiSender>::get(move _16) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_16);\n        _17 = discriminant(_15);\n        switchInt(move _17) -> [1: bb13, 0: bb17, otherwise: bb19];\n    }\n    bb13: {\n        _18 = ((_15 as variant#1).0: &smp::IpiSender);\n        StorageLive(_21);\n        _21 = util::id_set::IdSet::<cpu::id::CpuId>::new_full() -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        _20 = &_21;\n        StorageLive(_22);\n        _22 = ZeroSized: {closure@ostd/src/power.rs:91:62: 91:64} as fn();\n        _19 = smp::IpiSender::inter_processor_call(_18, _20, move _22) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_22);\n        drop(_21) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_21);\n        StorageDead(_15);\n        goto -> bb18;\n    }\n    bb17: {\n        StorageDead(_15);\n        goto -> bb18;\n    }\n    bb18: {\n        _23 = arch::irq::ops::disable_local_and_halt() -> unwind unreachable;\n    }\n    bb19: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

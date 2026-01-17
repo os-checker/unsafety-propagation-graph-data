@@ -1,0 +1,72 @@
+{
+  "name": "io::Write::write_all_vectored",
+  "safe": true,
+  "callees": {
+    "io::IoSlice::<'a>::advance_slices": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advance a slice of slices.\n\n Shrinks the slice to remove any `IoSlice`s that are fully advanced over.\n If the cursor ends up in the middle of an `IoSlice`, it is modified\n to start at that cursor.\n\n For example, if we have a slice of two 8-byte `IoSlice`s, and we advance by 10 bytes,\n the result will only include the second `IoSlice`, advanced by 2 bytes.\n\n # Panics\n\n Panics when trying to advance beyond the end of the slices.\n\n # Examples\n\n ```\n use std::io::IoSlice;\n use std::ops::Deref;\n\n let buf1 = [1; 8];\n let buf2 = [2; 16];\n let buf3 = [3; 8];\n let mut bufs = &mut [\n     IoSlice::new(&buf1),\n     IoSlice::new(&buf2),\n     IoSlice::new(&buf3),\n ][..];\n\n // Mark 10 bytes as written.\n IoSlice::advance_slices(&mut bufs, 10);\n assert_eq!(bufs[0].deref(), [2; 14].as_ref());\n assert_eq!(bufs[1].deref(), [3; 8].as_ref());\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the slice has a length of 0.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n assert!(!a.is_empty());\n\n let b: &[i32] = &[];\n assert!(b.is_empty());\n ```\n",
+      "adt": {}
+    },
+    "io::Write::write_vectored": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Like [`write`], except that it writes from a slice of buffers.\n\n Data is copied from each buffer in order, with the final buffer\n read from possibly being only partially consumed. This method must\n behave as a call to [`write`] with the buffers concatenated would.\n\n The default implementation calls [`write`] with either the first nonempty\n buffer provided, or an empty one if none exists.\n\n # Examples\n\n ```no_run\n use std::io::IoSlice;\n use std::io::prelude::*;\n use std::fs::File;\n\n fn main() -> std::io::Result<()> {\n     let data1 = [1; 8];\n     let data2 = [15; 8];\n     let io_slice1 = IoSlice::new(&data1);\n     let io_slice2 = IoSlice::new(&data2);\n\n     let mut buffer = File::create(\"foo.txt\")?;\n\n     // Writes some prefix of the byte string, not necessarily all of it.\n     buffer.write_vectored(&[io_slice1, io_slice2])?;\n     Ok(())\n }\n ```\n\n [`write`]: Write::write\n",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "io::error::Error": "Constructor"
+      }
+    },
+    "io::error::Error::is_interrupted": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::error::Error": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })])"
+    ],
+    "io::error::Error": [
+      "Ref",
+      "Plain"
+    ]
+  },
+  "path": "io::Write::write_all_vectored",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/mod.rs:1912:5: 1927:6",
+  "src": "fn write_all_vectored(&mut self, mut bufs: &mut [IoSlice<'_>]) -> Result<()> {\n        // Guarantee that bufs is empty if it contains no data,\n        // to avoid calling write_vectored if there is no data to be written.\n        IoSlice::advance_slices(&mut bufs, 0);\n        while !bufs.is_empty() {\n            match self.write_vectored(bufs) {\n                Ok(0) => {\n                    return Err(Error::WRITE_ALL_EOF);\n                }\n                Ok(n) => IoSlice::advance_slices(&mut bufs, n),\n                Err(ref e) if e.is_interrupted() => {}\n                Err(e) => return Err(e),\n            }\n        }\n        Ok(())\n    }",
+  "mir": "fn io::Write::write_all_vectored(_1: &mut Self, _2: &mut [io::IoSlice<'_>]) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let  _3: ();\n    let mut _4: &mut &mut [io::IoSlice<'_>];\n    let mut _5: ();\n    let mut _6: bool;\n    let mut _7: &[io::IoSlice<'_>];\n    let mut _8: core::result::Result<usize, io::error::Error>;\n    let mut _9: &[io::IoSlice<'_>];\n    let mut _10: isize;\n    let  _11: usize;\n    let mut _12: &mut &mut [io::IoSlice<'_>];\n    let  _13: &io::error::Error;\n    let  _14: &&io::error::Error;\n    let mut _15: bool;\n    let  _16: io::error::Error;\n    let mut _17: &io::error::Error;\n    let mut _18: bool;\n    let mut _19: isize;\n    debug self => _1;\n    debug bufs => _2;\n    debug n => _11;\n    debug e => _13;\n    debug e => _14;\n    debug e => _16;\n    bb0: {\n        _18 = false;\n        _4 = &mut _2;\n        _3 = io::IoSlice::<'_>::advance_slices(_4, 0_usize) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        goto -> bb2;\n    }\n    bb2: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &(*_2);\n        _6 = core::slice::<impl [io::IoSlice<'_>]>::is_empty(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _6) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_7);\n        StorageDead(_6);\n        _0 = core::result::Result::Ok(());\n        goto -> bb17;\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &(*_2);\n        _8 = <Self as io::Write>::write_vectored(_1, move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _18 = true;\n        StorageDead(_9);\n        _10 = discriminant(_8);\n        switchInt(move _10) -> [0: bb8, 1: bb9, otherwise: bb7];\n    }\n    bb7: {\n        unreachable;\n    }\n    bb8: {\n        switchInt(((_8 as variant#0).0: usize)) -> [0: bb11, otherwise: bb10];\n    }\n    bb9: {\n        StorageLive(_14);\n        StorageLive(_13);\n        _13 = &((_8 as variant#1).0: io::error::Error);\n        _14 = &_13;\n        StorageLive(_15);\n        _17 = (*_14);\n        _15 = io::error::Error::is_interrupted(_17) -> [return: bb13, unwind unreachable];\n    }\n    bb10: {\n        _11 = ((_8 as variant#0).0: usize);\n        _12 = &mut _2;\n        _5 = io::IoSlice::<'_>::advance_slices(_12, _11) -> [return: bb12, unwind unreachable];\n    }\n    bb11: {\n        _0 = core::result::Result::Err(io::error::Error::WRITE_ALL_EOF);\n        goto -> bb16;\n    }\n    bb12: {\n        goto -> bb21;\n    }\n    bb13: {\n        switchInt(move _15) -> [0: bb15, otherwise: bb14];\n    }\n    bb14: {\n        StorageDead(_15);\n        StorageDead(_13);\n        StorageDead(_14);\n        goto -> bb21;\n    }\n    bb15: {\n        StorageDead(_15);\n        StorageDead(_13);\n        StorageDead(_14);\n        _18 = false;\n        _16 = move ((_8 as variant#1).0: io::error::Error);\n        _0 = core::result::Result::Err(_16);\n        goto -> bb16;\n    }\n    bb16: {\n        _18 = false;\n        StorageDead(_8);\n        StorageDead(_6);\n        goto -> bb17;\n    }\n    bb17: {\n        return;\n    }\n    bb18: {\n        _18 = false;\n        StorageDead(_8);\n        StorageDead(_6);\n        goto -> bb2;\n    }\n    bb19: {\n        switchInt(_18) -> [0: bb18, otherwise: bb20];\n    }\n    bb20: {\n        drop(((_8 as variant#1).0: io::error::Error)) -> [return: bb18, unwind unreachable];\n    }\n    bb21: {\n        _19 = discriminant(_8);\n        switchInt(move _19) -> [1: bb19, 0: bb18, otherwise: bb7];\n    }\n}\n",
+  "doc": " Attempts to write multiple buffers into this writer.\n\n This method will continuously call [`write_vectored`] until there is no\n more data to be written or an error of non-[`ErrorKind::Interrupted`]\n kind is returned. This method will not return until all buffers have\n been successfully written or such an error occurs. The first error that\n is not of [`ErrorKind::Interrupted`] kind generated from this method\n will be returned.\n\n If the buffer contains no data, this will never call [`write_vectored`].\n\n # Notes\n\n Unlike [`write_vectored`], this takes a *mutable* reference to\n a slice of [`IoSlice`]s, not an immutable one. That's because we need to\n modify the slice to keep track of the bytes already written.\n\n Once this function returns, the contents of `bufs` are unspecified, as\n this depends on how many calls to [`write_vectored`] were necessary. It is\n best to understand this function as taking ownership of `bufs` and to\n not use `bufs` afterwards. The underlying buffers, to which the\n [`IoSlice`]s point (but not the [`IoSlice`]s themselves), are unchanged and\n can be reused.\n\n [`write_vectored`]: Write::write_vectored\n\n # Examples\n\n ```\n #![feature(write_all_vectored)]\n # fn main() -> std::io::Result<()> {\n\n use std::io::{Write, IoSlice};\n\n let mut writer = Vec::new();\n let bufs = &mut [\n     IoSlice::new(&[1]),\n     IoSlice::new(&[2, 3]),\n     IoSlice::new(&[4, 5, 6]),\n ];\n\n writer.write_all_vectored(bufs)?;\n // Note: the contents of `bufs` is now undefined, see the Notes section.\n\n assert_eq!(writer, &[1, 2, 3, 4, 5, 6]);\n # Ok(()) }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

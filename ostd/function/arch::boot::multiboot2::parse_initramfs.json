@@ -1,0 +1,115 @@
+{
+  "name": "arch::boot::multiboot2::parse_initramfs",
+  "safe": true,
+  "callees": {
+    "multiboot2::BootInformation::<'a>::module_tags": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Get an iterator of all [`ModuleTag`]s.\n\n [`ModuleTag`]: crate::ModuleTag\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "multiboot2::ModuleTag::start_address": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Start address of the module.\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "mm::kspace::paddr_to_vaddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Convert physical address to virtual address using offset, only available inside `ostd`\n",
+      "adt": {}
+    },
+    "multiboot2::ModuleTag::module_size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The size of the module/the BLOB in memory.\n",
+      "adt": {}
+    },
+    "core::slice::from_raw_parts": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forms a slice from a pointer and a length.\n\n The `len` argument is the number of **elements**, not the number of bytes.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for reads for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations. See [below](#incorrect-usage)\n       for an example incorrectly not taking this into account.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be mutated for the duration\n   of lifetime `'a`, except inside an `UnsafeCell`.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n # Caveat\n\n The lifetime for the returned slice is inferred from its usage. To\n prevent accidental misuse, it's suggested to tie the lifetime to whichever\n source lifetime is safe in the context, such as by providing a helper\n function taking the lifetime of a host value for the slice, or by explicit\n annotation.\n\n # Examples\n\n ```\n use std::slice;\n\n // manifest a slice for a single element\n let x = 42;\n let ptr = &x as *const _;\n let slice = unsafe { slice::from_raw_parts(ptr, 1) };\n assert_eq!(slice[0], 42);\n ```\n\n ### Incorrect usage\n\n The following `join_slices` function is **unsound** ⚠️\n\n ```rust,no_run\n use std::slice;\n\n fn join_slices<'a, T>(fst: &'a [T], snd: &'a [T]) -> &'a [T] {\n     let fst_end = fst.as_ptr().wrapping_add(fst.len());\n     let snd_start = snd.as_ptr();\n     assert_eq!(fst_end, snd_start, \"Slices must be contiguous!\");\n     unsafe {\n         // The assertion above ensures `fst` and `snd` are contiguous, but they might\n         // still be contained within _different allocations_, in which case\n         // creating this slice is undefined behavior.\n         slice::from_raw_parts(fst.as_ptr(), fst.len() + snd.len())\n     }\n }\n\n fn main() {\n     // `a` and `b` are different allocations...\n     let a = 42;\n     let b = 27;\n     // ... which may nevertheless be laid out contiguously in memory: | a | b |\n     let _ = join_slices(slice::from_ref(&a), slice::from_ref(&b)); // UB\n }\n ```\n\n ### FFI: Handling null pointers\n\n In languages such as C++, pointers to empty collections are not guaranteed to be non-null.\n When accepting such pointers, they have to be checked for null-ness to avoid undefined\n behavior.\n\n ```\n use std::slice;\n\n /// Sum the elements of an FFI slice.\n ///\n /// # Safety\n ///\n /// If ptr is not NULL, it must be correctly aligned and\n /// point to `len` initialized items of type `f32`.\n unsafe extern \"C\" fn sum_slice(ptr: *const f32, len: usize) -> f32 {\n     let data = if ptr.is_null() {\n         // `len` is assumed to be 0.\n         &[]\n     } else {\n         // SAFETY: see function docstring.\n         unsafe { slice::from_raw_parts(ptr, len) }\n     };\n     data.into_iter().sum()\n }\n\n // This could be the result of C++'s std::vector::data():\n let ptr = std::ptr::null();\n // And this could be std::vector::size():\n let len = 0;\n assert_eq!(unsafe { sum_slice(ptr, len) }, 0.0);\n ```\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "multiboot2::BootInformation": [
+      "Ref"
+    ],
+    "multiboot2::ModuleIter": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 287, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 294, kind: RigidTy(Adt(AdtDef(DefId { id: 2954, name: \"multiboot2::ModuleTag\" }), GenericArgs([]))) }, Not)) })])"
+    ],
+    "multiboot2::ModuleTag": [
+      "Ref"
+    ]
+  },
+  "path": 163,
+  "span": "ostd/src/arch/x86/boot/multiboot2/mod.rs:40:1: 50:2",
+  "src": "fn parse_initramfs(mb2_info: &BootInformation) -> Option<&'static [u8]> {\n    let module_tag = mb2_info.module_tags().next()?;\n\n    let initramfs_ptr = paddr_to_vaddr(module_tag.start_address() as usize);\n    let initramfs_len = module_tag.module_size() as usize;\n    // SAFETY: The initramfs is safe to read because of the contract with the loader.\n    let initramfs =\n        unsafe { core::slice::from_raw_parts(initramfs_ptr as *const u8, initramfs_len) };\n\n    Some(initramfs)\n}",
+  "mir": "fn arch::boot::multiboot2::parse_initramfs(_1: &multiboot2::BootInformation<'_>) -> core::option::Option<&[u8]> {\n    let mut _0: core::option::Option<&[u8]>;\n    let mut _2: core::ops::ControlFlow<core::option::Option<core::convert::Infallible>, &multiboot2::ModuleTag>;\n    let mut _3: core::option::Option<&multiboot2::ModuleTag>;\n    let mut _4: &mut multiboot2::ModuleIter<'_>;\n    let mut _5: multiboot2::ModuleIter<'_>;\n    let mut _6: isize;\n    let  _7: &multiboot2::ModuleTag;\n    let  _8: usize;\n    let mut _9: usize;\n    let mut _10: u32;\n    let  _11: usize;\n    let mut _12: u32;\n    let  _13: &[u8];\n    let mut _14: *const u8;\n    debug mb2_info => _1;\n    debug module_tag => _7;\n    debug residual => core::option::Option::<core::convert::Infallible>::None;\n    debug val => _7;\n    debug initramfs_ptr => _8;\n    debug initramfs_len => _11;\n    debug initramfs => _13;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = multiboot2::BootInformation::<'_>::module_tags(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = &mut _5;\n        _3 = <multiboot2::ModuleIter<'_> as core::iter::Iterator>::next(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _2 = <core::option::Option<&multiboot2::ModuleTag> as core::ops::Try>::branch(move _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        _6 = discriminant(_2);\n        switchInt(move _6) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _7 = ((_2 as variant#0).0: &multiboot2::ModuleTag);\n        StorageDead(_5);\n        StorageDead(_2);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = multiboot2::ModuleTag::start_address(_7) -> [return: bb8, unwind unreachable];\n    }\n    bb6: {\n        _0 = <core::option::Option<&[u8]> as core::ops::FromResidual<core::option::Option<core::convert::Infallible>>>::from_residual(core::option::Option::<core::convert::Infallible>::None) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_5);\n        StorageDead(_2);\n        goto -> bb12;\n    }\n    bb8: {\n        _9 = move _10 as usize;\n        StorageDead(_10);\n        _8 = mm::kspace::paddr_to_vaddr(move _9) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_9);\n        StorageLive(_12);\n        _12 = multiboot2::ModuleTag::module_size(_7) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _11 = move _12 as usize;\n        StorageDead(_12);\n        StorageLive(_14);\n        _14 = _8 as *const u8;\n        _13 = core::slice::from_raw_parts::<'_, u8>(move _14, _11) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_14);\n        _0 = core::option::Option::Some(_13);\n        goto -> bb12;\n    }\n    bb12: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

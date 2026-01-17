@@ -1,0 +1,49 @@
+{
+  "name": "ffi::c_str::CStr::as_non_null_ptr",
+  "safe": true,
+  "callees": {
+    "ptr::non_null::NonNull::<T>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `NonNull`.\n\n # Safety\n\n `ptr` must be non-null.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = unsafe { NonNull::new_unchecked(&mut x as *mut _) };\n ```\n\n *Incorrect* usage of this function:\n\n ```rust,no_run\n use std::ptr::NonNull;\n\n // NEVER DO THAT!!! This is undefined behavior. ⚠️\n let ptr = unsafe { NonNull::<u32>::new_unchecked(std::ptr::null_mut()) };\n ```\n",
+      "adt": {
+        "ptr::non_null::NonNull": "Constructor"
+      }
+    },
+    "ptr::non_null::NonNull::<[T]>::as_non_null_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a non-null pointer to the slice's buffer.\n\n # Examples\n\n ```rust\n #![feature(slice_ptr_get)]\n use std::ptr::NonNull;\n\n let slice: NonNull<[i8]> = NonNull::slice_from_raw_parts(NonNull::dangling(), 3);\n assert_eq!(slice.as_non_null_ptr(), NonNull::<i8>::dangling());\n ```\n",
+      "adt": {
+        "ptr::non_null::NonNull": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "ffi::c_str::CStr": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 12841,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ffi/c_str.rs:490:5: 495:6",
+  "src": "const fn as_non_null_ptr(&self) -> NonNull<c_char> {\n        // FIXME(const_trait_impl) replace with `NonNull::from`\n        // SAFETY: a reference is never null\n        unsafe { NonNull::new_unchecked(&self.inner as *const [c_char] as *mut [c_char]) }\n            .as_non_null_ptr()\n    }",
+  "mir": "fn ffi::c_str::CStr::as_non_null_ptr(_1: &ffi::c_str::CStr) -> ptr::non_null::NonNull<i8> {\n    let mut _0: ptr::non_null::NonNull<i8>;\n    let mut _2: ptr::non_null::NonNull<[i8]>;\n    let mut _3: *mut [i8];\n    let mut _4: *const [i8];\n    let  _5: &[i8];\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_1).0: [i8]);\n        _4 = &raw const (*_5);\n        _3 = move _4 as *mut [i8];\n        StorageDead(_4);\n        _2 = ptr::non_null::NonNull::<[i8]>::new_unchecked(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageDead(_3);\n        _0 = ptr::non_null::NonNull::<[i8]>::as_non_null_ptr(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " We could eventually expose this publicly, if we wanted.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

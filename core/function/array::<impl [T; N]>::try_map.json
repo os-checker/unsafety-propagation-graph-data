@@ -1,0 +1,61 @@
+{
+  "name": "array::<impl [T; N]>::try_map",
+  "safe": true,
+  "callees": {
+    "mem::manually_drop::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {
+        "mem::manually_drop::ManuallyDrop": "Constructor"
+      }
+    },
+    "array::drain::Drain::<'l, 'f, T, N, F>::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " This function returns a function that lets you index the given array in const.\n As implemented it can optimize better than iterators, and can be constified.\n It acts like a sort of guard (owns the array) and iterator combined, which can be implemented\n as it is a struct that implements const fn;\n in that regard it is somewhat similar to an array::Iter implementing `UncheckedIterator`.\n The only method you're really allowed to call is `next()`,\n anything else is more or less UB, hence this function being unsafe.\n Moved elements will not be dropped.\n This will also not actually store the array.\n\n SAFETY: must only be called `N` times. Thou shalt not drop the array either.\n",
+      "adt": {
+        "mem::manually_drop::ManuallyDrop": "MutableAsArgument",
+        "array::drain::Drain": "Constructor"
+      }
+    },
+    "array::try_from_fn": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an array `[T; N]` where each fallible array element `T` is returned by the `cb` call.\n Unlike [`from_fn`], where the element creation can't fail, this version will return an error\n if any element creation was unsuccessful.\n\n The return type of this function depends on the return type of the closure.\n If you return `Result<T, E>` from the closure, you'll get a `Result<[T; N], E>`.\n If you return `Option<T>` from the closure, you'll get an `Option<[T; N]>`.\n\n # Arguments\n\n * `cb`: Callback where the passed argument is the current array index.\n\n # Example\n\n ```rust\n #![feature(array_try_from_fn)]\n\n let array: Result<[u8; 5], _> = std::array::try_from_fn(|i| i.try_into());\n assert_eq!(array, Ok([0, 1, 2, 3, 4]));\n\n let array: Result<[i8; 200], _> = std::array::try_from_fn(|i| i.try_into());\n assert!(array.is_err());\n\n let array: Option<[_; 4]> = std::array::try_from_fn(|i| i.checked_add(100));\n assert_eq!(array, Some([100, 101, 102, 103]));\n\n let array: Option<[_; 4]> = std::array::try_from_fn(|i| i.checked_sub(100));\n assert_eq!(array, None);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mem::manually_drop::ManuallyDrop": [
+      "Plain",
+      "MutRef"
+    ],
+    "array::drain::Drain": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 1201,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/array/mod.rs:595:5: 607:6",
+  "src": "pub const fn try_map<R>(\n        self,\n        mut f: impl [const] FnMut(T) -> R + [const] Destruct,\n    ) -> ChangeOutputType<R, [R::Output; N]>\n    where\n        R: [const] Try<Residual: [const] Residual<[R::Output; N]>, Output: [const] Destruct>,\n        T: [const] Destruct,\n    {\n        let mut me = ManuallyDrop::new(self);\n        // SAFETY: try_from_fn calls `f` N times.\n        let mut f = unsafe { drain::Drain::new(&mut me, &mut f) };\n        try_from_fn(&mut f)\n    }",
+  "mir": "fn array::<impl [T; N]>::try_map(_1: [T; N], _2: impl [const] FnMut(T) -> R + [const] Destruct) -> <<R as ops::try_trait::Try>::Residual as ops::try_trait::Residual<[<R as ops::try_trait::Try>::Output; N]>>::TryType {\n    let mut _0: <<R as ops::try_trait::Try>::Residual as ops::try_trait::Residual<[<R as ops::try_trait::Try>::Output; N]>>::TryType;\n    let mut _3: mem::manually_drop::ManuallyDrop<[T; N]>;\n    let mut _4: array::drain::Drain<'_, '_, T, N, impl [const] FnMut(T) -> R + [const] Destruct>;\n    let mut _5: &mut mem::manually_drop::ManuallyDrop<[T; N]>;\n    let mut _6: &mut impl [const] FnMut(T) -> R + [const] Destruct;\n    let mut _7: &mut array::drain::Drain<'_, '_, T, N, impl [const] FnMut(T) -> R + [const] Destruct>;\n    debug self => _1;\n    debug f => _2;\n    debug me => _3;\n    debug f => _4;\n    bb0: {\n        StorageLive(_3);\n        _3 = mem::manually_drop::ManuallyDrop::<[T; N]>::new(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _5 = &mut _3;\n        _6 = &mut _2;\n        _4 = array::drain::Drain::<'_, '_, T, N, impl [const] FnMut(T) -> R + [const] Destruct>::new(_5, _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_7);\n        _7 = &mut _4;\n        _0 = array::try_from_fn::<R, N, &mut array::drain::Drain<'_, '_, T, N, impl [const] FnMut(T) -> R + [const] Destruct>>(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        drop(_4) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        StorageDead(_3);\n        drop(_2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": " A fallible function `f` applied to each element on array `self` in order to\n return an array the same size as `self` or the first error encountered.\n\n The return type of this function depends on the return type of the closure.\n If you return `Result<T, E>` from the closure, you'll get a `Result<[T; N], E>`.\n If you return `Option<T>` from the closure, you'll get an `Option<[T; N]>`.\n\n # Examples\n\n ```\n #![feature(array_try_map)]\n\n let a = [\"1\", \"2\", \"3\"];\n let b = a.try_map(|v| v.parse::<u32>()).unwrap().map(|v| v + 1);\n assert_eq!(b, [2, 3, 4]);\n\n let a = [\"1\", \"2a\", \"3\"];\n let b = a.try_map(|v| v.parse::<u32>());\n assert!(b.is_err());\n\n use std::num::NonZero;\n\n let z = [1, 2, 0, 3, 4];\n assert_eq!(z.try_map(NonZero::new), None);\n\n let a = [1, 2, 3];\n let b = a.try_map(NonZero::new);\n let c = b.map(|x| x.map(NonZero::get));\n assert_eq!(c, Some(a));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

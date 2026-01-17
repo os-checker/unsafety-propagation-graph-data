@@ -1,0 +1,57 @@
+{
+  "name": "ptr::swap_nonoverlapping",
+  "safe": false,
+  "callees": {
+    "mem::size_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of a type in bytes.\n\n More specifically, this is the offset in bytes between successive elements\n in an array with that item type including alignment padding. Thus, for any\n type `T` and length `n`, `[T; n]` has a size of `n * size_of::<T>()`.\n\n In general, the size of a type is not stable across compilations, but\n specific types such as primitives are.\n\n The following table gives the size for primitives.\n\n Type | `size_of::<Type>()`\n ---- | ---------------\n () | 0\n bool | 1\n u8 | 1\n u16 | 2\n u32 | 4\n u64 | 8\n u128 | 16\n i8 | 1\n i16 | 2\n i32 | 4\n i64 | 8\n i128 | 16\n f32 | 4\n f64 | 8\n char | 4\n\n Furthermore, `usize` and `isize` have the same size.\n\n The types [`*const T`], `&T`, [`Box<T>`], [`Option<&T>`], and `Option<Box<T>>` all have\n the same size. If `T` is `Sized`, all of those types have the same size as `usize`.\n\n The mutability of a pointer does not change its size. As such, `&T` and `&mut T`\n have the same size. Likewise for `*const T` and `*mut T`.\n\n # Size of `#[repr(C)]` items\n\n The `C` representation for items has a defined layout. With this layout,\n the size of items is also stable as long as all fields have a stable size.\n\n ## Size of Structs\n\n For `struct`s, the size is determined by the following algorithm.\n\n For each field in the struct ordered by declaration order:\n\n 1. Add the size of the field.\n 2. Round up the current size to the nearest multiple of the next field's [alignment].\n\n Finally, round the size of the struct to the nearest multiple of its [alignment].\n The alignment of the struct is usually the largest alignment of all its\n fields; this can be changed with the use of `repr(align(N))`.\n\n Unlike `C`, zero sized structs are not rounded up to one byte in size.\n\n ## Size of Enums\n\n Enums that carry no data other than the discriminant have the same size as C enums\n on the platform they are compiled for.\n\n ## Size of Unions\n\n The size of a union is the size of its largest field.\n\n Unlike `C`, zero sized unions are not rounded up to one byte in size.\n\n # Examples\n\n ```\n // Some primitives\n assert_eq!(4, size_of::<i32>());\n assert_eq!(8, size_of::<f64>());\n assert_eq!(0, size_of::<()>());\n\n // Some arrays\n assert_eq!(8, size_of::<[i32; 2]>());\n assert_eq!(12, size_of::<[i32; 3]>());\n assert_eq!(0, size_of::<[i32; 0]>());\n\n\n // Pointer size equality\n assert_eq!(size_of::<&i32>(), size_of::<*const i32>());\n assert_eq!(size_of::<&i32>(), size_of::<Box<i32>>());\n assert_eq!(size_of::<&i32>(), size_of::<Option<&i32>>());\n assert_eq!(size_of::<Box<i32>>(), size_of::<Option<Box<i32>>>());\n ```\n\n Using `#[repr(C)]`.\n\n ```\n #[repr(C)]\n struct FieldStruct {\n     first: u8,\n     second: u16,\n     third: u8\n }\n\n // The size of the first field is 1, so add 1 to the size. Size is 1.\n // The alignment of the second field is 2, so add 1 to the size for padding. Size is 2.\n // The size of the second field is 2, so add 2 to the size. Size is 4.\n // The alignment of the third field is 1, so add 0 to the size for padding. Size is 4.\n // The size of the third field is 1, so add 1 to the size. Size is 5.\n // Finally, the alignment of the struct is 2 (because the largest alignment amongst its\n // fields is 2), so add 1 to the size for padding. Size is 6.\n assert_eq!(6, size_of::<FieldStruct>());\n\n #[repr(C)]\n struct TupleStruct(u8, u16, u8);\n\n // Tuple structs follow the same rules.\n assert_eq!(6, size_of::<TupleStruct>());\n\n // Note that reordering the fields can lower the size. We can remove both padding bytes\n // by putting `third` before `second`.\n #[repr(C)]\n struct FieldStructOptimized {\n     first: u8,\n     third: u8,\n     second: u16\n }\n\n assert_eq!(4, size_of::<FieldStructOptimized>());\n\n // Union size is the size of the largest field.\n #[repr(C)]\n union ExampleUnion {\n     smaller: u8,\n     larger: u16\n }\n\n assert_eq!(2, size_of::<ExampleUnion>());\n ```\n\n [alignment]: align_of\n [`*const T`]: primitive@pointer\n [`Box<T>`]: ../../std/boxed/struct.Box.html\n [`Option<&T>`]: crate::option::Option\n\n",
+      "adt": {}
+    },
+    "mem::align_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the [ABI]-required minimum alignment of a type in bytes.\n\n Every reference to a value of the type `T` must be a multiple of this number.\n\n This is the alignment used for struct fields. It may be smaller than the preferred alignment.\n\n [ABI]: https://en.wikipedia.org/wiki/Application_binary_interface\n\n # Examples\n\n ```\n assert_eq!(4, align_of::<i32>());\n ```\n",
+      "adt": {}
+    },
+    "ptr::swap_nonoverlapping::precondition_check": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "ptr::swap_nonoverlapping::runtime": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 16088,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:1361:1: 1399:2",
+  "src": "pub const unsafe fn swap_nonoverlapping<T>(x: *mut T, y: *mut T, count: usize) {\n    ub_checks::assert_unsafe_precondition!(\n        check_library_ub,\n        \"ptr::swap_nonoverlapping requires that both pointer arguments are aligned and non-null \\\n        and the specified memory ranges do not overlap\",\n        (\n            x: *mut () = x as *mut (),\n            y: *mut () = y as *mut (),\n            size: usize = size_of::<T>(),\n            align: usize = align_of::<T>(),\n            count: usize = count,\n        ) => {\n            let zero_size = size == 0 || count == 0;\n            ub_checks::maybe_is_aligned_and_not_null(x, align, zero_size)\n                && ub_checks::maybe_is_aligned_and_not_null(y, align, zero_size)\n                && ub_checks::maybe_is_nonoverlapping(x, y, size, count)\n        }\n    );\n\n    const_eval_select!(\n        @capture[T] { x: *mut T, y: *mut T, count: usize }:\n        if const {\n            // At compile-time we don't need all the special code below.\n            // SAFETY: Same preconditions as this function\n            unsafe { swap_nonoverlapping_const(x, y, count) }\n        } else {\n            // Going though a slice here helps codegen know the size fits in `isize`\n            let slice = slice_from_raw_parts_mut(x, count);\n            // SAFETY: This is all readable from the pointer, meaning it's one\n            // allocation, and thus cannot be more than isize::MAX bytes.\n            let bytes = unsafe { mem::size_of_val_raw::<[T]>(slice) };\n            if let Some(bytes) = NonZero::new(bytes) {\n                // SAFETY: These are the same ranges, just expressed in a different\n                // type, so they're still non-overlapping.\n                unsafe { swap_nonoverlapping_bytes(x.cast(), y.cast(), bytes) };\n            }\n        }\n    )\n}",
+  "mir": "fn ptr::swap_nonoverlapping(_1: *mut T, _2: *mut T, _3: usize) -> () {\n    let mut _0: ();\n    let mut _4: bool;\n    let  _5: ();\n    let mut _6: *mut ();\n    let mut _7: *mut ();\n    let mut _8: usize;\n    let mut _9: usize;\n    let mut _10: (*mut T, *mut T, usize);\n    debug x => _1;\n    debug y => _2;\n    debug count => _3;\n    bb0: {\n        StorageLive(_4);\n        _4 = RuntimeChecks(UbChecks)() \" \";\n        switchInt(move _4) -> [0: bb5, otherwise: bb1];\n    }\n    bb1: {\n        StorageLive(_6);\n        _6 = _1 as *mut ();\n        StorageLive(_7);\n        _7 = _2 as *mut ();\n        StorageLive(_8);\n        _8 = mem::size_of::<T>() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_9);\n        _9 = mem::align_of::<T>() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _5 = ptr::swap_nonoverlapping::precondition_check(move _6, move _7, move _8, move _9, _3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_6);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_4);\n        StorageLive(_10);\n        _10 = (_1, _2, _3);\n        _0 = ptr::swap_nonoverlapping::runtime::<T>(move (_10.0: *mut T), move (_10.1: *mut T), move (_10.2: usize)) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        return;\n    }\n}\n",
+  "doc": " Swaps `count * size_of::<T>()` bytes between the two regions of memory\n beginning at `x` and `y`. The two regions must *not* overlap.\n\n The operation is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * Both `x` and `y` must be [valid] for both reads and writes of `count *\n   size_of::<T>()` bytes.\n\n * Both `x` and `y` must be properly aligned.\n\n * The region of memory beginning at `x` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `y` with the same size.\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is `0`,\n the pointers must be properly aligned.\n\n [valid]: self#safety\n\n # Examples\n\n Basic usage:\n\n ```\n use std::ptr;\n\n let mut x = [1, 2, 3, 4];\n let mut y = [7, 8, 9];\n\n unsafe {\n     ptr::swap_nonoverlapping(x.as_mut_ptr(), y.as_mut_ptr(), 2);\n }\n\n assert_eq!(x, [7, 8, 3, 4]);\n assert_eq!(y, [1, 2, 9]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

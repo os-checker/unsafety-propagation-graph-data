@@ -1,0 +1,51 @@
+{
+  "name": "raw_vec::RawVecInner::<A>::reserve",
+  "safe": false,
+  "callees": {
+    "raw_vec::RawVecInner::<A>::needs_to_grow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "raw_vec::RawVecInner": "ImmutableAsArgument",
+        "core::alloc::Layout": "ImmutableAsArgument"
+      }
+    },
+    "raw_vec::RawVecInner::<A>::reserve::do_reserve_and_handle": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "raw_vec::RawVecInner": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "raw_vec::RawVecInner": [
+      "Ref",
+      "Deref",
+      "MutRef"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ]
+  },
+  "path": 1672,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/raw_vec/mod.rs:544:5: 567:6",
+  "src": "unsafe fn reserve(&mut self, len: usize, additional: usize, elem_layout: Layout) {\n        // Callers expect this function to be very cheap when there is already sufficient capacity.\n        // Therefore, we move all the resizing and error-handling logic from grow_amortized and\n        // handle_reserve behind a call, while making sure that this function is likely to be\n        // inlined as just a comparison and a call if the comparison fails.\n        #[cold]\n        unsafe fn do_reserve_and_handle<A: Allocator>(\n            slf: &mut RawVecInner<A>,\n            len: usize,\n            additional: usize,\n            elem_layout: Layout,\n        ) {\n            // SAFETY: Precondition passed to caller\n            if let Err(err) = unsafe { slf.grow_amortized(len, additional, elem_layout) } {\n                handle_error(err);\n            }\n        }\n\n        if self.needs_to_grow(len, additional, elem_layout) {\n            unsafe {\n                do_reserve_and_handle(self, len, additional, elem_layout);\n            }\n        }\n    }",
+  "mir": "fn raw_vec::RawVecInner::<A>::reserve(_1: &mut raw_vec::RawVecInner<A>, _2: usize, _3: usize, _4: core::alloc::Layout) -> () {\n    let mut _0: ();\n    let mut _5: bool;\n    let mut _6: &raw_vec::RawVecInner<A>;\n    let  _7: ();\n    debug self => _1;\n    debug len => _2;\n    debug additional => _3;\n    debug elem_layout => _4;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &(*_1);\n        _5 = raw_vec::RawVecInner::<A>::needs_to_grow(move _6, _2, _3, _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _5) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_6);\n        _7 = raw_vec::RawVecInner::<A>::reserve::do_reserve_and_handle::<A>(_1, _2, _3, _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        goto -> bb5;\n    }\n    bb4: {\n        StorageDead(_6);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": " # Safety\n - `elem_layout` must be valid for `self`, i.e. it must be the same `elem_layout` used to\n   initially construct `self`\n - `elem_layout`'s size must be a multiple of its alignment\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

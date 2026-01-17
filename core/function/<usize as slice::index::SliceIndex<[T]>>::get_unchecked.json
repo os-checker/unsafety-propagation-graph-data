@@ -1,0 +1,47 @@
+{
+  "name": "<usize as slice::index::SliceIndex<[T]>>::get_unchecked",
+  "safe": false,
+  "callees": {
+    "ub_checks::check_language_ub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Determines whether we should check for language UB.\n\n The intention is to not do that when running in the interpreter, as that one has its own\n language UB checks which generally produce better errors.\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const [T]>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of a raw slice.\n\n The returned value is the number of **elements**, not the number of bytes.\n\n This function is safe, even when the raw slice cannot be cast to a slice\n reference because the pointer is null or unaligned.\n\n # Examples\n\n ```rust\n use std::ptr;\n\n let slice: *const [i8] = ptr::slice_from_raw_parts(ptr::null(), 3);\n assert_eq!(slice.len(), 3);\n ```\n",
+      "adt": {}
+    },
+    "<usize as slice::index::SliceIndex<[T]>>::get_unchecked::precondition_check": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 4280,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:239:5: 255:6",
+  "src": "unsafe fn get_unchecked(self, slice: *const [T]) -> *const T {\n        assert_unsafe_precondition!(\n            check_language_ub, // okay because of the `assume` below\n            \"slice::get_unchecked requires that the index is within the slice\",\n            (this: usize = self, len: usize = slice.len()) => this < len\n        );\n        // SAFETY: the caller guarantees that `slice` is not dangling, so it\n        // cannot be longer than `isize::MAX`. They also guarantee that\n        // `self` is in bounds of `slice` so `self` cannot overflow an `isize`,\n        // so the call to `add` is safe.\n        unsafe {\n            // Use intrinsics::assume instead of hint::assert_unchecked so that we don't check the\n            // precondition of this function twice.\n            crate::intrinsics::assume(self < slice.len());\n            slice_get_unchecked(slice, self)\n        }\n    }",
+  "mir": "fn <usize as slice::index::SliceIndex<[T]>>::get_unchecked(_1: usize, _2: *const [T]) -> *const T {\n    let mut _0: *const T;\n    let mut _3: bool;\n    let  _4: ();\n    let mut _5: usize;\n    let mut _6: bool;\n    let mut _7: usize;\n    debug self => _1;\n    debug slice => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = ub_checks::check_language_ub() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb5, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_5);\n        _5 = ptr::const_ptr::<impl *const [T]>::len(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _4 = <usize as slice::index::SliceIndex<[T]>>::get_unchecked::precondition_check(_1, move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_3);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = ptr::const_ptr::<impl *const [T]>::len(_2) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _6 = Lt(_1, move _7);\n        StorageDead(_7);\n        Intrinsic(Assume(Move(_6)));\n        StorageDead(_6);\n        _0 = &raw const (*_2)[_1];\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

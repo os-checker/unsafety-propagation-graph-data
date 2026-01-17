@@ -1,0 +1,50 @@
+{
+  "name": "wtf8::Wtf8Buf::leak",
+  "safe": true,
+  "callees": {
+    "vec::Vec::<T, A>::leak": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes and leaks the `Vec`, returning a mutable reference to the contents,\n `&'a mut [T]`.\n\n Note that the type `T` must outlive the chosen lifetime `'a`. If the type\n has only static references, or none at all, then this may be chosen to be\n `'static`.\n\n As of Rust 1.57, this method does not reallocate or shrink the `Vec`,\n so the leaked allocation may include unused capacity that is not part\n of the returned slice.\n\n This function is mainly useful for data that lives for the remainder of\n the program's life. Dropping the returned reference will cause a memory\n leak.\n\n # Examples\n\n Simple usage:\n\n ```\n let x = vec![1, 2, 3];\n let static_ref: &'static mut [usize] = x.leak();\n static_ref[0] += 1;\n assert_eq!(static_ref, &[2, 2, 3]);\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # drop(unsafe { Box::from_raw(static_ref) });\n ```\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "core::wtf8::Wtf8::from_mut_bytes_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a mutable WTF-8 slice from a mutable WTF-8 byte slice.\n\n Since the byte slice is not checked for valid WTF-8, this functions is\n marked unsafe.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Plain"
+    ],
+    "wtf8::Wtf8Buf": [
+      "Unknown([Field(0, Ty { id: 1639, kind: RigidTy(Adt(AdtDef(DefId { id: 2824, name: \"vec::Vec\" }), GenericArgs([Type(Ty { id: 93, kind: RigidTy(Uint(U8)) }), Type(Ty { id: 17, kind: RigidTy(Adt(AdtDef(DefId { id: 2583, name: \"alloc::Global\" }), GenericArgs([]))) })]))) })])",
+      "Plain"
+    ],
+    "core::wtf8::Wtf8": [
+      "MutRef"
+    ]
+  },
+  "path": 2445,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/wtf8/mod.rs:264:5: 266:6",
+  "src": "pub fn leak<'a>(self) -> &'a mut Wtf8 {\n        unsafe { Wtf8::from_mut_bytes_unchecked(self.bytes.leak()) }\n    }",
+  "mir": "fn wtf8::Wtf8Buf::leak(_1: wtf8::Wtf8Buf) -> &mut core::wtf8::Wtf8 {\n    let mut _0: &mut core::wtf8::Wtf8;\n    let mut _2: &mut [u8];\n    let mut _3: vec::Vec<u8>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_3);\n        _3 = move (_1.0: vec::Vec<u8>);\n        _2 = vec::Vec::<u8>::leak::<'_>(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _0 = core::wtf8::Wtf8::from_mut_bytes_unchecked(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

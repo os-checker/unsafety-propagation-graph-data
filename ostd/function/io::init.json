@@ -1,0 +1,41 @@
+{
+  "name": "io::init",
+  "safe": false,
+  "callees": {
+    "io::io_mem::allocator::init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Initializes the static `IO_MEM_ALLOCATOR` based on builder.\n\n # Safety\n\n User must ensure all the memory I/O regions that belong to the system device have been removed by calling the\n `remove` function.\n",
+      "adt": {}
+    },
+    "io::io_port::allocator::init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Initializes the static `IO_PORT_ALLOCATOR` and removes the system device I/O port regions.\n\n # Safety\n\n User must ensure that:\n\n 1. All the port I/O regions belonging to the system device are defined using the macros\n    `sensitive_io_port` and `reserve_io_port_range`.\n\n 2. `MAX_IO_PORT` defined in `crate::arch::io` is guaranteed not to exceed the maximum\n    value specified by architecture.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "io::io_mem::allocator::IoMemAllocatorBuilder": [
+      "Plain"
+    ]
+  },
+  "path": 1790,
+  "span": "ostd/src/io/mod.rs:39:1: 48:2",
+  "src": "pub(crate) unsafe fn init(io_mem_builder: IoMemAllocatorBuilder) {\n    // SAFETY: The safety is upheld by the caller.\n    unsafe { self::io_mem::init(io_mem_builder) };\n\n    // SAFETY: The safety is upheld by the caller.\n    #[cfg(target_arch = \"x86_64\")]\n    unsafe {\n        self::io_port::init()\n    };\n}",
+  "mir": "fn io::init(_1: io::io_mem::allocator::IoMemAllocatorBuilder) -> () {\n    let mut _0: ();\n    let  _2: ();\n    let  _3: ();\n    debug io_mem_builder => _1;\n    bb0: {\n        _2 = io::io_mem::allocator::init(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = io::io_port::allocator::init() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Initializes the static allocator based on builder.\n\n # Safety\n\n User must ensure that:\n\n 1. All the memory that belong to the system device have been removed\n    by calling the `remove` function.\n\n 2. All the port I/O regions belonging to the system device are defined\n    using the macros `sensitive_io_port` and `reserve_io_port_range`.\n\n 3. `MAX_IO_PORT` defined in `crate::arch::io` is guaranteed not to\n    exceed the maximum value specified by architecture.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "<str::iter::CharIndices<'a> as iter::traits::iterator::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "iter::traits::exact_size::ExactSizeIterator::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the exact remaining length of the iterator.\n\n The implementation ensures that the iterator will return exactly `len()`\n more times a [`Some(T)`] value, before returning [`None`].\n This method has a default implementation, so you usually should not\n implement it directly. However, if you can provide a more efficient\n implementation, you can do so. See the [trait-level] docs for an\n example.\n\n This function has the same safety guarantees as the\n [`Iterator::size_hint`] function.\n\n [trait-level]: ExactSizeIterator\n [`Some(T)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n // a finite range knows exactly how many times it will iterate\n let mut range = 0..5;\n\n assert_eq!(5, range.len());\n let _ = range.next();\n assert_eq!(4, range.len());\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::Iter": [
+      "Ref"
+    ],
+    "str::iter::CharIndices": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "str::iter::Chars": [
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4458, kind: RigidTy(Char) })])"
+    ]
+  },
+  "path": 16821,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/str/iter.rs:185:5: 196:6",
+  "src": "fn next(&mut self) -> Option<(usize, char)> {\n        let pre_len = self.iter.iter.len();\n        match self.iter.next() {\n            None => None,\n            Some(ch) => {\n                let index = self.front_offset;\n                let len = self.iter.iter.len();\n                self.front_offset += pre_len - len;\n                Some((index, ch))\n            }\n        }\n    }",
+  "mir": "fn <str::iter::CharIndices<'a> as iter::traits::iterator::Iterator>::next(_1: &mut str::iter::CharIndices<'_>) -> option::Option<(usize, char)> {\n    let mut _0: option::Option<(usize, char)>;\n    let  _2: usize;\n    let mut _3: &slice::iter::Iter<'_, u8>;\n    let mut _4: option::Option<char>;\n    let mut _5: &mut str::iter::Chars<'_>;\n    let mut _6: isize;\n    let  _7: char;\n    let  _8: usize;\n    let  _9: usize;\n    let mut _10: &slice::iter::Iter<'_, u8>;\n    let mut _11: usize;\n    let mut _12: (usize, bool);\n    let mut _13: (usize, bool);\n    let mut _14: (usize, char);\n    debug self => _1;\n    debug pre_len => _2;\n    debug ch => _7;\n    debug index => _8;\n    debug len => _9;\n    bb0: {\n        StorageLive(_3);\n        _3 = &(((*_1).1: str::iter::Chars<'_>).0: slice::iter::Iter<'_, u8>);\n        _2 = <slice::iter::Iter<'_, u8> as iter::traits::exact_size::ExactSizeIterator>::len(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &mut ((*_1).1: str::iter::Chars<'_>);\n        _4 = <str::iter::Chars<'_> as iter::traits::iterator::Iterator>::next(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _6 = discriminant(_4);\n        switchInt(move _6) -> [0: bb5, 1: bb4, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _7 = ((_4 as variant#1).0: char);\n        _8 = ((*_1).0: usize);\n        StorageLive(_10);\n        _10 = &(((*_1).1: str::iter::Chars<'_>).0: slice::iter::Iter<'_, u8>);\n        _9 = <slice::iter::Iter<'_, u8> as iter::traits::exact_size::ExactSizeIterator>::len(move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb5: {\n        _0 = option::Option::None;\n        goto -> bb9;\n    }\n    bb6: {\n        StorageDead(_10);\n        StorageLive(_11);\n        _12 = CheckedSub(_2, _9);\n        assert(!move (_12.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _2, _9) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _11 = move (_12.0: usize);\n        _13 = CheckedAdd(((*_1).0: usize), _11);\n        assert(!move (_13.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).0: usize), move _11) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        ((*_1).0: usize) = move (_13.0: usize);\n        StorageDead(_11);\n        StorageLive(_14);\n        _14 = (_8, _7);\n        _0 = option::Option::Some(move _14);\n        StorageDead(_14);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

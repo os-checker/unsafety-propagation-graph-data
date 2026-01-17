@@ -1,0 +1,47 @@
+{
+  "name": "fs::copy",
+  "safe": true,
+  "callees": {
+    "core::convert::AsRef::as_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into a shared reference of the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "sys::fs::copy": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "path::Path": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "path::Path": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1056,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/fs.rs:2762:1: 2764:2",
+  "src": "pub fn copy<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> io::Result<u64> {\n    fs_imp::copy(from.as_ref(), to.as_ref())\n}",
+  "mir": "fn fs::copy(_1: P, _2: Q) -> core::result::Result<u64, io::error::Error> {\n    let mut _0: core::result::Result<u64, io::error::Error>;\n    let  _3: &path::Path;\n    let mut _4: &P;\n    let  _5: &path::Path;\n    let mut _6: &Q;\n    debug from => _1;\n    debug to => _2;\n    bb0: {\n        StorageLive(_4);\n        _4 = &_1;\n        _3 = <P as core::convert::AsRef<path::Path>>::as_ref(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = &_2;\n        _5 = <Q as core::convert::AsRef<path::Path>>::as_ref(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _0 = sys::fs::copy(_3, _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        drop(_2) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        drop(_1) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": " Copies the contents of one file to another. This function will also\n copy the permission bits of the original file to the destination file.\n\n This function will **overwrite** the contents of `to`.\n\n Note that if `from` and `to` both point to the same file, then the file\n will likely get truncated by this operation.\n\n On success, the total number of bytes copied is returned and it is equal to\n the length of the `to` file as reported by `metadata`.\n\n If you want to copy the contents of one file to another and you’re\n working with [`File`]s, see the [`io::copy`](io::copy()) function.\n\n # Platform-specific behavior\n\n This function currently corresponds to the `open` function in Unix\n with `O_RDONLY` for `from` and `O_WRONLY`, `O_CREAT`, and `O_TRUNC` for `to`.\n `O_CLOEXEC` is set for returned file descriptors.\n\n On Linux (including Android), this function attempts to use `copy_file_range(2)`,\n and falls back to reading and writing if that is not possible.\n\n On Windows, this function currently corresponds to `CopyFileEx`. Alternate\n NTFS streams are copied but only the size of the main stream is returned by\n this function.\n\n On MacOS, this function corresponds to `fclonefileat` and `fcopyfile`.\n\n Note that platform-specific behavior [may change in the future][changes].\n\n [changes]: io#platform-specific-behavior\n\n # Errors\n\n This function will return an error in the following situations, but is not\n limited to just these cases:\n\n * `from` is neither a regular file nor a symlink to a regular file.\n * `from` does not exist.\n * The current process does not have the permission rights to read\n   `from` or write `to`.\n * The parent directory of `to` doesn't exist.\n\n # Examples\n\n ```no_run\n use std::fs;\n\n fn main() -> std::io::Result<()> {\n     fs::copy(\"foo.txt\", \"bar.txt\")?;  // Copy foo.txt to bar.txt\n     Ok(())\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

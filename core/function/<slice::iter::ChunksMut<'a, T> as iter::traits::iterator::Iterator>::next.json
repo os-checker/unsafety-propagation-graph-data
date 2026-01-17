@@ -1,0 +1,66 @@
+{
+  "name": "<slice::iter::ChunksMut<'a, T> as iter::traits::iterator::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "ptr::mut_ptr::<impl *mut [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the raw slice has a length of 0.\n\n # Examples\n\n ```\n use std::ptr;\n\n let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);\n assert!(!slice.is_empty());\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of a raw slice.\n\n The returned value is the number of **elements**, not the number of bytes.\n\n This function is safe, even when the raw slice cannot be cast to a slice\n reference because the pointer is null or unaligned.\n\n # Examples\n\n ```rust\n use std::ptr;\n\n let slice: *mut [i8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 3);\n assert_eq!(slice.len(), 3);\n ```\n",
+      "adt": {}
+    },
+    "cmp::min": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the minimum of two values.\n\n Returns the first argument if the comparison determines them to be equal.\n\n Internally uses an alias to [`Ord::min`].\n\n # Examples\n\n ```\n use std::cmp;\n\n assert_eq!(cmp::min(1, 2), 1);\n assert_eq!(cmp::min(2, 2), 2);\n ```\n ```\n use std::cmp::{self, Ordering};\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(cmp::min(Equal(\"v1\"), Equal(\"v2\")).0, \"v1\");\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::split_at_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable raw slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.\n\n # Safety\n\n `mid` must be [in-bounds] of the underlying [allocation].\n Which means `self` must be dereferenceable and span a single allocation\n that is at least `mid * size_of::<T>()` bytes long. Not upholding these\n requirements is *[undefined behavior]* even if the resulting pointers are not used.\n\n Since `len` being in-bounds it is not a safety invariant of `*mut [T]` the\n safety requirements of this method are the same as for [`split_at_mut_unchecked`].\n The explicit bounds check is only as useful as `len` is correct.\n\n [`split_at_mut_unchecked`]: #method.split_at_mut_unchecked\n [in-bounds]: #method.add\n [allocation]: crate::ptr#allocation\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n #![feature(raw_slice_split)]\n #![feature(slice_ptr_get)]\n\n let mut v = [1, 0, 3, 0, 5, 6];\n let ptr = &mut v as *mut [_];\n unsafe {\n     let (left, right) = ptr.split_at_mut(2);\n     assert_eq!(&*left, [1, 0]);\n     assert_eq!(&*right, [3, 0, 5, 6]);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::ChunksMut": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 16424,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:1680:5: 1691:6",
+  "src": "fn next(&mut self) -> Option<&'a mut [T]> {\n        if self.v.is_empty() {\n            None\n        } else {\n            let sz = cmp::min(self.v.len(), self.chunk_size);\n            // SAFETY: The self.v contract ensures that any split_at_mut is valid.\n            let (head, tail) = unsafe { self.v.split_at_mut(sz) };\n            self.v = tail;\n            // SAFETY: Nothing else points to or will point to the contents of this slice.\n            Some(unsafe { &mut *head })\n        }\n    }",
+  "mir": "fn <slice::iter::ChunksMut<'a, T> as iter::traits::iterator::Iterator>::next(_1: &mut slice::iter::ChunksMut<'_, T>) -> option::Option<&mut [T]> {\n    let mut _0: option::Option<&mut [T]>;\n    let mut _2: bool;\n    let mut _3: *mut [T];\n    let  _4: usize;\n    let mut _5: usize;\n    let mut _6: *mut [T];\n    let mut _7: usize;\n    let  _8: *mut [T];\n    let  _9: *mut [T];\n    let mut _10: (*mut [T], *mut [T]);\n    let mut _11: *mut [T];\n    let mut _12: &mut [T];\n    debug self => _1;\n    debug sz => _4;\n    debug head => _8;\n    debug tail => _9;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = ((*_1).0: *mut [T]);\n        _2 = ptr::mut_ptr::<impl *mut [T]>::is_empty(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = option::Option::None;\n        goto -> bb7;\n    }\n    bb3: {\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = ((*_1).0: *mut [T]);\n        _5 = ptr::mut_ptr::<impl *mut [T]>::len(move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageLive(_7);\n        _7 = ((*_1).1: usize);\n        _4 = cmp::min::<usize>(move _5, move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = ((*_1).0: *mut [T]);\n        _10 = ptr::mut_ptr::<impl *mut [T]>::split_at_mut(move _11, _4) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        StorageLive(_8);\n        _8 = (_10.0: *mut [T]);\n        _9 = (_10.1: *mut [T]);\n        StorageDead(_10);\n        ((*_1).0: *mut [T]) = _9;\n        _12 = &mut (*_8);\n        _0 = option::Option::Some(_12);\n        StorageDead(_8);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

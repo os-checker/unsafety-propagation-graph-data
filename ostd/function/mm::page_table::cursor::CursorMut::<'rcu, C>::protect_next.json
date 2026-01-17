@@ -1,0 +1,123 @@
+{
+  "name": "mm::page_table::cursor::CursorMut::<'rcu, C>::protect_next",
+  "safe": false,
+  "callees": {
+    "mm::page_table::cursor::Cursor::<'rcu, C>::find_next_impl": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Moves the cursor forward to the next fragment in the range.\n\n See [`Self::find_next`] for more details. Other than the semantics\n provided by [`Self::find_next`], this method also supports finding non-\n leaf entries and splitting huge pages if necessary.\n\n `find_unmap_subtree` specifies whether the cursor should stop at the\n highest possible level for unmapping. If `false`, the cursor will only\n stop at leaf entries.\n\n `split_huge` specifies whether the cursor should split huge pages when\n it finds a huge page that is mapped over the required range (`len`).\n",
+      "adt": {
+        "mm::page_table::cursor::Cursor": "MutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "mm::page_table::cursor::Cursor::<'rcu, C>::cur_entry": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "mm::page_table::cursor::Cursor": "MutableAsArgument",
+        "mm::page_table::node::entry::Entry": "Constructor"
+      }
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "mm::page_table::node::entry::Entry::<'a, 'rcu, C>::protect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Operates on the mapping properties of the entry.\n\n It only modifies the properties if the entry is present.\n",
+      "adt": {
+        "mm::page_table::node::entry::Entry": "MutableAsArgument"
+      }
+    },
+    "mm::page_table::cursor::Cursor::<'rcu, C>::cur_va_range": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the virtual address range that the current entry covers.\n",
+      "adt": {
+        "mm::page_table::cursor::Cursor": "ImmutableAsArgument",
+        "core::ops::Range": "Constructor"
+      }
+    },
+    "mm::page_table::cursor::Cursor::<'rcu, C>::move_forward": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Traverses forward to the end of [`Self::cur_va_range`].\n\n If reached the end of the current page table node, it (recursively)\n moves itself up to the next page of the parent page.\n",
+      "adt": {
+        "mm::page_table::cursor::Cursor": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "mm::page_table::cursor::Cursor": [
+      "MutRef",
+      "Ref"
+    ],
+    "mm::page_table::cursor::CursorMut": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "mm::page_table::node::entry::Entry": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::ops::Range": [
+      "Plain"
+    ]
+  },
+  "path": 2365,
+  "span": "ostd/src/mm/page_table/cursor/mod.rs:570:5: 584:6",
+  "src": "pub unsafe fn protect_next(\n        &mut self,\n        len: usize,\n        op: &mut impl FnMut(&mut PageProperty),\n    ) -> Option<Range<Vaddr>> {\n        self.0.find_next_impl(len, false, true)?;\n\n        self.0.cur_entry().protect(op);\n\n        let protected_va = self.0.cur_va_range();\n\n        self.0.move_forward();\n\n        Some(protected_va)\n    }",
+  "mir": "fn mm::page_table::cursor::CursorMut::<'rcu, C>::protect_next(_1: &mut mm::page_table::cursor::CursorMut<'_, C>, _2: usize, _3: &mut impl FnMut(&mut PageProperty)) -> core::option::Option<core::ops::Range<usize>> {\n    let mut _0: core::option::Option<core::ops::Range<usize>>;\n    let mut _4: core::ops::ControlFlow<core::option::Option<core::convert::Infallible>, usize>;\n    let mut _5: core::option::Option<usize>;\n    let mut _6: &mut mm::page_table::cursor::Cursor<'_, C>;\n    let mut _7: isize;\n    let  _8: usize;\n    let  _9: ();\n    let mut _10: &mut mm::page_table::node::entry::Entry<'_, '_, C>;\n    let mut _11: mm::page_table::node::entry::Entry<'_, '_, C>;\n    let mut _12: &mut mm::page_table::cursor::Cursor<'_, C>;\n    let  _13: core::ops::Range<usize>;\n    let mut _14: &mm::page_table::cursor::Cursor<'_, C>;\n    let  _15: ();\n    let mut _16: &mut mm::page_table::cursor::Cursor<'_, C>;\n    debug self => _1;\n    debug len => _2;\n    debug op => _3;\n    debug residual => core::option::Option::<core::convert::Infallible>::None;\n    debug val => _8;\n    debug protected_va => _13;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut ((*_1).0: mm::page_table::cursor::Cursor<'_, C>);\n        _5 = mm::page_table::cursor::Cursor::<'_, C>::find_next_impl(move _6, _2, false, true) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        _4 = <core::option::Option<usize> as core::ops::Try>::branch(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _7 = discriminant(_4);\n        switchInt(move _7) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        StorageLive(_8);\n        _8 = ((_4 as variant#0).0: usize);\n        StorageDead(_8);\n        StorageDead(_4);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &mut ((*_1).0: mm::page_table::cursor::Cursor<'_, C>);\n        _11 = mm::page_table::cursor::Cursor::<'_, C>::cur_entry(move _12) -> [return: bb7, unwind unreachable];\n    }\n    bb5: {\n        _0 = <core::option::Option<core::ops::Range<usize>> as core::ops::FromResidual<core::option::Option<core::convert::Infallible>>>::from_residual(core::option::Option::<core::convert::Infallible>::None) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_4);\n        goto -> bb11;\n    }\n    bb7: {\n        _10 = &mut _11;\n        StorageDead(_12);\n        _9 = mm::page_table::node::entry::Entry::<'_, '_, C>::protect::<impl FnMut(&mut PageProperty)>(move _10, _3) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_10);\n        StorageDead(_11);\n        StorageLive(_14);\n        _14 = &((*_1).0: mm::page_table::cursor::Cursor<'_, C>);\n        _13 = mm::page_table::cursor::Cursor::<'_, C>::cur_va_range(move _14) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_14);\n        StorageLive(_16);\n        _16 = &mut ((*_1).0: mm::page_table::cursor::Cursor<'_, C>);\n        _15 = mm::page_table::cursor::Cursor::<'_, C>::move_forward(move _16) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_16);\n        _0 = core::option::Option::Some(_13);\n        goto -> bb11;\n    }\n    bb11: {\n        return;\n    }\n}\n",
+  "doc": " Applies the operation to the next slot of mapping within the range.\n\n The range to be found in is the current virtual address with the\n provided length.\n\n The function stops and yields the actually protected range if it has\n actually protected a page, no matter if the following pages are also\n required to be protected.\n\n It also makes the cursor moves forward to the next page after the\n protected one. If no mapped pages exist in the following range, the\n cursor will stop at the end of the range and return [`None`].\n\n # Safety\n\n The caller should ensure that:\n  - the range being protected with the operation does not affect\n    kernel's memory safety;\n  - the privileged flag `AVAIL1` should not be altered, since this flag\n    is reserved for all page tables.\n\n # Panics\n\n Panics if:\n  - the length is longer than the remaining range of the cursor;\n  - the length is not page-aligned.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "mm::frame::meta::get_slot",
+  "safe": true,
+  "callees": {
+    "core::num::<impl usize>::is_multiple_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if `self` is an integer multiple of `rhs`, and false otherwise.\n\n This function is equivalent to `self % rhs == 0`, except that it will not panic\n for `rhs == 0`. Instead, `0.is_multiple_of(0) == true`, and for any non-zero `n`,\n `n.is_multiple_of(0) == false`.\n\n # Examples\n\n ```\n\n ```\n",
+      "adt": {}
+    },
+    "mm::frame::max_paddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the maximum physical address that is tracked by frame metadata.\n",
+      "adt": {}
+    },
+    "mm::frame::meta::mapping::frame_to_meta": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a physical address of a base frame to the virtual address of the metadata slot.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::frame::meta::GetFrameError": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "mm::frame::meta::MetaSlot": [
+      "Ref"
+    ]
+  },
+  "path": 1968,
+  "span": "ostd/src/mm/frame/meta.rs:209:1: 223:2",
+  "src": "pub(super) fn get_slot(paddr: Paddr) -> Result<&'static MetaSlot, GetFrameError> {\n    if !paddr.is_multiple_of(PAGE_SIZE) {\n        return Err(GetFrameError::NotAligned);\n    }\n    if paddr >= super::max_paddr() {\n        return Err(GetFrameError::OutOfBound);\n    }\n\n    let vaddr = mapping::frame_to_meta::<PagingConsts>(paddr);\n    let ptr = vaddr as *mut MetaSlot;\n\n    // SAFETY: `ptr` points to a valid `MetaSlot` that will never be\n    // mutably borrowed, so taking an immutable reference to it is safe.\n    Ok(unsafe { &*ptr })\n}",
+  "mir": "fn mm::frame::meta::get_slot(_1: usize) -> core::result::Result<&mm::frame::meta::MetaSlot, mm::frame::meta::GetFrameError> {\n    let mut _0: core::result::Result<&mm::frame::meta::MetaSlot, mm::frame::meta::GetFrameError>;\n    let mut _2: bool;\n    let mut _3: mm::frame::meta::GetFrameError;\n    let mut _4: bool;\n    let mut _5: usize;\n    let mut _6: mm::frame::meta::GetFrameError;\n    let  _7: usize;\n    let  _8: *mut mm::frame::meta::MetaSlot;\n    let  _9: &mm::frame::meta::MetaSlot;\n    debug paddr => _1;\n    debug vaddr => _7;\n    debug ptr => _8;\n    bb0: {\n        StorageLive(_2);\n        _2 = core::num::<impl usize>::is_multiple_of(_1, mm::PAGE_SIZE) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = mm::frame::max_paddr() -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_3);\n        _3 = mm::frame::meta::GetFrameError::NotAligned;\n        _0 = core::result::Result::Err(move _3);\n        StorageDead(_3);\n        StorageDead(_2);\n        goto -> bb8;\n    }\n    bb4: {\n        _4 = Ge(_1, move _5);\n        switchInt(move _4) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_5);\n        StorageLive(_6);\n        _6 = mm::frame::meta::GetFrameError::OutOfBound;\n        _0 = core::result::Result::Err(move _6);\n        StorageDead(_6);\n        StorageDead(_4);\n        goto -> bb8;\n    }\n    bb6: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _7 = mm::frame::meta::mapping::frame_to_meta::<arch::mm::PagingConsts>(_1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageLive(_8);\n        _8 = _7 as *mut mm::frame::meta::MetaSlot;\n        _9 = &(*_8);\n        _0 = core::result::Result::Ok(_9);\n        StorageDead(_8);\n        goto -> bb8;\n    }\n    bb8: {\n        return;\n    }\n}\n",
+  "doc": " Gets the reference to a metadata slot.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "<iter::adapters::take::Take<I> as iter::traits::iterator::Iterator>::nth",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::nth": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the `n`th element of the iterator.\n\n Like most indexing operations, the count starts from zero, so `nth(0)`\n returns the first value, `nth(1)` the second, and so on.\n\n Note that all preceding elements, as well as the returned element, will be\n consumed from the iterator. That means that the preceding elements will be\n discarded, and also that calling `nth(0)` multiple times on the same iterator\n will return different elements.\n\n `nth()` will return [`None`] if `n` is greater than or equal to the length of the\n iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n assert_eq!(a.into_iter().nth(1), Some(2));\n ```\n\n Calling `nth()` multiple times doesn't rewind the iterator:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n assert_eq!(iter.nth(1), Some(2));\n assert_eq!(iter.nth(1), None);\n ```\n\n Returning `None` if there are less than `n + 1` elements:\n\n ```\n let a = [1, 2, 3];\n assert_eq!(a.into_iter().nth(10), None);\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "iter::adapters::take::Take": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 14104,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/take.rs:46:5: 57:6",
+  "src": "fn nth(&mut self, n: usize) -> Option<I::Item> {\n        if self.n > n {\n            self.n -= n + 1;\n            self.iter.nth(n)\n        } else {\n            if self.n > 0 {\n                self.iter.nth(self.n - 1);\n                self.n = 0;\n            }\n            None\n        }\n    }",
+  "mir": "fn <iter::adapters::take::Take<I> as iter::traits::iterator::Iterator>::nth(_1: &mut iter::adapters::take::Take<I>, _2: usize) -> option::Option<<I as iter::traits::iterator::Iterator>::Item> {\n    let mut _0: option::Option<<I as iter::traits::iterator::Iterator>::Item>;\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: usize;\n    let mut _6: (usize, bool);\n    let mut _7: (usize, bool);\n    let mut _8: &mut I;\n    let mut _9: bool;\n    let mut _10: usize;\n    let  _11: option::Option<<I as iter::traits::iterator::Iterator>::Item>;\n    let mut _12: &mut I;\n    let mut _13: usize;\n    let mut _14: usize;\n    let mut _15: (usize, bool);\n    debug self => _1;\n    debug n => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).1: usize);\n        _3 = Gt(move _4, _2);\n        switchInt(move _3) -> [0: bb5, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _6 = CheckedAdd(_2, 1_usize);\n        assert(!move (_6.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _2, 1_usize) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = move (_6.0: usize);\n        _7 = CheckedSub(((*_1).1: usize), _5);\n        assert(!move (_7.1: bool), \"attempt to compute `{} - {}`, which would overflow\", ((*_1).1: usize), move _5) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        ((*_1).1: usize) = move (_7.0: usize);\n        StorageDead(_5);\n        StorageLive(_8);\n        _8 = &mut ((*_1).0: I);\n        _0 = <I as iter::traits::iterator::Iterator>::nth(move _8, _2) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        goto -> bb12;\n    }\n    bb5: {\n        StorageDead(_4);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = ((*_1).1: usize);\n        _9 = Gt(move _10, 0_usize);\n        switchInt(move _9) -> [0: bb10, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &mut ((*_1).0: I);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = ((*_1).1: usize);\n        _15 = CheckedSub(_14, 1_usize);\n        assert(!move (_15.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _14, 1_usize) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _13 = move (_15.0: usize);\n        StorageDead(_14);\n        _11 = <I as iter::traits::iterator::Iterator>::nth(move _12, move _13) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_13);\n        StorageDead(_12);\n        drop(_11) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_11);\n        ((*_1).1: usize) = 0_usize;\n        goto -> bb11;\n    }\n    bb10: {\n        StorageDead(_10);\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_9);\n        _0 = option::Option::None;\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

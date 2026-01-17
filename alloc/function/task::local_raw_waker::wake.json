@@ -1,0 +1,43 @@
+{
+  "name": "task::local_raw_waker::wake",
+  "safe": false,
+  "callees": {
+    "rc::Rc::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs an `Rc<T>` from a raw pointer.\n\n The raw pointer must have been previously returned by a call to\n [`Rc<U>::into_raw`][into_raw] with the following requirements:\n\n * If `U` is sized, it must have the same size and alignment as `T`. This\n   is trivially true if `U` is `T`.\n * If `U` is unsized, its data pointer must have the same size and\n   alignment as `T`. This is trivially true if `Rc<U>` was constructed\n   through `Rc<T>` and then converted to `Rc<U>` through an [unsized\n   coercion].\n\n Note that if `U` or `U`'s data pointer is not `T` but has the same size\n and alignment, this is basically like transmuting references of\n different types. See [`mem::transmute`][transmute] for more information\n on what restrictions apply in this case.\n\n The raw pointer must point to a block of memory allocated by the global allocator\n\n The user of `from_raw` has to make sure a specific value of `T` is only\n dropped once.\n\n This function is unsafe because improper use may lead to memory unsafety,\n even if the returned `Rc<T>` is never accessed.\n\n [into_raw]: Rc::into_raw\n [transmute]: core::mem::transmute\n [unsized coercion]: https://doc.rust-lang.org/reference/type-coercions.html#unsized-coercions\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let x = Rc::new(\"hello\".to_owned());\n let x_ptr = Rc::into_raw(x);\n\n unsafe {\n     // Convert back to an `Rc` to prevent leak.\n     let x = Rc::from_raw(x_ptr);\n     assert_eq!(&*x, \"hello\");\n\n     // Further calls to `Rc::from_raw(x_ptr)` would be memory-unsafe.\n }\n\n // The memory was freed when `x` went out of scope above, so `x_ptr` is now dangling!\n ```\n\n Convert a slice back into its original array:\n\n ```\n use std::rc::Rc;\n\n let x: Rc<[u32]> = Rc::new([1, 2, 3]);\n let x_ptr: *const [u32] = Rc::into_raw(x);\n\n unsafe {\n     let x: Rc<[u32; 3]> = Rc::from_raw(x_ptr.cast::<[u32; 3]>());\n     assert_eq!(&*x, &[1, 2, 3]);\n }\n ```\n",
+      "adt": {
+        "rc::Rc": "Constructor"
+      }
+    },
+    "task::LocalWake::wake": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wake this task.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "rc::Rc": [
+      "Plain"
+    ]
+  },
+  "path": 2184,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/task.rs:330:5: 333:6",
+  "src": "unsafe fn wake<W: LocalWake + 'static>(waker: *const ()) {\n        let waker = unsafe { Rc::from_raw(waker as *const W) };\n        <W as LocalWake>::wake(waker);\n    }",
+  "mir": "fn task::local_raw_waker::wake(_1: *const ()) -> () {\n    let mut _0: ();\n    let  _2: rc::Rc<W>;\n    let mut _3: *const W;\n    let  _4: ();\n    debug waker => _1;\n    debug waker => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = _1 as *const W;\n        _2 = rc::Rc::<W>::from_raw(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _4 = <W as task::LocalWake>::wake(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

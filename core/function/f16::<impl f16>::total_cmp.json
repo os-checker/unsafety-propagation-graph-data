@@ -1,0 +1,51 @@
+{
+  "name": "f16::<impl f16>::total_cmp",
+  "safe": true,
+  "callees": {
+    "f16::<impl f16>::to_bits": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unnecessary_transmutes"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unnecessary_transmutes\n"
+        ]
+      },
+      "doc": " Raw transmutation to `u16`.\n\n This is currently identical to `transmute::<f16, u16>(self)` on all platforms.\n\n See [`from_bits`](#method.from_bits) for some discussion of the\n portability of this operation (there are almost no issues).\n\n Note that this function is distinct from `as` casting, which attempts to\n preserve the *numeric* value, and not the bitwise value.\n\n ```\n #![feature(f16)]\n # #[cfg(all(target_arch = \"x86_64\", target_os = \"linux\"))] {\n\n # // FIXME(f16_f128): enable this once const casting works\n # // assert_ne!((1f16).to_bits(), 1f16 as u128); // to_bits() is not casting!\n assert_eq!((12.5f16).to_bits(), 0x4a40);\n # }\n ```\n",
+      "adt": {}
+    },
+    "cmp::Ord::cmp": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " This method returns an [`Ordering`] between `self` and `other`.\n\n By convention, `self.cmp(&other)` returns the ordering matching the expression\n `self <operator> other` if true.\n\n # Examples\n\n ```\n use std::cmp::Ordering;\n\n assert_eq!(5.cmp(&10), Ordering::Less);\n assert_eq!(10.cmp(&5), Ordering::Greater);\n assert_eq!(5.cmp(&5), Ordering::Equal);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "cmp::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 1679,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/f16.rs:1188:5: 1218:6",
+  "src": "pub const fn total_cmp(&self, other: &Self) -> crate::cmp::Ordering {\n        let mut left = self.to_bits() as i16;\n        let mut right = other.to_bits() as i16;\n\n        // In case of negatives, flip all the bits except the sign\n        // to achieve a similar layout as two's complement integers\n        //\n        // Why does this work? IEEE 754 floats consist of three fields:\n        // Sign bit, exponent and mantissa. The set of exponent and mantissa\n        // fields as a whole have the property that their bitwise order is\n        // equal to the numeric magnitude where the magnitude is defined.\n        // The magnitude is not normally defined on NaN values, but\n        // IEEE 754 totalOrder defines the NaN values also to follow the\n        // bitwise order. This leads to order explained in the doc comment.\n        // However, the representation of magnitude is the same for negative\n        // and positive numbers – only the sign bit is different.\n        // To easily compare the floats as signed integers, we need to\n        // flip the exponent and mantissa bits in case of negative numbers.\n        // We effectively convert the numbers to \"two's complement\" form.\n        //\n        // To do the flipping, we construct a mask and XOR against it.\n        // We branchlessly calculate an \"all-ones except for the sign bit\"\n        // mask from negative-signed values: right shifting sign-extends\n        // the integer, so we \"fill\" the mask with sign bits, and then\n        // convert to unsigned to push one more zero bit.\n        // On positive values, the mask is all zeros, so it's a no-op.\n        left ^= (((left >> 15) as u16) >> 1) as i16;\n        right ^= (((right >> 15) as u16) >> 1) as i16;\n\n        left.cmp(&right)\n    }",
+  "mir": "fn f16::<impl f16>::total_cmp(_1: &f16, _2: &f16) -> cmp::Ordering {\n    let mut _0: cmp::Ordering;\n    let mut _3: i16;\n    let mut _4: u16;\n    let mut _5: f16;\n    let mut _6: i16;\n    let mut _7: u16;\n    let mut _8: f16;\n    let mut _9: i16;\n    let mut _10: u16;\n    let mut _11: u16;\n    let mut _12: i16;\n    let mut _13: i16;\n    let mut _14: u32;\n    let mut _15: bool;\n    let mut _16: u32;\n    let mut _17: bool;\n    let mut _18: i16;\n    let mut _19: u16;\n    let mut _20: u16;\n    let mut _21: i16;\n    let mut _22: i16;\n    let mut _23: u32;\n    let mut _24: bool;\n    let mut _25: u32;\n    let mut _26: bool;\n    let mut _27: &i16;\n    let  _28: &i16;\n    debug self => _1;\n    debug other => _2;\n    debug left => _3;\n    debug right => _6;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = (*_1);\n        _4 = f16::<impl f16>::to_bits(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = move _4 as i16;\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = (*_2);\n        _7 = f16::<impl f16>::to_bits(move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        _6 = move _7 as i16;\n        StorageDead(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = _3;\n        _14 = 15_i32 as u32;\n        _15 = Lt(move _14, 16_u32);\n        assert(move _15, \"attempt to shift right by `{}`, which would overflow\", 15_i32) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _12 = Shr(move _13, 15_i32);\n        StorageDead(_13);\n        _11 = move _12 as u16;\n        StorageDead(_12);\n        _16 = 1_i32 as u32;\n        _17 = Lt(move _16, 16_u32);\n        assert(move _17, \"attempt to shift right by `{}`, which would overflow\", 1_i32) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _10 = Shr(move _11, 1_i32);\n        StorageDead(_11);\n        _9 = move _10 as i16;\n        StorageDead(_10);\n        _3 = BitXor(_3, move _9);\n        StorageDead(_9);\n        StorageLive(_18);\n        StorageLive(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = _6;\n        _23 = 15_i32 as u32;\n        _24 = Lt(move _23, 16_u32);\n        assert(move _24, \"attempt to shift right by `{}`, which would overflow\", 15_i32) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _21 = Shr(move _22, 15_i32);\n        StorageDead(_22);\n        _20 = move _21 as u16;\n        StorageDead(_21);\n        _25 = 1_i32 as u32;\n        _26 = Lt(move _25, 16_u32);\n        assert(move _26, \"attempt to shift right by `{}`, which would overflow\", 1_i32) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _19 = Shr(move _20, 1_i32);\n        StorageDead(_20);\n        _18 = move _19 as i16;\n        StorageDead(_19);\n        _6 = BitXor(_6, move _18);\n        StorageDead(_18);\n        StorageLive(_27);\n        _27 = &_3;\n        _28 = &_6;\n        _0 = <i16 as cmp::Ord>::cmp(move _27, _28) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_27);\n        StorageDead(_6);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Returns the ordering between `self` and `other`.\n\n Unlike the standard partial comparison between floating point numbers,\n this comparison always produces an ordering in accordance to\n the `totalOrder` predicate as defined in the IEEE 754 (2008 revision)\n floating point standard. The values are ordered in the following sequence:\n\n - negative quiet NaN\n - negative signaling NaN\n - negative infinity\n - negative numbers\n - negative subnormal numbers\n - negative zero\n - positive zero\n - positive subnormal numbers\n - positive numbers\n - positive infinity\n - positive signaling NaN\n - positive quiet NaN.\n\n The ordering established by this function does not always agree with the\n [`PartialOrd`] and [`PartialEq`] implementations of `f16`. For example,\n they consider negative and positive zero equal, while `total_cmp`\n doesn't.\n\n The interpretation of the signaling NaN bit follows the definition in\n the IEEE 754 standard, which may not match the interpretation by some of\n the older, non-conformant (e.g. MIPS) hardware implementations.\n\n # Example\n\n ```\n #![feature(f16)]\n # // FIXME(f16_f128): extendhfsf2, truncsfhf2, __gnu_h2f_ieee, __gnu_f2h_ieee missing for many platforms\n # #[cfg(all(target_arch = \"x86_64\", target_os = \"linux\"))] {\n\n struct GoodBoy {\n     name: &'static str,\n     weight: f16,\n }\n\n let mut bois = vec![\n     GoodBoy { name: \"Pucci\", weight: 0.1 },\n     GoodBoy { name: \"Woofer\", weight: 99.0 },\n     GoodBoy { name: \"Yapper\", weight: 10.0 },\n     GoodBoy { name: \"Chonk\", weight: f16::INFINITY },\n     GoodBoy { name: \"Abs. Unit\", weight: f16::NAN },\n     GoodBoy { name: \"Floaty\", weight: -5.0 },\n ];\n\n bois.sort_by(|a, b| a.weight.total_cmp(&b.weight));\n\n // `f16::NAN` could be positive or negative, which will affect the sort order.\n if f16::NAN.is_sign_negative() {\n     bois.into_iter().map(|b| b.weight)\n         .zip([f16::NAN, -5.0, 0.1, 10.0, 99.0, f16::INFINITY].iter())\n         .for_each(|(a, b)| assert_eq!(a.to_bits(), b.to_bits()))\n } else {\n     bois.into_iter().map(|b| b.weight)\n         .zip([-5.0, 0.1, 10.0, 99.0, f16::INFINITY, f16::NAN].iter())\n         .for_each(|(a, b)| assert_eq!(a.to_bits(), b.to_bits()))\n }\n # }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

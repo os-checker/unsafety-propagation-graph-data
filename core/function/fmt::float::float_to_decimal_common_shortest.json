@@ -1,0 +1,92 @@
+{
+  "name": "fmt::float::float_to_decimal_common_shortest",
+  "safe": true,
+  "callees": {
+    "mem::maybe_uninit::MaybeUninit::<T>::uninit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `MaybeUninit<T>` in an uninitialized state.\n\n Note that dropping a `MaybeUninit<T>` will never call `T`'s drop code.\n It is your responsibility to make sure `T` gets dropped if it got initialized.\n\n See the [type-level documentation][MaybeUninit] for some examples.\n\n # Example\n\n ```\n use std::mem::MaybeUninit;\n\n let v: MaybeUninit<String> = MaybeUninit::uninit();\n ```\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "Constructor"
+      }
+    },
+    "convert::Into::into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "num::flt2dec::to_shortest_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Formats the given floating point number into the decimal form with at least\n given number of fractional digits. The result is stored to the supplied parts\n array while utilizing given byte buffer as a scratch. `upper` is currently\n unused but left for the future decision to change the case of non-finite values,\n i.e., `inf` and `nan`. The first part to be rendered is always a `Part::Sign`\n (which can be an empty string if no sign is rendered).\n\n `format_shortest` should be the underlying digit-generation function.\n It should return the part of the buffer that it initialized.\n You probably would want `strategy::grisu::format_shortest` for this.\n\n `frac_digits` can be less than the number of actual fractional digits in `v`;\n it will be ignored and full digits will be printed. It is only used to print\n additional zeroes after rendered digits. Thus `frac_digits` of 0 means that\n it will only print given digits and nothing else.\n\n The byte buffer should be at least `MAX_SIG_DIGITS` bytes long.\n There should be at least 4 parts available, due to the worst case like\n `[+][0.][0000][2][0000]` with `frac_digits = 10`.\n",
+      "adt": {
+        "num::fmt::Formatted": "Constructor"
+      }
+    },
+    "num::flt2dec::strategy::grisu::format_shortest": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The shortest mode implementation for Grisu with Dragon fallback.\n\n This should be used for most cases.\n",
+      "adt": {}
+    },
+    "fmt::Formatter::<'a>::pad_formatted_parts": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes the formatted parts and applies the padding.\n\n Assumes that the caller already has rendered the parts with required precision,\n so that `self.precision` can be ignored.\n\n # Safety\n\n Any `numfmt::Part::Copy` parts in `formatted` must contain valid UTF-8.\n",
+      "adt": {
+        "num::fmt::Formatted": "ImmutableAsArgument",
+        "fmt::Formatter": "MutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "mem::maybe_uninit::MaybeUninit": [
+      "Plain"
+    ],
+    "num::flt2dec::Sign": [
+      "Plain"
+    ],
+    "num::fmt::Formatted": [
+      "Plain",
+      "Ref"
+    ],
+    "fmt::Formatter": [
+      "MutRef"
+    ],
+    "result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 12941,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/float.rs:56:1: 79:2",
+  "src": "fn float_to_decimal_common_shortest<T>(\n    fmt: &mut Formatter<'_>,\n    num: &T,\n    sign: flt2dec::Sign,\n    precision: u16,\n) -> Result\nwhere\n    T: flt2dec::DecodableFloat,\n{\n    // enough for f32 and f64\n    let mut buf: [MaybeUninit<u8>; flt2dec::MAX_SIG_DIGITS] =\n        [MaybeUninit::uninit(); flt2dec::MAX_SIG_DIGITS];\n    let mut parts: [MaybeUninit<numfmt::Part<'_>>; 4] = [MaybeUninit::uninit(); 4];\n    let formatted = flt2dec::to_shortest_str(\n        flt2dec::strategy::grisu::format_shortest,\n        *num,\n        sign,\n        precision.into(),\n        &mut buf,\n        &mut parts,\n    );\n    // SAFETY: `to_shortest_str` and `format_shortest` produce only ASCII characters.\n    unsafe { fmt.pad_formatted_parts(&formatted) }\n}",
+  "mir": "fn fmt::float::float_to_decimal_common_shortest(_1: &mut fmt::Formatter<'_>, _2: &T, _3: num::flt2dec::Sign, _4: u16) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    let mut _5: [mem::maybe_uninit::MaybeUninit<u8>; 17];\n    let mut _6: mem::maybe_uninit::MaybeUninit<u8>;\n    let mut _7: [mem::maybe_uninit::MaybeUninit<num::fmt::Part<'_>>; 4];\n    let mut _8: mem::maybe_uninit::MaybeUninit<num::fmt::Part<'_>>;\n    let  _9: num::fmt::Formatted<'_>;\n    let mut _10: T;\n    let mut _11: usize;\n    let mut _12: &mut [mem::maybe_uninit::MaybeUninit<u8>];\n    let mut _13: &mut [mem::maybe_uninit::MaybeUninit<u8>; 17];\n    let mut _14: &mut [mem::maybe_uninit::MaybeUninit<num::fmt::Part<'_>>];\n    let mut _15: &mut [mem::maybe_uninit::MaybeUninit<num::fmt::Part<'_>>; 4];\n    let  _16: &num::fmt::Formatted<'_>;\n    debug fmt => _1;\n    debug num => _2;\n    debug sign => _3;\n    debug precision => _4;\n    debug buf => _5;\n    debug parts => _7;\n    debug formatted => _9;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = mem::maybe_uninit::MaybeUninit::<u8>::uninit() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = [move _6; 17];\n        StorageDead(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = mem::maybe_uninit::MaybeUninit::<num::fmt::Part<'_>>::uninit() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _7 = [move _8; 4];\n        StorageDead(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = (*_2);\n        StorageLive(_11);\n        _11 = <u16 as convert::Into<usize>>::into(_4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_12);\n        _13 = &mut _5;\n        _12 = _13 as &mut [mem::maybe_uninit::MaybeUninit<u8>];\n        StorageLive(_14);\n        _15 = &mut _7;\n        _14 = _15 as &mut [mem::maybe_uninit::MaybeUninit<num::fmt::Part<'_>>];\n        _9 = num::flt2dec::to_shortest_str::<'_, T, for<'b, 'a> fn(&'b num::flt2dec::decoder::Decoded, &'a mut [mem::maybe_uninit::MaybeUninit<u8>]) -> (&'a [u8], i16) {num::flt2dec::strategy::grisu::format_shortest}>(num::flt2dec::strategy::grisu::format_shortest, move _10, _3, move _11, move _12, move _14) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_14);\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        _16 = &_9;\n        _0 = fmt::Formatter::<'_>::pad_formatted_parts(_1, _16) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        StorageDead(_7);\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

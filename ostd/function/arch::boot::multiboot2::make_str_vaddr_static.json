@@ -1,0 +1,81 @@
+{
+  "name": "arch::boot::multiboot2::make_str_vaddr_static",
+  "safe": false,
+  "callees": {
+    "core::str::<impl str>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a string slice to a raw pointer.\n\n As string slices are a slice of bytes, the raw pointer points to a\n [`u8`]. This pointer will be pointing to the first byte of the string\n slice.\n\n The caller must ensure that the returned pointer is never written to.\n If you need to mutate the contents of the string slice, use [`as_mut_ptr`].\n\n [`as_mut_ptr`]: str::as_mut_ptr\n\n # Examples\n\n ```\n let s = \"Hello\";\n let ptr = s.as_ptr();\n ```\n",
+      "adt": {}
+    },
+    "mm::kspace::paddr_to_vaddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Convert physical address to virtual address using offset, only available inside `ostd`\n",
+      "adt": {}
+    },
+    "core::str::<impl str>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of `self`.\n\n This length is in bytes, not [`char`]s or graphemes. In other words,\n it might not be what a human considers the length of the string.\n\n [`char`]: prim@char\n\n # Examples\n\n ```\n let len = \"foo\".len();\n assert_eq!(3, len);\n\n assert_eq!(\"ƒoo\".len(), 4); // fancy f!\n assert_eq!(\"ƒoo\".chars().count(), 3);\n ```\n",
+      "adt": {}
+    },
+    "core::slice::from_raw_parts": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forms a slice from a pointer and a length.\n\n The `len` argument is the number of **elements**, not the number of bytes.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for reads for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations. See [below](#incorrect-usage)\n       for an example incorrectly not taking this into account.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be mutated for the duration\n   of lifetime `'a`, except inside an `UnsafeCell`.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n # Caveat\n\n The lifetime for the returned slice is inferred from its usage. To\n prevent accidental misuse, it's suggested to tie the lifetime to whichever\n source lifetime is safe in the context, such as by providing a helper\n function taking the lifetime of a host value for the slice, or by explicit\n annotation.\n\n # Examples\n\n ```\n use std::slice;\n\n // manifest a slice for a single element\n let x = 42;\n let ptr = &x as *const _;\n let slice = unsafe { slice::from_raw_parts(ptr, 1) };\n assert_eq!(slice[0], 42);\n ```\n\n ### Incorrect usage\n\n The following `join_slices` function is **unsound** ⚠️\n\n ```rust,no_run\n use std::slice;\n\n fn join_slices<'a, T>(fst: &'a [T], snd: &'a [T]) -> &'a [T] {\n     let fst_end = fst.as_ptr().wrapping_add(fst.len());\n     let snd_start = snd.as_ptr();\n     assert_eq!(fst_end, snd_start, \"Slices must be contiguous!\");\n     unsafe {\n         // The assertion above ensures `fst` and `snd` are contiguous, but they might\n         // still be contained within _different allocations_, in which case\n         // creating this slice is undefined behavior.\n         slice::from_raw_parts(fst.as_ptr(), fst.len() + snd.len())\n     }\n }\n\n fn main() {\n     // `a` and `b` are different allocations...\n     let a = 42;\n     let b = 27;\n     // ... which may nevertheless be laid out contiguously in memory: | a | b |\n     let _ = join_slices(slice::from_ref(&a), slice::from_ref(&b)); // UB\n }\n ```\n\n ### FFI: Handling null pointers\n\n In languages such as C++, pointers to empty collections are not guaranteed to be non-null.\n When accepting such pointers, they have to be checked for null-ness to avoid undefined\n behavior.\n\n ```\n use std::slice;\n\n /// Sum the elements of an FFI slice.\n ///\n /// # Safety\n ///\n /// If ptr is not NULL, it must be correctly aligned and\n /// point to `len` initialized items of type `f32`.\n unsafe extern \"C\" fn sum_slice(ptr: *const f32, len: usize) -> f32 {\n     let data = if ptr.is_null() {\n         // `len` is assumed to be 0.\n         &[]\n     } else {\n         // SAFETY: see function docstring.\n         unsafe { slice::from_raw_parts(ptr, len) }\n     };\n     data.into_iter().sum()\n }\n\n // This could be the result of C++'s std::vector::data():\n let ptr = std::ptr::null();\n // And this could be std::vector::size():\n let len = 0;\n assert_eq!(unsafe { sum_slice(ptr, len) }, 0.0);\n ```\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    },
+    "core::str::from_utf8": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a slice of bytes to a string slice.\n\n This is an alias to [`str::from_utf8`].\n\n A string slice ([`&str`]) is made of bytes ([`u8`]), and a byte slice\n ([`&[u8]`][byteslice]) is made of bytes, so this function converts between\n the two. Not all byte slices are valid string slices, however: [`&str`] requires\n that it is valid UTF-8. `from_utf8()` checks to ensure that the bytes are valid\n UTF-8, and then does the conversion.\n\n [`&str`]: str\n [byteslice]: slice\n\n If you are sure that the byte slice is valid UTF-8, and you don't want to\n incur the overhead of the validity check, there is an unsafe version of\n this function, [`from_utf8_unchecked`], which has the same\n behavior but skips the check.\n\n If you need a `String` instead of a `&str`, consider\n [`String::from_utf8`][string].\n\n [string]: ../../std/string/struct.String.html#method.from_utf8\n\n Because you can stack-allocate a `[u8; N]`, and you can take a\n [`&[u8]`][byteslice] of it, this function is one way to have a\n stack-allocated string. There is an example of this in the\n examples section below.\n\n [byteslice]: slice\n\n # Errors\n\n Returns `Err` if the slice is not UTF-8 with a description as to why the\n provided slice is not UTF-8.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::str;\n\n // some bytes, in a vector\n let sparkle_heart = vec![240, 159, 146, 150];\n\n // We can use the ? (try) operator to check if the bytes are valid\n let sparkle_heart = str::from_utf8(&sparkle_heart)?;\n\n assert_eq!(\"💖\", sparkle_heart);\n # Ok::<_, str::Utf8Error>(())\n ```\n\n Incorrect bytes:\n\n ```\n use std::str;\n\n // some invalid bytes, in a vector\n let sparkle_heart = vec![0, 159, 146, 150];\n\n assert!(str::from_utf8(&sparkle_heart).is_err());\n ```\n\n See the docs for [`Utf8Error`] for more details on the kinds of\n errors that can be returned.\n\n A \"stack allocated string\":\n\n ```\n use std::str;\n\n // some bytes, in a stack-allocated array\n let sparkle_heart = [240, 159, 146, 150];\n\n // We know these bytes are valid, so just use `unwrap()`.\n let sparkle_heart: &str = str::from_utf8(&sparkle_heart).unwrap();\n\n assert_eq!(\"💖\", sparkle_heart);\n ```\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 159,
+  "span": "ostd/src/arch/x86/boot/multiboot2/mod.rs:31:1: 38:2",
+  "src": "unsafe fn make_str_vaddr_static(str: &str) -> &'static str {\n    let vaddr = paddr_to_vaddr(str.as_ptr() as Paddr);\n\n    // SAFETY: The safety is upheld by the caller.\n    let bytes = unsafe { core::slice::from_raw_parts(vaddr as *const u8, str.len()) };\n\n    core::str::from_utf8(bytes).unwrap()\n}",
+  "mir": "fn arch::boot::multiboot2::make_str_vaddr_static(_1: &str) -> &str {\n    let mut _0: &str;\n    let  _2: usize;\n    let mut _3: usize;\n    let mut _4: *const u8;\n    let  _5: &[u8];\n    let mut _6: *const u8;\n    let mut _7: usize;\n    let mut _8: core::result::Result<&str, core::str::Utf8Error>;\n    debug str => _1;\n    debug vaddr => _2;\n    debug bytes => _5;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = core::str::<impl str>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = move _4 as usize;\n        StorageDead(_4);\n        _2 = mm::kspace::paddr_to_vaddr(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_6);\n        _6 = _2 as *const u8;\n        StorageLive(_7);\n        _7 = core::str::<impl str>::len(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _5 = core::slice::from_raw_parts::<'_, u8>(move _6, move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageLive(_8);\n        _8 = core::str::from_utf8(_5) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = core::result::Result::<&str, core::str::Utf8Error>::unwrap(move _8) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_8);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

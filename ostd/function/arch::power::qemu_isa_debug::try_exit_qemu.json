@@ -1,0 +1,53 @@
+{
+  "name": "arch::power::qemu_isa_debug::try_exit_qemu",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the inner value if the [`Once`] has been initialized.\n",
+      "adt": {}
+    },
+    "io::io_port::IoPort::<T, A>::write": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes to the I/O port\n",
+      "adt": {
+        "io::io_port::IoPort": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "power::ExitCode": [
+      "Plain"
+    ],
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 2559, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 2563, kind: RigidTy(Adt(AdtDef(DefId { id: 3366, name: \"io::io_port::IoPort\" }), GenericArgs([Type(Ty { id: 9, kind: RigidTy(Uint(U32)) }), Type(Ty { id: 874, kind: RigidTy(Adt(AdtDef(DefId { id: 4322, name: \"x86_64::instructions::port::WriteOnlyAccess\" }), GenericArgs([]))) })]))) }, Not)) })])"
+    ],
+    "io::io_port::IoPort": [
+      "Ref"
+    ]
+  },
+  "path": 1398,
+  "span": "ostd/src/arch/x86/power.rs:27:5: 37:6",
+  "src": "fn try_exit_qemu(code: ExitCode) {\n        let value = match code {\n            ExitCode::Success => EXIT_SUCCESS,\n            ExitCode::Failure => EXIT_FAILURE,\n        };\n\n        // If possible, keep this method panic-free because it may be called by the panic handler.\n        if let Some(port) = DEBUG_EXIT_PORT.get() {\n            port.write(value);\n        }\n    }",
+  "mir": "fn arch::power::qemu_isa_debug::try_exit_qemu(_1: power::ExitCode) -> () {\n    let mut _0: ();\n    let  _2: u32;\n    let mut _3: isize;\n    let mut _4: core::option::Option<&io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>>;\n    let mut _5: &spin::once::Once<io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>>;\n    let mut _6: isize;\n    let  _7: &io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>;\n    let  _8: ();\n    let mut _9: u32;\n    debug code => _1;\n    debug value => _2;\n    debug port => _7;\n    bb0: {\n        StorageLive(_2);\n        _3 = discriminant(_1);\n        switchInt(move _3) -> [0: bb3, 1: bb2, otherwise: bb1];\n    }\n    bb1: {\n        unreachable;\n    }\n    bb2: {\n        _2 = arch::power::qemu_isa_debug::EXIT_FAILURE;\n        goto -> bb4;\n    }\n    bb3: {\n        _2 = arch::power::qemu_isa_debug::EXIT_SUCCESS;\n        goto -> bb4;\n    }\n    bb4: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = {alloc503: &spin::once::Once<io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>>};\n        _4 = spin::once::Once::<io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>>::get(move _5) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_5);\n        _6 = discriminant(_4);\n        switchInt(move _6) -> [1: bb6, 0: bb8, otherwise: bb1];\n    }\n    bb6: {\n        _7 = ((_4 as variant#1).0: &io::io_port::IoPort<u32, x86_64::instructions::port::WriteOnlyAccess>);\n        StorageLive(_9);\n        _9 = _2;\n        _8 = io::io_port::IoPort::<u32, x86_64::instructions::port::WriteOnlyAccess>::write(_7, move _9) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_9);\n        StorageDead(_4);\n        goto -> bb9;\n    }\n    bb8: {\n        StorageDead(_4);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

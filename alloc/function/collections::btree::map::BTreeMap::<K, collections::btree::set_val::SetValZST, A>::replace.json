@@ -1,0 +1,154 @@
+{
+  "name": "collections::btree::map::BTreeMap::<K, collections::btree::set_val::SetValZST, A>::replace",
+  "safe": true,
+  "callees": {
+    "collections::btree::borrow::DormantMutRef::<'a, T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Capture a unique borrow, and immediately reborrow it. For the compiler,\n the lifetime of the new reference is the same as the lifetime of the\n original reference, but you promise to use it for a shorter period.\n",
+      "adt": {
+        "collections::btree::borrow::DormantMutRef": "Constructor"
+      }
+    },
+    "core::option::Option::<T>::get_or_insert_with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Inserts a value computed from `f` into the option if it is [`None`],\n then returns a mutable reference to the contained value.\n\n # Examples\n\n ```\n let mut x = None;\n\n {\n     let y: &mut u32 = x.get_or_insert_with(|| 5);\n     assert_eq!(y, &5);\n\n     *y = 7;\n }\n\n assert_eq!(x, Some(7));\n ```\n",
+      "adt": {}
+    },
+    "collections::btree::node::NodeRef::<collections::btree::node::marker::Owned, K, V, Type>::borrow_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably borrows the owned root node. Unlike `reborrow_mut`, this is safe\n because the return value cannot be used to destroy the root, and there\n cannot be other references to the tree.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "Constructor"
+      }
+    },
+    "collections::btree::search::<impl collections::btree::node::NodeRef<BorrowType, K, V, collections::btree::node::marker::LeafOrInternal>>::search_tree": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Looks up a given key in a (sub)tree headed by the node, recursively.\n Returns a `Found` with the handle of the matching KV, if any. Otherwise,\n returns a `GoDown` with the handle of the leaf edge where the key belongs.\n\n The result is meaningful only if the tree is ordered by key, like the tree\n in a `BTreeMap` is.\n",
+      "adt": {
+        "collections::btree::search::SearchResult": "Constructor"
+      }
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "collections::btree::node::Handle::<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'a>, K, V, NodeType>, collections::btree::node::marker::KV>::key_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::btree::node::Handle": "MutableAsArgument"
+      }
+    },
+    "core::mem::replace": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Moves `src` into the referenced `dest`, returning the previous `dest` value.\n\n Neither value is dropped.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a default value, see [`take`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::replace(&mut v, vec![3, 4, 5]);\n assert_eq!(vec![1, 2], old_v);\n assert_eq!(vec![3, 4, 5], v);\n ```\n\n `replace` allows consumption of a struct field by replacing it with another value.\n Without `replace` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let t = self.buf[i];\n         self.buf[i] = v;\n         t\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so we can't even clone `self.buf[i]` to\n avoid the move. But `replace` can be used to disassociate the original value at that index from\n `self`, allowing it to be returned:\n\n ```\n # #![allow(dead_code)]\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         mem::replace(&mut self.buf[i], v)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf[0], 0);\n\n assert_eq!(buffer.replace_index(0, 2), 0);\n assert_eq!(buffer.buf[0], 2);\n ```\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "collections::btree::map::entry::VacantEntry::<'a, K, V, A>::insert": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets the value of the entry with the `VacantEntry`'s key,\n and returns a mutable reference to it.\n\n # Examples\n\n ```\n use std::collections::BTreeMap;\n use std::collections::btree_map::Entry;\n\n let mut map: BTreeMap<&str, u32> = BTreeMap::new();\n\n if let Entry::Vacant(o) = map.entry(\"poneyland\") {\n     o.insert(37);\n }\n assert_eq!(map[\"poneyland\"], 37);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::btree::map::BTreeMap": [
+      "MutRef",
+      "MutRefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))"
+    ],
+    "collections::btree::borrow::DormantMutRef": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 2888, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 2917, kind: RigidTy(Adt(AdtDef(DefId { id: 3598, name: \"collections::btree::map::BTreeMap\" }), GenericArgs([Type(Ty { id: 2376, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 2902, kind: RigidTy(Adt(AdtDef(DefId { id: 3628, name: \"collections::btree::set_val::SetValZST\" }), GenericArgs([]))) }), Type(Ty { id: 21, kind: Param(ParamTy { index: 1, name: \"A\" }) })]))) }, Mut)) })])",
+      "Unknown([Field(1, Ty { id: 2889, kind: RigidTy(Adt(AdtDef(DefId { id: 3504, name: \"collections::btree::borrow::DormantMutRef\" }), GenericArgs([Lifetime(Region { kind: ReErased }), Type(Ty { id: 2917, kind: RigidTy(Adt(AdtDef(DefId { id: 3598, name: \"collections::btree::map::BTreeMap\" }), GenericArgs([Type(Ty { id: 2376, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 2902, kind: RigidTy(Adt(AdtDef(DefId { id: 3628, name: \"collections::btree::set_val::SetValZST\" }), GenericArgs([]))) }), Type(Ty { id: 21, kind: Param(ParamTy { index: 1, name: \"A\" }) })]))) })]))) })])"
+    ],
+    "core::option::Option": [
+      "MutRef",
+      "Plain"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Ref"
+    ],
+    "collections::btree::node::NodeRef": [
+      "MutRef",
+      "Plain"
+    ],
+    "collections::btree::search::SearchResult": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 2897, kind: RigidTy(Adt(AdtDef(DefId { id: 3487, name: \"collections::btree::node::Handle\" }), GenericArgs([Type(Ty { id: 2919, kind: RigidTy(Adt(AdtDef(DefId { id: 3478, name: \"collections::btree::node::NodeRef\" }), GenericArgs([Type(Ty { id: 2425, kind: RigidTy(Adt(AdtDef(DefId { id: 3498, name: \"collections::btree::node::marker::Mut\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) }), Type(Ty { id: 2376, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 2902, kind: RigidTy(Adt(AdtDef(DefId { id: 3628, name: \"collections::btree::set_val::SetValZST\" }), GenericArgs([]))) }), Type(Ty { id: 2427, kind: RigidTy(Adt(AdtDef(DefId { id: 3605, name: \"collections::btree::node::marker::Leaf\" }), GenericArgs([]))) })]))) }), Type(Ty { id: 2426, kind: RigidTy(Adt(AdtDef(DefId { id: 3500, name: \"collections::btree::node::marker::Edge\" }), GenericArgs([]))) })]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 2899, kind: RigidTy(Adt(AdtDef(DefId { id: 3487, name: \"collections::btree::node::Handle\" }), GenericArgs([Type(Ty { id: 2906, kind: RigidTy(Adt(AdtDef(DefId { id: 3478, name: \"collections::btree::node::NodeRef\" }), GenericArgs([Type(Ty { id: 2425, kind: RigidTy(Adt(AdtDef(DefId { id: 3498, name: \"collections::btree::node::marker::Mut\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) }), Type(Ty { id: 2376, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 2902, kind: RigidTy(Adt(AdtDef(DefId { id: 3628, name: \"collections::btree::set_val::SetValZST\" }), GenericArgs([]))) }), Type(Ty { id: 2383, kind: RigidTy(Adt(AdtDef(DefId { id: 3525, name: \"collections::btree::node::marker::LeafOrInternal\" }), GenericArgs([]))) })]))) }), Type(Ty { id: 2548, kind: RigidTy(Adt(AdtDef(DefId { id: 3539, name: \"collections::btree::node::marker::KV\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "collections::btree::node::Handle": [
+      "Plain",
+      "MutRef"
+    ],
+    "collections::btree::map::entry::VacantEntry": [
+      "Plain"
+    ],
+    "collections::btree::set_val::SetValZST": [
+      "MutRef"
+    ]
+  },
+  "path": 630,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/map.rs:313:5: 334:6",
+  "src": "pub(super) fn replace(&mut self, key: K) -> Option<K>\n    where\n        K: Ord,\n    {\n        let (map, dormant_map) = DormantMutRef::new(self);\n        let root_node =\n            map.root.get_or_insert_with(|| Root::new((*map.alloc).clone())).borrow_mut();\n        match root_node.search_tree::<K>(&key) {\n            Found(mut kv) => Some(mem::replace(kv.key_mut(), key)),\n            GoDown(handle) => {\n                VacantEntry {\n                    key,\n                    handle: Some(handle),\n                    dormant_map,\n                    alloc: (*map.alloc).clone(),\n                    _marker: PhantomData,\n                }\n                .insert(SetValZST);\n                None\n            }\n        }\n    }",
+  "mir": "fn collections::btree::map::BTreeMap::<K, collections::btree::set_val::SetValZST, A>::replace(_1: &mut collections::btree::map::BTreeMap<K, collections::btree::set_val::SetValZST, A>, _2: K) -> core::option::Option<K> {\n    let mut _0: core::option::Option<K>;\n    let  _3: &mut collections::btree::map::BTreeMap<K, collections::btree::set_val::SetValZST, A>;\n    let  _4: collections::btree::borrow::DormantMutRef<'_, collections::btree::map::BTreeMap<K, collections::btree::set_val::SetValZST, A>>;\n    let mut _5: (&mut collections::btree::map::BTreeMap<K, collections::btree::set_val::SetValZST, A>, collections::btree::borrow::DormantMutRef<'_, collections::btree::map::BTreeMap<K, collections::btree::set_val::SetValZST, A>>);\n    let  _6: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::LeafOrInternal>;\n    let mut _7: &mut collections::btree::node::NodeRef<collections::btree::node::marker::Owned, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::LeafOrInternal>;\n    let mut _8: &mut core::option::Option<collections::btree::node::NodeRef<collections::btree::node::marker::Owned, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::LeafOrInternal>>;\n    let mut _9: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/map.rs:319:41: 319:43};\n    let mut _10: &core::mem::ManuallyDrop<A>;\n    let mut _11: collections::btree::search::SearchResult<collections::btree::node::marker::Mut<'_>, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::LeafOrInternal, collections::btree::node::marker::Leaf>;\n    let  _12: &K;\n    let mut _13: isize;\n    let mut _14: collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::LeafOrInternal>, collections::btree::node::marker::KV>;\n    let mut _15: K;\n    let mut _16: &mut K;\n    let mut _17: &mut collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::LeafOrInternal>, collections::btree::node::marker::KV>;\n    let mut _18: K;\n    let  _19: collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::Leaf>, collections::btree::node::marker::Edge>;\n    let  _20: &mut collections::btree::set_val::SetValZST;\n    let mut _21: collections::btree::map::entry::VacantEntry<'_, K, collections::btree::set_val::SetValZST, A>;\n    let mut _22: K;\n    let mut _23: core::option::Option<collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::Leaf>, collections::btree::node::marker::Edge>>;\n    let mut _24: A;\n    let  _25: &A;\n    let mut _26: &core::mem::ManuallyDrop<A>;\n    debug self => _1;\n    debug key => _2;\n    debug map => _3;\n    debug dormant_map => _4;\n    debug root_node => _6;\n    debug kv => _14;\n    debug handle => _19;\n    bb0: {\n        StorageLive(_5);\n        _5 = collections::btree::borrow::DormantMutRef::<'_, collections::btree::map::BTreeMap<K, collections::btree::set_val::SetValZST, A>>::new(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        _3 = move (_5.0: &mut collections::btree::map::BTreeMap<K, collections::btree::set_val::SetValZST, A>);\n        _4 = move (_5.1: collections::btree::borrow::DormantMutRef<'_, collections::btree::map::BTreeMap<K, collections::btree::set_val::SetValZST, A>>);\n        StorageDead(_5);\n        StorageLive(_8);\n        _8 = &mut ((*_3).0: core::option::Option<collections::btree::node::NodeRef<collections::btree::node::marker::Owned, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::LeafOrInternal>>);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &((*_3).2: core::mem::ManuallyDrop<A>);\n        _9 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/map.rs:319:41: 319:43}(move _10);\n        StorageDead(_10);\n        _7 = core::option::Option::<collections::btree::node::NodeRef<collections::btree::node::marker::Owned, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::LeafOrInternal>>::get_or_insert_with::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/map.rs:319:41: 319:43}>(move _8, move _9) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_9);\n        StorageDead(_8);\n        _6 = collections::btree::node::NodeRef::<collections::btree::node::marker::Owned, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::LeafOrInternal>::borrow_mut(_7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_11);\n        _12 = &_2;\n        _11 = collections::btree::search::<impl collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::LeafOrInternal>>::search_tree::<K>(_6, _12) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _13 = discriminant(_11);\n        switchInt(move _13) -> [0: bb7, 1: bb6, otherwise: bb5];\n    }\n    bb5: {\n        unreachable;\n    }\n    bb6: {\n        _19 = move ((_11 as variant#1).0: collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::Leaf>, collections::btree::node::marker::Edge>);\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = move _2;\n        StorageLive(_23);\n        _23 = core::option::Option::Some(_19);\n        StorageLive(_24);\n        StorageLive(_26);\n        _26 = &((*_3).2: core::mem::ManuallyDrop<A>);\n        _25 = <core::mem::ManuallyDrop<A> as core::ops::Deref>::deref(move _26) -> [return: bb10, unwind unreachable];\n    }\n    bb7: {\n        StorageLive(_14);\n        _14 = move ((_11 as variant#0).0: collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::LeafOrInternal>, collections::btree::node::marker::KV>);\n        StorageLive(_15);\n        StorageLive(_17);\n        _17 = &mut _14;\n        _16 = collections::btree::node::Handle::<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, collections::btree::set_val::SetValZST, collections::btree::node::marker::LeafOrInternal>, collections::btree::node::marker::KV>::key_mut(move _17) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_17);\n        StorageLive(_18);\n        _18 = move _2;\n        _15 = core::mem::replace::<K>(_16, move _18) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_18);\n        _0 = core::option::Option::Some(move _15);\n        StorageDead(_15);\n        StorageDead(_14);\n        goto -> bb13;\n    }\n    bb10: {\n        StorageDead(_26);\n        _24 = <A as core::clone::Clone>::clone(_25) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _21 = VacantEntry(move _22, move _23, _4, move _24, ZeroSized: core::marker::PhantomData<&mut (K, collections::btree::set_val::SetValZST)>);\n        StorageDead(_24);\n        StorageDead(_23);\n        StorageDead(_22);\n        _20 = collections::btree::map::entry::VacantEntry::<'_, K, collections::btree::set_val::SetValZST, A>::insert(move _21, collections::btree::set_val::SetValZST) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_21);\n        StorageDead(_20);\n        _0 = core::option::Option::None;\n        goto -> bb13;\n    }\n    bb13: {\n        StorageDead(_11);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

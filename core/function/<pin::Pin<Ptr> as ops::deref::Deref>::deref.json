@@ -1,0 +1,44 @@
+{
+  "name": "<pin::Pin<Ptr> as ops::deref::Deref>::deref",
+  "safe": true,
+  "callees": {
+    "pin::Pin::<Ptr>::as_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a shared reference to the pinned value this [`Pin`] points to.\n\n This is a generic method to go from `&Pin<Pointer<T>>` to `Pin<&T>`.\n It is safe because, as part of the contract of `Pin::new_unchecked`,\n the pointee cannot move after `Pin<Pointer<T>>` got created.\n \"Malicious\" implementations of `Pointer::Deref` are likewise\n ruled out by the contract of `Pin::new_unchecked`.\n",
+      "adt": {
+        "pin::Pin": "Constructor"
+      }
+    },
+    "pin::Pin::<&'a T>::get_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a shared reference out of a pin.\n\n This is safe because it is not possible to move out of a shared reference.\n It may seem like there is an issue here with interior mutability: in fact,\n it *is* possible to move a `T` out of a `&RefCell<T>`. However, this is\n not a problem as long as there does not also exist a `Pin<&T>` pointing\n to the inner `T` inside the `RefCell`, and `RefCell<T>` does not let you get a\n `Pin<&T>` pointer to its contents. See the discussion on [\"pinning projections\"]\n for further details.\n\n Note: `Pin` also implements `Deref` to the target, which can be used\n to access the inner value. However, `Deref` only provides a reference\n that lives for as long as the borrow of the `Pin`, not the lifetime of\n the reference contained in the `Pin`. This method allows turning the `Pin` into a reference\n with the same lifetime as the reference it wraps.\n\n [\"pinning projections\"]: self#projections-and-structural-pinning\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "pin::Pin": [
+      "Ref",
+      "Plain"
+    ]
+  },
+  "path": 15899,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/pin.rs:1687:5: 1689:6",
+  "src": "fn deref(&self) -> &Ptr::Target {\n        Pin::get_ref(Pin::as_ref(self))\n    }",
+  "mir": "fn <pin::Pin<Ptr> as ops::deref::Deref>::deref(_1: &pin::Pin<Ptr>) -> &<Ptr as ops::deref::Deref>::Target {\n    let mut _0: &<Ptr as ops::deref::Deref>::Target;\n    let mut _2: pin::Pin<&<Ptr as ops::deref::Deref>::Target>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = pin::Pin::<Ptr>::as_ref(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = pin::Pin::<&<Ptr as ops::deref::Deref>::Target>::get_ref(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

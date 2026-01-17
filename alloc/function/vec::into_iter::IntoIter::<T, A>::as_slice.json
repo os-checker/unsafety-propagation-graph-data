@@ -1,0 +1,55 @@
+{
+  "name": "vec::into_iter::IntoIter::<T, A>::as_slice",
+  "safe": true,
+  "callees": {
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::ExactSizeIterator::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the exact remaining length of the iterator.\n\n The implementation ensures that the iterator will return exactly `len()`\n more times a [`Some(T)`] value, before returning [`None`].\n This method has a default implementation, so you usually should not\n implement it directly. However, if you can provide a more efficient\n implementation, you can do so. See the [trait-level] docs for an\n example.\n\n This function has the same safety guarantees as the\n [`Iterator::size_hint`] function.\n\n [trait-level]: ExactSizeIterator\n [`Some(T)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n // a finite range knows exactly how many times it will iterate\n let mut range = 0..5;\n\n assert_eq!(5, range.len());\n let _ = range.next();\n assert_eq!(4, range.len());\n ```\n",
+      "adt": {}
+    },
+    "core::slice::from_raw_parts": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forms a slice from a pointer and a length.\n\n The `len` argument is the number of **elements**, not the number of bytes.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for reads for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations. See [below](#incorrect-usage)\n       for an example incorrectly not taking this into account.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be mutated for the duration\n   of lifetime `'a`, except inside an `UnsafeCell`.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n # Caveat\n\n The lifetime for the returned slice is inferred from its usage. To\n prevent accidental misuse, it's suggested to tie the lifetime to whichever\n source lifetime is safe in the context, such as by providing a helper\n function taking the lifetime of a host value for the slice, or by explicit\n annotation.\n\n # Examples\n\n ```\n use std::slice;\n\n // manifest a slice for a single element\n let x = 42;\n let ptr = &x as *const _;\n let slice = unsafe { slice::from_raw_parts(ptr, 1) };\n assert_eq!(slice[0], 42);\n ```\n\n ### Incorrect usage\n\n The following `join_slices` function is **unsound** ⚠️\n\n ```rust,no_run\n use std::slice;\n\n fn join_slices<'a, T>(fst: &'a [T], snd: &'a [T]) -> &'a [T] {\n     let fst_end = fst.as_ptr().wrapping_add(fst.len());\n     let snd_start = snd.as_ptr();\n     assert_eq!(fst_end, snd_start, \"Slices must be contiguous!\");\n     unsafe {\n         // The assertion above ensures `fst` and `snd` are contiguous, but they might\n         // still be contained within _different allocations_, in which case\n         // creating this slice is undefined behavior.\n         slice::from_raw_parts(fst.as_ptr(), fst.len() + snd.len())\n     }\n }\n\n fn main() {\n     // `a` and `b` are different allocations...\n     let a = 42;\n     let b = 27;\n     // ... which may nevertheless be laid out contiguously in memory: | a | b |\n     let _ = join_slices(slice::from_ref(&a), slice::from_ref(&b)); // UB\n }\n ```\n\n ### FFI: Handling null pointers\n\n In languages such as C++, pointers to empty collections are not guaranteed to be non-null.\n When accepting such pointers, they have to be checked for null-ness to avoid undefined\n behavior.\n\n ```\n use std::slice;\n\n /// Sum the elements of an FFI slice.\n ///\n /// # Safety\n ///\n /// If ptr is not NULL, it must be correctly aligned and\n /// point to `len` initialized items of type `f32`.\n unsafe extern \"C\" fn sum_slice(ptr: *const f32, len: usize) -> f32 {\n     let data = if ptr.is_null() {\n         // `len` is assumed to be 0.\n         &[]\n     } else {\n         // SAFETY: see function docstring.\n         unsafe { slice::from_raw_parts(ptr, len) }\n     };\n     data.into_iter().sum()\n }\n\n // This could be the result of C++'s std::vector::data():\n let ptr = std::ptr::null();\n // And this could be std::vector::size():\n let len = 0;\n assert_eq!(unsafe { sum_slice(ptr, len) }, 0.0);\n ```\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "vec::into_iter::IntoIter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(4)))",
+      "Ref"
+    ]
+  },
+  "path": 2257,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/into_iter.rs:89:5: 91:6",
+  "src": "pub fn as_slice(&self) -> &[T] {\n        unsafe { slice::from_raw_parts(self.ptr.as_ptr(), self.len()) }\n    }",
+  "mir": "fn vec::into_iter::IntoIter::<T, A>::as_slice(_1: &vec::into_iter::IntoIter<T, A>) -> &[T] {\n    let mut _0: &[T];\n    let mut _2: *const T;\n    let mut _3: *mut T;\n    let mut _4: core::ptr::NonNull<T>;\n    let mut _5: usize;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).4: core::ptr::NonNull<T>);\n        _3 = core::ptr::NonNull::<T>::as_ptr(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = move _3 as *const T;\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = <vec::into_iter::IntoIter<T, A> as core::iter::ExactSizeIterator>::len(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _0 = core::slice::from_raw_parts::<'_, T>(move _2, move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns the remaining items of this iterator as a slice.\n\n # Examples\n\n ```\n let vec = vec!['a', 'b', 'c'];\n let mut into_iter = vec.into_iter();\n assert_eq!(into_iter.as_slice(), &['a', 'b', 'c']);\n let _ = into_iter.next().unwrap();\n assert_eq!(into_iter.as_slice(), &['b', 'c']);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

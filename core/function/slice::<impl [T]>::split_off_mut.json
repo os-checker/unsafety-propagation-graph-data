@@ -1,0 +1,83 @@
+{
+  "name": "slice::<impl [T]>::split_off_mut",
+  "safe": true,
+  "callees": {
+    "slice::split_point_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calculates the direction and split point of a one-sided range.\n\n This is a helper function for `split_off` and `split_off_mut` that returns\n the direction of the split (front or back) as well as the index at\n which to split. Returns `None` if the split index would overflow.\n",
+      "adt": {
+        "option::Option": "Constructor",
+        "slice::Direction": "Constructor"
+      }
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "mem::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Replaces `dest` with the default value of `T`, returning the previous `dest` value.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a passed value instead of the default value, see [`replace`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::take(&mut v);\n assert_eq!(vec![1, 2], old_v);\n assert!(v.is_empty());\n ```\n\n `take` allows taking ownership of a struct field by replacing it with an \"empty\" value.\n Without `take` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let buf = self.buf;\n         self.buf = Vec::new();\n         buf\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so it can't even clone and reset\n `self.buf`. But `take` can be used to disassociate the original value of `self.buf` from\n `self`, allowing it to be returned:\n\n ```\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         mem::take(&mut self.buf)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf.len(), 2);\n\n assert_eq!(buffer.get_and_reset(), vec![0, 1]);\n assert_eq!(buffer.buf.len(), 0);\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::split_at_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.  For a non-panicking alternative see\n [`split_at_mut_checked`](slice::split_at_mut_checked).\n\n # Examples\n\n ```\n let mut v = [1, 0, 3, 0, 5, 6];\n let (left, right) = v.split_at_mut(2);\n assert_eq!(left, [1, 0]);\n assert_eq!(right, [3, 0, 5, 6]);\n left[1] = 2;\n right[1] = 4;\n assert_eq!(v, [1, 2, 3, 4, 5, 6]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 13638, kind: RigidTy(Tuple([Ty { id: 13642, kind: RigidTy(Adt(AdtDef(DefId { id: 28883, name: \"slice::Direction\" }), GenericArgs([]))) }, Ty { id: 47, kind: RigidTy(Uint(Usize)) }])) })])"
+    ],
+    "slice::Direction": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 13642, kind: RigidTy(Adt(AdtDef(DefId { id: 28883, name: \"slice::Direction\" }), GenericArgs([]))) })])",
+      "Unknown([Field(1, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ]
+  },
+  "path": 1325,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:4544:5: 4563:6",
+  "src": "pub fn split_off_mut<'a, R: OneSidedRange<usize>>(\n        self: &mut &'a mut Self,\n        range: R,\n    ) -> Option<&'a mut Self> {\n        let (direction, split_index) = split_point_of(range)?;\n        if split_index > self.len() {\n            return None;\n        }\n        let (front, back) = mem::take(self).split_at_mut(split_index);\n        match direction {\n            Direction::Front => {\n                *self = back;\n                Some(front)\n            }\n            Direction::Back => {\n                *self = front;\n                Some(back)\n            }\n        }\n    }",
+  "mir": "fn slice::<impl [T]>::split_off_mut(_1: &mut &mut [T], _2: R) -> option::Option<&mut [T]> {\n    let mut _0: option::Option<&mut [T]>;\n    let  _3: slice::Direction;\n    let  _4: usize;\n    let mut _5: ops::control_flow::ControlFlow<option::Option<convert::Infallible>, (slice::Direction, usize)>;\n    let mut _6: option::Option<(slice::Direction, usize)>;\n    let mut _7: isize;\n    let  _8: (slice::Direction, usize);\n    let mut _9: bool;\n    let mut _10: usize;\n    let mut _11: &[T];\n    let  _12: &mut [T];\n    let  _13: &mut [T];\n    let mut _14: (&mut [T], &mut [T]);\n    let mut _15: &mut [T];\n    let mut _16: isize;\n    let mut _17: &mut [T];\n    debug self => _1;\n    debug range => _2;\n    debug direction => _3;\n    debug split_index => _4;\n    debug residual => option::Option::<convert::Infallible>::None;\n    debug val => _8;\n    debug front => _12;\n    debug back => _13;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = slice::split_point_of::<R>(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = <option::Option<(slice::Direction, usize)> as ops::try_trait::Try>::branch(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _7 = discriminant(_5);\n        switchInt(move _7) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _8 = move ((_5 as variant#0).0: (slice::Direction, usize));\n        StorageLive(_3);\n        _3 = (_8.0: slice::Direction);\n        _4 = (_8.1: usize);\n        StorageDead(_5);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _17 = (*_1);\n        _11 = &(*_17);\n        _10 = PtrMetadata(move _11);\n        StorageDead(_11);\n        _9 = Gt(_4, move _10);\n        switchInt(move _9) -> [0: bb8, otherwise: bb7];\n    }\n    bb5: {\n        _0 = <option::Option<&mut [T]> as ops::try_trait::FromResidual<option::Option<convert::Infallible>>>::from_residual(option::Option::<convert::Infallible>::None) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_5);\n        goto -> bb14;\n    }\n    bb7: {\n        StorageDead(_10);\n        _0 = option::Option::None;\n        StorageDead(_9);\n        StorageDead(_3);\n        goto -> bb14;\n    }\n    bb8: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_14);\n        _15 = mem::take::<&mut [T]>(_1) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _14 = slice::<impl [T]>::split_at_mut(_15, _4) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _12 = move (_14.0: &mut [T]);\n        _13 = move (_14.1: &mut [T]);\n        StorageDead(_14);\n        _16 = discriminant(_3);\n        switchInt(move _16) -> [0: bb12, 1: bb11, otherwise: bb3];\n    }\n    bb11: {\n        (*_1) = _12;\n        _0 = option::Option::Some(_13);\n        goto -> bb13;\n    }\n    bb12: {\n        (*_1) = _13;\n        _0 = option::Option::Some(_12);\n        goto -> bb13;\n    }\n    bb13: {\n        StorageDead(_3);\n        goto -> bb14;\n    }\n    bb14: {\n        return;\n    }\n}\n",
+  "doc": " Removes the subslice corresponding to the given range\n and returns a mutable reference to it.\n\n Returns `None` and does not modify the slice if the given\n range is out of bounds.\n\n Note that this method only accepts one-sided ranges such as\n `2..` or `..6`, but not `2..6`.\n\n # Examples\n\n Splitting off the first three elements of a slice:\n\n ```\n let mut slice: &mut [_] = &mut ['a', 'b', 'c', 'd'];\n let mut first_three = slice.split_off_mut(..3).unwrap();\n\n assert_eq!(slice, &mut ['d']);\n assert_eq!(first_three, &mut ['a', 'b', 'c']);\n ```\n\n Splitting off a slice starting with the third element:\n\n ```\n let mut slice: &mut [_] = &mut ['a', 'b', 'c', 'd'];\n let mut tail = slice.split_off_mut(2..).unwrap();\n\n assert_eq!(slice, &mut ['a', 'b']);\n assert_eq!(tail, &mut ['c', 'd']);\n ```\n\n Getting `None` when `range` is out of bounds:\n\n ```\n let mut slice: &mut [_] = &mut ['a', 'b', 'c', 'd'];\n\n assert_eq!(None, slice.split_off_mut(5..));\n assert_eq!(None, slice.split_off_mut(..5));\n assert_eq!(None, slice.split_off_mut(..=4));\n let expected: &mut [_] = &mut ['a', 'b', 'c', 'd'];\n assert_eq!(Some(expected), slice.split_off_mut(..4));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

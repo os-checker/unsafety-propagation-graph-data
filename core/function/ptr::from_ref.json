@@ -1,0 +1,16 @@
+{
+  "name": "ptr::from_ref",
+  "safe": true,
+  "callees": {},
+  "adts": {},
+  "path": 16073,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:1083:1: 1085:2",
+  "src": "pub const fn from_ref<T: PointeeSized>(r: &T) -> *const T {\n    r\n}",
+  "mir": "fn ptr::from_ref(_1: &T) -> *const T {\n    let mut _0: *const T;\n    debug r => _1;\n    bb0: {\n        _0 = &raw const (*_1);\n        return;\n    }\n}\n",
+  "doc": " Converts a reference to a raw pointer.\n\n For `r: &T`, `from_ref(r)` is equivalent to `r as *const T` (except for the caveat noted below),\n but is a bit safer since it will never silently change type or mutability, in particular if the\n code is refactored.\n\n The caller must ensure that the pointee outlives the pointer this function returns, or else it\n will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to is never\n written to (except inside an `UnsafeCell`) using this pointer or any pointer derived from it. If\n you need to mutate the pointee, use [`from_mut`]. Specifically, to turn a mutable reference `m:\n &mut T` into `*const T`, prefer `from_mut(m).cast_const()` to obtain a pointer that can later be\n used for mutation.\n\n ## Interaction with lifetime extension\n\n Note that this has subtle interactions with the rules for lifetime extension of temporaries in\n tail expressions. This code is valid, albeit in a non-obvious way:\n ```rust\n # type T = i32;\n # fn foo() -> T { 42 }\n // The temporary holding the return value of `foo` has its lifetime extended,\n // because the surrounding expression involves no function call.\n let p = &foo() as *const T;\n unsafe { p.read() };\n ```\n Naively replacing the cast with `from_ref` is not valid:\n ```rust,no_run\n # use std::ptr;\n # type T = i32;\n # fn foo() -> T { 42 }\n // The temporary holding the return value of `foo` does *not* have its lifetime extended,\n // because the surrounding expression involves a function call.\n let p = ptr::from_ref(&foo());\n unsafe { p.read() }; // UB! Reading from a dangling pointer ⚠️\n ```\n The recommended way to write this code is to avoid relying on lifetime extension\n when raw pointers are involved:\n ```rust\n # use std::ptr;\n # type T = i32;\n # fn foo() -> T { 42 }\n let x = foo();\n let p = ptr::from_ref(&x);\n unsafe { p.read() };\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

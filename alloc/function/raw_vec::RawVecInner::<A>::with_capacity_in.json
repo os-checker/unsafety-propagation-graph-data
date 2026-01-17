@@ -1,0 +1,86 @@
+{
+  "name": "raw_vec::RawVecInner::<A>::with_capacity_in",
+  "safe": true,
+  "callees": {
+    "raw_vec::RawVecInner::<A>::try_allocate_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::alloc::Layout": "ImmutableAsArgument",
+        "core::result::Result": "Constructor",
+        "collections::TryReserveError": "Constructor",
+        "raw_vec::RawVecInner": "Constructor"
+      }
+    },
+    "raw_vec::handle_error": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::TryReserveError": "ImmutableAsArgument"
+      }
+    },
+    "raw_vec::RawVecInner::<A>::needs_to_grow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::alloc::Layout": "ImmutableAsArgument",
+        "raw_vec::RawVecInner": "ImmutableAsArgument"
+      }
+    },
+    "core::hint::assert_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Makes a *soundness* promise to the compiler that `cond` holds.\n\n This may allow the optimizer to simplify things, but it might also make the generated code\n slower. Either way, calling it will most likely make compilation take longer.\n\n You may know this from other places as\n [`llvm.assume`](https://llvm.org/docs/LangRef.html#llvm-assume-intrinsic) or, in C,\n [`__builtin_assume`](https://clang.llvm.org/docs/LanguageExtensions.html#builtin-assume).\n\n This promotes a correctness requirement to a soundness requirement. Don't do that without\n very good reason.\n\n # Usage\n\n This is a situational tool for micro-optimization, and is allowed to do nothing. Any use\n should come with a repeatable benchmark to show the value, with the expectation to drop it\n later should the optimizer get smarter and no longer need it.\n\n The more complicated the condition, the less likely this is to be useful. For example,\n `assert_unchecked(foo.is_sorted())` is a complex enough value that the compiler is unlikely\n to be able to take advantage of it.\n\n There's also no need to `assert_unchecked` basic properties of things.  For example, the\n compiler already knows the range of `count_ones`, so there is no benefit to\n `let n = u32::count_ones(x); assert_unchecked(n <= u32::BITS);`.\n\n `assert_unchecked` is logically equivalent to `if !cond { unreachable_unchecked(); }`. If\n ever you are tempted to write `assert_unchecked(false)`, you should instead use\n [`unreachable_unchecked()`] directly.\n\n # Safety\n\n `cond` must be `true`. It is immediate UB to call this with `false`.\n\n # Example\n\n ```\n use core::hint;\n\n /// # Safety\n ///\n /// `p` must be nonnull and valid\n pub unsafe fn next_value(p: *const i32) -> i32 {\n     // SAFETY: caller invariants guarantee that `p` is not null\n     unsafe { hint::assert_unchecked(!p.is_null()) }\n\n     if p.is_null() {\n         return -1;\n     } else {\n         // SAFETY: caller invariants guarantee that `p` is valid\n         unsafe { *p + 1 }\n     }\n }\n ```\n\n Without the `assert_unchecked`, the above function produces the following with optimizations\n enabled:\n\n ```asm\n next_value:\n         test    rdi, rdi\n         je      .LBB0_1\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n .LBB0_1:\n         mov     eax, -1\n         ret\n ```\n\n Adding the assertion allows the optimizer to remove the extra check:\n\n ```asm\n next_value:\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n ```\n\n This example is quite unlike anything that would be used in the real world: it is redundant\n to put an assertion right next to code that checks the same thing, and dereferencing a\n pointer already has the builtin assumption that it is nonnull. However, it illustrates the\n kind of changes the optimizer can make even when the behavior is less obviously related.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "raw_vec::AllocInit": [
+      "Plain"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 35, kind: RigidTy(Adt(AdtDef(DefId { id: 2595, name: \"collections::TryReserveError\" }), GenericArgs([]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 32, kind: RigidTy(Adt(AdtDef(DefId { id: 2590, name: \"raw_vec::RawVecInner\" }), GenericArgs([Type(Ty { id: 31, kind: Param(ParamTy { index: 0, name: \"A\" }) })]))) })])"
+    ],
+    "collections::TryReserveError": [
+      "Plain"
+    ],
+    "raw_vec::RawVecInner": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 1683,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/raw_vec/mod.rs:418:5: 429:6",
+  "src": "fn with_capacity_in(capacity: usize, alloc: A, elem_layout: Layout) -> Self {\n        match Self::try_allocate_in(capacity, AllocInit::Uninitialized, alloc, elem_layout) {\n            Ok(this) => {\n                unsafe {\n                    // Make it more obvious that a subsequent Vec::reserve(capacity) will not allocate.\n                    hint::assert_unchecked(!this.needs_to_grow(0, capacity, elem_layout));\n                }\n                this\n            }\n            Err(err) => handle_error(err),\n        }\n    }",
+  "mir": "fn raw_vec::RawVecInner::<A>::with_capacity_in(_1: usize, _2: A, _3: core::alloc::Layout) -> raw_vec::RawVecInner<A> {\n    let mut _0: raw_vec::RawVecInner<A>;\n    let mut _4: core::result::Result<raw_vec::RawVecInner<A>, collections::TryReserveError>;\n    let mut _5: raw_vec::AllocInit;\n    let mut _6: isize;\n    let  _7: raw_vec::RawVecInner<A>;\n    let  _8: ();\n    let mut _9: bool;\n    let mut _10: bool;\n    let mut _11: &raw_vec::RawVecInner<A>;\n    let  _12: collections::TryReserveError;\n    let mut _13: !;\n    debug capacity => _1;\n    debug alloc => _2;\n    debug elem_layout => _3;\n    debug this => _7;\n    debug err => _12;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = raw_vec::AllocInit::Uninitialized;\n        _4 = raw_vec::RawVecInner::<A>::try_allocate_in(_1, move _5, _2, _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _6 = discriminant(_4);\n        switchInt(move _6) -> [0: bb4, 1: bb3, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        _12 = move ((_4 as variant#1).0: collections::TryReserveError);\n        _13 = raw_vec::handle_error(_12) -> unwind unreachable;\n    }\n    bb4: {\n        StorageLive(_7);\n        _7 = move ((_4 as variant#0).0: raw_vec::RawVecInner<A>);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &_7;\n        _10 = raw_vec::RawVecInner::<A>::needs_to_grow(move _11, 0_usize, _1, _3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        _9 = Not(move _10);\n        StorageDead(_10);\n        _8 = core::hint::assert_unchecked(move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_9);\n        _0 = move _7;\n        StorageDead(_7);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

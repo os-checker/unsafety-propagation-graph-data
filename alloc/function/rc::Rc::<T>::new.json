@@ -1,0 +1,88 @@
+{
+  "name": "rc::Rc::<T>::new",
+  "safe": true,
+  "callees": {
+    "core::cell::Cell::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `Cell` containing the given value.\n\n # Examples\n\n ```\n use std::cell::Cell;\n\n let c = Cell::new(5);\n ```\n",
+      "adt": {}
+    },
+    "boxed::Box::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory on the heap and then places `x` into it.\n\n This doesn't actually allocate if `T` is zero-sized.\n\n # Examples\n\n ```\n let five = Box::new(5);\n ```\n",
+      "adt": {
+        "boxed::Box": "Constructor"
+      }
+    },
+    "boxed::Box::<T, A>::leak": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes and leaks the `Box`, returning a mutable reference,\n `&'a mut T`.\n\n Note that the type `T` must outlive the chosen lifetime `'a`. If the type\n has only static references, or none at all, then this may be chosen to be\n `'static`.\n\n This function is mainly useful for data that lives for the remainder of\n the program's life. Dropping the returned reference will cause a memory\n leak. If this is not acceptable, the reference should first be wrapped\n with the [`Box::from_raw`] function producing a `Box`. This `Box` can\n then be dropped which will properly destroy `T` and release the\n allocated memory.\n\n Note: this is an associated function, which means that you have\n to call it as `Box::leak(b)` instead of `b.leak()`. This\n is so that there is no conflict with a method on the inner type.\n\n # Examples\n\n Simple usage:\n\n ```\n let x = Box::new(41);\n let static_ref: &'static mut usize = Box::leak(x);\n *static_ref += 1;\n assert_eq!(*static_ref, 42);\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # drop(unsafe { Box::from_raw(static_ref) });\n ```\n\n Unsized data:\n\n ```\n let x = vec![1, 2, 3].into_boxed_slice();\n let static_ref = Box::leak(x);\n static_ref[0] = 4;\n assert_eq!(*static_ref, [4, 2, 3]);\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # drop(unsafe { Box::from_raw(static_ref) });\n ```\n",
+      "adt": {}
+    },
+    "core::convert::Into::into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "rc::Rc::<T>::from_inner": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "rc::Rc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::cell::Cell": [
+      "Plain"
+    ],
+    "rc::RcInner": [
+      "Plain",
+      "MutRef"
+    ],
+    "boxed::Box": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "rc::Rc": [
+      "Plain"
+    ]
+  },
+  "path": 1763,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:413:5: 424:6",
+  "src": "pub fn new(value: T) -> Rc<T> {\n        // There is an implicit weak pointer owned by all the strong\n        // pointers, which ensures that the weak destructor never frees\n        // the allocation while the strong destructor is running, even\n        // if the weak pointer is stored inside the strong one.\n        unsafe {\n            Self::from_inner(\n                Box::leak(Box::new(RcInner { strong: Cell::new(1), weak: Cell::new(1), value }))\n                    .into(),\n            )\n        }\n    }",
+  "mir": "fn rc::Rc::<T>::new(_1: T) -> rc::Rc<T> {\n    let mut _0: rc::Rc<T>;\n    let mut _2: core::ptr::NonNull<rc::RcInner<T>>;\n    let mut _3: &mut rc::RcInner<T>;\n    let mut _4: boxed::Box<rc::RcInner<T>>;\n    let mut _5: rc::RcInner<T>;\n    let mut _6: core::cell::Cell<usize>;\n    let mut _7: core::cell::Cell<usize>;\n    debug value => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = core::cell::Cell::<usize>::new(1_usize) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_7);\n        _7 = core::cell::Cell::<usize>::new(1_usize) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = RcInner(move _6, move _7, _1);\n        StorageDead(_7);\n        StorageDead(_6);\n        _4 = boxed::Box::<rc::RcInner<T>>::new(move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        _3 = boxed::Box::<rc::RcInner<T>>::leak::<'_>(move _4) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        _2 = <&mut rc::RcInner<T> as core::convert::Into<core::ptr::NonNull<rc::RcInner<T>>>>::into(_3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = rc::Rc::<T>::from_inner(move _2) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Constructs a new `Rc<T>`.\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let five = Rc::new(5);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "name": "<collections::vec_deque::iter::Iter<'a, T> as core::iter::DoubleEndedIterator>::try_rfold",
+  "safe": true,
+  "callees": {
+    "core::iter::DoubleEndedIterator::try_rfold": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " This is the reverse version of [`Iterator::try_fold()`]: it takes\n elements starting from the back of the iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [\"1\", \"2\", \"3\"];\n let sum = a.iter()\n     .map(|&s| s.parse::<i32>())\n     .try_rfold(0, |acc, x| x.and_then(|y| Ok(acc + y)));\n assert_eq!(sum, Ok(6));\n ```\n\n Short-circuiting:\n\n ```\n let a = [\"1\", \"rust\", \"3\"];\n let mut it = a.iter();\n let sum = it\n     .by_ref()\n     .map(|&s| s.parse::<i32>())\n     .try_rfold(0, |acc, x| x.and_then(|y| Ok(acc + y)));\n assert!(sum.is_err());\n\n // Because it short-circuited, the remaining elements are still\n // available through the iterator.\n assert_eq!(it.next_back(), Some(&\"1\"));\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::slice::Iter": [
+      "MutRef"
+    ],
+    "collections::vec_deque::iter::Iter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 482, kind: Param(ParamTy { index: 2, name: \"B\" }) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 6448, kind: Alias(Projection, AliasTy { def_id: AliasDef(DefId { id: 2990, name: \"core::ops::Try::Residual\" }), args: GenericArgs([Type(Ty { id: 3210, kind: Param(ParamTy { index: 4, name: \"R\" }) })]) }) })])"
+    ]
+  },
+  "path": 1371,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/iter.rs:197:5: 204:6",
+  "src": "fn try_rfold<B, F, R>(&mut self, init: B, mut f: F) -> R\n    where\n        F: FnMut(B, Self::Item) -> R,\n        R: Try<Output = B>,\n    {\n        let acc = self.i2.try_rfold(init, &mut f)?;\n        self.i1.try_rfold(acc, &mut f)\n    }",
+  "mir": "fn <collections::vec_deque::iter::Iter<'a, T> as core::iter::DoubleEndedIterator>::try_rfold(_1: &mut collections::vec_deque::iter::Iter<'_, T>, _2: B, _3: F) -> R {\n    let mut _0: R;\n    let mut _4: core::ops::ControlFlow<<R as core::ops::Try>::Residual, B>;\n    let mut _5: R;\n    let mut _6: &mut core::slice::Iter<'_, T>;\n    let mut _7: &mut F;\n    let mut _8: isize;\n    let  _9: <R as core::ops::Try>::Residual;\n    let  _10: B;\n    let mut _11: &mut core::slice::Iter<'_, T>;\n    let mut _12: &mut F;\n    debug self => _1;\n    debug init => _2;\n    debug f => _3;\n    debug acc => _10;\n    debug residual => _9;\n    debug val => _10;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut ((*_1).1: core::slice::Iter<'_, T>);\n        StorageLive(_7);\n        _7 = &mut _3;\n        _5 = <core::slice::Iter<'_, T> as core::iter::DoubleEndedIterator>::try_rfold::<B, &mut F, R>(move _6, _2, move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        StorageDead(_6);\n        _4 = <R as core::ops::Try>::branch(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _8 = discriminant(_4);\n        switchInt(move _8) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _10 = move ((_4 as variant#0).0: B);\n        StorageDead(_4);\n        StorageLive(_11);\n        _11 = &mut ((*_1).0: core::slice::Iter<'_, T>);\n        StorageLive(_12);\n        _12 = &mut _3;\n        _0 = <core::slice::Iter<'_, T> as core::iter::DoubleEndedIterator>::try_rfold::<B, &mut F, R>(move _11, _10, move _12) -> [return: bb7, unwind unreachable];\n    }\n    bb5: {\n        _9 = move ((_4 as variant#1).0: <R as core::ops::Try>::Residual);\n        _0 = <R as core::ops::FromResidual>::from_residual(_9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_4);\n        drop(_3) -> [return: bb8, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        StorageDead(_11);\n        drop(_3) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

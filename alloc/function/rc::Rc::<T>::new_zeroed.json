@@ -1,0 +1,68 @@
+{
+  "name": "rc::Rc::<T>::new_zeroed",
+  "safe": true,
+  "callees": {
+    "core::alloc::Layout::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `Layout` suitable for holding a value of type `T`.\n",
+      "adt": {}
+    },
+    "rc::Rc::<T>::allocate_for_layout": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates an `RcInner<T>` with sufficient space for\n a possibly-unsized inner value where the value has the layout provided.\n\n The function `mem_to_rc_inner` is called with the data pointer\n and must return back a (potentially fat)-pointer for the `RcInner<T>`.\n",
+      "adt": {
+        "core::alloc::Layout": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "rc::Rc::<T>::from_ptr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "rc::Rc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::alloc::Layout": [
+      "Plain"
+    ],
+    "rc::Rc": [
+      "Plain"
+    ]
+  },
+  "path": 1771,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:536:5: 544:6",
+  "src": "pub fn new_zeroed() -> Rc<mem::MaybeUninit<T>> {\n        unsafe {\n            Rc::from_ptr(Rc::allocate_for_layout(\n                Layout::new::<T>(),\n                |layout| Global.allocate_zeroed(layout),\n                <*mut u8>::cast,\n            ))\n        }\n    }",
+  "mir": "fn rc::Rc::<T>::new_zeroed() -> rc::Rc<core::mem::MaybeUninit<T>> {\n    let mut _0: rc::Rc<core::mem::MaybeUninit<T>>;\n    let mut _1: *mut rc::RcInner<core::mem::MaybeUninit<T>>;\n    let mut _2: core::alloc::Layout;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        _2 = core::alloc::Layout::new::<T>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _1 = rc::Rc::<core::mem::MaybeUninit<T>>::allocate_for_layout::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:540:17: 540:25}, fn(*mut u8) -> *mut rc::RcInner<core::mem::MaybeUninit<T>> {core::ptr::mut_ptr::<impl *mut u8>::cast::<rc::RcInner<core::mem::MaybeUninit<T>>>}>(move _2, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:540:17: 540:25}, core::ptr::mut_ptr::<impl *mut u8>::cast::<rc::RcInner<core::mem::MaybeUninit<T>>>) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        _0 = rc::Rc::<core::mem::MaybeUninit<T>>::from_ptr(move _1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": " Constructs a new `Rc` with uninitialized contents, with the memory\n being filled with `0` bytes.\n\n See [`MaybeUninit::zeroed`][zeroed] for examples of correct and\n incorrect usage of this method.\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let zero = Rc::<u32>::new_zeroed();\n let zero = unsafe { zero.assume_init() };\n\n assert_eq!(*zero, 0)\n ```\n\n [zeroed]: mem::MaybeUninit::zeroed\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "net::tcp::TcpListener::bind",
+  "safe": true,
+  "callees": {
+    "sys::net::connection::socket::TcpListener::bind": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<U, E>` by applying a function to a\n contained [`Ok`] value, leaving an [`Err`] value untouched.\n\n This function can be used to compose the results of two functions.\n\n # Examples\n\n Print the numbers on each line of a string multiplied by two.\n\n ```\n let line = \"1\\n2\\n3\\n4\\n\";\n\n for num in line.lines() {\n     match num.parse::<i32>().map(|i| i * 2) {\n         Ok(n) => println!(\"{n}\"),\n         Err(..) => {}\n     }\n }\n ```\n",
+      "adt": {}
+    },
+    "net::tcp::TcpListener": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " A TCP socket server, listening for connections.\n\n After creating a `TcpListener` by [`bind`]ing it to a socket address, it listens\n for incoming TCP connections. These can be accepted by calling [`accept`] or by\n iterating over the [`Incoming`] iterator returned by [`incoming`][`TcpListener::incoming`].\n\n The socket will be closed when the value is dropped.\n\n The Transmission Control Protocol is specified in [IETF RFC 793].\n\n [`accept`]: TcpListener::accept\n [`bind`]: TcpListener::bind\n [IETF RFC 793]: https://tools.ietf.org/html/rfc793\n\n # Examples\n\n ```no_run\n use std::net::{TcpListener, TcpStream};\n\n fn handle_client(stream: TcpStream) {\n     // ...\n }\n\n fn main() -> std::io::Result<()> {\n     let listener = TcpListener::bind(\"127.0.0.1:80\")?;\n\n     // accept connections and process them serially\n     for stream in listener.incoming() {\n         handle_client(stream?);\n     }\n     Ok(())\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1910,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/net/tcp.rs:784:5: 786:6",
+  "src": "pub fn bind<A: ToSocketAddrs>(addr: A) -> io::Result<TcpListener> {\n        net_imp::TcpListener::bind(addr).map(TcpListener)\n    }",
+  "mir": "fn net::tcp::TcpListener::bind(_1: A) -> core::result::Result<net::tcp::TcpListener, io::error::Error> {\n    let mut _0: core::result::Result<net::tcp::TcpListener, io::error::Error>;\n    let mut _2: core::result::Result<sys::net::connection::socket::TcpListener, io::error::Error>;\n    debug addr => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = sys::net::connection::socket::TcpListener::bind::<A>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = core::result::Result::<sys::net::connection::socket::TcpListener, io::error::Error>::map::<net::tcp::TcpListener, fn(sys::net::connection::socket::TcpListener) -> net::tcp::TcpListener {net::tcp::TcpListener}>(move _2, net::tcp::TcpListener) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Creates a new `TcpListener` which will be bound to the specified\n address.\n\n The returned listener is ready for accepting connections.\n\n Binding with a port number of 0 will request that the OS assigns a port\n to this listener. The port allocated can be queried via the\n [`TcpListener::local_addr`] method.\n\n The address type can be any implementor of [`ToSocketAddrs`] trait. See\n its documentation for concrete examples.\n\n If `addr` yields multiple addresses, `bind` will be attempted with\n each of the addresses until one succeeds and returns the listener. If\n none of the addresses succeed in creating a listener, the error returned\n from the last attempt (the last address) is returned.\n\n # Examples\n\n Creates a TCP listener bound to `127.0.0.1:80`:\n\n ```no_run\n use std::net::TcpListener;\n\n let listener = TcpListener::bind(\"127.0.0.1:80\").unwrap();\n ```\n\n Creates a TCP listener bound to `127.0.0.1:80`. If that fails, create a\n TCP listener bound to `127.0.0.1:443`:\n\n ```no_run\n use std::net::{SocketAddr, TcpListener};\n\n let addrs = [\n     SocketAddr::from(([127, 0, 0, 1], 80)),\n     SocketAddr::from(([127, 0, 0, 1], 443)),\n ];\n let listener = TcpListener::bind(&addrs[..]).unwrap();\n ```\n\n Creates a TCP listener bound to a port assigned by the operating system\n at `127.0.0.1`.\n\n ```no_run\n use std::net::TcpListener;\n\n let socket = TcpListener::bind(\"127.0.0.1:0\").unwrap();\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

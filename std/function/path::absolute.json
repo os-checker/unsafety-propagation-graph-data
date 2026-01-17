@@ -1,0 +1,110 @@
+{
+  "name": "path::absolute",
+  "safe": true,
+  "callees": {
+    "core::convert::AsRef::as_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into a shared reference of the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "path::Path::as_os_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Yields the underlying [`OsStr`] slice.\n\n # Examples\n\n ```\n use std::path::Path;\n\n let os_str = Path::new(\"foo.txt\").as_os_str();\n assert_eq!(os_str, std::ffi::OsStr::new(\"foo.txt\"));\n ```\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument"
+      }
+    },
+    "ffi::os_str::OsStr::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checks whether the `OsStr` is empty.\n\n # Examples\n\n ```\n use std::ffi::OsStr;\n\n let os_str = OsStr::new(\"\");\n assert!(os_str.is_empty());\n\n let os_str = OsStr::new(\"foo\");\n assert!(!os_str.is_empty());\n ```\n",
+      "adt": {
+        "ffi::os_str::OsStr": "ImmutableAsArgument"
+      }
+    },
+    "io::error::Error::from_static_message": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Creates a new I/O error from a known kind of error as well as a constant\n message.\n\n This function does not allocate.\n\n You should not use this directly, and instead use the `const_error!`\n macro: `io::const_error!(ErrorKind::Something, \"some_message\")`.\n\n This function should maybe change to `from_static_message<const MSG: &'static\n str>(kind: ErrorKind)` in the future, when const generics allow that.\n",
+      "adt": {
+        "io::error::Error": "Constructor"
+      }
+    },
+    "core::hint::must_use": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An identity function that causes an `unused_must_use` warning to be\n triggered if the given value is not used (returned, stored in a variable,\n etc) by the caller.\n\n This is primarily intended for use in macro-generated code, in which a\n [`#[must_use]` attribute][must_use] either on a type or a function would not\n be convenient.\n\n [must_use]: https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute\n\n # Example\n\n ```\n #![feature(hint_must_use)]\n\n use core::fmt;\n\n pub struct Error(/* ... */);\n\n #[macro_export]\n macro_rules! make_error {\n     ($($args:expr),*) => {\n         core::hint::must_use({\n             let error = $crate::make_error(core::format_args!($($args),*));\n             error\n         })\n     };\n }\n\n // Implementation detail of make_error! macro.\n #[doc(hidden)]\n pub fn make_error(args: fmt::Arguments<'_>) -> Error {\n     Error(/* ... */)\n }\n\n fn demo() -> Option<Error> {\n     if true {\n         // Oops, meant to write `return Some(make_error!(\"...\"));`\n         Some(make_error!(\"...\"));\n     }\n     None\n }\n #\n # // Make rustdoc not wrap the whole snippet in fn main, so that $crate::make_error works\n # fn main() {}\n ```\n\n In the above example, we'd like an `unused_must_use` lint to apply to the\n value created by `make_error!`. However, neither `#[must_use]` on a struct\n nor `#[must_use]` on a function is appropriate here, so the macro expands\n using `core::hint::must_use` instead.\n\n - We wouldn't want `#[must_use]` on the `struct Error` because that would\n   make the following unproblematic code trigger a warning:\n\n   ```\n   # struct Error;\n   #\n   fn f(arg: &str) -> Result<(), Error>\n   # { Ok(()) }\n\n   #[test]\n   fn t() {\n       // Assert that `f` returns error if passed an empty string.\n       // A value of type `Error` is unused here but that's not a problem.\n       f(\"\").unwrap_err();\n   }\n   ```\n\n - Using `#[must_use]` on `fn make_error` can't help because the return value\n   *is* used, as the right-hand side of a `let` statement. The `let`\n   statement looks useless but is in fact necessary for ensuring that\n   temporaries within the `format_args` expansion are not kept alive past the\n   creation of the `Error`, as keeping them alive past that point can cause\n   autotrait issues in async code:\n\n   ```\n   # #![feature(hint_must_use)]\n   #\n   # struct Error;\n   #\n   # macro_rules! make_error {\n   #     ($($args:expr),*) => {\n   #         core::hint::must_use({\n   #             // If `let` isn't used, then `f()` produces a non-Send future.\n   #             let error = make_error(core::format_args!($($args),*));\n   #             error\n   #         })\n   #     };\n   # }\n   #\n   # fn make_error(args: core::fmt::Arguments<'_>) -> Error {\n   #     Error\n   # }\n   #\n   async fn f() {\n       // Using `let` inside the make_error expansion causes temporaries like\n       // `unsync()` to drop at the semicolon of that `let` statement, which\n       // is prior to the await point. They would otherwise stay around until\n       // the semicolon on *this* statement, which is after the await point,\n       // and the enclosing Future would not implement Send.\n       log(make_error!(\"look: {:p}\", unsync())).await;\n   }\n\n   async fn log(error: Error) {/* ... */}\n\n   // Returns something without a Sync impl.\n   fn unsync() -> *const () {\n       0 as *const ()\n   }\n   #\n   # fn test() {\n   #     fn assert_send(_: impl Send) {}\n   #     assert_send(f());\n   # }\n   ```\n",
+      "adt": {}
+    },
+    "sys::path::unix::absolute": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Make a POSIX path absolute without changing its semantics.\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument",
+        "io::error::Error": "Constructor",
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "path::Path": [
+      "Ref"
+    ],
+    "ffi::os_str::OsStr": [
+      "Ref"
+    ],
+    "io::error::Error": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 2349,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:4006:1: 4013:2",
+  "src": "pub fn absolute<P: AsRef<Path>>(path: P) -> io::Result<PathBuf> {\n    let path = path.as_ref();\n    if path.as_os_str().is_empty() {\n        Err(io::const_error!(io::ErrorKind::InvalidInput, \"cannot make an empty path absolute\"))\n    } else {\n        sys::path::absolute(path)\n    }\n}",
+  "mir": "fn path::absolute(_1: P) -> core::result::Result<path::PathBuf, io::error::Error> {\n    let mut _0: core::result::Result<path::PathBuf, io::error::Error>;\n    let  _2: &path::Path;\n    let mut _3: &P;\n    let mut _4: bool;\n    let  _5: &ffi::os_str::OsStr;\n    let mut _6: io::error::Error;\n    let mut _7: io::error::Error;\n    debug path => _1;\n    debug path => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = &_1;\n        _2 = <P as core::convert::AsRef<path::Path>>::as_ref(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_4);\n        _5 = path::Path::as_os_str(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = ffi::os_str::OsStr::is_empty(_5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _4) -> [0: bb7, otherwise: bb4];\n    }\n    bb4: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = io::error::Error::from_static_message(path::absolute::<P>::{constant#0}) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _6 = core::hint::must_use::<io::error::Error>(move _7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_7);\n        _0 = core::result::Result::Err(move _6);\n        StorageDead(_6);\n        goto -> bb9;\n    }\n    bb7: {\n        _0 = sys::path::unix::absolute(_2) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_4);\n        drop(_1) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        return;\n    }\n}\n",
+  "doc": " Makes the path absolute without accessing the filesystem.\n\n If the path is relative, the current directory is used as the base directory.\n All intermediate components will be resolved according to platform-specific\n rules, but unlike [`canonicalize`][crate::fs::canonicalize], this does not\n resolve symlinks and may succeed even if the path does not exist.\n\n If the `path` is empty or getting the\n [current directory][crate::env::current_dir] fails, then an error will be\n returned.\n\n # Platform-specific behavior\n\n On POSIX platforms, the path is resolved using [POSIX semantics][posix-semantics],\n except that it stops short of resolving symlinks. This means it will keep `..`\n components and trailing separators.\n\n On Windows, for verbatim paths, this will simply return the path as given. For other\n paths, this is currently equivalent to calling\n [`GetFullPathNameW`][windows-path].\n\n On Cygwin, this is currently equivalent to calling [`cygwin_conv_path`][cygwin-path]\n with mode `CCP_WIN_A_TO_POSIX`, and then being processed like other POSIX platforms.\n If a Windows path is given, it will be converted to an absolute POSIX path without\n keeping `..`.\n\n Note that these [may change in the future][changes].\n\n # Errors\n\n This function may return an error in the following situations:\n\n * If `path` is syntactically invalid; in particular, if it is empty.\n * If getting the [current directory][crate::env::current_dir] fails.\n\n # Examples\n\n ## POSIX paths\n\n ```\n # #[cfg(unix)]\n fn main() -> std::io::Result<()> {\n     use std::path::{self, Path};\n\n     // Relative to absolute\n     let absolute = path::absolute(\"foo/./bar\")?;\n     assert!(absolute.ends_with(\"foo/bar\"));\n\n     // Absolute to absolute\n     let absolute = path::absolute(\"/foo//test/.././bar.rs\")?;\n     assert_eq!(absolute, Path::new(\"/foo/test/../bar.rs\"));\n     Ok(())\n }\n # #[cfg(not(unix))]\n # fn main() {}\n ```\n\n ## Windows paths\n\n ```\n # #[cfg(windows)]\n fn main() -> std::io::Result<()> {\n     use std::path::{self, Path};\n\n     // Relative to absolute\n     let absolute = path::absolute(\"foo/./bar\")?;\n     assert!(absolute.ends_with(r\"foo\\bar\"));\n\n     // Absolute to absolute\n     let absolute = path::absolute(r\"C:\\foo//test\\..\\./bar.rs\")?;\n\n     assert_eq!(absolute, Path::new(r\"C:\\foo\\bar.rs\"));\n     Ok(())\n }\n # #[cfg(not(windows))]\n # fn main() {}\n ```\n\n Note that this [may change in the future][changes].\n\n [changes]: io#platform-specific-behavior\n [posix-semantics]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html#tag_04_13\n [windows-path]: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew\n [cygwin-path]: https://cygwin.com/cygwin-api/func-cygwin-conv-path.html\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

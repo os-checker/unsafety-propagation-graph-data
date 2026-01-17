@@ -1,0 +1,74 @@
+{
+  "name": "io::impls::<impl io::Write for &mut [u8]>::write",
+  "safe": true,
+  "callees": {
+    "core::cmp::min": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the minimum of two values.\n\n Returns the first argument if the comparison determines them to be equal.\n\n Internally uses an alias to [`Ord::min`].\n\n # Examples\n\n ```\n use std::cmp;\n\n assert_eq!(cmp::min(1, 2), 1);\n assert_eq!(cmp::min(2, 2), 2);\n ```\n ```\n use std::cmp::{self, Ordering};\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(cmp::min(Equal(\"v1\"), Equal(\"v2\")).0, \"v1\");\n ```\n",
+      "adt": {}
+    },
+    "core::mem::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Replaces `dest` with the default value of `T`, returning the previous `dest` value.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a passed value instead of the default value, see [`replace`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::take(&mut v);\n assert_eq!(vec![1, 2], old_v);\n assert!(v.is_empty());\n ```\n\n `take` allows taking ownership of a struct field by replacing it with an \"empty\" value.\n Without `take` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let buf = self.buf;\n         self.buf = Vec::new();\n         buf\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so it can't even clone and reset\n `self.buf`. But `take` can be used to disassociate the original value of `self.buf` from\n `self`, allowing it to be returned:\n\n ```\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         mem::take(&mut self.buf)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf.len(), 2);\n\n assert_eq!(buffer.get_and_reset(), vec![0, 1]);\n assert_eq!(buffer.buf.len(), 0);\n ```\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::split_at_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.  For a non-panicking alternative see\n [`split_at_mut_checked`](slice::split_at_mut_checked).\n\n # Examples\n\n ```\n let mut v = [1, 0, 3, 0, 5, 6];\n let (left, right) = v.split_at_mut(2);\n assert_eq!(left, [1, 0]);\n assert_eq!(right, [3, 0, 5, 6]);\n left[1] = 2;\n right[1] = 4;\n assert_eq!(v, [1, 2, 3, 4, 5, 6]);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::copy_from_slice": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies all elements from `src` into `self`, using a memcpy.\n\n The length of `src` must be the same as `self`.\n\n If `T` does not implement `Copy`, use [`clone_from_slice`].\n\n # Panics\n\n This function will panic if the two slices have different lengths.\n\n # Examples\n\n Copying two elements from a slice into another:\n\n ```\n let src = [1, 2, 3, 4];\n let mut dst = [0, 0];\n\n // Because the slices have to be the same length,\n // we slice the source slice from four elements\n // to two. It will panic if we don't do this.\n dst.copy_from_slice(&src[2..]);\n\n assert_eq!(src, [1, 2, 3, 4]);\n assert_eq!(dst, [3, 4]);\n ```\n\n Rust enforces that there can only be one mutable reference with no\n immutable references to a particular piece of data in a particular\n scope. Because of this, attempting to use `copy_from_slice` on a\n single slice will result in a compile failure:\n\n ```compile_fail\n let mut slice = [1, 2, 3, 4, 5];\n\n slice[..2].copy_from_slice(&slice[3..]); // compile fail!\n ```\n\n To work around this, we can use [`split_at_mut`] to create two distinct\n sub-slices from a slice:\n\n ```\n let mut slice = [1, 2, 3, 4, 5];\n\n {\n     let (left, right) = slice.split_at_mut(2);\n     left.copy_from_slice(&right[1..]);\n }\n\n assert_eq!(slice, [4, 5, 3, 4, 5]);\n ```\n\n [`clone_from_slice`]: slice::clone_from_slice\n [`split_at_mut`]: slice::split_at_mut\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ops::RangeTo": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 172,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/impls.rs:430:5: 436:6",
+  "src": "fn write(&mut self, data: &[u8]) -> io::Result<usize> {\n        let amt = cmp::min(data.len(), self.len());\n        let (a, b) = mem::take(self).split_at_mut(amt);\n        a.copy_from_slice(&data[..amt]);\n        *self = b;\n        Ok(amt)\n    }",
+  "mir": "fn io::impls::<impl io::Write for &mut [u8]>::write(_1: &mut &mut [u8], _2: &[u8]) -> core::result::Result<usize, io::error::Error> {\n    let mut _0: core::result::Result<usize, io::error::Error>;\n    let  _3: usize;\n    let mut _4: usize;\n    let mut _5: usize;\n    let mut _6: &[u8];\n    let  _7: &mut [u8];\n    let  _8: &mut [u8];\n    let mut _9: (&mut [u8], &mut [u8]);\n    let mut _10: &mut [u8];\n    let  _11: ();\n    let  _12: &[u8];\n    let mut _13: core::ops::RangeTo<usize>;\n    let mut _14: &mut [u8];\n    debug self => _1;\n    debug data => _2;\n    debug amt => _3;\n    debug a => _7;\n    debug b => _8;\n    bb0: {\n        StorageLive(_4);\n        _4 = PtrMetadata(_2);\n        StorageLive(_5);\n        StorageLive(_6);\n        _14 = (*_1);\n        _6 = &(*_14);\n        _5 = PtrMetadata(move _6);\n        StorageDead(_6);\n        _3 = core::cmp::min::<usize>(move _4, move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_9);\n        _10 = core::mem::take::<&mut [u8]>(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _9 = core::slice::<impl [u8]>::split_at_mut(_10, _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _7 = move (_9.0: &mut [u8]);\n        _8 = move (_9.1: &mut [u8]);\n        StorageDead(_9);\n        StorageLive(_13);\n        _13 = RangeTo(_3);\n        _12 = <[u8] as core::ops::Index<core::ops::RangeTo<usize>>>::index(_2, move _13) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_13);\n        _11 = core::slice::<impl [u8]>::copy_from_slice(_7, _12) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        (*_1) = _8;\n        _0 = core::result::Result::Ok(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

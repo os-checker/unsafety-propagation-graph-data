@@ -1,0 +1,43 @@
+{
+  "name": "<ptr::metadata::DynMetadata<Dyn> as hash::Hash>::hash",
+  "safe": true,
+  "callees": {
+    "ptr::metadata::DynMetadata::<Dyn>::vtable_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " When `DynMetadata` appears as the metadata field of a wide pointer, the rustc_middle layout\n computation does magic and the resulting layout is *not* a `FieldsShape::Aggregate`, instead\n it is a `FieldsShape::Primitive`. This means that the same type can have different layout\n depending on whether it appears as the metadata field of a wide pointer or as a stand-alone\n type, which understandably confuses codegen and leads to ICEs when trying to project to a\n field of `DynMetadata`. To work around that issue, we use `transmute` instead of using a\n field projection.\n",
+      "adt": {}
+    },
+    "ptr::hash": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Hash a raw pointer.\n\n This can be used to hash a `&T` reference (which coerces to `*const T` implicitly)\n by its address rather than the value it points to\n (which is what the `Hash for &T` implementation does).\n\n # Examples\n\n ```\n use std::hash::{DefaultHasher, Hash, Hasher};\n use std::ptr;\n\n let five = 5;\n let five_ref = &five;\n\n let mut hasher = DefaultHasher::new();\n ptr::hash(five_ref, &mut hasher);\n let actual = hasher.finish();\n\n let mut hasher = DefaultHasher::new();\n (five_ref as *const i32).hash(&mut hasher);\n let expected = hasher.finish();\n\n assert_eq!(actual, expected);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ptr::metadata::DynMetadata": [
+      "Plain",
+      "Deref",
+      "Ref"
+    ]
+  },
+  "path": 15965,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/metadata.rs:264:5: 266:6",
+  "src": "fn hash<H: Hasher>(&self, hasher: &mut H) {\n        crate::ptr::hash::<VTable, _>(self.vtable_ptr(), hasher)\n    }",
+  "mir": "fn <ptr::metadata::DynMetadata<Dyn> as hash::Hash>::hash(_1: &ptr::metadata::DynMetadata<Dyn>, _2: &mut H) -> () {\n    let mut _0: ();\n    let mut _3: *const ptr::metadata::VTable;\n    let mut _4: ptr::metadata::DynMetadata<Dyn>;\n    debug self => _1;\n    debug hasher => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = (*_1);\n        _3 = ptr::metadata::DynMetadata::<Dyn>::vtable_ptr(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _0 = ptr::hash::<ptr::metadata::VTable, H>(move _3, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

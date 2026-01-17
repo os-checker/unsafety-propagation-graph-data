@@ -1,0 +1,45 @@
+{
+  "name": "boxed::thin::WithHeader::<H>::alloc_layout",
+  "safe": true,
+  "callees": {
+    "core::alloc::Layout::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `Layout` suitable for holding a value of type `T`.\n",
+      "adt": {}
+    },
+    "core::alloc::Layout::extend": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a layout describing the record for `self` followed by\n `next`, including any necessary padding to ensure that `next`\n will be properly aligned, but *no trailing padding*.\n\n In order to match C representation layout `repr(C)`, you should\n call `pad_to_align` after extending the layout with all fields.\n (There is no way to match the default Rust representation\n layout `repr(Rust)`, as it is unspecified.)\n\n Note that the alignment of the resulting layout will be the maximum of\n those of `self` and `next`, in order to ensure alignment of both parts.\n\n Returns `Ok((k, offset))`, where `k` is layout of the concatenated\n record and `offset` is the relative location, in bytes, of the\n start of the `next` embedded within the concatenated record\n (assuming that the record itself starts at offset 0).\n\n On arithmetic overflow, returns `LayoutError`.\n\n # Examples\n\n To calculate the layout of a `#[repr(C)]` structure and the offsets of\n the fields from its fields' layouts:\n\n ```rust\n # use std::alloc::{Layout, LayoutError};\n pub fn repr_c(fields: &[Layout]) -> Result<(Layout, Vec<usize>), LayoutError> {\n     let mut offsets = Vec::new();\n     let mut layout = Layout::from_size_align(0, 1)?;\n     for &field in fields {\n         let (new_layout, offset) = layout.extend(field)?;\n         layout = new_layout;\n         offsets.push(offset);\n     }\n     // Remember to finalize with `pad_to_align`!\n     Ok((layout.pad_to_align(), offsets))\n }\n # // test that it works\n # #[repr(C)] struct S { a: u64, b: u32, c: u16, d: u32 }\n # let s = Layout::new::<S>();\n # let u16 = Layout::new::<u16>();\n # let u32 = Layout::new::<u32>();\n # let u64 = Layout::new::<u64>();\n # assert_eq!(repr_c(&[u64, u32, u16, u32]), Ok((s, vec![0, 8, 12, 16])));\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::alloc::Layout": [
+      "Plain",
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 264,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed/thin.rs:422:5: 424:6",
+  "src": "fn alloc_layout(value_layout: Layout) -> Result<(Layout, usize), LayoutError> {\n        Layout::new::<H>().extend(value_layout)\n    }",
+  "mir": "fn boxed::thin::WithHeader::<H>::alloc_layout(_1: core::alloc::Layout) -> core::result::Result<(core::alloc::Layout, usize), core::alloc::LayoutError> {\n    let mut _0: core::result::Result<(core::alloc::Layout, usize), core::alloc::LayoutError>;\n    let mut _2: &core::alloc::Layout;\n    let  _3: core::alloc::Layout;\n    debug value_layout => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = core::alloc::Layout::new::<H>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = &_3;\n        _0 = core::alloc::Layout::extend(move _2, _1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

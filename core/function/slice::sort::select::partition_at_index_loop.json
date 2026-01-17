@@ -1,0 +1,95 @@
+{
+  "name": "slice::sort::select::partition_at_index_loop",
+  "safe": true,
+  "callees": {
+    "slice::sort::shared::smallsort::insertion_sort_shift_left": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sort `v` assuming `v[..offset]` is already sorted.\n",
+      "adt": {}
+    },
+    "slice::sort::select::median_of_medians": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Selection algorithm to select the k-th element from the slice in guaranteed O(n) time.\n This is essentially a quickselect that uses Tukey's Ninther for pivot selection\n",
+      "adt": {}
+    },
+    "slice::sort::shared::pivot::choose_pivot": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Selects a pivot from `v`. Algorithm taken from glidesort by Orson Peters.\n\n This chooses a pivot by sampling an adaptive amount of points, approximating\n the quality of a median of sqrt(n) elements.\n",
+      "adt": {}
+    },
+    "ops::function::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "slice::sort::unstable::quicksort::partition": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes the input slice `v` and re-arranges elements such that when the call returns normally\n all elements that compare true for `is_less(elem, pivot)` where `pivot == v[pivot_pos]` are\n on the left side of `v` followed by the other elements, notionally considered greater or\n equal to `pivot`.\n\n Returns the number of elements that are compared true for `is_less(elem, pivot)`.\n\n If `is_less` does not implement a total order the resulting order and return value are\n unspecified. All original elements will remain in `v` and any possible modifications via\n interior mutability will be observable. Same is true if `is_less` panics or `v.len()`\n exceeds `scratch.len()`.\n",
+      "adt": {}
+    },
+    "ops::index::IndexMut::index_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the mutable indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::split_at_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.  For a non-panicking alternative see\n [`split_at_mut_checked`](slice::split_at_mut_checked).\n\n # Examples\n\n ```\n let mut v = [1, 0, 3, 0, 5, 6];\n let (left, right) = v.split_at_mut(2);\n assert_eq!(left, [1, 0]);\n assert_eq!(right, [3, 0, 5, 6]);\n left[1] = 2;\n right[1] = 4;\n assert_eq!(v, [1, 2, 3, 4, 5, 6]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 1094, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) }, Not)) })])"
+    ],
+    "ops::range::RangeFrom": [
+      "Plain"
+    ]
+  },
+  "path": 16661,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/select.rs:66:1: 144:2",
+  "src": "fn partition_at_index_loop<'a, T, F>(\n    mut v: &'a mut [T],\n    mut index: usize,\n    mut ancestor_pivot: Option<&'a T>,\n    is_less: &mut F,\n) where\n    F: FnMut(&T, &T) -> bool,\n{\n    // Limit the amount of iterations and fall back to fast deterministic selection to ensure O(n)\n    // worst case running time. This limit needs to be constant, because using `ilog2(len)` like in\n    // `sort` would result in O(n log n) time complexity. The exact value of the limit is chosen\n    // somewhat arbitrarily, but for most inputs bad pivot selections should be relatively rare, so\n    // the limit is reached for sub-slices len / (2^limit or less). Which makes the remaining work\n    // with the fallback minimal in relative terms.\n    let mut limit = 16;\n\n    loop {\n        if v.len() <= INSERTION_SORT_THRESHOLD {\n            if v.len() >= 2 {\n                insertion_sort_shift_left(v, 1, is_less);\n            }\n            return;\n        }\n\n        if limit == 0 {\n            median_of_medians(v, is_less, index);\n            return;\n        }\n\n        limit -= 1;\n\n        // Choose a pivot\n        let pivot_pos = choose_pivot(v, is_less);\n\n        // If the chosen pivot is equal to the predecessor, then it's the smallest element in the\n        // slice. Partition the slice into elements equal to and elements greater than the pivot.\n        // This case is usually hit when the slice contains many duplicate elements.\n        if let Some(p) = ancestor_pivot {\n            let pivot = &v[pivot_pos];\n\n            if !is_less(p, pivot) {\n                let num_lt = partition(v, pivot_pos, &mut |a, b| !is_less(b, a));\n\n                // Continue sorting elements greater than the pivot. We know that `mid` contains\n                // the pivot. So we can continue after `mid`.\n                let mid = num_lt + 1;\n\n                // If we've passed our index, then we're good.\n                if mid > index {\n                    return;\n                }\n\n                v = &mut v[mid..];\n                index = index - mid;\n                ancestor_pivot = None;\n                continue;\n            }\n        }\n\n        let mid = partition(v, pivot_pos, is_less);\n\n        // Split the slice into `left`, `pivot`, and `right`.\n        let (left, right) = v.split_at_mut(mid);\n        let (pivot, right) = right.split_at_mut(1);\n        let pivot = &pivot[0];\n\n        if mid < index {\n            v = right;\n            index = index - mid - 1;\n            ancestor_pivot = Some(pivot);\n        } else if mid > index {\n            v = left;\n        } else {\n            // If mid == index, then we're done, since partition() guaranteed that all elements\n            // after mid are greater than or equal to mid.\n            return;\n        }\n    }\n}",
+  "mir": "fn slice::sort::select::partition_at_index_loop(_1: &mut [T], _2: usize, _3: option::Option<&T>, _4: &mut F) -> () {\n    let mut _0: ();\n    let mut _5: i32;\n    let mut _6: bool;\n    let mut _7: usize;\n    let mut _8: &[T];\n    let mut _9: bool;\n    let mut _10: usize;\n    let mut _11: &[T];\n    let  _12: ();\n    let mut _13: &mut [T];\n    let mut _14: i32;\n    let  _15: ();\n    let mut _16: &mut [T];\n    let mut _17: usize;\n    let mut _18: (i32, bool);\n    let  _19: usize;\n    let mut _20: &[T];\n    let mut _21: isize;\n    let  _22: &T;\n    let  _23: &T;\n    let mut _24: *const [T];\n    let mut _25: usize;\n    let mut _26: bool;\n    let mut _27: bool;\n    let mut _28: (&T, &T);\n    let  _29: usize;\n    let mut _30: &mut [T];\n    let mut _31: &mut {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/select.rs:107:59: 107:65};\n    let mut _32: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/select.rs:107:59: 107:65};\n    let  _33: usize;\n    let mut _34: (usize, bool);\n    let mut _35: bool;\n    let mut _36: usize;\n    let mut _37: &mut [T];\n    let mut _38: &mut [T];\n    let mut _39: ops::range::RangeFrom<usize>;\n    let mut _40: usize;\n    let mut _41: (usize, bool);\n    let mut _42: option::Option<&T>;\n    let  _43: usize;\n    let mut _44: &mut [T];\n    let  _45: &mut [T];\n    let  _46: &mut [T];\n    let mut _47: (&mut [T], &mut [T]);\n    let mut _48: &mut [T];\n    let  _49: &mut [T];\n    let  _50: &mut [T];\n    let mut _51: (&mut [T], &mut [T]);\n    let  _52: &T;\n    let  _53: usize;\n    let mut _54: *const [T];\n    let mut _55: usize;\n    let mut _56: bool;\n    let mut _57: bool;\n    let mut _58: usize;\n    let mut _59: usize;\n    let mut _60: usize;\n    let mut _61: (usize, bool);\n    let mut _62: (usize, bool);\n    let mut _63: option::Option<&T>;\n    let mut _64: bool;\n    let mut _65: usize;\n    debug v => _1;\n    debug index => _2;\n    debug ancestor_pivot => _3;\n    debug is_less => _4;\n    debug limit => _5;\n    debug pivot_pos => _19;\n    debug p => _22;\n    debug pivot => _23;\n    debug num_lt => _29;\n    debug mid => _33;\n    debug mid => _43;\n    debug left => _45;\n    debug right => _46;\n    debug pivot => _49;\n    debug right => _50;\n    debug pivot => _52;\n    bb0: {\n        StorageLive(_5);\n        _5 = 16_i32;\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &(*_1);\n        _7 = PtrMetadata(move _8);\n        StorageDead(_8);\n        _6 = Le(move _7, slice::sort::select::INSERTION_SORT_THRESHOLD);\n        switchInt(move _6) -> [0: bb7, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &(*_1);\n        _10 = PtrMetadata(move _11);\n        StorageDead(_11);\n        _9 = Ge(move _10, 2_usize);\n        switchInt(move _9) -> [0: bb5, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_10);\n        StorageLive(_13);\n        _13 = _1;\n        _12 = slice::sort::shared::smallsort::insertion_sort_shift_left::<T, F>(move _13, 1_usize, _4) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_13);\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_10);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_9);\n        StorageDead(_6);\n        goto -> bb37;\n    }\n    bb7: {\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageLive(_14);\n        _14 = _5;\n        switchInt(move _14) -> [0: bb8, otherwise: bb9];\n    }\n    bb8: {\n        StorageDead(_14);\n        StorageLive(_16);\n        _16 = _1;\n        StorageLive(_17);\n        _17 = _2;\n        _15 = slice::sort::select::median_of_medians::<T, F>(move _16, _4, move _17) -> [return: bb10, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_14);\n        _18 = CheckedSub(_5, 1_i32);\n        assert(!move (_18.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _5, 1_i32) -> [success: bb11, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_17);\n        StorageDead(_16);\n        goto -> bb37;\n    }\n    bb11: {\n        _5 = move (_18.0: i32);\n        StorageLive(_20);\n        _20 = &(*_1);\n        _19 = slice::sort::shared::pivot::choose_pivot::<T, F>(move _20, _4) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_20);\n        _21 = discriminant(_3);\n        switchInt(move _21) -> [1: bb13, 0: bb24, otherwise: bb38];\n    }\n    bb13: {\n        _22 = ((_3 as variant#1).0: &T);\n        _24 = &raw const (fake) (*_1);\n        _25 = PtrMetadata(move _24);\n        _26 = Lt(_19, _25);\n        assert(move _26, \"index out of bounds: the length is {} but the index is {}\", move _25, _19) -> [success: bb14, unwind unreachable];\n    }\n    bb14: {\n        _23 = &(*_1)[_19];\n        StorageLive(_27);\n        StorageLive(_28);\n        _28 = (_22, _23);\n        _27 = <F as ops::function::FnMut<(&T, &T)>>::call_mut(_4, move _28) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        switchInt(move _27) -> [0: bb17, otherwise: bb16];\n    }\n    bb16: {\n        StorageDead(_28);\n        StorageDead(_27);\n        goto -> bb24;\n    }\n    bb17: {\n        StorageDead(_28);\n        StorageLive(_30);\n        _30 = _1;\n        StorageLive(_32);\n        _32 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/select.rs:107:59: 107:65}(_4);\n        _31 = &mut _32;\n        _29 = slice::sort::unstable::quicksort::partition::<T, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/select.rs:107:59: 107:65}>(move _30, _19, _31) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_30);\n        StorageDead(_32);\n        _34 = CheckedAdd(_29, 1_usize);\n        assert(!move (_34.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _29, 1_usize) -> [success: bb19, unwind unreachable];\n    }\n    bb19: {\n        _33 = move (_34.0: usize);\n        StorageLive(_35);\n        StorageLive(_36);\n        _36 = _2;\n        _35 = Gt(_33, move _36);\n        switchInt(move _35) -> [0: bb21, otherwise: bb20];\n    }\n    bb20: {\n        StorageDead(_36);\n        StorageDead(_35);\n        StorageDead(_27);\n        goto -> bb36;\n    }\n    bb21: {\n        StorageDead(_36);\n        StorageDead(_35);\n        StorageLive(_38);\n        _38 = _1;\n        StorageLive(_39);\n        _39 = RangeFrom(_33);\n        _37 = <[T] as ops::index::IndexMut<ops::range::RangeFrom<usize>>>::index_mut(move _38, move _39) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_39);\n        StorageDead(_38);\n        _1 = _37;\n        StorageLive(_40);\n        _40 = _2;\n        _41 = CheckedSub(_40, _33);\n        assert(!move (_41.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _40, _33) -> [success: bb23, unwind unreachable];\n    }\n    bb23: {\n        _2 = move (_41.0: usize);\n        StorageDead(_40);\n        StorageLive(_42);\n        _42 = option::Option::None;\n        _3 = move _42;\n        StorageDead(_42);\n        StorageDead(_27);\n        goto -> bb1;\n    }\n    bb24: {\n        StorageLive(_44);\n        _44 = _1;\n        _43 = slice::sort::unstable::quicksort::partition::<T, F>(move _44, _19, _4) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_44);\n        StorageLive(_47);\n        StorageLive(_48);\n        _48 = _1;\n        _47 = slice::<impl [T]>::split_at_mut(move _48, _43) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_48);\n        _45 = move (_47.0: &mut [T]);\n        _46 = move (_47.1: &mut [T]);\n        StorageDead(_47);\n        StorageLive(_51);\n        _51 = slice::<impl [T]>::split_at_mut(_46, 1_usize) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        StorageLive(_49);\n        _49 = move (_51.0: &mut [T]);\n        _50 = move (_51.1: &mut [T]);\n        StorageDead(_51);\n        StorageLive(_53);\n        _53 = 0_usize;\n        _54 = &raw const (fake) (*_49);\n        _55 = PtrMetadata(move _54);\n        _56 = Lt(_53, _55);\n        assert(move _56, \"index out of bounds: the length is {} but the index is {}\", move _55, _53) -> [success: bb28, unwind unreachable];\n    }\n    bb28: {\n        _52 = &(*_49)[_53];\n        StorageDead(_53);\n        StorageLive(_57);\n        StorageLive(_58);\n        _58 = _2;\n        _57 = Lt(_43, move _58);\n        switchInt(move _57) -> [0: bb32, otherwise: bb29];\n    }\n    bb29: {\n        StorageDead(_58);\n        _1 = _50;\n        StorageLive(_59);\n        StorageLive(_60);\n        _60 = _2;\n        _61 = CheckedSub(_60, _43);\n        assert(!move (_61.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _60, _43) -> [success: bb30, unwind unreachable];\n    }\n    bb30: {\n        _59 = move (_61.0: usize);\n        StorageDead(_60);\n        _62 = CheckedSub(_59, 1_usize);\n        assert(!move (_62.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _59, 1_usize) -> [success: bb31, unwind unreachable];\n    }\n    bb31: {\n        _2 = move (_62.0: usize);\n        StorageDead(_59);\n        StorageLive(_63);\n        _63 = option::Option::Some(_52);\n        _3 = move _63;\n        StorageDead(_63);\n        goto -> bb35;\n    }\n    bb32: {\n        StorageDead(_58);\n        StorageLive(_64);\n        StorageLive(_65);\n        _65 = _2;\n        _64 = Gt(_43, move _65);\n        switchInt(move _64) -> [0: bb34, otherwise: bb33];\n    }\n    bb33: {\n        StorageDead(_65);\n        _1 = _45;\n        StorageDead(_64);\n        goto -> bb35;\n    }\n    bb34: {\n        StorageDead(_65);\n        StorageDead(_64);\n        StorageDead(_57);\n        StorageDead(_49);\n        goto -> bb36;\n    }\n    bb35: {\n        StorageDead(_57);\n        StorageDead(_49);\n        goto -> bb1;\n    }\n    bb36: {\n        goto -> bb37;\n    }\n    bb37: {\n        StorageDead(_5);\n        return;\n    }\n    bb38: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

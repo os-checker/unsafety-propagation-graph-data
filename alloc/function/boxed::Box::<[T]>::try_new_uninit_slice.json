@@ -1,0 +1,136 @@
+{
+  "name": "boxed::Box::<[T]>::try_new_uninit_slice",
+  "safe": true,
+  "callees": {
+    "core::ptr::NonNull::<T>::dangling": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `NonNull` that is dangling, but well-aligned.\n\n This is useful for initializing types which lazily allocate, like\n `Vec::new` does.\n\n Note that the address of the returned pointer may potentially\n be that of a valid pointer, which means this must not be used\n as a \"not yet initialized\" sentinel value.\n Types that lazily allocate must track initialization by some other means.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let ptr = NonNull::<u32>::dangling();\n // Important: don't try to access the value of `ptr` without\n // initializing it first! The pointer is not null but isn't valid either!\n ```\n",
+      "adt": {}
+    },
+    "core::alloc::Layout::array": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a layout describing the record for a `[T; n]`.\n\n On arithmetic overflow or when the total size would exceed\n `isize::MAX`, returns `LayoutError`.\n",
+      "adt": {}
+    },
+    "core::alloc::Allocator::allocate": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to allocate a block of memory.\n\n On success, returns a [`NonNull<[u8]>`][NonNull] meeting the size and alignment guarantees of `layout`.\n\n The returned block may have a larger size than specified by `layout.size()`, and may or may\n not have its contents initialized.\n\n The returned block of memory remains valid as long as it is [*currently allocated*] and the shorter of:\n   - the borrow-checker lifetime of the allocator type itself.\n   - as long as the allocator and all its clones have not been dropped.\n\n [*currently allocated*]: #currently-allocated-memory\n\n # Errors\n\n Returning `Err` indicates that either memory is exhausted or `layout` does not meet\n allocator's size or alignment constraints.\n\n Implementations are encouraged to return `Err` on memory exhaustion rather than panicking or\n aborting, but this is not a strict requirement. (Specifically: it is *legal* to implement\n this trait atop an underlying native allocation library that aborts on memory exhaustion.)\n\n Clients wishing to abort computation in response to an allocation error are encouraged to\n call the [`handle_alloc_error`] function, rather than directly invoking `panic!` or similar.\n\n [`handle_alloc_error`]: ../../alloc/alloc/fn.handle_alloc_error.html\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"null pointer\");\n\n let casted_ptr = ptr.cast::<i8>();\n let raw_ptr: *mut i8 = casted_ptr.as_ptr();\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "raw_vec::RawVec::<T, A>::from_raw_parts_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reconstitutes a `RawVec` from a pointer, capacity, and allocator.\n\n # Safety\n\n The `ptr` must be allocated (via the given allocator `alloc`), and with the given\n `capacity`.\n The `capacity` cannot exceed `isize::MAX` for sized types. (only a concern on 32-bit\n systems). For ZSTs capacity is ignored.\n If the `ptr` and `capacity` come from a `RawVec` created via `alloc`, then this is\n guaranteed.\n",
+      "adt": {
+        "raw_vec::RawVec": "Constructor"
+      }
+    },
+    "raw_vec::RawVec::<T, A>::into_box": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts the entire buffer into `Box<[MaybeUninit<T>]>` with the specified `len`.\n\n Note that this will correctly reconstitute any `cap` changes\n that may have been performed. (See description of type for details.)\n\n # Safety\n\n * `len` must be greater than or equal to the most recently requested capacity, and\n * `len` must be less than or equal to `self.capacity()`.\n\n Note, that the requested capacity and `self.capacity()` could differ, as\n an allocator could overallocate and return a greater memory block than requested.\n",
+      "adt": {
+        "raw_vec::RawVec": "ImmutableAsArgument",
+        "boxed::Box": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 24, kind: RigidTy(Adt(AdtDef(DefId { id: 2588, name: \"core::alloc::Layout\" }), GenericArgs([]))) })])"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ],
+    "alloc::Global": [
+      "Ref"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 188, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 195, kind: RigidTy(Slice(Ty { id: 93, kind: RigidTy(Uint(U8)) })) })]))) })])"
+    ],
+    "raw_vec::RawVec": [
+      "Plain"
+    ],
+    "boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 394,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed.rs:922:5: 933:6",
+  "src": "pub fn try_new_uninit_slice(len: usize) -> Result<Box<[mem::MaybeUninit<T>]>, AllocError> {\n        let ptr = if T::IS_ZST || len == 0 {\n            NonNull::dangling()\n        } else {\n            let layout = match Layout::array::<mem::MaybeUninit<T>>(len) {\n                Ok(l) => l,\n                Err(_) => return Err(AllocError),\n            };\n            Global.allocate(layout)?.cast()\n        };\n        unsafe { Ok(RawVec::from_raw_parts_in(ptr.as_ptr(), len, Global).into_box(len)) }\n    }",
+  "mir": "fn boxed::Box::<[T]>::try_new_uninit_slice(_1: usize) -> core::result::Result<boxed::Box<[core::mem::MaybeUninit<T>]>, core::alloc::AllocError> {\n    let mut _0: core::result::Result<boxed::Box<[core::mem::MaybeUninit<T>]>, core::alloc::AllocError>;\n    let  _2: core::ptr::NonNull<T>;\n    let mut _3: core::result::Result<core::alloc::Layout, core::alloc::LayoutError>;\n    let mut _4: isize;\n    let  _5: core::alloc::Layout;\n    let mut _6: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, core::alloc::AllocError>, core::ptr::NonNull<[u8]>>;\n    let mut _7: core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError>;\n    let mut _8: &alloc::Global;\n    let mut _9: isize;\n    let  _10: core::ptr::NonNull<[u8]>;\n    let mut _11: boxed::Box<[core::mem::MaybeUninit<T>]>;\n    let mut _12: raw_vec::RawVec<T>;\n    let mut _13: *mut T;\n    let mut _14: core::ptr::NonNull<T>;\n    debug len => _1;\n    debug ptr => _2;\n    debug layout => _5;\n    debug l => _5;\n    debug residual => core::result::Result::<core::convert::Infallible, core::alloc::AllocError>::Err(core::alloc::AllocError);\n    debug val => _10;\n    bb0: {\n        StorageLive(_2);\n        switchInt(<T as core::mem::SizedTypeProperties>::IS_ZST) -> [0: bb1, otherwise: bb3];\n    }\n    bb1: {\n        switchInt(_1) -> [0: bb2, otherwise: bb4];\n    }\n    bb2: {\n        goto -> bb3;\n    }\n    bb3: {\n        _2 = core::ptr::NonNull::<T>::dangling() -> [return: bb15, unwind unreachable];\n    }\n    bb4: {\n        StorageLive(_3);\n        _3 = core::alloc::Layout::array::<core::mem::MaybeUninit<T>>(_1) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _4 = discriminant(_3);\n        switchInt(move _4) -> [0: bb8, 1: bb7, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        _0 = core::result::Result::Err(core::alloc::AllocError);\n        StorageDead(_3);\n        goto -> bb19;\n    }\n    bb8: {\n        _5 = ((_3 as variant#0).0: core::alloc::Layout);\n        StorageDead(_3);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = boxed::Box::<[T]>::try_new_uninit_slice::promoted[0];\n        _7 = <alloc::Global as core::alloc::Allocator>::allocate(move _8, _5) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_8);\n        _6 = <core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError> as core::ops::Try>::branch(move _7) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_7);\n        _9 = discriminant(_6);\n        switchInt(move _9) -> [0: bb11, 1: bb12, otherwise: bb6];\n    }\n    bb11: {\n        _10 = ((_6 as variant#0).0: core::ptr::NonNull<[u8]>);\n        _2 = core::ptr::NonNull::<[u8]>::cast::<T>(_10) -> [return: bb14, unwind unreachable];\n    }\n    bb12: {\n        _0 = <core::result::Result<boxed::Box<[core::mem::MaybeUninit<T>]>, core::alloc::AllocError> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, core::alloc::AllocError>>>::from_residual(core::result::Result::<core::convert::Infallible, core::alloc::AllocError>::Err(core::alloc::AllocError)) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_6);\n        goto -> bb19;\n    }\n    bb14: {\n        StorageDead(_6);\n        goto -> bb15;\n    }\n    bb15: {\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = _2;\n        _13 = core::ptr::NonNull::<T>::as_ptr(move _14) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_14);\n        _12 = raw_vec::RawVec::<T>::from_raw_parts_in(move _13, _1, alloc::Global) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_13);\n        _11 = raw_vec::RawVec::<T>::into_box(move _12, _1) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_12);\n        _0 = core::result::Result::Ok(move _11);\n        StorageDead(_11);\n        StorageDead(_2);\n        goto -> bb20;\n    }\n    bb19: {\n        StorageDead(_2);\n        goto -> bb20;\n    }\n    bb20: {\n        return;\n    }\n}\n",
+  "doc": " Constructs a new boxed slice with uninitialized contents. Returns an error if\n the allocation fails.\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n let mut values = Box::<[u32]>::try_new_uninit_slice(3)?;\n // Deferred initialization:\n values[0].write(1);\n values[1].write(2);\n values[2].write(3);\n let values = unsafe { values.assume_init() };\n\n assert_eq!(*values, [1, 2, 3]);\n # Ok::<(), std::alloc::AllocError>(())\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

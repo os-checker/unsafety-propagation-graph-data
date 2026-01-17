@@ -1,0 +1,46 @@
+{
+  "name": "core_simd::vector::Simd::<T, N>::scatter_ptr",
+  "safe": false,
+  "callees": {
+    "core_simd::masks::Mask::<T, N>::splat": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a mask by setting all elements to the given value.\n",
+      "adt": {
+        "core_simd::masks::Mask": "Constructor"
+      }
+    },
+    "core_simd::vector::Simd::<T, N>::scatter_select_ptr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Conditionally write pointers elementwise into a SIMD vector.\n The mask `enable`s all `true` pointers and disables all `false` pointers.\n If a pointer is disabled, the write to its pointee is skipped.\n\n # Safety\n\n Enabled pointers must satisfy the same conditions as [`core::ptr::write`].\n\n # Example\n ```\n # #![feature(portable_simd)]\n # #[cfg(feature = \"as_crate\")] use core_simd::simd;\n # #[cfg(not(feature = \"as_crate\"))] use core::simd;\n # use simd::{Mask, Simd, ptr::SimdMutPtr};\n let mut values = [0; 4];\n let offset = Simd::from_array([3, 2, 1, 0]);\n let ptrs = Simd::splat(values.as_mut_ptr()).wrapping_add(offset);\n let enable = Mask::from_array([true, true, false, false]);\n unsafe { Simd::from_array([6, 3, 5, 7]).scatter_select_ptr(ptrs, enable); }\n assert_eq!(values, [0, 0, 3, 6]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_simd::masks::Mask": [
+      "Plain"
+    ],
+    "core_simd::vector::Simd": [
+      "Plain"
+    ]
+  },
+  "path": 12688,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/vector.rs:869:5: 872:6",
+  "src": "pub unsafe fn scatter_ptr(self, dest: Simd<*mut T, N>) {\n        // Safety: The caller is responsible for upholding all invariants\n        unsafe { self.scatter_select_ptr(dest, Mask::splat(true)) }\n    }",
+  "mir": "fn core_simd::vector::Simd::<T, N>::scatter_ptr(_1: core_simd::vector::Simd<T, N>, _2: core_simd::vector::Simd<*mut T, N>) -> () {\n    let mut _0: ();\n    let mut _3: core_simd::masks::Mask<isize, N>;\n    debug self => _1;\n    debug dest => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = core_simd::masks::Mask::<isize, N>::splat(true) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = core_simd::vector::Simd::<T, N>::scatter_select_ptr(_1, _2, move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Writes pointers elementwise into a SIMD vector.\n\n # Safety\n\n Each write must satisfy the same conditions as [`core::ptr::write`].\n\n # Example\n ```\n # #![feature(portable_simd)]\n # #[cfg(feature = \"as_crate\")] use core_simd::simd;\n # #[cfg(not(feature = \"as_crate\"))] use core::simd;\n # use simd::{Simd, ptr::SimdMutPtr};\n let mut values = [0; 4];\n let offset = Simd::from_array([3, 2, 1, 0]);\n let ptrs = Simd::splat(values.as_mut_ptr()).wrapping_add(offset);\n unsafe { Simd::from_array([6, 3, 5, 7]).scatter_ptr(ptrs); }\n assert_eq!(values, [7, 5, 3, 6]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

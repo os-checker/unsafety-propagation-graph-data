@@ -1,0 +1,54 @@
+{
+  "name": "<alloc::sync::Arc<T> as sync::rcu::non_null::NonNullPtr>::from_raw",
+  "safe": false,
+  "callees": {
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast_const": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Changes constness without changing the type.\n\n This is a bit safer than `as` because it wouldn't silently change the type if the code is\n refactored.\n\n While not strictly required (`*mut T` coerces to `*const T`), this is provided for symmetry\n with [`cast_mut`] on `*const T` and may have documentation value if used instead of implicit\n coercion.\n\n [`cast_mut`]: pointer::cast_mut\n",
+      "adt": {}
+    },
+    "alloc::sync::Arc::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs an `Arc<T>` from a raw pointer.\n\n The raw pointer must have been previously returned by a call to\n [`Arc<U>::into_raw`][into_raw] with the following requirements:\n\n * If `U` is sized, it must have the same size and alignment as `T`. This\n   is trivially true if `U` is `T`.\n * If `U` is unsized, its data pointer must have the same size and\n   alignment as `T`. This is trivially true if `Arc<U>` was constructed\n   through `Arc<T>` and then converted to `Arc<U>` through an [unsized\n   coercion].\n\n Note that if `U` or `U`'s data pointer is not `T` but has the same size\n and alignment, this is basically like transmuting references of\n different types. See [`mem::transmute`][transmute] for more information\n on what restrictions apply in this case.\n\n The raw pointer must point to a block of memory allocated by the global allocator.\n\n The user of `from_raw` has to make sure a specific value of `T` is only\n dropped once.\n\n This function is unsafe because improper use may lead to memory unsafety,\n even if the returned `Arc<T>` is never accessed.\n\n [into_raw]: Arc::into_raw\n [transmute]: core::mem::transmute\n [unsized coercion]: https://doc.rust-lang.org/reference/type-coercions.html#unsized-coercions\n\n # Examples\n\n ```\n use std::sync::Arc;\n\n let x = Arc::new(\"hello\".to_owned());\n let x_ptr = Arc::into_raw(x);\n\n unsafe {\n     // Convert back to an `Arc` to prevent leak.\n     let x = Arc::from_raw(x_ptr);\n     assert_eq!(&*x, \"hello\");\n\n     // Further calls to `Arc::from_raw(x_ptr)` would be memory-unsafe.\n }\n\n // The memory was freed when `x` went out of scope above, so `x_ptr` is now dangling!\n ```\n\n Convert a slice back into its original array:\n\n ```\n use std::sync::Arc;\n\n let x: Arc<[u32]> = Arc::new([1, 2, 3]);\n let x_ptr: *const [u32] = Arc::into_raw(x);\n\n unsafe {\n     let x: Arc<[u32; 3]> = Arc::from_raw(x_ptr.cast::<[u32; 3]>());\n     assert_eq!(&*x, &[1, 2, 3]);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "alloc::sync::Arc": [
+      "Plain"
+    ]
+  },
+  "path": 2599,
+  "span": "ostd/src/sync/rcu/non_null/mod.rs:183:5: 188:6",
+  "src": "unsafe fn from_raw(ptr: NonNull<Self::Target>) -> Self {\n        let ptr = ptr.as_ptr().cast_const();\n\n        // SAFETY: The safety is upheld by the caller.\n        unsafe { Arc::from_raw(ptr) }\n    }",
+  "mir": "fn <alloc::sync::Arc<T> as sync::rcu::non_null::NonNullPtr>::from_raw(_1: core::ptr::NonNull<T>) -> alloc::sync::Arc<T> {\n    let mut _0: alloc::sync::Arc<T>;\n    let  _2: *const T;\n    let mut _3: *mut T;\n    debug ptr => _1;\n    debug ptr => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = core::ptr::NonNull::<T>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = core::ptr::mut_ptr::<impl *mut T>::cast_const(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = alloc::sync::Arc::<T>::from_raw(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

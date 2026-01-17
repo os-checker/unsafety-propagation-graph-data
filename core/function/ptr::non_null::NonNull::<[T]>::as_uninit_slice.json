@@ -1,0 +1,63 @@
+{
+  "name": "ptr::non_null::NonNull::<[T]>::as_uninit_slice",
+  "safe": false,
+  "callees": {
+    "ptr::non_null::NonNull::<T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"null pointer\");\n\n let casted_ptr = ptr.cast::<i8>();\n let raw_ptr: *mut i8 = casted_ptr.as_ptr();\n ```\n",
+      "adt": {
+        "ptr::non_null::NonNull": "Constructor"
+      }
+    },
+    "ptr::non_null::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<[T]>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of a non-null raw slice.\n\n The returned value is the number of **elements**, not the number of bytes.\n\n This function is safe, even when the non-null raw slice cannot be dereferenced to a slice\n because the pointer does not have a valid address.\n\n # Examples\n\n ```rust\n use std::ptr::NonNull;\n\n let slice: NonNull<[i8]> = NonNull::slice_from_raw_parts(NonNull::dangling(), 3);\n assert_eq!(slice.len(), 3);\n ```\n",
+      "adt": {}
+    },
+    "slice::raw::from_raw_parts": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forms a slice from a pointer and a length.\n\n The `len` argument is the number of **elements**, not the number of bytes.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for reads for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations. See [below](#incorrect-usage)\n       for an example incorrectly not taking this into account.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be mutated for the duration\n   of lifetime `'a`, except inside an `UnsafeCell`.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n # Caveat\n\n The lifetime for the returned slice is inferred from its usage. To\n prevent accidental misuse, it's suggested to tie the lifetime to whichever\n source lifetime is safe in the context, such as by providing a helper\n function taking the lifetime of a host value for the slice, or by explicit\n annotation.\n\n # Examples\n\n ```\n use std::slice;\n\n // manifest a slice for a single element\n let x = 42;\n let ptr = &x as *const _;\n let slice = unsafe { slice::from_raw_parts(ptr, 1) };\n assert_eq!(slice[0], 42);\n ```\n\n ### Incorrect usage\n\n The following `join_slices` function is **unsound** ⚠️\n\n ```rust,no_run\n use std::slice;\n\n fn join_slices<'a, T>(fst: &'a [T], snd: &'a [T]) -> &'a [T] {\n     let fst_end = fst.as_ptr().wrapping_add(fst.len());\n     let snd_start = snd.as_ptr();\n     assert_eq!(fst_end, snd_start, \"Slices must be contiguous!\");\n     unsafe {\n         // The assertion above ensures `fst` and `snd` are contiguous, but they might\n         // still be contained within _different allocations_, in which case\n         // creating this slice is undefined behavior.\n         slice::from_raw_parts(fst.as_ptr(), fst.len() + snd.len())\n     }\n }\n\n fn main() {\n     // `a` and `b` are different allocations...\n     let a = 42;\n     let b = 27;\n     // ... which may nevertheless be laid out contiguously in memory: | a | b |\n     let _ = join_slices(slice::from_ref(&a), slice::from_ref(&b)); // UB\n }\n ```\n\n ### FFI: Handling null pointers\n\n In languages such as C++, pointers to empty collections are not guaranteed to be non-null.\n When accepting such pointers, they have to be checked for null-ness to avoid undefined\n behavior.\n\n ```\n use std::slice;\n\n /// Sum the elements of an FFI slice.\n ///\n /// # Safety\n ///\n /// If ptr is not NULL, it must be correctly aligned and\n /// point to `len` initialized items of type `f32`.\n unsafe extern \"C\" fn sum_slice(ptr: *const f32, len: usize) -> f32 {\n     let data = if ptr.is_null() {\n         // `len` is assumed to be 0.\n         &[]\n     } else {\n         // SAFETY: see function docstring.\n         unsafe { slice::from_raw_parts(ptr, len) }\n     };\n     data.into_iter().sum()\n }\n\n // This could be the result of C++'s std::vector::data():\n let ptr = std::ptr::null();\n // And this could be std::vector::size():\n let len = 0;\n assert_eq!(unsafe { sum_slice(ptr, len) }, 0.0);\n ```\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 15999,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/non_null.rs:1543:5: 1546:6",
+  "src": "pub const unsafe fn as_uninit_slice<'a>(self) -> &'a [MaybeUninit<T>] {\n        // SAFETY: the caller must uphold the safety contract for `as_uninit_slice`.\n        unsafe { slice::from_raw_parts(self.cast().as_ptr(), self.len()) }\n    }",
+  "mir": "fn ptr::non_null::NonNull::<[T]>::as_uninit_slice(_1: ptr::non_null::NonNull<[T]>) -> &[mem::maybe_uninit::MaybeUninit<T>] {\n    let mut _0: &[mem::maybe_uninit::MaybeUninit<T>];\n    let mut _2: *const mem::maybe_uninit::MaybeUninit<T>;\n    let mut _3: *mut mem::maybe_uninit::MaybeUninit<T>;\n    let mut _4: ptr::non_null::NonNull<mem::maybe_uninit::MaybeUninit<T>>;\n    let mut _5: usize;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ptr::non_null::NonNull::<[T]>::cast::<mem::maybe_uninit::MaybeUninit<T>>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = ptr::non_null::NonNull::<mem::maybe_uninit::MaybeUninit<T>>::as_ptr(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _2 = move _3 as *const mem::maybe_uninit::MaybeUninit<T>;\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = ptr::non_null::NonNull::<[T]>::len(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _0 = slice::raw::from_raw_parts::<'_, mem::maybe_uninit::MaybeUninit<T>>(move _2, move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns a shared reference to a slice of possibly uninitialized values. In contrast to\n [`as_ref`], this does not require that the value has to be initialized.\n\n For the mutable counterpart see [`as_uninit_slice_mut`].\n\n [`as_ref`]: NonNull::as_ref\n [`as_uninit_slice_mut`]: NonNull::as_uninit_slice_mut\n\n # Safety\n\n When calling this method, you have to ensure that all of the following is true:\n\n * The pointer must be [valid] for reads for `ptr.len() * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations.\n\n     * The pointer must be aligned even for zero-length slices. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * The total size `ptr.len() * size_of::<T>()` of the slice must be no larger than `isize::MAX`.\n   See the safety documentation of [`pointer::offset`].\n\n * You must enforce Rust's aliasing rules, since the returned lifetime `'a` is\n   arbitrarily chosen and does not necessarily reflect the actual lifetime of the data.\n   In particular, while this reference exists, the memory the pointer points to must\n   not get mutated (except inside `UnsafeCell`).\n\n This applies even if the result of this method is unused!\n\n See also [`slice::from_raw_parts`].\n\n [valid]: crate::ptr#safety\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

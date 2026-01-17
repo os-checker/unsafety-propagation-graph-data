@@ -1,0 +1,90 @@
+{
+  "name": "raw_vec::RawVecInner::<A>::try_reserve_exact",
+  "safe": false,
+  "callees": {
+    "raw_vec::RawVecInner::<A>::needs_to_grow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "raw_vec::RawVecInner": "ImmutableAsArgument",
+        "core::alloc::Layout": "ImmutableAsArgument"
+      }
+    },
+    "raw_vec::RawVecInner::<A>::grow_exact": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " # Safety\n - `elem_layout` must be valid for `self`, i.e. it must be the same `elem_layout` used to\n   initially construct `self`\n - `elem_layout`'s size must be a multiple of its alignment\n - The sum of `len` and `additional` must be greater than the current capacity\n",
+      "adt": {
+        "raw_vec::RawVecInner": "MutableAsArgument",
+        "core::alloc::Layout": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::hint::assert_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Makes a *soundness* promise to the compiler that `cond` holds.\n\n This may allow the optimizer to simplify things, but it might also make the generated code\n slower. Either way, calling it will most likely make compilation take longer.\n\n You may know this from other places as\n [`llvm.assume`](https://llvm.org/docs/LangRef.html#llvm-assume-intrinsic) or, in C,\n [`__builtin_assume`](https://clang.llvm.org/docs/LanguageExtensions.html#builtin-assume).\n\n This promotes a correctness requirement to a soundness requirement. Don't do that without\n very good reason.\n\n # Usage\n\n This is a situational tool for micro-optimization, and is allowed to do nothing. Any use\n should come with a repeatable benchmark to show the value, with the expectation to drop it\n later should the optimizer get smarter and no longer need it.\n\n The more complicated the condition, the less likely this is to be useful. For example,\n `assert_unchecked(foo.is_sorted())` is a complex enough value that the compiler is unlikely\n to be able to take advantage of it.\n\n There's also no need to `assert_unchecked` basic properties of things.  For example, the\n compiler already knows the range of `count_ones`, so there is no benefit to\n `let n = u32::count_ones(x); assert_unchecked(n <= u32::BITS);`.\n\n `assert_unchecked` is logically equivalent to `if !cond { unreachable_unchecked(); }`. If\n ever you are tempted to write `assert_unchecked(false)`, you should instead use\n [`unreachable_unchecked()`] directly.\n\n # Safety\n\n `cond` must be `true`. It is immediate UB to call this with `false`.\n\n # Example\n\n ```\n use core::hint;\n\n /// # Safety\n ///\n /// `p` must be nonnull and valid\n pub unsafe fn next_value(p: *const i32) -> i32 {\n     // SAFETY: caller invariants guarantee that `p` is not null\n     unsafe { hint::assert_unchecked(!p.is_null()) }\n\n     if p.is_null() {\n         return -1;\n     } else {\n         // SAFETY: caller invariants guarantee that `p` is valid\n         unsafe { *p + 1 }\n     }\n }\n ```\n\n Without the `assert_unchecked`, the above function produces the following with optimizations\n enabled:\n\n ```asm\n next_value:\n         test    rdi, rdi\n         je      .LBB0_1\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n .LBB0_1:\n         mov     eax, -1\n         ret\n ```\n\n Adding the assertion allows the optimizer to remove the extra check:\n\n ```asm\n next_value:\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n ```\n\n This example is quite unlike anything that would be used in the real world: it is redundant\n to put an assertion right next to code that checks the same thing, and dereferencing a\n pointer already has the builtin assumption that it is nonnull. However, it illustrates the\n kind of changes the optimizer can make even when the behavior is less obviously related.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "raw_vec::RawVecInner": [
+      "Ref",
+      "Deref",
+      "MutRef"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 232, kind: RigidTy(Adt(AdtDef(DefId { id: 2596, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 234, kind: RigidTy(Adt(AdtDef(DefId { id: 2685, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 35, kind: RigidTy(Adt(AdtDef(DefId { id: 2595, name: \"collections::TryReserveError\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 1680,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/raw_vec/mod.rs:621:5: 638:6",
+  "src": "unsafe fn try_reserve_exact(\n        &mut self,\n        len: usize,\n        additional: usize,\n        elem_layout: Layout,\n    ) -> Result<(), TryReserveError> {\n        if self.needs_to_grow(len, additional, elem_layout) {\n            // SAFETY: Precondition passed to caller\n            unsafe {\n                self.grow_exact(len, additional, elem_layout)?;\n            }\n        }\n        unsafe {\n            // Inform the optimizer that the reservation has succeeded or wasn't needed\n            hint::assert_unchecked(!self.needs_to_grow(len, additional, elem_layout));\n        }\n        Ok(())\n    }",
+  "mir": "fn raw_vec::RawVecInner::<A>::try_reserve_exact(_1: &mut raw_vec::RawVecInner<A>, _2: usize, _3: usize, _4: core::alloc::Layout) -> core::result::Result<(), collections::TryReserveError> {\n    let mut _0: core::result::Result<(), collections::TryReserveError>;\n    let mut _5: bool;\n    let mut _6: &raw_vec::RawVecInner<A>;\n    let mut _7: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, collections::TryReserveError>>;\n    let mut _8: core::result::Result<(), collections::TryReserveError>;\n    let mut _9: isize;\n    let  _10: core::result::Result<core::convert::Infallible, collections::TryReserveError>;\n    let  _11: ();\n    let mut _12: bool;\n    let mut _13: bool;\n    let mut _14: &raw_vec::RawVecInner<A>;\n    debug self => _1;\n    debug len => _2;\n    debug additional => _3;\n    debug elem_layout => _4;\n    debug residual => _10;\n    debug val => ();\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &(*_1);\n        _5 = raw_vec::RawVecInner::<A>::needs_to_grow(move _6, _2, _3, _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _5) -> [0: bb9, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = raw_vec::RawVecInner::<A>::grow_exact(_1, _2, _3, _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _7 = <core::result::Result<(), collections::TryReserveError> as core::ops::Try>::branch(move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        _9 = discriminant(_7);\n        switchInt(move _9) -> [0: bb6, 1: bb7, otherwise: bb5];\n    }\n    bb5: {\n        unreachable;\n    }\n    bb6: {\n        StorageDead(_7);\n        goto -> bb10;\n    }\n    bb7: {\n        _10 = move ((_7 as variant#1).0: core::result::Result<core::convert::Infallible, collections::TryReserveError>);\n        _0 = <core::result::Result<(), collections::TryReserveError> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, collections::TryReserveError>>>::from_residual(_10) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_7);\n        StorageDead(_5);\n        goto -> bb13;\n    }\n    bb9: {\n        StorageDead(_6);\n        goto -> bb10;\n    }\n    bb10: {\n        StorageDead(_5);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = &(*_1);\n        _13 = raw_vec::RawVecInner::<A>::needs_to_grow(move _14, _2, _3, _4) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_14);\n        _12 = Not(move _13);\n        StorageDead(_13);\n        _11 = core::hint::assert_unchecked(move _12) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_12);\n        _0 = core::result::Result::Ok(());\n        goto -> bb13;\n    }\n    bb13: {\n        return;\n    }\n}\n",
+  "doc": " # Safety\n - `elem_layout` must be valid for `self`, i.e. it must be the same `elem_layout` used to\n   initially construct `self`\n - `elem_layout`'s size must be a multiple of its alignment\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

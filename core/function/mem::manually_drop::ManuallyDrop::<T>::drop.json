@@ -1,0 +1,42 @@
+{
+  "name": "mem::manually_drop::ManuallyDrop::<T>::drop",
+  "safe": false,
+  "callees": {
+    "ptr::drop_in_place": {
+      "safe": false,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unconditional_recursion"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unconditional_recursion\n"
+        ]
+      },
+      "doc": " Executes the destructor (if any) of the pointed-to value.\n\n This is almost the same as calling [`ptr::read`] and discarding\n the result, but has the following advantages:\n\n * It is *required* to use `drop_in_place` to drop unsized types like\n   trait objects, because they can't be read out onto the stack and\n   dropped normally.\n\n * It is friendlier to the optimizer to do this over [`ptr::read`] when\n   dropping manually allocated memory (e.g., in the implementations of\n   `Box`/`Rc`/`Vec`), as the compiler doesn't need to prove that it's\n   sound to elide the copy.\n\n * It can be used to drop [pinned] data when `T` is not `repr(packed)`\n   (pinned data must not be moved before it is dropped).\n\n Unaligned values cannot be dropped in place, they must be copied to an aligned\n location first using [`ptr::read_unaligned`]. For packed structs, this move is\n done automatically by the compiler. This means the fields of packed structs\n are not dropped in-place.\n\n [`ptr::read`]: self::read\n [`ptr::read_unaligned`]: self::read_unaligned\n [pinned]: crate::pin\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `to_drop` must be [valid] for both reads and writes.\n\n * `to_drop` must be properly aligned, even if `T` has size 0.\n\n * `to_drop` must be nonnull, even if `T` has size 0.\n\n * The value `to_drop` points to must be valid for dropping, which may mean\n   it must uphold additional invariants. These invariants depend on the type\n   of the value being dropped. For instance, when dropping a Box, the box's\n   pointer to the heap must be valid.\n\n * While `drop_in_place` is executing, the only way to access parts of\n   `to_drop` is through the `&mut self` references supplied to the\n   `Drop::drop` methods that `drop_in_place` invokes.\n\n Additionally, if `T` is not [`Copy`], using the pointed-to value after\n calling `drop_in_place` can cause undefined behavior. Note that `*to_drop =\n foo` counts as a use because it will cause the value to be dropped\n again. [`write()`] can be used to overwrite data without causing it to be\n dropped.\n\n [valid]: self#safety\n\n # Examples\n\n Manually remove the last item from a vector:\n\n ```\n use std::ptr;\n use std::rc::Rc;\n\n let last = Rc::new(1);\n let weak = Rc::downgrade(&last);\n\n let mut v = vec![Rc::new(0), last];\n\n unsafe {\n     // Get a raw pointer to the last element in `v`.\n     let ptr = &mut v[1] as *mut _;\n     // Shorten `v` to prevent the last item from being dropped. We do that first,\n     // to prevent issues if the `drop_in_place` below panics.\n     v.set_len(1);\n     // Without a call `drop_in_place`, the last item would never be dropped,\n     // and the memory it manages would be leaked.\n     ptr::drop_in_place(ptr);\n }\n\n assert_eq!(v, &[0.into()]);\n\n // Ensure that the last item was dropped.\n assert!(weak.upgrade().is_none());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mem::manually_drop::ManuallyDrop": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ]
+  },
+  "path": 14414,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/mem/manually_drop.rs:255:5: 263:6",
+  "src": "pub const unsafe fn drop(slot: &mut ManuallyDrop<T>)\n    where\n        T: [const] Destruct,\n    {\n        // SAFETY: we are dropping the value pointed to by a mutable reference\n        // which is guaranteed to be valid for writes.\n        // It is up to the caller to make sure that `slot` isn't dropped again.\n        unsafe { ptr::drop_in_place(&mut slot.value) }\n    }",
+  "mir": "fn mem::manually_drop::ManuallyDrop::<T>::drop(_1: &mut mem::manually_drop::ManuallyDrop<T>) -> () {\n    let mut _0: ();\n    let mut _2: *mut T;\n    let mut _3: &mut T;\n    debug slot => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &mut ((*_1).0: T);\n        _2 = &raw mut (*_3);\n        _0 = ptr::drop_in_place::<T>(move _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Manually drops the contained value.\n\n This is exactly equivalent to calling [`ptr::drop_in_place`] with a\n pointer to the contained value. As such, unless the contained value is a\n packed struct, the destructor will be called in-place without moving the\n value, and thus can be used to safely drop [pinned] data.\n\n If you have ownership of the value, you can use [`ManuallyDrop::into_inner`] instead.\n\n # Safety\n\n This function runs the destructor of the contained value. Other than changes made by\n the destructor itself, the memory is left unchanged, and so as far as the compiler is\n concerned still holds a bit-pattern which is valid for the type `T`.\n\n However, this \"zombie\" value should not be exposed to safe code, and this function\n should not be called more than once. To use a value after it's been dropped, or drop\n a value multiple times, can cause Undefined Behavior (depending on what `drop` does).\n This is normally prevented by the type system, but users of `ManuallyDrop` must\n uphold those guarantees without assistance from the compiler.\n\n [pinned]: crate::pin\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

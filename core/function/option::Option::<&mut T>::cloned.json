@@ -1,0 +1,32 @@
+{
+  "name": "option::Option::<&mut T>::cloned",
+  "safe": true,
+  "callees": {
+    "clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 2012, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 622, kind: Param(ParamTy { index: 1, name: \"T\" }) }, Mut)) })])"
+    ]
+  },
+  "path": 15730,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2129:5: 2137:6",
+  "src": "pub fn cloned(self) -> Option<T>\n    where\n        T: Clone,\n    {\n        match self {\n            Some(t) => Some(t.clone()),\n            None => None,\n        }\n    }",
+  "mir": "fn option::Option::<&mut T>::cloned(_1: option::Option<&mut T>) -> option::Option<T> {\n    let mut _0: option::Option<T>;\n    let mut _2: isize;\n    let  _3: &mut T;\n    let mut _4: T;\n    let mut _5: &T;\n    debug self => _1;\n    debug t => _3;\n    bb0: {\n        _2 = discriminant(_1);\n        switchInt(move _2) -> [0: bb2, 1: bb3, otherwise: bb1];\n    }\n    bb1: {\n        unreachable;\n    }\n    bb2: {\n        _0 = option::Option::None;\n        goto -> bb5;\n    }\n    bb3: {\n        StorageLive(_3);\n        _3 = move ((_1 as variant#1).0: &mut T);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_3);\n        _4 = <T as clone::Clone>::clone(move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        _0 = option::Option::Some(move _4);\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb5;\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": " Maps an `Option<&mut T>` to an `Option<T>` by cloning the contents of the\n option.\n\n # Examples\n\n ```\n let mut x = 12;\n let opt_x = Some(&mut x);\n assert_eq!(opt_x, Some(&mut 12));\n let cloned = opt_x.cloned();\n assert_eq!(cloned, Some(12));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

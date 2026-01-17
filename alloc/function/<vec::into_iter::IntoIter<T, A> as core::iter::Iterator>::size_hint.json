@@ -1,0 +1,79 @@
+{
+  "name": "<vec::into_iter::IntoIter<T, A> as core::iter::Iterator>::size_hint",
+  "safe": true,
+  "callees": {
+    "core::ptr::const_ptr::<impl *const T>::addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n [without_provenance]: without_provenance_mut\n",
+      "adt": {}
+    },
+    "core::num::<impl usize>::wrapping_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrapping (modular) subtraction. Computes `self - rhs`,\n wrapping around at the boundary of the type.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::offset_from_unsigned": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calculates the distance between two pointers within the same allocation, *where it's known that\n `self` is equal to or greater than `origin`*. The returned value is in\n units of T: the distance in bytes is divided by `size_of::<T>()`.\n\n This computes the same value that [`offset_from`](#method.offset_from)\n would compute, but with the added precondition that the offset is\n guaranteed to be non-negative.  This method is equivalent to\n `usize::try_from(self.offset_from(origin)).unwrap_unchecked()`,\n but it provides slightly more information to the optimizer, which can\n sometimes allow it to optimize slightly better with some backends.\n\n This method can be though of as recovering the `count` that was passed\n to [`add`](#method.add) (or, with the parameters in the other order,\n to [`sub`](#method.sub)).  The following are all equivalent, assuming\n that their safety preconditions are met:\n ```rust\n # unsafe fn blah(ptr: std::ptr::NonNull<u32>, origin: std::ptr::NonNull<u32>, count: usize) -> bool { unsafe {\n ptr.offset_from_unsigned(origin) == count\n # &&\n origin.add(count) == ptr\n # &&\n ptr.sub(count) == origin\n # } }\n ```\n\n # Safety\n\n - The distance between the pointers must be non-negative (`self >= origin`)\n\n - *All* the safety conditions of [`offset_from`](#method.offset_from)\n   apply to this method as well; see it for the full details.\n\n Importantly, despite the return type of this method being able to represent\n a larger offset, it's still *not permitted* to pass pointers which differ\n by more than `isize::MAX` *bytes*.  As such, the result of this method will\n always be less than or equal to `isize::MAX as usize`.\n\n # Panics\n\n This function panics if `T` is a Zero-Sized Type (\"ZST\").\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let a = [0; 5];\n let ptr1: NonNull<u32> = NonNull::from(&a[1]);\n let ptr2: NonNull<u32> = NonNull::from(&a[3]);\n unsafe {\n     assert_eq!(ptr2.offset_from_unsigned(ptr1), 2);\n     assert_eq!(ptr1.add(2), ptr2);\n     assert_eq!(ptr2.sub(2), ptr1);\n     assert_eq!(ptr2.offset_from_unsigned(ptr2), 0);\n }\n\n // This would be incorrect, as the pointers are not correctly ordered:\n // ptr1.offset_from_unsigned(ptr2)\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "vec::into_iter::IntoIter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(5)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(4)))",
+      "Ref"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 2251,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/into_iter.rs:235:5: 242:6",
+  "src": "fn size_hint(&self) -> (usize, Option<usize>) {\n        let exact = if T::IS_ZST {\n            self.end.addr().wrapping_sub(self.ptr.as_ptr().addr())\n        } else {\n            unsafe { non_null!(self.end, T).offset_from_unsigned(self.ptr) }\n        };\n        (exact, Some(exact))\n    }",
+  "mir": "fn <vec::into_iter::IntoIter<T, A> as core::iter::Iterator>::size_hint(_1: &vec::into_iter::IntoIter<T, A>) -> (usize, core::option::Option<usize>) {\n    let mut _0: (usize, core::option::Option<usize>);\n    let  _2: usize;\n    let mut _3: usize;\n    let mut _4: *const T;\n    let mut _5: usize;\n    let mut _6: *mut T;\n    let mut _7: core::ptr::NonNull<T>;\n    let mut _8: core::ptr::NonNull<T>;\n    let mut _9: *const core::ptr::NonNull<T>;\n    let mut _10: *const *const T;\n    let mut _11: core::ptr::NonNull<T>;\n    let mut _12: usize;\n    let mut _13: core::option::Option<usize>;\n    let mut _14: usize;\n    debug self => _1;\n    debug exact => _2;\n    bb0: {\n        StorageLive(_2);\n        switchInt(<T as core::mem::SizedTypeProperties>::IS_ZST) -> [0: bb6, otherwise: bb1];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).5: *const T);\n        _3 = core::ptr::const_ptr::<impl *const T>::addr(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = ((*_1).4: core::ptr::NonNull<T>);\n        _6 = core::ptr::NonNull::<T>::as_ptr(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        _5 = core::ptr::mut_ptr::<impl *mut T>::addr(move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        _2 = core::num::<impl usize>::wrapping_sub(move _3, move _5) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_5);\n        StorageDead(_3);\n        goto -> bb8;\n    }\n    bb6: {\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &raw const ((*_1).5: *const T);\n        _9 = move _10 as *const core::ptr::NonNull<T>;\n        StorageDead(_10);\n        _8 = (*_9);\n        StorageDead(_9);\n        StorageLive(_11);\n        _11 = ((*_1).4: core::ptr::NonNull<T>);\n        _2 = core::ptr::NonNull::<T>::offset_from_unsigned(move _8, move _11) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_11);\n        StorageDead(_8);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageLive(_12);\n        _12 = _2;\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = _2;\n        _13 = core::option::Option::Some(move _14);\n        StorageDead(_14);\n        _0 = (move _12, move _13);\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

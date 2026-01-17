@@ -1,0 +1,60 @@
+{
+  "name": "<io::util::Sink as io::Write>::write_vectored",
+  "safe": true,
+  "callees": {
+    "core::slice::<impl [T]>::iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the slice.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let mut iterator = x.iter();\n\n assert_eq!(iterator.next(), Some(&1));\n assert_eq!(iterator.next(), Some(&2));\n assert_eq!(iterator.next(), Some(&4));\n assert_eq!(iterator.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes a closure and creates an iterator which calls that closure on each\n element.\n\n `map()` transforms one iterator into another, by means of its argument:\n something that implements [`FnMut`]. It produces a new iterator which\n calls this closure on each element of the original iterator.\n\n If you are good at thinking in types, you can think of `map()` like this:\n If you have an iterator that gives you elements of some type `A`, and\n you want an iterator of some other type `B`, you can use `map()`,\n passing a closure that takes an `A` and returns a `B`.\n\n `map()` is conceptually similar to a [`for`] loop. However, as `map()` is\n lazy, it is best used when you're already working with other iterators.\n If you're doing some sort of looping for a side effect, it's considered\n more idiomatic to use [`for`] than `map()`.\n\n [`for`]: ../../book/ch03-05-control-flow.html#looping-through-a-collection-with-for\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.iter().map(|x| 2 * x);\n\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), Some(6));\n assert_eq!(iter.next(), None);\n ```\n\n If you're doing some sort of side effect, prefer [`for`] to `map()`:\n\n ```\n # #![allow(unused_must_use)]\n // don't do this:\n (0..5).map(|x| println!(\"{x}\"));\n\n // it won't even execute, as it is lazy. Rust will warn you about this.\n\n // Instead, use a for-loop:\n for x in 0..5 {\n     println!(\"{x}\");\n }\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::sum": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sums the elements of an iterator.\n\n Takes each element, adds them together, and returns the result.\n\n An empty iterator returns the *additive identity* (\"zero\") of the type,\n which is `0` for integers and `-0.0` for floats.\n\n `sum()` can be used to sum any type implementing [`Sum`][`core::iter::Sum`],\n including [`Option`][`Option::sum`] and [`Result`][`Result::sum`].\n\n # Panics\n\n When calling `sum()` and a primitive integer type is being returned, this\n method will panic if the computation overflows and overflow checks are\n enabled.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n let sum: i32 = a.iter().sum();\n\n assert_eq!(sum, 6);\n\n let b: Vec<f32> = vec![];\n let sum: f32 = b.iter().sum();\n assert_eq!(sum, -0.0_f32);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::slice::Iter": [
+      "Plain"
+    ],
+    "core::iter::Map": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "io::util::Sink": [
+      "MutRef"
+    ]
+  },
+  "path": 1721,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/util.rs:380:5: 383:6",
+  "src": "fn write_vectored(&mut self, bufs: &[IoSlice<'_>]) -> io::Result<usize> {\n        let total_len = bufs.iter().map(|b| b.len()).sum();\n        Ok(total_len)\n    }",
+  "mir": "fn <io::util::Sink as io::Write>::write_vectored(_1: &mut io::util::Sink, _2: &[io::IoSlice<'_>]) -> core::result::Result<usize, io::error::Error> {\n    let mut _0: core::result::Result<usize, io::error::Error>;\n    let  _3: usize;\n    let mut _4: core::iter::Map<core::slice::Iter<'_, io::IoSlice<'_>>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/util.rs:381:41: 381:44}>;\n    let mut _5: core::slice::Iter<'_, io::IoSlice<'_>>;\n    debug self => _1;\n    debug bufs => _2;\n    debug total_len => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = core::slice::<impl [io::IoSlice<'_>]>::iter(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = <core::slice::Iter<'_, io::IoSlice<'_>> as core::iter::Iterator>::map::<usize, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/util.rs:381:41: 381:44}>(move _5, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/util.rs:381:41: 381:44}) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = <core::iter::Map<core::slice::Iter<'_, io::IoSlice<'_>>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/util.rs:381:41: 381:44}> as core::iter::Iterator>::sum::<usize>(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _0 = core::result::Result::Ok(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

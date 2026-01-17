@@ -1,0 +1,87 @@
+{
+  "name": "ffi::os_str::OsStr::slice_encoded_bytes",
+  "safe": true,
+  "callees": {
+    "ffi::os_str::OsStr::as_encoded_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts an OS string slice to a byte slice.  To convert the byte slice back into an OS\n string slice, use the [`OsStr::from_encoded_bytes_unchecked`] function.\n\n The byte encoding is an unspecified, platform-specific, self-synchronizing superset of UTF-8.\n By being a self-synchronizing superset of UTF-8, this encoding is also a superset of 7-bit\n ASCII.\n\n Note: As the encoding is unspecified, any sub-slice of bytes that is not valid UTF-8 should\n be treated as opaque and only comparable within the same Rust version built for the same\n target platform.  For example, sending the slice over the network or storing it in a file\n will likely result in incompatible byte slices.  See [`OsString`] for more encoding details\n and [`std::ffi`] for platform-specific, specified conversions.\n\n [`std::ffi`]: crate::ffi\n",
+      "adt": {
+        "ffi::os_str::OsStr": "ImmutableAsArgument"
+      }
+    },
+    "core::slice::range": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs bounds checking of a range.\n\n This method is similar to [`Index::index`] for slices, but it returns a\n [`Range`] equivalent to `range`. You can use this method to turn any range\n into `start` and `end` values.\n\n `bounds` is the range of the slice to use for bounds checking. It should\n be a [`RangeTo`] range that ends at the length of the slice.\n\n The returned [`Range`] is safe to pass to [`slice::get_unchecked`] and\n [`slice::get_unchecked_mut`] for slices with the given range.\n\n [`Range`]: ops::Range\n [`RangeTo`]: ops::RangeTo\n [`slice::get_unchecked`]: slice::get_unchecked\n [`slice::get_unchecked_mut`]: slice::get_unchecked_mut\n\n # Panics\n\n Panics if `range` would be out of bounds.\n\n # Examples\n\n ```\n #![feature(slice_range)]\n\n use std::slice;\n\n let v = [10, 40, 30];\n assert_eq!(1..2, slice::range(1..2, ..v.len()));\n assert_eq!(0..2, slice::range(..2, ..v.len()));\n assert_eq!(1..3, slice::range(1.., ..v.len()));\n ```\n\n Panics when [`Index::index`] would panic:\n\n ```should_panic\n #![feature(slice_range)]\n\n use std::slice;\n\n let _ = slice::range(2..1, ..3);\n ```\n\n ```should_panic\n #![feature(slice_range)]\n\n use std::slice;\n\n let _ = slice::range(1..4, ..3);\n ```\n\n ```should_panic\n #![feature(slice_range)]\n\n use std::slice;\n\n let _ = slice::range(1..=usize::MAX, ..3);\n ```\n\n [`Index::index`]: ops::Index::index\n",
+      "adt": {}
+    },
+    "sys::os_str::bytes::Slice::check_public_boundary": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::os_str::bytes::Slice": "ImmutableAsArgument"
+      }
+    },
+    "core::slice::<impl [T]>::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to an element or subslice, without doing bounds\n checking.\n\n For a safe alternative see [`get`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used.\n\n You can think of this like `.get(index).unwrap_unchecked()`.  It's UB\n to call `.get_unchecked(len)`, even if you immediately convert to a\n pointer.  And it's UB to call `.get_unchecked(..len + 1)`,\n `.get_unchecked(..=len)`, or similar.\n\n [`get`]: slice::get\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n\n unsafe {\n     assert_eq!(x.get_unchecked(1), &2);\n }\n ```\n",
+      "adt": {}
+    },
+    "ffi::os_str::OsStr::from_encoded_bytes_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a slice of bytes to an OS string slice without checking that the string contains\n valid `OsStr`-encoded data.\n\n The byte encoding is an unspecified, platform-specific, self-synchronizing superset of UTF-8.\n By being a self-synchronizing superset of UTF-8, this encoding is also a superset of 7-bit\n ASCII.\n\n See the [module's toplevel documentation about conversions][conversions] for safe,\n cross-platform [conversions] from/to native representations.\n\n # Safety\n\n As the encoding is unspecified, callers must pass in bytes that originated as a mixture of\n validated UTF-8 and bytes from [`OsStr::as_encoded_bytes`] from within the same Rust version\n built for the same target platform.  For example, reconstructing an `OsStr` from bytes sent\n over the network or stored in a file will likely violate these safety rules.\n\n Due to the encoding being self-synchronizing, the bytes from [`OsStr::as_encoded_bytes`] can be\n split either immediately before or immediately after any valid non-empty UTF-8 substring.\n\n # Example\n\n ```\n use std::ffi::OsStr;\n\n let os_str = OsStr::new(\"Mary had a little lamb\");\n let bytes = os_str.as_encoded_bytes();\n let words = bytes.split(|b| *b == b' ');\n let words: Vec<&OsStr> = words.map(|word| {\n     // SAFETY:\n     // - Each `word` only contains content that originated from `OsStr::as_encoded_bytes`\n     // - Only split with ASCII whitespace which is a non-empty UTF-8 substring\n     unsafe { OsStr::from_encoded_bytes_unchecked(word) }\n }).collect();\n ```\n\n [conversions]: super#conversions\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ffi::os_str::OsStr": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::ops::RangeTo": [
+      "Plain"
+    ],
+    "core::ops::Range": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(1, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "sys::os_str::bytes::Slice": [
+      "Ref"
+    ]
+  },
+  "path": 998,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/ffi/os_str.rs:1104:5: 1120:6",
+  "src": "pub fn slice_encoded_bytes<R: ops::RangeBounds<usize>>(&self, range: R) -> &Self {\n        let encoded_bytes = self.as_encoded_bytes();\n        let Range { start, end } = slice::range(range, ..encoded_bytes.len());\n\n        // `check_public_boundary` should panic if the index does not lie on an\n        // `OsStr` boundary as described above. It's possible to do this in an\n        // encoding-agnostic way, but details of the internal encoding might\n        // permit a more efficient implementation.\n        self.inner.check_public_boundary(start);\n        self.inner.check_public_boundary(end);\n\n        // SAFETY: `slice::range` ensures that `start` and `end` are valid\n        let slice = unsafe { encoded_bytes.get_unchecked(start..end) };\n\n        // SAFETY: `slice` comes from `self` and we validated the boundaries\n        unsafe { Self::from_encoded_bytes_unchecked(slice) }\n    }",
+  "mir": "fn ffi::os_str::OsStr::slice_encoded_bytes(_1: &ffi::os_str::OsStr, _2: R) -> &ffi::os_str::OsStr {\n    let mut _0: &ffi::os_str::OsStr;\n    let  _3: &[u8];\n    let  _4: usize;\n    let  _5: usize;\n    let mut _6: core::ops::Range<usize>;\n    let mut _7: core::ops::RangeTo<usize>;\n    let mut _8: usize;\n    let  _9: ();\n    let mut _10: &sys::os_str::bytes::Slice;\n    let  _11: ();\n    let mut _12: &sys::os_str::bytes::Slice;\n    let  _13: &[u8];\n    let mut _14: core::ops::Range<usize>;\n    debug self => _1;\n    debug range => _2;\n    debug encoded_bytes => _3;\n    debug start => _4;\n    debug end => _5;\n    debug slice => _13;\n    bb0: {\n        _3 = ffi::os_str::OsStr::as_encoded_bytes(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = PtrMetadata(_3);\n        _7 = RangeTo(move _8);\n        StorageDead(_8);\n        _6 = core::slice::range::<R>(_2, move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _4 = (_6.0: usize);\n        _5 = (_6.1: usize);\n        StorageDead(_6);\n        StorageLive(_10);\n        _10 = &((*_1).0: sys::os_str::bytes::Slice);\n        _9 = sys::os_str::bytes::Slice::check_public_boundary(move _10, _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        StorageLive(_12);\n        _12 = &((*_1).0: sys::os_str::bytes::Slice);\n        _11 = sys::os_str::bytes::Slice::check_public_boundary(move _12, _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_12);\n        StorageLive(_14);\n        _14 = Range(_4, _5);\n        _13 = core::slice::<impl [u8]>::get_unchecked::<core::ops::Range<usize>>(_3, move _14) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_14);\n        _0 = ffi::os_str::OsStr::from_encoded_bytes_unchecked(_13) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        return;\n    }\n}\n",
+  "doc": " Takes a substring based on a range that corresponds to the return value of\n [`OsStr::as_encoded_bytes`].\n\n The range's start and end must lie on valid `OsStr` boundaries.\n A valid `OsStr` boundary is one of:\n - The start of the string\n - The end of the string\n - Immediately before a valid non-empty UTF-8 substring\n - Immediately after a valid non-empty UTF-8 substring\n\n # Panics\n\n Panics if `range` does not lie on valid `OsStr` boundaries or if it\n exceeds the end of the string.\n\n # Example\n\n ```\n #![feature(os_str_slice)]\n\n use std::ffi::OsStr;\n\n let os_str = OsStr::new(\"foo=bar\");\n let bytes = os_str.as_encoded_bytes();\n if let Some(index) = bytes.iter().position(|b| *b == b'=') {\n     let key = os_str.slice_encoded_bytes(..index);\n     let value = os_str.slice_encoded_bytes(index + 1..);\n     assert_eq!(key, \"foo\");\n     assert_eq!(value, \"bar\");\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "name": "<mm::kspace::KernelPtConfig as mm::page_table::PageTableConfig>::item_from_raw",
+  "safe": false,
+  "callees": {
+    "mm::page_prop::PrivilegedPageFlags::contains": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if all of the flags in `other` are contained within `self`.\n",
+      "adt": {
+        "mm::page_prop::PrivilegedPageFlags": "ImmutableAsArgument"
+      }
+    },
+    "mm::frame::Frame::<M>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Restores a forgotten [`Frame`] from a physical address.\n\n # Safety\n\n The caller should only restore a `Frame` that was previously forgotten using\n [`Frame::into_raw`].\n\n And the restoring operation should only be done once for a forgotten\n [`Frame`]. Otherwise double-free will happen.\n\n Also, the caller ensures that the usage of the frame is correct. There's\n no checking of the usage in this function.\n",
+      "adt": {
+        "mm::frame::Frame": "Constructor"
+      }
+    },
+    "core::panicking::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Internal function for `assert_eq!` and `assert_ne!` macros\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::page_prop::PrivilegedPageFlags": [
+      "Ref"
+    ],
+    "mm::page_prop::PageProperty": [
+      "Unknown([Field(2, Ty { id: 1099, kind: RigidTy(Adt(AdtDef(DefId { id: 3473, name: \"mm::page_prop::PrivilegedPageFlags\" }), GenericArgs([]))) })])",
+      "Plain"
+    ],
+    "mm::frame::Frame": [
+      "Plain"
+    ],
+    "core::panicking::AssertKind": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "mm::kspace::MappedItem": [
+      "Plain"
+    ]
+  },
+  "path": 2192,
+  "span": "ostd/src/mm/kspace/mod.rs:171:5: 180:6",
+  "src": "unsafe fn item_from_raw(paddr: Paddr, level: PagingLevel, prop: PageProperty) -> Self::Item {\n        if prop.priv_flags.contains(PrivilegedPageFlags::AVAIL1) {\n            debug_assert_eq!(level, 1);\n            // SAFETY: The caller ensures safety.\n            let frame = unsafe { Frame::<dyn AnyFrameMeta>::from_raw(paddr) };\n            MappedItem::Tracked(frame, prop)\n        } else {\n            MappedItem::Untracked(paddr, level, prop)\n        }\n    }",
+  "mir": "fn <mm::kspace::KernelPtConfig as mm::page_table::PageTableConfig>::item_from_raw(_1: usize, _2: u8, _3: mm::page_prop::PageProperty) -> mm::kspace::MappedItem {\n    let mut _0: mm::kspace::MappedItem;\n    let mut _4: bool;\n    let mut _5: &mm::page_prop::PrivilegedPageFlags;\n    let mut _6: (&u8, &u8);\n    let mut _7: &u8;\n    let mut _8: &u8;\n    let  _9: &u8;\n    let  _10: &u8;\n    let mut _11: bool;\n    let mut _12: u8;\n    let mut _13: u8;\n    let  _14: core::panicking::AssertKind;\n    let  _15: !;\n    let mut _16: core::option::Option<core::fmt::Arguments<'_>>;\n    let  _17: mm::frame::Frame<dyn mm::frame::meta::AnyFrameMeta>;\n    debug paddr => _1;\n    debug level => _2;\n    debug prop => _3;\n    debug left_val => _9;\n    debug right_val => _10;\n    debug kind => _14;\n    debug frame => _17;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(_3.2: mm::page_prop::PrivilegedPageFlags);\n        _4 = mm::page_prop::PrivilegedPageFlags::contains(move _5, mm::page_prop::PrivilegedPageFlags::AVAIL1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _4) -> [0: bb6, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &_2;\n        StorageLive(_8);\n        _8 = <mm::kspace::KernelPtConfig as mm::page_table::PageTableConfig>::item_from_raw::promoted[0];\n        _6 = (move _7, move _8);\n        StorageDead(_8);\n        StorageDead(_7);\n        _9 = (_6.0: &u8);\n        _10 = (_6.1: &u8);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = (*_9);\n        StorageLive(_13);\n        _13 = (*_10);\n        _11 = Eq(move _12, move _13);\n        switchInt(move _11) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_6);\n        _17 = mm::frame::Frame::<dyn mm::frame::meta::AnyFrameMeta>::from_raw(_1) -> [return: bb5, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_13);\n        StorageDead(_12);\n        _14 = core::panicking::AssertKind::Eq;\n        StorageLive(_16);\n        _16 = core::option::Option::None;\n        _15 = core::panicking::assert_failed::<u8, u8>(_14, _9, _10, move _16) -> unwind unreachable;\n    }\n    bb5: {\n        _0 = mm::kspace::MappedItem::Tracked(_17, _3);\n        goto -> bb7;\n    }\n    bb6: {\n        StorageDead(_5);\n        _0 = mm::kspace::MappedItem::Untracked(_1, _2, _3);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

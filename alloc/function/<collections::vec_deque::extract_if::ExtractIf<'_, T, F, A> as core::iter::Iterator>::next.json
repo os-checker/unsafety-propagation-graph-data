@@ -1,0 +1,100 @@
+{
+  "name": "<collections::vec_deque::extract_if::ExtractIf<'_, T, F, A> as core::iter::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "collections::vec_deque::VecDeque::<T, A>::to_physical_idx": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Marginally more convenient\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "core::ptr::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `src` without moving it. This leaves the\n memory in `src` unchanged.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads.\n\n * `src` must be properly aligned. Use [`read_unaligned`] if this is not the\n   case.\n\n * `src` must point to a properly initialized value of type `T`.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n # Examples\n\n Basic usage:\n\n ```\n let x = 12;\n let y = &x as *const i32;\n\n unsafe {\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n\n ## Ownership of the Returned Value\n\n `read` creates a bitwise copy of `T`, regardless of whether `T` is [`Copy`].\n If `T` is not [`Copy`], using both the returned value and the value at\n `*src` can violate memory safety. Note that assigning to `*src` counts as a\n use because it will attempt to drop the value at `*src`.\n\n [`write()`] can be used to overwrite data without causing it to be dropped.\n\n ```\n use std::ptr;\n\n let mut s = String::from(\"foo\");\n unsafe {\n     // `s2` now points to the same underlying memory as `s`.\n     let mut s2: String = ptr::read(&s);\n\n     assert_eq!(s2, \"foo\");\n\n     // Assigning to `s2` causes its original value to be dropped. Beyond\n     // this point, `s` must no longer be used, as the underlying memory has\n     // been freed.\n     s2 = String::default();\n     assert_eq!(s2, \"\");\n\n     // Assigning to `s` would cause the old value to be dropped again,\n     // resulting in undefined behavior.\n     // s = String::from(\"bar\"); // ERROR\n\n     // `ptr::write` can be used to overwrite a value without dropping it.\n     ptr::write(&mut s, String::from(\"bar\"));\n }\n\n assert_eq!(s, \"bar\");\n ```\n\n [valid]: self#safety\n",
+      "adt": {}
+    },
+    "collections::vec_deque::VecDeque::<T, A>::wrap_copy": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies a potentially wrapping block of memory len long from src to dest.\n (abs(dst - src) + len) must be no larger than capacity() (There must be at\n most one continuous overlapping region between src and dest).\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "collections::vec_deque::extract_if::ExtractIf": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(5)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "MutRef"
+    ],
+    "collections::vec_deque::VecDeque": [
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 1332,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/extract_if.rs:74:5: 105:6",
+  "src": "fn next(&mut self) -> Option<T> {\n        while self.idx < self.end {\n            let i = self.idx;\n            // SAFETY:\n            //  We know that `i < self.end` from the if guard and that `self.end <= self.old_len` from\n            //  the validity of `Self`. Therefore `i` points to an element within `vec`.\n            //\n            //  Additionally, the i-th element is valid because each element is visited at most once\n            //  and it is the first time we access vec[i].\n            //\n            //  Note: we can't use `vec.get_mut(i).unwrap()` here since the precondition for that\n            //  function is that i < vec.len, but we've set vec's length to zero.\n            let idx = self.vec.to_physical_idx(i);\n            let cur = unsafe { &mut *self.vec.ptr().add(idx) };\n            let drained = (self.pred)(cur);\n            // Update the index *after* the predicate is called. If the index\n            // is updated prior and the predicate panics, the element at this\n            // index would be leaked.\n            self.idx += 1;\n            if drained {\n                self.del += 1;\n                // SAFETY: We never touch this element again after returning it.\n                return Some(unsafe { ptr::read(cur) });\n            } else if self.del > 0 {\n                let hole_slot = self.vec.to_physical_idx(i - self.del);\n                // SAFETY: `self.del` > 0, so the hole slot must not overlap with current element.\n                // We use copy for move, and never touch this element again.\n                unsafe { self.vec.wrap_copy(idx, hole_slot, 1) };\n            }\n        }\n        None\n    }",
+  "mir": "fn <collections::vec_deque::extract_if::ExtractIf<'_, T, F, A> as core::iter::Iterator>::next(_1: &mut collections::vec_deque::extract_if::ExtractIf<'_, T, F, A>) -> core::option::Option<T> {\n    let mut _0: core::option::Option<T>;\n    let mut _2: bool;\n    let mut _3: usize;\n    let mut _4: usize;\n    let  _5: usize;\n    let  _6: usize;\n    let mut _7: &collections::vec_deque::VecDeque<T, A>;\n    let mut _8: &mut T;\n    let mut _9: *mut T;\n    let mut _10: *mut T;\n    let mut _11: &collections::vec_deque::VecDeque<T, A>;\n    let  _12: bool;\n    let mut _13: &mut F;\n    let mut _14: (&mut T,);\n    let mut _15: (usize, bool);\n    let mut _16: (usize, bool);\n    let mut _17: T;\n    let mut _18: *const T;\n    let mut _19: bool;\n    let mut _20: usize;\n    let  _21: usize;\n    let mut _22: &collections::vec_deque::VecDeque<T, A>;\n    let mut _23: usize;\n    let mut _24: usize;\n    let mut _25: (usize, bool);\n    let  _26: ();\n    let mut _27: &mut collections::vec_deque::VecDeque<T, A>;\n    let mut _28: &mut collections::vec_deque::VecDeque<T, A>;\n    let mut _29: &mut collections::vec_deque::VecDeque<T, A>;\n    let mut _30: &mut collections::vec_deque::VecDeque<T, A>;\n    debug self => _1;\n    debug i => _5;\n    debug idx => _6;\n    debug cur => _8;\n    debug drained => _12;\n    debug hole_slot => _21;\n    bb0: {\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = ((*_1).1: usize);\n        StorageLive(_4);\n        _4 = ((*_1).2: usize);\n        _2 = Lt(move _3, move _4);\n        switchInt(move _2) -> [0: bb18, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        _5 = ((*_1).1: usize);\n        StorageLive(_7);\n        _27 = ((*_1).0: &mut collections::vec_deque::VecDeque<T, A>);\n        _7 = &(*_27);\n        _6 = collections::vec_deque::VecDeque::<T, A>::to_physical_idx(move _7, _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _28 = ((*_1).0: &mut collections::vec_deque::VecDeque<T, A>);\n        _11 = &(*_28);\n        _10 = collections::vec_deque::VecDeque::<T, A>::ptr(move _11) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_11);\n        _9 = core::ptr::mut_ptr::<impl *mut T>::add(move _10, _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_10);\n        _8 = &mut (*_9);\n        StorageLive(_13);\n        _13 = &mut ((*_1).5: F);\n        StorageLive(_14);\n        _14 = (_8);\n        _12 = <F as core::ops::FnMut<(&mut T,)>>::call_mut(move _13, move _14) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_14);\n        StorageDead(_13);\n        _15 = CheckedAdd(((*_1).1: usize), 1_usize);\n        assert(!move (_15.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).1: usize), 1_usize) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        ((*_1).1: usize) = move (_15.0: usize);\n        switchInt(_12) -> [0: bb11, otherwise: bb8];\n    }\n    bb8: {\n        _16 = CheckedAdd(((*_1).3: usize), 1_usize);\n        assert(!move (_16.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).3: usize), 1_usize) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        ((*_1).3: usize) = move (_16.0: usize);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = &raw const (*_8);\n        _17 = core::ptr::read::<T>(move _18) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_18);\n        _0 = core::option::Option::Some(move _17);\n        StorageDead(_17);\n        StorageDead(_9);\n        StorageDead(_2);\n        goto -> bb19;\n    }\n    bb11: {\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = ((*_1).3: usize);\n        _19 = Gt(move _20, 0_usize);\n        switchInt(move _19) -> [0: bb16, otherwise: bb12];\n    }\n    bb12: {\n        StorageDead(_20);\n        StorageLive(_22);\n        _29 = ((*_1).0: &mut collections::vec_deque::VecDeque<T, A>);\n        _22 = &(*_29);\n        StorageLive(_23);\n        StorageLive(_24);\n        _24 = ((*_1).3: usize);\n        _25 = CheckedSub(_5, _24);\n        assert(!move (_25.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _5, move _24) -> [success: bb13, unwind unreachable];\n    }\n    bb13: {\n        _23 = move (_25.0: usize);\n        StorageDead(_24);\n        _21 = collections::vec_deque::VecDeque::<T, A>::to_physical_idx(move _22, move _23) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_23);\n        StorageDead(_22);\n        _30 = ((*_1).0: &mut collections::vec_deque::VecDeque<T, A>);\n        _26 = collections::vec_deque::VecDeque::<T, A>::wrap_copy(_30, _6, _21, 1_usize) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        goto -> bb17;\n    }\n    bb16: {\n        StorageDead(_20);\n        goto -> bb17;\n    }\n    bb17: {\n        StorageDead(_19);\n        StorageDead(_9);\n        StorageDead(_2);\n        goto -> bb1;\n    }\n    bb18: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageDead(_2);\n        _0 = core::option::Option::None;\n        goto -> bb19;\n    }\n    bb19: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

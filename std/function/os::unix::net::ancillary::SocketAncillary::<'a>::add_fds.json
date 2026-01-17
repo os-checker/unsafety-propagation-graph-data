@@ -1,0 +1,34 @@
+{
+  "name": "os::unix::net::ancillary::SocketAncillary::<'a>::add_fds",
+  "safe": true,
+  "callees": {
+    "os::unix::net::ancillary::add_to_ancillary_data": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "os::unix::net::ancillary::SocketAncillary": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ]
+  },
+  "path": 2127,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/os/unix/net/ancillary.rs:715:5: 724:6",
+  "src": "pub fn add_fds(&mut self, fds: &[RawFd]) -> bool {\n        self.truncated = false;\n        add_to_ancillary_data(\n            &mut self.buffer,\n            &mut self.length,\n            fds,\n            libc::SOL_SOCKET,\n            libc::SCM_RIGHTS,\n        )\n    }",
+  "mir": "fn os::unix::net::ancillary::SocketAncillary::<'a>::add_fds(_1: &mut os::unix::net::ancillary::SocketAncillary<'_>, _2: &[i32]) -> bool {\n    let mut _0: bool;\n    let mut _3: &mut &mut [u8];\n    let mut _4: &mut usize;\n    let mut _5: &mut [u8];\n    debug self => _1;\n    debug fds => _2;\n    bb0: {\n        ((*_1).2: bool) = false;\n        StorageLive(_3);\n        _3 = &mut ((*_1).0: &mut [u8]);\n        _5 = (*_3);\n        _4 = &mut ((*_1).1: usize);\n        _0 = os::unix::net::ancillary::add_to_ancillary_data::<i32>(_5, _4, _2, libc::SOL_SOCKET, libc::SCM_RIGHTS) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Add file descriptors to the ancillary data.\n\n The function returns `true` if there was enough space in the buffer.\n If there was not enough space then no file descriptors was appended.\n Technically, that means this operation adds a control message with the level `SOL_SOCKET`\n and type `SCM_RIGHTS`.\n\n # Example\n\n ```no_run\n #![feature(unix_socket_ancillary_data)]\n use std::os::unix::net::{UnixStream, SocketAncillary};\n use std::os::unix::io::AsRawFd;\n use std::io::IoSlice;\n\n fn main() -> std::io::Result<()> {\n     let sock = UnixStream::connect(\"/tmp/sock\")?;\n\n     let mut ancillary_buffer = [0; 128];\n     let mut ancillary = SocketAncillary::new(&mut ancillary_buffer[..]);\n     ancillary.add_fds(&[sock.as_raw_fd()][..]);\n\n     let buf = [1; 8];\n     let mut bufs = &mut [IoSlice::new(&buf[..])][..];\n     sock.send_vectored_with_ancillary(bufs, &mut ancillary)?;\n     Ok(())\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "name": "collections::btree::fix::<impl collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'a>, K, V, collections::btree::node::marker::LeafOrInternal>>::fix_node_and_affected_ancestors",
+  "safe": true,
+  "callees": {
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "collections::btree::fix::<impl collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'a>, K, V, collections::btree::node::marker::LeafOrInternal>>::fix_node_through_parent": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stocks up a possibly underfull node by merging with or stealing from a\n sibling. If successful but at the cost of shrinking the parent node,\n returns that shrunk parent node. Returns an `Err` if the node is\n an empty root.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "Constructor",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "collections::btree::node::NodeRef::<BorrowType, K, V, collections::btree::node::marker::Internal>::forget_type": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Removes any static information asserting that this node is an `Internal` node.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "collections::btree::node::NodeRef": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 2511, kind: RigidTy(Adt(AdtDef(DefId { id: 2671, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 2510, kind: RigidTy(Adt(AdtDef(DefId { id: 3478, name: \"collections::btree::node::NodeRef\" }), GenericArgs([Type(Ty { id: 2425, kind: RigidTy(Adt(AdtDef(DefId { id: 3498, name: \"collections::btree::node::marker::Mut\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) }), Type(Ty { id: 2435, kind: Param(ParamTy { index: 1, name: \"K\" }) }), Type(Ty { id: 2436, kind: Param(ParamTy { index: 2, name: \"V\" }) }), Type(Ty { id: 2428, kind: RigidTy(Adt(AdtDef(DefId { id: 3499, name: \"collections::btree::node::marker::Internal\" }), GenericArgs([]))) })]))) })]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 2511, kind: RigidTy(Adt(AdtDef(DefId { id: 2671, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 2510, kind: RigidTy(Adt(AdtDef(DefId { id: 3478, name: \"collections::btree::node::NodeRef\" }), GenericArgs([Type(Ty { id: 2425, kind: RigidTy(Adt(AdtDef(DefId { id: 3498, name: \"collections::btree::node::marker::Mut\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) }), Type(Ty { id: 2435, kind: Param(ParamTy { index: 1, name: \"K\" }) }), Type(Ty { id: 2436, kind: Param(ParamTy { index: 2, name: \"V\" }) }), Type(Ty { id: 2428, kind: RigidTy(Adt(AdtDef(DefId { id: 3499, name: \"collections::btree::node::marker::Internal\" }), GenericArgs([]))) })]))) })]))) }), Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 2510, kind: RigidTy(Adt(AdtDef(DefId { id: 3478, name: \"collections::btree::node::NodeRef\" }), GenericArgs([Type(Ty { id: 2425, kind: RigidTy(Adt(AdtDef(DefId { id: 3498, name: \"collections::btree::node::marker::Mut\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) }), Type(Ty { id: 2435, kind: Param(ParamTy { index: 1, name: \"K\" }) }), Type(Ty { id: 2436, kind: Param(ParamTy { index: 2, name: \"V\" }) }), Type(Ty { id: 2428, kind: RigidTy(Adt(AdtDef(DefId { id: 3499, name: \"collections::btree::node::marker::Internal\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 961,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/fix.rs:60:5: 71:6",
+  "src": "pub(super) fn fix_node_and_affected_ancestors<A: Allocator + Clone>(\n        mut self,\n        alloc: A,\n    ) -> bool {\n        loop {\n            match self.fix_node_through_parent(alloc.clone()) {\n                Ok(Some(parent)) => self = parent.forget_type(),\n                Ok(None) => return true,\n                Err(_) => return false,\n            }\n        }\n    }",
+  "mir": "fn collections::btree::fix::<impl collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'a>, K, V, collections::btree::node::marker::LeafOrInternal>>::fix_node_and_affected_ancestors(_1: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::LeafOrInternal>, _2: A) -> bool {\n    let mut _0: bool;\n    let mut _3: core::result::Result<core::option::Option<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>>, collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::LeafOrInternal>>;\n    let mut _4: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::LeafOrInternal>;\n    let mut _5: A;\n    let mut _6: &A;\n    let mut _7: isize;\n    let mut _8: isize;\n    let  _9: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>;\n    let mut _10: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::LeafOrInternal>;\n    debug self => _1;\n    debug alloc => _2;\n    debug parent => _9;\n    bb0: {\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = move _1;\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &_2;\n        _5 = <A as core::clone::Clone>::clone(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _3 = collections::btree::fix::<impl collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::LeafOrInternal>>::fix_node_through_parent::<A>(move _4, move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _8 = discriminant(_3);\n        switchInt(move _8) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _7 = discriminant(((_3 as variant#0).0: core::option::Option<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>>));\n        switchInt(move _7) -> [0: bb7, 1: bb8, otherwise: bb4];\n    }\n    bb6: {\n        _0 = false;\n        goto -> bb10;\n    }\n    bb7: {\n        _0 = true;\n        goto -> bb10;\n    }\n    bb8: {\n        _9 = move ((((_3 as variant#0).0: core::option::Option<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>>) as variant#1).0: collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>);\n        StorageLive(_10);\n        _10 = collections::btree::node::NodeRef::<collections::btree::node::marker::Mut<'_>, K, V, collections::btree::node::marker::Internal>::forget_type(_9) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _1 = move _10;\n        StorageDead(_10);\n        StorageDead(_3);\n        goto -> bb1;\n    }\n    bb10: {\n        StorageDead(_3);\n        drop(_2) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        return;\n    }\n}\n",
+  "doc": " Stocks up a possibly underfull node, and if that causes its parent node\n to shrink, stocks up the parent, recursively.\n Returns `true` if it fixed the tree, `false` if it couldn't because the\n root node became empty.\n\n This method does not expect ancestors to already be underfull upon entry\n and panics if it encounters an empty ancestor.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "name": "io::error::Error::kind",
+  "safe": true,
+  "callees": {
+    "io::error::repr_bitpacked::Repr::data": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::error::repr_bitpacked::Repr": "ImmutableAsArgument",
+        "io::error::ErrorData": "Constructor"
+      }
+    },
+    "sys::pal::unix::decode_error_kind": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::error::ErrorKind": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "io::error::repr_bitpacked::Repr": [
+      "Ref"
+    ],
+    "io::error::Error": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "io::error::ErrorData": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(2, ThreadLocalIndex)), Field(0, Ty { id: 4341, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 4348, kind: RigidTy(Adt(AdtDef(DefId { id: 6822, name: \"io::error::SimpleMessage\" }), GenericArgs([]))) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 3753, kind: RigidTy(Adt(AdtDef(DefId { id: 5993, name: \"io::error::ErrorKind\" }), GenericArgs([]))) })])",
+      "Unknown([Downcast(VariantIdx(3, ThreadLocalIndex)), Field(0, Ty { id: 5470, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 5468, kind: RigidTy(Adt(AdtDef(DefId { id: 6829, name: \"io::error::Custom\" }), GenericArgs([]))) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 44, kind: RigidTy(Int(I32)) })])"
+    ],
+    "io::error::SimpleMessage": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "io::error::ErrorKind": [
+      "Plain"
+    ],
+    "io::error::Custom": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ]
+  },
+  "path": 1486,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/error.rs:998:5: 1005:6",
+  "src": "pub fn kind(&self) -> ErrorKind {\n        match self.repr.data() {\n            ErrorData::Os(code) => sys::decode_error_kind(code),\n            ErrorData::Custom(c) => c.kind,\n            ErrorData::Simple(kind) => kind,\n            ErrorData::SimpleMessage(m) => m.kind,\n        }\n    }",
+  "mir": "fn io::error::Error::kind(_1: &io::error::Error) -> io::error::ErrorKind {\n    let mut _0: io::error::ErrorKind;\n    let mut _2: io::error::ErrorData<&io::error::Custom>;\n    let mut _3: &io::error::repr_bitpacked::Repr;\n    let mut _4: isize;\n    let  _5: i32;\n    let  _6: &io::error::Custom;\n    let  _7: io::error::ErrorKind;\n    let  _8: &io::error::SimpleMessage;\n    debug self => _1;\n    debug code => _5;\n    debug c => _6;\n    debug kind => _7;\n    debug m => _8;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &((*_1).0: io::error::repr_bitpacked::Repr);\n        _2 = io::error::repr_bitpacked::Repr::data(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _4 = discriminant(_2);\n        switchInt(move _4) -> [0: bb6, 1: bb4, 2: bb3, 3: bb5, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        StorageLive(_8);\n        _8 = ((_2 as variant#2).0: &io::error::SimpleMessage);\n        _0 = ((*_8).0: io::error::ErrorKind);\n        StorageDead(_8);\n        goto -> bb8;\n    }\n    bb4: {\n        StorageLive(_7);\n        _7 = ((_2 as variant#1).0: io::error::ErrorKind);\n        _0 = _7;\n        StorageDead(_7);\n        goto -> bb8;\n    }\n    bb5: {\n        StorageLive(_6);\n        _6 = ((_2 as variant#3).0: &io::error::Custom);\n        _0 = ((*_6).0: io::error::ErrorKind);\n        StorageDead(_6);\n        goto -> bb8;\n    }\n    bb6: {\n        _5 = ((_2 as variant#0).0: i32);\n        _0 = sys::pal::unix::decode_error_kind(_5) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        goto -> bb8;\n    }\n    bb8: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns the corresponding [`ErrorKind`] for this error.\n\n This may be a value set by Rust code constructing custom `io::Error`s,\n or if this `io::Error` was sourced from the operating system,\n it will be a value inferred from the system's error encoding.\n See [`last_os_error`] for more details.\n\n [`last_os_error`]: Error::last_os_error\n\n # Examples\n\n ```\n use std::io::{Error, ErrorKind};\n\n fn print_error(err: Error) {\n     println!(\"{:?}\", err.kind());\n }\n\n fn main() {\n     // As no error has (visibly) occurred, this may print anything!\n     // It likely prints a placeholder for unidentified (non-)errors.\n     print_error(Error::last_os_error());\n     // Will print \"AddrInUse\".\n     print_error(Error::new(ErrorKind::AddrInUse, \"oh no!\"));\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

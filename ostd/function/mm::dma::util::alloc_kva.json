@@ -1,0 +1,303 @@
+{
+  "name": "mm::dma::util::alloc_kva",
+  "safe": true,
+  "callees": {
+    "mm::frame::allocator::FrameAllocOptions::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates new options for allocating the specified number of frames.\n",
+      "adt": {
+        "mm::frame::allocator::FrameAllocOptions": "Constructor"
+      }
+    },
+    "mm::frame::allocator::FrameAllocOptions::zeroed": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets whether the allocated frames should be initialized with zeros.\n\n If `zeroed` is `true`, the allocated frames are filled with zeros.\n If not, the allocated frames will contain sensitive data and the caller\n should clear them before sharing them with other components.\n\n By default, the frames are zero-initialized.\n",
+      "adt": {
+        "mm::frame::allocator::FrameAllocOptions": "MutableAsArgument"
+      }
+    },
+    "mm::frame::allocator::FrameAllocOptions::alloc_segment_with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates a contiguous range of frames with additional metadata.\n\n The returned [`Segment`] contains at least one frame. The method returns\n an error if the number of frames is zero.\n",
+      "adt": {
+        "mm::frame::allocator::FrameAllocOptions": "ImmutableAsArgument",
+        "core::result::Result": "Constructor",
+        "mm::frame::segment::Segment": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "mm::frame::segment::Segment::<(dyn mm::frame::meta::AnyFrameMeta + 'static)>::from_unsized": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a [`Segment`] with a specific metadata type into a\n [`Segment<dyn AnyFrameMeta>`].\n\n This exists because:\n\n ```ignore\n impl<M: AnyFrameMeta + ?Sized> From<Segment<M>> for Segment<dyn AnyFrameMeta>\n ```\n\n will conflict with `impl<T> core::convert::From<T> for T` in crate `core`.\n\n See also [`Frame::from_unsized`].\n",
+      "adt": {
+        "mm::frame::segment::Segment": "Constructor"
+      }
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "tdx_guest::tdx_is_enabled": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "mm::page_prop::PrivilegedPageFlags::empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an empty set of flags.\n",
+      "adt": {
+        "mm::page_prop::PrivilegedPageFlags": "Constructor"
+      }
+    },
+    "mm::mem_obj::HasPaddr::paddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the start physical address of the memory object.\n",
+      "adt": {}
+    },
+    "mm::mem_obj::HasSize::size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of the memory object in bytes.\n",
+      "adt": {}
+    },
+    "mm::kspace::kvirt_area::KVirtArea::map_frames": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a kernel virtual area and map tracked pages into it.\n\n The created virtual area will have a size of `area_size`, and the pages\n will be mapped starting from `map_offset` in the area.\n\n # Panics\n\n This function panics if\n  - the area size is not a multiple of [`PAGE_SIZE`];\n  - the map offset is not aligned to [`PAGE_SIZE`];\n  - the map offset plus the size of the pages exceeds the area size.\n",
+      "adt": {
+        "mm::kspace::kvirt_area::KVirtArea": "Constructor"
+      }
+    },
+    "util::id_set::IdSet::<I>::new_full": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `IdSet` with all IDs in the system.\n",
+      "adt": {
+        "util::id_set::IdSet": "Constructor"
+      }
+    },
+    "util::id_set::AtomicIdSet::<I>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `AtomicIdSet` from an `IdSet`.\n",
+      "adt": {
+        "util::id_set::AtomicIdSet": "Constructor"
+      }
+    },
+    "task::preempt::guard::disable_preempt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disables preemption.\n",
+      "adt": {
+        "task::preempt::guard::DisabledPreemptGuard": "Constructor"
+      }
+    },
+    "mm::tlb::TlbFlusher::<'a, G>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new TLB flusher with the specified CPUs to be flushed.\n\n The target CPUs should be a reference to an [`AtomicCpuSet`] that will\n be loaded upon [`Self::dispatch_tlb_flush`].\n\n The flusher needs to stick to the current CPU. So please provide a\n guard that implements [`PinCurrentCpu`].\n",
+      "adt": {
+        "util::id_set::AtomicIdSet": "ImmutableAsArgument",
+        "mm::tlb::TlbFlusher": "Constructor"
+      }
+    },
+    "mm::kspace::kvirt_area::KVirtArea::range": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "mm::kspace::kvirt_area::KVirtArea": "ImmutableAsArgument",
+        "core::ops::Range": "Constructor"
+      }
+    },
+    "mm::tlb::TlbFlushOp::for_range": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new TLB flush operation that flushes the TLB entries for the\n specified virtual address range.\n\n If the range is too large, the resulting [`TlbFlushOp`] will flush all\n TLB entries instead.\n\n # Panics\n\n Panics if the range is not page-aligned or if the range is empty.\n",
+      "adt": {
+        "mm::tlb::TlbFlushOp": "Constructor"
+      }
+    },
+    "mm::tlb::TlbFlusher::<'a, G>::issue_tlb_flush": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Issues a pending TLB flush request.\n\n This function does not guarantee to flush the TLB entries on either\n this CPU or remote CPUs. The flush requests are only performed when\n [`Self::dispatch_tlb_flush`] is called.\n",
+      "adt": {
+        "mm::tlb::TlbFlusher": "MutableAsArgument"
+      }
+    },
+    "mm::tlb::TlbFlusher::<'a, G>::dispatch_tlb_flush": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dispatches all the pending TLB flush requests.\n\n All previous pending requests issued by [`Self::issue_tlb_flush`] or\n [`Self::issue_tlb_flush_with`] starts to be processed after this\n function. But it may not be synchronous. Upon the return of this\n function, the TLB entries may not be coherent.\n",
+      "adt": {
+        "mm::tlb::TlbFlusher": "MutableAsArgument"
+      }
+    },
+    "mm::tlb::TlbFlusher::<'a, G>::sync_tlb_flush": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Waits for all the previous TLB flush requests to be completed.\n\n After this function, all TLB entries corresponding to previous\n dispatched TLB flush requests are guaranteed to be coherent.\n\n The TLB flush requests are issued with [`Self::issue_tlb_flush`] and\n dispatched with [`Self::dispatch_tlb_flush`]. This method will not\n dispatch any issued requests so it will not guarantee TLB coherence\n of requests that are not dispatched.\n\n # Panics\n\n This method panics if the IRQs are disabled. Since the remote flush are\n processed in IRQs, two CPUs may deadlock if they are waiting for each\n other's TLB coherence.\n",
+      "adt": {
+        "mm::tlb::TlbFlusher": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "mm::frame::allocator::FrameAllocOptions": [
+      "Plain",
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 4169, kind: RigidTy(Adt(AdtDef(DefId { id: 3684, name: \"mm::frame::segment::Segment\" }), GenericArgs([Type(Ty { id: 4178, kind: RigidTy(Adt(AdtDef(DefId { id: 4968, name: \"mm::dma::util::DmaBufferMeta\" }), GenericArgs([]))) })]))) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 1912, kind: RigidTy(Adt(AdtDef(DefId { id: 2763, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 31, kind: RigidTy(Adt(AdtDef(DefId { id: 3443, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 979, kind: RigidTy(Adt(AdtDef(DefId { id: 3864, name: \"error::Error\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "mm::frame::segment::Segment": [
+      "Plain",
+      "Ref"
+    ],
+    "mm::page_prop::PrivilegedPageFlags": [
+      "Plain"
+    ],
+    "mm::page_prop::CachePolicy": [
+      "Plain"
+    ],
+    "mm::page_prop::PageProperty": [
+      "Plain"
+    ],
+    "mm::kspace::kvirt_area::KVirtArea": [
+      "Plain",
+      "Ref"
+    ],
+    "util::id_set::IdSet": [
+      "Plain"
+    ],
+    "util::id_set::AtomicIdSet": [
+      "Plain",
+      "Ref"
+    ],
+    "task::preempt::guard::DisabledPreemptGuard": [
+      "Plain"
+    ],
+    "mm::tlb::TlbFlusher": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::ops::Range": [
+      "Plain"
+    ],
+    "mm::tlb::TlbFlushOp": [
+      "Plain"
+    ]
+  },
+  "path": 1893,
+  "span": "ostd/src/mm/dma/util.rs:74:1: 117:2",
+  "src": "pub(super) fn alloc_kva(\n    nframes: usize,\n    is_cache_coherent: bool,\n) -> Result<(KVirtArea, Paddr), Error> {\n    let segment = Segment::from_unsized(\n        FrameAllocOptions::new()\n            .zeroed(false)\n            .alloc_segment_with(nframes, |_| DmaBufferMeta)?,\n    );\n\n    #[cfg_attr(not(target_arch = \"x86_64\"), expect(unused_labels))]\n    let priv_flags = 'priv_flags: {\n        #[cfg(target_arch = \"x86_64\")]\n        crate::if_tdx_enabled!({ break 'priv_flags PrivilegedPageFlags::SHARED });\n\n        PrivilegedPageFlags::empty()\n    };\n\n    let cache = if is_cache_coherent {\n        CachePolicy::Writeback\n    } else {\n        CachePolicy::Uncacheable\n    };\n\n    let paddr = segment.paddr();\n    let kva = KVirtArea::map_frames(\n        segment.size(),\n        0,\n        segment,\n        PageProperty {\n            flags: PageFlags::RW,\n            cache,\n            priv_flags,\n        },\n    );\n\n    let target_cpus = AtomicCpuSet::new(CpuSet::new_full());\n    let mut flusher = TlbFlusher::new(&target_cpus, disable_preempt());\n    flusher.issue_tlb_flush(TlbFlushOp::for_range(kva.range()));\n    flusher.dispatch_tlb_flush();\n    flusher.sync_tlb_flush();\n\n    Ok((kva, paddr))\n}",
+  "mir": "fn mm::dma::util::alloc_kva(_1: usize, _2: bool) -> core::result::Result<(mm::kspace::kvirt_area::KVirtArea, usize), error::Error> {\n    let mut _0: core::result::Result<(mm::kspace::kvirt_area::KVirtArea, usize), error::Error>;\n    let  _3: mm::frame::segment::Segment<dyn mm::frame::meta::AnyFrameMeta>;\n    let mut _4: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, error::Error>, mm::frame::segment::Segment<mm::dma::util::DmaBufferMeta>>;\n    let mut _5: core::result::Result<mm::frame::segment::Segment<mm::dma::util::DmaBufferMeta>, error::Error>;\n    let mut _6: &mm::frame::allocator::FrameAllocOptions;\n    let  _7: &mut mm::frame::allocator::FrameAllocOptions;\n    let mut _8: &mut mm::frame::allocator::FrameAllocOptions;\n    let mut _9: mm::frame::allocator::FrameAllocOptions;\n    let mut _10: isize;\n    let  _11: core::result::Result<core::convert::Infallible, error::Error>;\n    let  _12: mm::frame::segment::Segment<mm::dma::util::DmaBufferMeta>;\n    let  _13: mm::page_prop::PrivilegedPageFlags;\n    let mut _14: bool;\n    let  _15: mm::page_prop::CachePolicy;\n    let  _16: usize;\n    let mut _17: &mm::frame::segment::Segment<dyn mm::frame::meta::AnyFrameMeta>;\n    let  _18: mm::kspace::kvirt_area::KVirtArea;\n    let mut _19: usize;\n    let mut _20: &mm::frame::segment::Segment<dyn mm::frame::meta::AnyFrameMeta>;\n    let mut _21: mm::page_prop::PageProperty;\n    let mut _22: mm::page_prop::CachePolicy;\n    let mut _23: mm::page_prop::PrivilegedPageFlags;\n    let  _24: util::id_set::AtomicIdSet<cpu::id::CpuId>;\n    let mut _25: util::id_set::IdSet<cpu::id::CpuId>;\n    let mut _26: mm::tlb::TlbFlusher<'_, task::preempt::guard::DisabledPreemptGuard>;\n    let  _27: &util::id_set::AtomicIdSet<cpu::id::CpuId>;\n    let mut _28: task::preempt::guard::DisabledPreemptGuard;\n    let  _29: ();\n    let mut _30: &mut mm::tlb::TlbFlusher<'_, task::preempt::guard::DisabledPreemptGuard>;\n    let mut _31: mm::tlb::TlbFlushOp;\n    let mut _32: core::ops::Range<usize>;\n    let mut _33: &mm::kspace::kvirt_area::KVirtArea;\n    let  _34: ();\n    let mut _35: &mut mm::tlb::TlbFlusher<'_, task::preempt::guard::DisabledPreemptGuard>;\n    let  _36: ();\n    let mut _37: &mut mm::tlb::TlbFlusher<'_, task::preempt::guard::DisabledPreemptGuard>;\n    let mut _38: (mm::kspace::kvirt_area::KVirtArea, usize);\n    debug nframes => _1;\n    debug is_cache_coherent => _2;\n    debug segment => _3;\n    debug residual => _11;\n    debug val => _12;\n    debug priv_flags => _13;\n    debug cache => _15;\n    debug paddr => _16;\n    debug kva => _18;\n    debug target_cpus => _24;\n    debug flusher => _26;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = mm::frame::allocator::FrameAllocOptions::new() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _8 = &mut _9;\n        _7 = mm::frame::allocator::FrameAllocOptions::zeroed(move _8, false) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _6 = &(*_7);\n        StorageDead(_8);\n        _5 = mm::frame::allocator::FrameAllocOptions::alloc_segment_with::<mm::dma::util::DmaBufferMeta, {closure@ostd/src/mm/dma/util.rs:81:42: 81:45}>(move _6, _1, ZeroSized: {closure@ostd/src/mm/dma/util.rs:81:42: 81:45}) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _4 = <core::result::Result<mm::frame::segment::Segment<mm::dma::util::DmaBufferMeta>, error::Error> as core::ops::Try>::branch(move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        _10 = discriminant(_4);\n        switchInt(move _10) -> [0: bb6, 1: bb7, otherwise: bb5];\n    }\n    bb5: {\n        unreachable;\n    }\n    bb6: {\n        _12 = move ((_4 as variant#0).0: mm::frame::segment::Segment<mm::dma::util::DmaBufferMeta>);\n        _3 = mm::frame::segment::Segment::<(dyn mm::frame::meta::AnyFrameMeta + 'static)>::from_unsized::<mm::dma::util::DmaBufferMeta>(_12) -> [return: bb9, unwind unreachable];\n    }\n    bb7: {\n        _11 = ((_4 as variant#1).0: core::result::Result<core::convert::Infallible, error::Error>);\n        _0 = <core::result::Result<(mm::kspace::kvirt_area::KVirtArea, usize), error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, error::Error>>>::from_residual(_11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_9);\n        StorageDead(_7);\n        StorageDead(_4);\n        goto -> bb31;\n    }\n    bb9: {\n        StorageDead(_9);\n        StorageDead(_7);\n        StorageDead(_4);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = tdx_guest::tdx_is_enabled() -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        switchInt(move _14) -> [0: bb12, otherwise: bb11];\n    }\n    bb11: {\n        _13 = mm::page_prop::PrivilegedPageFlags::SHARED;\n        StorageDead(_14);\n        goto -> bb13;\n    }\n    bb12: {\n        StorageDead(_14);\n        _13 = mm::page_prop::PrivilegedPageFlags::empty() -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageLive(_15);\n        switchInt(_2) -> [0: bb15, otherwise: bb14];\n    }\n    bb14: {\n        _15 = mm::page_prop::CachePolicy::Writeback;\n        goto -> bb16;\n    }\n    bb15: {\n        _15 = mm::page_prop::CachePolicy::Uncacheable;\n        goto -> bb16;\n    }\n    bb16: {\n        StorageLive(_17);\n        _17 = &_3;\n        _16 = <mm::frame::segment::Segment<dyn mm::frame::meta::AnyFrameMeta> as mm::mem_obj::HasPaddr>::paddr(move _17) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_17);\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = &_3;\n        _19 = <mm::frame::segment::Segment<dyn mm::frame::meta::AnyFrameMeta> as mm::mem_obj::HasSize>::size(move _20) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = _15;\n        StorageLive(_23);\n        _23 = _13;\n        _21 = PageProperty(mm::page_prop::PageFlags::RW, move _22, move _23);\n        StorageDead(_23);\n        StorageDead(_22);\n        _18 = mm::kspace::kvirt_area::KVirtArea::map_frames::<dyn mm::frame::meta::AnyFrameMeta, mm::frame::segment::Segment<dyn mm::frame::meta::AnyFrameMeta>>(move _19, 0_usize, _3, move _21) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_21);\n        StorageDead(_19);\n        StorageLive(_24);\n        StorageLive(_25);\n        _25 = util::id_set::IdSet::<cpu::id::CpuId>::new_full() -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        _24 = util::id_set::AtomicIdSet::<cpu::id::CpuId>::new(move _25) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_25);\n        StorageLive(_26);\n        _27 = &_24;\n        _28 = task::preempt::guard::disable_preempt() -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        _26 = mm::tlb::TlbFlusher::<'_, task::preempt::guard::DisabledPreemptGuard>::new(_27, task::preempt::guard::DisabledPreemptGuard {{ _private: () }}) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageLive(_30);\n        _30 = &mut _26;\n        StorageLive(_31);\n        StorageLive(_32);\n        StorageLive(_33);\n        _33 = &_18;\n        _32 = mm::kspace::kvirt_area::KVirtArea::range(move _33) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        StorageDead(_33);\n        _31 = mm::tlb::TlbFlushOp::for_range(move _32) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_32);\n        _29 = mm::tlb::TlbFlusher::<'_, task::preempt::guard::DisabledPreemptGuard>::issue_tlb_flush(move _30, move _31) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_31);\n        StorageDead(_30);\n        StorageLive(_35);\n        _35 = &mut _26;\n        _34 = mm::tlb::TlbFlusher::<'_, task::preempt::guard::DisabledPreemptGuard>::dispatch_tlb_flush(move _35) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        StorageDead(_35);\n        StorageLive(_37);\n        _37 = &mut _26;\n        _36 = mm::tlb::TlbFlusher::<'_, task::preempt::guard::DisabledPreemptGuard>::sync_tlb_flush(move _37) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        StorageDead(_37);\n        StorageLive(_38);\n        _38 = (_18, _16);\n        _0 = core::result::Result::Ok(move _38);\n        StorageDead(_38);\n        drop(_26) -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        StorageDead(_26);\n        drop(_24) -> [return: bb30, unwind unreachable];\n    }\n    bb30: {\n        StorageDead(_24);\n        StorageDead(_15);\n        StorageDead(_13);\n        goto -> bb31;\n    }\n    bb31: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

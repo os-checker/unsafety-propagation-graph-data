@@ -1,0 +1,42 @@
+{
+  "name": "task::LocalWake::wake_by_ref",
+  "safe": true,
+  "callees": {
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "task::LocalWake::wake": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wake this task.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "rc::Rc": [
+      "Ref",
+      "Plain"
+    ]
+  },
+  "path": "task::LocalWake::wake_by_ref",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/task.rs:282:5: 284:6",
+  "src": "fn wake_by_ref(self: &Rc<Self>) {\n        self.clone().wake();\n    }",
+  "mir": "fn task::LocalWake::wake_by_ref(_1: &rc::Rc<Self>) -> () {\n    let mut _0: ();\n    let  _2: ();\n    let mut _3: rc::Rc<Self>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_3);\n        _3 = <rc::Rc<Self> as core::clone::Clone>::clone(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = <Self as task::LocalWake>::wake(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Wake this task without consuming the local waker.\n\n If an executor supports a cheaper way to wake without consuming the\n waker, it should override this method. By default, it clones the\n [`Rc`] and calls [`wake`] on the clone.\n\n [`wake`]: LocalWaker::wake\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

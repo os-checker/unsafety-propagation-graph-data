@@ -1,0 +1,56 @@
+{
+  "name": "sys::process::unix::common::ProgramKind::new",
+  "safe": true,
+  "callees": {
+    "ffi::os_str::OsStr::as_encoded_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts an OS string slice to a byte slice.  To convert the byte slice back into an OS\n string slice, use the [`OsStr::from_encoded_bytes_unchecked`] function.\n\n The byte encoding is an unspecified, platform-specific, self-synchronizing superset of UTF-8.\n By being a self-synchronizing superset of UTF-8, this encoding is also a superset of 7-bit\n ASCII.\n\n Note: As the encoding is unspecified, any sub-slice of bytes that is not valid UTF-8 should\n be treated as opaque and only comparable within the same Rust version built for the same\n target platform.  For example, sending the slice over the network or storing it in a file\n will likely result in incompatible byte slices.  See [`OsString`] for more encoding details\n and [`std::ffi`] for platform-specific, specified conversions.\n\n [`std::ffi`]: crate::ffi\n",
+      "adt": {
+        "ffi::os_str::OsStr": "ImmutableAsArgument"
+      }
+    },
+    "core::slice::<impl [T]>::starts_with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if `needle` is a prefix of the slice or equal to the slice.\n\n # Examples\n\n ```\n let v = [10, 40, 30];\n assert!(v.starts_with(&[10]));\n assert!(v.starts_with(&[10, 40]));\n assert!(v.starts_with(&v));\n assert!(!v.starts_with(&[50]));\n assert!(!v.starts_with(&[10, 50]));\n ```\n\n Always returns `true` if `needle` is an empty slice:\n\n ```\n let v = &[10, 40, 30];\n assert!(v.starts_with(&[]));\n let v: &[u8] = &[];\n assert!(v.starts_with(&[]));\n ```\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::contains": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the slice contains an element with the given value.\n\n This operation is *O*(*n*).\n\n Note that if you have a sorted slice, [`binary_search`] may be faster.\n\n [`binary_search`]: slice::binary_search\n\n # Examples\n\n ```\n let v = [10, 40, 30];\n assert!(v.contains(&30));\n assert!(!v.contains(&50));\n ```\n\n If you do not have a `&T`, but some other value that you can compare\n with one (for example, `String` implements `PartialEq<str>`), you can\n use `iter().any`:\n\n ```\n let v = [String::from(\"hello\"), String::from(\"world\")]; // slice of `String`\n assert!(v.iter().any(|e| e == \"hello\")); // search with `&str`\n assert!(!v.iter().any(|e| e == \"hi\"));\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ffi::os_str::OsStr": [
+      "Ref"
+    ],
+    "sys::process::unix::common::ProgramKind": [
+      "Plain"
+    ]
+  },
+  "path": 4185,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/process/unix/common.rs:148:5: 157:6",
+  "src": "fn new(program: &OsStr) -> Self {\n        if program.as_encoded_bytes().starts_with(b\"/\") {\n            Self::Absolute\n        } else if program.as_encoded_bytes().contains(&b'/') {\n            // If the program has more than one component in it, it is a relative path.\n            Self::Relative\n        } else {\n            Self::PathLookup\n        }\n    }",
+  "mir": "fn sys::process::unix::common::ProgramKind::new(_1: &ffi::os_str::OsStr) -> sys::process::unix::common::ProgramKind {\n    let mut _0: sys::process::unix::common::ProgramKind;\n    let mut _2: bool;\n    let  _3: &[u8];\n    let mut _4: &[u8];\n    let mut _5: &[u8; 1];\n    let mut _6: bool;\n    let  _7: &[u8];\n    let  _8: &u8;\n    debug program => _1;\n    bb0: {\n        StorageLive(_2);\n        _3 = ffi::os_str::OsStr::as_encoded_bytes(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = b\"/\";\n        _4 = move _5 as &[u8];\n        StorageDead(_5);\n        _2 = core::slice::<impl [u8]>::starts_with(_3, move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _2) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_4);\n        _0 = sys::process::unix::common::ProgramKind::Absolute;\n        goto -> bb10;\n    }\n    bb4: {\n        StorageDead(_4);\n        StorageLive(_6);\n        _7 = ffi::os_str::OsStr::as_encoded_bytes(_1) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _8 = sys::process::unix::common::ProgramKind::new::promoted[0];\n        _6 = core::slice::<impl [u8]>::contains(_7, _8) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        switchInt(move _6) -> [0: bb8, otherwise: bb7];\n    }\n    bb7: {\n        _0 = sys::process::unix::common::ProgramKind::Relative;\n        goto -> bb9;\n    }\n    bb8: {\n        _0 = sys::process::unix::common::ProgramKind::PathLookup;\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_6);\n        goto -> bb10;\n    }\n    bb10: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "name": "<sync::mpsc::Iter<'a, T> as core::iter::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "sync::mpsc::Receiver::<T>::recv": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to wait for a value on this receiver, returning an error if the\n corresponding channel has hung up.\n\n This function will always block the current thread if there is no data\n available and it's possible for more data to be sent (at least one sender\n still exists). Once a message is sent to the corresponding [`Sender`]\n (or [`SyncSender`]), this receiver will wake up and return that\n message.\n\n If the corresponding [`Sender`] has disconnected, or it disconnects while\n this call is blocking, this call will wake up and return [`Err`] to\n indicate that no more messages can ever be received on this channel.\n However, since channels are buffered, messages sent before the disconnect\n will still be properly received.\n\n # Examples\n\n ```\n use std::sync::mpsc;\n use std::thread;\n\n let (send, recv) = mpsc::channel();\n let handle = thread::spawn(move || {\n     send.send(1u8).unwrap();\n });\n\n handle.join().unwrap();\n\n assert_eq!(Ok(1), recv.recv());\n ```\n\n Buffering behavior:\n\n ```\n use std::sync::mpsc;\n use std::thread;\n use std::sync::mpsc::RecvError;\n\n let (send, recv) = mpsc::channel();\n let handle = thread::spawn(move || {\n     send.send(1u8).unwrap();\n     send.send(2).unwrap();\n     send.send(3).unwrap();\n     drop(send);\n });\n\n // wait for the thread to join so we ensure the sender is dropped\n handle.join().unwrap();\n\n assert_eq!(Ok(1), recv.recv());\n assert_eq!(Ok(2), recv.recv());\n assert_eq!(Ok(3), recv.recv());\n assert_eq!(Err(RecvError), recv.recv());\n ```\n",
+      "adt": {
+        "sync::mpsc::Receiver": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::ok": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts from `Result<T, E>` to [`Option<T>`].\n\n Converts `self` into an [`Option<T>`], consuming `self`,\n and discarding the error, if any.\n\n # Examples\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.ok(), Some(2));\n\n let x: Result<u32, &str> = Err(\"Nothing here\");\n assert_eq!(x.ok(), None);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::mpsc::Receiver": [
+      "Ref"
+    ],
+    "sync::mpsc::Iter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 2992,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpsc.rs:1047:5: 1049:6",
+  "src": "fn next(&mut self) -> Option<T> {\n        self.rx.recv().ok()\n    }",
+  "mir": "fn <sync::mpsc::Iter<'a, T> as core::iter::Iterator>::next(_1: &mut sync::mpsc::Iter<'_, T>) -> core::option::Option<T> {\n    let mut _0: core::option::Option<T>;\n    let mut _2: core::result::Result<T, sync::mpsc::RecvError>;\n    let mut _3: &sync::mpsc::Receiver<T>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _3 = ((*_1).0: &sync::mpsc::Receiver<T>);\n        _2 = sync::mpsc::Receiver::<T>::recv(_3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = core::result::Result::<T, sync::mpsc::RecvError>::ok(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

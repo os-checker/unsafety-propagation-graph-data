@@ -1,0 +1,47 @@
+{
+  "name": "boxed::<impl core::default::Default for core::pin::Pin<boxed::Box<T>>>::default",
+  "safe": true,
+  "callees": {
+    "core::default::Default::default": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the \"default value\" for a type.\n\n Default values are often some kind of initial value, identity value, or anything else that\n may make sense as a default.\n\n # Examples\n\n Using built-in default values:\n\n ```\n let i: i8 = Default::default();\n let (x, y): (Option<String>, f64) = Default::default();\n let (a, b, (c, d)): (i32, u32, (bool, bool)) = Default::default();\n ```\n\n Making your own:\n\n ```\n # #[allow(dead_code)]\n enum Kind {\n     A,\n     B,\n     C,\n }\n\n impl Default for Kind {\n     fn default() -> Self { Kind::A }\n }\n ```\n",
+      "adt": {}
+    },
+    "boxed::Box::<T, A>::into_pin": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a `Box<T>` into a `Pin<Box<T>>`. If `T` does not implement [`Unpin`], then\n `*boxed` will be pinned in memory and unable to be moved.\n\n This conversion does not allocate on the heap and happens in place.\n\n This is also available via [`From`].\n\n Constructing and pinning a `Box` with <code>Box::into_pin([Box::new]\\(x))</code>\n can also be written more concisely using <code>[Box::pin]\\(x)</code>.\n This `into_pin` method is useful if you already have a `Box<T>`, or you are\n constructing a (pinned) `Box` in a different way than with [`Box::new`].\n\n # Notes\n\n It's not recommended that crates add an impl like `From<Box<T>> for Pin<T>`,\n as it'll introduce an ambiguity when calling `Pin::from`.\n A demonstration of such a poor impl is shown below.\n\n ```compile_fail\n # use std::pin::Pin;\n struct Foo; // A type defined in this crate.\n impl From<Box<()>> for Pin<Foo> {\n     fn from(_: Box<()>) -> Pin<Foo> {\n         Pin::new(Foo)\n     }\n }\n\n let foo = Box::new(());\n let bar = Pin::from(foo);\n ```\n",
+      "adt": {
+        "boxed::Box": "Constructor",
+        "core::pin::Pin": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "boxed::Box": [
+      "Plain"
+    ],
+    "core::pin::Pin": [
+      "Plain"
+    ]
+  },
+  "path": 14,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed.rs:1949:5: 1951:6",
+  "src": "fn default() -> Self {\n        Box::into_pin(Box::<T>::default())\n    }",
+  "mir": "fn boxed::<impl core::default::Default for core::pin::Pin<boxed::Box<T>>>::default() -> core::pin::Pin<boxed::Box<T>> {\n    let mut _0: core::pin::Pin<boxed::Box<T>>;\n    let mut _1: boxed::Box<T>;\n    bb0: {\n        StorageLive(_1);\n        _1 = <boxed::Box<T> as core::default::Default>::default() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = boxed::Box::<T>::into_pin(move _1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

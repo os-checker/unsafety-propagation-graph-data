@@ -1,0 +1,65 @@
+{
+  "name": "slice::sort::stable::quicksort::PartitionState::<T>::partition_one",
+  "safe": false,
+  "callees": {
+    "ptr::mut_ptr::<impl *mut T>::sub": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts an unsigned offset from a pointer.\n\n This can only move the pointer backward (or not move it). If you need to move forward or\n backward depending on the value, then you might want [`offset`](#method.offset) instead\n which takes a signed offset.\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n If any of the following conditions are violated, the result is Undefined Behavior:\n\n * The offset in bytes, `count * size_of::<T>()`, computed on mathematical integers (without\n   \"wrapping around\"), must fit in an `isize`.\n\n * If the computed offset is non-zero, then `self` must be [derived from][crate::ptr#provenance] a pointer to some\n   [allocation], and the entire memory range between `self` and the result must be in\n   bounds of that allocation. In particular, this range must not \"wrap around\" the edge\n   of the address space.\n\n Allocations can never be larger than `isize::MAX` bytes, so if the computed offset\n stays in bounds of the allocation, it is guaranteed to satisfy the first requirement.\n This implies, for instance, that `vec.as_ptr().add(vec.len())` (for `vec: Vec<T>`) is always\n safe.\n\n Consider using [`wrapping_sub`] instead if these constraints are\n difficult to satisfy. The only advantage of this method is that it\n enables more aggressive compiler optimizations.\n\n [`wrapping_sub`]: #method.wrapping_sub\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n let s: &str = \"123\";\n\n unsafe {\n     let end: *const u8 = s.as_ptr().add(3);\n     assert_eq!('3', *end.sub(1) as char);\n     assert_eq!('2', *end.sub(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"123\";\n let ptr: *const u8 = s.as_ptr();\n\n unsafe {\n     assert_eq!(*ptr.add(1), b'2');\n     assert_eq!(*ptr.add(2), b'3');\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::sort::stable::quicksort::PartitionState": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ]
+  },
+  "path": 16719,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/stable/quicksort.rs:212:5: 231:6",
+  "src": "unsafe fn partition_one(&mut self, towards_left: bool) -> *mut T {\n        // SAFETY: see individual comments.\n        unsafe {\n            // SAFETY: in-bounds because this function is called at most len times, and thus\n            // right now is incremented at most len - 1 times. Similarly, num_left < len and\n            // num_right < len, where num_right == i - num_left at the start of the ith\n            // iteration (zero-indexed).\n            self.scratch_rev = self.scratch_rev.sub(1);\n\n            // SAFETY: now we have scratch_rev == base + len - (i + 1). This means\n            // scratch_rev + num_left == base + len - 1 - num_right < base + len.\n            let dst_base = if towards_left { self.scratch_base } else { self.scratch_rev };\n            let dst = dst_base.add(self.num_left);\n            ptr::copy_nonoverlapping(self.scan, dst, 1);\n\n            self.num_left += towards_left as usize;\n            self.scan = self.scan.add(1);\n            dst\n        }\n    }",
+  "mir": "fn slice::sort::stable::quicksort::PartitionState::<T>::partition_one(_1: &mut slice::sort::stable::quicksort::PartitionState<T>, _2: bool) -> *mut T {\n    let mut _0: *mut T;\n    let mut _3: *mut T;\n    let mut _4: *mut T;\n    let  _5: *mut T;\n    let mut _6: *mut T;\n    let mut _7: usize;\n    let  _8: ();\n    let mut _9: *const T;\n    let mut _10: usize;\n    let mut _11: (usize, bool);\n    let mut _12: *const T;\n    let mut _13: *const T;\n    debug self => _1;\n    debug towards_left => _2;\n    debug dst_base => _5;\n    debug dst => _0;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).3: *mut T);\n        _3 = ptr::mut_ptr::<impl *mut T>::sub(move _4, 1_usize) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        ((*_1).3: *mut T) = move _3;\n        StorageDead(_3);\n        StorageLive(_5);\n        switchInt(_2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        _5 = ((*_1).0: *mut T);\n        goto -> bb4;\n    }\n    bb3: {\n        _5 = ((*_1).3: *mut T);\n        goto -> bb4;\n    }\n    bb4: {\n        StorageLive(_6);\n        _6 = _5;\n        StorageLive(_7);\n        _7 = ((*_1).2: usize);\n        _0 = ptr::mut_ptr::<impl *mut T>::add(move _6, move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageLive(_9);\n        _9 = ((*_1).1: *const T);\n        _8 = ptr::copy_nonoverlapping::<T>(move _9, _0, 1_usize) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_9);\n        StorageLive(_10);\n        _10 = _2 as usize;\n        _11 = CheckedAdd(((*_1).2: usize), _10);\n        assert(!move (_11.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).2: usize), move _10) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        ((*_1).2: usize) = move (_11.0: usize);\n        StorageDead(_10);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = ((*_1).1: *const T);\n        _12 = ptr::const_ptr::<impl *const T>::add(move _13, 1_usize) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_13);\n        ((*_1).1: *const T) = move _12;\n        StorageDead(_12);\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": " Depending on the value of `towards_left` this function will write a value\n to the growing left or right side of the scratch memory. This forms the\n branchless core of the partition.\n\n # Safety\n\n This function may be called at most `len` times. If it is called exactly\n `len` times the scratch buffer then contains a copy of each element from\n the scan buffer exactly once - a permutation, and num_left <= len.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

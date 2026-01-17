@@ -1,0 +1,81 @@
+{
+  "name": "<mm::vm_space::UserPtConfig as mm::page_table::PageTableConfig>::item_into_raw",
+  "safe": true,
+  "callees": {
+    "core::ops::BitOrAssign::bitor_assign": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the `|=` operation.\n\n # Examples\n\n ```\n let mut x = true;\n x |= false;\n assert_eq!(x, true);\n\n let mut x = false;\n x |= false;\n assert_eq!(x, false);\n\n let mut x: u8 = 5;\n x |= 1;\n assert_eq!(x, 5);\n\n let mut x: u8 = 5;\n x |= 2;\n assert_eq!(x, 7);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::SubAssign::sub_assign": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the `-=` operation.\n\n # Example\n\n ```\n let mut x: u32 = 12;\n x -= 1;\n assert_eq!(x, 11);\n ```\n",
+      "adt": {}
+    },
+    "mm::frame::Frame::<M>::map_level": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the map level of this page.\n\n This is the level of the page table entry that maps the frame,\n which determines the size of the frame.\n\n Currently, the level is always 1, which means the frame is a regular\n page frame.\n",
+      "adt": {
+        "mm::frame::Frame": "ImmutableAsArgument"
+      }
+    },
+    "mm::frame::Frame::<M>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forgets the handle to the frame.\n\n This will result in the frame being leaked without calling the custom dropper.\n\n A physical address to the frame is returned in case the frame needs to be\n restored using [`Frame::from_raw`] later. This is useful when some architectural\n data structures need to hold the frame handle such as the page table.\n",
+      "adt": {
+        "mm::frame::Frame": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "mm::vm_space::VmItem": [
+      "Unknown([Field(1, Ty { id: 6338, kind: RigidTy(Adt(AdtDef(DefId { id: 5605, name: \"mm::vm_space::MappedItem\" }), GenericArgs([]))) })])",
+      "Unknown([Field(1, Ty { id: 6338, kind: RigidTy(Adt(AdtDef(DefId { id: 5605, name: \"mm::vm_space::MappedItem\" }), GenericArgs([]))) }), Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(1, Ty { id: 6338, kind: RigidTy(Adt(AdtDef(DefId { id: 5605, name: \"mm::vm_space::MappedItem\" }), GenericArgs([]))) }), Downcast(VariantIdx(1, ThreadLocalIndex)), Field(1, Ty { id: 1, kind: RigidTy(Uint(U8)) })])",
+      "Unknown([Field(0, Ty { id: 1097, kind: RigidTy(Adt(AdtDef(DefId { id: 3471, name: \"mm::page_prop::PageProperty\" }), GenericArgs([]))) })])",
+      "Unknown([Field(1, Ty { id: 6338, kind: RigidTy(Adt(AdtDef(DefId { id: 5605, name: \"mm::vm_space::MappedItem\" }), GenericArgs([]))) }), Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 4909, kind: RigidTy(Adt(AdtDef(DefId { id: 3414, name: \"mm::frame::Frame\" }), GenericArgs([Type(Ty { id: 4095, kind: RigidTy(Dynamic([Binder { value: Trait(ExistentialTraitRef { def_id: TraitDef(DefId { id: 4951, name: \"mm::frame::untyped::AnyUFrameMeta\" }), generic_args: GenericArgs([]) }), bound_vars: [] }], Region { kind: ReErased })) })]))) })])",
+      "Plain"
+    ],
+    "mm::page_prop::PageProperty": [
+      "Plain",
+      "Unknown([Field(2, Ty { id: 1099, kind: RigidTy(Adt(AdtDef(DefId { id: 3473, name: \"mm::page_prop::PrivilegedPageFlags\" }), GenericArgs([]))) })])"
+    ],
+    "mm::page_prop::PrivilegedPageFlags": [
+      "MutRef"
+    ],
+    "mm::frame::Frame": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 2486,
+  "span": "ostd/src/mm/vm_space.rs:703:5: 718:6",
+  "src": "fn item_into_raw(item: Self::Item) -> (Paddr, PagingLevel, PageProperty) {\n        match item.mapped_item {\n            MappedItem::TrackedFrame(frame) => {\n                let mut prop = item.prop;\n                prop.priv_flags -= PrivilegedPageFlags::AVAIL1; // Clear AVAIL1 for tracked frames\n                let level = frame.map_level();\n                let paddr = frame.into_raw();\n                (paddr, level, prop)\n            }\n            MappedItem::UntrackedIoMem { paddr, level } => {\n                let mut prop = item.prop;\n                prop.priv_flags |= PrivilegedPageFlags::AVAIL1; // Set AVAIL1 for I/O memory\n                (paddr, level, prop)\n            }\n        }\n    }",
+  "mir": "fn <mm::vm_space::UserPtConfig as mm::page_table::PageTableConfig>::item_into_raw(_1: mm::vm_space::VmItem) -> (usize, u8, mm::page_prop::PageProperty) {\n    let mut _0: (usize, u8, mm::page_prop::PageProperty);\n    let mut _2: isize;\n    let  _3: mm::frame::Frame<dyn mm::frame::untyped::AnyUFrameMeta>;\n    let mut _4: mm::page_prop::PageProperty;\n    let  _5: ();\n    let mut _6: &mut mm::page_prop::PrivilegedPageFlags;\n    let  _7: u8;\n    let mut _8: &mm::frame::Frame<dyn mm::frame::untyped::AnyUFrameMeta>;\n    let  _9: usize;\n    let mut _10: mm::page_prop::PageProperty;\n    let  _11: usize;\n    let  _12: u8;\n    let mut _13: mm::page_prop::PageProperty;\n    let  _14: ();\n    let mut _15: &mut mm::page_prop::PrivilegedPageFlags;\n    let mut _16: mm::page_prop::PageProperty;\n    debug item => _1;\n    debug frame => _3;\n    debug prop => _4;\n    debug level => _7;\n    debug paddr => _9;\n    debug paddr => _11;\n    debug level => _12;\n    debug prop => _13;\n    bb0: {\n        _2 = discriminant((_1.1: mm::vm_space::MappedItem));\n        switchInt(move _2) -> [0: bb3, 1: bb2, otherwise: bb1];\n    }\n    bb1: {\n        unreachable;\n    }\n    bb2: {\n        _11 = (((_1.1: mm::vm_space::MappedItem) as variant#1).0: usize);\n        _12 = (((_1.1: mm::vm_space::MappedItem) as variant#1).1: u8);\n        StorageLive(_13);\n        _13 = (_1.0: mm::page_prop::PageProperty);\n        StorageLive(_15);\n        _15 = &mut (_13.2: mm::page_prop::PrivilegedPageFlags);\n        _14 = <mm::page_prop::PrivilegedPageFlags as core::ops::BitOrAssign>::bitor_assign(move _15, mm::page_prop::PrivilegedPageFlags::AVAIL1) -> [return: bb7, unwind unreachable];\n    }\n    bb3: {\n        _3 = move (((_1.1: mm::vm_space::MappedItem) as variant#0).0: mm::frame::Frame<dyn mm::frame::untyped::AnyUFrameMeta>);\n        StorageLive(_4);\n        _4 = (_1.0: mm::page_prop::PageProperty);\n        StorageLive(_6);\n        _6 = &mut (_4.2: mm::page_prop::PrivilegedPageFlags);\n        _5 = <mm::page_prop::PrivilegedPageFlags as core::ops::SubAssign>::sub_assign(move _6, mm::page_prop::PrivilegedPageFlags::AVAIL1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageLive(_8);\n        _8 = &_3;\n        _7 = mm::frame::Frame::<dyn mm::frame::untyped::AnyUFrameMeta>::map_level(move _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_8);\n        _9 = mm::frame::Frame::<dyn mm::frame::untyped::AnyUFrameMeta>::into_raw(_3) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_10);\n        _10 = _4;\n        _0 = (_9, _7, move _10);\n        StorageDead(_10);\n        StorageDead(_4);\n        goto -> bb8;\n    }\n    bb7: {\n        StorageDead(_15);\n        StorageLive(_16);\n        _16 = _13;\n        _0 = (_11, _12, move _16);\n        StorageDead(_16);\n        StorageDead(_13);\n        goto -> bb8;\n    }\n    bb8: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "name": "core_arch::x86::avx512f::_mm_maskz_andnot_epi64",
+  "safe": false,
+  "callees": {
+    "core_arch::x86::sse2::_mm_set1_epi64x": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Broadcasts 64-bit integer `a` to all elements.\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_set1_epi64x)\n",
+      "adt": {
+        "core_arch::x86::__m128i": "Constructor"
+      }
+    },
+    "core_arch::x86::avx512f::_mm_xor_epi64": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compute the bitwise XOR of packed 64-bit integers in a and b, and store the results in dst.\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_xor_epi64&expand=6145)\n",
+      "adt": {
+        "core_arch::x86::__m128i": "Constructor"
+      }
+    },
+    "core_arch::x86::__m128i::as_i64x2": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core_arch::simd::i64x2": "Constructor"
+      }
+    },
+    "intrinsics::simd::simd_and": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " \"And\"s vectors elementwise.\n\n `T` must be a vector of integers.\n",
+      "adt": {}
+    },
+    "intrinsics::simd::simd_select_bitmask": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Selects elements from a bitmask.\n\n `M` must be an unsigned integer or array of `u8`, matching `simd_bitmask`.\n\n `T` must be a vector.\n\n For each element, if the bit in `mask` is `1`, select the element from\n `if_true`.  If the corresponding bit in `mask` is `0`, select the element from\n `if_false`.\n The remaining bits of the mask are ignored.\n\n The bitmask bit order matches `simd_bitmask`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_arch::x86::__m128i": [
+      "Plain"
+    ],
+    "core_arch::simd::i64x2": [
+      "Plain"
+    ]
+  },
+  "path": 9848,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../stdarch/crates/core_arch/src/x86/avx512f.rs:28993:1: 28999:2",
+  "src": "pub fn _mm_maskz_andnot_epi64(k: __mmask8, a: __m128i, b: __m128i) -> __m128i {\n    unsafe {\n        let not = _mm_xor_epi64(a, _mm_set1_epi64x(u64::MAX as i64));\n        let andnot = simd_and(not.as_i64x2(), b.as_i64x2());\n        transmute(simd_select_bitmask(k, andnot, i64x2::ZERO))\n    }\n}",
+  "mir": "fn core_arch::x86::avx512f::_mm_maskz_andnot_epi64(_1: u8, _2: core_arch::x86::__m128i, _3: core_arch::x86::__m128i) -> core_arch::x86::__m128i {\n    let mut _0: core_arch::x86::__m128i;\n    let  _4: core_arch::x86::__m128i;\n    let mut _5: core_arch::x86::__m128i;\n    let mut _6: i64;\n    let  _7: core_arch::simd::i64x2;\n    let mut _8: core_arch::simd::i64x2;\n    let mut _9: core_arch::simd::i64x2;\n    let mut _10: core_arch::simd::i64x2;\n    debug k => _1;\n    debug a => _2;\n    debug b => _3;\n    debug not => _4;\n    debug andnot => _7;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = num::<impl u64>::MAX as i64;\n        _5 = core_arch::x86::sse2::_mm_set1_epi64x(move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        _4 = core_arch::x86::avx512f::_mm_xor_epi64(_2, move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_8);\n        _8 = core_arch::x86::__m128i::as_i64x2(_4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_9);\n        _9 = core_arch::x86::__m128i::as_i64x2(_3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _7 = intrinsics::simd::simd_and::<core_arch::simd::i64x2>(move _8, move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_10);\n        _10 = intrinsics::simd::simd_select_bitmask::<u8, core_arch::simd::i64x2>(_1, _7, core_arch::simd::i64x2::ZERO) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _0 = move _10 as core_arch::x86::__m128i;\n        StorageDead(_10);\n        return;\n    }\n}\n",
+  "doc": " Compute the bitwise NOT of packed 64-bit integers in a and then AND with b, and store the results in dst using zeromask k (elements are zeroed out when the corresponding mask bit is not set).\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_maskz_andnot_epi64&expand=314)\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

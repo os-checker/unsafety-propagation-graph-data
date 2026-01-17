@@ -1,0 +1,140 @@
+{
+  "name": "sys::pal::unix::stack_overflow::imp::get_stack",
+  "safe": false,
+  "callees": {
+    "sys::pal::unix::stack_overflow::imp::sigstack_size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Modern kernels on modern hardware can have dynamic signal stack sizes.\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicUsize::load": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads a value from the atomic integer.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering of this operation.\n Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.load(Ordering::Relaxed), 5);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::null_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a null mutable raw pointer.\n\n This function is equivalent to zero-initializing the pointer:\n `MaybeUninit::<*mut T>::zeroed().assume_init()`.\n The resulting pointer has the address 0.\n\n # Examples\n\n ```\n use std::ptr;\n\n let p: *mut i32 = ptr::null_mut();\n assert!(p.is_null());\n assert_eq!(p as usize, 0); // this pointer has the address 0\n ```\n",
+      "adt": {}
+    },
+    "libc::mmap64": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "io::error::Error::last_os_error": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an error representing the last OS error which occurred.\n\n This function reads the value of `errno` for the target platform (e.g.\n `GetLastError` on Windows) and will return a corresponding instance of\n [`Error`] for the error code.\n\n This should be called immediately after a call to a platform function,\n otherwise the state of the error value is indeterminate. In particular,\n other standard library functions may call platform functions that may\n (or may not) reset the error value even if they succeed.\n\n # Examples\n\n ```\n use std::io::Error;\n\n let os_error = Error::last_os_error();\n println!(\"last OS error: {os_error:?}\");\n ```\n",
+      "adt": {
+        "io::error::Error": "Constructor"
+      }
+    },
+    "core::fmt::rt::Argument::<'_>::new_display": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {}
+    },
+    "libc::mprotect": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "io::error::Error": [
+      "Plain",
+      "Ref",
+      "RefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::fmt::rt::Argument": [
+      "Plain"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ],
+    "libc::stack_t": [
+      "Plain"
+    ]
+  },
+  "path": 3959,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/stack_overflow.rs:205:5: 245:6",
+  "src": "unsafe fn get_stack() -> libc::stack_t {\n        // OpenBSD requires this flag for stack mapping\n        // otherwise the said mapping will fail as a no-op on most systems\n        // and has a different meaning on FreeBSD\n        #[cfg(any(\n            target_os = \"openbsd\",\n            target_os = \"netbsd\",\n            target_os = \"linux\",\n            target_os = \"dragonfly\",\n        ))]\n        let flags = MAP_PRIVATE | MAP_ANON | libc::MAP_STACK;\n        #[cfg(not(any(\n            target_os = \"openbsd\",\n            target_os = \"netbsd\",\n            target_os = \"linux\",\n            target_os = \"dragonfly\",\n        )))]\n        let flags = MAP_PRIVATE | MAP_ANON;\n\n        let sigstack_size = sigstack_size();\n        let page_size = PAGE_SIZE.load(Ordering::Relaxed);\n\n        let stackp = mmap64(\n            ptr::null_mut(),\n            sigstack_size + page_size,\n            PROT_READ | PROT_WRITE,\n            flags,\n            -1,\n            0,\n        );\n        if stackp == MAP_FAILED {\n            panic!(\"failed to allocate an alternative stack: {}\", io::Error::last_os_error());\n        }\n        let guard_result = libc::mprotect(stackp, page_size, PROT_NONE);\n        if guard_result != 0 {\n            panic!(\"failed to set up alternative stack guard page: {}\", io::Error::last_os_error());\n        }\n        let stackp = stackp.add(page_size);\n\n        libc::stack_t { ss_sp: stackp, ss_flags: 0, ss_size: sigstack_size }\n    }",
+  "mir": "fn sys::pal::unix::stack_overflow::imp::get_stack() -> libc::stack_t {\n    let mut _0: libc::stack_t;\n    let  _1: i32;\n    let mut _2: i32;\n    let  _3: usize;\n    let  _4: usize;\n    let mut _5: &core::sync::atomic::AtomicUsize;\n    let mut _6: core::sync::atomic::Ordering;\n    let  _7: *mut libc::c_void;\n    let mut _8: *mut libc::c_void;\n    let mut _9: usize;\n    let mut _10: (usize, bool);\n    let mut _11: i32;\n    let mut _12: bool;\n    let  _13: !;\n    let mut _14: core::fmt::Arguments<'_>;\n    let  _15: (&io::error::Error,);\n    let mut _16: &io::error::Error;\n    let  _17: io::error::Error;\n    let  _18: [core::fmt::rt::Argument<'_>; 1];\n    let mut _19: core::fmt::rt::Argument<'_>;\n    let mut _20: &[u8; 44];\n    let  _21: &[core::fmt::rt::Argument<'_>; 1];\n    let  _22: i32;\n    let  _23: !;\n    let mut _24: core::fmt::Arguments<'_>;\n    let  _25: (&io::error::Error,);\n    let mut _26: &io::error::Error;\n    let  _27: io::error::Error;\n    let  _28: [core::fmt::rt::Argument<'_>; 1];\n    let mut _29: core::fmt::rt::Argument<'_>;\n    let mut _30: &[u8; 50];\n    let  _31: &[core::fmt::rt::Argument<'_>; 1];\n    let  _32: *mut libc::c_void;\n    let mut _33: &io::error::Error;\n    let mut _34: &io::error::Error;\n    debug flags => _1;\n    debug sigstack_size => _3;\n    debug page_size => _4;\n    debug stackp => _7;\n    debug args => _15;\n    debug args => _18;\n    debug guard_result => _22;\n    debug args => _25;\n    debug args => _28;\n    debug stackp => _32;\n    bb0: {\n        StorageLive(_2);\n        _2 = BitOr(libc::MAP_PRIVATE, libc::MAP_ANON);\n        _1 = BitOr(move _2, libc::MAP_STACK);\n        StorageDead(_2);\n        _3 = sys::pal::unix::stack_overflow::imp::sigstack_size() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = {alloc341: &core::sync::atomic::AtomicUsize};\n        StorageLive(_6);\n        _6 = core::sync::atomic::Ordering::Relaxed;\n        _4 = core::sync::atomic::AtomicUsize::load(move _5, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_8);\n        _8 = core::ptr::null_mut::<libc::c_void>() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_9);\n        _10 = CheckedAdd(_3, _4);\n        assert(!move (_10.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _3, _4) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _9 = move (_10.0: usize);\n        StorageLive(_11);\n        _11 = BitOr(libc::PROT_READ, libc::PROT_WRITE);\n        _7 = libc::mmap64(move _8, move _9, move _11, _1, -1_i32, 0_i64) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_12);\n        _12 = Eq(_7, libc::MAP_FAILED);\n        switchInt(move _12) -> [0: bb10, otherwise: bb6];\n    }\n    bb6: {\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = io::error::Error::last_os_error() -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _16 = &_17;\n        _15 = (move _16);\n        StorageDead(_16);\n        StorageLive(_18);\n        StorageLive(_19);\n        _33 = (_15.0: &io::error::Error);\n        _19 = core::fmt::rt::Argument::<'_>::new_display::<io::error::Error>(_33) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _18 = [move _19];\n        StorageDead(_19);\n        StorageLive(_20);\n        _20 = b\")failed to allocate an alternative stack: \\xc0\\x00\";\n        _21 = &_18;\n        _14 = core::fmt::Arguments::<'_>::new::<44, 1>(move _20, _21) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_20);\n        _13 = core::panicking::panic_fmt(move _14) -> unwind unreachable;\n    }\n    bb10: {\n        StorageDead(_12);\n        _22 = libc::mprotect(_7, _4, libc::PROT_NONE) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        switchInt(_22) -> [0: bb16, otherwise: bb12];\n    }\n    bb12: {\n        StorageLive(_24);\n        StorageLive(_25);\n        StorageLive(_26);\n        StorageLive(_27);\n        _27 = io::error::Error::last_os_error() -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        _26 = &_27;\n        _25 = (move _26);\n        StorageDead(_26);\n        StorageLive(_28);\n        StorageLive(_29);\n        _34 = (_25.0: &io::error::Error);\n        _29 = core::fmt::rt::Argument::<'_>::new_display::<io::error::Error>(_34) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        _28 = [move _29];\n        StorageDead(_29);\n        StorageLive(_30);\n        _30 = b\"/failed to set up alternative stack guard page: \\xc0\\x00\";\n        _31 = &_28;\n        _24 = core::fmt::Arguments::<'_>::new::<50, 1>(move _30, _31) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_30);\n        _23 = core::panicking::panic_fmt(move _24) -> unwind unreachable;\n    }\n    bb16: {\n        _32 = core::ptr::mut_ptr::<impl *mut libc::c_void>::add(_7, _4) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        _0 = stack_t(_32, 0_i32, _3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

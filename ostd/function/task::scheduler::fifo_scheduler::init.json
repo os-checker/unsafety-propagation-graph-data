@@ -1,0 +1,67 @@
+{
+  "name": "task::scheduler::fifo_scheduler::init",
+  "safe": true,
+  "callees": {
+    "core::default::Default::default": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the \"default value\" for a type.\n\n Default values are often some kind of initial value, identity value, or anything else that\n may make sense as a default.\n\n # Examples\n\n Using built-in default values:\n\n ```\n let i: i8 = Default::default();\n let (x, y): (Option<String>, f64) = Default::default();\n let (a, b, (c, d)): (i32, u32, (bool, bool)) = Default::default();\n ```\n\n Making your own:\n\n ```\n # #[allow(dead_code)]\n enum Kind {\n     A,\n     B,\n     C,\n }\n\n impl Default for Kind {\n     fn default() -> Self { Kind::A }\n }\n ```\n",
+      "adt": {}
+    },
+    "alloc::boxed::Box::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory on the heap and then places `x` into it.\n\n This doesn't actually allocate if `T` is zero-sized.\n\n # Examples\n\n ```\n let five = Box::new(5);\n ```\n",
+      "adt": {}
+    },
+    "alloc::boxed::Box::<T, A>::leak": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes and leaks the `Box`, returning a mutable reference,\n `&'a mut T`.\n\n Note that the type `T` must outlive the chosen lifetime `'a`. If the type\n has only static references, or none at all, then this may be chosen to be\n `'static`.\n\n This function is mainly useful for data that lives for the remainder of\n the program's life. Dropping the returned reference will cause a memory\n leak. If this is not acceptable, the reference should first be wrapped\n with the [`Box::from_raw`] function producing a `Box`. This `Box` can\n then be dropped which will properly destroy `T` and release the\n allocated memory.\n\n Note: this is an associated function, which means that you have\n to call it as `Box::leak(b)` instead of `b.leak()`. This\n is so that there is no conflict with a method on the inner type.\n\n # Examples\n\n Simple usage:\n\n ```\n let x = Box::new(41);\n let static_ref: &'static mut usize = Box::leak(x);\n *static_ref += 1;\n assert_eq!(*static_ref, 42);\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # drop(unsafe { Box::from_raw(static_ref) });\n ```\n\n Unsized data:\n\n ```\n let x = vec![1, 2, 3].into_boxed_slice();\n let static_ref = Box::leak(x);\n static_ref[0] = 4;\n assert_eq!(*static_ref, [4, 2, 3]);\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # drop(unsafe { Box::from_raw(static_ref) });\n ```\n",
+      "adt": {}
+    },
+    "task::scheduler::inject_scheduler": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Injects a custom implementation of task scheduler into OSTD.\n\n This function can only be called once and must be called during the initialization phase of kernel,\n before any [`Task`]-related APIs are invoked.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "task::scheduler::fifo_scheduler::FifoScheduler": [
+      "Plain",
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "alloc::boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 2792,
+  "span": "ostd/src/task/scheduler/fifo_scheduler.rs:15:1: 19:2",
+  "src": "pub fn init() {\n    let fifo_scheduler = Box::new(FifoScheduler::default());\n    let scheduler = Box::<FifoScheduler<Task>>::leak(fifo_scheduler);\n    inject_scheduler(scheduler);\n}",
+  "mir": "fn task::scheduler::fifo_scheduler::init() -> () {\n    let mut _0: ();\n    let  _1: alloc::boxed::Box<task::scheduler::fifo_scheduler::FifoScheduler<task::Task>>;\n    let mut _2: task::scheduler::fifo_scheduler::FifoScheduler<task::Task>;\n    let  _3: &mut task::scheduler::fifo_scheduler::FifoScheduler<task::Task>;\n    let  _4: ();\n    let mut _5: &dyn task::scheduler::Scheduler;\n    let mut _6: &task::scheduler::fifo_scheduler::FifoScheduler<task::Task>;\n    debug fifo_scheduler => _1;\n    debug scheduler => _3;\n    bb0: {\n        StorageLive(_2);\n        _2 = <task::scheduler::fifo_scheduler::FifoScheduler<task::Task> as core::default::Default>::default() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _1 = alloc::boxed::Box::<task::scheduler::fifo_scheduler::FifoScheduler<task::Task>>::new(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_3);\n        _3 = alloc::boxed::Box::<task::scheduler::fifo_scheduler::FifoScheduler<task::Task>>::leak::<'_>(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &(*_3);\n        _5 = move _6 as &dyn task::scheduler::Scheduler;\n        StorageDead(_6);\n        _4 = task::scheduler::inject_scheduler(move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

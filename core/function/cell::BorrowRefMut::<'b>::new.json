@@ -1,0 +1,51 @@
+{
+  "name": "cell::BorrowRefMut::<'b>::new",
+  "safe": true,
+  "callees": {
+    "cell::Cell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a copy of the contained value.\n\n # Examples\n\n ```\n use std::cell::Cell;\n\n let c = Cell::new(5);\n\n let five = c.get();\n ```\n",
+      "adt": {
+        "cell::Cell": "ImmutableAsArgument"
+      }
+    },
+    "cell::Cell::<T>::replace": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Replaces the contained value with `val`, and returns the old contained value.\n\n # Examples\n\n ```\n use std::cell::Cell;\n\n let cell = Cell::new(5);\n assert_eq!(cell.get(), 5);\n assert_eq!(cell.replace(10), 5);\n assert_eq!(cell.get(), 10);\n ```\n",
+      "adt": {
+        "cell::Cell": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "cell::Cell": [
+      "Ref"
+    ],
+    "option::Option": [
+      "Plain"
+    ],
+    "cell::BorrowRefMut": [
+      "Plain"
+    ]
+  },
+  "path": 4738,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell.rs:2039:5: 2051:6",
+  "src": "const fn new(borrow: &'b Cell<BorrowCounter>) -> Option<BorrowRefMut<'b>> {\n        // NOTE: Unlike BorrowRefMut::clone, new is called to create the initial\n        // mutable reference, and so there must currently be no existing\n        // references. Thus, while clone increments the mutable refcount, here\n        // we explicitly only allow going from UNUSED to UNUSED - 1.\n        match borrow.get() {\n            UNUSED => {\n                borrow.replace(UNUSED - 1);\n                Some(BorrowRefMut { borrow })\n            }\n            _ => None,\n        }\n    }",
+  "mir": "fn cell::BorrowRefMut::<'b>::new(_1: &cell::Cell<isize>) -> option::Option<cell::BorrowRefMut<'_>> {\n    let mut _0: option::Option<cell::BorrowRefMut<'_>>;\n    let mut _2: isize;\n    let  _3: isize;\n    let mut _4: isize;\n    let mut _5: (isize, bool);\n    let mut _6: cell::BorrowRefMut<'_>;\n    debug borrow => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = cell::Cell::<isize>::get(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(_2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        _0 = option::Option::None;\n        goto -> bb6;\n    }\n    bb3: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _5 = CheckedSub(cell::UNUSED, 1_isize);\n        assert(!move (_5.1: bool), \"attempt to compute `{} - {}`, which would overflow\", cell::UNUSED, 1_isize) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _4 = move (_5.0: isize);\n        _3 = cell::Cell::<isize>::replace(_1, move _4) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_6);\n        _6 = BorrowRefMut(_1);\n        _0 = option::Option::Some(move _6);\n        StorageDead(_6);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

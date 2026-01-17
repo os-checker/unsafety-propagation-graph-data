@@ -1,0 +1,116 @@
+{
+  "name": "sys::fs::unix::set_times_impl",
+  "safe": true,
+  "callees": {
+    "sys::fs::unix::file_time_to_timespec": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "libc::timespec": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ffi::CStr::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the inner pointer to this C string.\n\n The returned pointer will be valid for as long as `self` is, and points\n to a contiguous region of memory terminated with a 0 byte to represent\n the end of the string.\n\n The type of the returned pointer is\n [`*const c_char`][crate::ffi::c_char], and whether it's\n an alias for `*const i8` or `*const u8` is platform-specific.\n\n **WARNING**\n\n The returned pointer is read-only; writing to it (including passing it\n to C code that writes to it) causes undefined behavior.\n\n It is your responsibility to make sure that the underlying memory is not\n freed too early. For example, the following code will cause undefined\n behavior when `ptr` is used inside the `unsafe` block:\n\n ```no_run\n # #![expect(dangling_pointers_from_temporaries)]\n use std::ffi::{CStr, CString};\n\n // 💀 The meaning of this entire program is undefined,\n // 💀 and nothing about its behavior is guaranteed,\n // 💀 not even that its behavior resembles the code as written,\n // 💀 just because it contains a single instance of undefined behavior!\n\n // 🚨 creates a dangling pointer to a temporary `CString`\n // 🚨 that is deallocated at the end of the statement\n let ptr = CString::new(\"Hi!\".to_uppercase()).unwrap().as_ptr();\n\n // without undefined behavior, you would expect that `ptr` equals:\n dbg!(CStr::from_bytes_with_nul(b\"HI!\\0\").unwrap());\n\n // 🙏 Possibly the program behaved as expected so far,\n // 🙏 and this just shows `ptr` is now garbage..., but\n // 💀 this violates `CStr::from_ptr`'s safety contract\n // 💀 leading to a dereference of a dangling pointer,\n // 💀 which is immediate undefined behavior.\n // 💀 *BOOM*, you're dead, your entire program has no meaning.\n dbg!(unsafe { CStr::from_ptr(ptr) });\n ```\n\n This happens because, the pointer returned by `as_ptr` does not carry any\n lifetime information, and the `CString` is deallocated immediately after\n the expression that it is part of has been evaluated.\n To fix the problem, bind the `CString` to a local variable:\n\n ```\n use std::ffi::{CStr, CString};\n\n let c_str = CString::new(\"Hi!\".to_uppercase()).unwrap();\n let ptr = c_str.as_ptr();\n\n assert_eq!(unsafe { CStr::from_ptr(ptr) }, c\"HI!\");\n ```\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "libc::utimensat": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "sys::pal::unix::cvt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts native return values to Result using the *-1 means error is in `errno`*  convention.\n Non-error values are `Ok`-wrapped.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain"
+    ],
+    "sys::fs::unix::FileTimes": [
+      "Unknown([Field(0, Ty { id: 12535, kind: RigidTy(Adt(AdtDef(DefId { id: 4387, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 4151, kind: RigidTy(Adt(AdtDef(DefId { id: 6224, name: \"sys::pal::unix::time::SystemTime\" }), GenericArgs([]))) })]))) })])",
+      "Unknown([Field(1, Ty { id: 12535, kind: RigidTy(Adt(AdtDef(DefId { id: 4387, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 4151, kind: RigidTy(Adt(AdtDef(DefId { id: 6224, name: \"sys::pal::unix::time::SystemTime\" }), GenericArgs([]))) })]))) })])",
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 14859, kind: RigidTy(Adt(AdtDef(DefId { id: 11368, name: \"libc::timespec\" }), GenericArgs([]))) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 44, kind: RigidTy(Int(I32)) })])"
+    ],
+    "libc::timespec": [
+      "Plain"
+    ],
+    "core::ffi::CStr": [
+      "Ref"
+    ]
+  },
+  "path": 3481,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/fs/unix.rs:2139:1: 2208:2",
+  "src": "fn set_times_impl(p: &CStr, times: FileTimes, follow_symlinks: bool) -> io::Result<()> {\n    cfg_select! {\n       any(target_os = \"redox\", target_os = \"espidf\", target_os = \"horizon\", target_os = \"nuttx\") => {\n            let _ = (p, times, follow_symlinks);\n            Err(io::const_error!(\n                io::ErrorKind::Unsupported,\n                \"setting file times not supported\",\n            ))\n       }\n       target_vendor = \"apple\" => {\n            // Apple platforms use setattrlist which supports setting times on symlinks\n            let ta = TimesAttrlist::from_times(&times)?;\n            let options = if follow_symlinks {\n                0\n            } else {\n                libc::FSOPT_NOFOLLOW\n            };\n\n            cvt(unsafe { libc::setattrlist(\n                p.as_ptr(),\n                ta.attrlist(),\n                ta.times_buf(),\n                ta.times_buf_size(),\n                options as u32\n            ) })?;\n            Ok(())\n       }\n       target_os = \"android\" => {\n            let times = [file_time_to_timespec(times.accessed)?, file_time_to_timespec(times.modified)?];\n            let flags = if follow_symlinks { 0 } else { libc::AT_SYMLINK_NOFOLLOW };\n            // utimensat requires Android API level 19\n            cvt(unsafe {\n                weak!(\n                    fn utimensat(dirfd: c_int, path: *const libc::c_char, times: *const libc::timespec, flags: c_int) -> c_int;\n                );\n                match utimensat.get() {\n                    Some(utimensat) => utimensat(libc::AT_FDCWD, p.as_ptr(), times.as_ptr(), flags),\n                    None => return Err(io::const_error!(\n                        io::ErrorKind::Unsupported,\n                        \"setting file times requires Android API level >= 19\",\n                    )),\n                }\n            })?;\n            Ok(())\n       }\n       _ => {\n            let flags = if follow_symlinks { 0 } else { libc::AT_SYMLINK_NOFOLLOW };\n            #[cfg(all(target_os = \"linux\", target_env = \"gnu\", target_pointer_width = \"32\", not(target_arch = \"riscv32\")))]\n            {\n                use crate::sys::{time::__timespec64, weak::weak};\n\n                // Added in glibc 2.34\n                weak!(\n                    fn __utimensat64(dirfd: c_int, path: *const c_char, times: *const __timespec64, flags: c_int) -> c_int;\n                );\n\n                if let Some(utimensat64) = __utimensat64.get() {\n                    let to_timespec = |time: Option<SystemTime>| time.map(|time| time.t.to_timespec64())\n                        .unwrap_or(__timespec64::new(0, libc::UTIME_OMIT as _));\n                    let times = [to_timespec(times.accessed), to_timespec(times.modified)];\n                    cvt(unsafe { utimensat64(libc::AT_FDCWD, p.as_ptr(), times.as_ptr(), flags) })?;\n                    return Ok(());\n                }\n            }\n            let times = [file_time_to_timespec(times.accessed)?, file_time_to_timespec(times.modified)?];\n            cvt(unsafe { libc::utimensat(libc::AT_FDCWD, p.as_ptr(), times.as_ptr(), flags) })?;\n            Ok(())\n         }\n    }\n}",
+  "mir": "fn sys::fs::unix::set_times_impl(_1: &core::ffi::CStr, _2: sys::fs::unix::FileTimes, _3: bool) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let  _4: i32;\n    let  _5: [libc::timespec; 2];\n    let mut _6: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, libc::timespec>;\n    let mut _7: core::result::Result<libc::timespec, io::error::Error>;\n    let mut _8: core::option::Option<sys::pal::unix::time::SystemTime>;\n    let mut _9: isize;\n    let  _10: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _11: libc::timespec;\n    let mut _12: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, libc::timespec>;\n    let mut _13: core::result::Result<libc::timespec, io::error::Error>;\n    let mut _14: core::option::Option<sys::pal::unix::time::SystemTime>;\n    let mut _15: isize;\n    let  _16: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _17: libc::timespec;\n    let mut _18: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, i32>;\n    let mut _19: core::result::Result<i32, io::error::Error>;\n    let mut _20: i32;\n    let mut _21: *const u8;\n    let mut _22: *const libc::timespec;\n    let mut _23: &[libc::timespec];\n    let mut _24: &[libc::timespec; 2];\n    let mut _25: i32;\n    let mut _26: isize;\n    let  _27: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _28: i32;\n    debug p => _1;\n    debug times => _2;\n    debug follow_symlinks => _3;\n    debug flags => _4;\n    debug times => _5;\n    debug residual => _10;\n    debug val => _11;\n    debug residual => _16;\n    debug val => _17;\n    debug residual => _27;\n    debug val => _28;\n    bb0: {\n        StorageLive(_4);\n        switchInt(_3) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        _4 = 0_i32;\n        goto -> bb3;\n    }\n    bb2: {\n        _4 = libc::AT_SYMLINK_NOFOLLOW;\n        goto -> bb3;\n    }\n    bb3: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = (_2.0: core::option::Option<sys::pal::unix::time::SystemTime>);\n        _7 = sys::fs::unix::file_time_to_timespec(move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        _6 = <core::result::Result<libc::timespec, io::error::Error> as core::ops::Try>::branch(move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        _9 = discriminant(_6);\n        switchInt(move _9) -> [0: bb7, 1: bb8, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        _11 = ((_6 as variant#0).0: libc::timespec);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = (_2.1: core::option::Option<sys::pal::unix::time::SystemTime>);\n        _13 = sys::fs::unix::file_time_to_timespec(move _14) -> [return: bb10, unwind unreachable];\n    }\n    bb8: {\n        _10 = move ((_6 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<(), io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_10) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        goto -> bb25;\n    }\n    bb10: {\n        StorageDead(_14);\n        _12 = <core::result::Result<libc::timespec, io::error::Error> as core::ops::Try>::branch(move _13) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_13);\n        _15 = discriminant(_12);\n        switchInt(move _15) -> [0: bb12, 1: bb13, otherwise: bb6];\n    }\n    bb12: {\n        _17 = ((_12 as variant#0).0: libc::timespec);\n        _5 = [_11, _17];\n        StorageDead(_12);\n        StorageDead(_6);\n        StorageLive(_18);\n        StorageLive(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = core::ffi::CStr::as_ptr(_1) -> [return: bb15, unwind unreachable];\n    }\n    bb13: {\n        _16 = move ((_12 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<(), io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_16) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_12);\n        goto -> bb25;\n    }\n    bb15: {\n        StorageLive(_22);\n        StorageLive(_23);\n        StorageLive(_24);\n        _24 = &_5;\n        _23 = move _24 as &[libc::timespec];\n        StorageDead(_24);\n        _22 = core::slice::<impl [libc::timespec]>::as_ptr(move _23) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_23);\n        StorageLive(_25);\n        _25 = _4;\n        _20 = libc::utimensat(libc::AT_FDCWD, move _21, move _22, move _25) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_25);\n        StorageDead(_22);\n        StorageDead(_21);\n        _19 = sys::pal::unix::cvt::<i32>(move _20) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_20);\n        _18 = <core::result::Result<i32, io::error::Error> as core::ops::Try>::branch(move _19) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_19);\n        _26 = discriminant(_18);\n        switchInt(move _26) -> [0: bb20, 1: bb21, otherwise: bb6];\n    }\n    bb20: {\n        StorageLive(_28);\n        _28 = ((_18 as variant#0).0: i32);\n        StorageDead(_28);\n        StorageDead(_18);\n        _0 = core::result::Result::Ok(());\n        StorageDead(_5);\n        StorageDead(_4);\n        goto -> bb24;\n    }\n    bb21: {\n        _27 = move ((_18 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<(), io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_27) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_18);\n        goto -> bb23;\n    }\n    bb23: {\n        StorageDead(_5);\n        StorageDead(_4);\n        goto -> bb24;\n    }\n    bb24: {\n        return;\n    }\n    bb25: {\n        StorageDead(_6);\n        goto -> bb23;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

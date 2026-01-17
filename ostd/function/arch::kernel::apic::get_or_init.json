@@ -1,0 +1,106 @@
+{
+  "name": "arch::kernel::apic::get_or_init",
+  "safe": true,
+  "callees": {
+    "cpu::id::current::<impl cpu::id::CpuId>::current_racy": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the ID of the current CPU.\n\n This function is safe to call, but is vulnerable to races. The returned CPU\n ID may be outdated if the task migrates to another CPU.\n\n To ensure that the CPU ID is up-to-date, do it under any guards that\n implement the [`PinCurrentCpu`] trait.\n",
+      "adt": {
+        "cpu::id::CpuId": "Constructor"
+      }
+    },
+    "cpu::local::CpuLocal::<T, S>::get_on_cpu": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets access to the CPU-local value on a specific CPU.\n\n This allows the caller to access CPU-local data from a remote CPU,\n so the data type must be `Sync`.\n",
+      "adt": {
+        "cpu::local::CpuLocal": "ImmutableAsArgument"
+      }
+    },
+    "spin::once::Once::<T, R>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the inner value if the [`Once`] has been initialized.\n",
+      "adt": {}
+    },
+    "arch::kernel::apic::get_or_init::ForceSyncSend::<T>::get": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " # Safety\n\n The caller must ensure that its context allows for safe access to `&T`.\n",
+      "adt": {
+        "arch::kernel::apic::get_or_init::ForceSyncSend": "ImmutableAsArgument"
+      }
+    },
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "cpu::local::CpuLocal": [
+      "Ref"
+    ],
+    "cpu::id::CpuId": [
+      "Plain"
+    ],
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 2342, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 2357, kind: RigidTy(Adt(AdtDef(DefId { id: 4221, name: \"arch::kernel::apic::get_or_init::ForceSyncSend\" }), GenericArgs([Type(Ty { id: 2353, kind: RigidTy(Adt(AdtDef(DefId { id: 3234, name: \"alloc::boxed::Box\" }), GenericArgs([Type(Ty { id: 493, kind: RigidTy(Dynamic([Binder { value: Trait(ExistentialTraitRef { def_id: TraitDef(DefId { id: 3087, name: \"arch::kernel::apic::Apic\" }), generic_args: GenericArgs([]) }), bound_vars: [] }], Region { kind: ReErased })) }), Type(Ty { id: 657, kind: RigidTy(Adt(AdtDef(DefId { id: 4225, name: \"alloc::alloc::Global\" }), GenericArgs([]))) })]))) })]))) }, Not)) })])"
+    ],
+    "arch::kernel::apic::get_or_init::ForceSyncSend": [
+      "Ref"
+    ],
+    "alloc::boxed::Box": [
+      "Ref",
+      "Plain",
+      "Deref",
+      "Unknown([Field(0, Ty { id: 2343, kind: RigidTy(Adt(AdtDef(DefId { id: 3281, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 493, kind: RigidTy(Dynamic([Binder { value: Trait(ExistentialTraitRef { def_id: TraitDef(DefId { id: 3087, name: \"arch::kernel::apic::Apic\" }), generic_args: GenericArgs([]) }), bound_vars: [] }], Region { kind: ReErased })) })]))) }), Field(0, Ty { id: 2344, kind: RigidTy(Adt(AdtDef(DefId { id: 3282, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 493, kind: RigidTy(Dynamic([Binder { value: Trait(ExistentialTraitRef { def_id: TraitDef(DefId { id: 3087, name: \"arch::kernel::apic::Apic\" }), generic_args: GenericArgs([]) }), bound_vars: [] }], Region { kind: ReErased })) })]))) })])"
+    ]
+  },
+  "path": 1280,
+  "span": "ostd/src/arch/x86/kernel/apic/mod.rs:44:1: 108:2",
+  "src": "pub fn get_or_init(_guard: &dyn PinCurrentCpu) -> &(dyn Apic + 'static) {\n    struct ForceSyncSend<T>(T);\n\n    // SAFETY: `ForceSyncSend` is `Sync + Send`, but accessing its contained value is unsafe.\n    unsafe impl<T> Sync for ForceSyncSend<T> {}\n    unsafe impl<T> Send for ForceSyncSend<T> {}\n\n    impl<T> ForceSyncSend<T> {\n        /// # Safety\n        ///\n        /// The caller must ensure that its context allows for safe access to `&T`.\n        unsafe fn get(&self) -> &T {\n            &self.0\n        }\n    }\n\n    cpu_local! {\n        static APIC_INSTANCE: Once<ForceSyncSend<Box<dyn Apic + 'static>>> = Once::new();\n    }\n\n    // No races due to `_guard`, but use `current_racy` to avoid calling via the vtable.\n    // TODO: Find a better way to make `dyn PinCurrentCpu` easy to use?\n    let apic_instance = APIC_INSTANCE.get_on_cpu(crate::cpu::CpuId::current_racy());\n\n    // The APIC instance has already been initialized.\n    if let Some(apic) = apic_instance.get() {\n        // SAFETY: Accessing `&dyn Apic` is safe as long as we're running on the same CPU on which\n        // the APIC instance was created. The `get_on_cpu` method above ensures this.\n        return &**unsafe { apic.get() };\n    }\n\n    // Initialize the APIC instance now.\n    apic_instance.call_once(|| match APIC_TYPE.get().unwrap() {\n        ApicType::XApic(io_mem) => {\n            let mut xapic = xapic::XApic::new(io_mem).unwrap();\n            xapic.enable();\n            let version = xapic.version();\n            log::info!(\n                \"xAPIC ID:{:x}, Version:{:x}, Max LVT:{:x}\",\n                xapic.id(),\n                version & 0xff,\n                (version >> 16) & 0xff\n            );\n            ForceSyncSend(Box::new(xapic))\n        }\n        ApicType::X2Apic => {\n            let mut x2apic = x2apic::X2Apic::new().unwrap();\n            x2apic.enable();\n            let version = x2apic.version();\n            log::info!(\n                \"x2APIC ID:{:x}, Version:{:x}, Max LVT:{:x}\",\n                x2apic.id(),\n                version & 0xff,\n                (version >> 16) & 0xff\n            );\n            ForceSyncSend(Box::new(x2apic))\n        }\n    });\n\n    // We've initialized the APIC instance, so this `unwrap` cannot fail.\n    let apic = apic_instance.get().unwrap();\n    // SAFETY: Accessing `&dyn Apic` is safe as long as we're running on the same CPU on which the\n    // APIC instance was created. The initialization above ensures this.\n    &**unsafe { apic.get() }\n}",
+  "mir": "fn arch::kernel::apic::get_or_init(_1: &dyn cpu::id::current::PinCurrentCpu) -> &dyn arch::kernel::apic::Apic {\n    let mut _0: &dyn arch::kernel::apic::Apic;\n    let  _2: &spin::once::Once<arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>;\n    let mut _3: &cpu::local::CpuLocal<spin::once::Once<arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>, cpu::local::static_cpu_local::StaticStorage<spin::once::Once<arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>>>;\n    let mut _4: cpu::id::CpuId;\n    let mut _5: core::option::Option<&arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>;\n    let mut _6: isize;\n    let  _7: &arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>;\n    let  _8: &dyn arch::kernel::apic::Apic;\n    let  _9: &alloc::boxed::Box<dyn arch::kernel::apic::Apic>;\n    let  _10: &arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>;\n    let  _11: &arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>;\n    let mut _12: core::option::Option<&arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>;\n    let  _13: &dyn arch::kernel::apic::Apic;\n    let  _14: &alloc::boxed::Box<dyn arch::kernel::apic::Apic>;\n    let mut _15: alloc::boxed::Box<dyn arch::kernel::apic::Apic>;\n    let mut _16: alloc::boxed::Box<dyn arch::kernel::apic::Apic>;\n    let mut _17: *const dyn arch::kernel::apic::Apic;\n    let mut _18: *const dyn arch::kernel::apic::Apic;\n    debug _guard => _1;\n    debug apic_instance => _2;\n    debug apic => _7;\n    debug apic => _11;\n    bb0: {\n        StorageLive(_3);\n        _3 = {alloc344: &cpu::local::CpuLocal<spin::once::Once<arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>, cpu::local::static_cpu_local::StaticStorage<spin::once::Once<arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>>>};\n        StorageLive(_4);\n        _4 = cpu::id::current::<impl cpu::id::CpuId>::current_racy() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = cpu::local::CpuLocal::<spin::once::Once<arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>, cpu::local::static_cpu_local::StaticStorage<spin::once::Once<arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>>>::get_on_cpu(move _3, move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = spin::once::Once::<arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>::get(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = discriminant(_5);\n        switchInt(move _6) -> [1: bb4, 0: bb6, otherwise: bb12];\n    }\n    bb4: {\n        _7 = ((_5 as variant#1).0: &arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>);\n        StorageLive(_9);\n        _9 = arch::kernel::apic::get_or_init::ForceSyncSend::<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>::get(_7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _15 = (*_9);\n        _17 = ((_15.0: core::ptr::Unique<dyn arch::kernel::apic::Apic>).0: core::ptr::NonNull<dyn arch::kernel::apic::Apic>) as *const dyn arch::kernel::apic::Apic;\n        _8 = &(*_17);\n        _0 = _8;\n        StorageDead(_9);\n        StorageDead(_5);\n        goto -> bb11;\n    }\n    bb6: {\n        StorageDead(_5);\n        StorageLive(_10);\n        _10 = spin::once::Once::<arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>::call_once::<{closure@ostd/src/arch/x86/kernel/apic/mod.rs:76:29: 76:31}>(_2, ZeroSized: {closure@ostd/src/arch/x86/kernel/apic/mod.rs:76:29: 76:31}) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageLive(_12);\n        _12 = spin::once::Once::<arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>::get(_2) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _11 = core::option::Option::<&arch::kernel::apic::get_or_init::ForceSyncSend<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>>::unwrap(move _12) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_12);\n        StorageLive(_14);\n        _14 = arch::kernel::apic::get_or_init::ForceSyncSend::<alloc::boxed::Box<dyn arch::kernel::apic::Apic>>::get(_11) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _16 = (*_14);\n        _18 = ((_16.0: core::ptr::Unique<dyn arch::kernel::apic::Apic>).0: core::ptr::NonNull<dyn arch::kernel::apic::Apic>) as *const dyn arch::kernel::apic::Apic;\n        _13 = &(*_18);\n        _0 = _13;\n        StorageDead(_14);\n        goto -> bb11;\n    }\n    bb11: {\n        return;\n    }\n    bb12: {\n        unreachable;\n    }\n}\n",
+  "doc": " Returns a reference to the local APIC instance of the current CPU.\n\n The reference to the APIC instance will not outlive the given\n [`PinCurrentCpu`] guard and the APIC instance does not implement\n [`Sync`], so it is safe to assume that the APIC instance belongs\n to the current CPU. Note that interrupts are not disabled, so the\n APIC instance may be accessed concurrently by interrupt handlers.\n\n At the first time the function is called, the local APIC instance\n is initialized and enabled if it was not enabled beforehand.\n\n # Examples\n\n ```rust\n use ostd::{\n     arch::x86::kernel::apic,\n     task::disable_preempt,\n };\n\n let preempt_guard = disable_preempt();\n let apic = apic::get_or_init(&preempt_guard as _);\n\n let ticks = apic.timer_current_count();\n apic.set_timer_init_count(0);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

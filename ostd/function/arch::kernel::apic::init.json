@@ -1,0 +1,158 @@
+{
+  "name": "arch::kernel::apic::init",
+  "safe": true,
+  "callees": {
+    "arch::kernel::apic::x2apic::X2Apic::has_x2apic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::cmp::PartialOrd::le": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests less than or equal to (for `self` and `other`) and is used by the\n `<=` operator.\n\n # Examples\n\n ```\n assert_eq!(1.0 <= 1.0, true);\n assert_eq!(1.0 <= 2.0, true);\n assert_eq!(2.0 <= 1.0, false);\n ```\n",
+      "adt": {}
+    },
+    "log::max_level": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the current maximum log level.\n\n The [`log!`], [`error!`], [`warn!`], [`info!`], [`debug!`], and [`trace!`] macros check\n this value and discard any message logged at a higher level. The maximum\n log level is set by the [`set_max_level`] function.\n\n [`log!`]: macro.log.html\n [`error!`]: macro.error.html\n [`warn!`]: macro.warn.html\n [`info!`]: macro.info.html\n [`debug!`]: macro.debug.html\n [`trace!`]: macro.trace.html\n [`set_max_level`]: fn.set_max_level.html\n",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {}
+    },
+    "log::__private_api::loc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "log::__private_api::log": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    },
+    "arch::kernel::apic::xapic::XApic::has_xapic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "arch::kernel::apic::xapic::read_xapic_base_address": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads xAPIC base address from the MSR.\n\n # Safety\n\n The caller must ensure that xAPIC is present.\n",
+      "adt": {}
+    },
+    "io::io_mem::allocator::IoMemAllocatorBuilder::reserve": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reserves `range` from the allocator for sensitive MMIO with the specified cache policy.\n\n # Panics\n\n This function will panic if the specified range is not available.\n",
+      "adt": {
+        "core::ops::Range": "ImmutableAsArgument",
+        "mm::page_prop::CachePolicy": "ImmutableAsArgument",
+        "io::io_mem::allocator::IoMemAllocatorBuilder": "ImmutableAsArgument",
+        "io::io_mem::IoMem": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "log::Level": [
+      "Plain",
+      "Ref"
+    ],
+    "log::LevelFilter": [
+      "Ref",
+      "Plain"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ],
+    "core::panic::Location": [
+      "Ref"
+    ],
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "arch::kernel::apic::ApicType": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::Range": [
+      "Plain"
+    ],
+    "mm::page_prop::CachePolicy": [
+      "Plain"
+    ],
+    "io::io_mem::allocator::IoMemAllocatorBuilder": [
+      "Ref"
+    ],
+    "io::io_mem::IoMem": [
+      "Plain"
+    ]
+  },
+  "path": 1281,
+  "span": "ostd/src/arch/x86/kernel/apic/mod.rs:353:1: 372:2",
+  "src": "pub fn init(io_mem_builder: &IoMemAllocatorBuilder) -> Result<(), ApicInitError> {\n    if x2apic::X2Apic::has_x2apic() {\n        log::info!(\"x2APIC found!\");\n        APIC_TYPE.call_once(|| ApicType::X2Apic);\n        Ok(())\n    } else if xapic::XApic::has_xapic() {\n        log::info!(\"xAPIC found!\");\n        // SAFETY: xAPIC is present.\n        let base_address = unsafe { xapic::read_xapic_base_address() };\n        let io_mem = io_mem_builder.reserve(\n            base_address..(base_address + xapic::XAPIC_MMIO_SIZE),\n            crate::mm::CachePolicy::Uncacheable,\n        );\n        APIC_TYPE.call_once(|| ApicType::XApic(io_mem));\n        Ok(())\n    } else {\n        log::warn!(\"Neither x2APIC nor xAPIC found!\");\n        Err(ApicInitError::NoApic)\n    }\n}",
+  "mir": "fn arch::kernel::apic::init(_1: &io::io_mem::allocator::IoMemAllocatorBuilder) -> core::result::Result<(), arch::kernel::apic::ApicInitError> {\n    let mut _0: core::result::Result<(), arch::kernel::apic::ApicInitError>;\n    let mut _2: bool;\n    let  _3: log::Level;\n    let mut _4: bool;\n    let mut _5: &log::Level;\n    let mut _6: &log::LevelFilter;\n    let mut _7: bool;\n    let mut _8: &log::Level;\n    let mut _9: &log::LevelFilter;\n    let  _10: log::LevelFilter;\n    let  _11: ();\n    let mut _12: core::fmt::Arguments<'_>;\n    let  _13: &(&str, &str, &core::panic::Location<'_>);\n    let  _14: (&str, &str, &core::panic::Location<'_>);\n    let mut _15: &str;\n    let  _16: &core::panic::Location<'_>;\n    let  _17: &arch::kernel::apic::ApicType;\n    let mut _18: &spin::once::Once<arch::kernel::apic::ApicType>;\n    let mut _19: bool;\n    let  _20: log::Level;\n    let mut _21: bool;\n    let mut _22: &log::Level;\n    let mut _23: &log::LevelFilter;\n    let mut _24: bool;\n    let mut _25: &log::Level;\n    let mut _26: &log::LevelFilter;\n    let  _27: log::LevelFilter;\n    let  _28: ();\n    let mut _29: core::fmt::Arguments<'_>;\n    let  _30: &(&str, &str, &core::panic::Location<'_>);\n    let  _31: (&str, &str, &core::panic::Location<'_>);\n    let mut _32: &str;\n    let  _33: &core::panic::Location<'_>;\n    let  _34: usize;\n    let  _35: io::io_mem::IoMem<io::io_mem::Sensitive>;\n    let mut _36: core::ops::Range<usize>;\n    let mut _37: usize;\n    let mut _38: (usize, bool);\n    let mut _39: mm::page_prop::CachePolicy;\n    let  _40: &arch::kernel::apic::ApicType;\n    let mut _41: &spin::once::Once<arch::kernel::apic::ApicType>;\n    let mut _42: {closure@ostd/src/arch/x86/kernel/apic/mod.rs:366:29: 366:31};\n    let  _43: log::Level;\n    let mut _44: bool;\n    let mut _45: &log::Level;\n    let mut _46: &log::LevelFilter;\n    let mut _47: bool;\n    let mut _48: &log::Level;\n    let mut _49: &log::LevelFilter;\n    let  _50: log::LevelFilter;\n    let  _51: ();\n    let mut _52: core::fmt::Arguments<'_>;\n    let  _53: &(&str, &str, &core::panic::Location<'_>);\n    let  _54: (&str, &str, &core::panic::Location<'_>);\n    let mut _55: &str;\n    let  _56: &core::panic::Location<'_>;\n    debug io_mem_builder => _1;\n    debug lvl => _3;\n    debug lvl => _20;\n    debug base_address => _34;\n    debug io_mem => _35;\n    debug lvl => _43;\n    bb0: {\n        StorageLive(_2);\n        _2 = arch::kernel::apic::x2apic::X2Apic::has_x2apic() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb15, otherwise: bb2];\n    }\n    bb2: {\n        _3 = log::Level::Info;\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &_3;\n        StorageLive(_6);\n        _6 = arch::kernel::apic::init::promoted[0];\n        _4 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _5, move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _4) -> [0: bb12, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &_3;\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = log::max_level() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _9 = &_10;\n        _7 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _8, move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        switchInt(move _7) -> [0: bb11, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_12);\n        _12 = core::fmt::Arguments::<'_>::from_str(\"x2APIC found!\") -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = \"ostd::arch::kernel::apic\";\n        _16 = log::__private_api::loc() -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _14 = (move _15, \"ostd::arch::kernel::apic\", _16);\n        StorageDead(_15);\n        _13 = &_14;\n        _11 = log::__private_api::log::<'_, (), log::__private_api::GlobalLogger>(log::__private_api::GlobalLogger, move _12, _3, _13, ()) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_12);\n        StorageDead(_14);\n        goto -> bb13;\n    }\n    bb11: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_8);\n        goto -> bb13;\n    }\n    bb12: {\n        StorageDead(_6);\n        StorageDead(_5);\n        goto -> bb13;\n    }\n    bb13: {\n        StorageDead(_7);\n        StorageDead(_4);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = {alloc327: &spin::once::Once<arch::kernel::apic::ApicType>};\n        _17 = spin::once::Once::<arch::kernel::apic::ApicType>::call_once::<{closure@ostd/src/arch/x86/kernel/apic/mod.rs:356:29: 356:31}>(move _18, ZeroSized: {closure@ostd/src/arch/x86/kernel/apic/mod.rs:356:29: 356:31}) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_18);\n        StorageDead(_17);\n        _0 = core::result::Result::Ok(());\n        goto -> bb46;\n    }\n    bb15: {\n        StorageLive(_19);\n        _19 = arch::kernel::apic::xapic::XApic::has_xapic() -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        switchInt(move _19) -> [0: bb33, otherwise: bb17];\n    }\n    bb17: {\n        _20 = log::Level::Info;\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = &_20;\n        StorageLive(_23);\n        _23 = arch::kernel::apic::init::promoted[1];\n        _21 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _22, move _23) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        switchInt(move _21) -> [0: bb27, otherwise: bb19];\n    }\n    bb19: {\n        StorageDead(_23);\n        StorageDead(_22);\n        StorageLive(_24);\n        StorageLive(_25);\n        _25 = &_20;\n        StorageLive(_26);\n        StorageLive(_27);\n        _27 = log::max_level() -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        _26 = &_27;\n        _24 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _25, move _26) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        switchInt(move _24) -> [0: bb26, otherwise: bb22];\n    }\n    bb22: {\n        StorageDead(_27);\n        StorageDead(_26);\n        StorageDead(_25);\n        StorageLive(_29);\n        _29 = core::fmt::Arguments::<'_>::from_str(\"xAPIC found!\") -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageLive(_31);\n        StorageLive(_32);\n        _32 = \"ostd::arch::kernel::apic\";\n        _33 = log::__private_api::loc() -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        _31 = (move _32, \"ostd::arch::kernel::apic\", _33);\n        StorageDead(_32);\n        _30 = &_31;\n        _28 = log::__private_api::log::<'_, (), log::__private_api::GlobalLogger>(log::__private_api::GlobalLogger, move _29, _20, _30, ()) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_29);\n        StorageDead(_31);\n        goto -> bb28;\n    }\n    bb26: {\n        StorageDead(_27);\n        StorageDead(_26);\n        StorageDead(_25);\n        goto -> bb28;\n    }\n    bb27: {\n        StorageDead(_23);\n        StorageDead(_22);\n        goto -> bb28;\n    }\n    bb28: {\n        StorageDead(_24);\n        StorageDead(_21);\n        _34 = arch::kernel::apic::xapic::read_xapic_base_address() -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        StorageLive(_35);\n        StorageLive(_36);\n        StorageLive(_37);\n        _38 = CheckedAdd(_34, arch::kernel::apic::xapic::XAPIC_MMIO_SIZE);\n        assert(!move (_38.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _34, arch::kernel::apic::xapic::XAPIC_MMIO_SIZE) -> [success: bb30, unwind unreachable];\n    }\n    bb30: {\n        _37 = move (_38.0: usize);\n        _36 = Range(_34, move _37);\n        StorageDead(_37);\n        StorageLive(_39);\n        _39 = mm::page_prop::CachePolicy::Uncacheable;\n        _35 = io::io_mem::allocator::IoMemAllocatorBuilder::reserve(_1, move _36, move _39) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        StorageDead(_39);\n        StorageDead(_36);\n        StorageLive(_40);\n        StorageLive(_41);\n        _41 = {alloc327: &spin::once::Once<arch::kernel::apic::ApicType>};\n        StorageLive(_42);\n        _42 = {closure@ostd/src/arch/x86/kernel/apic/mod.rs:366:29: 366:31}(move _35);\n        _40 = spin::once::Once::<arch::kernel::apic::ApicType>::call_once::<{closure@ostd/src/arch/x86/kernel/apic/mod.rs:366:29: 366:31}>(move _41, move _42) -> [return: bb32, unwind unreachable];\n    }\n    bb32: {\n        StorageDead(_42);\n        StorageDead(_41);\n        StorageDead(_40);\n        _0 = core::result::Result::Ok(());\n        StorageDead(_35);\n        goto -> bb45;\n    }\n    bb33: {\n        _43 = log::Level::Warn;\n        StorageLive(_44);\n        StorageLive(_45);\n        _45 = &_43;\n        StorageLive(_46);\n        _46 = arch::kernel::apic::init::promoted[2];\n        _44 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _45, move _46) -> [return: bb34, unwind unreachable];\n    }\n    bb34: {\n        switchInt(move _44) -> [0: bb43, otherwise: bb35];\n    }\n    bb35: {\n        StorageDead(_46);\n        StorageDead(_45);\n        StorageLive(_47);\n        StorageLive(_48);\n        _48 = &_43;\n        StorageLive(_49);\n        StorageLive(_50);\n        _50 = log::max_level() -> [return: bb36, unwind unreachable];\n    }\n    bb36: {\n        _49 = &_50;\n        _47 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _48, move _49) -> [return: bb37, unwind unreachable];\n    }\n    bb37: {\n        switchInt(move _47) -> [0: bb42, otherwise: bb38];\n    }\n    bb38: {\n        StorageDead(_50);\n        StorageDead(_49);\n        StorageDead(_48);\n        StorageLive(_52);\n        _52 = core::fmt::Arguments::<'_>::from_str(\"Neither x2APIC nor xAPIC found!\") -> [return: bb39, unwind unreachable];\n    }\n    bb39: {\n        StorageLive(_54);\n        StorageLive(_55);\n        _55 = \"ostd::arch::kernel::apic\";\n        _56 = log::__private_api::loc() -> [return: bb40, unwind unreachable];\n    }\n    bb40: {\n        _54 = (move _55, \"ostd::arch::kernel::apic\", _56);\n        StorageDead(_55);\n        _53 = &_54;\n        _51 = log::__private_api::log::<'_, (), log::__private_api::GlobalLogger>(log::__private_api::GlobalLogger, move _52, _43, _53, ()) -> [return: bb41, unwind unreachable];\n    }\n    bb41: {\n        StorageDead(_52);\n        StorageDead(_54);\n        goto -> bb44;\n    }\n    bb42: {\n        StorageDead(_50);\n        StorageDead(_49);\n        StorageDead(_48);\n        goto -> bb44;\n    }\n    bb43: {\n        StorageDead(_46);\n        StorageDead(_45);\n        goto -> bb44;\n    }\n    bb44: {\n        StorageDead(_47);\n        StorageDead(_44);\n        _0 = core::result::Result::Err(arch::kernel::apic::ApicInitError::NoApic);\n        goto -> bb45;\n    }\n    bb45: {\n        StorageDead(_19);\n        goto -> bb46;\n    }\n    bb46: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

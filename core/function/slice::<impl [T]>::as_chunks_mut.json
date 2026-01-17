@@ -1,0 +1,65 @@
+{
+  "name": "slice::<impl [T]>::as_chunks_mut",
+  "safe": true,
+  "callees": {
+    "fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {
+        "fmt::Arguments": "ImmutableAsArgument"
+      }
+    },
+    "slice::<impl [T]>::split_at_mut_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable slice into two at an index, without doing bounds checking.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n For a safe alternative see [`split_at_mut`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used. The caller has to ensure that\n `0 <= mid <= self.len()`.\n\n [`split_at_mut`]: slice::split_at_mut\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let mut v = [1, 0, 3, 0, 5, 6];\n // scoped to restrict the lifetime of the borrows\n unsafe {\n     let (left, right) = v.split_at_mut_unchecked(2);\n     assert_eq!(left, [1, 0]);\n     assert_eq!(right, [3, 0, 5, 6]);\n     left[1] = 2;\n     right[1] = 4;\n }\n assert_eq!(v, [1, 2, 3, 4, 5, 6]);\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_chunks_unchecked_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Splits the slice into a slice of `N`-element arrays,\n assuming that there's no remainder.\n\n This is the inverse operation to [`as_flattened_mut`].\n\n [`as_flattened_mut`]: slice::as_flattened_mut\n\n As this is `unsafe`, consider whether you could use [`as_chunks_mut`] or\n [`as_rchunks_mut`] instead, perhaps via something like\n `if let (chunks, []) = slice.as_chunks_mut()` or\n `let (chunks, []) = slice.as_chunks_mut() else { unreachable!() };`.\n\n [`as_chunks_mut`]: slice::as_chunks_mut\n [`as_rchunks_mut`]: slice::as_rchunks_mut\n\n # Safety\n\n This may only be called when\n - The slice splits exactly into `N`-element chunks (aka `self.len() % N == 0`).\n - `N != 0`.\n\n # Examples\n\n ```\n let slice: &mut [char] = &mut ['l', 'o', 'r', 'e', 'm', '!'];\n let chunks: &mut [[char; 1]] =\n     // SAFETY: 1-element chunks never have remainder\n     unsafe { slice.as_chunks_unchecked_mut() };\n chunks[0] = ['L'];\n assert_eq!(chunks, &[['L'], ['o'], ['r'], ['e'], ['m'], ['!']]);\n let chunks: &mut [[char; 3]] =\n     // SAFETY: The slice length (6) is a multiple of 3\n     unsafe { slice.as_chunks_unchecked_mut() };\n chunks[1] = ['a', 'x', '?'];\n assert_eq!(slice, &['L', 'o', 'r', 'a', 'x', '?']);\n\n // These would be unsound:\n // let chunks: &[[_; 5]] = slice.as_chunks_unchecked_mut() // The slice length is not a multiple of 5\n // let chunks: &[[_; 0]] = slice.as_chunks_unchecked_mut() // Zero-length chunks are never allowed\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 1230,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:1551:5: 1561:6",
+  "src": "pub const fn as_chunks_mut<const N: usize>(&mut self) -> (&mut [[T; N]], &mut [T]) {\n        assert!(N != 0, \"chunk size must be non-zero\");\n        let len_rounded_down = self.len() / N * N;\n        // SAFETY: The rounded-down value is always the same or smaller than the\n        // original length, and thus must be in-bounds of the slice.\n        let (multiple_of_n, remainder) = unsafe { self.split_at_mut_unchecked(len_rounded_down) };\n        // SAFETY: We already panicked for zero, and ensured by construction\n        // that the length of the subslice is a multiple of N.\n        let array_slice = unsafe { multiple_of_n.as_chunks_unchecked_mut() };\n        (array_slice, remainder)\n    }",
+  "mir": "fn slice::<impl [T]>::as_chunks_mut(_1: &mut [T]) -> (&mut [[T; N]], &mut [T]) {\n    let mut _0: (&mut [[T; N]], &mut [T]);\n    let mut _2: bool;\n    let  _3: !;\n    let mut _4: fmt::Arguments<'_>;\n    let  _5: usize;\n    let mut _6: usize;\n    let mut _7: usize;\n    let mut _8: &[T];\n    let mut _9: bool;\n    let mut _10: (usize, bool);\n    let  _11: &mut [T];\n    let  _12: &mut [T];\n    let mut _13: (&mut [T], &mut [T]);\n    let mut _14: &mut [[T; N]];\n    debug self => _1;\n    debug len_rounded_down => _5;\n    debug multiple_of_n => _11;\n    debug remainder => _12;\n    debug array_slice => _14;\n    bb0: {\n        StorageLive(_2);\n        _2 = Ne(N, 0_usize);\n        switchInt(move _2) -> [0: bb1, otherwise: bb3];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = fmt::Arguments::<'_>::from_str(\"chunk size must be non-zero\") -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = panicking::panic_fmt(move _4) -> unwind unreachable;\n    }\n    bb3: {\n        StorageDead(_2);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &(*_1);\n        _7 = PtrMetadata(move _8);\n        StorageDead(_8);\n        _9 = Eq(N, 0_usize);\n        assert(!move _9, \"attempt to divide `{}` by zero\", _7) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _6 = Div(move _7, N);\n        StorageDead(_7);\n        _10 = CheckedMul(_6, N);\n        assert(!move (_10.1: bool), \"attempt to compute `{} * {}`, which would overflow\", move _6, N) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _5 = move (_10.0: usize);\n        StorageDead(_6);\n        StorageLive(_13);\n        _13 = slice::<impl [T]>::split_at_mut_unchecked(_1, _5) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _11 = move (_13.0: &mut [T]);\n        _12 = move (_13.1: &mut [T]);\n        StorageDead(_13);\n        _14 = slice::<impl [T]>::as_chunks_unchecked_mut::<N>(_11) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _0 = (_14, _12);\n        return;\n    }\n}\n",
+  "doc": " Splits the slice into a slice of `N`-element arrays,\n starting at the beginning of the slice,\n and a remainder slice with length strictly less than `N`.\n\n The remainder is meaningful in the division sense.  Given\n `let (chunks, remainder) = slice.as_chunks_mut()`, then:\n - `chunks.len()` equals `slice.len() / N`,\n - `remainder.len()` equals `slice.len() % N`, and\n - `slice.len()` equals `chunks.len() * N + remainder.len()`.\n\n You can flatten the chunks back into a slice-of-`T` with [`as_flattened_mut`].\n\n [`as_flattened_mut`]: slice::as_flattened_mut\n\n # Panics\n\n Panics if `N` is zero.\n\n Note that this check is against a const generic parameter, not a runtime\n value, and thus a particular monomorphization will either always panic\n or it will never panic.\n\n # Examples\n\n ```\n let v = &mut [0, 0, 0, 0, 0];\n let mut count = 1;\n\n let (chunks, remainder) = v.as_chunks_mut();\n remainder[0] = 9;\n for chunk in chunks {\n     *chunk = [count; 2];\n     count += 1;\n }\n assert_eq!(v, &[1, 1, 2, 2, 9]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

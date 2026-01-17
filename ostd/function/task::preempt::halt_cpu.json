@@ -1,0 +1,93 @@
+{
+  "name": "task::preempt::halt_cpu",
+  "safe": true,
+  "callees": {
+    "task::atomic_mode::might_sleep": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Marks a function as one that might sleep.\n\n This function will panic if it is executed in atomic mode.\n",
+      "adt": {}
+    },
+    "irq::guard::disable_local": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disables all IRQs on the current CPU (i.e., locally).\n\n This function returns a guard object, which will automatically enable local IRQs again when\n it is dropped. This function works correctly even when it is called in a _nested_ way.\n The local IRQs shall only be re-enabled when the most outer guard is dropped.\n\n This function can play nicely with [`SpinLock`] as the type uses this function internally.\n One can invoke this function even after acquiring a spin lock. And the reversed order is also ok.\n\n [`SpinLock`]: crate::sync::SpinLock\n\n # Example\n\n ```rust\n use ostd::irq;\n\n {\n     let _ = irq::disable_local();\n     todo!(\"do something when irqs are disabled\");\n }\n ```\n",
+      "adt": {
+        "irq::guard::DisabledLocalIrqGuard": "Constructor"
+      }
+    },
+    "task::preempt::cpu_local::need_preempt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::mem::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disposes of a value.\n\n This effectively does nothing for types which implement `Copy`, e.g.\n integers. Such values are copied and _then_ moved into the function, so the\n value persists after this function call.\n\n This function is not magic; it is literally defined as\n\n ```\n pub fn drop<T>(_x: T) {}\n ```\n\n Because `_x` is moved into the function, it is automatically [dropped][drop] before\n the function returns.\n\n [drop]: Drop\n\n # Examples\n\n Basic usage:\n\n ```\n let v = vec![1, 2, 3];\n\n drop(v); // explicitly drop the vector\n ```\n\n Since [`RefCell`] enforces the borrow rules at runtime, `drop` can\n release a [`RefCell`] borrow:\n\n ```\n use std::cell::RefCell;\n\n let x = RefCell::new(1);\n\n let mut mutable_borrow = x.borrow_mut();\n *mutable_borrow = 1;\n\n drop(mutable_borrow); // relinquish the mutable borrow on this slot\n\n let borrow = x.borrow();\n println!(\"{}\", *borrow);\n ```\n\n Integers and other types implementing [`Copy`] are unaffected by `drop`.\n\n ```\n # #![allow(dropping_copy_types)]\n #[derive(Copy, Clone)]\n struct Foo(u8);\n\n let x = 1;\n let y = Foo(2);\n drop(x); // a copy of `x` is moved and dropped\n drop(y); // a copy of `y` is moved and dropped\n\n println!(\"x: {}, y: {}\", x, y.0); // still available\n ```\n\n [`RefCell`]: crate::cell::RefCell\n",
+      "adt": {}
+    },
+    "core::mem::forget": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes ownership and \"forgets\" about the value **without running its destructor**.\n\n Any resources the value manages, such as heap memory or a file handle, will linger\n forever in an unreachable state. However, it does not guarantee that pointers\n to this memory will remain valid.\n\n * If you want to leak memory, see [`Box::leak`].\n * If you want to obtain a raw pointer to the memory, see [`Box::into_raw`].\n * If you want to dispose of a value properly, running its destructor, see\n   [`mem::drop`].\n\n # Safety\n\n `forget` is not marked as `unsafe`, because Rust's safety guarantees\n do not include a guarantee that destructors will always run. For example,\n a program can create a reference cycle using [`Rc`][rc], or call\n [`process::exit`][exit] to exit without running destructors. Thus, allowing\n `mem::forget` from safe code does not fundamentally change Rust's safety\n guarantees.\n\n That said, leaking resources such as memory or I/O objects is usually undesirable.\n The need comes up in some specialized use cases for FFI or unsafe code, but even\n then, [`ManuallyDrop`] is typically preferred.\n\n Because forgetting a value is allowed, any `unsafe` code you write must\n allow for this possibility. You cannot return a value and expect that the\n caller will necessarily run the value's destructor.\n\n [rc]: ../../std/rc/struct.Rc.html\n [exit]: ../../std/process/fn.exit.html\n\n # Examples\n\n The canonical safe use of `mem::forget` is to circumvent a value's destructor\n implemented by the `Drop` trait. For example, this will leak a `File`, i.e. reclaim\n the space taken by the variable but never close the underlying system resource:\n\n ```no_run\n use std::mem;\n use std::fs::File;\n\n let file = File::open(\"foo.txt\").unwrap();\n mem::forget(file);\n ```\n\n This is useful when the ownership of the underlying resource was previously\n transferred to code outside of Rust, for example by transmitting the raw\n file descriptor to C code.\n\n # Relationship with `ManuallyDrop`\n\n While `mem::forget` can also be used to transfer *memory* ownership, doing so is error-prone.\n [`ManuallyDrop`] should be used instead. Consider, for example, this code:\n\n ```\n use std::mem;\n\n let mut v = vec![65, 122];\n // Build a `String` using the contents of `v`\n let s = unsafe { String::from_raw_parts(v.as_mut_ptr(), v.len(), v.capacity()) };\n // leak `v` because its memory is now managed by `s`\n mem::forget(v);  // ERROR - v is invalid and must not be passed to a function\n assert_eq!(s, \"Az\");\n // `s` is implicitly dropped and its memory deallocated.\n ```\n\n There are two issues with the above example:\n\n * If more code were added between the construction of `String` and the invocation of\n   `mem::forget()`, a panic within it would cause a double free because the same memory\n   is handled by both `v` and `s`.\n * After calling `v.as_mut_ptr()` and transmitting the ownership of the data to `s`,\n   the `v` value is invalid. Even when a value is just moved to `mem::forget` (which won't\n   inspect it), some types have strict requirements on their values that\n   make them invalid when dangling or no longer owned. Using invalid values in any\n   way, including passing them to or returning them from functions, constitutes\n   undefined behavior and may break the assumptions made by the compiler.\n\n Switching to `ManuallyDrop` avoids both issues:\n\n ```\n use std::mem::ManuallyDrop;\n\n let v = vec![65, 122];\n // Before we disassemble `v` into its raw parts, make sure it\n // does not get dropped!\n let mut v = ManuallyDrop::new(v);\n // Now disassemble `v`. These operations cannot panic, so there cannot be a leak.\n let (ptr, len, cap) = (v.as_mut_ptr(), v.len(), v.capacity());\n // Finally, build a `String`.\n let s = unsafe { String::from_raw_parts(ptr, len, cap) };\n assert_eq!(s, \"Az\");\n // `s` is implicitly dropped and its memory deallocated.\n ```\n\n `ManuallyDrop` robustly prevents double-free because we disable `v`'s destructor\n before doing anything else. `mem::forget()` doesn't allow this because it consumes its\n argument, forcing us to call it only after extracting anything we need from `v`. Even\n if a panic were introduced between construction of `ManuallyDrop` and building the\n string (which cannot happen in the code as shown), it would result in a leak and not a\n double free. In other words, `ManuallyDrop` errs on the side of leaking instead of\n erring on the side of (double-)dropping.\n\n Also, `ManuallyDrop` prevents us from having to \"touch\" `v` after transferring the\n ownership to `s` — the final step of interacting with `v` to dispose of it without\n running its destructor is entirely avoided.\n\n [`Box`]: ../../std/boxed/struct.Box.html\n [`Box::leak`]: ../../std/boxed/struct.Box.html#method.leak\n [`Box::into_raw`]: ../../std/boxed/struct.Box.html#method.into_raw\n [`mem::drop`]: drop\n [ub]: ../../reference/behavior-considered-undefined.html\n",
+      "adt": {}
+    },
+    "arch::irq::ops::enable_local_and_halt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Enables local IRQs and halts the CPU to wait for interrupts.\n\n This method guarantees that no interrupts can occur in the middle. In other words, IRQs must\n either have been processed before this method is called, or they must wake the CPU up from the\n halting state.\n",
+      "adt": {}
+    },
+    "task::scheduler::might_preempt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Preempts the current task.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "irq::guard::DisabledLocalIrqGuard": [
+      "Plain"
+    ]
+  },
+  "path": 2784,
+  "span": "ostd/src/task/preempt/mod.rs:23:1: 37:2",
+  "src": "pub fn halt_cpu() {\n    crate::task::atomic_mode::might_sleep();\n\n    let irq_guard = crate::irq::disable_local();\n\n    if cpu_local::need_preempt() {\n        drop(irq_guard);\n    } else {\n        core::mem::forget(irq_guard);\n        // IRQs were previously enabled (checked by `might_sleep`). So we can re-enable them now.\n        crate::arch::irq::enable_local_and_halt();\n    }\n\n    super::scheduler::might_preempt();\n}",
+  "mir": "fn task::preempt::halt_cpu() -> () {\n    let mut _0: ();\n    let  _1: ();\n    let  _2: irq::guard::DisabledLocalIrqGuard;\n    let mut _3: bool;\n    let  _4: ();\n    let  _5: ();\n    let  _6: ();\n    let  _7: ();\n    debug irq_guard => _2;\n    bb0: {\n        _1 = task::atomic_mode::might_sleep() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = irq::guard::disable_local() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_3);\n        _3 = task::preempt::cpu_local::need_preempt() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _3) -> [0: bb6, otherwise: bb4];\n    }\n    bb4: {\n        _4 = core::mem::drop::<irq::guard::DisabledLocalIrqGuard>(_2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        goto -> bb8;\n    }\n    bb6: {\n        _5 = core::mem::forget::<irq::guard::DisabledLocalIrqGuard>(_2) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _6 = arch::irq::ops::enable_local_and_halt() -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_3);\n        _7 = task::scheduler::might_preempt() -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        return;\n    }\n}\n",
+  "doc": " Halts the CPU until interrupts if no preemption is required.\n\n This function will return if:\n  - preemption is required when calling this function,\n  - preemption is required during halting the CPU, or\n  - interrupts occur during halting the CPU.\n\n This function will perform preemption before returning if\n preemption is required.\n\n # Panics\n\n This function will panic if it is called in the atomic mode\n ([`crate::task::atomic_mode`]).\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

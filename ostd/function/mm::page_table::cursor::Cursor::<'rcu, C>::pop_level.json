@@ -1,0 +1,74 @@
+{
+  "name": "mm::page_table::cursor::Cursor::<'rcu, C>::pop_level",
+  "safe": true,
+  "callees": {
+    "core::option::Option::<T>::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes the value out of the option, leaving a [`None`] in its place.\n\n # Examples\n\n ```\n let mut x = Some(2);\n let y = x.take();\n assert_eq!(x, None);\n assert_eq!(y, Some(2));\n\n let mut x: Option<u32> = None;\n let y = x.take();\n assert_eq!(x, None);\n assert_eq!(y, None);\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::expect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n # Panics\n\n Panics if the value is a [`None`] with a custom panic message provided by\n `msg`.\n\n # Examples\n\n ```\n let x = Some(\"value\");\n assert_eq!(x.expect(\"fruits are healthy\"), \"value\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n x.expect(\"fruits are healthy\"); // panics with `fruits are healthy`\n ```\n\n # Recommended Message Style\n\n We recommend that `expect` messages are used to describe the reason you\n _expect_ the `Option` should be `Some`.\n\n ```should_panic\n # let slice: &[u8] = &[];\n let item = slice.get(0)\n     .expect(\"slice should not be empty\");\n ```\n\n **Hint**: If you're having trouble remembering how to phrase expect\n error messages remember to focus on the word \"should\" as in \"env\n variable should be set by blah\" or \"the given binary should be available\n and executable by the current user\".\n\n For more detail on expect message styles and the reasoning behind our\n recommendation please refer to the section on [\"Common Message\n Styles\"](../../std/error/index.html#common-message-styles) in the [`std::error`](../../std/error/index.html) module docs.\n",
+      "adt": {}
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::page_table::cursor::Cursor": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "MutRef",
+      "Plain"
+    ],
+    "mm::page_table::node::PageTableGuard": [
+      "Plain"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain"
+    ]
+  },
+  "path": 2355,
+  "span": "ostd/src/mm/page_table/cursor/mod.rs:327:5: 335:6",
+  "src": "fn pop_level(&mut self) {\n        let taken = self.path[self.level as usize - 1]\n            .take()\n            .expect(\"Popping a level without a lock\");\n        let _ = ManuallyDrop::new(taken);\n\n        debug_assert!(self.level < self.guard_level);\n        self.level += 1;\n    }",
+  "mir": "fn mm::page_table::cursor::Cursor::<'rcu, C>::pop_level(_1: &mut mm::page_table::cursor::Cursor<'_, C>) -> () {\n    let mut _0: ();\n    let  _2: mm::page_table::node::PageTableGuard<'_, C>;\n    let mut _3: core::option::Option<mm::page_table::node::PageTableGuard<'_, C>>;\n    let mut _4: &mut core::option::Option<mm::page_table::node::PageTableGuard<'_, C>>;\n    let  _5: usize;\n    let mut _6: usize;\n    let mut _7: u8;\n    let mut _8: (usize, bool);\n    let mut _9: bool;\n    let mut _10: &str;\n    let mut _11: core::mem::ManuallyDrop<mm::page_table::node::PageTableGuard<'_, C>>;\n    let mut _12: bool;\n    let mut _13: u8;\n    let mut _14: u8;\n    let mut _15: !;\n    let mut _16: (u8, bool);\n    debug self => _1;\n    debug taken => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = ((*_1).2: u8);\n        _6 = move _7 as usize;\n        StorageDead(_7);\n        _8 = CheckedSub(_6, 1_usize);\n        assert(!move (_8.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _6, 1_usize) -> [success: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = move (_8.0: usize);\n        StorageDead(_6);\n        _9 = Lt(_5, 4_usize);\n        assert(move _9, \"index out of bounds: the length is {} but the index is {}\", 4_usize, _5) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = &mut ((*_1).0: [core::option::Option<mm::page_table::node::PageTableGuard<'_, C>>; 4])[_5];\n        _3 = core::option::Option::<mm::page_table::node::PageTableGuard<'_, C>>::take(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageLive(_10);\n        _10 = \"Popping a level without a lock\";\n        _2 = core::option::Option::<mm::page_table::node::PageTableGuard<'_, C>>::expect(move _3, move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        StorageDead(_3);\n        StorageDead(_5);\n        StorageLive(_11);\n        _11 = core::mem::ManuallyDrop::<mm::page_table::node::PageTableGuard<'_, C>>::new(_2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = ((*_1).2: u8);\n        StorageLive(_14);\n        _14 = ((*_1).3: u8);\n        _12 = Lt(move _13, move _14);\n        switchInt(move _12) -> [0: bb7, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_12);\n        _16 = CheckedAdd(((*_1).2: u8), 1_u8);\n        assert(!move (_16.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).2: u8), 1_u8) -> [success: bb8, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_14);\n        StorageDead(_13);\n        _15 = core::panicking::panic(\"assertion failed: self.level < self.guard_level\") -> unwind unreachable;\n    }\n    bb8: {\n        ((*_1).2: u8) = move (_16.0: u8);\n        return;\n    }\n}\n",
+  "doc": " Goes up a level.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

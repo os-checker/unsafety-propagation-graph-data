@@ -1,0 +1,33 @@
+{
+  "name": "slice::memchr::memchr_aligned",
+  "safe": true,
+  "callees": {
+    "slice::memchr::memchr_aligned::runtime": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 16632,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/memchr.rs:51:1: 107:2",
+  "src": "const fn memchr_aligned(x: u8, text: &[u8]) -> Option<usize> {\n    // The runtime version behaves the same as the compiletime version, it's\n    // just more optimized.\n    const_eval_select!(\n        @capture { x: u8, text: &[u8] } -> Option<usize>:\n        if const {\n            memchr_naive(x, text)\n        } else {\n            // Scan for a single byte value by reading two `usize` words at a time.\n            //\n            // Split `text` in three parts\n            // - unaligned initial part, before the first word aligned address in text\n            // - body, scan by 2 words at a time\n            // - the last remaining part, < 2 word size\n\n            // search up to an aligned boundary\n            let len = text.len();\n            let ptr = text.as_ptr();\n            let mut offset = ptr.align_offset(USIZE_BYTES);\n\n            if offset > 0 {\n                offset = offset.min(len);\n                let slice = &text[..offset];\n                if let Some(index) = memchr_naive(x, slice) {\n                    return Some(index);\n                }\n            }\n\n            // search the body of the text\n            let repeated_x = usize::repeat_u8(x);\n            while offset <= len - 2 * USIZE_BYTES {\n                // SAFETY: the while's predicate guarantees a distance of at least 2 * usize_bytes\n                // between the offset and the end of the slice.\n                unsafe {\n                    let u = *(ptr.add(offset) as *const usize);\n                    let v = *(ptr.add(offset + USIZE_BYTES) as *const usize);\n\n                    // break if there is a matching byte\n                    let zu = contains_zero_byte(u ^ repeated_x);\n                    let zv = contains_zero_byte(v ^ repeated_x);\n                    if zu || zv {\n                        break;\n                    }\n                }\n                offset += USIZE_BYTES * 2;\n            }\n\n            // Find the byte after the point the body loop stopped.\n            // FIXME(const-hack): Use `?` instead.\n            // FIXME(const-hack, fee1-dead): use range slicing\n            let slice =\n            // SAFETY: offset is within bounds\n                unsafe { super::from_raw_parts(text.as_ptr().add(offset), text.len() - offset) };\n            if let Some(i) = memchr_naive(x, slice) { Some(offset + i) } else { None }\n        }\n    )\n}",
+  "mir": "fn slice::memchr::memchr_aligned(_1: u8, _2: &[u8]) -> option::Option<usize> {\n    let mut _0: option::Option<usize>;\n    let mut _3: (u8, &[u8]);\n    debug x => _1;\n    debug text => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = (_1, _2);\n        _0 = slice::memchr::memchr_aligned::runtime(move (_3.0: u8), move (_3.1: &[u8])) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "<slice::iter::SplitMut<'a, T, P> as slice::iter::SplitIter>::finish",
+  "safe": true,
+  "callees": {
+    "mem::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Replaces `dest` with the default value of `T`, returning the previous `dest` value.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a passed value instead of the default value, see [`replace`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::take(&mut v);\n assert_eq!(vec![1, 2], old_v);\n assert!(v.is_empty());\n ```\n\n `take` allows taking ownership of a struct field by replacing it with an \"empty\" value.\n Without `take` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let buf = self.buf;\n         self.buf = Vec::new();\n         buf\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so it can't even clone and reset\n `self.buf`. But `take` can be used to disassociate the original value of `self.buf` from\n `self`, allowing it to be returned:\n\n ```\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         mem::take(&mut self.buf)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf.len(), 2);\n\n assert_eq!(buffer.get_and_reset(), vec![0, 1]);\n assert_eq!(buffer.buf.len(), 0);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::SplitMut": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 16603,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:709:5: 716:6",
+  "src": "fn finish(&mut self) -> Option<&'a mut [T]> {\n        if self.finished {\n            None\n        } else {\n            self.finished = true;\n            Some(mem::take(&mut self.v))\n        }\n    }",
+  "mir": "fn <slice::iter::SplitMut<'a, T, P> as slice::iter::SplitIter>::finish(_1: &mut slice::iter::SplitMut<'_, T, P>) -> option::Option<&mut [T]> {\n    let mut _0: option::Option<&mut [T]>;\n    let mut _2: bool;\n    let mut _3: &mut [T];\n    let mut _4: &mut &mut [T];\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = ((*_1).2: bool);\n        switchInt(move _2) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        _0 = option::Option::None;\n        goto -> bb4;\n    }\n    bb2: {\n        ((*_1).2: bool) = true;\n        _4 = &mut ((*_1).0: &mut [T]);\n        _3 = mem::take::<&mut [T]>(_4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _0 = option::Option::Some(_3);\n        goto -> bb4;\n    }\n    bb4: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

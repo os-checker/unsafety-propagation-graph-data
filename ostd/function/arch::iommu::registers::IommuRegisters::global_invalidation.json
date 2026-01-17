@@ -1,0 +1,70 @@
+{
+  "name": "arch::iommu::registers::IommuRegisters::global_invalidation",
+  "safe": true,
+  "callees": {
+    "volatile::VolatileRef::<'a, T, A>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Borrows this `VolatileRef` as a mutable [`VolatilePtr`].\n\n Use this method to do (partial) volatile reads or writes of the referenced data.\n",
+      "adt": {}
+    },
+    "volatile::volatile_ptr::operations::<impl volatile::VolatilePtr<'a, T, A>>::write": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs a volatile write, setting the contained value to the given `value`.\n\n Volatile writes are guaranteed to not be optimized away by the compiler, but by\n themselves do not have atomic ordering guarantees. To also get atomicity, consider\n looking at the `Atomic` wrapper types of the standard/`core` library.\n\n ## Example\n\n ```rust\n use volatile::VolatilePtr;\n\n let mut value = 42;\n let volatile = unsafe { VolatilePtr::new((&mut value).into()) };\n volatile.write(50);\n\n assert_eq!(volatile.read(), 50);\n ```\n",
+      "adt": {}
+    },
+    "volatile::VolatileRef::<'a, T, A>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Borrows this `VolatileRef` as a read-only [`VolatilePtr`].\n\n Use this method to do (partial) volatile reads of the referenced data.\n",
+      "adt": {}
+    },
+    "volatile::volatile_ptr::operations::<impl volatile::VolatilePtr<'a, T, A>>::read": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs a volatile read of the contained value.\n\n Returns a copy of the read value. Volatile reads are guaranteed not to be optimized\n away by the compiler, but by themselves do not have atomic ordering\n guarantees. To also get atomicity, consider looking at the `Atomic` wrapper types of\n the standard/`core` library.\n\n ## Examples\n\n ```rust\n use volatile::{VolatilePtr, access};\n use core::ptr::NonNull;\n\n let value = 42;\n let pointer = unsafe {\n     VolatilePtr::new_restricted(access::ReadOnly, NonNull::from(&value))\n };\n assert_eq!(pointer.read(), 42);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "volatile::VolatileRef": [
+      "MutRef",
+      "Ref"
+    ],
+    "arch::iommu::registers::IommuRegisters": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(6)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(8)))",
+      "MutRef"
+    ],
+    "volatile::VolatilePtr": [
+      "Plain"
+    ]
+  },
+  "path": 1098,
+  "span": "ostd/src/arch/x86/iommu/registers/mod.rs:230:5: 247:6",
+  "src": "fn global_invalidation(&mut self) {\n        // Set ICC(63) to 1 to requests invalidation and CIRG(62:61) to 01 to indicate global invalidation request.\n        self.context_command\n            .as_mut_ptr()\n            .write(0xA000_0000_0000_0000);\n\n        // Wait for invalidation complete (ICC set to 0).\n        let mut value = 0x8000_0000_0000_0000;\n        while (value & 0x8000_0000_0000_0000) != 0 {\n            value = self.context_command.as_ptr().read();\n        }\n\n        // Set IVT(63) to 1 to requests IOTLB invalidation and IIRG(61:60) to 01 to indicate global invalidation request.\n        self.invalidate\n            .iotlb_invalidate\n            .as_mut_ptr()\n            .write(0x9000_0000_0000_0000);\n    }",
+  "mir": "fn arch::iommu::registers::IommuRegisters::global_invalidation(_1: &mut arch::iommu::registers::IommuRegisters) -> () {\n    let mut _0: ();\n    let  _2: ();\n    let mut _3: volatile::VolatilePtr<'_, u64>;\n    let mut _4: &mut volatile::VolatileRef<'_, u64>;\n    let mut _5: u64;\n    let mut _6: u64;\n    let mut _7: u64;\n    let mut _8: u64;\n    let mut _9: volatile::VolatilePtr<'_, u64, volatile::access::ReadOnly>;\n    let mut _10: &volatile::VolatileRef<'_, u64>;\n    let  _11: ();\n    let mut _12: volatile::VolatilePtr<'_, u64>;\n    let mut _13: &mut volatile::VolatileRef<'_, u64>;\n    debug self => _1;\n    debug value => _5;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &mut ((*_1).6: volatile::VolatileRef<'_, u64>);\n        _3 = volatile::VolatileRef::<'_, u64>::as_mut_ptr(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = volatile::volatile_ptr::operations::<impl volatile::VolatilePtr<'_, u64>>::write(move _3, 11529215046068469760_u64) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = 9223372036854775808_u64;\n        goto -> bb3;\n    }\n    bb3: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = _5;\n        _6 = BitAnd(move _7, 9223372036854775808_u64);\n        StorageDead(_7);\n        switchInt(move _6) -> [0: bb7, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &((*_1).6: volatile::VolatileRef<'_, u64>);\n        _9 = volatile::VolatileRef::<'_, u64>::as_ptr(move _10) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_10);\n        _8 = volatile::volatile_ptr::operations::<impl volatile::VolatilePtr<'_, u64, volatile::access::ReadOnly>>::read(move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_9);\n        _5 = move _8;\n        StorageDead(_8);\n        goto -> bb3;\n    }\n    bb7: {\n        StorageDead(_6);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &mut (((*_1).8: arch::iommu::registers::invalidation::InvalidationRegisters).10: volatile::VolatileRef<'_, u64>);\n        _12 = volatile::VolatileRef::<'_, u64>::as_mut_ptr(move _13) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_13);\n        _11 = volatile::volatile_ptr::operations::<impl volatile::VolatilePtr<'_, u64>>::write(move _12, 10376293541461622784_u64) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_12);\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

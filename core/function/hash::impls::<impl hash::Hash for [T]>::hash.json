@@ -1,0 +1,37 @@
+{
+  "name": "hash::impls::<impl hash::Hash for [T]>::hash",
+  "safe": true,
+  "callees": {
+    "hash::Hasher::write_length_prefix": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a length prefix into this hasher, as part of being prefix-free.\n\n If you're implementing [`Hash`] for a custom collection, call this before\n writing its contents to this `Hasher`.  That way\n `(collection![1, 2, 3], collection![4, 5])` and\n `(collection![1, 2], collection![3, 4, 5])` will provide different\n sequences of values to the `Hasher`\n\n The `impl<T> Hash for [T]` includes a call to this method, so if you're\n hashing a slice (or array or vector) via its `Hash::hash` method,\n you should **not** call this yourself.\n\n This method is only for providing domain separation.  If you want to\n hash a `usize` that represents part of the *data*, then it's important\n that you pass it to [`Hasher::write_usize`] instead of to this method.\n\n # Examples\n\n ```\n #![feature(hasher_prefixfree_extras)]\n # // Stubs to make the `impl` below pass the compiler\n # #![allow(non_local_definitions)]\n # struct MyCollection<T>(Option<T>);\n # impl<T> MyCollection<T> {\n #     fn len(&self) -> usize { todo!() }\n # }\n # impl<'a, T> IntoIterator for &'a MyCollection<T> {\n #     type Item = T;\n #     type IntoIter = std::iter::Empty<T>;\n #     fn into_iter(self) -> Self::IntoIter { todo!() }\n # }\n\n use std::hash::{Hash, Hasher};\n impl<T: Hash> Hash for MyCollection<T> {\n     fn hash<H: Hasher>(&self, state: &mut H) {\n         state.write_length_prefix(self.len());\n         for elt in self {\n             elt.hash(state);\n         }\n     }\n }\n ```\n\n # Note to Implementers\n\n If you've decided that your `Hasher` is willing to be susceptible to\n Hash-DoS attacks, then you might consider skipping hashing some or all\n of the `len` provided in the name of increased performance.\n",
+      "adt": {}
+    },
+    "hash::Hash::hash_slice": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Feeds a slice of this type into the given [`Hasher`].\n\n This method is meant as a convenience, but its implementation is\n also explicitly left unspecified. It isn't guaranteed to be\n equivalent to repeated calls of [`hash`] and implementations of\n [`Hash`] should keep that in mind and call [`hash`] themselves\n if the slice isn't treated as a whole unit in the [`PartialEq`]\n implementation.\n\n For example, a [`VecDeque`] implementation might naïvely call\n [`as_slices`] and then [`hash_slice`] on each slice, but this\n is wrong since the two slices can change with a call to\n [`make_contiguous`] without affecting the [`PartialEq`]\n result. Since these slices aren't treated as singular\n units, and instead part of a larger deque, this method cannot\n be used.\n\n # Examples\n\n ```\n use std::hash::{DefaultHasher, Hash, Hasher};\n\n let mut hasher = DefaultHasher::new();\n let numbers = [6, 28, 496, 8128];\n Hash::hash_slice(&numbers, &mut hasher);\n println!(\"Hash is {:x}!\", hasher.finish());\n ```\n\n [`VecDeque`]: ../../std/collections/struct.VecDeque.html\n [`as_slices`]: ../../std/collections/struct.VecDeque.html#method.as_slices\n [`make_contiguous`]: ../../std/collections/struct.VecDeque.html#method.make_contiguous\n [`hash`]: Hash::hash\n [`hash_slice`]: Hash::hash_slice\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1218,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/hash/mod.rs:933:9: 936:10",
+  "src": "fn hash<H: Hasher>(&self, state: &mut H) {\n            state.write_length_prefix(self.len());\n            Hash::hash_slice(self, state)\n        }",
+  "mir": "fn hash::impls::<impl hash::Hash for [T]>::hash(_1: &[T], _2: &mut H) -> () {\n    let mut _0: ();\n    let  _3: ();\n    let mut _4: usize;\n    debug self => _1;\n    debug state => _2;\n    bb0: {\n        StorageLive(_4);\n        _4 = PtrMetadata(_1);\n        _3 = <H as hash::Hasher>::write_length_prefix(_2, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _0 = <T as hash::Hash>::hash_slice::<H>(_1, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

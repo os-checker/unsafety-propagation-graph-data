@@ -1,0 +1,126 @@
+{
+  "name": "vec::Vec::<T, A>::drain",
+  "safe": true,
+  "callees": {
+    "vec::Vec::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the vector, also referred to\n as its 'length'.\n\n # Examples\n\n ```\n let a = vec![1, 2, 3];\n assert_eq!(a.len(), 3);\n ```\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "core::slice::range": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs bounds checking of a range.\n\n This method is similar to [`Index::index`] for slices, but it returns a\n [`Range`] equivalent to `range`. You can use this method to turn any range\n into `start` and `end` values.\n\n `bounds` is the range of the slice to use for bounds checking. It should\n be a [`RangeTo`] range that ends at the length of the slice.\n\n The returned [`Range`] is safe to pass to [`slice::get_unchecked`] and\n [`slice::get_unchecked_mut`] for slices with the given range.\n\n [`Range`]: ops::Range\n [`RangeTo`]: ops::RangeTo\n [`slice::get_unchecked`]: slice::get_unchecked\n [`slice::get_unchecked_mut`]: slice::get_unchecked_mut\n\n # Panics\n\n Panics if `range` would be out of bounds.\n\n # Examples\n\n ```\n #![feature(slice_range)]\n\n use std::slice;\n\n let v = [10, 40, 30];\n assert_eq!(1..2, slice::range(1..2, ..v.len()));\n assert_eq!(0..2, slice::range(..2, ..v.len()));\n assert_eq!(1..3, slice::range(1.., ..v.len()));\n ```\n\n Panics when [`Index::index`] would panic:\n\n ```should_panic\n #![feature(slice_range)]\n\n use std::slice;\n\n let _ = slice::range(2..1, ..3);\n ```\n\n ```should_panic\n #![feature(slice_range)]\n\n use std::slice;\n\n let _ = slice::range(1..4, ..3);\n ```\n\n ```should_panic\n #![feature(slice_range)]\n\n use std::slice;\n\n let _ = slice::range(1..=usize::MAX, ..3);\n ```\n\n [`Index::index`]: ops::Index::index\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::set_len": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forces the length of the vector to `new_len`.\n\n This is a low-level operation that maintains none of the normal\n invariants of the type. Normally changing the length of a vector\n is done using one of the safe operations instead, such as\n [`truncate`], [`resize`], [`extend`], or [`clear`].\n\n [`truncate`]: Vec::truncate\n [`resize`]: Vec::resize\n [`extend`]: Extend::extend\n [`clear`]: Vec::clear\n\n # Safety\n\n - `new_len` must be less than or equal to [`capacity()`].\n - The elements at `old_len..new_len` must be initialized.\n\n [`capacity()`]: Vec::capacity\n\n # Examples\n\n See [`spare_capacity_mut()`] for an example with safe\n initialization of capacity elements and use of this method.\n\n `set_len()` can be useful for situations in which the vector\n is serving as a buffer for other code, particularly over FFI:\n\n ```no_run\n # #![allow(dead_code)]\n # // This is just a minimal skeleton for the doc example;\n # // don't use this as a starting point for a real library.\n # pub struct StreamWrapper { strm: *mut std::ffi::c_void }\n # const Z_OK: i32 = 0;\n # unsafe extern \"C\" {\n #     fn deflateGetDictionary(\n #         strm: *mut std::ffi::c_void,\n #         dictionary: *mut u8,\n #         dictLength: *mut usize,\n #     ) -> i32;\n # }\n # impl StreamWrapper {\n pub fn get_dictionary(&self) -> Option<Vec<u8>> {\n     // Per the FFI method's docs, \"32768 bytes is always enough\".\n     let mut dict = Vec::with_capacity(32_768);\n     let mut dict_length = 0;\n     // SAFETY: When `deflateGetDictionary` returns `Z_OK`, it holds that:\n     // 1. `dict_length` elements were initialized.\n     // 2. `dict_length` <= the capacity (32_768)\n     // which makes `set_len` safe to call.\n     unsafe {\n         // Make the FFI call...\n         let r = deflateGetDictionary(self.strm, dict.as_mut_ptr(), &mut dict_length);\n         if r == Z_OK {\n             // ...and update the length to what was initialized.\n             dict.set_len(dict_length);\n             Some(dict)\n         } else {\n             None\n         }\n     }\n }\n # }\n ```\n\n While the following example is sound, there is a memory leak since\n the inner vectors were not freed prior to the `set_len` call:\n\n ```\n let mut vec = vec![vec![1, 0, 0],\n                    vec![0, 1, 0],\n                    vec![0, 0, 1]];\n // SAFETY:\n // 1. `old_len..0` is empty so no elements need to be initialized.\n // 2. `0 <= capacity` always holds whatever `capacity` is.\n unsafe {\n     vec.set_len(0);\n #   // FIXME(https://github.com/rust-lang/miri/issues/3670):\n #   // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n #   vec.set_len(3);\n }\n ```\n\n Normally, here, one would use [`clear`] instead to correctly drop\n the contents and thus not leak memory.\n\n [`spare_capacity_mut()`]: Vec::spare_capacity_mut\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "vec::Vec::<T, A>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the vector's buffer, or a dangling raw pointer\n valid for zero sized reads if the vector didn't allocate.\n\n The caller must ensure that the vector outlives the pointer this\n function returns, or else it will end up dangling.\n Modifying the vector may cause its buffer to be reallocated,\n which would also make any pointers to it invalid.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n This method guarantees that for the purpose of the aliasing model, this method\n does not materialize a reference to the underlying slice, and thus the returned pointer\n will remain valid when mixed with other calls to [`as_ptr`], [`as_mut_ptr`],\n and [`as_non_null`].\n Note that calling other methods that materialize mutable references to the slice,\n or mutable references to specific elements you are planning on accessing through this pointer,\n as well as writing to those elements, may still invalidate this pointer.\n See the second example below for how this guarantee can be used.\n\n\n # Examples\n\n ```\n let x = vec![1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(*x_ptr.add(i), 1 << i);\n     }\n }\n ```\n\n Due to the aliasing guarantee, the following code is legal:\n\n ```rust\n unsafe {\n     let mut v = vec![0, 1, 2];\n     let ptr1 = v.as_ptr();\n     let _ = ptr1.read();\n     let ptr2 = v.as_mut_ptr().offset(2);\n     ptr2.write(2);\n     // Notably, the write to `ptr2` did *not* invalidate `ptr1`\n     // because it mutated a different element:\n     let _ = ptr1.read();\n }\n ```\n\n [`as_mut_ptr`]: Vec::as_mut_ptr\n [`as_ptr`]: Vec::as_ptr\n [`as_non_null`]: Vec::as_non_null\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::const_ptr::<impl *const T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"123\";\n let ptr: *const u8 = s.as_ptr();\n\n unsafe {\n     assert_eq!(*ptr.add(1), b'2');\n     assert_eq!(*ptr.add(2), b'3');\n }\n ```\n",
+      "adt": {}
+    },
+    "core::slice::from_raw_parts": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forms a slice from a pointer and a length.\n\n The `len` argument is the number of **elements**, not the number of bytes.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for reads for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations. See [below](#incorrect-usage)\n       for an example incorrectly not taking this into account.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be mutated for the duration\n   of lifetime `'a`, except inside an `UnsafeCell`.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n # Caveat\n\n The lifetime for the returned slice is inferred from its usage. To\n prevent accidental misuse, it's suggested to tie the lifetime to whichever\n source lifetime is safe in the context, such as by providing a helper\n function taking the lifetime of a host value for the slice, or by explicit\n annotation.\n\n # Examples\n\n ```\n use std::slice;\n\n // manifest a slice for a single element\n let x = 42;\n let ptr = &x as *const _;\n let slice = unsafe { slice::from_raw_parts(ptr, 1) };\n assert_eq!(slice[0], 42);\n ```\n\n ### Incorrect usage\n\n The following `join_slices` function is **unsound** ⚠️\n\n ```rust,no_run\n use std::slice;\n\n fn join_slices<'a, T>(fst: &'a [T], snd: &'a [T]) -> &'a [T] {\n     let fst_end = fst.as_ptr().wrapping_add(fst.len());\n     let snd_start = snd.as_ptr();\n     assert_eq!(fst_end, snd_start, \"Slices must be contiguous!\");\n     unsafe {\n         // The assertion above ensures `fst` and `snd` are contiguous, but they might\n         // still be contained within _different allocations_, in which case\n         // creating this slice is undefined behavior.\n         slice::from_raw_parts(fst.as_ptr(), fst.len() + snd.len())\n     }\n }\n\n fn main() {\n     // `a` and `b` are different allocations...\n     let a = 42;\n     let b = 27;\n     // ... which may nevertheless be laid out contiguously in memory: | a | b |\n     let _ = join_slices(slice::from_ref(&a), slice::from_ref(&b)); // UB\n }\n ```\n\n ### FFI: Handling null pointers\n\n In languages such as C++, pointers to empty collections are not guaranteed to be non-null.\n When accepting such pointers, they have to be checked for null-ness to avoid undefined\n behavior.\n\n ```\n use std::slice;\n\n /// Sum the elements of an FFI slice.\n ///\n /// # Safety\n ///\n /// If ptr is not NULL, it must be correctly aligned and\n /// point to `len` initialized items of type `f32`.\n unsafe extern \"C\" fn sum_slice(ptr: *const f32, len: usize) -> f32 {\n     let data = if ptr.is_null() {\n         // `len` is assumed to be 0.\n         &[]\n     } else {\n         // SAFETY: see function docstring.\n         unsafe { slice::from_raw_parts(ptr, len) }\n     };\n     data.into_iter().sum()\n }\n\n // This could be the result of C++'s std::vector::data():\n let ptr = std::ptr::null();\n // And this could be std::vector::size():\n let len = 0;\n assert_eq!(unsafe { sum_slice(ptr, len) }, 0.0);\n ```\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the slice.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let mut iterator = x.iter();\n\n assert_eq!(iterator.next(), Some(&1));\n assert_eq!(iterator.next(), Some(&2));\n assert_eq!(iterator.next(), Some(&4));\n assert_eq!(iterator.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Ref",
+      "Deref",
+      "MutRef"
+    ],
+    "core::ops::RangeTo": [
+      "Plain"
+    ],
+    "core::ops::Range": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(1, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "core::slice::Iter": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "vec::drain::Drain": [
+      "Plain"
+    ]
+  },
+  "path": 2352,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:2781:5: 2809:6",
+  "src": "pub fn drain<R>(&mut self, range: R) -> Drain<'_, T, A>\n    where\n        R: RangeBounds<usize>,\n    {\n        // Memory safety\n        //\n        // When the Drain is first created, it shortens the length of\n        // the source vector to make sure no uninitialized or moved-from elements\n        // are accessible at all if the Drain's destructor never gets to run.\n        //\n        // Drain will ptr::read out the values to remove.\n        // When finished, remaining tail of the vec is copied back to cover\n        // the hole, and the vector length is restored to the new length.\n        //\n        let len = self.len();\n        let Range { start, end } = slice::range(range, ..len);\n\n        unsafe {\n            // set self.vec length's to start, to be safe in case Drain is leaked\n            self.set_len(start);\n            let range_slice = slice::from_raw_parts(self.as_ptr().add(start), end - start);\n            Drain {\n                tail_start: end,\n                tail_len: len - end,\n                iter: range_slice.iter(),\n                vec: NonNull::from(self),\n            }\n        }\n    }",
+  "mir": "fn vec::Vec::<T, A>::drain(_1: &mut vec::Vec<T, A>, _2: R) -> vec::drain::Drain<'_, T, A> {\n    let mut _0: vec::drain::Drain<'_, T, A>;\n    let  _3: usize;\n    let mut _4: &vec::Vec<T, A>;\n    let  _5: usize;\n    let  _6: usize;\n    let mut _7: core::ops::Range<usize>;\n    let mut _8: core::ops::RangeTo<usize>;\n    let  _9: ();\n    let  _10: &[T];\n    let mut _11: *const T;\n    let mut _12: *const T;\n    let mut _13: &vec::Vec<T, A>;\n    let mut _14: usize;\n    let mut _15: (usize, bool);\n    let mut _16: usize;\n    let mut _17: (usize, bool);\n    let mut _18: core::slice::Iter<'_, T>;\n    let mut _19: core::ptr::NonNull<vec::Vec<T, A>>;\n    debug self => _1;\n    debug range => _2;\n    debug len => _3;\n    debug start => _5;\n    debug end => _6;\n    debug range_slice => _10;\n    bb0: {\n        StorageLive(_4);\n        _4 = &(*_1);\n        _3 = vec::Vec::<T, A>::len(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = RangeTo(_3);\n        _7 = core::slice::range::<R>(_2, move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        _5 = (_7.0: usize);\n        _6 = (_7.1: usize);\n        StorageDead(_7);\n        _9 = vec::Vec::<T, A>::set_len(_1, _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &(*_1);\n        _12 = vec::Vec::<T, A>::as_ptr(move _13) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_13);\n        _11 = core::ptr::const_ptr::<impl *const T>::add(move _12, _5) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        StorageLive(_14);\n        _15 = CheckedSub(_6, _5);\n        assert(!move (_15.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _6, _5) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _14 = move (_15.0: usize);\n        _10 = core::slice::from_raw_parts::<'_, T>(move _11, move _14) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_14);\n        StorageDead(_11);\n        StorageLive(_16);\n        _17 = CheckedSub(_3, _6);\n        assert(!move (_17.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _3, _6) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _16 = move (_17.0: usize);\n        StorageLive(_18);\n        _18 = core::slice::<impl [T]>::iter(_10) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageLive(_19);\n        _19 = <core::ptr::NonNull<vec::Vec<T, A>> as core::convert::From<&mut vec::Vec<T, A>>>::from(_1) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _0 = Drain(_6, move _16, move _18, move _19);\n        StorageDead(_19);\n        StorageDead(_18);\n        StorageDead(_16);\n        return;\n    }\n}\n",
+  "doc": " Removes the subslice indicated by the given range from the vector,\n returning a double-ended iterator over the removed subslice.\n\n If the iterator is dropped before being fully consumed,\n it drops the remaining removed elements.\n\n The returned iterator keeps a mutable borrow on the vector to optimize\n its implementation.\n\n # Panics\n\n Panics if the range has `start_bound > end_bound`, or, if the range is\n bounded on either end and past the length of the vector.\n\n # Leaking\n\n If the returned iterator goes out of scope without being dropped (due to\n [`mem::forget`], for example), the vector may have lost and leaked\n elements arbitrarily, including elements outside the range.\n\n # Examples\n\n ```\n let mut v = vec![1, 2, 3];\n let u: Vec<_> = v.drain(1..).collect();\n assert_eq!(v, &[1]);\n assert_eq!(u, &[2, 3]);\n\n // A full range clears the vector, like `clear()` does\n v.drain(..);\n assert_eq!(v, &[]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

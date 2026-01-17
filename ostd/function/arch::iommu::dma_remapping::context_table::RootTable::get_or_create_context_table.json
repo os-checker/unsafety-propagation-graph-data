@@ -1,0 +1,170 @@
+{
+  "name": "arch::iommu::dma_remapping::context_table::RootTable::get_or_create_context_table",
+  "safe": true,
+  "callees": {
+    "core::mem::size_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of a type in bytes.\n\n More specifically, this is the offset in bytes between successive elements\n in an array with that item type including alignment padding. Thus, for any\n type `T` and length `n`, `[T; n]` has a size of `n * size_of::<T>()`.\n\n In general, the size of a type is not stable across compilations, but\n specific types such as primitives are.\n\n The following table gives the size for primitives.\n\n Type | `size_of::<Type>()`\n ---- | ---------------\n () | 0\n bool | 1\n u8 | 1\n u16 | 2\n u32 | 4\n u64 | 8\n u128 | 16\n i8 | 1\n i16 | 2\n i32 | 4\n i64 | 8\n i128 | 16\n f32 | 4\n f64 | 8\n char | 4\n\n Furthermore, `usize` and `isize` have the same size.\n\n The types [`*const T`], `&T`, [`Box<T>`], [`Option<&T>`], and `Option<Box<T>>` all have\n the same size. If `T` is `Sized`, all of those types have the same size as `usize`.\n\n The mutability of a pointer does not change its size. As such, `&T` and `&mut T`\n have the same size. Likewise for `*const T` and `*mut T`.\n\n # Size of `#[repr(C)]` items\n\n The `C` representation for items has a defined layout. With this layout,\n the size of items is also stable as long as all fields have a stable size.\n\n ## Size of Structs\n\n For `struct`s, the size is determined by the following algorithm.\n\n For each field in the struct ordered by declaration order:\n\n 1. Add the size of the field.\n 2. Round up the current size to the nearest multiple of the next field's [alignment].\n\n Finally, round the size of the struct to the nearest multiple of its [alignment].\n The alignment of the struct is usually the largest alignment of all its\n fields; this can be changed with the use of `repr(align(N))`.\n\n Unlike `C`, zero sized structs are not rounded up to one byte in size.\n\n ## Size of Enums\n\n Enums that carry no data other than the discriminant have the same size as C enums\n on the platform they are compiled for.\n\n ## Size of Unions\n\n The size of a union is the size of its largest field.\n\n Unlike `C`, zero sized unions are not rounded up to one byte in size.\n\n # Examples\n\n ```\n // Some primitives\n assert_eq!(4, size_of::<i32>());\n assert_eq!(8, size_of::<f64>());\n assert_eq!(0, size_of::<()>());\n\n // Some arrays\n assert_eq!(8, size_of::<[i32; 2]>());\n assert_eq!(12, size_of::<[i32; 3]>());\n assert_eq!(0, size_of::<[i32; 0]>());\n\n\n // Pointer size equality\n assert_eq!(size_of::<&i32>(), size_of::<*const i32>());\n assert_eq!(size_of::<&i32>(), size_of::<Box<i32>>());\n assert_eq!(size_of::<&i32>(), size_of::<Option<&i32>>());\n assert_eq!(size_of::<Box<i32>>(), size_of::<Option<Box<i32>>>());\n ```\n\n Using `#[repr(C)]`.\n\n ```\n #[repr(C)]\n struct FieldStruct {\n     first: u8,\n     second: u16,\n     third: u8\n }\n\n // The size of the first field is 1, so add 1 to the size. Size is 1.\n // The alignment of the second field is 2, so add 1 to the size for padding. Size is 2.\n // The size of the second field is 2, so add 2 to the size. Size is 4.\n // The alignment of the third field is 1, so add 0 to the size for padding. Size is 4.\n // The size of the third field is 1, so add 1 to the size. Size is 5.\n // Finally, the alignment of the struct is 2 (because the largest alignment amongst its\n // fields is 2), so add 1 to the size for padding. Size is 6.\n assert_eq!(6, size_of::<FieldStruct>());\n\n #[repr(C)]\n struct TupleStruct(u8, u16, u8);\n\n // Tuple structs follow the same rules.\n assert_eq!(6, size_of::<TupleStruct>());\n\n // Note that reordering the fields can lower the size. We can remove both padding bytes\n // by putting `third` before `second`.\n #[repr(C)]\n struct FieldStructOptimized {\n     first: u8,\n     third: u8,\n     second: u16\n }\n\n assert_eq!(4, size_of::<FieldStructOptimized>());\n\n // Union size is the size of the largest field.\n #[repr(C)]\n union ExampleUnion {\n     smaller: u8,\n     larger: u16\n }\n\n assert_eq!(2, size_of::<ExampleUnion>());\n ```\n\n [alignment]: align_of\n [`*const T`]: primitive@pointer\n [`Box<T>`]: ../../std/boxed/struct.Box.html\n [`Option<&T>`]: crate::option::Option\n\n",
+      "adt": {}
+    },
+    "mm::io::VmIo::read_val": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads a value of a specified type at a specified offset.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    },
+    "arch::iommu::dma_remapping::context_table::RootEntry::is_present": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "arch::iommu::dma_remapping::context_table::RootEntry": "ImmutableAsArgument"
+      }
+    },
+    "arch::iommu::dma_remapping::context_table::RootEntry::addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "arch::iommu::dma_remapping::context_table::RootEntry": "ImmutableAsArgument"
+      }
+    },
+    "arch::iommu::dma_remapping::context_table::ContextTable::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "arch::iommu::dma_remapping::context_table::ContextTable": "Constructor"
+      }
+    },
+    "arch::iommu::dma_remapping::context_table::ContextTable::paddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "arch::iommu::dma_remapping::context_table::ContextTable": "ImmutableAsArgument"
+      }
+    },
+    "alloc::collections::BTreeMap::<K, V, A>::insert": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Inserts a key-value pair into the map.\n\n If the map did not have this key present, `None` is returned.\n\n If the map did have this key present, the value is updated, and the old\n value is returned. The key is not updated, though; this matters for\n types that can be `==` without being identical. See the [module-level\n documentation] for more.\n\n [module-level documentation]: index.html#insert-and-complex-keys\n\n # Examples\n\n ```\n use std::collections::BTreeMap;\n\n let mut map = BTreeMap::new();\n assert_eq!(map.insert(37, \"a\"), None);\n assert_eq!(map.is_empty(), false);\n\n map.insert(37, \"b\");\n assert_eq!(map.insert(37, \"c\"), Some(\"b\"));\n assert_eq!(map[&37], \"c\");\n ```\n",
+      "adt": {}
+    },
+    "mm::io::VmIo::write_val": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a value of a specified type at a specified offset.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "alloc::collections::BTreeMap::<K, V, A>::get_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to the value corresponding to the key.\n\n The key may be any borrowed form of the map's key type, but the ordering\n on the borrowed form *must* match the ordering on the key type.\n\n # Examples\n\n ```\n use std::collections::BTreeMap;\n\n let mut map = BTreeMap::new();\n map.insert(1, \"a\");\n if let Some(x) = map.get_mut(&1) {\n     *x = \"b\";\n }\n assert_eq!(map[&1], \"b\");\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::frame::Frame": [
+      "Ref"
+    ],
+    "arch::iommu::dma_remapping::context_table::RootTable": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "arch::iommu::dma_remapping::PciDeviceLocation": [
+      "Unknown([Field(0, Ty { id: 1, kind: RigidTy(Uint(U8)) })])",
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "arch::iommu::dma_remapping::context_table::RootEntry": [
+      "Plain",
+      "Ref"
+    ],
+    "alloc::collections::BTreeMap": [
+      "MutRef"
+    ],
+    "arch::iommu::dma_remapping::context_table::ContextTable": [
+      "Plain",
+      "Ref",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 479,
+  "span": "ostd/src/arch/x86/iommu/dma_remapping/context_table.rs:138:5: 158:6",
+  "src": "fn get_or_create_context_table(&mut self, device_id: PciDeviceLocation) -> &mut ContextTable {\n        let bus_entry = self\n            .root_frame\n            .read_val::<RootEntry>(device_id.bus as usize * size_of::<RootEntry>())\n            .unwrap();\n\n        if !bus_entry.is_present() {\n            let table = ContextTable::new();\n            let address = table.paddr();\n            self.context_tables.insert(address, table);\n            let entry = RootEntry(address as u128 | 1);\n            self.root_frame\n                .write_val::<RootEntry>(device_id.bus as usize * size_of::<RootEntry>(), &entry)\n                .unwrap();\n            self.context_tables.get_mut(&address).unwrap()\n        } else {\n            self.context_tables\n                .get_mut(&(bus_entry.addr() as usize))\n                .unwrap()\n        }\n    }",
+  "mir": "fn arch::iommu::dma_remapping::context_table::RootTable::get_or_create_context_table(_1: &mut arch::iommu::dma_remapping::context_table::RootTable, _2: arch::iommu::dma_remapping::PciDeviceLocation) -> &mut arch::iommu::dma_remapping::context_table::ContextTable {\n    let mut _0: &mut arch::iommu::dma_remapping::context_table::ContextTable;\n    let  _3: arch::iommu::dma_remapping::context_table::RootEntry;\n    let mut _4: core::result::Result<arch::iommu::dma_remapping::context_table::RootEntry, error::Error>;\n    let mut _5: &mm::frame::Frame<()>;\n    let mut _6: usize;\n    let mut _7: usize;\n    let mut _8: u8;\n    let mut _9: usize;\n    let mut _10: (usize, bool);\n    let mut _11: &mut arch::iommu::dma_remapping::context_table::ContextTable;\n    let mut _12: bool;\n    let mut _13: &arch::iommu::dma_remapping::context_table::RootEntry;\n    let  _14: arch::iommu::dma_remapping::context_table::ContextTable;\n    let  _15: usize;\n    let mut _16: &arch::iommu::dma_remapping::context_table::ContextTable;\n    let  _17: core::option::Option<arch::iommu::dma_remapping::context_table::ContextTable>;\n    let mut _18: &mut alloc::collections::BTreeMap<usize, arch::iommu::dma_remapping::context_table::ContextTable>;\n    let  _19: arch::iommu::dma_remapping::context_table::RootEntry;\n    let mut _20: u128;\n    let mut _21: u128;\n    let  _22: ();\n    let mut _23: core::result::Result<(), error::Error>;\n    let mut _24: &mm::frame::Frame<()>;\n    let mut _25: usize;\n    let mut _26: usize;\n    let mut _27: u8;\n    let mut _28: usize;\n    let mut _29: (usize, bool);\n    let  _30: &arch::iommu::dma_remapping::context_table::RootEntry;\n    let mut _31: &mut arch::iommu::dma_remapping::context_table::ContextTable;\n    let mut _32: core::option::Option<&mut arch::iommu::dma_remapping::context_table::ContextTable>;\n    let mut _33: &mut alloc::collections::BTreeMap<usize, arch::iommu::dma_remapping::context_table::ContextTable>;\n    let  _34: &usize;\n    let mut _35: &mut arch::iommu::dma_remapping::context_table::ContextTable;\n    let mut _36: core::option::Option<&mut arch::iommu::dma_remapping::context_table::ContextTable>;\n    let mut _37: &mut alloc::collections::BTreeMap<usize, arch::iommu::dma_remapping::context_table::ContextTable>;\n    let  _38: &usize;\n    let  _39: usize;\n    let mut _40: u64;\n    let mut _41: &arch::iommu::dma_remapping::context_table::RootEntry;\n    debug self => _1;\n    debug device_id => _2;\n    debug bus_entry => _3;\n    debug table => _14;\n    debug address => _15;\n    debug entry => _19;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_1).0: mm::frame::Frame<()>);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = (_2.0: u8);\n        _7 = move _8 as usize;\n        StorageDead(_8);\n        StorageLive(_9);\n        _9 = core::mem::size_of::<arch::iommu::dma_remapping::context_table::RootEntry>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _10 = CheckedMul(_7, _9);\n        assert(!move (_10.1: bool), \"attempt to compute `{} * {}`, which would overflow\", move _7, move _9) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _6 = move (_10.0: usize);\n        StorageDead(_9);\n        StorageDead(_7);\n        _4 = <mm::frame::Frame<()> as mm::io::VmIo>::read_val::<arch::iommu::dma_remapping::context_table::RootEntry>(move _5, move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_5);\n        _3 = core::result::Result::<arch::iommu::dma_remapping::context_table::RootEntry, error::Error>::unwrap(move _4) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &_3;\n        _12 = arch::iommu::dma_remapping::context_table::RootEntry::is_present(move _13) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        switchInt(move _12) -> [0: bb7, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_13);\n        StorageLive(_35);\n        StorageLive(_36);\n        StorageLive(_37);\n        _37 = &mut ((*_1).1: alloc::collections::BTreeMap<usize, arch::iommu::dma_remapping::context_table::ContextTable>);\n        StorageLive(_39);\n        StorageLive(_40);\n        StorageLive(_41);\n        _41 = &_3;\n        _40 = arch::iommu::dma_remapping::context_table::RootEntry::addr(move _41) -> [return: bb18, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_13);\n        _14 = arch::iommu::dma_remapping::context_table::ContextTable::new() -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageLive(_16);\n        _16 = &_14;\n        _15 = arch::iommu::dma_remapping::context_table::ContextTable::paddr(move _16) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = &mut ((*_1).1: alloc::collections::BTreeMap<usize, arch::iommu::dma_remapping::context_table::ContextTable>);\n        _17 = alloc::collections::BTreeMap::<usize, arch::iommu::dma_remapping::context_table::ContextTable>::insert(move _18, _15, _14) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_18);\n        drop(_17) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_17);\n        StorageLive(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = _15 as u128;\n        _20 = BitOr(move _21, 1_u128);\n        StorageDead(_21);\n        _19 = RootEntry(move _20);\n        StorageDead(_20);\n        StorageLive(_23);\n        StorageLive(_24);\n        _24 = &((*_1).0: mm::frame::Frame<()>);\n        StorageLive(_25);\n        StorageLive(_26);\n        StorageLive(_27);\n        _27 = (_2.0: u8);\n        _26 = move _27 as usize;\n        StorageDead(_27);\n        StorageLive(_28);\n        _28 = core::mem::size_of::<arch::iommu::dma_remapping::context_table::RootEntry>() -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        _29 = CheckedMul(_26, _28);\n        assert(!move (_29.1: bool), \"attempt to compute `{} * {}`, which would overflow\", move _26, move _28) -> [success: bb13, unwind unreachable];\n    }\n    bb13: {\n        _25 = move (_29.0: usize);\n        StorageDead(_28);\n        StorageDead(_26);\n        _30 = &_19;\n        _23 = <mm::frame::Frame<()> as mm::io::VmIo>::write_val::<arch::iommu::dma_remapping::context_table::RootEntry>(move _24, move _25, _30) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_25);\n        StorageDead(_24);\n        _22 = core::result::Result::<(), error::Error>::unwrap(move _23) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_23);\n        StorageLive(_32);\n        StorageLive(_33);\n        _33 = &mut ((*_1).1: alloc::collections::BTreeMap<usize, arch::iommu::dma_remapping::context_table::ContextTable>);\n        _34 = &_15;\n        _32 = alloc::collections::BTreeMap::<usize, arch::iommu::dma_remapping::context_table::ContextTable>::get_mut::<usize>(move _33, _34) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_33);\n        _31 = core::option::Option::<&mut arch::iommu::dma_remapping::context_table::ContextTable>::unwrap(move _32) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_32);\n        StorageDead(_19);\n        _11 = _31;\n        goto -> bb21;\n    }\n    bb18: {\n        StorageDead(_41);\n        _39 = move _40 as usize;\n        StorageDead(_40);\n        _38 = &_39;\n        _36 = alloc::collections::BTreeMap::<usize, arch::iommu::dma_remapping::context_table::ContextTable>::get_mut::<usize>(move _37, _38) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_37);\n        _35 = core::option::Option::<&mut arch::iommu::dma_remapping::context_table::ContextTable>::unwrap(move _36) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        _11 = _35;\n        StorageDead(_39);\n        StorageDead(_36);\n        StorageDead(_35);\n        goto -> bb21;\n    }\n    bb21: {\n        _0 = _11;\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

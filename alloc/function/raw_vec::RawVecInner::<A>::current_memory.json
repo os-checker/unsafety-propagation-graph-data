@@ -1,0 +1,99 @@
+{
+  "name": "raw_vec::RawVecInner::<A>::current_memory",
+  "safe": false,
+  "callees": {
+    "core::alloc::Layout::size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The minimum size in bytes for a memory block of this layout.\n",
+      "adt": {}
+    },
+    "core::num::niche_types::UsizeNoHighBit::as_inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::num::<impl usize>::unchecked_mul": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Unchecked integer multiplication. Computes `self * rhs`, assuming overflow\n cannot occur.\n\n Calling `x.unchecked_mul(y)` is semantically equivalent to calling\n `x.`[`checked_mul`]`(y).`[`unwrap_unchecked`]`()`.\n\n If you're just trying to avoid the panic in debug mode, then **do not**\n use this.  Instead, you're looking for [`wrapping_mul`].\n\n # Safety\n\n This results in undefined behavior when\n i.e. when [`checked_mul`] would return `None`.\n\n [`unwrap_unchecked`]: option/enum.Option.html#method.unwrap_unchecked\n",
+      "adt": {}
+    },
+    "core::alloc::Layout::align": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The minimum byte alignment for a memory block of this layout.\n\n The returned alignment is guaranteed to be a power of two.\n",
+      "adt": {}
+    },
+    "core::alloc::Layout::from_size_align_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a layout, bypassing all checks.\n\n # Safety\n\n This function is unsafe as it does not verify the preconditions from\n [`Layout::from_size_align`].\n",
+      "adt": {}
+    },
+    "core::convert::Into::into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into the (usually inferred) input type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::alloc::Layout": [
+      "Ref",
+      "Plain"
+    ],
+    "core::num::niche_types::UsizeNoHighBit": [
+      "Plain"
+    ],
+    "raw_vec::RawVecInner": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::ptr::Unique": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 1660,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/raw_vec/mod.rs:522:5: 536:6",
+  "src": "unsafe fn current_memory(&self, elem_layout: Layout) -> Option<(NonNull<u8>, Layout)> {\n        if elem_layout.size() == 0 || self.cap.as_inner() == 0 {\n            None\n        } else {\n            // We could use Layout::array here which ensures the absence of isize and usize overflows\n            // and could hypothetically handle differences between stride and size, but this memory\n            // has already been allocated so we know it can't overflow and currently Rust does not\n            // support such types. So we can do better by skipping some checks and avoid an unwrap.\n            unsafe {\n                let alloc_size = elem_layout.size().unchecked_mul(self.cap.as_inner());\n                let layout = Layout::from_size_align_unchecked(alloc_size, elem_layout.align());\n                Some((self.ptr.into(), layout))\n            }\n        }\n    }",
+  "mir": "fn raw_vec::RawVecInner::<A>::current_memory(_1: &raw_vec::RawVecInner<A>, _2: core::alloc::Layout) -> core::option::Option<(core::ptr::NonNull<u8>, core::alloc::Layout)> {\n    let mut _0: core::option::Option<(core::ptr::NonNull<u8>, core::alloc::Layout)>;\n    let mut _3: usize;\n    let mut _4: &core::alloc::Layout;\n    let mut _5: usize;\n    let mut _6: core::num::niche_types::UsizeNoHighBit;\n    let  _7: usize;\n    let mut _8: usize;\n    let mut _9: &core::alloc::Layout;\n    let mut _10: usize;\n    let mut _11: core::num::niche_types::UsizeNoHighBit;\n    let  _12: core::alloc::Layout;\n    let mut _13: usize;\n    let mut _14: &core::alloc::Layout;\n    let mut _15: (core::ptr::NonNull<u8>, core::alloc::Layout);\n    let mut _16: core::ptr::NonNull<u8>;\n    let mut _17: core::ptr::Unique<u8>;\n    debug self => _1;\n    debug elem_layout => _2;\n    debug alloc_size => _7;\n    debug layout => _12;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &_2;\n        _3 = core::alloc::Layout::size(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        switchInt(move _3) -> [0: bb2, otherwise: bb3];\n    }\n    bb2: {\n        StorageDead(_3);\n        goto -> bb6;\n    }\n    bb3: {\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = ((*_1).1: core::num::niche_types::UsizeNoHighBit);\n        _5 = core::num::niche_types::UsizeNoHighBit::as_inner(move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        switchInt(move _5) -> [0: bb5, otherwise: bb7];\n    }\n    bb5: {\n        StorageDead(_5);\n        goto -> bb6;\n    }\n    bb6: {\n        _0 = core::option::Option::None;\n        goto -> bb14;\n    }\n    bb7: {\n        StorageDead(_5);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &_2;\n        _8 = core::alloc::Layout::size(move _9) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = ((*_1).1: core::num::niche_types::UsizeNoHighBit);\n        _10 = core::num::niche_types::UsizeNoHighBit::as_inner(move _11) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_11);\n        _7 = core::num::<impl usize>::unchecked_mul(move _8, move _10) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_10);\n        StorageDead(_8);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = &_2;\n        _13 = core::alloc::Layout::align(move _14) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_14);\n        _12 = core::alloc::Layout::from_size_align_unchecked(_7, move _13) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_13);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = ((*_1).0: core::ptr::Unique<u8>);\n        _16 = <core::ptr::Unique<u8> as core::convert::Into<core::ptr::NonNull<u8>>>::into(move _17) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_17);\n        _15 = (move _16, _12);\n        StorageDead(_16);\n        _0 = core::option::Option::Some(move _15);\n        StorageDead(_15);\n        goto -> bb14;\n    }\n    bb14: {\n        return;\n    }\n}\n",
+  "doc": " # Safety\n - `elem_layout` must be valid for `self`, i.e. it must be the same `elem_layout` used to\n   initially construct `self`\n - `elem_layout`'s size must be a multiple of its alignment\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

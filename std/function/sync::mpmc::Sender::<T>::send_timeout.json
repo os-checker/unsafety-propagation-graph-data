@@ -1,0 +1,107 @@
+{
+  "name": "sync::mpmc::Sender::<T>::send_timeout",
+  "safe": true,
+  "callees": {
+    "time::Instant::now": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an instant corresponding to \"now\".\n\n # Examples\n\n ```\n use std::time::Instant;\n\n let now = Instant::now();\n ```\n",
+      "adt": {
+        "time::Instant": "Constructor"
+      }
+    },
+    "time::Instant::checked_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `Some(t)` where `t` is the time `self + duration` if `t` can be represented as\n `Instant` (which means it's inside the bounds of the underlying data structure), `None`\n otherwise.\n",
+      "adt": {
+        "time::Instant": "Constructor",
+        "core::time::Duration": "ImmutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    },
+    "sync::mpmc::Sender::<T>::send": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to send a value on this channel, returning it back if it could\n not be sent.\n\n A successful send occurs when it is determined that the other end of\n the channel has not hung up already. An unsuccessful send would be one\n where the corresponding receiver has already been deallocated. Note\n that a return value of [`Err`] means that the data will never be\n received, but a return value of [`Ok`] does *not* mean that the data\n will be received. It is possible for the corresponding receiver to\n hang up immediately after this function returns [`Ok`]. However, if\n the channel is zero-capacity, it acts as a rendezvous channel and a\n return value of [`Ok`] means that the data has been received.\n\n If the channel is full and not disconnected, this call will block until\n the send operation can proceed. If the channel becomes disconnected,\n this call will wake up and return an error. The returned error contains\n the original message.\n\n If called on a zero-capacity channel, this method will wait for a receive\n operation to appear on the other side of the channel.\n\n # Examples\n\n ```\n #![feature(mpmc_channel)]\n\n use std::sync::mpmc::channel;\n\n let (tx, rx) = channel();\n\n // This send is always successful\n tx.send(1).unwrap();\n\n // This send will fail because the receiver is gone\n drop(rx);\n assert!(tx.send(1).is_err());\n ```\n",
+      "adt": {
+        "sync::mpmc::Sender": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "sync::mpmc::Sender::<T>::send_deadline": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Waits for a message to be sent into the channel, but only until a given deadline.\n\n If the channel is full and not disconnected, this call will block until the send operation\n can proceed or the operation times out. If the channel becomes disconnected, this call will\n wake up and return an error. The returned error contains the original message.\n\n If called on a zero-capacity channel, this method will wait for a receive operation to\n appear on the other side of the channel.\n\n # Examples\n\n ```\n #![feature(mpmc_channel)]\n\n use std::sync::mpmc::channel;\n use std::time::{Duration, Instant};\n\n let (tx, rx) = channel();\n\n let t = Instant::now() + Duration::from_millis(400);\n tx.send_deadline(1, t).unwrap();\n ```\n",
+      "adt": {
+        "sync::mpmc::Sender": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::map_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<T, F>` by applying a function to a\n contained [`Err`] value, leaving an [`Ok`] value untouched.\n\n This function can be used to pass through a successful result while handling\n an error.\n\n\n # Examples\n\n ```\n fn stringify(x: u32) -> String { format!(\"error code: {x}\") }\n\n let x: Result<u32, u32> = Ok(2);\n assert_eq!(x.map_err(stringify), Ok(2));\n\n let x: Result<u32, u32> = Err(13);\n assert_eq!(x.map_err(stringify), Err(\"error code: 13\".to_string()));\n ```\n",
+      "adt": {}
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "time::Instant": [
+      "Plain",
+      "Ref"
+    ],
+    "core::time::Duration": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 613, kind: RigidTy(Adt(AdtDef(DefId { id: 4610, name: \"time::Instant\" }), GenericArgs([]))) })])"
+    ],
+    "sync::mpmc::Sender": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 2977,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/mod.rs:428:5: 434:6",
+  "src": "pub fn send_timeout(&self, msg: T, timeout: Duration) -> Result<(), SendTimeoutError<T>> {\n        match Instant::now().checked_add(timeout) {\n            Some(deadline) => self.send_deadline(msg, deadline),\n            // So far in the future that it's practically the same as waiting indefinitely.\n            None => self.send(msg).map_err(SendTimeoutError::from),\n        }\n    }",
+  "mir": "fn sync::mpmc::Sender::<T>::send_timeout(_1: &sync::mpmc::Sender<T>, _2: T, _3: core::time::Duration) -> core::result::Result<(), sync::mpmc::error::SendTimeoutError<T>> {\n    let mut _0: core::result::Result<(), sync::mpmc::error::SendTimeoutError<T>>;\n    let mut _4: core::option::Option<time::Instant>;\n    let mut _5: &time::Instant;\n    let  _6: time::Instant;\n    let mut _7: isize;\n    let  _8: time::Instant;\n    let mut _9: core::result::Result<(), sync::mpsc::SendError<T>>;\n    debug self => _1;\n    debug msg => _2;\n    debug timeout => _3;\n    debug deadline => _8;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = time::Instant::now() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = &_6;\n        _4 = time::Instant::checked_add(move _5, _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _7 = discriminant(_4);\n        switchInt(move _7) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        StorageLive(_9);\n        _9 = sync::mpmc::Sender::<T>::send(_1, _2) -> [return: bb7, unwind unreachable];\n    }\n    bb5: {\n        _8 = ((_4 as variant#1).0: time::Instant);\n        _0 = sync::mpmc::Sender::<T>::send_deadline(_1, _2, _8) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        goto -> bb9;\n    }\n    bb7: {\n        _0 = core::result::Result::<(), sync::mpsc::SendError<T>>::map_err::<sync::mpmc::error::SendTimeoutError<T>, fn(sync::mpsc::SendError<T>) -> sync::mpmc::error::SendTimeoutError<T> {<sync::mpmc::error::SendTimeoutError<T> as core::convert::From<sync::mpsc::SendError<T>>>::from}>(move _9, <sync::mpmc::error::SendTimeoutError<T> as core::convert::From<sync::mpsc::SendError<T>>>::from) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_9);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_6);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Waits for a message to be sent into the channel, but only for a limited time.\n\n If the channel is full and not disconnected, this call will block until the send operation\n can proceed or the operation times out. If the channel becomes disconnected, this call will\n wake up and return an error. The returned error contains the original message.\n\n If called on a zero-capacity channel, this method will wait for a receive operation to\n appear on the other side of the channel.\n\n # Examples\n\n ```\n #![feature(mpmc_channel)]\n\n use std::sync::mpmc::channel;\n use std::time::Duration;\n\n let (tx, rx) = channel();\n\n tx.send_timeout(1, Duration::from_millis(400)).unwrap();\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "name": "sync::Arc::<T, A>::try_unwrap",
+  "safe": true,
+  "callees": {
+    "sync::Arc::<T, A>::inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::Arc": "ImmutableAsArgument"
+      }
+    },
+    "core::sync::atomic::AtomicUsize::compare_exchange": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer if the current value is the same as\n the `current` value.\n\n The return value is a result indicating whether the new value was written and\n containing the previous value. On success this value is guaranteed to be equal to\n `current`.\n\n `compare_exchange` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. `success` describes the required ordering for the\n read-modify-write operation that takes place if the comparison with `current` succeeds.\n `failure` describes the required ordering for the load operation that takes place when\n the comparison fails. Using [`Acquire`] as success ordering makes the store part\n of this operation [`Relaxed`], and using [`Release`] makes the successful load\n [`Relaxed`]. The failure ordering can only be [`SeqCst`], [`Acquire`] or [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.compare_exchange(5, 10,\n                                      Ordering::Acquire,\n                                      Ordering::Relaxed),\n            Ok(5));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n\n assert_eq!(some_var.compare_exchange(6, 12,\n                                      Ordering::SeqCst,\n                                      Ordering::Acquire),\n            Err(10));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n\n # Considerations\n\n `compare_exchange` is a [compare-and-swap operation] and thus exhibits the usual downsides\n of CAS operations. In particular, a load of the value followed by a successful\n `compare_exchange` with the previous load *does not ensure* that other threads have not\n changed the value in the interim! This is usually important when the *equality* check in\n the `compare_exchange` is being used to check the *identity* of a value, but equality\n does not necessarily imply identity. This is a particularly common case for pointers, as\n a pointer holding the same address does not imply that the same object exists at that\n address! In this case, `compare_exchange` can lead to the [ABA problem].\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::is_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the result is [`Err`].\n\n # Examples\n\n ```\n let x: Result<i32, &str> = Ok(-3);\n assert_eq!(x.is_err(), false);\n\n let x: Result<i32, &str> = Err(\"Some error message\");\n assert_eq!(x.is_err(), true);\n ```\n",
+      "adt": {}
+    },
+    "core::sync::atomic::fence": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An atomic fence.\n\n Fences create synchronization between themselves and atomic operations or fences in other\n threads. To achieve this, a fence prevents the compiler and CPU from reordering certain types of\n memory operations around it.\n\n There are 3 different ways to use an atomic fence:\n\n - atomic - fence synchronization: an atomic operation with (at least) [`Release`] ordering\n   semantics synchronizes with a fence with (at least) [`Acquire`] ordering semantics.\n - fence - atomic synchronization: a fence with (at least) [`Release`] ordering semantics\n   synchronizes with an atomic operation with (at least) [`Acquire`] ordering semantics.\n - fence - fence synchronization: a fence with (at least) [`Release`] ordering semantics\n   synchronizes with a fence with (at least) [`Acquire`] ordering semantics.\n\n These 3 ways complement the regular, fence-less, atomic - atomic synchronization.\n\n ## Atomic - Fence\n\n An atomic operation on one thread will synchronize with a fence on another thread when:\n\n -   on thread 1:\n     -   an atomic operation 'X' with (at least) [`Release`] ordering semantics on some atomic\n         object 'm',\n\n -   is paired on thread 2 with:\n     -   an atomic read 'Y' with any order on 'm',\n     -   followed by a fence 'B' with (at least) [`Acquire`] ordering semantics.\n\n This provides a happens-before dependence between X and B.\n\n ```text\n     Thread 1                                          Thread 2\n\n m.store(3, Release); X ---------\n                                |\n                                |\n                                -------------> Y  if m.load(Relaxed) == 3 {\n                                               B      fence(Acquire);\n                                                      ...\n                                                  }\n ```\n\n ## Fence - Atomic\n\n A fence on one thread will synchronize with an atomic operation on another thread when:\n\n -   on thread:\n     -   a fence 'A' with (at least) [`Release`] ordering semantics,\n     -   followed by an atomic write 'X' with any ordering on some atomic object 'm',\n\n -   is paired on thread 2 with:\n     -   an atomic operation 'Y' with (at least) [`Acquire`] ordering semantics.\n\n This provides a happens-before dependence between A and Y.\n\n ```text\n     Thread 1                                          Thread 2\n\n fence(Release);      A\n m.store(3, Relaxed); X ---------\n                                |\n                                |\n                                -------------> Y  if m.load(Acquire) == 3 {\n                                                      ...\n                                                  }\n ```\n\n ## Fence - Fence\n\n A fence on one thread will synchronize with a fence on another thread when:\n\n -   on thread 1:\n     -   a fence 'A' which has (at least) [`Release`] ordering semantics,\n     -   followed by an atomic write 'X' with any ordering on some atomic object 'm',\n\n -   is paired on thread 2 with:\n     -   an atomic read 'Y' with any ordering on 'm',\n     -   followed by a fence 'B' with (at least) [`Acquire`] ordering semantics.\n\n This provides a happens-before dependence between A and B.\n\n ```text\n     Thread 1                                          Thread 2\n\n fence(Release);      A --------------\n m.store(3, Relaxed); X ---------    |\n                                |    |\n                                |    |\n                                -------------> Y  if m.load(Relaxed) == 3 {\n                                     |-------> B      fence(Acquire);\n                                                      ...\n                                                  }\n ```\n\n ## Mandatory Atomic\n\n Note that in the examples above, it is crucial that the access to `m` are atomic. Fences cannot\n be used to establish synchronization between non-atomic accesses in different threads. However,\n thanks to the happens-before relationship, any non-atomic access that happen-before the atomic\n operation or fence with (at least) [`Release`] ordering semantics are now also properly\n synchronized with any non-atomic accesses that happen-after the atomic operation or fence with\n (at least) [`Acquire`] ordering semantics.\n\n ## Memory Ordering\n\n A fence which has [`SeqCst`] ordering, in addition to having both [`Acquire`] and [`Release`]\n semantics, participates in the global program order of the other [`SeqCst`] operations and/or\n fences.\n\n Accepts [`Acquire`], [`Release`], [`AcqRel`] and [`SeqCst`] orderings.\n\n # Panics\n\n Panics if `order` is [`Relaxed`].\n\n # Examples\n\n ```\n use std::sync::atomic::AtomicBool;\n use std::sync::atomic::fence;\n use std::sync::atomic::Ordering;\n\n // A mutual exclusion primitive based on spinlock.\n pub struct Mutex {\n     flag: AtomicBool,\n }\n\n impl Mutex {\n     pub fn new() -> Mutex {\n         Mutex {\n             flag: AtomicBool::new(false),\n         }\n     }\n\n     pub fn lock(&self) {\n         // Wait until the old value is `false`.\n         while self\n             .flag\n             .compare_exchange_weak(false, true, Ordering::Relaxed, Ordering::Relaxed)\n             .is_err()\n         {}\n         // This fence synchronizes-with store in `unlock`.\n         fence(Ordering::Acquire);\n     }\n\n     pub fn unlock(&self) {\n         self.flag.store(false, Ordering::Release);\n     }\n }\n ```\n",
+      "adt": {}
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::as_ref": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a shared reference to the value. If the value may be uninitialized, [`as_uninit_ref`]\n must be used instead.\n\n For the mutable counterpart see [`as_mut`].\n\n [`as_uninit_ref`]: NonNull::as_uninit_ref\n [`as_mut`]: NonNull::as_mut\n\n # Safety\n\n When calling this method, you have to ensure that\n the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"ptr is null!\");\n\n let ref_x = unsafe { ptr.as_ref() };\n println!(\"{ref_x}\");\n ```\n\n [the module documentation]: crate::ptr#safety\n",
+      "adt": {}
+    },
+    "core::ptr::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `src` without moving it. This leaves the\n memory in `src` unchanged.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads.\n\n * `src` must be properly aligned. Use [`read_unaligned`] if this is not the\n   case.\n\n * `src` must point to a properly initialized value of type `T`.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n # Examples\n\n Basic usage:\n\n ```\n let x = 12;\n let y = &x as *const i32;\n\n unsafe {\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n\n ## Ownership of the Returned Value\n\n `read` creates a bitwise copy of `T`, regardless of whether `T` is [`Copy`].\n If `T` is not [`Copy`], using both the returned value and the value at\n `*src` can violate memory safety. Note that assigning to `*src` counts as a\n use because it will attempt to drop the value at `*src`.\n\n [`write()`] can be used to overwrite data without causing it to be dropped.\n\n ```\n use std::ptr;\n\n let mut s = String::from(\"foo\");\n unsafe {\n     // `s2` now points to the same underlying memory as `s`.\n     let mut s2: String = ptr::read(&s);\n\n     assert_eq!(s2, \"foo\");\n\n     // Assigning to `s2` causes its original value to be dropped. Beyond\n     // this point, `s` must no longer be used, as the underlying memory has\n     // been freed.\n     s2 = String::default();\n     assert_eq!(s2, \"\");\n\n     // Assigning to `s` would cause the old value to be dropped again,\n     // resulting in undefined behavior.\n     // s = String::from(\"bar\"); // ERROR\n\n     // `ptr::write` can be used to overwrite a value without dropping it.\n     ptr::write(&mut s, String::from(\"bar\"));\n }\n\n assert_eq!(s, \"bar\");\n ```\n\n [valid]: self#safety\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::Arc": [
+      "Ref",
+      "Plain",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))"
+    ],
+    "sync::ArcInner": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))"
+    ],
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Ref"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "core::ptr::NonNull": [
+      "Ref",
+      "Plain"
+    ],
+    "sync::Weak": [
+      "Plain"
+    ]
+  },
+  "path": 2111,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:1106:5: 1121:6",
+  "src": "pub fn try_unwrap(this: Self) -> Result<T, Self> {\n        if this.inner().strong.compare_exchange(1, 0, Relaxed, Relaxed).is_err() {\n            return Err(this);\n        }\n\n        acquire!(this.inner().strong);\n\n        let this = ManuallyDrop::new(this);\n        let elem: T = unsafe { ptr::read(&this.ptr.as_ref().data) };\n        let alloc: A = unsafe { ptr::read(&this.alloc) }; // copy the allocator\n\n        // Make a weak pointer to clean up the implicit strong-weak reference\n        let _weak = Weak { ptr: this.ptr, alloc };\n\n        Ok(elem)\n    }",
+  "mir": "fn sync::Arc::<T, A>::try_unwrap(_1: sync::Arc<T, A>) -> core::result::Result<T, sync::Arc<T, A>> {\n    let mut _0: core::result::Result<T, sync::Arc<T, A>>;\n    let mut _2: bool;\n    let mut _3: &core::result::Result<usize, usize>;\n    let  _4: core::result::Result<usize, usize>;\n    let mut _5: &core::sync::atomic::AtomicUsize;\n    let  _6: &sync::ArcInner<T>;\n    let mut _7: &sync::Arc<T, A>;\n    let mut _8: core::sync::atomic::Ordering;\n    let mut _9: core::sync::atomic::Ordering;\n    let mut _10: sync::Arc<T, A>;\n    let  _11: ();\n    let mut _12: core::sync::atomic::Ordering;\n    let  _13: core::mem::ManuallyDrop<sync::Arc<T, A>>;\n    let mut _14: sync::Arc<T, A>;\n    let  _15: T;\n    let mut _16: *const T;\n    let  _17: &T;\n    let  _18: &sync::ArcInner<T>;\n    let mut _19: &core::ptr::NonNull<sync::ArcInner<T>>;\n    let  _20: &sync::Arc<T, A>;\n    let mut _21: &core::mem::ManuallyDrop<sync::Arc<T, A>>;\n    let  _22: A;\n    let mut _23: *const A;\n    let  _24: &A;\n    let  _25: &sync::Arc<T, A>;\n    let mut _26: &core::mem::ManuallyDrop<sync::Arc<T, A>>;\n    let  _27: sync::Weak<T, A>;\n    let mut _28: core::ptr::NonNull<sync::ArcInner<T>>;\n    let mut _29: &sync::Arc<T, A>;\n    let mut _30: &core::mem::ManuallyDrop<sync::Arc<T, A>>;\n    debug this => _1;\n    debug this => _13;\n    debug elem => _15;\n    debug alloc => _22;\n    debug _weak => _27;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &_1;\n        _6 = sync::Arc::<T, A>::inner(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        _5 = &((*_6).0: core::sync::atomic::AtomicUsize);\n        StorageLive(_8);\n        _8 = core::sync::atomic::Ordering::Relaxed;\n        StorageLive(_9);\n        _9 = core::sync::atomic::Ordering::Relaxed;\n        _4 = core::sync::atomic::AtomicUsize::compare_exchange(move _5, 1_usize, 0_usize, move _8, move _9) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = &_4;\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_5);\n        _2 = core::result::Result::<usize, usize>::is_err(move _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _2) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_10);\n        _10 = move _1;\n        _0 = core::result::Result::Err(move _10);\n        StorageDead(_10);\n        StorageDead(_2);\n        goto -> bb15;\n    }\n    bb5: {\n        StorageDead(_6);\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageDead(_2);\n        StorageLive(_12);\n        _12 = core::sync::atomic::Ordering::Acquire;\n        _11 = core::sync::atomic::fence(move _12) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = move _1;\n        _13 = core::mem::ManuallyDrop::<sync::Arc<T, A>>::new(move _14) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_14);\n        StorageLive(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = &_13;\n        _20 = <core::mem::ManuallyDrop<sync::Arc<T, A>> as core::ops::Deref>::deref(move _21) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_21);\n        _19 = &((*_20).0: core::ptr::NonNull<sync::ArcInner<T>>);\n        _18 = core::ptr::NonNull::<sync::ArcInner<T>>::as_ref::<'_>(move _19) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_19);\n        _17 = &((*_18).2: T);\n        _16 = &raw const (*_17);\n        _15 = core::ptr::read::<T>(move _16) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_20);\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageDead(_16);\n        StorageLive(_23);\n        StorageLive(_24);\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = &_13;\n        _25 = <core::mem::ManuallyDrop<sync::Arc<T, A>> as core::ops::Deref>::deref(move _26) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_26);\n        _24 = &((*_25).2: A);\n        _23 = &raw const (*_24);\n        _22 = core::ptr::read::<A>(move _23) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_25);\n        StorageDead(_24);\n        StorageDead(_23);\n        StorageLive(_27);\n        StorageLive(_28);\n        StorageLive(_29);\n        StorageLive(_30);\n        _30 = &_13;\n        _29 = <core::mem::ManuallyDrop<sync::Arc<T, A>> as core::ops::Deref>::deref(move _30) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_30);\n        _28 = ((*_29).0: core::ptr::NonNull<sync::ArcInner<T>>);\n        _27 = Weak(move _28, _22);\n        StorageDead(_28);\n        StorageDead(_29);\n        _0 = core::result::Result::Ok(_15);\n        drop(_27) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_27);\n        StorageDead(_13);\n        goto -> bb15;\n    }\n    bb15: {\n        return;\n    }\n}\n",
+  "doc": " Returns the inner value, if the `Arc` has exactly one strong reference.\n\n Otherwise, an [`Err`] is returned with the same `Arc` that was\n passed in.\n\n This will succeed even if there are outstanding weak references.\n\n It is strongly recommended to use [`Arc::into_inner`] instead if you don't\n keep the `Arc` in the [`Err`] case.\n Immediately dropping the [`Err`]-value, as the expression\n `Arc::try_unwrap(this).ok()` does, can cause the strong count to\n drop to zero and the inner value of the `Arc` to be dropped.\n For instance, if two threads execute such an expression in parallel,\n there is a race condition without the possibility of unsafety:\n The threads could first both check whether they own the last instance\n in `Arc::try_unwrap`, determine that they both do not, and then both\n discard and drop their instance in the call to [`ok`][`Result::ok`].\n In this scenario, the value inside the `Arc` is safely destroyed\n by exactly one of the threads, but neither thread will ever be able\n to use the value.\n\n # Examples\n\n ```\n use std::sync::Arc;\n\n let x = Arc::new(3);\n assert_eq!(Arc::try_unwrap(x), Ok(3));\n\n let x = Arc::new(4);\n let _y = Arc::clone(&x);\n assert_eq!(*Arc::try_unwrap(x).unwrap_err(), 4);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

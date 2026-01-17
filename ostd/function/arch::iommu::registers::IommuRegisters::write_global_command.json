@@ -1,0 +1,86 @@
+{
+  "name": "arch::iommu::registers::IommuRegisters::write_global_command",
+  "safe": true,
+  "callees": {
+    "volatile::VolatileRef::<'a, T, A>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Borrows this `VolatileRef` as a read-only [`VolatilePtr`].\n\n Use this method to do (partial) volatile reads of the referenced data.\n",
+      "adt": {}
+    },
+    "volatile::volatile_ptr::operations::<impl volatile::VolatilePtr<'a, T, A>>::read": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs a volatile read of the contained value.\n\n Returns a copy of the read value. Volatile reads are guaranteed not to be optimized\n away by the compiler, but by themselves do not have atomic ordering\n guarantees. To also get atomicity, consider looking at the `Atomic` wrapper types of\n the standard/`core` library.\n\n ## Examples\n\n ```rust\n use volatile::{VolatilePtr, access};\n use core::ptr::NonNull;\n\n let value = 42;\n let pointer = unsafe {\n     VolatilePtr::new_restricted(access::ReadOnly, NonNull::from(&value))\n };\n assert_eq!(pointer.read(), 42);\n ```\n",
+      "adt": {}
+    },
+    "volatile::VolatileRef::<'a, T, A>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Borrows this `VolatileRef` as a mutable [`VolatilePtr`].\n\n Use this method to do (partial) volatile reads or writes of the referenced data.\n",
+      "adt": {}
+    },
+    "arch::iommu::registers::command::GlobalCommand::bits": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the raw value of the flags currently stored.\n",
+      "adt": {
+        "arch::iommu::registers::command::GlobalCommand": "ImmutableAsArgument"
+      }
+    },
+    "volatile::volatile_ptr::operations::<impl volatile::VolatilePtr<'a, T, A>>::write": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs a volatile write, setting the contained value to the given `value`.\n\n Volatile writes are guaranteed to not be optimized away by the compiler, but by\n themselves do not have atomic ordering guarantees. To also get atomicity, consider\n looking at the `Atomic` wrapper types of the standard/`core` library.\n\n ## Example\n\n ```rust\n use volatile::VolatilePtr;\n\n let mut value = 42;\n let volatile = unsafe { VolatilePtr::new((&mut value).into()) };\n volatile.write(50);\n\n assert_eq!(volatile.read(), 50);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "volatile::VolatileRef": [
+      "Ref",
+      "MutRef"
+    ],
+    "arch::iommu::registers::IommuRegisters": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(4)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "MutRef"
+    ],
+    "volatile::VolatilePtr": [
+      "Plain"
+    ],
+    "arch::iommu::registers::command::GlobalCommand": [
+      "Ref",
+      "Plain"
+    ]
+  },
+  "path": 1105,
+  "span": "ostd/src/arch/x86/iommu/registers/mod.rs:251:5: 263:6",
+  "src": "fn write_global_command(&mut self, command: GlobalCommand, enable: bool) {\n        const ONE_SHOT_STATUS_MASK: u32 = 0x96FF_FFFF;\n        let status = self.global_status.as_ptr().read() & ONE_SHOT_STATUS_MASK;\n        if enable {\n            self.global_command\n                .as_mut_ptr()\n                .write(status | command.bits());\n        } else {\n            self.global_command\n                .as_mut_ptr()\n                .write(status & !command.bits());\n        }\n    }",
+  "mir": "fn arch::iommu::registers::IommuRegisters::write_global_command(_1: &mut arch::iommu::registers::IommuRegisters, _2: arch::iommu::registers::command::GlobalCommand, _3: bool) -> () {\n    let mut _0: ();\n    let  _4: u32;\n    let mut _5: u32;\n    let mut _6: volatile::VolatilePtr<'_, u32, volatile::access::ReadOnly>;\n    let mut _7: &volatile::VolatileRef<'_, u32, volatile::access::ReadOnly>;\n    let  _8: ();\n    let mut _9: volatile::VolatilePtr<'_, u32, volatile::access::WriteOnly>;\n    let mut _10: &mut volatile::VolatileRef<'_, u32, volatile::access::WriteOnly>;\n    let mut _11: u32;\n    let mut _12: u32;\n    let mut _13: &arch::iommu::registers::command::GlobalCommand;\n    let  _14: ();\n    let mut _15: volatile::VolatilePtr<'_, u32, volatile::access::WriteOnly>;\n    let mut _16: &mut volatile::VolatileRef<'_, u32, volatile::access::WriteOnly>;\n    let mut _17: u32;\n    let mut _18: u32;\n    let mut _19: u32;\n    let mut _20: &arch::iommu::registers::command::GlobalCommand;\n    debug self => _1;\n    debug command => _2;\n    debug enable => _3;\n    debug status => _4;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).4: volatile::VolatileRef<'_, u32, volatile::access::ReadOnly>);\n        _6 = volatile::VolatileRef::<'_, u32, volatile::access::ReadOnly>::as_ptr(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        _5 = volatile::volatile_ptr::operations::<impl volatile::VolatilePtr<'_, u32, volatile::access::ReadOnly>>::read(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _4 = BitAnd(move _5, arch::iommu::registers::IommuRegisters::write_global_command::ONE_SHOT_STATUS_MASK);\n        StorageDead(_5);\n        switchInt(_3) -> [0: bb7, otherwise: bb3];\n    }\n    bb3: {\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &mut ((*_1).3: volatile::VolatileRef<'_, u32, volatile::access::WriteOnly>);\n        _9 = volatile::VolatileRef::<'_, u32, volatile::access::WriteOnly>::as_mut_ptr(move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &_2;\n        _12 = arch::iommu::registers::command::GlobalCommand::bits(move _13) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_13);\n        _11 = BitOr(_4, move _12);\n        StorageDead(_12);\n        _8 = volatile::volatile_ptr::operations::<impl volatile::VolatilePtr<'_, u32, volatile::access::WriteOnly>>::write(move _9, move _11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        StorageDead(_9);\n        goto -> bb11;\n    }\n    bb7: {\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &mut ((*_1).3: volatile::VolatileRef<'_, u32, volatile::access::WriteOnly>);\n        _15 = volatile::VolatileRef::<'_, u32, volatile::access::WriteOnly>::as_mut_ptr(move _16) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = &_2;\n        _19 = arch::iommu::registers::command::GlobalCommand::bits(move _20) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_20);\n        _18 = Not(move _19);\n        StorageDead(_19);\n        _17 = BitAnd(_4, move _18);\n        StorageDead(_18);\n        _14 = volatile::volatile_ptr::operations::<impl volatile::VolatilePtr<'_, u32, volatile::access::WriteOnly>>::write(move _15, move _17) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_17);\n        StorageDead(_15);\n        goto -> bb11;\n    }\n    bb11: {\n        return;\n    }\n}\n",
+  "doc": " Writes value to the global command register. This function will not wait until the command\n is serviced. User need to check the global status register.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

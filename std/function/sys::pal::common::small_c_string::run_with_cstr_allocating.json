@@ -1,0 +1,59 @@
+{
+  "name": "sys::pal::common::small_c_string::run_with_cstr_allocating",
+  "safe": true,
+  "callees": {
+    "alloc_crate::ffi::CString::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new C-compatible string from a container of bytes.\n\n This function will consume the provided data and use the\n underlying bytes to construct a new string, ensuring that\n there is a trailing 0 byte. This trailing 0 byte will be\n appended by this function; the provided data should *not*\n contain any 0 bytes in it.\n\n # Examples\n\n ```ignore (extern-declaration)\n use std::ffi::CString;\n use std::os::raw::c_char;\n\n extern \"C\" { fn puts(s: *const c_char); }\n\n let to_print = CString::new(\"Hello!\").expect(\"CString::new failed\");\n unsafe {\n     puts(to_print.as_ptr());\n }\n ```\n\n # Errors\n\n This function will return an error if the supplied bytes contain an\n internal 0 byte. The [`NulError`] returned will contain the bytes as well as\n the position of the nul byte.\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::ops::Fn::call": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 979, kind: RigidTy(Adt(AdtDef(DefId { id: 4790, name: \"alloc_crate::ffi::CString\" }), GenericArgs([]))) })])"
+    ],
+    "alloc_crate::ffi::CString": [
+      "Plain",
+      "Ref"
+    ],
+    "core::ffi::CStr": [
+      "Ref"
+    ]
+  },
+  "path": 3890,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/common/small_c_string.rs:55:1: 60:2",
+  "src": "fn run_with_cstr_allocating<T>(bytes: &[u8], f: &dyn Fn(&CStr) -> io::Result<T>) -> io::Result<T> {\n    match CString::new(bytes) {\n        Ok(s) => f(&s),\n        Err(_) => Err(NUL_ERR),\n    }\n}",
+  "mir": "fn sys::pal::common::small_c_string::run_with_cstr_allocating(_1: &[u8], _2: &dyn for<'a> core::ops::Fn(&'a core::ffi::CStr) -> core::result::Result<T, io::error::Error>) -> core::result::Result<T, io::error::Error> {\n    let mut _0: core::result::Result<T, io::error::Error>;\n    let mut _3: core::result::Result<alloc_crate::ffi::CString, alloc_crate::ffi::NulError>;\n    let mut _4: isize;\n    let  _5: alloc_crate::ffi::CString;\n    let mut _6: (&core::ffi::CStr,);\n    let  _7: &core::ffi::CStr;\n    let  _8: &alloc_crate::ffi::CString;\n    let mut _9: isize;\n    debug bytes => _1;\n    debug f => _2;\n    debug s => _5;\n    bb0: {\n        StorageLive(_3);\n        _3 = alloc_crate::ffi::CString::new::<&[u8]>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = discriminant(_3);\n        switchInt(move _4) -> [0: bb4, 1: bb3, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        _0 = core::result::Result::Err(sys::pal::common::small_c_string::NUL_ERR);\n        goto -> bb10;\n    }\n    bb4: {\n        StorageLive(_5);\n        _5 = move ((_3 as variant#0).0: alloc_crate::ffi::CString);\n        StorageLive(_6);\n        _8 = &_5;\n        _7 = <alloc_crate::ffi::CString as core::ops::Deref>::deref(_8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _6 = (_7);\n        _0 = <dyn for<'a> core::ops::Fn(&'a core::ffi::CStr) -> core::result::Result<T, io::error::Error> as core::ops::Fn<(&core::ffi::CStr,)>>::call(_2, move _6) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_6);\n        drop(_5) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_5);\n        goto -> bb10;\n    }\n    bb8: {\n        StorageDead(_3);\n        return;\n    }\n    bb9: {\n        drop(_3) -> [return: bb8, unwind unreachable];\n    }\n    bb10: {\n        _9 = discriminant(_3);\n        switchInt(move _9) -> [0: bb8, 1: bb9, otherwise: bb2];\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

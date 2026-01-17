@@ -1,0 +1,63 @@
+{
+  "name": "<panicking::begin_panic::Payload<A> as core::fmt::Display>::fmt",
+  "safe": true,
+  "callees": {
+    "process::abort": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Terminates the process in an abnormal fashion.\n\n The function will never return and will immediately terminate the current\n process in a platform specific \"abnormal\" manner. As a consequence,\n no destructors on the current stack or any other thread's stack\n will be run, Rust IO buffers (eg, from `BufWriter`) will not be flushed,\n and C stdio buffers will (on most platforms) not be flushed.\n\n This is in contrast to the default behavior of [`panic!`] which unwinds\n the current thread's stack and calls all destructors.\n When `panic=\"abort\"` is set, either as an argument to `rustc` or in a\n crate's Cargo.toml, [`panic!`] and `abort` are similar. However,\n [`panic!`] will still call the [panic hook] while `abort` will not.\n\n If a clean shutdown is needed it is recommended to only call\n this function at a known point where there are no more destructors left\n to run.\n\n The process's termination will be similar to that from the C `abort()`\n function.  On Unix, the process will terminate with signal `SIGABRT`, which\n typically means that the shell prints \"Aborted\".\n\n # Examples\n\n ```no_run\n use std::process;\n\n fn main() {\n     println!(\"aborting\");\n\n     process::abort();\n\n     // execution never gets here\n }\n ```\n\n The `abort` function terminates the process, so the destructor will not\n get run on the example below:\n\n ```no_run\n use std::process;\n\n struct HasDrop;\n\n impl Drop for HasDrop {\n     fn drop(&mut self) {\n         println!(\"This will never be printed!\");\n     }\n }\n\n fn main() {\n     let _x = HasDrop;\n     process::abort();\n     // the destructor implemented for HasDrop will never get run\n }\n ```\n\n [panic hook]: crate::panic::set_hook\n",
+      "adt": {}
+    },
+    "panicking::payload_as_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::fmt::Formatter::<'a>::write_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes some data to the underlying buffer contained within this\n formatter.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Foo;\n\n impl fmt::Display for Foo {\n     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {\n         formatter.write_str(\"Foo\")\n         // This is equivalent to:\n         // write!(formatter, \"Foo\")\n     }\n }\n\n assert_eq!(format!(\"{Foo}\"), \"Foo\");\n assert_eq!(format!(\"{Foo:0>8}\"), \"Foo\");\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Ref",
+      "Deref",
+      "Unknown([Deref, Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 5094, kind: Param(ParamTy { index: 0, name: \"A\" }) })])"
+    ],
+    "panicking::begin_panic::Payload": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::fmt::Formatter": [
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 2291,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:752:9: 757:10",
+  "src": "fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n            match &self.inner {\n                Some(a) => f.write_str(payload_as_str(a)),\n                None => process::abort(),\n            }\n        }",
+  "mir": "fn <panicking::begin_panic::Payload<A> as core::fmt::Display>::fmt(_1: &panicking::begin_panic::Payload<A>, _2: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error> {\n    let mut _0: core::result::Result<(), core::fmt::Error>;\n    let mut _3: &core::option::Option<A>;\n    let mut _4: isize;\n    let  _5: &A;\n    let  _6: &str;\n    let mut _7: &dyn core::any::Any;\n    let mut _8: !;\n    debug self => _1;\n    debug f => _2;\n    debug a => _5;\n    bb0: {\n        StorageLive(_3);\n        _3 = &((*_1).0: core::option::Option<A>);\n        _4 = discriminant((*_3));\n        switchInt(move _4) -> [0: bb2, 1: bb3, otherwise: bb1];\n    }\n    bb1: {\n        unreachable;\n    }\n    bb2: {\n        _8 = process::abort() -> unwind unreachable;\n    }\n    bb3: {\n        _5 = &(((*_3) as variant#1).0: A);\n        StorageLive(_7);\n        _7 = _5 as &dyn core::any::Any;\n        _6 = panicking::payload_as_str(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        _0 = core::fmt::Formatter::<'_>::write_str(_2, _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

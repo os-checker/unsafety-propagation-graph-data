@@ -1,0 +1,47 @@
+{
+  "name": "arch::cpu::context::tdx::VirtualizationExceptionHandler::new",
+  "safe": true,
+  "callees": {
+    "tdx_guest::get_veinfo": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Get Virtualization Exception Information for the recent #VE exception.\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::expect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Instead, prefer to use pattern matching and handle the [`Err`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`].\n\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message including the\n passed message, and the content of the [`Err`].\n\n\n # Examples\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.expect(\"Testing expect\"); // panics with `Testing expect: emergency failure`\n ```\n\n # Recommended Message Style\n\n We recommend that `expect` messages are used to describe the reason you\n _expect_ the `Result` should be `Ok`.\n\n ```should_panic\n let path = std::env::var(\"IMPORTANT_PATH\")\n     .expect(\"env variable `IMPORTANT_PATH` should be set by `wrapper_script.sh`\");\n ```\n\n **Hint**: If you're having trouble remembering how to phrase expect\n error messages remember to focus on the word \"should\" as in \"env\n variable should be set by blah\" or \"the given binary should be available\n and executable by the current user\".\n\n For more detail on expect message styles and the reasoning behind our recommendation please\n refer to the section on [\"Common Message\n Styles\"](../../std/error/index.html#common-message-styles) in the\n [`std::error`](../../std/error/index.html) module docs.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ],
+    "tdx_guest::TdgVeInfo": [
+      "Plain"
+    ],
+    "arch::cpu::context::tdx::VirtualizationExceptionHandler": [
+      "Plain"
+    ]
+  },
+  "path": 220,
+  "span": "ostd/src/arch/x86/cpu/context/tdx.rs:25:5: 28:6",
+  "src": "pub fn new() -> Self {\n        let ve_info = tdcall::get_veinfo().expect(\"#VE handler: fail to get VE info\\n\");\n        Self { ve_info }\n    }",
+  "mir": "fn arch::cpu::context::tdx::VirtualizationExceptionHandler::new() -> arch::cpu::context::tdx::VirtualizationExceptionHandler {\n    let mut _0: arch::cpu::context::tdx::VirtualizationExceptionHandler;\n    let  _1: tdx_guest::TdgVeInfo;\n    let mut _2: core::result::Result<tdx_guest::TdgVeInfo, tdx_guest::tdcall::TdCallError>;\n    let mut _3: &str;\n    debug ve_info => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = tdx_guest::get_veinfo() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        _3 = \"#VE handler: fail to get VE info\\n\";\n        _1 = core::result::Result::<tdx_guest::TdgVeInfo, tdx_guest::tdcall::TdCallError>::expect(move _2, move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageDead(_2);\n        _0 = VirtualizationExceptionHandler(_1);\n        return;\n    }\n}\n",
+  "doc": " Creates a VE handler.\n\n It is important that such a handler is created immediately after a VE happens,\n before the local IRQs are re-enabled. This is because the handler needs to retrieve more information\n about the last VE from the trusted Intel TDX module. If another VE happens, the information about\n the last one held by Intel TDX module would be overridden and lost!\n\n This constructor method retrieves the VE information from\n Intel TDX module and saved into the newly-created instance.\n So after instantiating a `VirtualizationExceptionHandler`,\n we won't need to worry about triggering a new VE.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

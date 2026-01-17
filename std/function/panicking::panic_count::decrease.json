@@ -1,0 +1,49 @@
+{
+  "name": "panicking::panic_count::decrease",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicUsize::fetch_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts from the current value, returning the previous value.\n\n This operation wraps around on overflow.\n\n `fetch_sub` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n assert_eq!(foo.fetch_sub(10, Ordering::SeqCst), 20);\n assert_eq!(foo.load(Ordering::SeqCst), 10);\n ```\n",
+      "adt": {}
+    },
+    "thread::local::LocalKey::<T>::with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires a reference to the value in this TLS key.\n\n This will lazily initialize the value if this thread has not referenced\n this key yet.\n\n # Panics\n\n This function will `panic!()` if the key currently has its\n destructor running, and it **may** panic if the destructor has\n previously been run for this thread.\n\n # Examples\n\n ```\n thread_local! {\n     pub static STATIC: String = String::from(\"I am\");\n }\n\n assert_eq!(\n     STATIC.with(|original_value| format!(\"{original_value} initialized\")),\n     \"I am initialized\",\n );\n ```\n",
+      "adt": {
+        "thread::local::LocalKey": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "thread::local::LocalKey": [
+      "Ref"
+    ]
+  },
+  "path": 2296,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:442:5: 448:6",
+  "src": "pub fn decrease() {\n        GLOBAL_PANIC_COUNT.fetch_sub(1, Ordering::Relaxed);\n        LOCAL_PANIC_COUNT.with(|c| {\n            let (count, _) = c.get();\n            c.set((count - 1, false));\n        });\n    }",
+  "mir": "fn panicking::panic_count::decrease() -> () {\n    let mut _0: ();\n    let  _1: usize;\n    let mut _2: &core::sync::atomic::AtomicUsize;\n    let mut _3: core::sync::atomic::Ordering;\n    let  _4: ();\n    let mut _5: &thread::local::LocalKey<core::cell::Cell<(usize, bool)>>;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        _2 = {alloc673: &core::sync::atomic::AtomicUsize};\n        StorageLive(_3);\n        _3 = core::sync::atomic::Ordering::Relaxed;\n        _1 = core::sync::atomic::AtomicUsize::fetch_sub(move _2, 1_usize, move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageDead(_2);\n        StorageDead(_1);\n        StorageLive(_5);\n        _5 = panicking::panic_count::decrease::promoted[0];\n        _4 = thread::local::LocalKey::<core::cell::Cell<(usize, bool)>>::with::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:444:32: 444:35}, ()>(move _5, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:444:32: 444:35}) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

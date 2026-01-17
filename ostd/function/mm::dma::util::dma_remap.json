@@ -1,0 +1,144 @@
+{
+  "name": "mm::dma::util::dma_remap",
+  "safe": false,
+  "callees": {
+    "arch::iommu::dma_remapping::has_dma_remapping": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::iter::ExactSizeIterator::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the exact remaining length of the iterator.\n\n The implementation ensures that the iterator will return exactly `len()`\n more times a [`Some(T)`] value, before returning [`None`].\n This method has a default implementation, so you usually should not\n implement it directly. However, if you can provide a more efficient\n implementation, you can do so. See the [trait-level] docs for an\n example.\n\n This function has the same safety guarantees as the\n [`Iterator::size_hint`] function.\n\n [trait-level]: ExactSizeIterator\n [`Some(T)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n // a finite range knows exactly how many times it will iterate\n let mut range = 0..5;\n\n assert_eq!(5, range.len());\n let _ = range.next();\n assert_eq!(4, range.len());\n ```\n",
+      "adt": {}
+    },
+    "util::range_alloc::RangeAllocator::alloc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates a range specific by the `size`.\n\n This is currently implemented with a simple FIRST-FIT algorithm.\n",
+      "adt": {
+        "util::range_alloc::RangeAllocator": "ImmutableAsArgument",
+        "core::ops::Range": "Constructor",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::expect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Instead, prefer to use pattern matching and handle the [`Err`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`].\n\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message including the\n passed message, and the content of the [`Err`].\n\n\n # Examples\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.expect(\"Testing expect\"); // panics with `Testing expect: emergency failure`\n ```\n\n # Recommended Message Style\n\n We recommend that `expect` messages are used to describe the reason you\n _expect_ the `Result` should be `Ok`.\n\n ```should_panic\n let path = std::env::var(\"IMPORTANT_PATH\")\n     .expect(\"env variable `IMPORTANT_PATH` should be set by `wrapper_script.sh`\");\n ```\n\n **Hint**: If you're having trouble remembering how to phrase expect\n error messages remember to focus on the word \"should\" as in \"env\n variable should be set by blah\" or \"the given binary should be available\n and executable by the current user\".\n\n For more detail on expect message styles and the reasoning behind our recommendation please\n refer to the section on [\"Common Message\n Styles\"](../../std/error/index.html#common-message-styles) in the\n [`std::error`](../../std/error/index.html) module docs.\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::step_by": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator starting at the same point, but stepping by\n the given amount at each iteration.\n\n Note 1: The first element of the iterator will always be returned,\n regardless of the step given.\n\n Note 2: The time at which ignored elements are pulled is not fixed.\n `StepBy` behaves like the sequence `self.next()`, `self.nth(step-1)`,\n `self.nth(step-1)`, …, but is also free to behave like the sequence\n `advance_n_and_return_first(&mut self, step)`,\n `advance_n_and_return_first(&mut self, step)`, …\n Which way is used may change for some iterators for performance reasons.\n The second way will advance the iterator earlier and may consume more items.\n\n `advance_n_and_return_first` is the equivalent of:\n ```\n fn advance_n_and_return_first<I>(iter: &mut I, n: usize) -> Option<I::Item>\n where\n     I: Iterator,\n {\n     let next = iter.next();\n     if n > 1 {\n         iter.nth(n - 2);\n     }\n     next\n }\n ```\n\n # Panics\n\n The method will panic if the given step is `0`.\n\n # Examples\n\n ```\n let a = [0, 1, 2, 3, 4, 5];\n let mut iter = a.into_iter().step_by(2);\n\n assert_eq!(iter.next(), Some(0));\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "arch::iommu::dma_remapping::map": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a device address to a physical address.\n\n The physical address should point to a page containing untyped, non-sensitive data that can be\n accessed by the device.\n\n # Safety\n\n While the physical address is mapped as the device address (i.e. from calling this method to\n calling [`unmap`]), it must point to an untyped memory page. Otherwise, the device may corrupt\n kernel data, which could lead to memory safety issues.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "util::range_alloc::RangeAllocator": [
+      "Ref"
+    ],
+    "core::ops::Range": [
+      "Ref",
+      "Plain",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Unknown([Field(0, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::iter::StepBy": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])"
+    ]
+  },
+  "path": 1897,
+  "span": "ostd/src/mm/dma/util.rs:233:1: 254:2",
+  "src": "unsafe fn dma_remap(pa_range: &Range<Paddr>) -> Option<Daddr> {\n    if has_dma_remapping() {\n        #[cfg(target_arch = \"x86_64\")]\n        let daddr = DADDR_ALLOCATOR\n            .alloc(pa_range.len())\n            .expect(\"failed to allocate DMA address range\");\n        #[cfg(not(target_arch = \"x86_64\"))]\n        let daddr = pa_range.clone();\n\n        for map_paddr in pa_range.clone().step_by(PAGE_SIZE) {\n            let map_daddr = (map_paddr - pa_range.start + daddr.start) as Daddr;\n            // SAFETY: The caller guarantees that `map_paddr` corresponds to\n            // untyped frames that outlive `iommu::unmap()` in `dma_unmap()`.\n            unsafe {\n                iommu::map(map_daddr, map_paddr).unwrap();\n            }\n        }\n        Some(daddr.start)\n    } else {\n        None\n    }\n}",
+  "mir": "fn mm::dma::util::dma_remap(_1: &core::ops::Range<usize>) -> core::option::Option<usize> {\n    let mut _0: core::option::Option<usize>;\n    let mut _2: bool;\n    let  _3: core::ops::Range<usize>;\n    let mut _4: core::result::Result<core::ops::Range<usize>, util::range_alloc::RangeAllocError>;\n    let mut _5: &util::range_alloc::RangeAllocator;\n    let mut _6: usize;\n    let mut _7: &str;\n    let mut _8: core::iter::StepBy<core::ops::Range<usize>>;\n    let mut _9: core::iter::StepBy<core::ops::Range<usize>>;\n    let mut _10: core::ops::Range<usize>;\n    let mut _11: core::iter::StepBy<core::ops::Range<usize>>;\n    let mut _12: core::option::Option<usize>;\n    let mut _13: &mut core::iter::StepBy<core::ops::Range<usize>>;\n    let mut _14: isize;\n    let  _15: usize;\n    let  _16: usize;\n    let mut _17: usize;\n    let mut _18: usize;\n    let mut _19: (usize, bool);\n    let mut _20: usize;\n    let mut _21: (usize, bool);\n    let  _22: ();\n    let mut _23: core::result::Result<(), arch::iommu::IommuError>;\n    let mut _24: usize;\n    debug pa_range => _1;\n    debug daddr => _3;\n    debug iter => _11;\n    debug map_paddr => _15;\n    debug map_daddr => _16;\n    bb0: {\n        StorageLive(_2);\n        _2 = arch::iommu::dma_remapping::has_dma_remapping() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb18, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = {alloc1036: &util::range_alloc::RangeAllocator};\n        StorageLive(_6);\n        _6 = <core::ops::Range<usize> as core::iter::ExactSizeIterator>::len(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _4 = util::range_alloc::RangeAllocator::alloc(move _5, move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_7);\n        _7 = \"failed to allocate DMA address range\";\n        _3 = core::result::Result::<core::ops::Range<usize>, util::range_alloc::RangeAllocError>::expect(move _4, move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageDead(_4);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = <core::ops::Range<usize> as core::clone::Clone>::clone(_1) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _9 = <core::ops::Range<usize> as core::iter::Iterator>::step_by(move _10, mm::PAGE_SIZE) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_10);\n        _8 = <core::iter::StepBy<core::ops::Range<usize>> as core::iter::IntoIterator>::into_iter(move _9) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_9);\n        StorageLive(_11);\n        _11 = move _8;\n        goto -> bb9;\n    }\n    bb9: {\n        StorageLive(_12);\n        _13 = &mut _11;\n        _12 = <core::iter::StepBy<core::ops::Range<usize>> as core::iter::Iterator>::next(_13) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _14 = discriminant(_12);\n        switchInt(move _14) -> [0: bb13, 1: bb12, otherwise: bb11];\n    }\n    bb11: {\n        unreachable;\n    }\n    bb12: {\n        _15 = ((_12 as variant#1).0: usize);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = ((*_1).0: usize);\n        _19 = CheckedSub(_15, _18);\n        assert(!move (_19.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _15, move _18) -> [success: bb14, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_8);\n        StorageLive(_24);\n        _24 = (_3.0: usize);\n        _0 = core::option::Option::Some(move _24);\n        StorageDead(_24);\n        StorageDead(_3);\n        goto -> bb19;\n    }\n    bb14: {\n        _17 = move (_19.0: usize);\n        StorageDead(_18);\n        StorageLive(_20);\n        _20 = (_3.0: usize);\n        _21 = CheckedAdd(_17, _20);\n        assert(!move (_21.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _17, move _20) -> [success: bb15, unwind unreachable];\n    }\n    bb15: {\n        _16 = move (_21.0: usize);\n        StorageDead(_20);\n        StorageDead(_17);\n        StorageLive(_23);\n        _23 = arch::iommu::dma_remapping::map(_16, _15) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        _22 = core::result::Result::<(), arch::iommu::IommuError>::unwrap(move _23) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_23);\n        StorageDead(_12);\n        goto -> bb9;\n    }\n    bb18: {\n        _0 = core::option::Option::None;\n        goto -> bb19;\n    }\n    bb19: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Allocates device addresses and maps them to the given physical address range.\n\n # Safety\n\n The provided physical address range must be untyped DMA memory that\n outlives the following [`unmap_dma_remap()`] call.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "name": "core_arch::x86::avx512bw::_mm256_maskz_unpackhi_epi8",
+  "safe": false,
+  "callees": {
+    "core_arch::x86::avx2::_mm256_unpackhi_epi8": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Unpacks and interleave 8-bit integers from the high half of each\n 128-bit lane in `a` and `b`.\n\n ```rust\n #[cfg(target_arch = \"x86\")]\n use std::arch::x86::*;\n #[cfg(target_arch = \"x86_64\")]\n use std::arch::x86_64::*;\n\n # fn main() {\n #     if is_x86_feature_detected!(\"avx2\") {\n #         #[target_feature(enable = \"avx2\")]\n #         unsafe fn worker() {\n let a = _mm256_setr_epi8(\n     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,\n     20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,\n );\n let b = _mm256_setr_epi8(\n     0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15,\n     -16, -17, -18, -19, -20, -21, -22, -23, -24, -25, -26, -27, -28, -29,\n     -30, -31,\n );\n\n let c = _mm256_unpackhi_epi8(a, b);\n\n let expected = _mm256_setr_epi8(\n     8, -8, 9, -9, 10, -10, 11, -11, 12, -12, 13, -13, 14, -14, 15, -15,\n     24, -24, 25, -25, 26, -26, 27, -27, 28, -28, 29, -29, 30, -30, 31,\n     -31,\n );\n assert_eq!(_mm256_movemask_epi8(_mm256_cmpeq_epi8(c, expected)), !0);\n\n #         }\n #         unsafe { worker(); }\n #     }\n # }\n ```\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_unpackhi_epi8)\n",
+      "adt": {
+        "core_arch::x86::__m256i": "Constructor"
+      }
+    },
+    "core_arch::x86::__m256i::as_i8x32": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core_arch::simd::i8x32": "Constructor"
+      }
+    },
+    "intrinsics::simd::simd_select_bitmask": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Selects elements from a bitmask.\n\n `M` must be an unsigned integer or array of `u8`, matching `simd_bitmask`.\n\n `T` must be a vector.\n\n For each element, if the bit in `mask` is `1`, select the element from\n `if_true`.  If the corresponding bit in `mask` is `0`, select the element from\n `if_false`.\n The remaining bits of the mask are ignored.\n\n The bitmask bit order matches `simd_bitmask`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_arch::x86::__m256i": [
+      "Plain"
+    ],
+    "core_arch::simd::i8x32": [
+      "Plain"
+    ]
+  },
+  "path": 6548,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../stdarch/crates/core_arch/src/x86/avx512bw.rs:8476:1: 8481:2",
+  "src": "pub fn _mm256_maskz_unpackhi_epi8(k: __mmask32, a: __m256i, b: __m256i) -> __m256i {\n    unsafe {\n        let unpackhi = _mm256_unpackhi_epi8(a, b).as_i8x32();\n        transmute(simd_select_bitmask(k, unpackhi, i8x32::ZERO))\n    }\n}",
+  "mir": "fn core_arch::x86::avx512bw::_mm256_maskz_unpackhi_epi8(_1: u32, _2: core_arch::x86::__m256i, _3: core_arch::x86::__m256i) -> core_arch::x86::__m256i {\n    let mut _0: core_arch::x86::__m256i;\n    let  _4: core_arch::simd::i8x32;\n    let mut _5: core_arch::x86::__m256i;\n    let mut _6: core_arch::simd::i8x32;\n    debug k => _1;\n    debug a => _2;\n    debug b => _3;\n    debug unpackhi => _4;\n    bb0: {\n        StorageLive(_5);\n        _5 = core_arch::x86::avx2::_mm256_unpackhi_epi8(_2, _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = core_arch::x86::__m256i::as_i8x32(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_6);\n        _6 = intrinsics::simd::simd_select_bitmask::<u32, core_arch::simd::i8x32>(_1, _4, core_arch::simd::i8x32::ZERO) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _0 = move _6 as core_arch::x86::__m256i;\n        StorageDead(_6);\n        return;\n    }\n}\n",
+  "doc": " Unpack and interleave 8-bit integers from the high half of each 128-bit lane in a and b, and store the results in dst using zeromask k (elements are zeroed out when the corresponding mask bit is not set).\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_maskz_unpackhi_epi8&expand=6035)\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

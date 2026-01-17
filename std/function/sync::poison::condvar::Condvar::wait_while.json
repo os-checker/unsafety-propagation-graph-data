@@ -1,0 +1,76 @@
+{
+  "name": "sync::poison::condvar::Condvar::wait_while",
+  "safe": true,
+  "callees": {
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "core::ops::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "sync::poison::condvar::Condvar::wait": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Blocks the current thread until this condition variable receives a\n notification.\n\n This function will atomically unlock the mutex specified (represented by\n `guard`) and block the current thread. This means that any calls\n to [`notify_one`] or [`notify_all`] which happen logically after the\n mutex is unlocked are candidates to wake this thread up. When this\n function call returns, the lock specified will have been re-acquired.\n\n Note that this function is susceptible to spurious wakeups. Condition\n variables normally have a boolean predicate associated with them, and\n the predicate must always be checked each time this function returns to\n protect against spurious wakeups.\n\n # Errors\n\n This function will return an error if the mutex being waited on is\n poisoned when this thread re-acquires the lock. For more information,\n see information about [poisoning] on the [`Mutex`] type.\n\n # Panics\n\n This function may [`panic!`] if it is used with more than one mutex\n over time.\n\n [`notify_one`]: Self::notify_one\n [`notify_all`]: Self::notify_all\n [poisoning]: super::Mutex#poisoning\n [`Mutex`]: super::Mutex\n\n # Examples\n\n ```\n use std::sync::{Arc, Mutex, Condvar};\n use std::thread;\n\n let pair = Arc::new((Mutex::new(false), Condvar::new()));\n let pair2 = Arc::clone(&pair);\n\n thread::spawn(move || {\n     let (lock, cvar) = &*pair2;\n     let mut started = lock.lock().unwrap();\n     *started = true;\n     // We notify the condvar that the value has changed.\n     cvar.notify_one();\n });\n\n // Wait for the thread to start up.\n let (lock, cvar) = &*pair;\n let mut started = lock.lock().unwrap();\n // As long as the value inside the `Mutex<bool>` is `false`, we wait.\n while !*started {\n     started = cvar.wait(started).unwrap();\n }\n ```\n",
+      "adt": {
+        "sync::poison::mutex::MutexGuard": "Constructor",
+        "sync::poison::condvar::Condvar": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::poison::mutex::MutexGuard": [
+      "MutRef",
+      "Plain"
+    ],
+    "sync::poison::condvar::Condvar": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 12070, kind: RigidTy(Adt(AdtDef(DefId { id: 7214, name: \"sync::poison::mutex::MutexGuard\" }), GenericArgs([Lifetime(Region { kind: ReErased }), Type(Ty { id: 9, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])"
+    ]
+  },
+  "path": 3199,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/condvar.rs:182:5: 194:6",
+  "src": "pub fn wait_while<'a, T, F>(\n        &self,\n        mut guard: MutexGuard<'a, T>,\n        mut condition: F,\n    ) -> LockResult<MutexGuard<'a, T>>\n    where\n        F: FnMut(&mut T) -> bool,\n    {\n        while condition(&mut *guard) {\n            guard = self.wait(guard)?;\n        }\n        Ok(guard)\n    }",
+  "mir": "fn sync::poison::condvar::Condvar::wait_while(_1: &sync::poison::condvar::Condvar, _2: sync::poison::mutex::MutexGuard<'_, T>, _3: F) -> core::result::Result<sync::poison::mutex::MutexGuard<'_, T>, sync::poison::PoisonError<sync::poison::mutex::MutexGuard<'_, T>>> {\n    let mut _0: core::result::Result<sync::poison::mutex::MutexGuard<'_, T>, sync::poison::PoisonError<sync::poison::mutex::MutexGuard<'_, T>>>;\n    let mut _4: bool;\n    let mut _5: &mut F;\n    let mut _6: (&mut T,);\n    let mut _7: &mut T;\n    let mut _8: &mut sync::poison::mutex::MutexGuard<'_, T>;\n    let mut _9: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, sync::poison::PoisonError<sync::poison::mutex::MutexGuard<'_, T>>>, sync::poison::mutex::MutexGuard<'_, T>>;\n    let mut _10: core::result::Result<sync::poison::mutex::MutexGuard<'_, T>, sync::poison::PoisonError<sync::poison::mutex::MutexGuard<'_, T>>>;\n    let mut _11: sync::poison::mutex::MutexGuard<'_, T>;\n    let mut _12: isize;\n    let  _13: core::result::Result<core::convert::Infallible, sync::poison::PoisonError<sync::poison::mutex::MutexGuard<'_, T>>>;\n    let  _14: sync::poison::mutex::MutexGuard<'_, T>;\n    let mut _15: sync::poison::mutex::MutexGuard<'_, T>;\n    debug self => _1;\n    debug guard => _2;\n    debug condition => _3;\n    debug residual => _13;\n    debug val => _14;\n    bb0: {\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &mut _3;\n        StorageLive(_6);\n        StorageLive(_8);\n        _8 = &mut _2;\n        _7 = <sync::poison::mutex::MutexGuard<'_, T> as core::ops::DerefMut>::deref_mut(move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        _6 = (_7);\n        _4 = <F as core::ops::FnMut<(&mut T,)>>::call_mut(move _5, move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _4) -> [0: bb8, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = move _2;\n        _10 = sync::poison::condvar::Condvar::wait::<T>(_1, move _11) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        _9 = <core::result::Result<sync::poison::mutex::MutexGuard<'_, T>, sync::poison::PoisonError<sync::poison::mutex::MutexGuard<'_, T>>> as core::ops::Try>::branch(move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        _12 = discriminant(_9);\n        switchInt(move _12) -> [0: bb7, otherwise: bb10];\n    }\n    bb7: {\n        _14 = move ((_9 as variant#0).0: sync::poison::mutex::MutexGuard<'_, T>);\n        _2 = _14;\n        StorageDead(_9);\n        StorageDead(_4);\n        goto -> bb1;\n    }\n    bb8: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_15);\n        _15 = move _2;\n        _0 = core::result::Result::Ok(move _15);\n        StorageDead(_15);\n        drop(_3) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        return;\n    }\n    bb10: {\n        unreachable;\n    }\n}\n",
+  "doc": " Blocks the current thread until the provided condition becomes false.\n\n `condition` is checked immediately; if not met (returns `true`), this\n will [`wait`] for the next notification then check again. This repeats\n until `condition` returns `false`, in which case this function returns.\n\n This function will atomically unlock the mutex specified (represented by\n `guard`) and block the current thread. This means that any calls\n to [`notify_one`] or [`notify_all`] which happen logically after the\n mutex is unlocked are candidates to wake this thread up. When this\n function call returns, the lock specified will have been re-acquired.\n\n # Errors\n\n This function will return an error if the mutex being waited on is\n poisoned when this thread re-acquires the lock. For more information,\n see information about [poisoning] on the [`Mutex`] type.\n\n [`wait`]: Self::wait\n [`notify_one`]: Self::notify_one\n [`notify_all`]: Self::notify_all\n [poisoning]: super::Mutex#poisoning\n [`Mutex`]: super::Mutex\n\n # Examples\n\n ```\n use std::sync::{Arc, Mutex, Condvar};\n use std::thread;\n\n let pair = Arc::new((Mutex::new(true), Condvar::new()));\n let pair2 = Arc::clone(&pair);\n\n thread::spawn(move || {\n     let (lock, cvar) = &*pair2;\n     let mut pending = lock.lock().unwrap();\n     *pending = false;\n     // We notify the condvar that the value has changed.\n     cvar.notify_one();\n });\n\n // Wait for the thread to start up.\n let (lock, cvar) = &*pair;\n // As long as the value inside the `Mutex<bool>` is `true`, we wait.\n let _guard = cvar.wait_while(lock.lock().unwrap(), |pending| { *pending }).unwrap();\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

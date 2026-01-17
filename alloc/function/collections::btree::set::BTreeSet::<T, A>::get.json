@@ -1,0 +1,51 @@
+{
+  "name": "collections::btree::set::BTreeSet::<T, A>::get",
+  "safe": true,
+  "callees": {
+    "collections::btree::map::BTreeMap::<K, V, A>::get_key_value": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the key-value pair corresponding to the supplied key. This is\n potentially useful:\n - for key types where non-identical keys can be considered equal;\n - for getting the `&K` stored key value from a borrowed `&Q` lookup key; or\n - for getting a reference to a key with the same lifetime as the collection.\n\n The supplied key may be any borrowed form of the map's key type, but the ordering\n on the borrowed form *must* match the ordering on the key type.\n\n # Examples\n\n ```\n use std::cmp::Ordering;\n use std::collections::BTreeMap;\n\n #[derive(Clone, Copy, Debug)]\n struct S {\n     id: u32,\n #   #[allow(unused)] // prevents a \"field `name` is never read\" error\n     name: &'static str, // ignored by equality and ordering operations\n }\n\n impl PartialEq for S {\n     fn eq(&self, other: &S) -> bool {\n         self.id == other.id\n     }\n }\n\n impl Eq for S {}\n\n impl PartialOrd for S {\n     fn partial_cmp(&self, other: &S) -> Option<Ordering> {\n         self.id.partial_cmp(&other.id)\n     }\n }\n\n impl Ord for S {\n     fn cmp(&self, other: &S) -> Ordering {\n         self.id.cmp(&other.id)\n     }\n }\n\n let j_a = S { id: 1, name: \"Jessica\" };\n let j_b = S { id: 1, name: \"Jess\" };\n let p = S { id: 2, name: \"Paul\" };\n assert_eq!(j_a, j_b);\n\n let mut map = BTreeMap::new();\n map.insert(j_a, \"Paris\");\n assert_eq!(map.get_key_value(&j_a), Some((&j_a, &\"Paris\")));\n assert_eq!(map.get_key_value(&j_b), Some((&j_a, &\"Paris\"))); // the notable case\n assert_eq!(map.get_key_value(&p), None);\n ```\n",
+      "adt": {
+        "collections::btree::map::BTreeMap": "ImmutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::option::Option::<T>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).\n\n # Examples\n\n Calculates the length of an <code>Option<[String]></code> as an\n <code>Option<[usize]></code>, consuming the original:\n\n [String]: ../../std/string/struct.String.html \"String\"\n ```\n let maybe_some_string = Some(String::from(\"Hello, World!\"));\n // `Option::map` takes self *by value*, consuming `maybe_some_string`\n let maybe_some_len = maybe_some_string.map(|s| s.len());\n assert_eq!(maybe_some_len, Some(13));\n\n let x: Option<&str> = None;\n assert_eq!(x.map(|s| s.len()), None);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::btree::map::BTreeMap": [
+      "Ref"
+    ],
+    "collections::btree::set::BTreeSet": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 1052,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/set.rs:629:5: 635:6",
+  "src": "pub fn get<Q: ?Sized>(&self, value: &Q) -> Option<&T>\n    where\n        T: Borrow<Q> + Ord,\n        Q: Ord,\n    {\n        self.map.get_key_value(value).map(|(k, _)| k)\n    }",
+  "mir": "fn collections::btree::set::BTreeSet::<T, A>::get(_1: &collections::btree::set::BTreeSet<T, A>, _2: &Q) -> core::option::Option<&T> {\n    let mut _0: core::option::Option<&T>;\n    let mut _3: core::option::Option<(&T, &collections::btree::set_val::SetValZST)>;\n    let mut _4: &collections::btree::map::BTreeMap<T, collections::btree::set_val::SetValZST, A>;\n    debug self => _1;\n    debug value => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &((*_1).0: collections::btree::map::BTreeMap<T, collections::btree::set_val::SetValZST, A>);\n        _3 = collections::btree::map::BTreeMap::<T, collections::btree::set_val::SetValZST, A>::get_key_value::<Q>(move _4, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _0 = core::option::Option::<(&T, &collections::btree::set_val::SetValZST)>::map::<&T, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/set.rs:634:43: 634:51}>(move _3, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/set.rs:634:43: 634:51}) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Returns a reference to the element in the set, if any, that is equal to\n the value.\n\n The value may be any borrowed form of the set's element type,\n but the ordering on the borrowed form *must* match the\n ordering on the element type.\n\n # Examples\n\n ```\n use std::collections::BTreeSet;\n\n let set = BTreeSet::from([1, 2, 3]);\n assert_eq!(set.get(&2), Some(&2));\n assert_eq!(set.get(&4), None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "name": "sync::atomic::AtomicUsize::compare_exchange",
+  "safe": true,
+  "callees": {
+    "cell::UnsafeCell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the wrapped value.\n\n This can be cast to a pointer of any kind. When creating references, you must uphold the\n aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and\n caveats.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let five = uc.get();\n ```\n",
+      "adt": {
+        "cell::UnsafeCell": "MutableAsArgument"
+      }
+    },
+    "sync::atomic::atomic_compare_exchange": {
+      "safe": false,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Publicly exposed for stdarch; nobody else should use this.\n",
+      "adt": {
+        "result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "cell::UnsafeCell": [
+      "Ref"
+    ],
+    "sync::atomic::AtomicUsize": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 17509,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/sync/atomic.rs:3111:13: 3118:14",
+  "src": "pub fn compare_exchange(&self,\n                                    current: $int_type,\n                                    new: $int_type,\n                                    success: Ordering,\n                                    failure: Ordering) -> Result<$int_type, $int_type> {\n                // SAFETY: data races are prevented by atomic intrinsics.\n                unsafe { atomic_compare_exchange(self.v.get(), current, new, success, failure) }\n            }",
+  "mir": "fn sync::atomic::AtomicUsize::compare_exchange(_1: &sync::atomic::AtomicUsize, _2: usize, _3: usize, _4: sync::atomic::Ordering, _5: sync::atomic::Ordering) -> result::Result<usize, usize> {\n    let mut _0: result::Result<usize, usize>;\n    let mut _6: *mut usize;\n    let mut _7: &cell::UnsafeCell<usize>;\n    debug self => _1;\n    debug current => _2;\n    debug new => _3;\n    debug success => _4;\n    debug failure => _5;\n    bb0: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).0: cell::UnsafeCell<usize>);\n        _6 = cell::UnsafeCell::<usize>::get(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        _0 = sync::atomic::atomic_compare_exchange::<usize>(move _6, _2, _3, _4, _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        return;\n    }\n}\n",
+  "doc": " Stores a value into the atomic integer if the current value is the same as\n the `current` value.\n\n The return value is a result indicating whether the new value was written and\n containing the previous value. On success this value is guaranteed to be equal to\n `current`.\n\n `compare_exchange` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. `success` describes the required ordering for the\n read-modify-write operation that takes place if the comparison with `current` succeeds.\n `failure` describes the required ordering for the load operation that takes place when\n the comparison fails. Using [`Acquire`] as success ordering makes the store part\n of this operation [`Relaxed`], and using [`Release`] makes the successful load\n [`Relaxed`]. The failure ordering can only be [`SeqCst`], [`Acquire`] or [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.compare_exchange(5, 10,\n                                      Ordering::Acquire,\n                                      Ordering::Relaxed),\n            Ok(5));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n\n assert_eq!(some_var.compare_exchange(6, 12,\n                                      Ordering::SeqCst,\n                                      Ordering::Acquire),\n            Err(10));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n\n # Considerations\n\n `compare_exchange` is a [compare-and-swap operation] and thus exhibits the usual downsides\n of CAS operations. In particular, a load of the value followed by a successful\n `compare_exchange` with the previous load *does not ensure* that other threads have not\n changed the value in the interim! This is usually important when the *equality* check in\n the `compare_exchange` is being used to check the *identity* of a value, but equality\n does not necessarily imply identity. This is a particularly common case for pointers, as\n a pointer holding the same address does not imply that the same object exists at that\n address! In this case, `compare_exchange` can lead to the [ABA problem].\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

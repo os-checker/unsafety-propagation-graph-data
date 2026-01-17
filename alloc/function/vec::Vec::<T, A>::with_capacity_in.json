@@ -1,0 +1,36 @@
+{
+  "name": "vec::Vec::<T, A>::with_capacity_in",
+  "safe": true,
+  "callees": {
+    "raw_vec::RawVec::<T, A>::with_capacity_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Like `with_capacity`, but parameterized over the choice of\n allocator for the returned `RawVec`.\n",
+      "adt": {
+        "raw_vec::RawVec": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "raw_vec::RawVec": [
+      "Plain"
+    ],
+    "vec::Vec": [
+      "Plain"
+    ]
+  },
+  "path": 2407,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:912:5: 914:6",
+  "src": "pub fn with_capacity_in(capacity: usize, alloc: A) -> Self {\n        Vec { buf: RawVec::with_capacity_in(capacity, alloc), len: 0 }\n    }",
+  "mir": "fn vec::Vec::<T, A>::with_capacity_in(_1: usize, _2: A) -> vec::Vec<T, A> {\n    let mut _0: vec::Vec<T, A>;\n    let mut _3: raw_vec::RawVec<T, A>;\n    debug capacity => _1;\n    debug alloc => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = raw_vec::RawVec::<T, A>::with_capacity_in(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = Vec(move _3, 0_usize);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Constructs a new, empty `Vec<T, A>` with at least the specified capacity\n with the provided allocator.\n\n The vector will be able to hold at least `capacity` elements without\n reallocating. This method is allowed to allocate for more elements than\n `capacity`. If `capacity` is zero, the vector will not allocate.\n\n It is important to note that although the returned vector has the\n minimum *capacity* specified, the vector will have a zero *length*. For\n an explanation of the difference between length and capacity, see\n *[Capacity and reallocation]*.\n\n If it is important to know the exact allocated capacity of a `Vec`,\n always use the [`capacity`] method after construction.\n\n For `Vec<T, A>` where `T` is a zero-sized type, there will be no allocation\n and the capacity will always be `usize::MAX`.\n\n [Capacity and reallocation]: #capacity-and-reallocation\n [`capacity`]: Vec::capacity\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let mut vec = Vec::with_capacity_in(10, System);\n\n // The vector contains no items, even though it has capacity for more\n assert_eq!(vec.len(), 0);\n assert!(vec.capacity() >= 10);\n\n // These are all done without reallocating...\n for i in 0..10 {\n     vec.push(i);\n }\n assert_eq!(vec.len(), 10);\n assert!(vec.capacity() >= 10);\n\n // ...but this may make the vector reallocate\n vec.push(11);\n assert_eq!(vec.len(), 11);\n assert!(vec.capacity() >= 11);\n\n // A vector of a zero-sized type will always over-allocate, since no\n // allocation is necessary\n let vec_units = Vec::<(), System>::with_capacity_in(10, System);\n assert_eq!(vec_units.capacity(), usize::MAX);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

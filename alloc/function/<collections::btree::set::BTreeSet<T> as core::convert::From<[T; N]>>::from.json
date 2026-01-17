@@ -1,0 +1,68 @@
+{
+  "name": "<collections::btree::set::BTreeSet<T> as core::convert::From<[T; N]>>::from",
+  "safe": true,
+  "callees": {
+    "collections::btree::set::BTreeSet::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Makes a new, empty `BTreeSet`.\n\n Does not allocate anything on its own.\n\n # Examples\n\n ```\n # #![allow(unused_mut)]\n use std::collections::BTreeSet;\n\n let mut set: BTreeSet<i32> = BTreeSet::new();\n ```\n",
+      "adt": {
+        "collections::btree::set::BTreeSet": "Constructor"
+      }
+    },
+    "slice::<impl [T]>::sort": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sorts the slice in ascending order, preserving initial order of equal elements.\n\n This sort is stable (i.e., does not reorder equal elements) and *O*(*n* \\* log(*n*))\n worst-case.\n\n If the implementation of [`Ord`] for `T` does not implement a [total order], the function\n may panic; even if the function exits normally, the resulting order of elements in the slice\n is unspecified. See also the note on panicking below.\n\n When applicable, unstable sorting is preferred because it is generally faster than stable\n sorting and it doesn't allocate auxiliary memory. See\n [`sort_unstable`](slice::sort_unstable). The exception are partially sorted slices, which\n may be better served with `slice::sort`.\n\n Sorting types that only implement [`PartialOrd`] such as [`f32`] and [`f64`] require\n additional precautions. For example, `f32::NAN != f32::NAN`, which doesn't fulfill the\n reflexivity requirement of [`Ord`]. By using an alternative comparison function with\n `slice::sort_by` such as [`f32::total_cmp`] or [`f64::total_cmp`] that defines a [total\n order] users can sort slices containing floating-point values. Alternatively, if all values\n in the slice are guaranteed to be in a subset for which [`PartialOrd::partial_cmp`] forms a\n [total order], it's possible to sort the slice with `sort_by(|a, b|\n a.partial_cmp(b).unwrap())`.\n\n # Current implementation\n\n The current implementation is based on [driftsort] by Orson Peters and Lukas Bergdoll, which\n combines the fast average case of quicksort with the fast worst case and partial run\n detection of mergesort, achieving linear time on fully sorted and reversed inputs. On inputs\n with k distinct elements, the expected time to sort the data is *O*(*n* \\* log(*k*)).\n\n The auxiliary memory allocation behavior depends on the input length. Short slices are\n handled without allocation, medium sized slices allocate `self.len()` and beyond that it\n clamps at `self.len() / 2`.\n\n # Panics\n\n May panic if the implementation of [`Ord`] for `T` does not implement a [total order], or if\n the [`Ord`] implementation itself panics.\n\n All safe functions on slices preserve the invariant that even if the function panics, all\n original elements will remain in the slice and any possible modifications via interior\n mutability are observed in the input. This ensures that recovery code (for instance inside\n of a `Drop` or following a `catch_unwind`) will still have access to all the original\n elements. For instance, if the slice belongs to a `Vec`, the `Vec::drop` method will be able\n to dispose of all contained elements.\n\n # Examples\n\n ```\n let mut v = [4, -5, 1, -3, 2];\n\n v.sort();\n assert_eq!(v, [-5, -3, 1, 2, 4]);\n ```\n\n [driftsort]: https://github.com/Voultapher/driftsort\n [total order]: https://en.wikipedia.org/wiki/Total_order\n",
+      "adt": {}
+    },
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "collections::btree::set::BTreeSet::<T, A>::from_sorted_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::btree::set::BTreeSet": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "collections::btree::set::BTreeSet": [
+      "Plain"
+    ],
+    "core::array::IntoIter": [
+      "Plain"
+    ]
+  },
+  "path": 1036,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/set.rs:1506:5: 1514:6",
+  "src": "fn from(mut arr: [T; N]) -> Self {\n        if N == 0 {\n            return BTreeSet::new();\n        }\n\n        // use stable sort to preserve the insertion order.\n        arr.sort();\n        BTreeSet::from_sorted_iter(IntoIterator::into_iter(arr), Global)\n    }",
+  "mir": "fn <collections::btree::set::BTreeSet<T> as core::convert::From<[T; N]>>::from(_1: [T; N]) -> collections::btree::set::BTreeSet<T> {\n    let mut _0: collections::btree::set::BTreeSet<T>;\n    let mut _2: bool;\n    let  _3: ();\n    let mut _4: &mut [T];\n    let mut _5: &mut [T; N];\n    let mut _6: core::array::IntoIter<T, N>;\n    let mut _7: [T; N];\n    debug arr => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = Eq(N, 0_usize);\n        switchInt(move _2) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        _0 = collections::btree::set::BTreeSet::<T>::new() -> [return: bb6, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &mut _1;\n        _4 = move _5 as &mut [T];\n        StorageDead(_5);\n        _3 = slice::<impl [T]>::sort(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = move _1;\n        _6 = <[T; N] as core::iter::IntoIterator>::into_iter(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        _0 = collections::btree::set::BTreeSet::<T>::from_sorted_iter::<core::array::IntoIter<T, N>>(move _6, alloc::Global) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        goto -> bb7;\n    }\n    bb6: {\n        StorageDead(_2);\n        drop(_1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        return;\n    }\n}\n",
+  "doc": " Converts a `[T; N]` into a `BTreeSet<T>`.\n\n If the array contains any equal values,\n all but one will be dropped.\n\n # Examples\n\n ```\n use std::collections::BTreeSet;\n\n let set1 = BTreeSet::from([1, 2, 3, 4]);\n let set2: BTreeSet<_> = [1, 2, 3, 4].into();\n assert_eq!(set1, set2);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "thread::local::LocalKey::<core::cell::Cell<T>>::take",
+  "safe": true,
+  "callees": {
+    "thread::local::LocalKey::<T>::with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires a reference to the value in this TLS key.\n\n This will lazily initialize the value if this thread has not referenced\n this key yet.\n\n # Panics\n\n This function will `panic!()` if the key currently has its\n destructor running, and it **may** panic if the destructor has\n previously been run for this thread.\n\n # Examples\n\n ```\n thread_local! {\n     pub static STATIC: String = String::from(\"I am\");\n }\n\n assert_eq!(\n     STATIC.with(|original_value| format!(\"{original_value} initialized\")),\n     \"I am initialized\",\n );\n ```\n",
+      "adt": {
+        "thread::local::LocalKey": "ImmutableAsArgument"
+      }
+    },
+    "core::cell::Cell::<T>::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes the value of the cell, leaving `Default::default()` in its place.\n\n # Examples\n\n ```\n use std::cell::Cell;\n\n let c = Cell::new(5);\n let five = c.take();\n\n assert_eq!(five, 5);\n assert_eq!(c.into_inner(), 0);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "thread::local::LocalKey": [
+      "Ref"
+    ]
+  },
+  "path": 4524,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/local.rs:636:5: 641:6",
+  "src": "pub fn take(&'static self) -> T\n    where\n        T: Default,\n    {\n        self.with(Cell::take)\n    }",
+  "mir": "fn thread::local::LocalKey::<core::cell::Cell<T>>::take(_1: &thread::local::LocalKey<core::cell::Cell<T>>) -> T {\n    let mut _0: T;\n    debug self => _1;\n    bb0: {\n        _0 = thread::local::LocalKey::<core::cell::Cell<T>>::with::<for<'a> fn(&'a core::cell::Cell<T>) -> T {core::cell::Cell::<T>::take}, T>(_1, core::cell::Cell::<T>::take) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Takes the contained value, leaving `Default::default()` in its place.\n\n This will lazily initialize the value if this thread has not referenced\n this key yet.\n\n # Panics\n\n Panics if the key currently has its destructor running,\n and it **may** panic if the destructor has previously been run for this thread.\n\n # Examples\n\n ```\n use std::cell::Cell;\n\n thread_local! {\n     static X: Cell<Option<i32>> = const { Cell::new(Some(1)) };\n }\n\n assert_eq!(X.take(), Some(1));\n assert_eq!(X.take(), None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

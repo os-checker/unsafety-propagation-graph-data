@@ -1,0 +1,40 @@
+{
+  "name": "path::Components::<'a>::parse_single_component",
+  "safe": false,
+  "callees": {
+    "ffi::os_str::OsStr::from_encoded_bytes_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a slice of bytes to an OS string slice without checking that the string contains\n valid `OsStr`-encoded data.\n\n The byte encoding is an unspecified, platform-specific, self-synchronizing superset of UTF-8.\n By being a self-synchronizing superset of UTF-8, this encoding is also a superset of 7-bit\n ASCII.\n\n See the [module's toplevel documentation about conversions][conversions] for safe,\n cross-platform [conversions] from/to native representations.\n\n # Safety\n\n As the encoding is unspecified, callers must pass in bytes that originated as a mixture of\n validated UTF-8 and bytes from [`OsStr::as_encoded_bytes`] from within the same Rust version\n built for the same target platform.  For example, reconstructing an `OsStr` from bytes sent\n over the network or stored in a file will likely violate these safety rules.\n\n Due to the encoding being self-synchronizing, the bytes from [`OsStr::as_encoded_bytes`] can be\n split either immediately before or immediately after any valid non-empty UTF-8 substring.\n\n # Example\n\n ```\n use std::ffi::OsStr;\n\n let os_str = OsStr::new(\"Mary had a little lamb\");\n let bytes = os_str.as_encoded_bytes();\n let words = bytes.split(|b| *b == b' ');\n let words: Vec<&OsStr> = words.map(|word| {\n     // SAFETY:\n     // - Each `word` only contains content that originated from `OsStr::as_encoded_bytes`\n     // - Only split with ASCII whitespace which is a non-empty UTF-8 substring\n     unsafe { OsStr::from_encoded_bytes_unchecked(word) }\n }).collect();\n ```\n\n [conversions]: super#conversions\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ffi::os_str::OsStr": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "path::Component": [
+      "Plain"
+    ],
+    "path::Components": [
+      "Ref"
+    ]
+  },
+  "path": 2379,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:742:5: 752:6",
+  "src": "unsafe fn parse_single_component<'b>(&self, comp: &'b [u8]) -> Option<Component<'b>> {\n        match comp {\n            b\".\" if HAS_PREFIXES && self.prefix_verbatim() => Some(Component::CurDir),\n            b\".\" => None, // . components are normalized away, except at\n            // the beginning of a path, which is treated\n            // separately via `include_cur_dir`\n            b\"..\" => Some(Component::ParentDir),\n            b\"\" => None,\n            _ => Some(Component::Normal(unsafe { OsStr::from_encoded_bytes_unchecked(comp) })),\n        }\n    }",
+  "mir": "fn path::Components::<'a>::parse_single_component(_1: &path::Components<'_>, _2: &[u8]) -> core::option::Option<path::Component<'_>> {\n    let mut _0: core::option::Option<path::Component<'_>>;\n    let mut _3: usize;\n    let mut _4: usize;\n    let mut _5: usize;\n    let mut _6: path::Component<'_>;\n    let mut _7: path::Component<'_>;\n    let  _8: &ffi::os_str::OsStr;\n    debug self => _1;\n    debug comp => _2;\n    bb0: {\n        _5 = PtrMetadata(_2);\n        switchInt(_5) -> [1: bb2, otherwise: bb4];\n    }\n    bb1: {\n        StorageLive(_7);\n        _8 = ffi::os_str::OsStr::from_encoded_bytes_unchecked(_2) -> [return: bb10, unwind unreachable];\n    }\n    bb2: {\n        switchInt((*_2)[0 of 1]) -> [46: bb3, otherwise: bb1];\n    }\n    bb3: {\n        _0 = core::option::Option::None;\n        goto -> bb11;\n    }\n    bb4: {\n        _4 = PtrMetadata(_2);\n        switchInt(_4) -> [2: bb5, otherwise: bb7];\n    }\n    bb5: {\n        switchInt((*_2)[0 of 2]) -> [46: bb6, otherwise: bb1];\n    }\n    bb6: {\n        switchInt((*_2)[1 of 2]) -> [46: bb9, otherwise: bb1];\n    }\n    bb7: {\n        _3 = PtrMetadata(_2);\n        switchInt(_3) -> [0: bb8, otherwise: bb1];\n    }\n    bb8: {\n        _0 = core::option::Option::None;\n        goto -> bb11;\n    }\n    bb9: {\n        StorageLive(_6);\n        _6 = path::Component::ParentDir;\n        _0 = core::option::Option::Some(move _6);\n        StorageDead(_6);\n        goto -> bb11;\n    }\n    bb10: {\n        _7 = path::Component::Normal(_8);\n        _0 = core::option::Option::Some(move _7);\n        StorageDead(_7);\n        goto -> bb11;\n    }\n    bb11: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "name": "arch::boot::linux_boot::parse_acpi_arg",
+  "safe": true,
+  "callees": {
+    "core::convert::TryInto::try_into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the conversion.\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::expect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Instead, prefer to use pattern matching and handle the [`Err`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`].\n\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message including the\n passed message, and the content of the [`Err`].\n\n\n # Examples\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.expect(\"Testing expect\"); // panics with `Testing expect: emergency failure`\n ```\n\n # Recommended Message Style\n\n We recommend that `expect` messages are used to describe the reason you\n _expect_ the `Result` should be `Ok`.\n\n ```should_panic\n let path = std::env::var(\"IMPORTANT_PATH\")\n     .expect(\"env variable `IMPORTANT_PATH` should be set by `wrapper_script.sh`\");\n ```\n\n **Hint**: If you're having trouble remembering how to phrase expect\n error messages remember to focus on the word \"should\" as in \"env\n variable should be set by blah\" or \"the given binary should be available\n and executable by the current user\".\n\n For more detail on expect message styles and the reasoning behind our recommendation please\n refer to the section on [\"Common Message\n Styles\"](../../std/error/index.html#common-message-styles) in the\n [`std::error`](../../std/error/index.html) module docs.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "linux_boot_params::BootParams": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(5)))",
+      "Ref"
+    ],
+    "boot::BootloaderAcpiArg": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 123,
+  "span": "ostd/src/arch/x86/boot/linux_boot/mod.rs:89:1: 97:2",
+  "src": "fn parse_acpi_arg(boot_params: &BootParams) -> BootloaderAcpiArg {\n    let rsdp = boot_params.acpi_rsdp_addr;\n\n    if rsdp == 0 {\n        BootloaderAcpiArg::NotProvided\n    } else {\n        BootloaderAcpiArg::Rsdp(rsdp.try_into().expect(\"RSDP address overflowed!\"))\n    }\n}",
+  "mir": "fn arch::boot::linux_boot::parse_acpi_arg(_1: &linux_boot_params::BootParams) -> boot::BootloaderAcpiArg {\n    let mut _0: boot::BootloaderAcpiArg;\n    let  _2: u64;\n    let mut _3: usize;\n    let mut _4: core::result::Result<usize, core::num::TryFromIntError>;\n    let mut _5: &str;\n    debug boot_params => _1;\n    debug rsdp => _2;\n    bb0: {\n        _2 = ((*_1).5: u64);\n        switchInt(_2) -> [0: bb1, otherwise: bb2];\n    }\n    bb1: {\n        _0 = boot::BootloaderAcpiArg::NotProvided;\n        goto -> bb5;\n    }\n    bb2: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = <u64 as core::convert::TryInto<usize>>::try_into(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_5);\n        _5 = \"RSDP address overflowed!\";\n        _3 = core::result::Result::<usize, core::num::TryFromIntError>::expect(move _4, move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _0 = boot::BootloaderAcpiArg::Rsdp(move _3);\n        StorageDead(_3);\n        goto -> bb5;\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "<wtf8::EncodeWide<'_> as iter::traits::iterator::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "option::Option::<T>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).\n\n # Examples\n\n Calculates the length of an <code>Option<[String]></code> as an\n <code>Option<[usize]></code>, consuming the original:\n\n [String]: ../../std/string/struct.String.html \"String\"\n ```\n let maybe_some_string = Some(String::from(\"Hello, World!\"));\n // `Option::map` takes self *by value*, consuming `maybe_some_string`\n let maybe_some_len = maybe_some_string.map(|s| s.len());\n assert_eq!(maybe_some_len, Some(13));\n\n let x: Option<&str> = None;\n assert_eq!(x.map(|s| s.len()), None);\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "wtf8::EncodeWide": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ],
+    "wtf8::Wtf8CodePoints": [
+      "MutRef"
+    ]
+  },
+  "path": 17781,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/wtf8.rs:543:5: 558:6",
+  "src": "fn next(&mut self) -> Option<u16> {\n        if self.extra != 0 {\n            let tmp = self.extra;\n            self.extra = 0;\n            return Some(tmp);\n        }\n\n        let mut buf = [0; char::MAX_LEN_UTF16];\n        self.code_points.next().map(|code_point| {\n            let n = encode_utf16_raw(code_point.to_u32(), &mut buf).len();\n            if n == 2 {\n                self.extra = buf[1];\n            }\n            buf[0]\n        })\n    }",
+  "mir": "fn <wtf8::EncodeWide<'_> as iter::traits::iterator::Iterator>::next(_1: &mut wtf8::EncodeWide<'_>) -> option::Option<u16> {\n    let mut _0: option::Option<u16>;\n    let mut _2: u16;\n    let  _3: u16;\n    let mut _4: [u16; 2];\n    let mut _5: option::Option<wtf8::CodePoint>;\n    let mut _6: &mut wtf8::Wtf8CodePoints<'_>;\n    let mut _7: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/wtf8.rs:551:37: 551:49};\n    let mut _8: &mut [u16; 2];\n    let mut _9: &mut u16;\n    debug self => _1;\n    debug tmp => _3;\n    debug buf => _4;\n    bb0: {\n        StorageLive(_2);\n        _2 = ((*_1).1: u16);\n        switchInt(move _2) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_2);\n        _3 = ((*_1).1: u16);\n        ((*_1).1: u16) = 0_u16;\n        _0 = option::Option::Some(_3);\n        goto -> bb5;\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_4);\n        _4 = [0_u16; 2];\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut ((*_1).0: wtf8::Wtf8CodePoints<'_>);\n        _5 = <wtf8::Wtf8CodePoints<'_> as iter::traits::iterator::Iterator>::next(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &mut _4;\n        StorageLive(_9);\n        _9 = &mut ((*_1).1: u16);\n        _7 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/wtf8.rs:551:37: 551:49}(move _8, move _9);\n        StorageDead(_9);\n        StorageDead(_8);\n        _0 = option::Option::<wtf8::CodePoint>::map::<u16, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/wtf8.rs:551:37: 551:49}>(move _5, move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageDead(_4);\n        goto -> bb5;\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

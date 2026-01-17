@@ -1,0 +1,77 @@
+{
+  "name": "sys::pal::unix::os::split_paths",
+  "safe": true,
+  "callees": {
+    "os::unix::ffi::os_str::OsStrExt::as_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the underlying byte view of the [`OsStr`] slice.\n\n See the module documentation for an example.\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::split": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over subslices separated by elements that match\n `pred`. The matched element is not contained in the subslices.\n\n # Examples\n\n ```\n let slice = [10, 40, 33, 20];\n let mut iter = slice.split(|num| num % 3 == 0);\n\n assert_eq!(iter.next().unwrap(), &[10, 40]);\n assert_eq!(iter.next().unwrap(), &[20]);\n assert!(iter.next().is_none());\n ```\n\n If the first element is matched, an empty slice will be the first item\n returned by the iterator. Similarly, if the last element in the slice\n is matched, an empty slice will be the last item returned by the\n iterator:\n\n ```\n let slice = [10, 40, 33];\n let mut iter = slice.split(|num| num % 3 == 0);\n\n assert_eq!(iter.next().unwrap(), &[10, 40]);\n assert_eq!(iter.next().unwrap(), &[]);\n assert!(iter.next().is_none());\n ```\n\n If two matched elements are directly adjacent, an empty slice will be\n present between them:\n\n ```\n let slice = [10, 6, 33, 20];\n let mut iter = slice.split(|num| num % 3 == 0);\n\n assert_eq!(iter.next().unwrap(), &[10]);\n assert_eq!(iter.next().unwrap(), &[]);\n assert_eq!(iter.next().unwrap(), &[20]);\n assert!(iter.next().is_none());\n ```\n",
+      "adt": {}
+    },
+    "sys::pal::unix::os::split_paths::is_separator": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::iter::Iterator::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes a closure and creates an iterator which calls that closure on each\n element.\n\n `map()` transforms one iterator into another, by means of its argument:\n something that implements [`FnMut`]. It produces a new iterator which\n calls this closure on each element of the original iterator.\n\n If you are good at thinking in types, you can think of `map()` like this:\n If you have an iterator that gives you elements of some type `A`, and\n you want an iterator of some other type `B`, you can use `map()`,\n passing a closure that takes an `A` and returns a `B`.\n\n `map()` is conceptually similar to a [`for`] loop. However, as `map()` is\n lazy, it is best used when you're already working with other iterators.\n If you're doing some sort of looping for a side effect, it's considered\n more idiomatic to use [`for`] than `map()`.\n\n [`for`]: ../../book/ch03-05-control-flow.html#looping-through-a-collection-with-for\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.iter().map(|x| 2 * x);\n\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), Some(6));\n assert_eq!(iter.next(), None);\n ```\n\n If you're doing some sort of side effect, prefer [`for`] to `map()`:\n\n ```\n # #![allow(unused_must_use)]\n // don't do this:\n (0..5).map(|x| println!(\"{x}\"));\n\n // it won't even execute, as it is lazy. Rust will warn you about this.\n\n // Instead, use a for-loop:\n for x in 0..5 {\n     println!(\"{x}\");\n }\n ```\n",
+      "adt": {}
+    },
+    "sys::pal::unix::os::split_paths::into_pathbuf": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ffi::os_str::OsStr": [
+      "Ref"
+    ],
+    "core::slice::Split": [
+      "Plain"
+    ],
+    "core::iter::Map": [
+      "Plain"
+    ]
+  },
+  "path": 3927,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/os.rs:197:1: 207:2",
+  "src": "pub fn split_paths(unparsed: &OsStr) -> SplitPaths<'_> {\n    fn is_separator(&b: &u8) -> bool {\n        b == PATH_SEPARATOR\n    }\n\n    fn into_pathbuf(part: &[u8]) -> PathBuf {\n        PathBuf::from(OsStr::from_bytes(part))\n    }\n\n    unparsed.as_bytes().split(is_separator).map(into_pathbuf)\n}",
+  "mir": "fn sys::pal::unix::os::split_paths(_1: &ffi::os_str::OsStr) -> core::iter::Map<core::slice::Split<'_, u8, for<'a> fn(&'a u8) -> bool {sys::pal::unix::os::split_paths::is_separator}>, for<'a> fn(&'a [u8]) -> path::PathBuf {sys::pal::unix::os::split_paths::into_pathbuf}> {\n    let mut _0: core::iter::Map<core::slice::Split<'_, u8, for<'a> fn(&'a u8) -> bool {sys::pal::unix::os::split_paths::is_separator}>, for<'a> fn(&'a [u8]) -> path::PathBuf {sys::pal::unix::os::split_paths::into_pathbuf}>;\n    let mut _2: core::slice::Split<'_, u8, for<'a> fn(&'a u8) -> bool {sys::pal::unix::os::split_paths::is_separator}>;\n    let  _3: &[u8];\n    debug unparsed => _1;\n    bb0: {\n        StorageLive(_2);\n        _3 = <ffi::os_str::OsStr as os::unix::ffi::os_str::OsStrExt>::as_bytes(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = core::slice::<impl [u8]>::split::<for<'a> fn(&'a u8) -> bool {sys::pal::unix::os::split_paths::is_separator}>(_3, sys::pal::unix::os::split_paths::is_separator) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _0 = <core::slice::Split<'_, u8, for<'a> fn(&'a u8) -> bool {sys::pal::unix::os::split_paths::is_separator}> as core::iter::Iterator>::map::<path::PathBuf, for<'a> fn(&'a [u8]) -> path::PathBuf {sys::pal::unix::os::split_paths::into_pathbuf}>(move _2, sys::pal::unix::os::split_paths::into_pathbuf) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

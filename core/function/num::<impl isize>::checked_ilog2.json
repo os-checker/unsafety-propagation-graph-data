@@ -1,0 +1,31 @@
+{
+  "name": "num::<impl isize>::checked_ilog2",
+  "safe": true,
+  "callees": {
+    "intrinsics::ctlz_nonzero": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Like `ctlz`, but extra-unsafe as it returns `undef` when\n given an `x` with value `0`.\n\n This intrinsic does not have a stable counterpart.\n\n # Examples\n\n ```\n #![feature(core_intrinsics)]\n # #![allow(internal_features)]\n\n use std::intrinsics::ctlz_nonzero;\n\n let x = 0b0001_1100_u8;\n let num_leading = unsafe { ctlz_nonzero(x) };\n assert_eq!(num_leading, 3);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 2942,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/int_macros.rs:3505:9: 3513:10",
+  "src": "pub const fn checked_ilog2(self) -> Option<u32> {\n            if self <= 0 {\n                None\n            } else {\n                // SAFETY: We just checked that this number is positive\n                let log = (Self::BITS - 1) - unsafe { intrinsics::ctlz_nonzero(self) as u32 };\n                Some(log)\n            }\n        }",
+  "mir": "fn num::<impl isize>::checked_ilog2(_1: isize) -> option::Option<u32> {\n    let mut _0: option::Option<u32>;\n    let mut _2: bool;\n    let  _3: u32;\n    let mut _4: u32;\n    let mut _5: (u32, bool);\n    let mut _6: u32;\n    let mut _7: (u32, bool);\n    debug self => _1;\n    debug log => _3;\n    bb0: {\n        StorageLive(_2);\n        _2 = Le(_1, 0_isize);\n        switchInt(move _2) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        _0 = option::Option::None;\n        goto -> bb6;\n    }\n    bb2: {\n        StorageLive(_4);\n        _5 = CheckedSub(num::<impl isize>::BITS, 1_u32);\n        assert(!move (_5.1: bool), \"attempt to compute `{} - {}`, which would overflow\", num::<impl isize>::BITS, 1_u32) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _4 = move (_5.0: u32);\n        StorageLive(_6);\n        _6 = intrinsics::ctlz_nonzero::<isize>(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _7 = CheckedSub(_4, _6);\n        assert(!move (_7.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _4, move _6) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _3 = move (_7.0: u32);\n        StorageDead(_6);\n        StorageDead(_4);\n        _0 = option::Option::Some(_3);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns the base 2 logarithm of the number, rounded down.\n\n Returns `None` if the number is negative or zero.\n\n # Examples\n\n ```\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

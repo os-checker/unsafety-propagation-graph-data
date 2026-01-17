@@ -1,0 +1,27 @@
+{
+  "name": "num::<impl u128>::one_less_than_next_power_of_two",
+  "safe": true,
+  "callees": {
+    "intrinsics::ctlz_nonzero": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Like `ctlz`, but extra-unsafe as it returns `undef` when\n given an `x` with value `0`.\n\n This intrinsic does not have a stable counterpart.\n\n # Examples\n\n ```\n #![feature(core_intrinsics)]\n # #![allow(internal_features)]\n\n use std::intrinsics::ctlz_nonzero;\n\n let x = 0b0001_1100_u8;\n let num_leading = unsafe { ctlz_nonzero(x) };\n assert_eq!(num_leading, 3);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 3284,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/uint_macros.rs:3668:9: 3678:10",
+  "src": "const fn one_less_than_next_power_of_two(self) -> Self {\n            if self <= 1 { return 0; }\n\n            let p = self - 1;\n            // SAFETY: Because `p > 0`, it cannot consist entirely of leading zeros.\n            // That means the shift is always in-bounds, and some processors\n            // (such as intel pre-haswell) have more efficient ctlz\n            // intrinsics when the argument is non-zero.\n            let z = unsafe { intrinsics::ctlz_nonzero(p) };\n            <$SelfT>::MAX >> z\n        }",
+  "mir": "fn num::<impl u128>::one_less_than_next_power_of_two(_1: u128) -> u128 {\n    let mut _0: u128;\n    let mut _2: bool;\n    let  _3: u128;\n    let mut _4: (u128, bool);\n    let  _5: u32;\n    let mut _6: bool;\n    debug self => _1;\n    debug p => _3;\n    debug z => _5;\n    bb0: {\n        StorageLive(_2);\n        _2 = Le(_1, 1_u128);\n        switchInt(move _2) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        _0 = 0_u128;\n        StorageDead(_2);\n        goto -> bb6;\n    }\n    bb2: {\n        StorageDead(_2);\n        _4 = CheckedSub(_1, 1_u128);\n        assert(!move (_4.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _1, 1_u128) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _3 = move (_4.0: u128);\n        _5 = intrinsics::ctlz_nonzero::<u128>(_3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _6 = Lt(_5, 128_u32);\n        assert(move _6, \"attempt to shift right by `{}`, which would overflow\", _5) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = Shr(num::<impl u128>::MAX, _5);\n        goto -> bb6;\n    }\n    bb6: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

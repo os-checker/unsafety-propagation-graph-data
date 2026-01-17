@@ -1,0 +1,47 @@
+{
+  "name": "sync::mpsc::channel",
+  "safe": true,
+  "callees": {
+    "sync::mpmc::channel": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new asynchronous channel, returning the sender/receiver halves.\n\n All data sent on the [`Sender`] will become available on the [`Receiver`] in\n the same order as it was sent, and no [`send`] will block the calling thread\n (this channel has an \"infinite buffer\", unlike [`sync_channel`], which will\n block after its buffer limit is reached). [`recv`] will block until a message\n is available while there is at least one [`Sender`] alive (including clones).\n\n The [`Sender`] can be cloned to [`send`] to the same channel multiple times.\n The [`Receiver`] also can be cloned to have multi receivers.\n\n If the [`Receiver`] is disconnected while trying to [`send`] with the\n [`Sender`], the [`send`] method will return a [`SendError`]. Similarly, if the\n [`Sender`] is disconnected while trying to [`recv`], the [`recv`] method will\n return a [`RecvError`].\n\n [`send`]: Sender::send\n [`recv`]: Receiver::recv\n\n # Examples\n\n ```\n #![feature(mpmc_channel)]\n\n use std::sync::mpmc::channel;\n use std::thread;\n\n let (sender, receiver) = channel();\n\n // Spawn off an expensive computation\n thread::spawn(move || {\n #   fn expensive_computation() {}\n     sender.send(expensive_computation()).unwrap();\n });\n\n // Do some useful work for a while\n\n // Let's see what that answer was\n println!(\"{:?}\", receiver.recv().unwrap());\n ```\n",
+      "adt": {
+        "sync::mpmc::Sender": "Constructor",
+        "sync::mpmc::Receiver": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sync::mpmc::Sender": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 11129, kind: RigidTy(Adt(AdtDef(DefId { id: 9502, name: \"sync::mpmc::Sender\" }), GenericArgs([Type(Ty { id: 9, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])",
+      "Unknown([Field(1, Ty { id: 11131, kind: RigidTy(Adt(AdtDef(DefId { id: 9504, name: \"sync::mpmc::Receiver\" }), GenericArgs([Type(Ty { id: 9, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])"
+    ],
+    "sync::mpmc::Receiver": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 11129, kind: RigidTy(Adt(AdtDef(DefId { id: 9502, name: \"sync::mpmc::Sender\" }), GenericArgs([Type(Ty { id: 9, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])",
+      "Unknown([Field(1, Ty { id: 11131, kind: RigidTy(Adt(AdtDef(DefId { id: 9504, name: \"sync::mpmc::Receiver\" }), GenericArgs([Type(Ty { id: 9, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])"
+    ],
+    "sync::mpsc::Sender": [
+      "Plain"
+    ],
+    "sync::mpsc::Receiver": [
+      "Plain"
+    ]
+  },
+  "path": 2985,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpsc.rs:519:1: 522:2",
+  "src": "pub fn channel<T>() -> (Sender<T>, Receiver<T>) {\n    let (tx, rx) = mpmc::channel();\n    (Sender { inner: tx }, Receiver { inner: rx })\n}",
+  "mir": "fn sync::mpsc::channel() -> (sync::mpsc::Sender<T>, sync::mpsc::Receiver<T>) {\n    let mut _0: (sync::mpsc::Sender<T>, sync::mpsc::Receiver<T>);\n    let  _1: sync::mpmc::Sender<T>;\n    let  _2: sync::mpmc::Receiver<T>;\n    let mut _3: (sync::mpmc::Sender<T>, sync::mpmc::Receiver<T>);\n    let mut _4: sync::mpsc::Sender<T>;\n    let mut _5: sync::mpsc::Receiver<T>;\n    debug tx => _1;\n    debug rx => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = sync::mpmc::channel::<T>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _1 = move (_3.0: sync::mpmc::Sender<T>);\n        _2 = move (_3.1: sync::mpmc::Receiver<T>);\n        StorageDead(_3);\n        StorageLive(_4);\n        _4 = Sender(_1);\n        StorageLive(_5);\n        _5 = Receiver(_2);\n        _0 = (move _4, move _5);\n        StorageDead(_5);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Creates a new asynchronous channel, returning the sender/receiver halves.\n\n All data sent on the [`Sender`] will become available on the [`Receiver`] in\n the same order as it was sent, and no [`send`] will block the calling thread\n (this channel has an \"infinite buffer\", unlike [`sync_channel`], which will\n block after its buffer limit is reached). [`recv`] will block until a message\n is available while there is at least one [`Sender`] alive (including clones).\n\n The [`Sender`] can be cloned to [`send`] to the same channel multiple times, but\n only one [`Receiver`] is supported.\n\n If the [`Receiver`] is disconnected while trying to [`send`] with the\n [`Sender`], the [`send`] method will return a [`SendError`]. Similarly, if the\n [`Sender`] is disconnected while trying to [`recv`], the [`recv`] method will\n return a [`RecvError`].\n\n [`send`]: Sender::send\n [`recv`]: Receiver::recv\n\n # Examples\n\n ```\n use std::sync::mpsc::channel;\n use std::thread;\n\n let (sender, receiver) = channel();\n\n // Spawn off an expensive computation\n thread::spawn(move || {\n #   fn expensive_computation() {}\n     sender.send(expensive_computation()).unwrap();\n });\n\n // Do some useful work for a while\n\n // Let's see what that answer was\n println!(\"{:?}\", receiver.recv().unwrap());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

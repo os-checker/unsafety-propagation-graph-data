@@ -1,0 +1,73 @@
+{
+  "name": "sys::pal::unix::os::home_dir",
+  "safe": true,
+  "callees": {
+    "env::var_os": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Fetches the environment variable `key` from the current process, returning\n [`None`] if the variable isn't set or if there is another error.\n\n It may return `None` if the environment variable's name contains\n the equal sign character (`=`) or the NUL character.\n\n Note that this function will not check if the environment variable\n is valid Unicode. If you want to have an error on invalid UTF-8,\n use the [`var`] function instead.\n\n # Examples\n\n ```\n use std::env;\n\n let key = \"HOME\";\n match env::var_os(key) {\n     Some(val) => println!(\"{key}: {val:?}\"),\n     None => println!(\"{key} is not defined in the environment.\")\n }\n ```\n\n If expecting a delimited variable (such as `PATH`), [`split_paths`]\n can be used to separate items.\n",
+      "adt": {
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::option::Option::<T>::filter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns [`None`] if the option is [`None`], otherwise calls `predicate`\n with the wrapped value and returns:\n\n - [`Some(t)`] if `predicate` returns `true` (where `t` is the wrapped\n   value), and\n - [`None`] if `predicate` returns `false`.\n\n This function works similar to [`Iterator::filter()`]. You can imagine\n the `Option<T>` being an iterator over one or zero elements. `filter()`\n lets you decide which elements to keep.\n\n # Examples\n\n ```rust\n fn is_even(n: &i32) -> bool {\n     n % 2 == 0\n }\n\n assert_eq!(None.filter(is_even), None);\n assert_eq!(Some(3).filter(is_even), None);\n assert_eq!(Some(4).filter(is_even), Some(4));\n ```\n\n [`Some(t)`]: Some\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::or_else": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the option if it contains a value, otherwise calls `f` and\n returns the result.\n\n # Examples\n\n ```\n fn nobody() -> Option<&'static str> { None }\n fn vikings() -> Option<&'static str> { Some(\"vikings\") }\n\n assert_eq!(Some(\"barbarians\").or_else(vikings), Some(\"barbarians\"));\n assert_eq!(None.or_else(vikings), Some(\"vikings\"));\n assert_eq!(None.or_else(nobody), None);\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).\n\n # Examples\n\n Calculates the length of an <code>Option<[String]></code> as an\n <code>Option<[usize]></code>, consuming the original:\n\n [String]: ../../std/string/struct.String.html \"String\"\n ```\n let maybe_some_string = Some(String::from(\"Hello, World!\"));\n // `Option::map` takes self *by value*, consuming `maybe_some_string`\n let maybe_some_len = maybe_some_string.map(|s| s.len());\n assert_eq!(maybe_some_len, Some(13));\n\n let x: Option<&str> = None;\n assert_eq!(x.map(|s| s.len()), None);\n ```\n",
+      "adt": {}
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 3920,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/os.rs:610:1: 664:2",
+  "src": "pub fn home_dir() -> Option<PathBuf> {\n    return crate::env::var_os(\"HOME\")\n        .filter(|s| !s.is_empty())\n        .or_else(|| unsafe { fallback() })\n        .map(PathBuf::from);\n\n    #[cfg(any(\n        target_os = \"android\",\n        target_os = \"emscripten\",\n        target_os = \"redox\",\n        target_os = \"vxworks\",\n        target_os = \"espidf\",\n        target_os = \"horizon\",\n        target_os = \"vita\",\n        target_os = \"nuttx\",\n        all(target_vendor = \"apple\", not(target_os = \"macos\")),\n    ))]\n    unsafe fn fallback() -> Option<OsString> {\n        None\n    }\n    #[cfg(not(any(\n        target_os = \"android\",\n        target_os = \"emscripten\",\n        target_os = \"redox\",\n        target_os = \"vxworks\",\n        target_os = \"espidf\",\n        target_os = \"horizon\",\n        target_os = \"vita\",\n        target_os = \"nuttx\",\n        all(target_vendor = \"apple\", not(target_os = \"macos\")),\n    )))]\n    unsafe fn fallback() -> Option<OsString> {\n        let amt = match libc::sysconf(libc::_SC_GETPW_R_SIZE_MAX) {\n            n if n < 0 => 512 as usize,\n            n => n as usize,\n        };\n        let mut buf = Vec::with_capacity(amt);\n        let mut p = mem::MaybeUninit::<libc::passwd>::uninit();\n        let mut result = ptr::null_mut();\n        match libc::getpwuid_r(\n            libc::getuid(),\n            p.as_mut_ptr(),\n            buf.as_mut_ptr(),\n            buf.capacity(),\n            &mut result,\n        ) {\n            0 if !result.is_null() => {\n                let ptr = (*result).pw_dir as *const _;\n                let bytes = CStr::from_ptr(ptr).to_bytes().to_vec();\n                Some(OsStringExt::from_vec(bytes))\n            }\n            _ => None,\n        }\n    }\n}",
+  "mir": "fn sys::pal::unix::os::home_dir() -> core::option::Option<path::PathBuf> {\n    let mut _0: core::option::Option<path::PathBuf>;\n    let mut _1: core::option::Option<ffi::os_str::OsString>;\n    let mut _2: core::option::Option<ffi::os_str::OsString>;\n    let mut _3: core::option::Option<ffi::os_str::OsString>;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = env::var_os::<&str>(\"HOME\") -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = core::option::Option::<ffi::os_str::OsString>::filter::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/os.rs:612:17: 612:20}>(move _3, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/os.rs:612:17: 612:20}) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _1 = core::option::Option::<ffi::os_str::OsString>::or_else::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/os.rs:613:18: 613:20}>(move _2, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/os.rs:613:18: 613:20}) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_2);\n        _0 = core::option::Option::<ffi::os_str::OsString>::map::<path::PathBuf, fn(ffi::os_str::OsString) -> path::PathBuf {<path::PathBuf as core::convert::From<ffi::os_str::OsString>>::from}>(move _1, <path::PathBuf as core::convert::From<ffi::os_str::OsString>>::from) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

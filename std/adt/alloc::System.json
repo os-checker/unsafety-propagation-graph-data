@@ -1,0 +1,47 @@
+{
+  "name": "alloc::System",
+  "constructors": [
+    "<alloc::System as core::default::Default>::default",
+    "<alloc::System as core::clone::Clone>::clone"
+  ],
+  "access_self_as_arg": {
+    "read": [
+      "sys::alloc::realloc_fallback",
+      "alloc::System::alloc_impl",
+      "alloc::System::grow_impl",
+      "<alloc::System as core::alloc::Allocator>::allocate",
+      "<alloc::System as core::alloc::Allocator>::allocate_zeroed",
+      "<alloc::System as core::alloc::Allocator>::deallocate",
+      "<alloc::System as core::alloc::Allocator>::grow",
+      "<alloc::System as core::alloc::Allocator>::grow_zeroed",
+      "<alloc::System as core::alloc::Allocator>::shrink",
+      "sys::alloc::unix::<impl core::alloc::GlobalAlloc for alloc::System>::alloc",
+      "sys::alloc::unix::<impl core::alloc::GlobalAlloc for alloc::System>::alloc_zeroed",
+      "sys::alloc::unix::<impl core::alloc::GlobalAlloc for alloc::System>::dealloc",
+      "sys::alloc::unix::<impl core::alloc::GlobalAlloc for alloc::System>::realloc",
+      "<alloc::System as core::fmt::Debug>::fmt",
+      "<alloc::System as core::clone::Clone>::clone"
+    ],
+    "write": [],
+    "other": []
+  },
+  "access_self_as_locals": {
+    "read": [
+      "alloc::__default_lib_allocator::__rdl_alloc",
+      "alloc::__default_lib_allocator::__rdl_dealloc",
+      "alloc::__default_lib_allocator::__rdl_realloc",
+      "alloc::__default_lib_allocator::__rdl_alloc_zeroed"
+    ],
+    "write": [],
+    "other": [
+      "thread::thread::Thread::into_raw",
+      "thread::thread::Thread::into_raw"
+    ]
+  },
+  "access_field": [],
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/alloc.rs:139:1: 139:18",
+  "src": "pub struct System",
+  "kind": "Struct",
+  "doc_adt": " The default memory allocator provided by the operating system.\n\n This is based on `malloc` on Unix platforms and `HeapAlloc` on Windows,\n plus related functions. However, it is not valid to mix use of the backing\n system allocator with `System`, as this implementation may include extra\n work, such as to serve alignment requests greater than the alignment\n provided directly by the backing system allocator.\n\n This type implements the [`GlobalAlloc`] trait. Currently the default\n global allocator is unspecified. Libraries, however, like `cdylib`s and\n `staticlib`s are guaranteed to use the [`System`] by default and as such\n work as if they had this definition:\n\n ```rust\n use std::alloc::System;\n\n #[global_allocator]\n static A: System = System;\n\n fn main() {\n     let a = Box::new(4); // Allocates from the system allocator.\n     println!(\"{a}\");\n }\n ```\n\n You can also define your own wrapper around `System` if you'd like, such as\n keeping track of the number of all bytes allocated:\n\n ```rust\n use std::alloc::{System, GlobalAlloc, Layout};\n use std::sync::atomic::{AtomicUsize, Ordering::Relaxed};\n\n struct Counter;\n\n static ALLOCATED: AtomicUsize = AtomicUsize::new(0);\n\n unsafe impl GlobalAlloc for Counter {\n     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {\n         let ret = unsafe { System.alloc(layout) };\n         if !ret.is_null() {\n             ALLOCATED.fetch_add(layout.size(), Relaxed);\n         }\n         ret\n     }\n\n     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {\n         unsafe { System.dealloc(ptr, layout); }\n         ALLOCATED.fetch_sub(layout.size(), Relaxed);\n     }\n }\n\n #[global_allocator]\n static A: Counter = Counter;\n\n fn main() {\n     println!(\"allocated bytes before main: {}\", ALLOCATED.load(Relaxed));\n }\n ```\n\n It can also be used directly to allocate memory independently of whatever\n global allocator has been selected for a Rust program. For example if a Rust\n program opts in to using jemalloc as the global allocator, `System` will\n still allocate memory using `malloc` and `HeapAlloc`.\n",
+  "variant_fields": {}
+}

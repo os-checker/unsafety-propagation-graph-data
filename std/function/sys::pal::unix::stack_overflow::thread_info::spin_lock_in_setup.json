@@ -1,0 +1,81 @@
+{
+  "name": "sys::pal::unix::stack_overflow::thread_info::spin_lock_in_setup",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicUsize::compare_exchange": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer if the current value is the same as\n the `current` value.\n\n The return value is a result indicating whether the new value was written and\n containing the previous value. On success this value is guaranteed to be equal to\n `current`.\n\n `compare_exchange` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. `success` describes the required ordering for the\n read-modify-write operation that takes place if the comparison with `current` succeeds.\n `failure` describes the required ordering for the load operation that takes place when\n the comparison fails. Using [`Acquire`] as success ordering makes the store part\n of this operation [`Relaxed`], and using [`Release`] makes the successful load\n [`Relaxed`]. The failure ordering can only be [`SeqCst`], [`Acquire`] or [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.compare_exchange(5, 10,\n                                      Ordering::Acquire,\n                                      Ordering::Relaxed),\n            Ok(5));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n\n assert_eq!(some_var.compare_exchange(6, 12,\n                                      Ordering::SeqCst,\n                                      Ordering::Acquire),\n            Err(10));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n\n # Considerations\n\n `compare_exchange` is a [compare-and-swap operation] and thus exhibits the usual downsides\n of CAS operations. In particular, a load of the value followed by a successful\n `compare_exchange` with the previous load *does not ensure* that other threads have not\n changed the value in the interim! This is usually important when the *equality* check in\n the `compare_exchange` is being used to check the *identity* of a value, but equality\n does not necessarily imply identity. This is a particularly common case for pointers, as\n a pointer holding the same address does not imply that the same object exists at that\n address! In this case, `compare_exchange` can lead to the [ABA problem].\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::from_str_nonconst": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "libc::pause": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {}
+    },
+    "core::mem::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disposes of a value.\n\n This effectively does nothing for types which implement `Copy`, e.g.\n integers. Such values are copied and _then_ moved into the function, so the\n value persists after this function call.\n\n This function is not magic; it is literally defined as\n\n ```\n pub fn drop<T>(_x: T) {}\n ```\n\n Because `_x` is moved into the function, it is automatically [dropped][drop] before\n the function returns.\n\n [drop]: Drop\n\n # Examples\n\n Basic usage:\n\n ```\n let v = vec![1, 2, 3];\n\n drop(v); // explicitly drop the vector\n ```\n\n Since [`RefCell`] enforces the borrow rules at runtime, `drop` can\n release a [`RefCell`] borrow:\n\n ```\n use std::cell::RefCell;\n\n let x = RefCell::new(1);\n\n let mut mutable_borrow = x.borrow_mut();\n *mutable_borrow = 1;\n\n drop(mutable_borrow); // relinquish the mutable borrow on this slot\n\n let borrow = x.borrow();\n println!(\"{}\", *borrow);\n ```\n\n Integers and other types implementing [`Copy`] are unaffected by `drop`.\n\n ```\n # #![allow(dropping_copy_types)]\n #[derive(Copy, Clone)]\n struct Foo(u8);\n\n let x = 1;\n let y = Foo(2);\n drop(x); // a copy of `x` is moved and dropped\n drop(y); // a copy of `y` is moved and dropped\n\n println!(\"x: {}, y: {}\", x, y.0); // still available\n ```\n\n [`RefCell`]: crate::cell::RefCell\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 3974,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/stack_overflow/thread_info.rs:94:1: 110:2",
+  "src": "fn spin_lock_in_setup(this: usize) -> UnlockOnDrop {\n    loop {\n        match SPIN_LOCK.compare_exchange(0, this, Ordering::Acquire, Ordering::Relaxed) {\n            Ok(_) => return UnlockOnDrop,\n            Err(owner) if owner == this => {\n                unreachable!(\"the thread info setup logic isn't recursive\")\n            }\n            // This function is always called with the outer lock held,\n            // meaning the only time locking can fail is if another thread has\n            // encountered a stack overflow. Since that will abort the process,\n            // we just stop the current thread until that time. We use `pause`\n            // instead of spinning to avoid priority inversion.\n            // SAFETY: this doesn't have any safety preconditions.\n            Err(_) => drop(unsafe { libc::pause() }),\n        }\n    }\n}",
+  "mir": "fn sys::pal::unix::stack_overflow::thread_info::spin_lock_in_setup(_1: usize) -> sys::pal::unix::stack_overflow::thread_info::UnlockOnDrop {\n    let mut _0: sys::pal::unix::stack_overflow::thread_info::UnlockOnDrop;\n    let mut _2: ();\n    let mut _3: core::result::Result<usize, usize>;\n    let mut _4: &core::sync::atomic::AtomicUsize;\n    let mut _5: core::sync::atomic::Ordering;\n    let mut _6: core::sync::atomic::Ordering;\n    let mut _7: isize;\n    let  _8: usize;\n    let  _9: &usize;\n    let mut _10: bool;\n    let mut _11: usize;\n    let  _12: !;\n    let mut _13: core::fmt::Arguments<'_>;\n    let mut _14: i32;\n    debug this => _1;\n    debug owner => _8;\n    debug owner => _9;\n    bb0: {\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = {alloc332: &core::sync::atomic::AtomicUsize};\n        StorageLive(_5);\n        _5 = core::sync::atomic::Ordering::Acquire;\n        StorageLive(_6);\n        _6 = core::sync::atomic::Ordering::Relaxed;\n        _3 = core::sync::atomic::AtomicUsize::compare_exchange(move _4, 0_usize, _1, move _5, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_4);\n        _7 = discriminant(_3);\n        switchInt(move _7) -> [0: bb5, 1: bb4, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        StorageLive(_9);\n        _9 = &((_3 as variant#1).0: usize);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = (*_9);\n        _10 = Eq(move _11, _1);\n        switchInt(move _10) -> [0: bb7, otherwise: bb6];\n    }\n    bb5: {\n        StorageDead(_3);\n        return;\n    }\n    bb6: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageLive(_8);\n        _8 = ((_3 as variant#1).0: usize);\n        StorageLive(_13);\n        _13 = core::fmt::Arguments::<'_>::from_str_nonconst(\"internal error: entered unreachable code: the thread info setup logic isn't recursive\") -> [return: bb8, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_14);\n        _14 = libc::pause() -> [return: bb9, unwind unreachable];\n    }\n    bb8: {\n        _12 = core::panicking::panic_fmt(move _13) -> unwind unreachable;\n    }\n    bb9: {\n        _2 = core::mem::drop::<i32>(move _14) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_14);\n        StorageDead(_3);\n        goto -> bb1;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

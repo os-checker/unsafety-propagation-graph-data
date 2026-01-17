@@ -1,0 +1,46 @@
+{
+  "name": "core_arch::x86::avx512fp16::_mm512_mask_fmadd_round_pch",
+  "safe": false,
+  "callees": {
+    "core_arch::x86::avx512fp16::_mm512_mask3_fmadd_round_pch": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Multiply packed complex numbers in a and b, accumulate to the corresponding complex numbers in c,\n and store the results in dst using writemask k (the element is copied from c when the corresponding\n mask bit is not set). Each complex number is composed of two adjacent half-precision (16-bit)\n floating-point elements, which defines the complex number `complex = vec.fp16[0] + i * vec.fp16[1]`.\n\n Rounding is done according to the rounding parameter, which can be one of:\n\n * [`_MM_FROUND_TO_NEAREST_INT`] | [`_MM_FROUND_NO_EXC`] : round to nearest and suppress exceptions\n * [`_MM_FROUND_TO_NEG_INF`] | [`_MM_FROUND_NO_EXC`] : round down and suppress exceptions\n * [`_MM_FROUND_TO_POS_INF`] | [`_MM_FROUND_NO_EXC`] : round up and suppress exceptions\n * [`_MM_FROUND_TO_ZERO`] | [`_MM_FROUND_NO_EXC`] : truncate and suppress exceptions\n * [`_MM_FROUND_CUR_DIRECTION`] : use `MXCSR.RC` - see [`_MM_SET_ROUNDING_MODE`]\n\n [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm512_mask3_fmadd_round_pch)\n",
+      "adt": {
+        "core_arch::x86::__m512h": "Constructor"
+      }
+    },
+    "intrinsics::simd::simd_select_bitmask": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Selects elements from a bitmask.\n\n `M` must be an unsigned integer or array of `u8`, matching `simd_bitmask`.\n\n `T` must be a vector.\n\n For each element, if the bit in `mask` is `1`, select the element from\n `if_true`.  If the corresponding bit in `mask` is `0`, select the element from\n `if_false`.\n The remaining bits of the mask are ignored.\n\n The bitmask bit order matches `simd_bitmask`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_arch::x86::__m512h": [
+      "Plain"
+    ],
+    "core_arch::x86::__m512": [
+      "Plain"
+    ]
+  },
+  "path": 10522,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../stdarch/crates/core_arch/src/x86/avx512fp16.rs:4361:1: 4372:2",
+  "src": "pub fn _mm512_mask_fmadd_round_pch<const ROUNDING: i32>(\n    a: __m512h,\n    k: __mmask16,\n    b: __m512h,\n    c: __m512h,\n) -> __m512h {\n    unsafe {\n        static_assert_rounding!(ROUNDING);\n        let r: __m512 = transmute(_mm512_mask3_fmadd_round_pch::<ROUNDING>(a, b, c, k)); // using `0xffff` would have been fine here, but this is what CLang does\n        transmute(simd_select_bitmask(k, r, transmute(a)))\n    }\n}",
+  "mir": "fn core_arch::x86::avx512fp16::_mm512_mask_fmadd_round_pch(_1: core_arch::x86::__m512h, _2: u16, _3: core_arch::x86::__m512h, _4: core_arch::x86::__m512h) -> core_arch::x86::__m512h {\n    let mut _0: core_arch::x86::__m512h;\n    let  _5: core_arch::x86::__m512;\n    let mut _6: core_arch::x86::__m512h;\n    let mut _7: core_arch::x86::__m512;\n    let mut _8: core_arch::x86::__m512;\n    debug a => _1;\n    debug k => _2;\n    debug b => _3;\n    debug c => _4;\n    debug r => _5;\n    bb0: {\n        StorageLive(_6);\n        _6 = core_arch::x86::avx512fp16::_mm512_mask3_fmadd_round_pch::<ROUNDING>(_1, _3, _4, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = move _6 as core_arch::x86::__m512;\n        StorageDead(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = _1 as core_arch::x86::__m512;\n        _7 = intrinsics::simd::simd_select_bitmask::<u16, core_arch::x86::__m512>(_2, _5, move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        _0 = move _7 as core_arch::x86::__m512h;\n        StorageDead(_7);\n        return;\n    }\n}\n",
+  "doc": " Multiply packed complex numbers in a and b, accumulate to the corresponding complex numbers in c,\n and store the results in dst using writemask k (the element is copied from a when the corresponding mask\n bit is not set). Each complex number is composed of two adjacent half-precision (16-bit) floating-point\n elements, which defines the complex number `complex = vec.fp16[0] + i * vec.fp16[1]`.\n\n Rounding is done according to the rounding parameter, which can be one of:\n\n * [`_MM_FROUND_TO_NEAREST_INT`] | [`_MM_FROUND_NO_EXC`] : round to nearest and suppress exceptions\n * [`_MM_FROUND_TO_NEG_INF`] | [`_MM_FROUND_NO_EXC`] : round down and suppress exceptions\n * [`_MM_FROUND_TO_POS_INF`] | [`_MM_FROUND_NO_EXC`] : round up and suppress exceptions\n * [`_MM_FROUND_TO_ZERO`] | [`_MM_FROUND_NO_EXC`] : truncate and suppress exceptions\n * [`_MM_FROUND_CUR_DIRECTION`] : use `MXCSR.RC` - see [`_MM_SET_ROUNDING_MODE`]\n\n [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm512_mask_fmadd_round_pch)\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

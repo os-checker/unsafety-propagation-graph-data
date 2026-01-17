@@ -1,0 +1,170 @@
+{
+  "name": "sync::mpmc::zero::Channel::<T>::try_send",
+  "safe": true,
+  "callees": {
+    "core::default::Default::default": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the \"default value\" for a type.\n\n Default values are often some kind of initial value, identity value, or anything else that\n may make sense as a default.\n\n # Examples\n\n Using built-in default values:\n\n ```\n let i: i8 = Default::default();\n let (x, y): (Option<String>, f64) = Default::default();\n let (a, b, (c, d)): (i32, u32, (bool, bool)) = Default::default();\n ```\n\n Making your own:\n\n ```\n # #[allow(dead_code)]\n enum Kind {\n     A,\n     B,\n     C,\n }\n\n impl Default for Kind {\n     fn default() -> Self { Kind::A }\n }\n ```\n",
+      "adt": {}
+    },
+    "sync::poison::mutex::Mutex::<T>::lock": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires a mutex, blocking the current thread until it is able to do so.\n\n This function will block the local thread until it is available to acquire\n the mutex. Upon returning, the thread is the only thread with the lock\n held. An RAII guard is returned to allow scoped unlock of the lock. When\n the guard goes out of scope, the mutex will be unlocked.\n\n The exact behavior on locking a mutex in the thread which already holds\n the lock is left unspecified. However, this function will not return on\n the second call (it might panic or deadlock, for example).\n\n # Errors\n\n If another user of this mutex panicked while holding the mutex, then\n this call will return an error once the mutex is acquired. The acquired\n mutex guard will be contained in the returned error.\n\n # Panics\n\n This function might panic when called if the lock is already held by\n the current thread.\n\n # Examples\n\n ```\n use std::sync::{Arc, Mutex};\n use std::thread;\n\n let mutex = Arc::new(Mutex::new(0));\n let c_mutex = Arc::clone(&mutex);\n\n thread::spawn(move || {\n     *c_mutex.lock().unwrap() = 10;\n }).join().expect(\"thread::spawn failed\");\n assert_eq!(*mutex.lock().unwrap(), 10);\n ```\n",
+      "adt": {
+        "sync::poison::mutex::Mutex": "ImmutableAsArgument",
+        "core::result::Result": "Constructor",
+        "sync::poison::mutex::MutexGuard": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "sync::mpmc::waker::Waker::try_select": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to find another thread's entry, select the operation, and wake it up.\n",
+      "adt": {
+        "sync::mpmc::waker::Waker": "MutableAsArgument",
+        "core::option::Option": "Constructor",
+        "sync::mpmc::waker::Entry": "Constructor"
+      }
+    },
+    "core::mem::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disposes of a value.\n\n This effectively does nothing for types which implement `Copy`, e.g.\n integers. Such values are copied and _then_ moved into the function, so the\n value persists after this function call.\n\n This function is not magic; it is literally defined as\n\n ```\n pub fn drop<T>(_x: T) {}\n ```\n\n Because `_x` is moved into the function, it is automatically [dropped][drop] before\n the function returns.\n\n [drop]: Drop\n\n # Examples\n\n Basic usage:\n\n ```\n let v = vec![1, 2, 3];\n\n drop(v); // explicitly drop the vector\n ```\n\n Since [`RefCell`] enforces the borrow rules at runtime, `drop` can\n release a [`RefCell`] borrow:\n\n ```\n use std::cell::RefCell;\n\n let x = RefCell::new(1);\n\n let mut mutable_borrow = x.borrow_mut();\n *mutable_borrow = 1;\n\n drop(mutable_borrow); // relinquish the mutable borrow on this slot\n\n let borrow = x.borrow();\n println!(\"{}\", *borrow);\n ```\n\n Integers and other types implementing [`Copy`] are unaffected by `drop`.\n\n ```\n # #![allow(dropping_copy_types)]\n #[derive(Copy, Clone)]\n struct Foo(u8);\n\n let x = 1;\n let y = Foo(2);\n drop(x); // a copy of `x` is moved and dropped\n drop(y); // a copy of `y` is moved and dropped\n\n println!(\"x: {}, y: {}\", x, y.0); // still available\n ```\n\n [`RefCell`]: crate::cell::RefCell\n",
+      "adt": {}
+    },
+    "sync::mpmc::zero::Channel::<T>::write": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a message into the packet.\n",
+      "adt": {
+        "sync::mpmc::select::Token": "MutableAsArgument",
+        "sync::mpmc::zero::Channel": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::ok": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts from `Result<T, E>` to [`Option<T>`].\n\n Converts `self` into an [`Option<T>`], consuming `self`,\n and discarding the error, if any.\n\n # Examples\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.ok(), Some(2));\n\n let x: Result<u32, &str> = Err(\"Nothing here\");\n assert_eq!(x.ok(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::mpmc::select::Token": [
+      "Plain",
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))"
+    ],
+    "sync::poison::mutex::Mutex": [
+      "Ref"
+    ],
+    "sync::mpmc::zero::Channel": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "sync::poison::mutex::MutexGuard": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "sync::mpmc::zero::Inner": [
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "Ref"
+    ],
+    "sync::mpmc::waker::Waker": [
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 10950, kind: RigidTy(Adt(AdtDef(DefId { id: 9447, name: \"sync::mpmc::waker::Entry\" }), GenericArgs([]))) })])"
+    ],
+    "sync::mpmc::waker::Entry": [
+      "Plain",
+      "Unknown([Field(1, Ty { id: 525, kind: RigidTy(RawPtr(Ty { id: 1, kind: RigidTy(Tuple([])) }, Mut)) })])"
+    ],
+    "sync::mpsc::TrySendError": [
+      "Plain"
+    ]
+  },
+  "path": 2932,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/zero.rs:142:5: 159:6",
+  "src": "pub(crate) fn try_send(&self, msg: T) -> Result<(), TrySendError<T>> {\n        let token = &mut Token::default();\n        let mut inner = self.inner.lock().unwrap();\n\n        // If there's a waiting receiver, pair up with it.\n        if let Some(operation) = inner.receivers.try_select() {\n            token.zero.0 = operation.packet;\n            drop(inner);\n            unsafe {\n                self.write(token, msg).ok().unwrap();\n            }\n            Ok(())\n        } else if inner.is_disconnected {\n            Err(TrySendError::Disconnected(msg))\n        } else {\n            Err(TrySendError::Full(msg))\n        }\n    }",
+  "mir": "fn sync::mpmc::zero::Channel::<T>::try_send(_1: &sync::mpmc::zero::Channel<T>, _2: T) -> core::result::Result<(), sync::mpsc::TrySendError<T>> {\n    let mut _0: core::result::Result<(), sync::mpsc::TrySendError<T>>;\n    let  _3: &mut sync::mpmc::select::Token;\n    let mut _4: sync::mpmc::select::Token;\n    let mut _5: sync::poison::mutex::MutexGuard<'_, sync::mpmc::zero::Inner>;\n    let mut _6: core::result::Result<sync::poison::mutex::MutexGuard<'_, sync::mpmc::zero::Inner>, sync::poison::PoisonError<sync::poison::mutex::MutexGuard<'_, sync::mpmc::zero::Inner>>>;\n    let mut _7: &sync::poison::mutex::Mutex<sync::mpmc::zero::Inner>;\n    let mut _8: core::option::Option<sync::mpmc::waker::Entry>;\n    let mut _9: &mut sync::mpmc::waker::Waker;\n    let mut _10: &mut sync::mpmc::zero::Inner;\n    let mut _11: &mut sync::poison::mutex::MutexGuard<'_, sync::mpmc::zero::Inner>;\n    let mut _12: isize;\n    let  _13: sync::mpmc::waker::Entry;\n    let mut _14: *mut ();\n    let  _15: ();\n    let mut _16: sync::poison::mutex::MutexGuard<'_, sync::mpmc::zero::Inner>;\n    let  _17: ();\n    let mut _18: core::option::Option<()>;\n    let mut _19: core::result::Result<(), T>;\n    let mut _20: bool;\n    let mut _21: &sync::mpmc::zero::Inner;\n    let mut _22: &sync::poison::mutex::MutexGuard<'_, sync::mpmc::zero::Inner>;\n    let mut _23: sync::mpsc::TrySendError<T>;\n    let mut _24: sync::mpsc::TrySendError<T>;\n    let mut _25: bool;\n    debug self => _1;\n    debug msg => _2;\n    debug token => _3;\n    debug inner => _5;\n    debug operation => _13;\n    bb0: {\n        _25 = false;\n        StorageLive(_4);\n        _4 = <sync::mpmc::select::Token as core::default::Default>::default() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = &mut _4;\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).0: sync::poison::mutex::Mutex<sync::mpmc::zero::Inner>);\n        _6 = sync::poison::mutex::Mutex::<sync::mpmc::zero::Inner>::lock(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = core::result::Result::<sync::poison::mutex::MutexGuard<'_, sync::mpmc::zero::Inner>, sync::poison::PoisonError<sync::poison::mutex::MutexGuard<'_, sync::mpmc::zero::Inner>>>::unwrap(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _25 = true;\n        StorageDead(_6);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &mut _5;\n        _10 = <sync::poison::mutex::MutexGuard<'_, sync::mpmc::zero::Inner> as core::ops::DerefMut>::deref_mut(move _11) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_11);\n        _9 = &mut ((*_10).1: sync::mpmc::waker::Waker);\n        _8 = sync::mpmc::waker::Waker::try_select(move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        _12 = discriminant(_8);\n        switchInt(move _12) -> [1: bb6, 0: bb17, otherwise: bb20];\n    }\n    bb6: {\n        StorageLive(_13);\n        _13 = move ((_8 as variant#1).0: sync::mpmc::waker::Entry);\n        StorageLive(_14);\n        _14 = (_13.1: *mut ());\n        (((*_3).2: sync::mpmc::zero::ZeroToken).0: *mut ()) = move _14;\n        StorageDead(_14);\n        StorageLive(_16);\n        _25 = false;\n        _16 = move _5;\n        _15 = core::mem::drop::<sync::poison::mutex::MutexGuard<'_, sync::mpmc::zero::Inner>>(move _16) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_16);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = sync::mpmc::zero::Channel::<T>::write(_1, _3, _2) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _18 = core::result::Result::<(), T>::ok(move _19) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_19);\n        _17 = core::option::Option::<()>::unwrap(move _18) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_18);\n        _0 = core::result::Result::Ok(());\n        drop(_13) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_13);\n        StorageDead(_10);\n        StorageDead(_8);\n        goto -> bb19;\n    }\n    bb12: {\n        StorageDead(_22);\n        _20 = ((*_21).2: bool);\n        switchInt(move _20) -> [0: bb14, otherwise: bb13];\n    }\n    bb13: {\n        StorageDead(_21);\n        StorageLive(_23);\n        _23 = sync::mpsc::TrySendError::Disconnected(_2);\n        _0 = core::result::Result::Err(move _23);\n        StorageDead(_23);\n        goto -> bb15;\n    }\n    bb14: {\n        StorageDead(_21);\n        StorageLive(_24);\n        _24 = sync::mpsc::TrySendError::Full(_2);\n        _0 = core::result::Result::Err(move _24);\n        StorageDead(_24);\n        goto -> bb15;\n    }\n    bb15: {\n        StorageDead(_20);\n        goto -> bb19;\n    }\n    bb16: {\n        _25 = false;\n        StorageDead(_5);\n        StorageDead(_4);\n        return;\n    }\n    bb17: {\n        StorageDead(_10);\n        StorageDead(_8);\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = &_5;\n        _21 = <sync::poison::mutex::MutexGuard<'_, sync::mpmc::zero::Inner> as core::ops::Deref>::deref(move _22) -> [return: bb12, unwind unreachable];\n    }\n    bb18: {\n        drop(_5) -> [return: bb16, unwind unreachable];\n    }\n    bb19: {\n        switchInt(_25) -> [0: bb16, otherwise: bb18];\n    }\n    bb20: {\n        unreachable;\n    }\n}\n",
+  "doc": " Attempts to send a message into the channel.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

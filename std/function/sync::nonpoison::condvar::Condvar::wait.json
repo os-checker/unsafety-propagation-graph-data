@@ -1,0 +1,58 @@
+{
+  "name": "sync::nonpoison::condvar::Condvar::wait",
+  "safe": true,
+  "callees": {
+    "sync::nonpoison::mutex::guard_lock": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " For use in [`nonpoison::condvar`](super::condvar).\n",
+      "adt": {
+        "sync::nonpoison::mutex::MutexGuard": "ImmutableAsArgument"
+      }
+    },
+    "sys::sync::condvar::futex::Condvar::wait": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::sync::mutex::futex::Mutex": "ImmutableAsArgument",
+        "sys::sync::condvar::futex::Condvar": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "sync::nonpoison::mutex::MutexGuard": [
+      "Ref",
+      "Deref",
+      "MutRef"
+    ],
+    "sys::sync::mutex::futex::Mutex": [
+      "Ref"
+    ],
+    "sys::sync::condvar::futex::Condvar": [
+      "Ref"
+    ],
+    "sync::nonpoison::condvar::Condvar": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ]
+  },
+  "path": 3056,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/nonpoison/condvar.rs:123:5: 128:6",
+  "src": "pub fn wait<T>(&self, guard: &mut MutexGuard<'_, T>) {\n        unsafe {\n            let lock = mutex::guard_lock(guard);\n            self.inner.wait(lock);\n        }\n    }",
+  "mir": "fn sync::nonpoison::condvar::Condvar::wait(_1: &sync::nonpoison::condvar::Condvar, _2: &mut sync::nonpoison::mutex::MutexGuard<'_, T>) -> () {\n    let mut _0: ();\n    let  _3: &sys::sync::mutex::futex::Mutex;\n    let mut _4: &sync::nonpoison::mutex::MutexGuard<'_, T>;\n    let  _5: ();\n    let mut _6: &sys::sync::condvar::futex::Condvar;\n    debug self => _1;\n    debug guard => _2;\n    debug lock => _3;\n    bb0: {\n        StorageLive(_4);\n        _4 = &(*_2);\n        _3 = sync::nonpoison::mutex::guard_lock::<T>(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = &((*_1).0: sys::sync::condvar::futex::Condvar);\n        _5 = sys::sync::condvar::futex::Condvar::wait(move _6, _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        return;\n    }\n}\n",
+  "doc": " Blocks the current thread until this condition variable receives a\n notification.\n\n This function will atomically unlock the mutex specified (represented by\n `guard`) and block the current thread. This means that any calls\n to [`notify_one`] or [`notify_all`] which happen logically after the\n mutex is unlocked are candidates to wake this thread up. When this\n function call returns, the lock specified will have been re-acquired.\n\n Note that this function is susceptible to spurious wakeups. Condition\n variables normally have a boolean predicate associated with them, and\n the predicate must always be checked each time this function returns to\n protect against spurious wakeups.\n\n # Panics\n\n This function may [`panic!`] if it is used with more than one mutex\n over time.\n\n [`notify_one`]: Self::notify_one\n [`notify_all`]: Self::notify_all\n\n # Examples\n\n ```\n #![feature(nonpoison_mutex)]\n #![feature(nonpoison_condvar)]\n\n use std::sync::nonpoison::{Mutex, Condvar};\n use std::sync::Arc;\n use std::thread;\n\n let pair = Arc::new((Mutex::new(false), Condvar::new()));\n let pair2 = Arc::clone(&pair);\n\n thread::spawn(move || {\n     let (lock, cvar) = &*pair2;\n     let mut started = lock.lock();\n     *started = true;\n     // We notify the condvar that the value has changed.\n     cvar.notify_one();\n });\n\n // Wait for the thread to start up.\n let (lock, cvar) = &*pair;\n let mut started = lock.lock();\n // As long as the value inside the `Mutex<bool>` is `false`, we wait.\n while !*started {\n     cvar.wait(&mut started);\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

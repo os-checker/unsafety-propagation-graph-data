@@ -1,0 +1,67 @@
+{
+  "name": "fs::File::set_modified",
+  "safe": true,
+  "callees": {
+    "fs::FileTimes::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `FileTimes` with no times set.\n\n Using the resulting `FileTimes` in [`File::set_times`] will not modify any timestamps.\n",
+      "adt": {
+        "fs::FileTimes": "Constructor"
+      }
+    },
+    "fs::FileTimes::set_modified": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Set the last modified time of a file.\n",
+      "adt": {
+        "fs::FileTimes": "Constructor"
+      }
+    },
+    "fs::File::set_times": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Changes the timestamps of the underlying file.\n\n # Platform-specific behavior\n\n This function currently corresponds to the `futimens` function on Unix (falling back to\n `futimes` on macOS before 10.13) and the `SetFileTime` function on Windows. Note that this\n [may change in the future][changes].\n\n On most platforms, including UNIX and Windows platforms, this function can also change the\n timestamps of a directory. To get a `File` representing a directory in order to call\n `set_times`, open the directory with `File::open` without attempting to obtain write\n permission.\n\n [changes]: io#platform-specific-behavior\n\n # Errors\n\n This function will return an error if the user lacks permission to change timestamps on the\n underlying file. It may also return an error in other os-specific unspecified cases.\n\n This function may return an error if the operating system lacks support to change one or\n more of the timestamps set in the `FileTimes` structure.\n\n # Examples\n\n ```no_run\n fn main() -> std::io::Result<()> {\n     use std::fs::{self, File, FileTimes};\n\n     let src = fs::metadata(\"src\")?;\n     let dest = File::open(\"dest\")?;\n     let times = FileTimes::new()\n         .set_accessed(src.accessed()?)\n         .set_modified(src.modified()?);\n     dest.set_times(times)?;\n     Ok(())\n }\n ```\n",
+      "adt": {
+        "fs::File": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "fs::FileTimes": [
+      "Plain"
+    ],
+    "time::SystemTime": [
+      "Plain"
+    ],
+    "fs::File": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1137,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/fs.rs:1238:5: 1240:6",
+  "src": "pub fn set_modified(&self, time: SystemTime) -> io::Result<()> {\n        self.set_times(FileTimes::new().set_modified(time))\n    }",
+  "mir": "fn fs::File::set_modified(_1: &fs::File, _2: time::SystemTime) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let mut _3: fs::FileTimes;\n    let mut _4: fs::FileTimes;\n    debug self => _1;\n    debug time => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = fs::FileTimes::new() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = fs::FileTimes::set_modified(move _4, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = fs::File::set_times(_1, move _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Changes the modification time of the underlying file.\n\n This is an alias for `set_times(FileTimes::new().set_modified(time))`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

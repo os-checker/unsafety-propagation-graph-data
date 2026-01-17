@@ -1,0 +1,61 @@
+{
+  "name": "collections::vec_deque::spec_extend::prepend",
+  "safe": false,
+  "callees": {
+    "collections::vec_deque::VecDeque::<T, A>::reserve": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reserves capacity for at least `additional` more elements to be inserted in the given\n deque. The collection may reserve more space to speculatively avoid frequent reallocations.\n\n # Panics\n\n Panics if the new capacity overflows `usize`.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut buf: VecDeque<i32> = [1].into();\n buf.reserve(10);\n assert!(buf.capacity() >= 11);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::wrap_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the index in the underlying buffer for a given logical element\n index - subtrahend.\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::copy_slice": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies all values from `src` to `dst`, wrapping around if needed.\n Assumes capacity is sufficient.\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "MutRef",
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ]
+  },
+  "path": 1405,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/spec_extend.rs:205:1: 213:2",
+  "src": "unsafe fn prepend<T, A: Allocator>(deque: &mut VecDeque<T, A>, slice: &[T]) {\n    deque.reserve(slice.len());\n\n    unsafe {\n        deque.head = deque.wrap_sub(deque.head, slice.len());\n        deque.copy_slice(deque.head, slice);\n        deque.len += slice.len();\n    }\n}",
+  "mir": "fn collections::vec_deque::spec_extend::prepend(_1: &mut collections::vec_deque::VecDeque<T, A>, _2: &[T]) -> () {\n    let mut _0: ();\n    let  _3: ();\n    let mut _4: usize;\n    let mut _5: usize;\n    let mut _6: &collections::vec_deque::VecDeque<T, A>;\n    let mut _7: usize;\n    let mut _8: usize;\n    let  _9: ();\n    let mut _10: usize;\n    let mut _11: usize;\n    let mut _12: (usize, bool);\n    debug deque => _1;\n    debug slice => _2;\n    bb0: {\n        StorageLive(_4);\n        _4 = PtrMetadata(_2);\n        _3 = collections::vec_deque::VecDeque::<T, A>::reserve(_1, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &(*_1);\n        StorageLive(_7);\n        _7 = ((*_1).0: usize);\n        StorageLive(_8);\n        _8 = PtrMetadata(_2);\n        _5 = collections::vec_deque::VecDeque::<T, A>::wrap_sub(move _6, move _7, move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_6);\n        ((*_1).0: usize) = move _5;\n        StorageDead(_5);\n        StorageLive(_10);\n        _10 = ((*_1).0: usize);\n        _9 = collections::vec_deque::VecDeque::<T, A>::copy_slice(_1, move _10, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        StorageLive(_11);\n        _11 = PtrMetadata(_2);\n        _12 = CheckedAdd(((*_1).1: usize), _11);\n        assert(!move (_12.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).1: usize), move _11) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        ((*_1).1: usize) = move (_12.0: usize);\n        StorageDead(_11);\n        return;\n    }\n}\n",
+  "doc": " # Safety\n\n Elements of `slice` will be copied into the deque, make sure to forget the items if `T` is not `Copy`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

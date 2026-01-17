@@ -1,0 +1,84 @@
+{
+  "name": "alloc::collections::BTreeMap",
+  "constructors": [
+    "util::range_alloc::RangeAllocator::get_freelist_guard"
+  ],
+  "access_self_as_arg": {
+    "read": [],
+    "write": [],
+    "other": []
+  },
+  "access_self_as_locals": {
+    "read": [
+      "boot::smp::wait_for_all_aps_started::is_all_aps_started",
+      "boot::smp::construct_hw_cpu_id_mapping",
+      "util::range_alloc::RangeAllocator::alloc_specific",
+      "util::range_alloc::RangeAllocator::alloc"
+    ],
+    "write": [
+      "arch::iommu::dma_remapping::context_table::RootTable::specify_device_page_table",
+      "arch::iommu::dma_remapping::context_table::RootTable::get_or_create_context_table",
+      "arch::iommu::dma_remapping::context_table::ContextTable::get_or_create_page_table",
+      "boot::smp::report_online_and_hw_cpu_id",
+      "boot::smp::construct_hw_cpu_id_mapping",
+      "util::range_alloc::RangeAllocator::alloc_specific",
+      "util::range_alloc::RangeAllocator::alloc",
+      "util::range_alloc::RangeAllocator::free",
+      "util::range_alloc::RangeAllocator::get_freelist_guard",
+      "util::range_counter::RangeCounter::add",
+      "util::range_counter::RangeCounter::remove",
+      "util::range_alloc::RangeAllocator::alloc_specific",
+      "util::range_alloc::RangeAllocator::alloc"
+    ],
+    "other": [
+      "arch::iommu::dma_remapping::context_table::RootTable::new",
+      "arch::iommu::dma_remapping::context_table::ContextTable::new",
+      "util::range_alloc::RangeAllocator::get_freelist_guard",
+      "util::range_counter::RangeCounter::new"
+    ]
+  },
+  "access_field": [
+    {
+      "read": [],
+      "write": [],
+      "other": []
+    },
+    {
+      "read": [],
+      "write": [],
+      "other": []
+    },
+    {
+      "read": [],
+      "write": [],
+      "other": []
+    },
+    {
+      "read": [],
+      "write": [],
+      "other": []
+    }
+  ],
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/map.rs:189:1: 193:2",
+  "src": "pub struct BTreeMap<\n    K,\n    V,\n    #[unstable(feature = \"allocator_api\", issue = \"32838\")] A: Allocator + Clone = Global,\n>",
+  "kind": "Struct",
+  "doc_adt": " An ordered map based on a [B-Tree].\n\n Given a key type with a [total order], an ordered map stores its entries in key order.\n That means that keys must be of a type that implements the [`Ord`] trait,\n such that two keys can always be compared to determine their [`Ordering`].\n Examples of keys with a total order are strings with lexicographical order,\n and numbers with their natural order.\n\n Iterators obtained from functions such as [`BTreeMap::iter`], [`BTreeMap::into_iter`], [`BTreeMap::values`], or\n [`BTreeMap::keys`] produce their items in key order, and take worst-case logarithmic and\n amortized constant time per item returned.\n\n It is a logic error for a key to be modified in such a way that the key's ordering relative to\n any other key, as determined by the [`Ord`] trait, changes while it is in the map. This is\n normally only possible through [`Cell`], [`RefCell`], global state, I/O, or unsafe code.\n The behavior resulting from such a logic error is not specified, but will be encapsulated to the\n `BTreeMap` that observed the logic error and not result in undefined behavior. This could\n include panics, incorrect results, aborts, memory leaks, and non-termination.\n\n # Examples\n\n ```\n use std::collections::BTreeMap;\n\n // type inference lets us omit an explicit type signature (which\n // would be `BTreeMap<&str, &str>` in this example).\n let mut movie_reviews = BTreeMap::new();\n\n // review some movies.\n movie_reviews.insert(\"Office Space\",       \"Deals with real issues in the workplace.\");\n movie_reviews.insert(\"Pulp Fiction\",       \"Masterpiece.\");\n movie_reviews.insert(\"The Godfather\",      \"Very enjoyable.\");\n movie_reviews.insert(\"The Blues Brothers\", \"Eye lyked it a lot.\");\n\n // check for a specific one.\n if !movie_reviews.contains_key(\"Les Misérables\") {\n     println!(\"We've got {} reviews, but Les Misérables ain't one.\",\n              movie_reviews.len());\n }\n\n // oops, this review has a lot of spelling mistakes, let's delete it.\n movie_reviews.remove(\"The Blues Brothers\");\n\n // look up the values associated with some keys.\n let to_find = [\"Up!\", \"Office Space\"];\n for movie in &to_find {\n     match movie_reviews.get(movie) {\n        Some(review) => println!(\"{movie}: {review}\"),\n        None => println!(\"{movie} is unreviewed.\")\n     }\n }\n\n // Look up the value for a key (will panic if the key is not found).\n println!(\"Movie review: {}\", movie_reviews[\"Office Space\"]);\n\n // iterate over everything.\n for (movie, review) in &movie_reviews {\n     println!(\"{movie}: \\\"{review}\\\"\");\n }\n ```\n\n A `BTreeMap` with a known list of items can be initialized from an array:\n\n ```\n use std::collections::BTreeMap;\n\n let solar_distance = BTreeMap::from([\n     (\"Mercury\", 0.4),\n     (\"Venus\", 0.7),\n     (\"Earth\", 1.0),\n     (\"Mars\", 1.5),\n ]);\n ```\n\n ## `Entry` API\n\n `BTreeMap` implements an [`Entry API`], which allows for complex\n methods of getting, setting, updating and removing keys and their values:\n\n [`Entry API`]: BTreeMap::entry\n\n ```\n use std::collections::BTreeMap;\n\n // type inference lets us omit an explicit type signature (which\n // would be `BTreeMap<&str, u8>` in this example).\n let mut player_stats = BTreeMap::new();\n\n fn random_stat_buff() -> u8 {\n     // could actually return some random value here - let's just return\n     // some fixed value for now\n     42\n }\n\n // insert a key only if it doesn't already exist\n player_stats.entry(\"health\").or_insert(100);\n\n // insert a key using a function that provides a new value only if it\n // doesn't already exist\n player_stats.entry(\"defence\").or_insert_with(random_stat_buff);\n\n // update a key, guarding against the key possibly not being set\n let stat = player_stats.entry(\"attack\").or_insert(100);\n *stat += random_stat_buff();\n\n // modify an entry before an insert with in-place mutation\n player_stats.entry(\"mana\").and_modify(|mana| *mana += 200).or_insert(100);\n ```\n\n # Background\n\n A B-tree is (like) a [binary search tree], but adapted to the natural granularity that modern\n machines like to consume data at. This means that each node contains an entire array of elements,\n instead of just a single element.\n\n B-Trees represent a fundamental compromise between cache-efficiency and actually minimizing\n the amount of work performed in a search. In theory, a binary search tree (BST) is the optimal\n choice for a sorted map, as a perfectly balanced BST performs the theoretical minimum number of\n comparisons necessary to find an element (log<sub>2</sub>n). However, in practice the way this\n is done is *very* inefficient for modern computer architectures. In particular, every element\n is stored in its own individually heap-allocated node. This means that every single insertion\n triggers a heap-allocation, and every comparison is a potential cache-miss due to the indirection.\n Since both heap-allocations and cache-misses are notably expensive in practice, we are forced to,\n at the very least, reconsider the BST strategy.\n\n A B-Tree instead makes each node contain B-1 to 2B-1 elements in a contiguous array. By doing\n this, we reduce the number of allocations by a factor of B, and improve cache efficiency in\n searches. However, this does mean that searches will have to do *more* comparisons on average.\n The precise number of comparisons depends on the node search strategy used. For optimal cache\n efficiency, one could search the nodes linearly. For optimal comparisons, one could search\n the node using binary search. As a compromise, one could also perform a linear search\n that initially only checks every i<sup>th</sup> element for some choice of i.\n\n Currently, our implementation simply performs naive linear search. This provides excellent\n performance on *small* nodes of elements which are cheap to compare. However in the future we\n would like to further explore choosing the optimal search strategy based on the choice of B,\n and possibly other factors. Using linear search, searching for a random element is expected\n to take B * log(n) comparisons, which is generally worse than a BST. In practice,\n however, performance is excellent.\n\n [B-Tree]: https://en.wikipedia.org/wiki/B-tree\n [binary search tree]: https://en.wikipedia.org/wiki/Binary_search_tree\n [total order]: https://en.wikipedia.org/wiki/Total_order\n [`Cell`]: core::cell::Cell\n [`RefCell`]: core::cell::RefCell\n",
+  "variant_fields": {
+    "VariantIdx(None)-FieldIdx(Some(0))": {
+      "name": "root",
+      "doc": ""
+    },
+    "VariantIdx(None)-FieldIdx(Some(1))": {
+      "name": "length",
+      "doc": ""
+    },
+    "VariantIdx(None)-FieldIdx(Some(2))": {
+      "name": "alloc",
+      "doc": ""
+    },
+    "VariantIdx(None)-FieldIdx(Some(3))": {
+      "name": "_marker",
+      "doc": ""
+    }
+  }
+}

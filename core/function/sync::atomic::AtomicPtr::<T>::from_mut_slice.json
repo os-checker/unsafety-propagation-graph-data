@@ -1,0 +1,16 @@
+{
+  "name": "sync::atomic::AtomicPtr::<T>::from_mut_slice",
+  "safe": true,
+  "callees": {},
+  "adts": {},
+  "path": 17376,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/sync/atomic.rs:1674:5: 1680:6",
+  "src": "pub fn from_mut_slice(v: &mut [*mut T]) -> &mut [Self] {\n        // SAFETY:\n        //  - the mutable reference guarantees unique ownership.\n        //  - the alignment of `*mut T` and `Self` is the same on all platforms\n        //    supported by rust, as verified above.\n        unsafe { &mut *(v as *mut [*mut T] as *mut [Self]) }\n    }",
+  "mir": "fn sync::atomic::AtomicPtr::<T>::from_mut_slice(_1: &mut [*mut T]) -> &mut [sync::atomic::AtomicPtr<T>] {\n    let mut _0: &mut [sync::atomic::AtomicPtr<T>];\n    let mut _2: *mut [sync::atomic::AtomicPtr<T>];\n    let mut _3: *mut [*mut T];\n    debug v => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &raw mut (*_1);\n        _2 = move _3 as *mut [sync::atomic::AtomicPtr<T>];\n        StorageDead(_3);\n        _0 = &mut (*_2);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Gets atomic access to a slice of pointers.\n\n **Note:** This function is only available on targets where `AtomicPtr<T>` has the same alignment as `*const T`\n\n # Examples\n\n ```ignore-wasm\n #![feature(atomic_from_mut)]\n use std::ptr::null_mut;\n use std::sync::atomic::{AtomicPtr, Ordering};\n\n let mut some_ptrs = [null_mut::<String>(); 10];\n let a = &*AtomicPtr::from_mut_slice(&mut some_ptrs);\n std::thread::scope(|s| {\n     for i in 0..a.len() {\n         s.spawn(move || {\n             let name = Box::new(format!(\"thread{i}\"));\n             a[i].store(Box::into_raw(name), Ordering::Relaxed);\n         });\n     }\n });\n for p in some_ptrs {\n     assert!(!p.is_null());\n     let name = unsafe { Box::from_raw(p) };\n     println!(\"Hello, {name}!\");\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

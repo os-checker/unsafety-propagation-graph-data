@@ -1,0 +1,75 @@
+{
+  "name": "path::Path::_strip_prefix",
+  "safe": true,
+  "callees": {
+    "path::Path::components": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Produces an iterator over the [`Component`]s of the path.\n\n When parsing the path, there is a small amount of normalization:\n\n * Repeated separators are ignored, so `a/b` and `a//b` both have\n   `a` and `b` as components.\n\n * Occurrences of `.` are normalized away, except if they are at the\n   beginning of the path. For example, `a/./b`, `a/b/`, `a/b/.` and\n   `a/b` all have `a` and `b` as components, but `./a/b` starts with\n   an additional [`CurDir`] component.\n\n * Trailing separators are normalized away, so `/a/b` and `/a/b/` are equivalent.\n\n Note that no other normalization takes place; in particular, `a/c`\n and `a/b/../c` are distinct, to account for the possibility that `b`\n is a symbolic link (so its parent isn't `a`).\n\n # Examples\n\n ```\n use std::path::{Path, Component};\n use std::ffi::OsStr;\n\n let mut components = Path::new(\"/tmp/foo.txt\").components();\n\n assert_eq!(components.next(), Some(Component::RootDir));\n assert_eq!(components.next(), Some(Component::Normal(OsStr::new(\"tmp\"))));\n assert_eq!(components.next(), Some(Component::Normal(OsStr::new(\"foo.txt\"))));\n assert_eq!(components.next(), None)\n ```\n\n [`CurDir`]: Component::CurDir\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument",
+        "path::Components": "Constructor"
+      }
+    },
+    "path::iter_after": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::option::Option::<T>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).\n\n # Examples\n\n Calculates the length of an <code>Option<[String]></code> as an\n <code>Option<[usize]></code>, consuming the original:\n\n [String]: ../../std/string/struct.String.html \"String\"\n ```\n let maybe_some_string = Some(String::from(\"Hello, World!\"));\n // `Option::map` takes self *by value*, consuming `maybe_some_string`\n let maybe_some_len = maybe_some_string.map(|s| s.len());\n assert_eq!(maybe_some_len, Some(13));\n\n let x: Option<&str> = None;\n assert_eq!(x.map(|s| s.len()), None);\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::ok_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Transforms the `Option<T>` into a [`Result<T, E>`], mapping [`Some(v)`] to\n [`Ok(v)`] and [`None`] to [`Err(err)`].\n\n Arguments passed to `ok_or` are eagerly evaluated; if you are passing the\n result of a function call, it is recommended to use [`ok_or_else`], which is\n lazily evaluated.\n\n [`Ok(v)`]: Ok\n [`Err(err)`]: Err\n [`Some(v)`]: Some\n [`ok_or_else`]: Option::ok_or_else\n\n # Examples\n\n ```\n let x = Some(\"foo\");\n assert_eq!(x.ok_or(0), Ok(\"foo\"));\n\n let x: Option<&str> = None;\n assert_eq!(x.ok_or(0), Err(0));\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "path::Path": [
+      "Ref"
+    ],
+    "path::Components": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 2413,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:2703:5: 2707:6",
+  "src": "fn _strip_prefix(&self, base: &Path) -> Result<&Path, StripPrefixError> {\n        iter_after(self.components(), base.components())\n            .map(|c| c.as_path())\n            .ok_or(StripPrefixError(()))\n    }",
+  "mir": "fn path::Path::_strip_prefix(_1: &path::Path, _2: &path::Path) -> core::result::Result<&path::Path, path::StripPrefixError> {\n    let mut _0: core::result::Result<&path::Path, path::StripPrefixError>;\n    let mut _3: core::option::Option<&path::Path>;\n    let mut _4: core::option::Option<path::Components<'_>>;\n    let mut _5: path::Components<'_>;\n    let mut _6: path::Components<'_>;\n    debug self => _1;\n    debug base => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = path::Path::components(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        _6 = path::Path::components(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = path::iter_after::<'_, '_, path::Components<'_>, path::Components<'_>>(move _5, move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_5);\n        _3 = core::option::Option::<path::Components<'_>>::map::<&path::Path, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:2705:18: 2705:21}>(move _4, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:2705:18: 2705:21}) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        _0 = core::option::Option::<&path::Path>::ok_or::<path::StripPrefixError>(move _3, path::StripPrefixError(())) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

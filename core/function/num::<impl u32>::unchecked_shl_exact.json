@@ -1,0 +1,47 @@
+{
+  "name": "num::<impl u32>::unchecked_shl_exact",
+  "safe": false,
+  "callees": {
+    "num::<impl u32>::leading_zeros": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of leading zeros in the binary representation of `self`.\n\n Depending on what you're doing with the value, you might also be interested in the\n [`ilog2`] function which returns a consistent number, even if the type widens.\n\n # Examples\n\n ```\n assert_eq!(n.leading_zeros(), 2);\n\n\n assert_eq!(max.leading_zeros(), 0);\n ```\n",
+      "adt": {}
+    },
+    "num::<impl u32>::unchecked_shl_exact::precondition_check": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "num::<impl u32>::unchecked_shl": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Unchecked shift left. Computes `self << rhs`, assuming that\n `rhs` is less than the number of bits in `self`.\n\n # Safety\n\n This results in undefined behavior if `rhs` is larger than\n or equal to the number of bits in `self`,\n i.e. when [`checked_shl`] would return `None`.\n\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 3760,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/uint_macros.rs:1943:9: 1956:10",
+  "src": "pub const unsafe fn unchecked_shl_exact(self, rhs: u32) -> $SelfT {\n            assert_unsafe_precondition!(\n                check_library_ub,\n                concat!(stringify!($SelfT), \"::unchecked_shl_exact cannot shift out non-zero bits\"),\n                (\n                    zeros: u32 = self.leading_zeros(),\n                    bits: u32 =  <$SelfT>::BITS,\n                    rhs: u32 = rhs,\n                ) => rhs <= zeros && rhs < bits,\n            );\n\n            // SAFETY: this is guaranteed to be safe by the caller\n            unsafe { self.unchecked_shl(rhs) }\n        }",
+  "mir": "fn num::<impl u32>::unchecked_shl_exact(_1: u32, _2: u32) -> u32 {\n    let mut _0: u32;\n    let mut _3: bool;\n    let  _4: ();\n    let mut _5: u32;\n    debug self => _1;\n    debug rhs => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = RuntimeChecks(UbChecks)() \" \";\n        switchInt(move _3) -> [0: bb4, otherwise: bb1];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = num::<impl u32>::leading_zeros(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = num::<impl u32>::unchecked_shl_exact::precondition_check(move _5, num::<impl u32>::BITS, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        goto -> bb4;\n    }\n    bb4: {\n        StorageDead(_3);\n        _0 = num::<impl u32>::unchecked_shl(_1, _2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": " Unchecked exact shift left. Computes `self << rhs`, assuming the operation can be\n losslessly reversed `rhs` cannot be larger than\n\n # Safety\n\n This results in undefined behavior when `rhs > self.leading_zeros() || rhs >=\n i.e. when\n would return `None`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

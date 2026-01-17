@@ -1,0 +1,26 @@
+{
+  "name": "f16::<impl f16>::from_bits",
+  "safe": true,
+  "callees": {},
+  "adts": {},
+  "path": 1647,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/f16.rs:952:5: 956:6",
+  "src": "pub const fn from_bits(v: u16) -> Self {\n        // It turns out the safety issues with sNaN were overblown! Hooray!\n        // SAFETY: `u16` is a plain old datatype so we can always transmute from it.\n        unsafe { mem::transmute(v) }\n    }",
+  "mir": "fn f16::<impl f16>::from_bits(_1: u16) -> f16 {\n    let mut _0: f16;\n    debug v => _1;\n    bb0: {\n        _0 = _1 as f16;\n        return;\n    }\n}\n",
+  "doc": " Raw transmutation from `u16`.\n\n This is currently identical to `transmute::<u16, f16>(v)` on all platforms.\n It turns out this is incredibly portable, for two reasons:\n\n * Floats and Ints have the same endianness on all supported platforms.\n * IEEE 754 very precisely specifies the bit layout of floats.\n\n However there is one caveat: prior to the 2008 version of IEEE 754, how\n to interpret the NaN signaling bit wasn't actually specified. Most platforms\n (notably x86 and ARM) picked the interpretation that was ultimately\n standardized in 2008, but some didn't (notably MIPS). As a result, all\n signaling NaNs on MIPS are quiet NaNs on x86, and vice-versa.\n\n Rather than trying to preserve signaling-ness cross-platform, this\n implementation favors preserving the exact bits. This means that\n any payloads encoded in NaNs will be preserved even if the result of\n this method is sent over the network from an x86 machine to a MIPS one.\n\n If the results of this method are only manipulated by the same\n architecture that produced them, then there is no portability concern.\n\n If the input isn't NaN, then there is no portability concern.\n\n If you don't care about signalingness (very likely), then there is no\n portability concern.\n\n Note that this function is distinct from `as` casting, which attempts to\n preserve the *numeric* value, and not the bitwise value.\n\n ```\n #![feature(f16)]\n # #[cfg(all(target_arch = \"x86_64\", target_os = \"linux\"))] {\n\n let v = f16::from_bits(0x4a40);\n assert_eq!(v, 12.5);\n # }\n ```\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "unnecessary_transmutes"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* unnecessary_transmutes\n"
+    ]
+  }
+}

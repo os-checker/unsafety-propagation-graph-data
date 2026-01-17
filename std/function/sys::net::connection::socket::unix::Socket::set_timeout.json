@@ -1,0 +1,80 @@
+{
+  "name": "sys::net::connection::socket::unix::Socket::set_timeout",
+  "safe": true,
+  "callees": {
+    "core::time::Duration::as_secs": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of _whole_ seconds contained by this `Duration`.\n\n The returned value does not include the fractional (nanosecond) part of the\n duration, which can be obtained using [`subsec_nanos`].\n\n # Examples\n\n ```\n use std::time::Duration;\n\n let duration = Duration::new(5, 730_023_852);\n assert_eq!(duration.as_secs(), 5);\n ```\n\n To determine the total number of seconds represented by the `Duration`\n including the fractional part, use [`as_secs_f64`] or [`as_secs_f32`]\n\n [`as_secs_f64`]: Duration::as_secs_f64\n [`as_secs_f32`]: Duration::as_secs_f32\n [`subsec_nanos`]: Duration::subsec_nanos\n",
+      "adt": {}
+    },
+    "core::time::Duration::subsec_nanos": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the fractional part of this `Duration`, in nanoseconds.\n\n This method does **not** return the length of the duration when\n represented by nanoseconds. The returned number always represents a\n fractional portion of a second (i.e., it is less than one billion).\n\n # Examples\n\n ```\n use std::time::Duration;\n\n let duration = Duration::from_millis(5_010);\n assert_eq!(duration.as_secs(), 5);\n assert_eq!(duration.subsec_nanos(), 10_000_000);\n ```\n",
+      "adt": {}
+    },
+    "core::time::Duration::subsec_micros": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the fractional part of this `Duration`, in whole microseconds.\n\n This method does **not** return the length of the duration when\n represented by microseconds. The returned number always represents a\n fractional portion of a second (i.e., it is less than one million).\n\n # Examples\n\n ```\n use std::time::Duration;\n\n let duration = Duration::from_micros(1_234_567);\n assert_eq!(duration.as_secs(), 1);\n assert_eq!(duration.subsec_micros(), 234_567);\n ```\n",
+      "adt": {}
+    },
+    "sys::net::connection::socket::setsockopt": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets the value of a socket option.\n\n # Safety\n `T` must be the type associated with the given socket option.\n",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "sys::net::connection::socket::unix::Socket": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 609, kind: RigidTy(Adt(AdtDef(DefId { id: 4607, name: \"core::time::Duration\" }), GenericArgs([]))) })])"
+    ],
+    "libc::timeval": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 4522, kind: RigidTy(Int(I64)) })])",
+      "Unknown([Field(1, Ty { id: 4522, kind: RigidTy(Int(I64)) })])"
+    ],
+    "core::time::Duration": [
+      "Plain",
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "sys::net::connection::socket::unix::Socket": [
+      "Ref"
+    ]
+  },
+  "path": 3713,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/net/connection/socket/unix.rs:383:5: 407:6",
+  "src": "pub fn set_timeout(&self, dur: Option<Duration>, kind: libc::c_int) -> io::Result<()> {\n        let timeout = match dur {\n            Some(dur) => {\n                if dur.as_secs() == 0 && dur.subsec_nanos() == 0 {\n                    return Err(io::Error::ZERO_TIMEOUT);\n                }\n\n                let secs = if dur.as_secs() > libc::time_t::MAX as u64 {\n                    libc::time_t::MAX\n                } else {\n                    dur.as_secs() as libc::time_t\n                };\n                let mut timeout = libc::timeval {\n                    tv_sec: secs,\n                    tv_usec: dur.subsec_micros() as libc::suseconds_t,\n                };\n                if timeout.tv_sec == 0 && timeout.tv_usec == 0 {\n                    timeout.tv_usec = 1;\n                }\n                timeout\n            }\n            None => libc::timeval { tv_sec: 0, tv_usec: 0 },\n        };\n        unsafe { setsockopt(self, libc::SOL_SOCKET, kind, timeout) }\n    }",
+  "mir": "fn sys::net::connection::socket::unix::Socket::set_timeout(_1: &sys::net::connection::socket::unix::Socket, _2: core::option::Option<core::time::Duration>, _3: i32) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let  _4: libc::timeval;\n    let mut _5: isize;\n    let  _6: core::time::Duration;\n    let mut _7: u64;\n    let mut _8: &core::time::Duration;\n    let mut _9: u32;\n    let mut _10: &core::time::Duration;\n    let  _11: i64;\n    let mut _12: bool;\n    let mut _13: u64;\n    let mut _14: &core::time::Duration;\n    let mut _15: u64;\n    let mut _16: u64;\n    let mut _17: &core::time::Duration;\n    let mut _18: libc::timeval;\n    let mut _19: i64;\n    let mut _20: i64;\n    let mut _21: u32;\n    let mut _22: &core::time::Duration;\n    let mut _23: i64;\n    let mut _24: i64;\n    let mut _25: libc::timeval;\n    debug self => _1;\n    debug dur => _2;\n    debug kind => _3;\n    debug timeout => _4;\n    debug dur => _6;\n    debug secs => _11;\n    debug timeout => _18;\n    bb0: {\n        StorageLive(_4);\n        _5 = discriminant(_2);\n        switchInt(move _5) -> [0: bb2, 1: bb3, otherwise: bb1];\n    }\n    bb1: {\n        unreachable;\n    }\n    bb2: {\n        _4 = timeval(0_i64, 0_i64);\n        goto -> bb22;\n    }\n    bb3: {\n        StorageLive(_6);\n        _6 = ((_2 as variant#1).0: core::time::Duration);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &_6;\n        _7 = core::time::Duration::as_secs(move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        switchInt(move _7) -> [0: bb5, otherwise: bb9];\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_6;\n        _9 = core::time::Duration::subsec_nanos(move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        switchInt(move _9) -> [0: bb7, otherwise: bb8];\n    }\n    bb7: {\n        StorageDead(_9);\n        _0 = core::result::Result::Err(io::error::Error::ZERO_TIMEOUT);\n        StorageDead(_6);\n        StorageDead(_4);\n        goto -> bb24;\n    }\n    bb8: {\n        StorageDead(_9);\n        goto -> bb10;\n    }\n    bb9: {\n        StorageDead(_7);\n        goto -> bb10;\n    }\n    bb10: {\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = &_6;\n        _13 = core::time::Duration::as_secs(move _14) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_14);\n        StorageLive(_15);\n        _15 = core::num::<impl i64>::MAX as u64;\n        _12 = Gt(move _13, move _15);\n        switchInt(move _12) -> [0: bb13, otherwise: bb12];\n    }\n    bb12: {\n        StorageDead(_15);\n        StorageDead(_13);\n        _11 = core::num::<impl i64>::MAX;\n        goto -> bb15;\n    }\n    bb13: {\n        StorageDead(_15);\n        StorageDead(_13);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &_6;\n        _16 = core::time::Duration::as_secs(move _17) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_17);\n        _11 = move _16 as i64;\n        StorageDead(_16);\n        goto -> bb15;\n    }\n    bb15: {\n        StorageDead(_12);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = _11;\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = &_6;\n        _21 = core::time::Duration::subsec_micros(move _22) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_22);\n        _20 = move _21 as i64;\n        StorageDead(_21);\n        _18 = timeval(move _19, move _20);\n        StorageDead(_20);\n        StorageDead(_19);\n        StorageLive(_23);\n        _23 = (_18.0: i64);\n        switchInt(move _23) -> [0: bb17, otherwise: bb20];\n    }\n    bb17: {\n        StorageDead(_23);\n        StorageLive(_24);\n        _24 = (_18.1: i64);\n        switchInt(move _24) -> [0: bb18, otherwise: bb19];\n    }\n    bb18: {\n        StorageDead(_24);\n        (_18.1: i64) = 1_i64;\n        goto -> bb21;\n    }\n    bb19: {\n        StorageDead(_24);\n        goto -> bb21;\n    }\n    bb20: {\n        StorageDead(_23);\n        goto -> bb21;\n    }\n    bb21: {\n        _4 = _18;\n        StorageDead(_18);\n        StorageDead(_11);\n        StorageDead(_6);\n        goto -> bb22;\n    }\n    bb22: {\n        StorageLive(_25);\n        _25 = _4;\n        _0 = sys::net::connection::socket::setsockopt::<libc::timeval>(_1, libc::SOL_SOCKET, _3, move _25) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_25);\n        StorageDead(_4);\n        goto -> bb24;\n    }\n    bb24: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

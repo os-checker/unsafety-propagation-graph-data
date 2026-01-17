@@ -1,0 +1,53 @@
+{
+  "name": "sync::Arc::<T, A>::from_raw_in",
+  "safe": false,
+  "callees": {
+    "sync::data_offset": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the offset within an `ArcInner` for the payload behind a pointer.\n\n # Safety\n\n The pointer must point to (and have valid metadata for) a previously\n valid instance of T, but the T is allowed to be dropped.\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::byte_sub": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts an unsigned offset in bytes from a pointer.\n\n `count` is in units of bytes.\n\n This is purely a convenience for casting to a `u8` pointer and\n using [sub][pointer::sub] on it. See that method for documentation\n and safety requirements.\n\n For non-`Sized` pointees this operation changes only the data pointer,\n leaving the metadata untouched.\n",
+      "adt": {}
+    },
+    "sync::Arc::<T, A>::from_ptr_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::Arc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sync::Arc": [
+      "Plain"
+    ]
+  },
+  "path": 2068,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:1888:5: 1897:6",
+  "src": "pub unsafe fn from_raw_in(ptr: *const T, alloc: A) -> Self {\n        unsafe {\n            let offset = data_offset(ptr);\n\n            // Reverse the offset to find the original ArcInner.\n            let arc_ptr = ptr.byte_sub(offset) as *mut ArcInner<T>;\n\n            Self::from_ptr_in(arc_ptr, alloc)\n        }\n    }",
+  "mir": "fn sync::Arc::<T, A>::from_raw_in(_1: *const T, _2: A) -> sync::Arc<T, A> {\n    let mut _0: sync::Arc<T, A>;\n    let  _3: usize;\n    let  _4: *mut sync::ArcInner<T>;\n    let mut _5: *const T;\n    debug ptr => _1;\n    debug alloc => _2;\n    debug offset => _3;\n    debug arc_ptr => _4;\n    bb0: {\n        _3 = sync::data_offset::<T>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = core::ptr::const_ptr::<impl *const T>::byte_sub(_1, _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = move _5 as *mut sync::ArcInner<T>;\n        StorageDead(_5);\n        _0 = sync::Arc::<T, A>::from_ptr_in(_4, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": " Constructs an `Arc<T, A>` from a raw pointer.\n\n The raw pointer must have been previously returned by a call to [`Arc<U,\n A>::into_raw`][into_raw] with the following requirements:\n\n * If `U` is sized, it must have the same size and alignment as `T`. This\n   is trivially true if `U` is `T`.\n * If `U` is unsized, its data pointer must have the same size and\n   alignment as `T`. This is trivially true if `Arc<U>` was constructed\n   through `Arc<T>` and then converted to `Arc<U>` through an [unsized\n   coercion].\n\n Note that if `U` or `U`'s data pointer is not `T` but has the same size\n and alignment, this is basically like transmuting references of\n different types. See [`mem::transmute`][transmute] for more information\n on what restrictions apply in this case.\n\n The raw pointer must point to a block of memory allocated by `alloc`\n\n The user of `from_raw` has to make sure a specific value of `T` is only\n dropped once.\n\n This function is unsafe because improper use may lead to memory unsafety,\n even if the returned `Arc<T>` is never accessed.\n\n [into_raw]: Arc::into_raw\n [transmute]: core::mem::transmute\n [unsized coercion]: https://doc.rust-lang.org/reference/type-coercions.html#unsized-coercions\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::sync::Arc;\n use std::alloc::System;\n\n let x = Arc::new_in(\"hello\".to_owned(), System);\n let (x_ptr, alloc) = Arc::into_raw_with_allocator(x);\n\n unsafe {\n     // Convert back to an `Arc` to prevent leak.\n     let x = Arc::from_raw_in(x_ptr, System);\n     assert_eq!(&*x, \"hello\");\n\n     // Further calls to `Arc::from_raw(x_ptr)` would be memory-unsafe.\n }\n\n // The memory was freed when `x` went out of scope above, so `x_ptr` is now dangling!\n ```\n\n Convert a slice back into its original array:\n\n ```\n #![feature(allocator_api)]\n\n use std::sync::Arc;\n use std::alloc::System;\n\n let x: Arc<[u32], _> = Arc::new_in([1, 2, 3], System);\n let x_ptr: *const [u32] = Arc::into_raw_with_allocator(x).0;\n\n unsafe {\n     let x: Arc<[u32; 3], _> = Arc::from_raw_in(x_ptr.cast::<[u32; 3]>(), System);\n     assert_eq!(&*x, &[1, 2, 3]);\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

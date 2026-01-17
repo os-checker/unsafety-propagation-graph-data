@@ -1,0 +1,56 @@
+{
+  "name": "collections::vec_deque::VecDeque::<T, A>::drain",
+  "safe": true,
+  "callees": {
+    "core::slice::range": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs bounds checking of a range.\n\n This method is similar to [`Index::index`] for slices, but it returns a\n [`Range`] equivalent to `range`. You can use this method to turn any range\n into `start` and `end` values.\n\n `bounds` is the range of the slice to use for bounds checking. It should\n be a [`RangeTo`] range that ends at the length of the slice.\n\n The returned [`Range`] is safe to pass to [`slice::get_unchecked`] and\n [`slice::get_unchecked_mut`] for slices with the given range.\n\n [`Range`]: ops::Range\n [`RangeTo`]: ops::RangeTo\n [`slice::get_unchecked`]: slice::get_unchecked\n [`slice::get_unchecked_mut`]: slice::get_unchecked_mut\n\n # Panics\n\n Panics if `range` would be out of bounds.\n\n # Examples\n\n ```\n #![feature(slice_range)]\n\n use std::slice;\n\n let v = [10, 40, 30];\n assert_eq!(1..2, slice::range(1..2, ..v.len()));\n assert_eq!(0..2, slice::range(..2, ..v.len()));\n assert_eq!(1..3, slice::range(1.., ..v.len()));\n ```\n\n Panics when [`Index::index`] would panic:\n\n ```should_panic\n #![feature(slice_range)]\n\n use std::slice;\n\n let _ = slice::range(2..1, ..3);\n ```\n\n ```should_panic\n #![feature(slice_range)]\n\n use std::slice;\n\n let _ = slice::range(1..4, ..3);\n ```\n\n ```should_panic\n #![feature(slice_range)]\n\n use std::slice;\n\n let _ = slice::range(1..=usize::MAX, ..3);\n ```\n\n [`Index::index`]: ops::Index::index\n",
+      "adt": {}
+    },
+    "collections::vec_deque::drain::Drain::<'a, T, A>::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument",
+        "collections::vec_deque::drain::Drain": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "core::ops::RangeTo": [
+      "Plain"
+    ],
+    "core::ops::Range": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(1, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "collections::vec_deque::drain::Drain": [
+      "Plain"
+    ]
+  },
+  "path": 1472,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:1801:5: 1839:6",
+  "src": "pub fn drain<R>(&mut self, range: R) -> Drain<'_, T, A>\n    where\n        R: RangeBounds<usize>,\n    {\n        // Memory safety\n        //\n        // When the Drain is first created, the source deque is shortened to\n        // make sure no uninitialized or moved-from elements are accessible at\n        // all if the Drain's destructor never gets to run.\n        //\n        // Drain will ptr::read out the values to remove.\n        // When finished, the remaining data will be copied back to cover the hole,\n        // and the head/tail values will be restored correctly.\n        //\n        let Range { start, end } = slice::range(range, ..self.len);\n        let drain_start = start;\n        let drain_len = end - start;\n\n        // The deque's elements are parted into three segments:\n        // * 0  -> drain_start\n        // * drain_start -> drain_start+drain_len\n        // * drain_start+drain_len -> self.len\n        //\n        // H = self.head; T = self.head+self.len; t = drain_start+drain_len; h = drain_head\n        //\n        // We store drain_start as self.len, and drain_len and self.len as\n        // drain_len and orig_len respectively on the Drain. This also\n        // truncates the effective array such that if the Drain is leaked, we\n        // have forgotten about the potentially moved values after the start of\n        // the drain.\n        //\n        //        H   h   t   T\n        // [. . . o o x x o o . . .]\n        //\n        // \"forget\" about the values after the start of the drain until after\n        // the drain is complete and the Drain destructor is run.\n\n        unsafe { Drain::new(self, drain_start, drain_len) }\n    }",
+  "mir": "fn collections::vec_deque::VecDeque::<T, A>::drain(_1: &mut collections::vec_deque::VecDeque<T, A>, _2: R) -> collections::vec_deque::drain::Drain<'_, T, A> {\n    let mut _0: collections::vec_deque::drain::Drain<'_, T, A>;\n    let  _3: usize;\n    let  _4: usize;\n    let mut _5: core::ops::Range<usize>;\n    let mut _6: core::ops::RangeTo<usize>;\n    let mut _7: usize;\n    let  _8: usize;\n    let mut _9: (usize, bool);\n    debug self => _1;\n    debug range => _2;\n    debug start => _3;\n    debug end => _4;\n    debug drain_start => _3;\n    debug drain_len => _8;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = ((*_1).1: usize);\n        _6 = RangeTo(move _7);\n        StorageDead(_7);\n        _5 = core::slice::range::<R>(_2, move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        _3 = (_5.0: usize);\n        _4 = (_5.1: usize);\n        StorageDead(_5);\n        _9 = CheckedSub(_4, _3);\n        assert(!move (_9.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _4, _3) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _8 = move (_9.0: usize);\n        _0 = collections::vec_deque::drain::Drain::<'_, T, A>::new(_1, _3, _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": " Removes the specified range from the deque in bulk, returning all\n removed elements as an iterator. If the iterator is dropped before\n being fully consumed, it drops the remaining removed elements.\n\n The returned iterator keeps a mutable borrow on the queue to optimize\n its implementation.\n\n\n # Panics\n\n Panics if the range has `start_bound > end_bound`, or, if the range is\n bounded on either end and past the length of the deque.\n\n # Leaking\n\n If the returned iterator goes out of scope without being dropped (due to\n [`mem::forget`], for example), the deque may have lost and leaked\n elements arbitrarily, including elements outside the range.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut deque: VecDeque<_> = [1, 2, 3].into();\n let drained = deque.drain(2..).collect::<VecDeque<_>>();\n assert_eq!(drained, [3]);\n assert_eq!(deque, [1, 2]);\n\n // A full range clears all contents, like `clear()` does\n deque.drain(..);\n assert!(deque.is_empty());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

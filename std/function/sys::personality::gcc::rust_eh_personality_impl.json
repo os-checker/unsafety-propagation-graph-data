@@ -1,0 +1,84 @@
+{
+  "name": "sys::personality::gcc::rust_eh_personality_impl",
+  "safe": false,
+  "callees": {
+    "sys::personality::gcc::find_eh_action": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "sys::personality::dwarf::eh::EHAction": "Constructor"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "unwind::_Unwind_SetGR": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::ptr::null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a null raw pointer.\n\n This function is equivalent to zero-initializing the pointer:\n `MaybeUninit::<*const T>::zeroed().assume_init()`.\n The resulting pointer has the address 0.\n\n # Examples\n\n ```\n use std::ptr;\n\n let p: *const i32 = ptr::null();\n assert!(p.is_null());\n assert_eq!(p as usize, 0); // this pointer has the address 0\n ```\n",
+      "adt": {}
+    },
+    "unwind::_Unwind_SetIP": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "unwind::_Unwind_Reason_Code": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 12640, kind: RigidTy(Adt(AdtDef(DefId { id: 10143, name: \"sys::personality::dwarf::eh::EHAction\" }), GenericArgs([]))) })])"
+    ],
+    "sys::personality::dwarf::eh::EHAction": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(2, ThreadLocalIndex)), Field(0, Ty { id: 37, kind: RigidTy(RawPtr(Ty { id: 35, kind: RigidTy(Uint(U8)) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 37, kind: RigidTy(RawPtr(Ty { id: 35, kind: RigidTy(Uint(U8)) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(3, ThreadLocalIndex)), Field(0, Ty { id: 37, kind: RigidTy(RawPtr(Ty { id: 35, kind: RigidTy(Uint(U8)) }, Not)) })])"
+    ]
+  },
+  "path": 4074,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/personality/gcc.rs:209:9: 249:10",
+  "src": "unsafe extern \"C\" fn rust_eh_personality_impl(\n            version: c_int,\n            actions: uw::_Unwind_Action,\n            _exception_class: uw::_Unwind_Exception_Class,\n            exception_object: *mut uw::_Unwind_Exception,\n            context: *mut uw::_Unwind_Context,\n        ) -> uw::_Unwind_Reason_Code {\n            unsafe {\n                if version != 1 {\n                    return uw::_URC_FATAL_PHASE1_ERROR;\n                }\n                let eh_action = match find_eh_action(context) {\n                    Ok(action) => action,\n                    Err(_) => return uw::_URC_FATAL_PHASE1_ERROR,\n                };\n                if actions & uw::_UA_SEARCH_PHASE != 0 {\n                    match eh_action {\n                        EHAction::None | EHAction::Cleanup(_) => uw::_URC_CONTINUE_UNWIND,\n                        EHAction::Catch(_) | EHAction::Filter(_) => uw::_URC_HANDLER_FOUND,\n                        EHAction::Terminate => uw::_URC_FATAL_PHASE1_ERROR,\n                    }\n                } else {\n                    match eh_action {\n                        EHAction::None => uw::_URC_CONTINUE_UNWIND,\n                        // Forced unwinding hits a terminate action.\n                        EHAction::Filter(_) if actions & uw::_UA_FORCE_UNWIND != 0 => uw::_URC_CONTINUE_UNWIND,\n                        EHAction::Cleanup(lpad) | EHAction::Catch(lpad) | EHAction::Filter(lpad) => {\n                            uw::_Unwind_SetGR(\n                                context,\n                                UNWIND_DATA_REG.0,\n                                exception_object.cast(),\n                            );\n                            uw::_Unwind_SetGR(context, UNWIND_DATA_REG.1, core::ptr::null());\n                            uw::_Unwind_SetIP(context, lpad);\n                            uw::_URC_INSTALL_CONTEXT\n                        }\n                        EHAction::Terminate => uw::_URC_FATAL_PHASE2_ERROR,\n                    }\n                }\n            }\n        }",
+  "mir": "fn sys::personality::gcc::rust_eh_personality_impl(_1: i32, _2: i32, _3: u64, _4: *mut unwind::_Unwind_Exception, _5: *mut unwind::_Unwind_Context) -> unwind::_Unwind_Reason_Code {\n    let mut _0: unwind::_Unwind_Reason_Code;\n    let mut _6: core::result::Result<sys::personality::dwarf::eh::EHAction, ()>;\n    let mut _7: isize;\n    let  _8: sys::personality::dwarf::eh::EHAction;\n    let mut _9: i32;\n    let mut _10: isize;\n    let mut _11: isize;\n    let mut _12: i32;\n    let  _13: *const u8;\n    let  _14: ();\n    let mut _15: i32;\n    let mut _16: (i32, i32);\n    let mut _17: *const u8;\n    let mut _18: *mut u8;\n    let  _19: ();\n    let mut _20: i32;\n    let mut _21: (i32, i32);\n    let mut _22: *const u8;\n    let  _23: ();\n    let mut _24: *const u8;\n    debug version => _1;\n    debug actions => _2;\n    debug _exception_class => _3;\n    debug exception_object => _4;\n    debug context => _5;\n    debug eh_action => _8;\n    debug action => _8;\n    debug lpad => _13;\n    bb0: {\n        switchInt(_1) -> [1: bb2, otherwise: bb1];\n    }\n    bb1: {\n        _0 = unwind::_Unwind_Reason_Code::_URC_FATAL_PHASE1_ERROR;\n        goto -> bb26;\n    }\n    bb2: {\n        StorageLive(_6);\n        _6 = sys::personality::gcc::find_eh_action(_5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _7 = discriminant(_6);\n        switchInt(move _7) -> [0: bb6, 1: bb5, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _0 = unwind::_Unwind_Reason_Code::_URC_FATAL_PHASE1_ERROR;\n        StorageDead(_6);\n        goto -> bb26;\n    }\n    bb6: {\n        _8 = move ((_6 as variant#0).0: sys::personality::dwarf::eh::EHAction);\n        StorageDead(_6);\n        StorageLive(_9);\n        _9 = BitAnd(_2, unwind::_UA_SEARCH_PHASE);\n        switchInt(move _9) -> [0: bb8, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_9);\n        _10 = discriminant(_8);\n        switchInt(move _10) -> [0: bb11, 1: bb11, 2: bb10, 3: bb10, 4: bb9, otherwise: bb4];\n    }\n    bb8: {\n        StorageDead(_9);\n        _11 = discriminant(_8);\n        switchInt(move _11) -> [0: bb16, 1: bb14, 2: bb13, 3: bb15, 4: bb12, otherwise: bb4];\n    }\n    bb9: {\n        _0 = unwind::_Unwind_Reason_Code::_URC_FATAL_PHASE1_ERROR;\n        goto -> bb25;\n    }\n    bb10: {\n        _0 = unwind::_Unwind_Reason_Code::_URC_HANDLER_FOUND;\n        goto -> bb25;\n    }\n    bb11: {\n        _0 = unwind::_Unwind_Reason_Code::_URC_CONTINUE_UNWIND;\n        goto -> bb25;\n    }\n    bb12: {\n        _0 = unwind::_Unwind_Reason_Code::_URC_FATAL_PHASE2_ERROR;\n        goto -> bb25;\n    }\n    bb13: {\n        StorageLive(_13);\n        _13 = ((_8 as variant#2).0: *const u8);\n        goto -> bb19;\n    }\n    bb14: {\n        StorageLive(_13);\n        _13 = ((_8 as variant#1).0: *const u8);\n        goto -> bb19;\n    }\n    bb15: {\n        StorageLive(_12);\n        _12 = BitAnd(_2, unwind::_UA_FORCE_UNWIND);\n        switchInt(move _12) -> [0: bb18, otherwise: bb17];\n    }\n    bb16: {\n        _0 = unwind::_Unwind_Reason_Code::_URC_CONTINUE_UNWIND;\n        goto -> bb25;\n    }\n    bb17: {\n        StorageDead(_12);\n        _0 = unwind::_Unwind_Reason_Code::_URC_CONTINUE_UNWIND;\n        goto -> bb25;\n    }\n    bb18: {\n        StorageDead(_12);\n        StorageLive(_13);\n        _13 = ((_8 as variant#3).0: *const u8);\n        goto -> bb19;\n    }\n    bb19: {\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = sys::personality::gcc::UNWIND_DATA_REG;\n        _15 = (_16.0: i32);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = core::ptr::mut_ptr::<impl *mut unwind::_Unwind_Exception>::cast::<u8>(_4) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        _17 = move _18 as *const u8;\n        StorageDead(_18);\n        _14 = unwind::_Unwind_SetGR(_5, move _15, move _17) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_17);\n        StorageDead(_15);\n        StorageDead(_16);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = sys::personality::gcc::UNWIND_DATA_REG;\n        _20 = (_21.1: i32);\n        StorageLive(_22);\n        _22 = core::ptr::null::<u8>() -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        _19 = unwind::_Unwind_SetGR(_5, move _20, move _22) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_22);\n        StorageDead(_20);\n        StorageDead(_21);\n        StorageLive(_24);\n        _24 = _13;\n        _23 = unwind::_Unwind_SetIP(_5, move _24) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        StorageDead(_24);\n        _0 = unwind::_Unwind_Reason_Code::_URC_INSTALL_CONTEXT;\n        StorageDead(_13);\n        goto -> bb25;\n    }\n    bb25: {\n        goto -> bb26;\n    }\n    bb26: {\n        return;\n    }\n}\n",
+  "doc": " Default personality routine, which is used directly on most targets\n and indirectly on Windows x86_64 and AArch64 via SEH.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

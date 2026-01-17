@@ -1,0 +1,101 @@
+{
+  "name": "<isize as string::SpecToString>::spec_to_string",
+  "safe": true,
+  "callees": {
+    "core::mem::MaybeUninit::<T>::uninit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `MaybeUninit<T>` in an uninitialized state.\n\n Note that dropping a `MaybeUninit<T>` will never call `T`'s drop code.\n It is your responsibility to make sure `T` gets dropped if it got initialized.\n\n See the [type-level documentation][MaybeUninit] for some examples.\n\n # Example\n\n ```\n use std::mem::MaybeUninit;\n\n let v: MaybeUninit<String> = MaybeUninit::uninit();\n ```\n",
+      "adt": {}
+    },
+    "string::String::with_capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new empty `String` with at least the specified capacity.\n\n `String`s have an internal buffer to hold their data. The capacity is\n the length of that buffer, and can be queried with the [`capacity`]\n method. This method creates an empty `String`, but one with an initial\n buffer that can hold at least `capacity` bytes. This is useful when you\n may be appending a bunch of data to the `String`, reducing the number of\n reallocations it needs to do.\n\n [`capacity`]: String::capacity\n\n If the given capacity is `0`, no allocation will occur, and this method\n is identical to the [`new`] method.\n\n [`new`]: String::new\n\n # Panics\n\n Panics if the capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut s = String::with_capacity(10);\n\n // The String contains no chars, even though it has capacity for more\n assert_eq!(s.len(), 0);\n\n // These are all done without reallocating...\n let cap = s.capacity();\n for _ in 0..10 {\n     s.push('a');\n }\n\n assert_eq!(s.capacity(), cap);\n\n // ...but this may make the string reallocate\n s.push('a');\n ```\n",
+      "adt": {
+        "string::String": "Constructor"
+      }
+    },
+    "string::String::push": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Appends the given [`char`] to the end of this `String`.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut s = String::from(\"abc\");\n\n s.push('1');\n s.push('2');\n s.push('3');\n\n assert_eq!(\"abc123\", s);\n ```\n",
+      "adt": {
+        "string::String": "MutableAsArgument"
+      }
+    },
+    "core::num::<impl isize>::unsigned_abs": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Computes the absolute value of `self` without any wrapping\n or panicking.\n\n\n # Examples\n\n ```\n assert_eq!((-128i8).unsigned_abs(), 128u8);\n ```\n",
+      "adt": {}
+    },
+    "core::fmt::num::imp::<impl usize>::_fmt": {
+      "safe": false,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "string::String::push_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Appends a given string slice onto the end of this `String`.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut s = String::from(\"foo\");\n\n s.push_str(\"bar\");\n\n assert_eq!(\"foobar\", s);\n ```\n",
+      "adt": {
+        "string::String": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "core::mem::MaybeUninit": [
+      "Plain"
+    ],
+    "string::String": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 153,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:2925:13: 2940:14",
+  "src": "fn spec_to_string(&self) -> String {\n                const SIZE: usize = $signed::MAX.ilog10() as usize + 1;\n                let mut buf = [core::mem::MaybeUninit::<u8>::uninit(); SIZE];\n                // Only difference between signed and unsigned are these 8 lines.\n                let mut out;\n                if *self < 0 {\n                    out = String::with_capacity(SIZE + 1);\n                    out.push('-');\n                } else {\n                    out = String::with_capacity(SIZE);\n                }\n\n                // SAFETY: `buf` is always big enough to contain all the digits.\n                unsafe { out.push_str(self.unsigned_abs()._fmt(&mut buf)); }\n                out\n            }",
+  "mir": "fn <isize as string::SpecToString>::spec_to_string(_1: &isize) -> string::String {\n    let mut _0: string::String;\n    let mut _2: [core::mem::MaybeUninit<u8>; 19];\n    let mut _3: core::mem::MaybeUninit<u8>;\n    let mut _4: string::String;\n    let mut _5: bool;\n    let mut _6: isize;\n    let mut _7: string::String;\n    let mut _8: usize;\n    let mut _9: (usize, bool);\n    let  _10: ();\n    let mut _11: &mut string::String;\n    let mut _12: string::String;\n    let  _13: ();\n    let mut _14: &mut string::String;\n    let  _15: &str;\n    let mut _16: usize;\n    let mut _17: isize;\n    let mut _18: &mut [core::mem::MaybeUninit<u8>];\n    let mut _19: &mut [core::mem::MaybeUninit<u8>; 19];\n    debug self => _1;\n    debug buf => _2;\n    debug out => _4;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = core::mem::MaybeUninit::<u8>::uninit() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = [move _3; 19];\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = (*_1);\n        _5 = Lt(move _6, 0_isize);\n        switchInt(move _5) -> [0: bb6, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _9 = CheckedAdd(<isize as string::SpecToString>::spec_to_string::SIZE, 1_usize);\n        assert(!move (_9.1: bool), \"attempt to compute `{} + {}`, which would overflow\", <isize as string::SpecToString>::spec_to_string::SIZE, 1_usize) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _8 = move (_9.0: usize);\n        _7 = string::String::with_capacity(move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        _4 = move _7;\n        StorageDead(_7);\n        StorageLive(_11);\n        _11 = &mut _4;\n        _10 = string::String::push(move _11, '-') -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        goto -> bb8;\n    }\n    bb6: {\n        StorageDead(_6);\n        StorageLive(_12);\n        _12 = string::String::with_capacity(<isize as string::SpecToString>::spec_to_string::SIZE) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _4 = move _12;\n        StorageDead(_12);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageDead(_5);\n        StorageLive(_14);\n        _14 = &mut _4;\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = (*_1);\n        _16 = core::num::<impl isize>::unsigned_abs(move _17) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_17);\n        StorageLive(_18);\n        _19 = &mut _2;\n        _18 = _19 as &mut [core::mem::MaybeUninit<u8>];\n        _15 = core::fmt::num::imp::<impl usize>::_fmt(move _16, move _18) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_18);\n        StorageDead(_16);\n        _13 = string::String::push_str(move _14, _15) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_14);\n        _0 = move _4;\n        StorageDead(_4);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

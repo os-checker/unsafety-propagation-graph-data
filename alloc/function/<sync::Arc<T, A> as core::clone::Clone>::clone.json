@@ -1,0 +1,91 @@
+{
+  "name": "<sync::Arc<T, A> as core::clone::Clone>::clone",
+  "safe": true,
+  "callees": {
+    "sync::Arc::<T, A>::inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::Arc": "ImmutableAsArgument"
+      }
+    },
+    "core::sync::atomic::AtomicUsize::fetch_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds to the current value, returning the previous value.\n\n This operation wraps around on overflow.\n\n `fetch_add` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n assert_eq!(foo.fetch_add(10, Ordering::SeqCst), 0);\n assert_eq!(foo.load(Ordering::SeqCst), 10);\n ```\n",
+      "adt": {}
+    },
+    "core::intrinsics::abort": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Aborts the execution of the process.\n\n Note that, unlike most intrinsics, this is safe to call;\n it does not require an `unsafe` block.\n Therefore, implementations must not require the user to uphold\n any safety invariants.\n\n [`std::process::abort`](../../std/process/fn.abort.html) is to be preferred if possible,\n as its behavior is more user-friendly and more stable.\n\n The current implementation of `intrinsics::abort` is to invoke an invalid instruction,\n on most platforms.\n On Unix, the\n process will probably terminate with a signal like `SIGABRT`, `SIGILL`, `SIGTRAP`, `SIGSEGV` or\n `SIGBUS`.  The precise behavior is not guaranteed and not stable.\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "sync::Arc::<T, A>::from_inner_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::Arc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sync::Arc": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "Plain"
+    ],
+    "sync::ArcInner": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 2022,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:2376:5: 2410:6",
+  "src": "fn clone(&self) -> Arc<T, A> {\n        // Using a relaxed ordering is alright here, as knowledge of the\n        // original reference prevents other threads from erroneously deleting\n        // the object.\n        //\n        // As explained in the [Boost documentation][1], Increasing the\n        // reference counter can always be done with memory_order_relaxed: New\n        // references to an object can only be formed from an existing\n        // reference, and passing an existing reference from one thread to\n        // another must already provide any required synchronization.\n        //\n        // [1]: (www.boost.org/doc/libs/1_55_0/doc/html/atomic/usage_examples.html)\n        let old_size = self.inner().strong.fetch_add(1, Relaxed);\n\n        // However we need to guard against massive refcounts in case someone is `mem::forget`ing\n        // Arcs. If we don't do this the count can overflow and users will use-after free. This\n        // branch will never be taken in any realistic program. We abort because such a program is\n        // incredibly degenerate, and we don't care to support it.\n        //\n        // This check is not 100% water-proof: we error when the refcount grows beyond `isize::MAX`.\n        // But we do that check *after* having done the increment, so there is a chance here that\n        // the worst already happened and we actually do overflow the `usize` counter. However, that\n        // requires the counter to grow from `isize::MAX` to `usize::MAX` between the increment\n        // above and the `abort` below, which seems exceedingly unlikely.\n        //\n        // This is a global invariant, and also applies when using a compare-exchange loop to increment\n        // counters in other methods.\n        // Otherwise, the counter could be brought to an almost-overflow using a compare-exchange loop,\n        // and then overflow using a few `fetch_add`s.\n        if old_size > MAX_REFCOUNT {\n            abort();\n        }\n\n        unsafe { Self::from_inner_in(self.ptr, self.alloc.clone()) }\n    }",
+  "mir": "fn <sync::Arc<T, A> as core::clone::Clone>::clone(_1: &sync::Arc<T, A>) -> sync::Arc<T, A> {\n    let mut _0: sync::Arc<T, A>;\n    let  _2: usize;\n    let mut _3: &core::sync::atomic::AtomicUsize;\n    let  _4: &sync::ArcInner<T>;\n    let mut _5: core::sync::atomic::Ordering;\n    let mut _6: bool;\n    let  _7: !;\n    let mut _8: core::ptr::NonNull<sync::ArcInner<T>>;\n    let mut _9: A;\n    let mut _10: &A;\n    debug self => _1;\n    debug old_size => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = sync::Arc::<T, A>::inner(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = &((*_4).0: core::sync::atomic::AtomicUsize);\n        StorageLive(_5);\n        _5 = core::sync::atomic::Ordering::Relaxed;\n        _2 = core::sync::atomic::AtomicUsize::fetch_add(move _3, 1_usize, move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = Gt(_2, sync::MAX_REFCOUNT);\n        switchInt(move _6) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        _7 = core::intrinsics::abort() -> unwind unreachable;\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageLive(_8);\n        _8 = ((*_1).0: core::ptr::NonNull<sync::ArcInner<T>>);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &((*_1).2: A);\n        _9 = <A as core::clone::Clone>::clone(move _10) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_10);\n        _0 = sync::Arc::<T, A>::from_inner_in(move _8, move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_9);\n        StorageDead(_8);\n        return;\n    }\n}\n",
+  "doc": " Makes a clone of the `Arc` pointer.\n\n This creates another pointer to the same allocation, increasing the\n strong reference count.\n\n # Examples\n\n ```\n use std::sync::Arc;\n\n let five = Arc::new(5);\n\n let _ = Arc::clone(&five);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

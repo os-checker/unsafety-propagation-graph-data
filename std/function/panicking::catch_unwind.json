@@ -1,0 +1,82 @@
+{
+  "name": "panicking::catch_unwind",
+  "safe": false,
+  "callees": {
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "panicking::catch_unwind::do_call": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "panicking::catch_unwind::do_catch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::intrinsics::catch_unwind": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Rust's \"try catch\" construct for unwinding. Invokes the function pointer `try_fn` with the\n data pointer `data`, and calls `catch_fn` if unwinding occurs while `try_fn` runs.\n Returns `1` if unwinding occurred and `catch_fn` was called; returns `0` otherwise.\n\n `catch_fn` must not unwind.\n\n The third argument is a function called if an unwind occurs (both Rust `panic` and foreign\n unwinds). This function takes the data pointer and a pointer to the target- and\n runtime-specific exception object that was caught.\n\n Note that in the case of a foreign unwinding operation, the exception object data may not be\n safely usable from Rust, and should not be directly exposed via the standard library. To\n prevent unsafe access, the library implementation may either abort the process or present an\n opaque error type to the user.\n\n For more information, see the compiler's source, as well as the documentation for the stable\n version of this intrinsic, `std::panic::catch_unwind`.\n",
+      "adt": {}
+    },
+    "core::mem::ManuallyDrop::<T>::into_inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the value from the `ManuallyDrop` container.\n\n This allows the value to be dropped again.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let x = ManuallyDrop::new(Box::new(()));\n let _: Box<()> = ManuallyDrop::into_inner(x); // This drops the `Box`.\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::mem::ManuallyDrop": [
+      "Plain"
+    ],
+    "panicking::catch_unwind::Data": [
+      "Plain",
+      "Unknown([Field(1, Ty { id: 13236, kind: RigidTy(Adt(AdtDef(DefId { id: 4590, name: \"core::mem::ManuallyDrop\" }), GenericArgs([Type(Ty { id: 3404, kind: Param(ParamTy { index: 0, name: \"R\" }) })]))) })])",
+      "Unknown([Field(2, Ty { id: 13238, kind: RigidTy(Adt(AdtDef(DefId { id: 4590, name: \"core::mem::ManuallyDrop\" }), GenericArgs([Type(Ty { id: 10, kind: RigidTy(Adt(AdtDef(DefId { id: 4386, name: \"alloc_crate::boxed::Box\" }), GenericArgs([Type(Ty { id: 18, kind: RigidTy(Dynamic([Binder { value: Trait(ExistentialTraitRef { def_id: TraitDef(DefId { id: 4633, name: \"core::any::Any\" }), generic_args: GenericArgs([]) }), bound_vars: [] }, Binder { value: AutoTrait(TraitDef(DefId { id: 4634, name: \"core::marker::Send\" })), bound_vars: [] }], Region { kind: ReErased })) }), Type(Ty { id: 19, kind: RigidTy(Adt(AdtDef(DefId { id: 4635, name: \"alloc_crate::alloc::Global\" }), GenericArgs([]))) })]))) })]))) })])"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "alloc_crate::boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 2320,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:500:1: 611:2",
+  "src": "pub unsafe fn catch_unwind<R, F: FnOnce() -> R>(f: F) -> Result<R, Box<dyn Any + Send>> {\n    union Data<F, R> {\n        f: ManuallyDrop<F>,\n        r: ManuallyDrop<R>,\n        p: ManuallyDrop<Box<dyn Any + Send>>,\n    }\n\n    // We do some sketchy operations with ownership here for the sake of\n    // performance. We can only pass pointers down to `do_call` (can't pass\n    // objects by value), so we do all the ownership tracking here manually\n    // using a union.\n    //\n    // We go through a transition where:\n    //\n    // * First, we set the data field `f` to be the argumentless closure that we're going to call.\n    // * When we make the function call, the `do_call` function below, we take\n    //   ownership of the function pointer. At this point the `data` union is\n    //   entirely uninitialized.\n    // * If the closure successfully returns, we write the return value into the\n    //   data's return slot (field `r`).\n    // * If the closure panics (`do_catch` below), we write the panic payload into field `p`.\n    // * Finally, when we come back out of the `try` intrinsic we're\n    //   in one of two states:\n    //\n    //      1. The closure didn't panic, in which case the return value was\n    //         filled in. We move it out of `data.r` and return it.\n    //      2. The closure panicked, in which case the panic payload was\n    //         filled in. We move it out of `data.p` and return it.\n    //\n    // Once we stack all that together we should have the \"most efficient'\n    // method of calling a catch panic whilst juggling ownership.\n    let mut data = Data { f: ManuallyDrop::new(f) };\n\n    let data_ptr = (&raw mut data) as *mut u8;\n    // SAFETY:\n    //\n    // Access to the union's fields: this is `std` and we know that the `catch_unwind`\n    // intrinsic fills in the `r` or `p` union field based on its return value.\n    //\n    // The call to `intrinsics::catch_unwind` is made safe by:\n    // - `do_call`, the first argument, can be called with the initial `data_ptr`.\n    // - `do_catch`, the second argument, can be called with the `data_ptr` as well.\n    // See their safety preconditions for more information\n    unsafe {\n        return if intrinsics::catch_unwind(do_call::<F, R>, data_ptr, do_catch::<F, R>) == 0 {\n            Ok(ManuallyDrop::into_inner(data.r))\n        } else {\n            Err(ManuallyDrop::into_inner(data.p))\n        };\n    }\n\n    // We consider unwinding to be rare, so mark this function as cold. However,\n    // do not mark it no-inline -- that decision is best to leave to the\n    // optimizer (in most cases this function is not inlined even as a normal,\n    // non-cold function, though, as of the writing of this comment).\n    #[cold]\n    #[optimize(size)]\n    unsafe fn cleanup(payload: *mut u8) -> Box<dyn Any + Send + 'static> {\n        // SAFETY: The whole unsafe block hinges on a correct implementation of\n        // the panic handler `__rust_panic_cleanup`. As such we can only\n        // assume it returns the correct thing for `Box::from_raw` to work\n        // without undefined behavior.\n        let obj = unsafe { Box::from_raw(__rust_panic_cleanup(payload)) };\n        panic_count::decrease();\n        obj\n    }\n\n    // SAFETY:\n    // data must be non-NUL, correctly aligned, and a pointer to a `Data<F, R>`\n    // Its must contains a valid `f` (type: F) value that can be use to fill\n    // `data.r`.\n    //\n    // This function cannot be marked as `unsafe` because `intrinsics::catch_unwind`\n    // expects normal function pointers.\n    #[inline]\n    fn do_call<F: FnOnce() -> R, R>(data: *mut u8) {\n        // SAFETY: this is the responsibility of the caller, see above.\n        unsafe {\n            let data = data as *mut Data<F, R>;\n            let data = &mut (*data);\n            let f = ManuallyDrop::take(&mut data.f);\n            data.r = ManuallyDrop::new(f());\n        }\n    }\n\n    // We *do* want this part of the catch to be inlined: this allows the\n    // compiler to properly track accesses to the Data union and optimize it\n    // away most of the time.\n    //\n    // SAFETY:\n    // data must be non-NUL, correctly aligned, and a pointer to a `Data<F, R>`\n    // Since this uses `cleanup` it also hinges on a correct implementation of\n    // `__rustc_panic_cleanup`.\n    //\n    // This function cannot be marked as `unsafe` because `intrinsics::catch_unwind`\n    // expects normal function pointers.\n    #[inline]\n    #[rustc_nounwind] // `intrinsic::catch_unwind` requires catch fn to be nounwind\n    fn do_catch<F: FnOnce() -> R, R>(data: *mut u8, payload: *mut u8) {\n        // SAFETY: this is the responsibility of the caller, see above.\n        //\n        // When `__rustc_panic_cleaner` is correctly implemented we can rely\n        // on `obj` being the correct thing to pass to `data.p` (after wrapping\n        // in `ManuallyDrop`).\n        unsafe {\n            let data = data as *mut Data<F, R>;\n            let data = &mut (*data);\n            let obj = cleanup(payload);\n            data.p = ManuallyDrop::new(obj);\n        }\n    }\n}",
+  "mir": "fn panicking::catch_unwind(_1: F) -> core::result::Result<R, alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>> {\n    let mut _0: core::result::Result<R, alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>>;\n    let mut _2: panicking::catch_unwind::Data<F, R>;\n    let mut _3: core::mem::ManuallyDrop<F>;\n    let  _4: *mut u8;\n    let mut _5: *mut panicking::catch_unwind::Data<F, R>;\n    let mut _6: i32;\n    let mut _7: fn(*mut u8);\n    let mut _8: fn(*mut u8, *mut u8);\n    let mut _9: R;\n    let mut _10: core::mem::ManuallyDrop<R>;\n    let mut _11: alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>;\n    let mut _12: core::mem::ManuallyDrop<alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>>;\n    debug f => _1;\n    debug data => _2;\n    debug data_ptr => _4;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = core::mem::ManuallyDrop::<F>::new(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = Data(move _3);\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = &raw mut _2;\n        _4 = move _5 as *mut u8;\n        StorageDead(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = panicking::catch_unwind::do_call::<F, R> as fn(*mut u8);\n        StorageLive(_8);\n        _8 = panicking::catch_unwind::do_catch::<F, R> as fn(*mut u8, *mut u8);\n        _6 = core::intrinsics::catch_unwind(move _7, _4, move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        StorageDead(_7);\n        switchInt(move _6) -> [0: bb3, otherwise: bb5];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = move (_2.1: core::mem::ManuallyDrop<R>);\n        _9 = core::mem::ManuallyDrop::<R>::into_inner(move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        _0 = core::result::Result::Ok(move _9);\n        StorageDead(_9);\n        goto -> bb7;\n    }\n    bb5: {\n        StorageDead(_6);\n        StorageLive(_12);\n        _12 = move (_2.2: core::mem::ManuallyDrop<alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>>);\n        _11 = core::mem::ManuallyDrop::<alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>>::into_inner(move _12) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_12);\n        _0 = core::result::Result::Err(_11);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Invoke a closure, capturing the cause of an unwinding panic if one occurs.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "num::nonzero::NonZero::<u8>::isolate_highest_one",
+  "safe": true,
+  "callees": {
+    "num::nonzero::NonZero::<u8>::leading_zeros": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of leading zeros in the binary representation of `self`.\n\n On many architectures, this function can perform better than `leading_zeros()` on the underlying integer type, as special handling of zero can be avoided.\n\n # Examples\n\n ```\n # use std::num::NonZero;\n #\n # fn main() { test().unwrap(); }\n # fn test() -> Option<()> {\n\n assert_eq!(n.leading_zeros(), 0);\n # Some(())\n # }\n ```\n",
+      "adt": {}
+    },
+    "num::<impl u8>::unchecked_shr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Unchecked shift right. Computes `self >> rhs`, assuming that\n `rhs` is less than the number of bits in `self`.\n\n # Safety\n\n This results in undefined behavior if `rhs` is larger than\n or equal to the number of bits in `self`,\n i.e. when [`checked_shr`] would return `None`.\n\n",
+      "adt": {}
+    },
+    "num::nonzero::NonZero::<T>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a non-zero without checking whether the value is non-zero.\n This results in undefined behavior if the value is zero.\n\n # Safety\n\n The value must not be zero.\n",
+      "adt": {
+        "num::nonzero::NonZero": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "num::nonzero::NonZero": [
+      "Plain"
+    ]
+  },
+  "path": 15209,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/nonzero.rs:666:13: 676:14",
+  "src": "pub const fn isolate_highest_one(self) -> Self {\n                // SAFETY:\n                // `self` is non-zero, so masking to preserve only the most\n                // significant set bit will result in a non-zero `n`.\n                // and self.leading_zeros() is always < $INT::BITS since\n                // at least one of the bits in the number is not zero\n                unsafe {\n                    let bit = (((1 as $Uint) << (<$Uint>::BITS - 1)).unchecked_shr(self.leading_zeros()));\n                    NonZero::new_unchecked(bit as $Int)\n                }\n            }",
+  "mir": "fn num::nonzero::NonZero::<u8>::isolate_highest_one(_1: num::nonzero::NonZero<u8>) -> num::nonzero::NonZero<u8> {\n    let mut _0: num::nonzero::NonZero<u8>;\n    let  _2: u8;\n    let mut _3: u8;\n    let mut _4: u8;\n    let mut _5: u32;\n    let mut _6: (u32, bool);\n    let mut _7: bool;\n    let mut _8: u32;\n    debug self => _1;\n    debug bit => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = 1_u8;\n        StorageLive(_5);\n        _6 = CheckedSub(num::<impl u8>::BITS, 1_u32);\n        assert(!move (_6.1: bool), \"attempt to compute `{} - {}`, which would overflow\", num::<impl u8>::BITS, 1_u32) -> [success: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = move (_6.0: u32);\n        _7 = Lt(_5, 8_u32);\n        assert(move _7, \"attempt to shift left by `{}`, which would overflow\", _5) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = Shl(move _4, move _5);\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_8);\n        _8 = num::nonzero::NonZero::<u8>::leading_zeros(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _2 = num::<impl u8>::unchecked_shr(move _3, move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        StorageDead(_3);\n        _0 = num::nonzero::NonZero::<u8>::new_unchecked(_2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": " Returns `self` with only the most significant bit set.\n\n # Example\n\n ```\n #![feature(isolate_most_least_significant_one)]\n\n # use core::num::NonZero;\n # fn main() { test().unwrap(); }\n # fn test() -> Option<()> {\n\n assert_eq!(a.isolate_highest_one(), b);\n # Some(())\n # }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

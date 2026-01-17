@@ -1,0 +1,92 @@
+{
+  "name": "<string::String as core::iter::FromIterator<&'a core::ascii::Char>>::from_iter",
+  "safe": true,
+  "callees": {
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::copied": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator which copies all of its elements.\n\n This is useful when you have an iterator over `&T`, but you need an\n iterator over `T`.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let v_copied: Vec<_> = a.iter().copied().collect();\n\n // copied is the same as .map(|&x| x)\n let v_map: Vec<_> = a.iter().map(|&x| x).collect();\n\n assert_eq!(v_copied, [1, 2, 3]);\n assert_eq!(v_map, [1, 2, 3]);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes a closure and creates an iterator which calls that closure on each\n element.\n\n `map()` transforms one iterator into another, by means of its argument:\n something that implements [`FnMut`]. It produces a new iterator which\n calls this closure on each element of the original iterator.\n\n If you are good at thinking in types, you can think of `map()` like this:\n If you have an iterator that gives you elements of some type `A`, and\n you want an iterator of some other type `B`, you can use `map()`,\n passing a closure that takes an `A` and returns a `B`.\n\n `map()` is conceptually similar to a [`for`] loop. However, as `map()` is\n lazy, it is best used when you're already working with other iterators.\n If you're doing some sort of looping for a side effect, it's considered\n more idiomatic to use [`for`] than `map()`.\n\n [`for`]: ../../book/ch03-05-control-flow.html#looping-through-a-collection-with-for\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.iter().map(|x| 2 * x);\n\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), Some(6));\n assert_eq!(iter.next(), None);\n ```\n\n If you're doing some sort of side effect, prefer [`for`] to `map()`:\n\n ```\n # #![allow(unused_must_use)]\n // don't do this:\n (0..5).map(|x| println!(\"{x}\"));\n\n // it won't even execute, as it is lazy. Rust will warn you about this.\n\n // Instead, use a for-loop:\n for x in 0..5 {\n     println!(\"{x}\");\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ascii::Char::to_u8": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets this ASCII character as a byte.\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::collect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Transforms an iterator into a collection.\n\n `collect()` can take anything iterable, and turn it into a relevant\n collection. This is one of the more powerful methods in the standard\n library, used in a variety of contexts.\n\n The most basic pattern in which `collect()` is used is to turn one\n collection into another. You take a collection, call [`iter`] on it,\n do a bunch of transformations, and then `collect()` at the end.\n\n `collect()` can also create instances of types that are not typical\n collections. For example, a [`String`] can be built from [`char`]s,\n and an iterator of [`Result<T, E>`][`Result`] items can be collected\n into `Result<Collection<T>, E>`. See the examples below for more.\n\n Because `collect()` is so general, it can cause problems with type\n inference. As such, `collect()` is one of the few times you'll see\n the syntax affectionately known as the 'turbofish': `::<>`. This\n helps the inference algorithm understand specifically which collection\n you're trying to collect into.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let doubled: Vec<i32> = a.iter()\n                          .map(|x| x * 2)\n                          .collect();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Note that we needed the `: Vec<i32>` on the left-hand side. This is because\n we could collect into, for example, a [`VecDeque<T>`] instead:\n\n [`VecDeque<T>`]: ../../std/collections/struct.VecDeque.html\n\n ```\n use std::collections::VecDeque;\n\n let a = [1, 2, 3];\n\n let doubled: VecDeque<i32> = a.iter().map(|x| x * 2).collect();\n\n assert_eq!(2, doubled[0]);\n assert_eq!(4, doubled[1]);\n assert_eq!(6, doubled[2]);\n ```\n\n Using the 'turbofish' instead of annotating `doubled`:\n\n ```\n let a = [1, 2, 3];\n\n let doubled = a.iter().map(|x| x * 2).collect::<Vec<i32>>();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Because `collect()` only cares about what you're collecting into, you can\n still use a partial type hint, `_`, with the turbofish:\n\n ```\n let a = [1, 2, 3];\n\n let doubled = a.iter().map(|x| x * 2).collect::<Vec<_>>();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Using `collect()` to make a [`String`]:\n\n ```\n let chars = ['g', 'd', 'k', 'k', 'n'];\n\n let hello: String = chars.into_iter()\n     .map(|x| x as u8)\n     .map(|x| (x + 1) as char)\n     .collect();\n\n assert_eq!(\"hello\", hello);\n ```\n\n If you have a list of [`Result<T, E>`][`Result`]s, you can use `collect()` to\n see if any of them failed:\n\n ```\n let results = [Ok(1), Err(\"nope\"), Ok(3), Err(\"bad\")];\n\n let result: Result<Vec<_>, &str> = results.into_iter().collect();\n\n // gives us the first error\n assert_eq!(Err(\"nope\"), result);\n\n let results = [Ok(1), Ok(3)];\n\n let result: Result<Vec<_>, &str> = results.into_iter().collect();\n\n // gives us the list of answers\n assert_eq!(Ok(vec![1, 3]), result);\n ```\n\n [`iter`]: Iterator::next\n [`String`]: ../../std/string/struct.String.html\n [`char`]: type@char\n",
+      "adt": {}
+    },
+    "string::String::from_utf8_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a vector of bytes to a `String` without checking that the\n string contains valid UTF-8.\n\n See the safe version, [`from_utf8`], for more details.\n\n [`from_utf8`]: String::from_utf8\n\n # Safety\n\n This function is unsafe because it does not check that the bytes passed\n to it are valid UTF-8. If this constraint is violated, it may cause\n memory unsafety issues with future users of the `String`, as the rest of\n the standard library assumes that `String`s are valid UTF-8.\n\n # Examples\n\n ```\n // some bytes, in a vector\n let sparkle_heart = vec![240, 159, 146, 150];\n\n let sparkle_heart = unsafe {\n     String::from_utf8_unchecked(sparkle_heart)\n };\n\n assert_eq!(\"💖\", sparkle_heart);\n ```\n",
+      "adt": {
+        "string::String": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::iter::Copied": [
+      "Plain"
+    ],
+    "core::iter::Map": [
+      "Plain"
+    ],
+    "vec::Vec": [
+      "Plain"
+    ],
+    "string::String": [
+      "Plain"
+    ]
+  },
+  "path": 1943,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:2454:5: 2459:6",
+  "src": "fn from_iter<T: IntoIterator<Item = &'a core::ascii::Char>>(iter: T) -> Self {\n        let buf = iter.into_iter().copied().map(core::ascii::Char::to_u8).collect();\n        // SAFETY: `buf` is guaranteed to be valid UTF-8 because the `core::ascii::Char` type\n        // only contains ASCII values (0x00-0x7F), which are valid UTF-8.\n        unsafe { String::from_utf8_unchecked(buf) }\n    }",
+  "mir": "fn <string::String as core::iter::FromIterator<&'a core::ascii::Char>>::from_iter(_1: T) -> string::String {\n    let mut _0: string::String;\n    let  _2: vec::Vec<u8>;\n    let mut _3: core::iter::Map<core::iter::Copied<<T as core::iter::IntoIterator>::IntoIter>, fn(core::ascii::Char) -> u8 {core::ascii::Char::to_u8}>;\n    let mut _4: core::iter::Copied<<T as core::iter::IntoIterator>::IntoIter>;\n    let mut _5: <T as core::iter::IntoIterator>::IntoIter;\n    debug iter => _1;\n    debug buf => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = <T as core::iter::IntoIterator>::into_iter(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = <<T as core::iter::IntoIterator>::IntoIter as core::iter::Iterator>::copied::<'_, core::ascii::Char>(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = <core::iter::Copied<<T as core::iter::IntoIterator>::IntoIter> as core::iter::Iterator>::map::<u8, fn(core::ascii::Char) -> u8 {core::ascii::Char::to_u8}>(move _4, core::ascii::Char::to_u8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _2 = <core::iter::Map<core::iter::Copied<<T as core::iter::IntoIterator>::IntoIter>, fn(core::ascii::Char) -> u8 {core::ascii::Char::to_u8}> as core::iter::Iterator>::collect::<vec::Vec<u8>>(move _3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_3);\n        _0 = string::String::from_utf8_unchecked(_2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

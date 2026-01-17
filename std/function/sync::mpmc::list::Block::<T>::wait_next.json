@@ -1,0 +1,76 @@
+{
+  "name": "sync::mpmc::list::Block::<T>::wait_next",
+  "safe": true,
+  "callees": {
+    "sync::mpmc::utils::Backoff::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `Backoff`.\n",
+      "adt": {
+        "sync::mpmc::utils::Backoff": "Constructor"
+      }
+    },
+    "core::sync::atomic::AtomicPtr::<T>::load": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads a value from the pointer.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n use std::sync::atomic::{AtomicPtr, Ordering};\n\n let ptr = &mut 5;\n let some_ptr = AtomicPtr::new(ptr);\n\n let value = some_ptr.load(Ordering::Relaxed);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::is_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s = [1, 2, 3];\n let ptr: *mut u32 = s.as_mut_ptr();\n assert!(!ptr.is_null());\n ```\n",
+      "adt": {}
+    },
+    "sync::mpmc::utils::Backoff::spin_heavy": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Backs off using heavyweight spinning.\n\n This method should be used in blocking loops where parking the thread is not an option.\n",
+      "adt": {
+        "sync::mpmc::utils::Backoff": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "sync::mpmc::utils::Backoff": [
+      "Plain",
+      "Ref"
+    ],
+    "core::sync::atomic::AtomicPtr": [
+      "Ref"
+    ],
+    "sync::mpmc::list::Block": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 2843,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/list.rs:77:5: 86:6",
+  "src": "fn wait_next(&self) -> *mut Block<T> {\n        let backoff = Backoff::new();\n        loop {\n            let next = self.next.load(Ordering::Acquire);\n            if !next.is_null() {\n                return next;\n            }\n            backoff.spin_heavy();\n        }\n    }",
+  "mir": "fn sync::mpmc::list::Block::<T>::wait_next(_1: &sync::mpmc::list::Block<T>) -> *mut sync::mpmc::list::Block<T> {\n    let mut _0: *mut sync::mpmc::list::Block<T>;\n    let  _2: sync::mpmc::utils::Backoff;\n    let mut _3: &core::sync::atomic::AtomicPtr<sync::mpmc::list::Block<T>>;\n    let mut _4: core::sync::atomic::Ordering;\n    let mut _5: bool;\n    let  _6: ();\n    let mut _7: &sync::mpmc::utils::Backoff;\n    debug self => _1;\n    debug backoff => _2;\n    debug next => _0;\n    bb0: {\n        StorageLive(_2);\n        _2 = sync::mpmc::utils::Backoff::new() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        _3 = &((*_1).0: core::sync::atomic::AtomicPtr<sync::mpmc::list::Block<T>>);\n        StorageLive(_4);\n        _4 = core::sync::atomic::Ordering::Acquire;\n        _0 = core::sync::atomic::AtomicPtr::<sync::mpmc::list::Block<T>>::load(move _3, move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = core::ptr::mut_ptr::<impl *mut sync::mpmc::list::Block<T>>::is_null(_0) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _5) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageLive(_7);\n        _7 = &_2;\n        _6 = sync::mpmc::utils::Backoff::spin_heavy(move _7) -> [return: bb6, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_5);\n        StorageDead(_2);\n        return;\n    }\n    bb6: {\n        StorageDead(_7);\n        goto -> bb1;\n    }\n}\n",
+  "doc": " Waits until the next pointer is set.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

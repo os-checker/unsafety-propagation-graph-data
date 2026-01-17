@@ -1,0 +1,95 @@
+{
+  "name": "sync::Arc::<T, A>::try_new_uninit_in",
+  "safe": true,
+  "callees": {
+    "core::alloc::Layout::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `Layout` suitable for holding a value of type `T`.\n",
+      "adt": {}
+    },
+    "sync::Arc::<T>::try_allocate_for_layout": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates an `ArcInner<T>` with sufficient space for\n a possibly-unsized inner value where the value has the layout provided,\n returning an error if allocation fails.\n\n The function `mem_to_arcinner` is called with the data pointer\n and must return back a (potentially fat)-pointer for the `ArcInner<T>`.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "sync::Arc::<T, A>::from_ptr_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::Arc": "Constructor"
+      }
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::alloc::Layout": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 9376, kind: RigidTy(RawPtr(Ty { id: 9377, kind: RigidTy(Adt(AdtDef(DefId { id: 5664, name: \"sync::ArcInner\" }), GenericArgs([Type(Ty { id: 73, kind: RigidTy(Adt(AdtDef(DefId { id: 2984, name: \"core::mem::MaybeUninit\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })]))) }, Mut)) })])"
+    ],
+    "sync::Arc": [
+      "Plain"
+    ]
+  },
+  "path": 2106,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:1021:5: 1032:6",
+  "src": "pub fn try_new_uninit_in(alloc: A) -> Result<Arc<mem::MaybeUninit<T>, A>, AllocError> {\n        unsafe {\n            Ok(Arc::from_ptr_in(\n                Arc::try_allocate_for_layout(\n                    Layout::new::<T>(),\n                    |layout| alloc.allocate(layout),\n                    <*mut u8>::cast,\n                )?,\n                alloc,\n            ))\n        }\n    }",
+  "mir": "fn sync::Arc::<T, A>::try_new_uninit_in(_1: A) -> core::result::Result<sync::Arc<core::mem::MaybeUninit<T>, A>, core::alloc::AllocError> {\n    let mut _0: core::result::Result<sync::Arc<core::mem::MaybeUninit<T>, A>, core::alloc::AllocError>;\n    let mut _2: sync::Arc<core::mem::MaybeUninit<T>, A>;\n    let mut _3: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, core::alloc::AllocError>, *mut sync::ArcInner<core::mem::MaybeUninit<T>>>;\n    let mut _4: core::result::Result<*mut sync::ArcInner<core::mem::MaybeUninit<T>>, core::alloc::AllocError>;\n    let mut _5: core::alloc::Layout;\n    let mut _6: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:1026:21: 1026:29};\n    let mut _7: &A;\n    let mut _8: isize;\n    let  _9: *mut sync::ArcInner<core::mem::MaybeUninit<T>>;\n    let mut _10: A;\n    debug alloc => _1;\n    debug residual => core::result::Result::<core::convert::Infallible, core::alloc::AllocError>::Err(core::alloc::AllocError);\n    debug val => _9;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = core::alloc::Layout::new::<T>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &_1;\n        _6 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:1026:21: 1026:29}(move _7);\n        StorageDead(_7);\n        _4 = sync::Arc::<core::mem::MaybeUninit<T>>::try_allocate_for_layout::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:1026:21: 1026:29}, fn(*mut u8) -> *mut sync::ArcInner<core::mem::MaybeUninit<T>> {core::ptr::mut_ptr::<impl *mut u8>::cast::<sync::ArcInner<core::mem::MaybeUninit<T>>>}>(move _5, move _6, core::ptr::mut_ptr::<impl *mut u8>::cast::<sync::ArcInner<core::mem::MaybeUninit<T>>>) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_5);\n        _3 = <core::result::Result<*mut sync::ArcInner<core::mem::MaybeUninit<T>>, core::alloc::AllocError> as core::ops::Try>::branch(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _8 = discriminant(_3);\n        switchInt(move _8) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _9 = ((_3 as variant#0).0: *mut sync::ArcInner<core::mem::MaybeUninit<T>>);\n        StorageLive(_10);\n        _10 = move _1;\n        _2 = sync::Arc::<core::mem::MaybeUninit<T>, A>::from_ptr_in(_9, move _10) -> [return: bb8, unwind unreachable];\n    }\n    bb6: {\n        _0 = <core::result::Result<sync::Arc<core::mem::MaybeUninit<T>, A>, core::alloc::AllocError> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, core::alloc::AllocError>>>::from_residual(core::result::Result::<core::convert::Infallible, core::alloc::AllocError>::Err(core::alloc::AllocError)) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_3);\n        StorageDead(_2);\n        drop(_1) -> [return: bb9, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_10);\n        _0 = core::result::Result::Ok(move _2);\n        StorageDead(_3);\n        StorageDead(_2);\n        goto -> bb9;\n    }\n    bb9: {\n        return;\n    }\n}\n",
+  "doc": " Constructs a new `Arc` with uninitialized contents, in the provided allocator, returning an\n error if allocation fails.\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n #![feature(get_mut_unchecked)]\n\n use std::sync::Arc;\n use std::alloc::System;\n\n let mut five = Arc::<u32, _>::try_new_uninit_in(System)?;\n\n let five = unsafe {\n     // Deferred initialization:\n     Arc::get_mut_unchecked(&mut five).as_mut_ptr().write(5);\n\n     five.assume_init()\n };\n\n assert_eq!(*five, 5);\n # Ok::<(), std::alloc::AllocError>(())\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

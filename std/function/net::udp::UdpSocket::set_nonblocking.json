@@ -1,0 +1,41 @@
+{
+  "name": "net::udp::UdpSocket::set_nonblocking",
+  "safe": true,
+  "callees": {
+    "sys::net::connection::socket::UdpSocket::set_nonblocking": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::net::connection::socket::UdpSocket": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sys::net::connection::socket::UdpSocket": [
+      "Ref"
+    ],
+    "net::udp::UdpSocket": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1998,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/net/udp.rs:814:5: 816:6",
+  "src": "pub fn set_nonblocking(&self, nonblocking: bool) -> io::Result<()> {\n        self.0.set_nonblocking(nonblocking)\n    }",
+  "mir": "fn net::udp::UdpSocket::set_nonblocking(_1: &net::udp::UdpSocket, _2: bool) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let mut _3: &sys::net::connection::socket::UdpSocket;\n    debug self => _1;\n    debug nonblocking => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = &((*_1).0: sys::net::connection::socket::UdpSocket);\n        _0 = sys::net::connection::socket::UdpSocket::set_nonblocking(move _3, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Moves this UDP socket into or out of nonblocking mode.\n\n This will result in `recv`, `recv_from`, `send`, and `send_to` system\n operations becoming nonblocking, i.e., immediately returning from their\n calls. If the IO operation is successful, `Ok` is returned and no\n further action is required. If the IO operation could not be completed\n and needs to be retried, an error with kind\n [`io::ErrorKind::WouldBlock`] is returned.\n\n On Unix platforms, calling this method corresponds to calling `fcntl`\n `FIONBIO`. On Windows calling this method corresponds to calling\n `ioctlsocket` `FIONBIO`.\n\n # Examples\n\n Creates a UDP socket bound to `127.0.0.1:7878` and read bytes in\n nonblocking mode:\n\n ```no_run\n use std::io;\n use std::net::UdpSocket;\n\n let socket = UdpSocket::bind(\"127.0.0.1:7878\").unwrap();\n socket.set_nonblocking(true).unwrap();\n\n # fn wait_for_fd() { unimplemented!() }\n let mut buf = [0; 10];\n let (num_bytes_read, _) = loop {\n     match socket.recv_from(&mut buf) {\n         Ok(n) => break n,\n         Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {\n             // wait until network socket is ready, typically implemented\n             // via platform-specific APIs such as epoll or IOCP\n             wait_for_fd();\n         }\n         Err(e) => panic!(\"encountered IO error: {e}\"),\n     }\n };\n println!(\"bytes: {:?}\", &buf[..num_bytes_read]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "name": "<slice::iter::Iter<'a, T> as iter::traits::iterator::Iterator>::position",
+  "safe": true,
+  "callees": {
+    "ptr::const_ptr::<impl *const T>::addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::offset_from_unsigned": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calculates the distance between two pointers within the same allocation, *where it's known that\n `self` is equal to or greater than `origin`*. The returned value is in\n units of T: the distance in bytes is divided by `size_of::<T>()`.\n\n This computes the same value that [`offset_from`](#method.offset_from)\n would compute, but with the added precondition that the offset is\n guaranteed to be non-negative.  This method is equivalent to\n `usize::try_from(self.offset_from(origin)).unwrap_unchecked()`,\n but it provides slightly more information to the optimizer, which can\n sometimes allow it to optimize slightly better with some backends.\n\n This method can be though of as recovering the `count` that was passed\n to [`add`](#method.add) (or, with the parameters in the other order,\n to [`sub`](#method.sub)).  The following are all equivalent, assuming\n that their safety preconditions are met:\n ```rust\n # unsafe fn blah(ptr: std::ptr::NonNull<u32>, origin: std::ptr::NonNull<u32>, count: usize) -> bool { unsafe {\n ptr.offset_from_unsigned(origin) == count\n # &&\n origin.add(count) == ptr\n # &&\n ptr.sub(count) == origin\n # } }\n ```\n\n # Safety\n\n - The distance between the pointers must be non-negative (`self >= origin`)\n\n - *All* the safety conditions of [`offset_from`](#method.offset_from)\n   apply to this method as well; see it for the full details.\n\n Importantly, despite the return type of this method being able to represent\n a larger offset, it's still *not permitted* to pass pointers which differ\n by more than `isize::MAX` *bytes*.  As such, the result of this method will\n always be less than or equal to `isize::MAX as usize`.\n\n # Panics\n\n This function panics if `T` is a Zero-Sized Type (\"ZST\").\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let a = [0; 5];\n let ptr1: NonNull<u32> = NonNull::from(&a[1]);\n let ptr2: NonNull<u32> = NonNull::from(&a[3]);\n unsafe {\n     assert_eq!(ptr2.offset_from_unsigned(ptr1), 2);\n     assert_eq!(ptr1.add(2), ptr2);\n     assert_eq!(ptr2.sub(2), ptr1);\n     assert_eq!(ptr2.offset_from_unsigned(ptr2), 0);\n }\n\n // This would be incorrect, as the pointers are not correctly ordered:\n // ptr1.offset_from_unsigned(ptr2)\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "ops::function::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "hint::assert_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Makes a *soundness* promise to the compiler that `cond` holds.\n\n This may allow the optimizer to simplify things, but it might also make the generated code\n slower. Either way, calling it will most likely make compilation take longer.\n\n You may know this from other places as\n [`llvm.assume`](https://llvm.org/docs/LangRef.html#llvm-assume-intrinsic) or, in C,\n [`__builtin_assume`](https://clang.llvm.org/docs/LanguageExtensions.html#builtin-assume).\n\n This promotes a correctness requirement to a soundness requirement. Don't do that without\n very good reason.\n\n # Usage\n\n This is a situational tool for micro-optimization, and is allowed to do nothing. Any use\n should come with a repeatable benchmark to show the value, with the expectation to drop it\n later should the optimizer get smarter and no longer need it.\n\n The more complicated the condition, the less likely this is to be useful. For example,\n `assert_unchecked(foo.is_sorted())` is a complex enough value that the compiler is unlikely\n to be able to take advantage of it.\n\n There's also no need to `assert_unchecked` basic properties of things.  For example, the\n compiler already knows the range of `count_ones`, so there is no benefit to\n `let n = u32::count_ones(x); assert_unchecked(n <= u32::BITS);`.\n\n `assert_unchecked` is logically equivalent to `if !cond { unreachable_unchecked(); }`. If\n ever you are tempted to write `assert_unchecked(false)`, you should instead use\n [`unreachable_unchecked()`] directly.\n\n # Safety\n\n `cond` must be `true`. It is immediate UB to call this with `false`.\n\n # Example\n\n ```\n use core::hint;\n\n /// # Safety\n ///\n /// `p` must be nonnull and valid\n pub unsafe fn next_value(p: *const i32) -> i32 {\n     // SAFETY: caller invariants guarantee that `p` is not null\n     unsafe { hint::assert_unchecked(!p.is_null()) }\n\n     if p.is_null() {\n         return -1;\n     } else {\n         // SAFETY: caller invariants guarantee that `p` is valid\n         unsafe { *p + 1 }\n     }\n }\n ```\n\n Without the `assert_unchecked`, the above function produces the following with optimizations\n enabled:\n\n ```asm\n next_value:\n         test    rdi, rdi\n         je      .LBB0_1\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n .LBB0_1:\n         mov     eax, -1\n         ret\n ```\n\n Adding the assertion allows the optimizer to remove the extra check:\n\n ```asm\n next_value:\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n ```\n\n This example is quite unlike anything that would be used in the real world: it is redundant\n to put an assertion right next to code that checks the same thing, and dereferencing a\n pointer already has the builtin assumption that it is nonnull. However, it illustrates the\n kind of changes the optimizer can make even when the behavior is less obviously related.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::Iter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 2016, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 622, kind: Param(ParamTy { index: 1, name: \"T\" }) }, Not)) })])"
+    ]
+  },
+  "path": 16457,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter/macros.rs:377:13: 393:14",
+  "src": "fn position<P>(&mut self, mut predicate: P) -> Option<usize> where\n                Self: Sized,\n                P: FnMut(Self::Item) -> bool,\n            {\n                let n = len!(self);\n                let mut i = 0;\n                while let Some(x) = self.next() {\n                    if predicate(x) {\n                        // SAFETY: we are guaranteed to be in bounds by the loop invariant:\n                        // when `i >= n`, `self.next()` returns `None` and the loop breaks.\n                        unsafe { assert_unchecked(i < n) };\n                        return Some(i);\n                    }\n                    i += 1;\n                }\n                None\n            }",
+  "mir": "fn <slice::iter::Iter<'a, T> as iter::traits::iterator::Iterator>::position(_1: &mut slice::iter::Iter<'_, T>, _2: P) -> option::Option<usize> {\n    let mut _0: option::Option<usize>;\n    let  _3: usize;\n    let  _4: usize;\n    let mut _5: *const T;\n    let  _6: ptr::non_null::NonNull<T>;\n    let mut _7: *const T;\n    let mut _8: ptr::non_null::NonNull<T>;\n    let mut _9: usize;\n    let mut _10: option::Option<&T>;\n    let mut _11: isize;\n    let  _12: &T;\n    let mut _13: bool;\n    let mut _14: &mut P;\n    let mut _15: (&T,);\n    let  _16: ();\n    let mut _17: bool;\n    let mut _18: usize;\n    let mut _19: usize;\n    let mut _20: usize;\n    let mut _21: (usize, bool);\n    debug self => _1;\n    debug predicate => _2;\n    debug n => _3;\n    debug len => _4;\n    debug end => _6;\n    debug i => _9;\n    debug x => _12;\n    bb0: {\n        StorageLive(_3);\n        switchInt(<T as mem::SizedTypeProperties>::IS_ZST) -> [0: bb3, otherwise: bb1];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = ((*_1).1: *const T);\n        _4 = ptr::const_ptr::<impl *const T>::addr(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = _4;\n        StorageDead(_4);\n        goto -> bb5;\n    }\n    bb3: {\n        StorageLive(_7);\n        _7 = ((*_1).1: *const T);\n        _6 = move _7 as ptr::non_null::NonNull<T>;\n        StorageDead(_7);\n        StorageLive(_8);\n        _8 = ((*_1).0: ptr::non_null::NonNull<T>);\n        _3 = ptr::non_null::NonNull::<T>::offset_from_unsigned(_6, move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageLive(_9);\n        _9 = 0_usize;\n        goto -> bb6;\n    }\n    bb6: {\n        StorageLive(_10);\n        _10 = <slice::iter::Iter<'_, T> as iter::traits::iterator::Iterator>::next(_1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _11 = discriminant(_10);\n        switchInt(move _11) -> [1: bb8, 0: bb14, otherwise: bb16];\n    }\n    bb8: {\n        _12 = ((_10 as variant#1).0: &T);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = &mut _2;\n        StorageLive(_15);\n        _15 = (_12);\n        _13 = <P as ops::function::FnMut<(&T,)>>::call_mut(move _14, move _15) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        switchInt(move _13) -> [0: bb12, otherwise: bb10];\n    }\n    bb10: {\n        StorageDead(_15);\n        StorageDead(_14);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = _9;\n        StorageLive(_19);\n        _19 = _3;\n        _17 = Lt(move _18, move _19);\n        StorageDead(_19);\n        StorageDead(_18);\n        _16 = hint::assert_unchecked(move _17) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_17);\n        StorageLive(_20);\n        _20 = _9;\n        _0 = option::Option::Some(move _20);\n        StorageDead(_20);\n        StorageDead(_13);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_3);\n        drop(_2) -> [return: bb15, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_15);\n        StorageDead(_14);\n        StorageDead(_13);\n        _21 = CheckedAdd(_9, 1_usize);\n        assert(!move (_21.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _9, 1_usize) -> [success: bb13, unwind unreachable];\n    }\n    bb13: {\n        _9 = move (_21.0: usize);\n        StorageDead(_10);\n        goto -> bb6;\n    }\n    bb14: {\n        StorageDead(_10);\n        _0 = option::Option::None;\n        StorageDead(_9);\n        StorageDead(_3);\n        drop(_2) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        return;\n    }\n    bb16: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

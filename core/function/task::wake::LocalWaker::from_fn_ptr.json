@@ -1,0 +1,52 @@
+{
+  "name": "task::wake::LocalWaker::from_fn_ptr",
+  "safe": true,
+  "callees": {
+    "task::wake::RawWaker::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `RawWaker` from the provided `data` pointer and `vtable`.\n\n The `data` pointer can be used to store arbitrary data as required\n by the executor. This could be e.g. a type-erased pointer to an `Arc`\n that is associated with the task.\n The value of this pointer will get passed to all functions that are part\n of the `vtable` as the first parameter.\n\n It is important to consider that the `data` pointer must point to a\n thread safe type such as an `Arc<T: Send + Sync>`\n when used to construct a [`Waker`]. This restriction is lifted when\n constructing a [`LocalWaker`], which allows using types that do not implement\n <code>[Send] + [Sync]</code> like `Rc<T>`.\n\n The `vtable` customizes the behavior of a `Waker` which gets created\n from a `RawWaker`. For each operation on the `Waker`, the associated\n function in the `vtable` of the underlying `RawWaker` will be called.\n",
+      "adt": {
+        "task::wake::RawWakerVTable": "ImmutableAsArgument",
+        "task::wake::RawWaker": "Constructor"
+      }
+    },
+    "task::wake::LocalWaker::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `LocalWaker` from [`RawWaker`].\n\n The behavior of the returned `LocalWaker` is undefined if the contract defined\n in [`RawWaker`]'s and [`RawWakerVTable`]'s documentation is not upheld.\n Therefore this method is unsafe.\n",
+      "adt": {
+        "task::wake::LocalWaker": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "task::wake::RawWakerVTable": [
+      "Ref"
+    ],
+    "task::wake::RawWaker": [
+      "Plain"
+    ],
+    "task::wake::LocalWaker": [
+      "Plain"
+    ]
+  },
+  "path": 17603,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/task/wake.rs:909:5: 925:6",
+  "src": "pub const fn from_fn_ptr(f: fn()) -> Self {\n        // SAFETY: Unsafe is used for transmutes, pointer came from `fn()` so it\n        //         is sound to transmute it back to `fn()`.\n        static VTABLE: RawWakerVTable = unsafe {\n            RawWakerVTable::new(\n                |this| RawWaker::new(this, &VTABLE),\n                |this| transmute::<*const (), fn()>(this)(),\n                |this| transmute::<*const (), fn()>(this)(),\n                |_| {},\n            )\n        };\n        let raw = RawWaker::new(f as *const (), &VTABLE);\n\n        // SAFETY: `clone` is just a copy, `drop` is a no-op while `wake` and\n        //         `wake_by_ref` just call the function pointer.\n        unsafe { Self::from_raw(raw) }\n    }",
+  "mir": "fn task::wake::LocalWaker::from_fn_ptr(_1: fn()) -> task::wake::LocalWaker {\n    let mut _0: task::wake::LocalWaker;\n    let  _2: task::wake::RawWaker;\n    let mut _3: *const ();\n    let  _4: &task::wake::RawWakerVTable;\n    debug f => _1;\n    debug raw => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = _1 as *const ();\n        _4 = {alloc5688: &task::wake::RawWakerVTable};\n        _2 = task::wake::RawWaker::new(move _3, _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _0 = task::wake::LocalWaker::from_raw(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Constructs a `LocalWaker` from a function pointer.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

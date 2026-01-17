@@ -1,0 +1,144 @@
+{
+  "name": "slice::<impl [T]>::get_disjoint_unchecked_mut",
+  "safe": false,
+  "callees": {
+    "mem::maybe_uninit::MaybeUninit::<T>::uninit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `MaybeUninit<T>` in an uninitialized state.\n\n Note that dropping a `MaybeUninit<T>` will never call `T`'s drop code.\n It is your responsibility to make sure `T` gets dropped if it got initialized.\n\n See the [type-level documentation][MaybeUninit] for some examples.\n\n # Example\n\n ```\n use std::mem::MaybeUninit;\n\n let v: MaybeUninit<String> = MaybeUninit::uninit();\n ```\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "Constructor"
+      }
+    },
+    "mem::maybe_uninit::MaybeUninit::<T>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<Vec<u32>>`.\n // This is okay because we initialized it.\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n x_vec.push(3);\n assert_eq!(x_vec.len(), 4);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "MutableAsArgument"
+      }
+    },
+    "iter::traits::collect::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to an element or subslice, without doing bounds\n checking.\n\n For a safe alternative see [`get`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used.\n\n You can think of this like `.get(index).unwrap_unchecked()`.  It's UB\n to call `.get_unchecked(len)`, even if you immediately convert to a\n pointer.  And it's UB to call `.get_unchecked(..len + 1)`,\n `.get_unchecked(..=len)`, or similar.\n\n [`get`]: slice::get\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n\n unsafe {\n     assert_eq!(x.get_unchecked(1), &2);\n }\n ```\n",
+      "adt": {}
+    },
+    "mem::maybe_uninit::MaybeUninit::<T>::assume_init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the value from the `MaybeUninit<T>` container. This is a great way\n to ensure that the data will get dropped, because the resulting `T` is\n subject to the usual drop handling.\n\n # Safety\n\n It is up to the caller to guarantee that the `MaybeUninit<T>` really is in an initialized\n state. Calling this when the content is not yet fully initialized causes immediate undefined\n behavior. The [type-level documentation][inv] contains more information about\n this initialization invariant.\n\n [inv]: #initialization-invariant\n\n On top of that, remember that most types have additional invariants beyond merely\n being considered initialized at the type level. For example, a `1`-initialized [`Vec<T>`]\n is considered initialized (under the current implementation; this does not constitute\n a stable guarantee) because the only requirement the compiler knows about it\n is that the data pointer must be non-null. Creating such a `Vec<T>` does not cause\n *immediate* undefined behavior, but will cause undefined behavior with most\n safe operations (including dropping it).\n\n [`Vec<T>`]: ../../std/vec/struct.Vec.html\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<bool>::uninit();\n x.write(true);\n let x_init = unsafe { x.assume_init() };\n assert_eq!(x_init, true);\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let x = MaybeUninit::<Vec<u32>>::uninit();\n let x_init = unsafe { x.assume_init() };\n // `x` had not been initialized yet, so this last line caused undefined behavior. ⚠️\n ```\n",
+      "adt": {}
+    },
+    "clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::get_unchecked_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to an element or subslice, without doing bounds\n checking.\n\n Calling this method with an [out-of-bounds index] or when `self` is not dereferenceable\n is *[undefined behavior]* even if the resulting pointer is not used.\n\n [out-of-bounds index]: #method.add\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n #![feature(slice_ptr_get)]\n\n let x = &mut [1, 2, 4] as *mut [i32];\n\n unsafe {\n     assert_eq!(x.get_unchecked_mut(1), x.as_mut_ptr().add(1));\n }\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::write": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Overwrites a memory location with the given value without reading or\n dropping the old value.\n\n See [`ptr::write`] for safety concerns and examples.\n\n [`ptr::write`]: crate::ptr::write()\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mem::maybe_uninit::MaybeUninit": [
+      "Plain",
+      "MutRef"
+    ],
+    "ops::range::Range": [
+      "Plain",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ]
+  },
+  "path": 1265,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:4714:5: 4738:6",
+  "src": "pub unsafe fn get_disjoint_unchecked_mut<I, const N: usize>(\n        &mut self,\n        indices: [I; N],\n    ) -> [&mut I::Output; N]\n    where\n        I: GetDisjointMutIndex + SliceIndex<Self>,\n    {\n        // NB: This implementation is written as it is because any variation of\n        // `indices.map(|i| self.get_unchecked_mut(i))` would make miri unhappy,\n        // or generate worse code otherwise. This is also why we need to go\n        // through a raw pointer here.\n        let slice: *mut [T] = self;\n        let mut arr: MaybeUninit<[&mut I::Output; N]> = MaybeUninit::uninit();\n        let arr_ptr = arr.as_mut_ptr();\n\n        // SAFETY: We expect `indices` to contain disjunct values that are\n        // in bounds of `self`.\n        unsafe {\n            for i in 0..N {\n                let idx = indices.get_unchecked(i).clone();\n                arr_ptr.cast::<&mut I::Output>().add(i).write(&mut *slice.get_unchecked_mut(idx));\n            }\n            arr.assume_init()\n        }\n    }",
+  "mir": "fn slice::<impl [T]>::get_disjoint_unchecked_mut(_1: &mut [T], _2: [I; N]) -> [&mut <I as slice::index::SliceIndex<[T]>>::Output; N] {\n    let mut _0: [&mut <I as slice::index::SliceIndex<[T]>>::Output; N];\n    let  _3: *mut [T];\n    let mut _4: mem::maybe_uninit::MaybeUninit<[&mut <I as slice::index::SliceIndex<[T]>>::Output; N]>;\n    let  _5: *mut [&mut <I as slice::index::SliceIndex<[T]>>::Output; N];\n    let mut _6: &mut mem::maybe_uninit::MaybeUninit<[&mut <I as slice::index::SliceIndex<[T]>>::Output; N]>;\n    let mut _7: ops::range::Range<usize>;\n    let mut _8: ops::range::Range<usize>;\n    let mut _9: ops::range::Range<usize>;\n    let mut _10: option::Option<usize>;\n    let mut _11: &mut ops::range::Range<usize>;\n    let mut _12: isize;\n    let  _13: usize;\n    let  _14: I;\n    let  _15: &I;\n    let mut _16: &[I];\n    let mut _17: &[I; N];\n    let  _18: ();\n    let mut _19: *mut &mut <I as slice::index::SliceIndex<[T]>>::Output;\n    let mut _20: *mut &mut <I as slice::index::SliceIndex<[T]>>::Output;\n    let mut _21: &mut <I as slice::index::SliceIndex<[T]>>::Output;\n    let mut _22: *mut <I as slice::index::SliceIndex<[T]>>::Output;\n    let mut _23: mem::maybe_uninit::MaybeUninit<[&mut <I as slice::index::SliceIndex<[T]>>::Output; N]>;\n    debug self => _1;\n    debug indices => _2;\n    debug slice => _3;\n    debug arr => _4;\n    debug arr_ptr => _5;\n    debug iter => _9;\n    debug i => _13;\n    debug idx => _14;\n    bb0: {\n        _3 = &raw mut (*_1);\n        StorageLive(_4);\n        _4 = mem::maybe_uninit::MaybeUninit::<[&mut <I as slice::index::SliceIndex<[T]>>::Output; N]>::uninit() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        _6 = &mut _4;\n        _5 = mem::maybe_uninit::MaybeUninit::<[&mut <I as slice::index::SliceIndex<[T]>>::Output; N]>::as_mut_ptr(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = Range(0_usize, N);\n        _7 = <ops::range::Range<usize> as iter::traits::collect::IntoIterator>::into_iter(move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageLive(_9);\n        _9 = move _7;\n        goto -> bb4;\n    }\n    bb4: {\n        StorageLive(_10);\n        _11 = &mut _9;\n        _10 = <ops::range::Range<usize> as iter::traits::iterator::Iterator>::next(_11) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _12 = discriminant(_10);\n        switchInt(move _12) -> [0: bb8, 1: bb7, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        _13 = ((_10 as variant#1).0: usize);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &_2;\n        _16 = move _17 as &[I];\n        StorageDead(_17);\n        _15 = slice::<impl [I]>::get_unchecked::<usize>(move _16, _13) -> [return: bb9, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_7);\n        StorageLive(_23);\n        _23 = move _4;\n        _0 = mem::maybe_uninit::MaybeUninit::<[&mut <I as slice::index::SliceIndex<[T]>>::Output; N]>::assume_init(move _23) -> [return: bb15, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_16);\n        _14 = <I as clone::Clone>::clone(_15) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = ptr::mut_ptr::<impl *mut [&mut <I as slice::index::SliceIndex<[T]>>::Output; N]>::cast::<&mut <I as slice::index::SliceIndex<[T]>>::Output>(_5) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _19 = ptr::mut_ptr::<impl *mut &mut <I as slice::index::SliceIndex<[T]>>::Output>::add(move _20, _13) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_20);\n        StorageLive(_22);\n        _22 = ptr::mut_ptr::<impl *mut [T]>::get_unchecked_mut::<I>(_3, _14) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        _21 = &mut (*_22);\n        _18 = ptr::mut_ptr::<impl *mut &mut <I as slice::index::SliceIndex<[T]>>::Output>::write(move _19, _21) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_19);\n        StorageDead(_22);\n        StorageDead(_10);\n        goto -> bb4;\n    }\n    bb15: {\n        StorageDead(_23);\n        StorageDead(_4);\n        drop(_2) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        return;\n    }\n}\n",
+  "doc": " Returns mutable references to many indices at once, without doing any checks.\n\n An index can be either a `usize`, a [`Range`] or a [`RangeInclusive`]. Note\n that this method takes an array, so all indices must be of the same type.\n If passed an array of `usize`s this method gives back an array of mutable references\n to single elements, while if passed an array of ranges it gives back an array of\n mutable references to slices.\n\n For a safe alternative see [`get_disjoint_mut`].\n\n # Safety\n\n Calling this method with overlapping or out-of-bounds indices is *[undefined behavior]*\n even if the resulting references are not used.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n\n unsafe {\n     let [a, b] = x.get_disjoint_unchecked_mut([0, 2]);\n     *a *= 10;\n     *b *= 100;\n }\n assert_eq!(x, &[10, 2, 400]);\n\n unsafe {\n     let [a, b] = x.get_disjoint_unchecked_mut([0..1, 1..3]);\n     a[0] = 8;\n     b[0] = 88;\n     b[1] = 888;\n }\n assert_eq!(x, &[8, 88, 888]);\n\n unsafe {\n     let [a, b] = x.get_disjoint_unchecked_mut([1..=2, 0..=0]);\n     a[0] = 11;\n     a[1] = 111;\n     b[0] = 1;\n }\n assert_eq!(x, &[1, 11, 111]);\n ```\n\n [`get_disjoint_mut`]: slice::get_disjoint_mut\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

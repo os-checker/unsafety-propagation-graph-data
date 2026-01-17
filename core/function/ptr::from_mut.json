@@ -1,0 +1,16 @@
+{
+  "name": "ptr::from_mut",
+  "safe": true,
+  "callees": {},
+  "adts": {},
+  "path": 16072,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:1133:1: 1135:2",
+  "src": "pub const fn from_mut<T: PointeeSized>(r: &mut T) -> *mut T {\n    r\n}",
+  "mir": "fn ptr::from_mut(_1: &mut T) -> *mut T {\n    let mut _0: *mut T;\n    debug r => _1;\n    bb0: {\n        _0 = &raw mut (*_1);\n        return;\n    }\n}\n",
+  "doc": " Converts a mutable reference to a raw pointer.\n\n For `r: &mut T`, `from_mut(r)` is equivalent to `r as *mut T` (except for the caveat noted\n below), but is a bit safer since it will never silently change type or mutability, in particular\n if the code is refactored.\n\n The caller must ensure that the pointee outlives the pointer this function returns, or else it\n will end up dangling.\n\n ## Interaction with lifetime extension\n\n Note that this has subtle interactions with the rules for lifetime extension of temporaries in\n tail expressions. This code is valid, albeit in a non-obvious way:\n ```rust\n # type T = i32;\n # fn foo() -> T { 42 }\n // The temporary holding the return value of `foo` has its lifetime extended,\n // because the surrounding expression involves no function call.\n let p = &mut foo() as *mut T;\n unsafe { p.write(T::default()) };\n ```\n Naively replacing the cast with `from_mut` is not valid:\n ```rust,no_run\n # use std::ptr;\n # type T = i32;\n # fn foo() -> T { 42 }\n // The temporary holding the return value of `foo` does *not* have its lifetime extended,\n // because the surrounding expression involves a function call.\n let p = ptr::from_mut(&mut foo());\n unsafe { p.write(T::default()) }; // UB! Writing to a dangling pointer ⚠️\n ```\n The recommended way to write this code is to avoid relying on lifetime extension\n when raw pointers are involved:\n ```rust\n # use std::ptr;\n # type T = i32;\n # fn foo() -> T { 42 }\n let mut x = foo();\n let p = ptr::from_mut(&mut x);\n unsafe { p.write(T::default()) };\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

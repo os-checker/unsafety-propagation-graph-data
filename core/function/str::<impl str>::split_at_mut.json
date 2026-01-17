@@ -1,0 +1,47 @@
+{
+  "name": "str::<impl str>::split_at_mut",
+  "safe": true,
+  "callees": {
+    "str::<impl str>::is_char_boundary": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checks that `index`-th byte is the first byte in a UTF-8 code point\n sequence or the end of the string.\n\n The start and end of the string (when `index == self.len()`) are\n considered to be boundaries.\n\n Returns `false` if `index` is greater than `self.len()`.\n\n # Examples\n\n ```\n let s = \"Löwe 老虎 Léopard\";\n assert!(s.is_char_boundary(0));\n // start of `老`\n assert!(s.is_char_boundary(6));\n assert!(s.is_char_boundary(s.len()));\n\n // second byte of `ö`\n assert!(!s.is_char_boundary(2));\n\n // third byte of `老`\n assert!(!s.is_char_boundary(8));\n ```\n",
+      "adt": {}
+    },
+    "str::<impl str>::split_at_mut_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one string slice into two at an index.\n\n # Safety\n\n The caller must ensure that `mid` is a valid byte offset from the start\n of the string and falls on the boundary of a UTF-8 code point.\n",
+      "adt": {}
+    },
+    "str::slice_error_fail": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 3129,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/str/mod.rs:872:5: 880:6",
+  "src": "pub const fn split_at_mut(&mut self, mid: usize) -> (&mut str, &mut str) {\n        // is_char_boundary checks that the index is in [0, .len()]\n        if self.is_char_boundary(mid) {\n            // SAFETY: just checked that `mid` is on a char boundary.\n            unsafe { self.split_at_mut_unchecked(mid) }\n        } else {\n            slice_error_fail(self, 0, mid)\n        }\n    }",
+  "mir": "fn str::<impl str>::split_at_mut(_1: &mut str, _2: usize) -> (&mut str, &mut str) {\n    let mut _0: (&mut str, &mut str);\n    let mut _3: bool;\n    let mut _4: &str;\n    let mut _5: !;\n    let mut _6: &str;\n    debug self => _1;\n    debug mid => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &(*_1);\n        _3 = str::<impl str>::is_char_boundary(move _4, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = str::<impl str>::split_at_mut_unchecked(_1, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        return;\n    }\n    bb4: {\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = &(*_1);\n        _5 = str::slice_error_fail(move _6, 0_usize, _2) -> unwind unreachable;\n    }\n}\n",
+  "doc": " Divides one mutable string slice into two at an index.\n\n The argument, `mid`, should be a byte offset from the start of the\n string. It must also be on the boundary of a UTF-8 code point.\n\n The two slices returned go from the start of the string slice to `mid`,\n and from `mid` to the end of the string slice.\n\n To get immutable string slices instead, see the [`split_at`] method.\n\n [`split_at`]: str::split_at\n\n # Panics\n\n Panics if `mid` is not on a UTF-8 code point boundary, or if it is past\n the end of the last code point of the string slice.  For a non-panicking\n alternative see [`split_at_mut_checked`](str::split_at_mut_checked).\n\n # Examples\n\n ```\n let mut s = \"Per Martin-Löf\".to_string();\n {\n     let (first, last) = s.split_at_mut(3);\n     first.make_ascii_uppercase();\n     assert_eq!(\"PER\", first);\n     assert_eq!(\" Martin-Löf\", last);\n }\n assert_eq!(\"PER Martin-Löf\", s);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

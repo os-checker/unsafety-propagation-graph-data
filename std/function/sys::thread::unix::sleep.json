@@ -1,0 +1,103 @@
+{
+  "name": "sys::thread::unix::sleep",
+  "safe": true,
+  "callees": {
+    "core::time::Duration::as_secs": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of _whole_ seconds contained by this `Duration`.\n\n The returned value does not include the fractional (nanosecond) part of the\n duration, which can be obtained using [`subsec_nanos`].\n\n # Examples\n\n ```\n use std::time::Duration;\n\n let duration = Duration::new(5, 730_023_852);\n assert_eq!(duration.as_secs(), 5);\n ```\n\n To determine the total number of seconds represented by the `Duration`\n including the fractional part, use [`as_secs_f64`] or [`as_secs_f32`]\n\n [`as_secs_f64`]: Duration::as_secs_f64\n [`as_secs_f32`]: Duration::as_secs_f32\n [`subsec_nanos`]: Duration::subsec_nanos\n",
+      "adt": {}
+    },
+    "core::time::Duration::subsec_nanos": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the fractional part of this `Duration`, in nanoseconds.\n\n This method does **not** return the length of the duration when\n represented by nanoseconds. The returned number always represents a\n fractional portion of a second (i.e., it is less than one billion).\n\n # Examples\n\n ```\n use std::time::Duration;\n\n let duration = Duration::from_millis(5_010);\n assert_eq!(duration.as_secs(), 5);\n assert_eq!(duration.subsec_nanos(), 10_000_000);\n ```\n",
+      "adt": {}
+    },
+    "core::cmp::min": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the minimum of two values.\n\n Returns the first argument if the comparison determines them to be equal.\n\n Internally uses an alias to [`Ord::min`].\n\n # Examples\n\n ```\n use std::cmp;\n\n assert_eq!(cmp::min(1, 2), 1);\n assert_eq!(cmp::min(2, 2), 2);\n ```\n ```\n use std::cmp::{self, Ordering};\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(cmp::min(Equal(\"v1\"), Equal(\"v2\")).0, \"v1\");\n ```\n",
+      "adt": {}
+    },
+    "libc::nanosleep": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "sys::pal::unix::os::errno": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the platform-specific value of errno\n",
+      "adt": {}
+    },
+    "core::panicking::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Internal function for `assert_eq!` and `assert_ne!` macros\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::time::Duration": [
+      "Ref",
+      "Plain"
+    ],
+    "libc::timespec": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 4522, kind: RigidTy(Int(I64)) })])",
+      "Unknown([Field(1, Ty { id: 4522, kind: RigidTy(Int(I64)) })])"
+    ],
+    "core::panicking::AssertKind": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 4351,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/thread/unix.rs:522:1: 545:2",
+  "src": "pub fn sleep(dur: Duration) {\n    let mut secs = dur.as_secs();\n    let mut nsecs = dur.subsec_nanos() as _;\n\n    // If we're awoken with a signal then the return value will be -1 and\n    // nanosleep will fill in `ts` with the remaining time.\n    unsafe {\n        while secs > 0 || nsecs > 0 {\n            let mut ts = libc::timespec {\n                tv_sec: cmp::min(libc::time_t::MAX as u64, secs) as libc::time_t,\n                tv_nsec: nsecs,\n            };\n            secs -= ts.tv_sec as u64;\n            let ts_ptr = &raw mut ts;\n            if libc::nanosleep(ts_ptr, ts_ptr) == -1 {\n                assert_eq!(os::errno(), libc::EINTR);\n                secs += ts.tv_sec as u64;\n                nsecs = ts.tv_nsec;\n            } else {\n                nsecs = 0;\n            }\n        }\n    }\n}",
+  "mir": "fn sys::thread::unix::sleep(_1: core::time::Duration) -> () {\n    let mut _0: ();\n    let mut _2: u64;\n    let mut _3: &core::time::Duration;\n    let mut _4: i64;\n    let mut _5: i64;\n    let mut _6: u32;\n    let mut _7: &core::time::Duration;\n    let mut _8: bool;\n    let mut _9: u64;\n    let mut _10: bool;\n    let mut _11: i64;\n    let mut _12: libc::timespec;\n    let mut _13: i64;\n    let mut _14: u64;\n    let mut _15: u64;\n    let mut _16: u64;\n    let mut _17: i64;\n    let mut _18: u64;\n    let mut _19: i64;\n    let mut _20: (u64, bool);\n    let  _21: *mut libc::timespec;\n    let mut _22: i32;\n    let mut _23: *const libc::timespec;\n    let mut _24: (&i32, &i32);\n    let mut _25: &i32;\n    let  _26: i32;\n    let mut _27: &i32;\n    let  _28: &i32;\n    let  _29: &i32;\n    let mut _30: bool;\n    let mut _31: i32;\n    let mut _32: i32;\n    let  _33: core::panicking::AssertKind;\n    let  _34: !;\n    let mut _35: core::option::Option<core::fmt::Arguments<'_>>;\n    let mut _36: u64;\n    let mut _37: i64;\n    let mut _38: (u64, bool);\n    let mut _39: i64;\n    debug dur => _1;\n    debug secs => _2;\n    debug nsecs => _4;\n    debug ts => _12;\n    debug ts_ptr => _21;\n    debug left_val => _28;\n    debug right_val => _29;\n    debug kind => _33;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &_1;\n        _2 = core::time::Duration::as_secs(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &_1;\n        _6 = core::time::Duration::subsec_nanos(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = move _6 as i64;\n        _4 = _5;\n        StorageDead(_6);\n        StorageDead(_5);\n        goto -> bb3;\n    }\n    bb3: {\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = _2;\n        _8 = Gt(move _9, 0_u64);\n        switchInt(move _8) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_9);\n        goto -> bb7;\n    }\n    bb5: {\n        StorageDead(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = _4;\n        _10 = Gt(move _11, 0_i64);\n        switchInt(move _10) -> [0: bb18, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_11);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = core::num::<impl i64>::MAX as u64;\n        StorageLive(_16);\n        _16 = _2;\n        _14 = core::cmp::min::<u64>(move _15, move _16) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_16);\n        StorageDead(_15);\n        _13 = move _14 as i64;\n        StorageDead(_14);\n        StorageLive(_17);\n        _17 = _4;\n        _12 = timespec(move _13, move _17);\n        StorageDead(_17);\n        StorageDead(_13);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = (_12.0: i64);\n        _18 = move _19 as u64;\n        StorageDead(_19);\n        _20 = CheckedSub(_2, _18);\n        assert(!move (_20.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _2, move _18) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        _2 = move (_20.0: u64);\n        StorageDead(_18);\n        _21 = &raw mut _12;\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = _21 as *const libc::timespec;\n        _22 = libc::nanosleep(move _23, _21) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_23);\n        switchInt(move _22) -> [4294967295: bb11, otherwise: bb16];\n    }\n    bb11: {\n        StorageDead(_22);\n        StorageLive(_24);\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = sys::pal::unix::os::errno() -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        _25 = &_26;\n        StorageLive(_27);\n        _27 = sys::thread::unix::sleep::promoted[0];\n        _24 = (move _25, move _27);\n        StorageDead(_27);\n        StorageDead(_25);\n        _28 = (_24.0: &i32);\n        _29 = (_24.1: &i32);\n        StorageLive(_30);\n        StorageLive(_31);\n        _31 = (*_28);\n        StorageLive(_32);\n        _32 = (*_29);\n        _30 = Eq(move _31, move _32);\n        switchInt(move _30) -> [0: bb14, otherwise: bb13];\n    }\n    bb13: {\n        StorageDead(_32);\n        StorageDead(_31);\n        StorageDead(_30);\n        StorageDead(_26);\n        StorageDead(_24);\n        StorageLive(_36);\n        StorageLive(_37);\n        _37 = (_12.0: i64);\n        _36 = move _37 as u64;\n        StorageDead(_37);\n        _38 = CheckedAdd(_2, _36);\n        assert(!move (_38.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _2, move _36) -> [success: bb15, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_32);\n        StorageDead(_31);\n        _33 = core::panicking::AssertKind::Eq;\n        StorageLive(_35);\n        _35 = core::option::Option::None;\n        _34 = core::panicking::assert_failed::<i32, i32>(_33, _28, _29, move _35) -> unwind unreachable;\n    }\n    bb15: {\n        _2 = move (_38.0: u64);\n        StorageDead(_36);\n        StorageLive(_39);\n        _39 = (_12.1: i64);\n        _4 = move _39;\n        StorageDead(_39);\n        goto -> bb17;\n    }\n    bb16: {\n        StorageDead(_22);\n        _4 = 0_i64;\n        goto -> bb17;\n    }\n    bb17: {\n        StorageDead(_12);\n        StorageDead(_10);\n        StorageDead(_8);\n        goto -> bb3;\n    }\n    bb18: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_8);\n        StorageDead(_4);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

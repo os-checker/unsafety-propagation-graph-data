@@ -1,0 +1,130 @@
+{
+  "name": "io::append_to_string",
+  "safe": false,
+  "callees": {
+    "alloc_crate::string::String::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of this `String`, in bytes, not [`char`]s or\n graphemes. In other words, it might not be what a human considers the\n length of the string.\n\n # Examples\n\n ```\n let a = String::from(\"foo\");\n assert_eq!(a.len(), 3);\n\n let fancy_f = String::from(\"ƒoo\");\n assert_eq!(fancy_f.len(), 4);\n assert_eq!(fancy_f.chars().count(), 3);\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::string::String::as_mut_vec": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to the contents of this `String`.\n\n # Safety\n\n This function is unsafe because the returned `&mut Vec` allows writing\n bytes which are not valid UTF-8. If this constraint is violated, using\n the original `String` after dropping the `&mut Vec` may violate memory\n safety, as the rest of the standard library assumes that `String`s are\n valid UTF-8.\n\n # Examples\n\n ```\n let mut s = String::from(\"hello\");\n\n unsafe {\n     let vec = s.as_mut_vec();\n     assert_eq!(&[104, 101, 108, 108, 111][..], &vec[..]);\n\n     vec.reverse();\n }\n assert_eq!(s, \"olleh\");\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to an element or subslice, without doing bounds\n checking.\n\n For a safe alternative see [`get`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used.\n\n You can think of this like `.get(index).unwrap_unchecked()`.  It's UB\n to call `.get_unchecked(len)`, even if you immediately convert to a\n pointer.  And it's UB to call `.get_unchecked(..len + 1)`,\n `.get_unchecked(..=len)`, or similar.\n\n [`get`]: slice::get\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n\n unsafe {\n     assert_eq!(x.get_unchecked(1), &2);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::str::from_utf8": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a slice of bytes to a string slice.\n\n This is an alias to [`str::from_utf8`].\n\n A string slice ([`&str`]) is made of bytes ([`u8`]), and a byte slice\n ([`&[u8]`][byteslice]) is made of bytes, so this function converts between\n the two. Not all byte slices are valid string slices, however: [`&str`] requires\n that it is valid UTF-8. `from_utf8()` checks to ensure that the bytes are valid\n UTF-8, and then does the conversion.\n\n [`&str`]: str\n [byteslice]: slice\n\n If you are sure that the byte slice is valid UTF-8, and you don't want to\n incur the overhead of the validity check, there is an unsafe version of\n this function, [`from_utf8_unchecked`], which has the same\n behavior but skips the check.\n\n If you need a `String` instead of a `&str`, consider\n [`String::from_utf8`][string].\n\n [string]: ../../std/string/struct.String.html#method.from_utf8\n\n Because you can stack-allocate a `[u8; N]`, and you can take a\n [`&[u8]`][byteslice] of it, this function is one way to have a\n stack-allocated string. There is an example of this in the\n examples section below.\n\n [byteslice]: slice\n\n # Errors\n\n Returns `Err` if the slice is not UTF-8 with a description as to why the\n provided slice is not UTF-8.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::str;\n\n // some bytes, in a vector\n let sparkle_heart = vec![240, 159, 146, 150];\n\n // We can use the ? (try) operator to check if the bytes are valid\n let sparkle_heart = str::from_utf8(&sparkle_heart)?;\n\n assert_eq!(\"💖\", sparkle_heart);\n # Ok::<_, str::Utf8Error>(())\n ```\n\n Incorrect bytes:\n\n ```\n use std::str;\n\n // some invalid bytes, in a vector\n let sparkle_heart = vec![0, 159, 146, 150];\n\n assert!(str::from_utf8(&sparkle_heart).is_err());\n ```\n\n See the docs for [`Utf8Error`] for more details on the kinds of\n errors that can be returned.\n\n A \"stack allocated string\":\n\n ```\n use std::str;\n\n // some bytes, in a stack-allocated array\n let sparkle_heart = [240, 159, 146, 150];\n\n // We know these bytes are valid, so just use `unwrap()`.\n let sparkle_heart: &str = str::from_utf8(&sparkle_heart).unwrap();\n\n assert_eq!(\"💖\", sparkle_heart);\n ```\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::is_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the result is [`Err`].\n\n # Examples\n\n ```\n let x: Result<i32, &str> = Ok(-3);\n assert_eq!(x.is_err(), false);\n\n let x: Result<i32, &str> = Err(\"Some error message\");\n assert_eq!(x.is_err(), true);\n ```\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::and_then": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calls `op` if the result is [`Ok`], otherwise returns the [`Err`] value of `self`.\n\n\n This function can be used for control flow based on `Result` values.\n\n # Examples\n\n ```\n fn sq_then_to_string(x: u32) -> Result<String, &'static str> {\n     x.checked_mul(x).map(|sq| sq.to_string()).ok_or(\"overflowed\")\n }\n\n assert_eq!(Ok(2).and_then(sq_then_to_string), Ok(4.to_string()));\n assert_eq!(Ok(1_000_000).and_then(sq_then_to_string), Err(\"overflowed\"));\n assert_eq!(Err(\"not a number\").and_then(sq_then_to_string), Err(\"not a number\"));\n ```\n\n Often used to chain fallible operations that may return [`Err`].\n\n ```\n use std::{io::ErrorKind, path::Path};\n\n // Note: on Windows \"/\" maps to \"C:\\\"\n let root_modified_time = Path::new(\"/\").metadata().and_then(|md| md.modified());\n assert!(root_modified_time.is_ok());\n\n let should_fail = Path::new(\"/bad/path\").metadata().and_then(|md| md.modified());\n assert!(should_fail.is_err());\n assert_eq!(should_fail.unwrap_err().kind(), ErrorKind::NotFound);\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::vec::Vec::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the vector, also referred to\n as its 'length'.\n\n # Examples\n\n ```\n let a = vec![1, 2, 3];\n assert_eq!(a.len(), 3);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc_crate::string::String": [
+      "Ref",
+      "Deref",
+      "MutRef"
+    ],
+    "alloc_crate::vec::Vec": [
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "io::Guard": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 3691, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 1195, kind: RigidTy(Adt(AdtDef(DefId { id: 4768, name: \"alloc_crate::vec::Vec\" }), GenericArgs([Type(Ty { id: 35, kind: RigidTy(Uint(U8)) }), Type(Ty { id: 19, kind: RigidTy(Adt(AdtDef(DefId { id: 4635, name: \"alloc_crate::alloc::Global\" }), GenericArgs([]))) })]))) }, Mut)) })])",
+      "Unknown([Field(1, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Ref"
+    ],
+    "core::ops::RangeFrom": [
+      "Plain"
+    ]
+  },
+  "path": 1722,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/mod.rs:383:1: 398:2",
+  "src": "pub(crate) unsafe fn append_to_string<F>(buf: &mut String, f: F) -> Result<usize>\nwhere\n    F: FnOnce(&mut Vec<u8>) -> Result<usize>,\n{\n    let mut g = Guard { len: buf.len(), buf: unsafe { buf.as_mut_vec() } };\n    let ret = f(g.buf);\n\n    // SAFETY: the caller promises to only append data to `buf`\n    let appended = unsafe { g.buf.get_unchecked(g.len..) };\n    if str::from_utf8(appended).is_err() {\n        ret.and_then(|_| Err(Error::INVALID_UTF8))\n    } else {\n        g.len = g.buf.len();\n        ret\n    }\n}",
+  "mir": "fn io::append_to_string(_1: &mut alloc_crate::string::String, _2: F) -> core::result::Result<usize, io::error::Error> {\n    let mut _0: core::result::Result<usize, io::error::Error>;\n    let mut _3: io::Guard<'_>;\n    let mut _4: usize;\n    let mut _5: &alloc_crate::string::String;\n    let mut _6: &mut alloc_crate::vec::Vec<u8>;\n    let  _7: core::result::Result<usize, io::error::Error>;\n    let mut _8: (&mut alloc_crate::vec::Vec<u8>,);\n    let  _9: &[u8];\n    let  _10: &[u8];\n    let mut _11: &alloc_crate::vec::Vec<u8>;\n    let mut _12: core::ops::RangeFrom<usize>;\n    let mut _13: usize;\n    let mut _14: bool;\n    let mut _15: &core::result::Result<&str, core::str::Utf8Error>;\n    let  _16: core::result::Result<&str, core::str::Utf8Error>;\n    let mut _17: usize;\n    let mut _18: &alloc_crate::vec::Vec<u8>;\n    let mut _19: &mut alloc_crate::vec::Vec<u8>;\n    let mut _20: &mut alloc_crate::vec::Vec<u8>;\n    let mut _21: &mut alloc_crate::vec::Vec<u8>;\n    debug buf => _1;\n    debug f => _2;\n    debug g => _3;\n    debug ret => _7;\n    debug appended => _9;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = alloc_crate::string::String::len(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _6 = alloc_crate::string::String::as_mut_vec(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = Guard(_6, move _4);\n        StorageDead(_4);\n        StorageLive(_8);\n        _19 = (_3.0: &mut alloc_crate::vec::Vec<u8>);\n        _8 = (_19);\n        _7 = <F as core::ops::FnOnce<(&mut alloc_crate::vec::Vec<u8>,)>>::call_once(_2, move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageLive(_11);\n        _20 = (_3.0: &mut alloc_crate::vec::Vec<u8>);\n        _11 = &(*_20);\n        _10 = <alloc_crate::vec::Vec<u8> as core::ops::Deref>::deref(move _11) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = (_3.1: usize);\n        _12 = RangeFrom(move _13);\n        StorageDead(_13);\n        _9 = core::slice::<impl [u8]>::get_unchecked::<core::ops::RangeFrom<usize>>(_10, move _12) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = core::str::from_utf8(_9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _15 = &_16;\n        _14 = core::result::Result::<&str, core::str::Utf8Error>::is_err(move _15) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        switchInt(move _14) -> [0: bb10, otherwise: bb8];\n    }\n    bb8: {\n        StorageDead(_16);\n        StorageDead(_15);\n        _0 = core::result::Result::<usize, io::error::Error>::and_then::<usize, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/mod.rs:393:22: 393:25}>(_7, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/mod.rs:393:22: 393:25}) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        goto -> bb12;\n    }\n    bb10: {\n        StorageDead(_16);\n        StorageDead(_15);\n        StorageLive(_17);\n        StorageLive(_18);\n        _21 = (_3.0: &mut alloc_crate::vec::Vec<u8>);\n        _18 = &(*_21);\n        _17 = alloc_crate::vec::Vec::<u8>::len(move _18) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_18);\n        (_3.1: usize) = move _17;\n        StorageDead(_17);\n        _0 = _7;\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_14);\n        drop(_3) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

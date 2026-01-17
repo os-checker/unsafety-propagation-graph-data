@@ -1,0 +1,59 @@
+{
+  "name": "cell::RefMut::<'b, T>::map",
+  "safe": true,
+  "callees": {
+    "ops::deref::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "ops::function::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "cell::RefMut": [
+      "MutRef",
+      "Plain",
+      "Unknown([Field(1, Ty { id: 5177, kind: RigidTy(Adt(AdtDef(DefId { id: 26100, name: \"cell::BorrowRefMut\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ],
+    "cell::BorrowRefMut": [
+      "Plain"
+    ]
+  },
+  "path": 4809,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell.rs:1839:5: 1845:6",
+  "src": "pub fn map<U: ?Sized, F>(mut orig: RefMut<'b, T>, f: F) -> RefMut<'b, U>\n    where\n        F: FnOnce(&mut T) -> &mut U,\n    {\n        let value = NonNull::from(f(&mut *orig));\n        RefMut { value, borrow: orig.borrow, marker: PhantomData }\n    }",
+  "mir": "fn cell::RefMut::<'b, T>::map(_1: cell::RefMut<'_, T>, _2: F) -> cell::RefMut<'_, U> {\n    let mut _0: cell::RefMut<'_, U>;\n    let  _3: ptr::non_null::NonNull<U>;\n    let mut _4: &mut U;\n    let mut _5: (&mut T,);\n    let mut _6: &mut T;\n    let mut _7: &mut cell::RefMut<'_, T>;\n    let mut _8: cell::BorrowRefMut<'_>;\n    debug orig => _1;\n    debug f => _2;\n    debug value => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_7);\n        _7 = &mut _1;\n        _6 = <cell::RefMut<'_, T> as ops::deref::DerefMut>::deref_mut(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        _5 = (_6);\n        _4 = <F as ops::function::FnOnce<(&mut T,)>>::call_once(_2, move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = <ptr::non_null::NonNull<U> as convert::From<&mut U>>::from(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageLive(_8);\n        _8 = move (_1.1: cell::BorrowRefMut<'_>);\n        _0 = RefMut(_3, move _8, ZeroSized: marker::PhantomData<&mut U>);\n        StorageDead(_8);\n        return;\n    }\n}\n",
+  "doc": " Makes a new `RefMut` for a component of the borrowed data, e.g., an enum\n variant.\n\n The `RefCell` is already mutably borrowed, so this cannot fail.\n\n This is an associated function that needs to be used as\n `RefMut::map(...)`. A method would interfere with methods of the same\n name on the contents of a `RefCell` used through `Deref`.\n\n # Examples\n\n ```\n use std::cell::{RefCell, RefMut};\n\n let c = RefCell::new((5, 'b'));\n {\n     let b1: RefMut<'_, (u32, char)> = c.borrow_mut();\n     let mut b2: RefMut<'_, u32> = RefMut::map(b1, |t| &mut t.0);\n     assert_eq!(*b2, 5);\n     *b2 = 42;\n }\n assert_eq!(*c.borrow(), (42, 'b'));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

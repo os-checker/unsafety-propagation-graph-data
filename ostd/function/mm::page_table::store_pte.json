@@ -1,0 +1,64 @@
+{
+  "name": "mm::page_table::store_pte",
+  "safe": false,
+  "callees": {
+    "mm::page_table::PageTableEntryTrait::as_usize": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts the PTE into a raw `usize` value.\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicUsize::from_ptr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new reference to an atomic integer from a pointer.\n\n # Examples\n\n ```\n\n // Get a pointer to an allocated value\n\n\n {\n     // Create an atomic view of the allocated value\n\n     // Use `atomic` for atomic operations, possibly share it with other threads\n     atomic.store(1, atomic::Ordering::Relaxed);\n }\n\n // It's ok to non-atomically access the value behind `ptr`,\n // since the reference to the atomic ended its lifetime in the block above\n assert_eq!(unsafe { *ptr }, 1);\n\n // Deallocate the value\n unsafe { drop(Box::from_raw(ptr)) }\n ```\n\n # Safety\n\n * `ptr` must be aligned to\n * `ptr` must be [valid] for both reads and writes for the whole lifetime `'a`.\n * You must adhere to the [Memory model for atomic accesses]. In particular, it is not\n   allowed to mix conflicting atomic and non-atomic accesses, or atomic accesses of different\n   sizes, without synchronization.\n\n [valid]: crate::ptr#safety\n [Memory model for atomic accesses]: self#memory-model-for-atomic-accesses\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicUsize::store": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer.\n\n `store` takes an [`Ordering`] argument which describes the memory ordering of this operation.\n  Possible values are [`SeqCst`], [`Release`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Acquire`] or [`AcqRel`].\n\n # Examples\n\n ```\n\n\n some_var.store(10, Ordering::Relaxed);\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 2415,
+  "span": "ostd/src/mm/page_table/mod.rs:570:1: 575:2",
+  "src": "pub unsafe fn store_pte<E: PageTableEntryTrait>(ptr: *mut E, new_val: E, ordering: Ordering) {\n    let new_raw = new_val.as_usize();\n    // SAFETY: The safety is upheld by the caller.\n    let atomic = unsafe { AtomicUsize::from_ptr(ptr.cast()) };\n    atomic.store(new_raw, ordering)\n}",
+  "mir": "fn mm::page_table::store_pte(_1: *mut E, _2: E, _3: core::sync::atomic::Ordering) -> () {\n    let mut _0: ();\n    let  _4: usize;\n    let  _5: &core::sync::atomic::AtomicUsize;\n    let mut _6: *mut usize;\n    debug ptr => _1;\n    debug new_val => _2;\n    debug ordering => _3;\n    debug new_raw => _4;\n    debug atomic => _5;\n    bb0: {\n        _4 = <E as mm::page_table::PageTableEntryTrait>::as_usize(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        _6 = core::ptr::mut_ptr::<impl *mut E>::cast::<usize>(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = core::sync::atomic::AtomicUsize::from_ptr::<'_>(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _0 = core::sync::atomic::AtomicUsize::store(_5, _4, _3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        return;\n    }\n}\n",
+  "doc": " Stores a page table entry with an atomic instruction.\n\n # Safety\n\n The safety preconditions are same as those of [`AtomicUsize::from_ptr`].\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

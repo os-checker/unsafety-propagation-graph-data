@@ -1,0 +1,94 @@
+{
+  "name": "mm::page_table::node::<impl mm::frame::frame_ref::FrameRef<'a, mm::page_table::node::PageTablePageMeta<C>>>::lock",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "mm::frame::Frame::<M>::meta": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the metadata of this page.\n",
+      "adt": {
+        "mm::frame::Frame": "ImmutableAsArgument"
+      }
+    },
+    "core::sync::atomic::AtomicU8::compare_exchange": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer if the current value is the same as\n the `current` value.\n\n The return value is a result indicating whether the new value was written and\n containing the previous value. On success this value is guaranteed to be equal to\n `current`.\n\n `compare_exchange` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. `success` describes the required ordering for the\n read-modify-write operation that takes place if the comparison with `current` succeeds.\n `failure` describes the required ordering for the load operation that takes place when\n the comparison fails. Using [`Acquire`] as success ordering makes the store part\n of this operation [`Relaxed`], and using [`Release`] makes the successful load\n [`Relaxed`]. The failure ordering can only be [`SeqCst`], [`Acquire`] or [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.compare_exchange(5, 10,\n                                      Ordering::Acquire,\n                                      Ordering::Relaxed),\n            Ok(5));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n\n assert_eq!(some_var.compare_exchange(6, 12,\n                                      Ordering::SeqCst,\n                                      Ordering::Acquire),\n            Err(10));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n\n # Considerations\n\n `compare_exchange` is a [compare-and-swap operation] and thus exhibits the usual downsides\n of CAS operations. In particular, a load of the value followed by a successful\n `compare_exchange` with the previous load *does not ensure* that other threads have not\n changed the value in the interim! This is usually important when the *equality* check in\n the `compare_exchange` is being used to check the *identity* of a value, but equality\n does not necessarily imply identity. This is a particularly common case for pointers, as\n a pointer holding the same address does not imply that the same object exists at that\n address! In this case, `compare_exchange` can lead to the [ABA problem].\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::is_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the result is [`Err`].\n\n # Examples\n\n ```\n let x: Result<i32, &str> = Ok(-3);\n assert_eq!(x.is_err(), false);\n\n let x: Result<i32, &str> = Err(\"Some error message\");\n assert_eq!(x.is_err(), true);\n ```\n",
+      "adt": {}
+    },
+    "core::hint::spin_loop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Emits a machine instruction to signal the processor that it is running in\n a busy-wait spin-loop (\"spin lock\").\n\n Upon receiving the spin-loop signal the processor can optimize its behavior by,\n for example, saving power or switching hyper-threads.\n\n This function is different from [`thread::yield_now`] which directly\n yields to the system's scheduler, whereas `spin_loop` does not interact\n with the operating system.\n\n A common use case for `spin_loop` is implementing bounded optimistic\n spinning in a CAS loop in synchronization primitives. To avoid problems\n like priority inversion, it is strongly recommended that the spin loop is\n terminated after a finite amount of iterations and an appropriate blocking\n syscall is made.\n\n **Note**: On platforms that do not support receiving spin-loop hints this\n function does not do anything at all.\n\n # Examples\n\n ```ignore-wasm\n use std::sync::atomic::{AtomicBool, Ordering};\n use std::sync::Arc;\n use std::{hint, thread};\n\n // A shared atomic value that threads will use to coordinate\n let live = Arc::new(AtomicBool::new(false));\n\n // In a background thread we'll eventually set the value\n let bg_work = {\n     let live = live.clone();\n     thread::spawn(move || {\n         // Do some work, then make the value live\n         do_some_work();\n         live.store(true, Ordering::Release);\n     })\n };\n\n // Back on our current thread, we wait for the value to be set\n while !live.load(Ordering::Acquire) {\n     // The spin loop is a hint to the CPU that we're waiting, but probably\n     // not for very long\n     hint::spin_loop();\n }\n\n // The value is now set\n # fn do_some_work() {}\n do_some_work();\n bg_work.join()?;\n # Ok::<(), Box<dyn core::any::Any + Send + 'static>>(())\n ```\n\n [`thread::yield_now`]: ../../std/thread/fn.yield_now.html\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::frame::frame_ref::FrameRef": [
+      "Ref",
+      "Plain"
+    ],
+    "mm::frame::Frame": [
+      "Ref"
+    ],
+    "mm::page_table::node::PageTablePageMeta": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))"
+    ],
+    "core::sync::atomic::AtomicU8": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Ref"
+    ],
+    "mm::page_table::node::PageTableGuard": [
+      "Plain"
+    ]
+  },
+  "path": 1929,
+  "span": "ostd/src/mm/page_table/node/mod.rs:140:5: 154:6",
+  "src": "pub(super) fn lock<'rcu>(self, _guard: &'rcu dyn InAtomicMode) -> PageTableGuard<'rcu, C>\n    where\n        'a: 'rcu,\n    {\n        while self\n            .meta()\n            .lock\n            .compare_exchange(0, 1, Ordering::Acquire, Ordering::Relaxed)\n            .is_err()\n        {\n            core::hint::spin_loop();\n        }\n\n        PageTableGuard::<'rcu, C> { inner: self }\n    }",
+  "mir": "fn mm::page_table::node::<impl mm::frame::frame_ref::FrameRef<'a, mm::page_table::node::PageTablePageMeta<C>>>::lock(_1: mm::frame::frame_ref::FrameRef<'_, mm::page_table::node::PageTablePageMeta<C>>, _2: &dyn task::atomic_mode::InAtomicMode) -> mm::page_table::node::PageTableGuard<'_, C> {\n    let mut _0: mm::page_table::node::PageTableGuard<'_, C>;\n    let mut _3: bool;\n    let mut _4: &core::result::Result<u8, u8>;\n    let  _5: core::result::Result<u8, u8>;\n    let mut _6: &core::sync::atomic::AtomicU8;\n    let  _7: &mm::page_table::node::PageTablePageMeta<C>;\n    let  _8: &mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>;\n    let mut _9: &mm::frame::frame_ref::FrameRef<'_, mm::page_table::node::PageTablePageMeta<C>>;\n    let mut _10: core::sync::atomic::Ordering;\n    let mut _11: core::sync::atomic::Ordering;\n    let  _12: ();\n    debug self => _1;\n    debug _guard => _2;\n    bb0: {\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_9);\n        _9 = &_1;\n        _8 = <mm::frame::frame_ref::FrameRef<'_, mm::page_table::node::PageTablePageMeta<C>> as core::ops::Deref>::deref(move _9) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_9);\n        _7 = mm::frame::Frame::<mm::page_table::node::PageTablePageMeta<C>>::meta(_8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = &((*_7).3: core::sync::atomic::AtomicU8);\n        StorageLive(_10);\n        _10 = core::sync::atomic::Ordering::Acquire;\n        StorageLive(_11);\n        _11 = core::sync::atomic::Ordering::Relaxed;\n        _5 = core::sync::atomic::AtomicU8::compare_exchange(move _6, 0_u8, 1_u8, move _10, move _11) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _4 = &_5;\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_6);\n        _3 = core::result::Result::<u8, u8>::is_err(move _4) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        switchInt(move _3) -> [0: bb8, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageDead(_4);\n        _12 = core::hint::spin_loop() -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_3);\n        goto -> bb1;\n    }\n    bb8: {\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageDead(_3);\n        _0 = PageTableGuard(_1);\n        return;\n    }\n}\n",
+  "doc": " Locks the page table node.\n\n An atomic mode guard is required to\n  1. prevent deadlocks;\n  2. provide a lifetime (`'rcu`) that the nodes are guaranteed to outlive.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

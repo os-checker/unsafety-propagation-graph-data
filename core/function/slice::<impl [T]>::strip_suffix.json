@@ -1,0 +1,51 @@
+{
+  "name": "slice::<impl [T]>::strip_suffix",
+  "safe": true,
+  "callees": {
+    "slice::SlicePattern::as_slice": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Currently, the consumers of `SlicePattern` need a slice.\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::split_at": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.  For a non-panicking alternative see\n [`split_at_checked`](slice::split_at_checked).\n\n # Examples\n\n ```\n let v = ['a', 'b', 'c'];\n\n {\n    let (left, right) = v.split_at(0);\n    assert_eq!(left, []);\n    assert_eq!(right, ['a', 'b', 'c']);\n }\n\n {\n     let (left, right) = v.split_at(2);\n     assert_eq!(left, ['a', 'b']);\n     assert_eq!(right, ['c']);\n }\n\n {\n     let (left, right) = v.split_at(3);\n     assert_eq!(left, ['a', 'b', 'c']);\n     assert_eq!(right, []);\n }\n ```\n",
+      "adt": {}
+    },
+    "cmp::PartialEq::eq": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests for `self` and `other` values to be equal, and is used by `==`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 1332,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:2715:5: 2729:6",
+  "src": "pub fn strip_suffix<P: SlicePattern<Item = T> + ?Sized>(&self, suffix: &P) -> Option<&[T]>\n    where\n        T: PartialEq,\n    {\n        // This function will need rewriting if and when SlicePattern becomes more sophisticated.\n        let suffix = suffix.as_slice();\n        let (len, n) = (self.len(), suffix.len());\n        if n <= len {\n            let (head, tail) = self.split_at(len - n);\n            if tail == suffix {\n                return Some(head);\n            }\n        }\n        None\n    }",
+  "mir": "fn slice::<impl [T]>::strip_suffix(_1: &[T], _2: &P) -> option::Option<&[T]> {\n    let mut _0: option::Option<&[T]>;\n    let  _3: &[T];\n    let  _4: usize;\n    let  _5: usize;\n    let mut _6: (usize, usize);\n    let mut _7: usize;\n    let mut _8: usize;\n    let mut _9: bool;\n    let  _10: &[T];\n    let  _11: &[T];\n    let mut _12: (&[T], &[T]);\n    let mut _13: usize;\n    let mut _14: (usize, bool);\n    let mut _15: bool;\n    let mut _16: &&[T];\n    let mut _17: &&[T];\n    debug self => _1;\n    debug suffix => _2;\n    debug suffix => _3;\n    debug len => _4;\n    debug n => _5;\n    debug head => _10;\n    debug tail => _11;\n    bb0: {\n        _3 = <P as slice::SlicePattern>::as_slice(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = PtrMetadata(_1);\n        StorageLive(_8);\n        _8 = PtrMetadata(_3);\n        _6 = (move _7, move _8);\n        StorageDead(_8);\n        StorageDead(_7);\n        _4 = (_6.0: usize);\n        _5 = (_6.1: usize);\n        StorageDead(_6);\n        StorageLive(_9);\n        _9 = Le(_5, _4);\n        switchInt(move _9) -> [0: bb8, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_12);\n        StorageLive(_13);\n        _14 = CheckedSub(_4, _5);\n        assert(!move (_14.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _4, _5) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _13 = move (_14.0: usize);\n        _12 = slice::<impl [T]>::split_at(_1, move _13) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_13);\n        _10 = (_12.0: &[T]);\n        StorageLive(_11);\n        _11 = (_12.1: &[T]);\n        StorageDead(_12);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &_11;\n        StorageLive(_17);\n        _17 = &_3;\n        _15 = <&[T] as cmp::PartialEq>::eq(move _16, move _17) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        switchInt(move _15) -> [0: bb7, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_17);\n        StorageDead(_16);\n        _0 = option::Option::Some(_10);\n        StorageDead(_15);\n        StorageDead(_11);\n        StorageDead(_9);\n        goto -> bb10;\n    }\n    bb7: {\n        StorageDead(_17);\n        StorageDead(_16);\n        StorageDead(_15);\n        StorageDead(_11);\n        goto -> bb9;\n    }\n    bb8: {\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_9);\n        _0 = option::Option::None;\n        goto -> bb10;\n    }\n    bb10: {\n        return;\n    }\n}\n",
+  "doc": " Returns a subslice with the suffix removed.\n\n If the slice ends with `suffix`, returns the subslice before the suffix, wrapped in `Some`.\n If `suffix` is empty, simply returns the original slice. If `suffix` is equal to the\n original slice, returns an empty slice.\n\n If the slice does not end with `suffix`, returns `None`.\n\n # Examples\n\n ```\n let v = &[10, 40, 30];\n assert_eq!(v.strip_suffix(&[30]), Some(&[10, 40][..]));\n assert_eq!(v.strip_suffix(&[40, 30]), Some(&[10][..]));\n assert_eq!(v.strip_suffix(&[10, 40, 30]), Some(&[][..]));\n assert_eq!(v.strip_suffix(&[50]), None);\n assert_eq!(v.strip_suffix(&[50, 30]), None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

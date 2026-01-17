@@ -1,0 +1,64 @@
+{
+  "name": "sys::sync::rwlock::futex::RwLock::write",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicU32::compare_exchange_weak": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer if the current value is the same as\n the `current` value.\n\n this function is allowed to spuriously fail even\n when the comparison succeeds, which can result in more efficient code on some\n platforms. The return value is a result indicating whether the new value was\n written and containing the previous value.\n\n `compare_exchange_weak` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. `success` describes the required ordering for the\n read-modify-write operation that takes place if the comparison with `current` succeeds.\n `failure` describes the required ordering for the load operation that takes place when\n the comparison fails. Using [`Acquire`] as success ordering makes the store part\n of this operation [`Relaxed`], and using [`Release`] makes the successful load\n [`Relaxed`]. The failure ordering can only be [`SeqCst`], [`Acquire`] or [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n let mut old = val.load(Ordering::Relaxed);\n loop {\n     let new = old * 2;\n     match val.compare_exchange_weak(old, new, Ordering::SeqCst, Ordering::Relaxed) {\n         Ok(_) => break,\n         Err(x) => old = x,\n     }\n }\n ```\n\n # Considerations\n\n `compare_exchange` is a [compare-and-swap operation] and thus exhibits the usual downsides\n of CAS operations. In particular, a load of the value followed by a successful\n `compare_exchange` with the previous load *does not ensure* that other threads have not\n changed the value in the interim. This is usually important when the *equality* check in\n the `compare_exchange` is being used to check the *identity* of a value, but equality\n does not necessarily imply identity. This is a particularly common case for pointers, as\n a pointer holding the same address does not imply that the same object exists at that\n address! In this case, `compare_exchange` can lead to the [ABA problem].\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::is_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the result is [`Err`].\n\n # Examples\n\n ```\n let x: Result<i32, &str> = Ok(-3);\n assert_eq!(x.is_err(), false);\n\n let x: Result<i32, &str> = Err(\"Some error message\");\n assert_eq!(x.is_err(), true);\n ```\n",
+      "adt": {}
+    },
+    "sys::sync::rwlock::futex::RwLock::write_contended": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::sync::rwlock::futex::RwLock": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicU32": [
+      "Ref"
+    ],
+    "sys::sync::rwlock::futex::RwLock": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 4327,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/sync/rwlock/futex.rs:172:5: 176:6",
+  "src": "pub fn write(&self) {\n        if self.state.compare_exchange_weak(0, WRITE_LOCKED, Acquire, Relaxed).is_err() {\n            self.write_contended();\n        }\n    }",
+  "mir": "fn sys::sync::rwlock::futex::RwLock::write(_1: &sys::sync::rwlock::futex::RwLock) -> () {\n    let mut _0: ();\n    let mut _2: bool;\n    let mut _3: &core::result::Result<u32, u32>;\n    let  _4: core::result::Result<u32, u32>;\n    let mut _5: &core::sync::atomic::AtomicU32;\n    let mut _6: core::sync::atomic::Ordering;\n    let mut _7: core::sync::atomic::Ordering;\n    let  _8: ();\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_1).0: core::sync::atomic::AtomicU32);\n        StorageLive(_6);\n        _6 = core::sync::atomic::Ordering::Acquire;\n        StorageLive(_7);\n        _7 = core::sync::atomic::Ordering::Relaxed;\n        _4 = core::sync::atomic::AtomicU32::compare_exchange_weak(move _5, 0_u32, sys::sync::rwlock::futex::WRITE_LOCKED, move _6, move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = &_4;\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_5);\n        _2 = core::result::Result::<u32, u32>::is_err(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _2) -> [0: bb5, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_3);\n        _8 = sys::sync::rwlock::futex::RwLock::write_contended(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

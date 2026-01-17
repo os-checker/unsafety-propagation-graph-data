@@ -1,0 +1,50 @@
+{
+  "name": "slice::iter::Iter::<'a, T>::pre_dec_end",
+  "safe": false,
+  "callees": {
+    "ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::sub": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts an offset from a pointer (convenience for\n `.offset((count as isize).wrapping_neg())`).\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n If any of the following conditions are violated, the result is Undefined Behavior:\n\n * The computed offset, `count * size_of::<T>()` bytes, must not overflow `isize`.\n\n * If the computed offset is non-zero, then `self` must be derived from a pointer to some\n   [allocation], and the entire memory range between `self` and the result must be in\n   bounds of that allocation. In particular, this range must not \"wrap around\" the edge\n   of the address space.\n\n Allocations can never be larger than `isize::MAX` bytes, so if the computed offset\n stays in bounds of the allocation, it is guaranteed to satisfy the first requirement.\n This implies, for instance, that `vec.as_ptr().add(vec.len())` (for `vec: Vec<T>`) is always\n safe.\n\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let s: &str = \"123\";\n\n unsafe {\n     let end: NonNull<u8> = NonNull::new(s.as_ptr().cast_mut()).unwrap().add(3);\n     println!(\"{}\", end.sub(1).read() as char);\n     println!(\"{}\", end.sub(2).read() as char);\n }\n ```\n",
+      "adt": {
+        "ptr::non_null::NonNull": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "slice::iter::Iter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain",
+      "MutRef",
+      "Deref"
+    ]
+  },
+  "path": 16466,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter/macros.rs:119:13: 136:14",
+  "src": "unsafe fn pre_dec_end(&mut self, offset: usize) -> NonNull<T> {\n                if_zst!(mut self,\n                    // SAFETY: By our precondition, `offset` can be at most the\n                    // current length, so the subtraction can never overflow.\n                    len => unsafe {\n                        // Using the intrinsic directly avoids emitting a UbCheck\n                        *len = crate::intrinsics::unchecked_sub(*len, offset);\n                        self.ptr\n                    },\n                    // SAFETY: the caller guarantees that `offset` doesn't exceed `self.len()`,\n                    // which is guaranteed to not overflow an `isize`. Also, the resulting pointer\n                    // is in bounds of `slice`, which fulfills the other requirements for `offset`.\n                    end => unsafe {\n                        *end = end.sub(offset);\n                        *end\n                    },\n                )\n            }",
+  "mir": "fn slice::iter::Iter::<'a, T>::pre_dec_end(_1: &mut slice::iter::Iter<'_, T>, _2: usize) -> ptr::non_null::NonNull<T> {\n    let mut _0: ptr::non_null::NonNull<T>;\n    let mut _3: &mut usize;\n    let mut _4: *mut usize;\n    let mut _5: *mut *const T;\n    let mut _6: usize;\n    let mut _7: usize;\n    let mut _8: &mut ptr::non_null::NonNull<T>;\n    let mut _9: *mut ptr::non_null::NonNull<T>;\n    let mut _10: *mut *const T;\n    let mut _11: ptr::non_null::NonNull<T>;\n    let mut _12: ptr::non_null::NonNull<T>;\n    debug self => _1;\n    debug offset => _2;\n    debug len => _3;\n    debug end => _8;\n    bb0: {\n        switchInt(<T as mem::SizedTypeProperties>::IS_ZST) -> [0: bb3, otherwise: bb1];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &raw mut ((*_1).1: *const T);\n        _4 = ptr::mut_ptr::<impl *mut *const T>::cast::<usize>(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = &mut (*_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = (*_3);\n        _6 = SubUnchecked(move _7, _2);\n        StorageDead(_7);\n        (*_3) = move _6;\n        StorageDead(_6);\n        _0 = ((*_1).0: ptr::non_null::NonNull<T>);\n        StorageDead(_4);\n        goto -> bb6;\n    }\n    bb3: {\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &raw mut ((*_1).1: *const T);\n        _9 = ptr::mut_ptr::<impl *mut *const T>::cast::<ptr::non_null::NonNull<T>>(move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        _8 = &mut (*_9);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = (*_8);\n        _11 = ptr::non_null::NonNull::<T>::sub(move _12, _2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        (*_8) = move _11;\n        StorageDead(_11);\n        _0 = (*_8);\n        StorageDead(_9);\n        goto -> bb6;\n    }\n    bb6: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

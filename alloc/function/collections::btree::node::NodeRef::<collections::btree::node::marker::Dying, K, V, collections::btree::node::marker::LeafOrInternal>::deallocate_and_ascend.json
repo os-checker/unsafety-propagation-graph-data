@@ -1,0 +1,88 @@
+{
+  "name": "collections::btree::node::NodeRef::<collections::btree::node::marker::Dying, K, V, collections::btree::node::marker::LeafOrInternal>::deallocate_and_ascend",
+  "safe": false,
+  "callees": {
+    "collections::btree::node::NodeRef::<BorrowType, K, V, Type>::ascend": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Finds the parent of the current node. Returns `Ok(handle)` if the current\n node actually has a parent, where `handle` points to the edge of the parent\n that points to the current node. Returns `Err(self)` if the current node has\n no parent, giving back the original `NodeRef`.\n\n The method name assumes you picture trees with the root node on top.\n\n `edge.descend().ascend().unwrap()` and `node.ascend().unwrap().descend()` should\n both, upon success, do nothing.\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "Constructor",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::ok": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts from `Result<T, E>` to [`Option<T>`].\n\n Converts `self` into an [`Option<T>`], consuming `self`,\n and discarding the error, if any.\n\n # Examples\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.ok(), Some(2));\n\n let x: Result<u32, &str> = Err(\"Nothing here\");\n assert_eq!(x.ok(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"null pointer\");\n\n let casted_ptr = ptr.cast::<i8>();\n let raw_ptr: *mut i8 = casted_ptr.as_ptr();\n ```\n",
+      "adt": {}
+    },
+    "core::alloc::Layout::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `Layout` suitable for holding a value of type `T`.\n",
+      "adt": {}
+    },
+    "core::alloc::Allocator::deallocate": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Deallocates the memory referenced by `ptr`.\n\n # Safety\n\n * `ptr` must denote a block of memory [*currently allocated*] via this allocator, and\n * `layout` must [*fit*] that block of memory.\n\n [*currently allocated*]: #currently-allocated-memory\n [*fit*]: #memory-fitting\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::btree::node::NodeRef": [
+      "Unknown([Field(0, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(1, Ty { id: 4333, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 4300, kind: RigidTy(Adt(AdtDef(DefId { id: 4043, name: \"collections::btree::node::LeafNode\" }), GenericArgs([Type(Ty { id: 2376, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 2377, kind: Param(ParamTy { index: 1, name: \"V\" }) })]))) })]))) })])",
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ]
+  },
+  "path": 947,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/node.rs:404:5: 422:6",
+  "src": "pub(super) unsafe fn deallocate_and_ascend<A: Allocator + Clone>(\n        self,\n        alloc: A,\n    ) -> Option<Handle<NodeRef<marker::Dying, K, V, marker::Internal>, marker::Edge>> {\n        let height = self.height;\n        let node = self.node;\n        let ret = self.ascend().ok();\n        unsafe {\n            alloc.deallocate(\n                node.cast(),\n                if height > 0 {\n                    Layout::new::<InternalNode<K, V>>()\n                } else {\n                    Layout::new::<LeafNode<K, V>>()\n                },\n            );\n        }\n        ret\n    }",
+  "mir": "fn collections::btree::node::NodeRef::<collections::btree::node::marker::Dying, K, V, collections::btree::node::marker::LeafOrInternal>::deallocate_and_ascend(_1: collections::btree::node::NodeRef<collections::btree::node::marker::Dying, K, V, collections::btree::node::marker::LeafOrInternal>, _2: A) -> core::option::Option<collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Dying, K, V, collections::btree::node::marker::Internal>, collections::btree::node::marker::Edge>> {\n    let mut _0: core::option::Option<collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Dying, K, V, collections::btree::node::marker::Internal>, collections::btree::node::marker::Edge>>;\n    let  _3: usize;\n    let  _4: core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>;\n    let mut _5: core::result::Result<collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Dying, K, V, collections::btree::node::marker::Internal>, collections::btree::node::marker::Edge>, collections::btree::node::NodeRef<collections::btree::node::marker::Dying, K, V, collections::btree::node::marker::LeafOrInternal>>;\n    let  _6: ();\n    let mut _7: &A;\n    let mut _8: core::ptr::NonNull<u8>;\n    let mut _9: core::alloc::Layout;\n    let mut _10: bool;\n    debug self => _1;\n    debug alloc => _2;\n    debug height => _3;\n    debug node => _4;\n    debug ret => _0;\n    bb0: {\n        _3 = (_1.0: usize);\n        _4 = (_1.1: core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>);\n        StorageLive(_5);\n        _5 = collections::btree::node::NodeRef::<collections::btree::node::marker::Dying, K, V, collections::btree::node::marker::LeafOrInternal>::ascend(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = core::result::Result::<collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Dying, K, V, collections::btree::node::marker::Internal>, collections::btree::node::marker::Edge>, collections::btree::node::NodeRef<collections::btree::node::marker::Dying, K, V, collections::btree::node::marker::LeafOrInternal>>::ok(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_7);\n        _7 = &_2;\n        StorageLive(_8);\n        _8 = core::ptr::NonNull::<collections::btree::node::LeafNode<K, V>>::cast::<u8>(_4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = Gt(_3, 0_usize);\n        switchInt(move _10) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        _9 = core::alloc::Layout::new::<collections::btree::node::InternalNode<K, V>>() -> [return: bb6, unwind unreachable];\n    }\n    bb5: {\n        _9 = core::alloc::Layout::new::<collections::btree::node::LeafNode<K, V>>() -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        _6 = <A as core::alloc::Allocator>::deallocate(move _7, move _8, move _9) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_7);\n        drop(_2) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        return;\n    }\n}\n",
+  "doc": " Similar to `ascend`, gets a reference to a node's parent node, but also\n deallocates the current node in the process. This is unsafe because the\n current node will still be accessible despite being deallocated.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

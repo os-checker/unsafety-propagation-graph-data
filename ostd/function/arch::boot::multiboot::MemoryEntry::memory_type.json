@@ -1,0 +1,55 @@
+{
+  "name": "arch::boot::multiboot::MemoryEntry::memory_type",
+  "safe": true,
+  "callees": {
+    "core::ptr::const_ptr::<impl *const T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"123\";\n let ptr: *const u8 = s.as_ptr();\n\n unsafe {\n     assert_eq!(*ptr.add(1), b'2');\n     assert_eq!(*ptr.add(2), b'3');\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::read_unaligned": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `self` without moving it. This leaves the\n memory in `self` unchanged.\n\n Unlike `read`, the pointer may be unaligned.\n\n See [`ptr::read_unaligned`] for safety concerns and examples.\n\n [`ptr::read_unaligned`]: crate::ptr::read_unaligned()\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "arch::boot::multiboot::MemoryEntry": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "boot::memory_region::MemoryRegionType": [
+      "Plain"
+    ]
+  },
+  "path": 144,
+  "span": "ostd/src/arch/x86/boot/multiboot/mod.rs:322:5: 337:6",
+  "src": "fn memory_type(&self) -> MemoryRegionType {\n        // The multiboot (v1) manual doesn't specify the length of the type field.\n        // Experimental result shows that \"u8\" works. So be it.\n        // SAFETY: The entry can only be constructed from a valid address. The offset is in bounds.\n        let typ_val = unsafe { self.ptr.add(20).cast::<u8>().read_unaligned() };\n\n        // The meaning of the values are however documented clearly by the manual.\n        match typ_val {\n            1 => MemoryRegionType::Usable,\n            2 => MemoryRegionType::Reserved,\n            3 => MemoryRegionType::Reclaimable,\n            4 => MemoryRegionType::NonVolatileSleep,\n            5 => MemoryRegionType::BadMemory,\n            _ => MemoryRegionType::Reserved,\n        }\n    }",
+  "mir": "fn arch::boot::multiboot::MemoryEntry::memory_type(_1: &arch::boot::multiboot::MemoryEntry) -> boot::memory_region::MemoryRegionType {\n    let mut _0: boot::memory_region::MemoryRegionType;\n    let  _2: u8;\n    let mut _3: *const u8;\n    let mut _4: *const u8;\n    let mut _5: *const u8;\n    debug self => _1;\n    debug typ_val => _2;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = ((*_1).0: *const u8);\n        _4 = core::ptr::const_ptr::<impl *const u8>::add(move _5, 20_usize) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = core::ptr::const_ptr::<impl *const u8>::cast::<u8>(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _2 = core::ptr::const_ptr::<impl *const u8>::read_unaligned(move _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        switchInt(_2) -> [1: bb9, 2: bb8, 3: bb7, 4: bb6, 5: bb5, otherwise: bb4];\n    }\n    bb4: {\n        _0 = boot::memory_region::MemoryRegionType::Reserved;\n        goto -> bb10;\n    }\n    bb5: {\n        _0 = boot::memory_region::MemoryRegionType::BadMemory;\n        goto -> bb10;\n    }\n    bb6: {\n        _0 = boot::memory_region::MemoryRegionType::NonVolatileSleep;\n        goto -> bb10;\n    }\n    bb7: {\n        _0 = boot::memory_region::MemoryRegionType::Reclaimable;\n        goto -> bb10;\n    }\n    bb8: {\n        _0 = boot::memory_region::MemoryRegionType::Reserved;\n        goto -> bb10;\n    }\n    bb9: {\n        _0 = boot::memory_region::MemoryRegionType::Usable;\n        goto -> bb10;\n    }\n    bb10: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

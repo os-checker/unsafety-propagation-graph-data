@@ -1,0 +1,94 @@
+{
+  "name": "collections::btree::node::NodeRef::<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal>::new_internal",
+  "safe": true,
+  "callees": {
+    "collections::btree::node::InternalNode::<K, V>::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new boxed `InternalNode`.\n\n # Safety\n An invariant of internal nodes is that they have at least one\n initialized and valid edge. This function does not set up\n such an edge.\n",
+      "adt": {
+        "boxed::Box": "Constructor"
+      }
+    },
+    "core::mem::MaybeUninit::<T>::write": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets the value of the `MaybeUninit<T>`.\n\n This overwrites any previous value without dropping it, so be careful\n not to use this twice unless you want to skip running the destructor.\n For your convenience, this also returns a mutable reference to the\n (now safely initialized) contents of `self`.\n\n As the content is stored inside a `ManuallyDrop`, the destructor is not\n run for the inner data if the MaybeUninit leaves scope without a call to\n [`assume_init`], [`assume_init_drop`], or similar. Code that receives\n the mutable reference returned by this function needs to keep this in\n mind. The safety model of Rust regards leaks as safe, but they are\n usually still undesirable. This being said, the mutable reference\n behaves like any other mutable reference would, so assigning a new value\n to it will drop the old content.\n\n [`assume_init`]: Self::assume_init\n [`assume_init_drop`]: Self::assume_init_drop\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u8>>::uninit();\n\n {\n     let hello = x.write((&b\"Hello, world!\").to_vec());\n     // Setting hello does not leak prior allocations, but drops them\n     *hello = (&b\"Hello\").to_vec();\n     hello[0] = 'h' as u8;\n }\n // x is initialized now:\n let s = unsafe { x.assume_init() };\n assert_eq!(b\"hello\", s.as_slice());\n ```\n\n This usage of the method causes a leak:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<String>::uninit();\n\n x.write(\"Hello\".to_string());\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n // This leaks the contained string:\n x.write(\"hello\".to_string());\n // x is initialized now:\n let s = unsafe { x.assume_init() };\n ```\n\n This method can be used to avoid unsafe in some cases. The example below\n shows a part of an implementation of a fixed sized arena that lends out\n pinned references.\n With `write`, we can avoid the need to write through a raw pointer:\n\n ```rust\n use core::pin::Pin;\n use core::mem::MaybeUninit;\n\n struct PinArena<T> {\n     memory: Box<[MaybeUninit<T>]>,\n     len: usize,\n }\n\n impl <T> PinArena<T> {\n     pub fn capacity(&self) -> usize {\n         self.memory.len()\n     }\n     pub fn push(&mut self, val: T) -> Pin<&mut T> {\n         if self.len >= self.capacity() {\n             panic!(\"Attempted to push to a full pin arena!\");\n         }\n         let ref_ = self.memory[self.len].write(val);\n         self.len += 1;\n         unsafe { Pin::new_unchecked(ref_) }\n     }\n }\n ```\n",
+      "adt": {}
+    },
+    "core::num::NonZero::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a non-zero if the given value is not zero.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "collections::btree::node::NodeRef::<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal>::from_new_internal": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new internal (height > 0) `NodeRef` from an existing internal node\n",
+      "adt": {
+        "collections::btree::node::NodeRef": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "boxed::Box": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 4338, kind: RigidTy(Adt(AdtDef(DefId { id: 2645, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 4324, kind: RigidTy(Adt(AdtDef(DefId { id: 4049, name: \"collections::btree::node::InternalNode\" }), GenericArgs([Type(Ty { id: 2376, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 2377, kind: Param(ParamTy { index: 1, name: \"V\" }) })]))) })]))) }), Field(0, Ty { id: 4295, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 4324, kind: RigidTy(Adt(AdtDef(DefId { id: 4049, name: \"collections::btree::node::InternalNode\" }), GenericArgs([Type(Ty { id: 2376, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 2377, kind: Param(ParamTy { index: 1, name: \"V\" }) })]))) })]))) })])"
+    ],
+    "core::mem::MaybeUninit": [
+      "MutRef"
+    ],
+    "core::ptr::NonNull": [
+      "Plain",
+      "MutRef"
+    ],
+    "collections::btree::node::NodeRef": [
+      "Unknown([Field(1, Ty { id: 4333, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 4300, kind: RigidTy(Adt(AdtDef(DefId { id: 4043, name: \"collections::btree::node::LeafNode\" }), GenericArgs([Type(Ty { id: 2376, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 2377, kind: Param(ParamTy { index: 1, name: \"V\" }) })]))) })]))) })])",
+      "Unknown([Field(0, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])",
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::num::NonZero": [
+      "Plain"
+    ]
+  },
+  "path": 986,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/node.rs:237:5: 241:6",
+  "src": "fn new_internal<A: Allocator + Clone>(child: Root<K, V>, alloc: A) -> Self {\n        let mut new_node = unsafe { InternalNode::new(alloc) };\n        new_node.edges[0].write(child.node);\n        NodeRef::from_new_internal(new_node, NonZero::new(child.height + 1).unwrap())\n    }",
+  "mir": "fn collections::btree::node::NodeRef::<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal>::new_internal(_1: collections::btree::node::NodeRef<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::LeafOrInternal>, _2: A) -> collections::btree::node::NodeRef<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal> {\n    let mut _0: collections::btree::node::NodeRef<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal>;\n    let mut _3: boxed::Box<collections::btree::node::InternalNode<K, V>, A>;\n    let  _4: &mut core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>;\n    let mut _5: &mut core::mem::MaybeUninit<core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>>;\n    let  _6: usize;\n    let mut _7: bool;\n    let mut _8: core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>;\n    let mut _9: core::num::NonZero<usize>;\n    let mut _10: core::option::Option<core::num::NonZero<usize>>;\n    let mut _11: usize;\n    let mut _12: usize;\n    let mut _13: (usize, bool);\n    let mut _14: *const collections::btree::node::InternalNode<K, V>;\n    debug child => _1;\n    debug alloc => _2;\n    debug new_node => _3;\n    bb0: {\n        _3 = collections::btree::node::InternalNode::<K, V>::new::<A>(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = 0_usize;\n        _7 = Lt(_6, 12_usize);\n        assert(move _7, \"index out of bounds: the length is {} but the index is {}\", 12_usize, _6) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _14 = ((_3.0: core::ptr::Unique<collections::btree::node::InternalNode<K, V>>).0: core::ptr::NonNull<collections::btree::node::InternalNode<K, V>>) as *const collections::btree::node::InternalNode<K, V>;\n        _5 = &mut ((*_14).1: [core::mem::MaybeUninit<core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>>; 12])[_6];\n        StorageLive(_8);\n        _8 = (_1.1: core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>);\n        _4 = core::mem::MaybeUninit::<core::ptr::NonNull<collections::btree::node::LeafNode<K, V>>>::write(move _5, move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageDead(_5);\n        StorageDead(_6);\n        StorageDead(_4);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = (_1.0: usize);\n        _13 = CheckedAdd(_12, 1_usize);\n        assert(!move (_13.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _12, 1_usize) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _11 = move (_13.0: usize);\n        StorageDead(_12);\n        _10 = core::num::NonZero::<usize>::new(move _11) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        _9 = core::option::Option::<core::num::NonZero<usize>>::unwrap(move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        _0 = collections::btree::node::NodeRef::<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::Internal>::from_new_internal::<A>(_3, move _9) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_9);\n        return;\n    }\n}\n",
+  "doc": " Creates a new internal (height > 0) `NodeRef`\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

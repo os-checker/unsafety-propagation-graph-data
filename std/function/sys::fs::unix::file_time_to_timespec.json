@@ -1,0 +1,106 @@
+{
+  "name": "sys::fs::unix::file_time_to_timespec",
+  "safe": true,
+  "callees": {
+    "sys::pal::unix::time::Timespec::to_timespec": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "dead_code"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* dead_code\n"
+        ]
+      },
+      "doc": "",
+      "adt": {
+        "core::option::Option": "Constructor",
+        "libc::timespec": "Constructor",
+        "sys::pal::unix::time::Timespec": "ImmutableAsArgument"
+      }
+    },
+    "core::cmp::PartialOrd::gt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests greater than (for `self` and `other`) and is used by the `>`\n operator.\n\n # Examples\n\n ```\n assert_eq!(1.0 > 1.0, false);\n assert_eq!(1.0 > 2.0, false);\n assert_eq!(2.0 > 1.0, true);\n ```\n",
+      "adt": {}
+    },
+    "io::error::Error::from_static_message": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Creates a new I/O error from a known kind of error as well as a constant\n message.\n\n This function does not allocate.\n\n You should not use this directly, and instead use the `const_error!`\n macro: `io::const_error!(ErrorKind::Something, \"some_message\")`.\n\n This function should maybe change to `from_static_message<const MSG: &'static\n str>(kind: ErrorKind)` in the future, when const generics allow that.\n",
+      "adt": {
+        "io::error::Error": "Constructor"
+      }
+    },
+    "core::hint::must_use": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An identity function that causes an `unused_must_use` warning to be\n triggered if the given value is not used (returned, stored in a variable,\n etc) by the caller.\n\n This is primarily intended for use in macro-generated code, in which a\n [`#[must_use]` attribute][must_use] either on a type or a function would not\n be convenient.\n\n [must_use]: https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute\n\n # Example\n\n ```\n #![feature(hint_must_use)]\n\n use core::fmt;\n\n pub struct Error(/* ... */);\n\n #[macro_export]\n macro_rules! make_error {\n     ($($args:expr),*) => {\n         core::hint::must_use({\n             let error = $crate::make_error(core::format_args!($($args),*));\n             error\n         })\n     };\n }\n\n // Implementation detail of make_error! macro.\n #[doc(hidden)]\n pub fn make_error(args: fmt::Arguments<'_>) -> Error {\n     Error(/* ... */)\n }\n\n fn demo() -> Option<Error> {\n     if true {\n         // Oops, meant to write `return Some(make_error!(\"...\"));`\n         Some(make_error!(\"...\"));\n     }\n     None\n }\n #\n # // Make rustdoc not wrap the whole snippet in fn main, so that $crate::make_error works\n # fn main() {}\n ```\n\n In the above example, we'd like an `unused_must_use` lint to apply to the\n value created by `make_error!`. However, neither `#[must_use]` on a struct\n nor `#[must_use]` on a function is appropriate here, so the macro expands\n using `core::hint::must_use` instead.\n\n - We wouldn't want `#[must_use]` on the `struct Error` because that would\n   make the following unproblematic code trigger a warning:\n\n   ```\n   # struct Error;\n   #\n   fn f(arg: &str) -> Result<(), Error>\n   # { Ok(()) }\n\n   #[test]\n   fn t() {\n       // Assert that `f` returns error if passed an empty string.\n       // A value of type `Error` is unused here but that's not a problem.\n       f(\"\").unwrap_err();\n   }\n   ```\n\n - Using `#[must_use]` on `fn make_error` can't help because the return value\n   *is* used, as the right-hand side of a `let` statement. The `let`\n   statement looks useless but is in fact necessary for ensuring that\n   temporaries within the `format_args` expansion are not kept alive past the\n   creation of the `Error`, as keeping them alive past that point can cause\n   autotrait issues in async code:\n\n   ```\n   # #![feature(hint_must_use)]\n   #\n   # struct Error;\n   #\n   # macro_rules! make_error {\n   #     ($($args:expr),*) => {\n   #         core::hint::must_use({\n   #             // If `let` isn't used, then `f()` produces a non-Send future.\n   #             let error = make_error(core::format_args!($($args),*));\n   #             error\n   #         })\n   #     };\n   # }\n   #\n   # fn make_error(args: core::fmt::Arguments<'_>) -> Error {\n   #     Error\n   # }\n   #\n   async fn f() {\n       // Using `let` inside the make_error expansion causes temporaries like\n       // `unsync()` to drop at the semicolon of that `let` statement, which\n       // is prior to the await point. They would otherwise stay around until\n       // the semicolon on *this* statement, which is after the await point,\n       // and the enclosing Future would not implement Send.\n       log(make_error!(\"look: {:p}\", unsync())).await;\n   }\n\n   async fn log(error: Error) {/* ... */}\n\n   // Returns something without a Sync impl.\n   fn unsync() -> *const () {\n       0 as *const ()\n   }\n   #\n   # fn test() {\n   #     fn assert_send(_: impl Send) {}\n   #     assert_send(f());\n   # }\n   ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4151, kind: RigidTy(Adt(AdtDef(DefId { id: 6224, name: \"sys::pal::unix::time::SystemTime\" }), GenericArgs([]))) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 14859, kind: RigidTy(Adt(AdtDef(DefId { id: 11368, name: \"libc::timespec\" }), GenericArgs([]))) })])"
+    ],
+    "libc::timespec": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "sys::pal::unix::time::SystemTime": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Plain"
+    ],
+    "sys::pal::unix::time::Timespec": [
+      "Ref"
+    ],
+    "io::error::Error": [
+      "Plain"
+    ]
+  },
+  "path": 3464,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/fs/unix.rs:1701:1: 1714:2",
+  "src": "fn file_time_to_timespec(time: Option<SystemTime>) -> io::Result<libc::timespec> {\n    match time {\n        Some(time) if let Some(ts) = time.t.to_timespec() => Ok(ts),\n        Some(time) if time > crate::sys::time::UNIX_EPOCH => Err(io::const_error!(\n            io::ErrorKind::InvalidInput,\n            \"timestamp is too large to set as a file time\",\n        )),\n        Some(_) => Err(io::const_error!(\n            io::ErrorKind::InvalidInput,\n            \"timestamp is too small to set as a file time\",\n        )),\n        None => Ok(libc::timespec { tv_sec: 0, tv_nsec: libc::UTIME_OMIT as _ }),\n    }\n}",
+  "mir": "fn sys::fs::unix::file_time_to_timespec(_1: core::option::Option<sys::pal::unix::time::SystemTime>) -> core::result::Result<libc::timespec, io::error::Error> {\n    let mut _0: core::result::Result<libc::timespec, io::error::Error>;\n    let mut _2: isize;\n    let  _3: sys::pal::unix::time::SystemTime;\n    let  _4: &sys::pal::unix::time::SystemTime;\n    let  _5: libc::timespec;\n    let mut _6: core::option::Option<libc::timespec>;\n    let mut _7: &sys::pal::unix::time::Timespec;\n    let mut _8: isize;\n    let  _9: sys::pal::unix::time::SystemTime;\n    let  _10: &sys::pal::unix::time::SystemTime;\n    let mut _11: bool;\n    let mut _12: &sys::pal::unix::time::SystemTime;\n    let mut _13: io::error::Error;\n    let mut _14: io::error::Error;\n    let mut _15: io::error::Error;\n    let mut _16: io::error::Error;\n    let mut _17: libc::timespec;\n    let mut _18: i64;\n    debug time => _1;\n    debug time => _3;\n    debug time => _4;\n    debug ts => _5;\n    debug time => _9;\n    debug time => _10;\n    bb0: {\n        _2 = discriminant(_1);\n        switchInt(move _2) -> [0: bb2, 1: bb3, otherwise: bb1];\n    }\n    bb1: {\n        unreachable;\n    }\n    bb2: {\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = libc::UTIME_OMIT;\n        _17 = timespec(0_i64, move _18);\n        StorageDead(_18);\n        _0 = core::result::Result::Ok(move _17);\n        StorageDead(_17);\n        goto -> bb14;\n    }\n    bb3: {\n        StorageLive(_4);\n        _4 = &((_1 as variant#1).0: sys::pal::unix::time::SystemTime);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_4).0: sys::pal::unix::time::Timespec);\n        _6 = sys::pal::unix::time::Timespec::to_timespec(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        _8 = discriminant(_6);\n        switchInt(move _8) -> [1: bb5, 0: bb6, otherwise: bb1];\n    }\n    bb5: {\n        _5 = ((_6 as variant#1).0: libc::timespec);\n        StorageLive(_3);\n        _3 = ((_1 as variant#1).0: sys::pal::unix::time::SystemTime);\n        _0 = core::result::Result::Ok(_5);\n        StorageDead(_6);\n        StorageDead(_3);\n        StorageDead(_4);\n        goto -> bb14;\n    }\n    bb6: {\n        StorageDead(_6);\n        StorageDead(_4);\n        _10 = &((_1 as variant#1).0: sys::pal::unix::time::SystemTime);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = sys::fs::unix::file_time_to_timespec::promoted[0];\n        _11 = <sys::pal::unix::time::SystemTime as core::cmp::PartialOrd>::gt(_10, move _12) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        switchInt(move _11) -> [0: bb9, otherwise: bb8];\n    }\n    bb8: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageLive(_9);\n        _9 = ((_1 as variant#1).0: sys::pal::unix::time::SystemTime);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = io::error::Error::from_static_message(sys::fs::unix::file_time_to_timespec::{constant#1}) -> [return: bb10, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = io::error::Error::from_static_message(sys::fs::unix::file_time_to_timespec::{constant#0}) -> [return: bb12, unwind unreachable];\n    }\n    bb10: {\n        _13 = core::hint::must_use::<io::error::Error>(move _14) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_14);\n        _0 = core::result::Result::Err(move _13);\n        StorageDead(_13);\n        StorageDead(_9);\n        goto -> bb14;\n    }\n    bb12: {\n        _15 = core::hint::must_use::<io::error::Error>(move _16) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_16);\n        _0 = core::result::Result::Err(move _15);\n        StorageDead(_15);\n        goto -> bb14;\n    }\n    bb14: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

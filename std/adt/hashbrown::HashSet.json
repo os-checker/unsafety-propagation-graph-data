@@ -1,0 +1,68 @@
+{
+  "name": "hashbrown::HashSet",
+  "constructors": [],
+  "access_self_as_arg": {
+    "read": [],
+    "write": [],
+    "other": []
+  },
+  "access_self_as_locals": {
+    "read": [
+      "collections::hash::set::HashSet::<T, S>::capacity",
+      "collections::hash::set::HashSet::<T, S>::iter",
+      "collections::hash::set::HashSet::<T, S>::len",
+      "collections::hash::set::HashSet::<T, S>::is_empty",
+      "collections::hash::set::HashSet::<T, S>::hasher",
+      "collections::hash::set::HashSet::<T, S>::contains",
+      "collections::hash::set::HashSet::<T, S>::get",
+      "<collections::hash::set::HashSet<T, S> as core::clone::Clone>::clone",
+      "<collections::hash::set::HashSet<T, S> as core::clone::Clone>::clone_from"
+    ],
+    "write": [
+      "collections::hash::set::HashSet::<T, S>::drain",
+      "collections::hash::set::HashSet::<T, S>::extract_if",
+      "collections::hash::set::HashSet::<T, S>::retain",
+      "collections::hash::set::HashSet::<T, S>::clear",
+      "collections::hash::set::HashSet::<T, S>::reserve",
+      "collections::hash::set::HashSet::<T, S>::try_reserve",
+      "collections::hash::set::HashSet::<T, S>::shrink_to_fit",
+      "collections::hash::set::HashSet::<T, S>::shrink_to",
+      "collections::hash::set::HashSet::<T, S>::get_or_insert",
+      "collections::hash::set::HashSet::<T, S>::get_or_insert_with",
+      "collections::hash::set::HashSet::<T, S>::entry",
+      "collections::hash::set::HashSet::<T, S>::insert",
+      "collections::hash::set::HashSet::<T, S>::replace",
+      "collections::hash::set::HashSet::<T, S>::remove",
+      "collections::hash::set::HashSet::<T, S>::take",
+      "<collections::hash::set::HashSet<T, S> as core::clone::Clone>::clone_from",
+      "<collections::hash::set::HashSet<T, S> as core::iter::Extend<T>>::extend",
+      "<collections::hash::set::HashSet<T, S> as core::iter::Extend<T>>::extend_one",
+      "<collections::hash::set::HashSet<T, S> as core::iter::Extend<T>>::extend_reserve",
+      "<collections::hash::set::HashSet<T, S> as core::iter::Extend<&'a T>>::extend_one"
+    ],
+    "other": [
+      "collections::hash::set::HashSet::<T, S>::with_hasher",
+      "collections::hash::set::HashSet::<T, S>::with_capacity_and_hasher",
+      "<collections::hash::set::HashSet<T, S> as core::clone::Clone>::clone",
+      "<collections::hash::set::HashSet<T, S> as core::default::Default>::default",
+      "<collections::hash::set::HashSet<T, S> as core::iter::IntoIterator>::into_iter"
+    ]
+  },
+  "access_field": [
+    {
+      "read": [],
+      "write": [],
+      "other": []
+    }
+  ],
+  "span": "/home/gh-zjp-CN/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashbrown-0.16.1/src/set.rs:114:1: 114:69",
+  "src": "pub struct HashSet<T, S = DefaultHashBuilder, A: Allocator = Global>",
+  "kind": "Struct",
+  "doc_adt": " A hash set implemented as a `HashMap` where the value is `()`.\n\n As with the [`HashMap`] type, a `HashSet` requires that the elements\n implement the [`Eq`] and [`Hash`] traits. This can frequently be achieved by\n using `#[derive(PartialEq, Eq, Hash)]`. If you implement these yourself,\n it is important that the following property holds:\n\n ```text\n k1 == k2 -> hash(k1) == hash(k2)\n ```\n\n In other words, if two keys are equal, their hashes must be equal.\n\n\n It is a logic error for an item to be modified in such a way that the\n item's hash, as determined by the [`Hash`] trait, or its equality, as\n determined by the [`Eq`] trait, changes while it is in the set. This is\n normally only possible through [`Cell`], [`RefCell`], global state, I/O, or\n unsafe code.\n\n It is also a logic error for the [`Hash`] implementation of a key to panic.\n This is generally only possible if the trait is implemented manually. If a\n panic does occur then the contents of the `HashSet` may become corrupted and\n some items may be dropped from the table.\n\n # Examples\n\n ```\n use hashbrown::HashSet;\n // Type inference lets us omit an explicit type signature (which\n // would be `HashSet<String>` in this example).\n let mut books = HashSet::new();\n\n // Add some books.\n books.insert(\"A Dance With Dragons\".to_string());\n books.insert(\"To Kill a Mockingbird\".to_string());\n books.insert(\"The Odyssey\".to_string());\n books.insert(\"The Great Gatsby\".to_string());\n\n // Check for a specific one.\n if !books.contains(\"The Winds of Winter\") {\n     println!(\"We have {} books, but The Winds of Winter ain't one.\",\n              books.len());\n }\n\n // Remove a book.\n books.remove(\"The Odyssey\");\n\n // Iterate over everything.\n for book in &books {\n     println!(\"{}\", book);\n }\n ```\n\n The easiest way to use `HashSet` with a custom type is to derive\n [`Eq`] and [`Hash`]. We must also derive [`PartialEq`]. This will in the\n future be implied by [`Eq`].\n\n ```\n use hashbrown::HashSet;\n #[derive(Hash, Eq, PartialEq, Debug)]\n struct Viking {\n     name: String,\n     power: usize,\n }\n\n let mut vikings = HashSet::new();\n\n vikings.insert(Viking { name: \"Einar\".to_string(), power: 9 });\n vikings.insert(Viking { name: \"Einar\".to_string(), power: 9 });\n vikings.insert(Viking { name: \"Olaf\".to_string(), power: 4 });\n vikings.insert(Viking { name: \"Harald\".to_string(), power: 8 });\n\n // Use derived implementation to print the vikings.\n for x in &vikings {\n     println!(\"{:?}\", x);\n }\n ```\n\n A `HashSet` with fixed list of elements can be initialized from an array:\n\n ```\n use hashbrown::HashSet;\n\n let viking_names: HashSet<&'static str> =\n     [ \"Einar\", \"Olaf\", \"Harald\" ].into_iter().collect();\n // use the values stored in the set\n ```\n\n [`Cell`]: https://doc.rust-lang.org/std/cell/struct.Cell.html\n [`Eq`]: https://doc.rust-lang.org/std/cmp/trait.Eq.html\n [`Hash`]: https://doc.rust-lang.org/std/hash/trait.Hash.html\n [`HashMap`]: struct.HashMap.html\n [`PartialEq`]: https://doc.rust-lang.org/std/cmp/trait.PartialEq.html\n [`RefCell`]: https://doc.rust-lang.org/std/cell/struct.RefCell.html\n",
+  "variant_fields": {
+    "VariantIdx(None)-FieldIdx(Some(0))": {
+      "name": "map",
+      "doc": ""
+    }
+  }
+}

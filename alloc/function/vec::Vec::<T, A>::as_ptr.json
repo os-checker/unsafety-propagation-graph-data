@@ -1,0 +1,37 @@
+{
+  "name": "vec::Vec::<T, A>::as_ptr",
+  "safe": true,
+  "callees": {
+    "raw_vec::RawVec::<T, A>::ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a raw pointer to the start of the allocation. Note that this is\n `Unique::dangling()` if `capacity == 0` or `T` is zero-sized. In the former case, you must\n be careful.\n",
+      "adt": {
+        "raw_vec::RawVec": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "raw_vec::RawVec": [
+      "Ref"
+    ],
+    "vec::Vec": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ]
+  },
+  "path": 2345,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:1692:5: 1696:6",
+  "src": "pub const fn as_ptr(&self) -> *const T {\n        // We shadow the slice method of the same name to avoid going through\n        // `deref`, which creates an intermediate reference.\n        self.buf.ptr()\n    }",
+  "mir": "fn vec::Vec::<T, A>::as_ptr(_1: &vec::Vec<T, A>) -> *const T {\n    let mut _0: *const T;\n    let mut _2: *mut T;\n    let mut _3: &raw_vec::RawVec<T, A>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &((*_1).0: raw_vec::RawVec<T, A>);\n        _2 = raw_vec::RawVec::<T, A>::ptr(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = move _2 as *const T;\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns a raw pointer to the vector's buffer, or a dangling raw pointer\n valid for zero sized reads if the vector didn't allocate.\n\n The caller must ensure that the vector outlives the pointer this\n function returns, or else it will end up dangling.\n Modifying the vector may cause its buffer to be reallocated,\n which would also make any pointers to it invalid.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n This method guarantees that for the purpose of the aliasing model, this method\n does not materialize a reference to the underlying slice, and thus the returned pointer\n will remain valid when mixed with other calls to [`as_ptr`], [`as_mut_ptr`],\n and [`as_non_null`].\n Note that calling other methods that materialize mutable references to the slice,\n or mutable references to specific elements you are planning on accessing through this pointer,\n as well as writing to those elements, may still invalidate this pointer.\n See the second example below for how this guarantee can be used.\n\n\n # Examples\n\n ```\n let x = vec![1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(*x_ptr.add(i), 1 << i);\n     }\n }\n ```\n\n Due to the aliasing guarantee, the following code is legal:\n\n ```rust\n unsafe {\n     let mut v = vec![0, 1, 2];\n     let ptr1 = v.as_ptr();\n     let _ = ptr1.read();\n     let ptr2 = v.as_mut_ptr().offset(2);\n     ptr2.write(2);\n     // Notably, the write to `ptr2` did *not* invalidate `ptr1`\n     // because it mutated a different element:\n     let _ = ptr1.read();\n }\n ```\n\n [`as_mut_ptr`]: Vec::as_mut_ptr\n [`as_ptr`]: Vec::as_ptr\n [`as_non_null`]: Vec::as_non_null\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

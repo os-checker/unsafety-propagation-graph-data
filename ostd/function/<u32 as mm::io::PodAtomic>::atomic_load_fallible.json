@@ -1,0 +1,34 @@
+{
+  "name": "<u32 as mm::io::PodAtomic>::atomic_load_fallible",
+  "safe": false,
+  "callees": {
+    "arch::mm::util::__atomic_load_fallible": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Atomically loads a 32-bit integer value. This function works with exception handling\n and can recover from page fault.\n Returns the loaded value or `!0u64` if failed to load.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "error::Error": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 97,
+  "span": "ostd/src/mm/io.rs:1073:5: 1081:6",
+  "src": "unsafe fn atomic_load_fallible(ptr: *const Self) -> Result<Self> {\n        // SAFETY: The safety is upheld by the caller.\n        let result = unsafe { __atomic_load_fallible(ptr) };\n        if result == !0 {\n            Err(Error::PageFault)\n        } else {\n            Ok(result as Self)\n        }\n    }",
+  "mir": "fn <u32 as mm::io::PodAtomic>::atomic_load_fallible(_1: *const u32) -> core::result::Result<u32, error::Error> {\n    let mut _0: core::result::Result<u32, error::Error>;\n    let  _2: u64;\n    let mut _3: bool;\n    let mut _4: u64;\n    let mut _5: error::Error;\n    let mut _6: u32;\n    debug ptr => _1;\n    debug result => _2;\n    bb0: {\n        _2 = arch::mm::util::__atomic_load_fallible(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = Not(0_u64);\n        _3 = Eq(_2, move _4);\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = error::Error::PageFault;\n        _0 = core::result::Result::Err(move _5);\n        StorageDead(_5);\n        goto -> bb4;\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = _2 as u32;\n        _0 = core::result::Result::Ok(move _6);\n        StorageDead(_6);\n        goto -> bb4;\n    }\n    bb4: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "name": "collections::vec_deque::VecDeque::<T, A>::retain_mut",
+  "safe": true,
+  "callees": {
+    "core::ops::IndexMut::index_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the mutable indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "core::ops::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "collections::vec_deque::VecDeque::<T, A>::swap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Swaps elements at indices `i` and `j`.\n\n `i` and `j` may be equal.\n\n Element at index 0 is the front of the queue.\n\n # Panics\n\n Panics if either index is out of bounds.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut buf = VecDeque::new();\n buf.push_back(3);\n buf.push_back(4);\n buf.push_back(5);\n assert_eq!(buf, [3, 4, 5]);\n buf.swap(0, 2);\n assert_eq!(buf, [5, 4, 3]);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::truncate": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Shortens the deque, keeping the first `len` elements and dropping\n the rest.\n\n If `len` is greater or equal to the deque's current length, this has\n no effect.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut buf = VecDeque::new();\n buf.push_back(5);\n buf.push_back(10);\n buf.push_back(15);\n assert_eq!(buf, [5, 10, 15]);\n buf.truncate(1);\n assert_eq!(buf, [5]);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ]
+  },
+  "path": 1517,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:2622:5: 2654:6",
+  "src": "pub fn retain_mut<F>(&mut self, mut f: F)\n    where\n        F: FnMut(&mut T) -> bool,\n    {\n        let len = self.len;\n        let mut idx = 0;\n        let mut cur = 0;\n\n        // Stage 1: All values are retained.\n        while cur < len {\n            if !f(&mut self[cur]) {\n                cur += 1;\n                break;\n            }\n            cur += 1;\n            idx += 1;\n        }\n        // Stage 2: Swap retained value into current idx.\n        while cur < len {\n            if !f(&mut self[cur]) {\n                cur += 1;\n                continue;\n            }\n\n            self.swap(idx, cur);\n            cur += 1;\n            idx += 1;\n        }\n        // Stage 3: Truncate all values after idx.\n        if cur != idx {\n            self.truncate(idx);\n        }\n    }",
+  "mir": "fn collections::vec_deque::VecDeque::<T, A>::retain_mut(_1: &mut collections::vec_deque::VecDeque<T, A>, _2: F) -> () {\n    let mut _0: ();\n    let  _3: usize;\n    let mut _4: usize;\n    let mut _5: usize;\n    let mut _6: bool;\n    let mut _7: usize;\n    let mut _8: bool;\n    let mut _9: &mut F;\n    let mut _10: (&mut T,);\n    let mut _11: &mut T;\n    let mut _12: usize;\n    let mut _13: (usize, bool);\n    let mut _14: (usize, bool);\n    let mut _15: (usize, bool);\n    let mut _16: bool;\n    let mut _17: usize;\n    let mut _18: bool;\n    let mut _19: &mut F;\n    let mut _20: (&mut T,);\n    let mut _21: &mut T;\n    let mut _22: usize;\n    let mut _23: (usize, bool);\n    let  _24: ();\n    let mut _25: usize;\n    let mut _26: usize;\n    let mut _27: (usize, bool);\n    let mut _28: (usize, bool);\n    let mut _29: bool;\n    let mut _30: usize;\n    let mut _31: usize;\n    let  _32: ();\n    let mut _33: usize;\n    debug self => _1;\n    debug f => _2;\n    debug len => _3;\n    debug idx => _4;\n    debug cur => _5;\n    bb0: {\n        _3 = ((*_1).1: usize);\n        StorageLive(_4);\n        _4 = 0_usize;\n        StorageLive(_5);\n        _5 = 0_usize;\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = _5;\n        _6 = Lt(move _7, _3);\n        switchInt(move _6) -> [0: bb10, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &mut _2;\n        StorageLive(_10);\n        StorageLive(_12);\n        _12 = _5;\n        _11 = <collections::vec_deque::VecDeque<T, A> as core::ops::IndexMut<usize>>::index_mut(_1, move _12) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_12);\n        _10 = (_11);\n        _8 = <F as core::ops::FnMut<(&mut T,)>>::call_mut(move _9, move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        switchInt(move _8) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_8);\n        _14 = CheckedAdd(_5, 1_usize);\n        assert(!move (_14.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _5, 1_usize) -> [success: bb8, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        StorageDead(_9);\n        _13 = CheckedAdd(_5, 1_usize);\n        assert(!move (_13.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _5, 1_usize) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _5 = move (_13.0: usize);\n        StorageDead(_8);\n        goto -> bb11;\n    }\n    bb8: {\n        _5 = move (_14.0: usize);\n        _15 = CheckedAdd(_4, 1_usize);\n        assert(!move (_15.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _4, 1_usize) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        _4 = move (_15.0: usize);\n        StorageDead(_6);\n        goto -> bb1;\n    }\n    bb10: {\n        StorageDead(_7);\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_6);\n        goto -> bb12;\n    }\n    bb12: {\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = _5;\n        _16 = Lt(move _17, _3);\n        switchInt(move _16) -> [0: bb22, otherwise: bb13];\n    }\n    bb13: {\n        StorageDead(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = &mut _2;\n        StorageLive(_20);\n        StorageLive(_22);\n        _22 = _5;\n        _21 = <collections::vec_deque::VecDeque<T, A> as core::ops::IndexMut<usize>>::index_mut(_1, move _22) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_22);\n        _20 = (_21);\n        _18 = <F as core::ops::FnMut<(&mut T,)>>::call_mut(move _19, move _20) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        switchInt(move _18) -> [0: bb17, otherwise: bb16];\n    }\n    bb16: {\n        StorageDead(_20);\n        StorageDead(_19);\n        StorageDead(_18);\n        StorageLive(_25);\n        _25 = _4;\n        StorageLive(_26);\n        _26 = _5;\n        _24 = collections::vec_deque::VecDeque::<T, A>::swap(_1, move _25, move _26) -> [return: bb19, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_20);\n        StorageDead(_19);\n        _23 = CheckedAdd(_5, 1_usize);\n        assert(!move (_23.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _5, 1_usize) -> [success: bb18, unwind unreachable];\n    }\n    bb18: {\n        _5 = move (_23.0: usize);\n        StorageDead(_18);\n        StorageDead(_16);\n        goto -> bb12;\n    }\n    bb19: {\n        StorageDead(_26);\n        StorageDead(_25);\n        _27 = CheckedAdd(_5, 1_usize);\n        assert(!move (_27.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _5, 1_usize) -> [success: bb20, unwind unreachable];\n    }\n    bb20: {\n        _5 = move (_27.0: usize);\n        _28 = CheckedAdd(_4, 1_usize);\n        assert(!move (_28.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _4, 1_usize) -> [success: bb21, unwind unreachable];\n    }\n    bb21: {\n        _4 = move (_28.0: usize);\n        StorageDead(_16);\n        goto -> bb12;\n    }\n    bb22: {\n        StorageDead(_17);\n        StorageDead(_16);\n        StorageLive(_29);\n        StorageLive(_30);\n        _30 = _5;\n        StorageLive(_31);\n        _31 = _4;\n        _29 = Ne(move _30, move _31);\n        switchInt(move _29) -> [0: bb24, otherwise: bb23];\n    }\n    bb23: {\n        StorageDead(_31);\n        StorageDead(_30);\n        StorageLive(_33);\n        _33 = _4;\n        _32 = collections::vec_deque::VecDeque::<T, A>::truncate(_1, move _33) -> [return: bb25, unwind unreachable];\n    }\n    bb24: {\n        StorageDead(_31);\n        StorageDead(_30);\n        goto -> bb26;\n    }\n    bb25: {\n        StorageDead(_33);\n        goto -> bb26;\n    }\n    bb26: {\n        StorageDead(_29);\n        StorageDead(_5);\n        StorageDead(_4);\n        drop(_2) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        return;\n    }\n}\n",
+  "doc": " Retains only the elements specified by the predicate.\n\n In other words, remove all elements `e` for which `f(&mut e)` returns false.\n This method operates in place, visiting each element exactly once in the\n original order, and preserves the order of the retained elements.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut buf = VecDeque::new();\n buf.extend(1..5);\n buf.retain_mut(|x| if *x % 2 == 0 {\n     *x += 1;\n     true\n } else {\n     false\n });\n assert_eq!(buf, [3, 5]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

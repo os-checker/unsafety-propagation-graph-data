@@ -1,0 +1,39 @@
+{
+  "name": "io::stdio::stdout",
+  "safe": true,
+  "callees": {
+    "sync::once_lock::OnceLock::<T>::get_or_init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the contents of the cell, initializing it to `f()` if the cell\n was uninitialized.\n\n Many threads may call `get_or_init` concurrently with different\n initializing functions, but it is guaranteed that only one function\n will be executed if the function doesn't panic.\n\n # Panics\n\n If `f()` panics, the panic is propagated to the caller, and the cell\n remains uninitialized.\n\n It is an error to reentrantly initialize the cell from `f`. The\n exact outcome is unspecified. Current implementation deadlocks, but\n this may be changed to a panic in the future.\n\n # Examples\n\n ```\n use std::sync::OnceLock;\n\n let cell = OnceLock::new();\n let value = cell.get_or_init(|| 92);\n assert_eq!(value, &92);\n let value = cell.get_or_init(|| unreachable!());\n assert_eq!(value, &92);\n ```\n",
+      "adt": {
+        "sync::once_lock::OnceLock": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "sync::once_lock::OnceLock": [
+      "Ref"
+    ],
+    "sync::reentrant_lock::ReentrantLock": [
+      "Ref"
+    ],
+    "io::stdio::Stdout": [
+      "Plain"
+    ]
+  },
+  "path": 1550,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/stdio.rs:716:1: 721:2",
+  "src": "pub fn stdout() -> Stdout {\n    Stdout {\n        inner: STDOUT\n            .get_or_init(|| ReentrantLock::new(RefCell::new(LineWriter::new(stdout_raw())))),\n    }\n}",
+  "mir": "fn io::stdio::stdout() -> io::stdio::Stdout {\n    let mut _0: io::stdio::Stdout;\n    let  _1: &sync::reentrant_lock::ReentrantLock<core::cell::RefCell<io::buffered::linewriter::LineWriter<io::stdio::StdoutRaw>>>;\n    let mut _2: &sync::once_lock::OnceLock<sync::reentrant_lock::ReentrantLock<core::cell::RefCell<io::buffered::linewriter::LineWriter<io::stdio::StdoutRaw>>>>;\n    bb0: {\n        StorageLive(_2);\n        _2 = {alloc210: &sync::once_lock::OnceLock<sync::reentrant_lock::ReentrantLock<core::cell::RefCell<io::buffered::linewriter::LineWriter<io::stdio::StdoutRaw>>>>};\n        _1 = sync::once_lock::OnceLock::<sync::reentrant_lock::ReentrantLock<core::cell::RefCell<io::buffered::linewriter::LineWriter<io::stdio::StdoutRaw>>>>::get_or_init::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/stdio.rs:719:26: 719:28}>(move _2, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/stdio.rs:719:26: 719:28}) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_2);\n        _0 = Stdout(_1);\n        return;\n    }\n}\n",
+  "doc": " Constructs a new handle to the standard output of the current process.\n\n Each handle returned is a reference to a shared global buffer whose access\n is synchronized via a mutex. If you need more explicit control over\n locking, see the [`Stdout::lock`] method.\n\n By default, the handle is line-buffered when connected to a terminal, meaning\n it flushes automatically when a newline (`\\n`) is encountered. For immediate\n output, you can manually call the [`flush`] method. When the handle goes out\n of scope, the buffer is automatically flushed.\n\n ### Note: Windows Portability Considerations\n\n When operating in a console, the Windows implementation of this stream does not support\n non-UTF-8 byte sequences. Attempting to write bytes that are not valid UTF-8 will return\n an error.\n\n In a process with a detached console, such as one using\n `#![windows_subsystem = \"windows\"]`, or in a child process spawned from such a process,\n the contained handle will be null. In such cases, the standard library's `Read` and\n `Write` will do nothing and silently succeed. All other I/O operations, via the\n standard library or via raw Windows API calls, will fail.\n\n # Examples\n\n Using implicit synchronization:\n\n ```no_run\n use std::io::{self, Write};\n\n fn main() -> io::Result<()> {\n     io::stdout().write_all(b\"hello world\")?;\n\n     Ok(())\n }\n ```\n\n Using explicit synchronization:\n\n ```no_run\n use std::io::{self, Write};\n\n fn main() -> io::Result<()> {\n     let stdout = io::stdout();\n     let mut handle = stdout.lock();\n\n     handle.write_all(b\"hello world\")?;\n\n     Ok(())\n }\n ```\n\n Ensuring output is flushed immediately:\n\n ```no_run\n use std::io::{self, Write};\n\n fn main() -> io::Result<()> {\n     let mut stdout = io::stdout();\n     stdout.write_all(b\"hello, \")?;\n     stdout.flush()?;                // Manual flush\n     stdout.write_all(b\"world!\\n\")?; // Automatically flushed\n     Ok(())\n }\n ```\n\n [`flush`]: Write::flush\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

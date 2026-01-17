@@ -1,0 +1,185 @@
+{
+  "name": "<mm::kspace::kvirt_area::KVirtArea as core::ops::Drop>::drop",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the inner value if the [`Once`] has been initialized.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "mm::kspace::kvirt_area::KVirtArea::start": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "mm::kspace::kvirt_area::KVirtArea": "ImmutableAsArgument"
+      }
+    },
+    "mm::kspace::kvirt_area::KVirtArea::end": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "mm::kspace::kvirt_area::KVirtArea": "ImmutableAsArgument"
+      }
+    },
+    "task::preempt::guard::disable_preempt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disables preemption.\n",
+      "adt": {
+        "task::preempt::guard::DisabledPreemptGuard": "Constructor"
+      }
+    },
+    "mm::page_table::PageTable::<C>::cursor_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a new cursor exclusively accessing the virtual address range for mapping.\n\n If another cursor is already accessing the range, the new cursor may wait until the\n previous cursor is dropped.\n",
+      "adt": {
+        "mm::page_table::PageTable": "ImmutableAsArgument",
+        "core::ops::Range": "ImmutableAsArgument",
+        "core::result::Result": "Constructor",
+        "mm::page_table::cursor::CursorMut": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    },
+    "mm::page_table::cursor::CursorMut::<'rcu, C>::virt_addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the current virtual address.\n",
+      "adt": {
+        "mm::page_table::cursor::CursorMut": "ImmutableAsArgument"
+      }
+    },
+    "mm::page_table::cursor::CursorMut::<'rcu, C>::take_next": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Finds and removes the first page table fragment in the following range.\n\n The range to be found in is the current virtual address with the\n provided length.\n\n The function stops and yields the fragment if it has actually removed a\n fragment, no matter if the following pages are also required to be\n unmapped. The returned virtual address is the virtual page that existed\n before the removal but having just been unmapped.\n\n It also makes the cursor moves forward to the next page after the\n removed one, when an actual page is removed. If no mapped pages exist\n in the following range, the cursor will stop at the end of the range\n and return [`None`].\n\n The caller should handle TLB coherence if necessary, using the returned\n virtual address range.\n\n # Safety\n\n The caller should ensure that the range being unmapped does not affect\n kernel's memory safety.\n\n # Panics\n\n Panics if:\n  - the length is longer than the remaining range of the cursor;\n  - the length is not page-aligned.\n",
+      "adt": {
+        "core::option::Option": "Constructor",
+        "mm::page_table::cursor::CursorMut": "MutableAsArgument",
+        "mm::page_table::cursor::PageTableFrag": "Constructor"
+      }
+    },
+    "core::mem::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disposes of a value.\n\n This effectively does nothing for types which implement `Copy`, e.g.\n integers. Such values are copied and _then_ moved into the function, so the\n value persists after this function call.\n\n This function is not magic; it is literally defined as\n\n ```\n pub fn drop<T>(_x: T) {}\n ```\n\n Because `_x` is moved into the function, it is automatically [dropped][drop] before\n the function returns.\n\n [drop]: Drop\n\n # Examples\n\n Basic usage:\n\n ```\n let v = vec![1, 2, 3];\n\n drop(v); // explicitly drop the vector\n ```\n\n Since [`RefCell`] enforces the borrow rules at runtime, `drop` can\n release a [`RefCell`] borrow:\n\n ```\n use std::cell::RefCell;\n\n let x = RefCell::new(1);\n\n let mut mutable_borrow = x.borrow_mut();\n *mutable_borrow = 1;\n\n drop(mutable_borrow); // relinquish the mutable borrow on this slot\n\n let borrow = x.borrow();\n println!(\"{}\", *borrow);\n ```\n\n Integers and other types implementing [`Copy`] are unaffected by `drop`.\n\n ```\n # #![allow(dropping_copy_types)]\n #[derive(Copy, Clone)]\n struct Foo(u8);\n\n let x = 1;\n let y = Foo(2);\n drop(x); // a copy of `x` is moved and dropped\n drop(y); // a copy of `y` is moved and dropped\n\n println!(\"x: {}, y: {}\", x, y.0); // still available\n ```\n\n [`RefCell`]: crate::cell::RefCell\n",
+      "adt": {}
+    },
+    "util::range_alloc::RangeAllocator::free": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Frees a `range`.\n",
+      "adt": {
+        "core::ops::Range": "ImmutableAsArgument",
+        "util::range_alloc::RangeAllocator": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 5354, kind: RigidTy(Adt(AdtDef(DefId { id: 5332, name: \"mm::page_table::cursor::PageTableFrag\" }), GenericArgs([Type(Ty { id: 5353, kind: RigidTy(Adt(AdtDef(DefId { id: 5341, name: \"mm::kspace::KernelPtConfig\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "mm::page_table::PageTable": [
+      "Ref"
+    ],
+    "mm::kspace::kvirt_area::KVirtArea": [
+      "Ref",
+      "Deref",
+      "MutRef"
+    ],
+    "core::ops::Range": [
+      "Plain",
+      "Ref"
+    ],
+    "task::preempt::guard::DisabledPreemptGuard": [
+      "Plain",
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "mm::page_table::cursor::CursorMut": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "mm::page_table::cursor::PageTableFrag": [
+      "Plain"
+    ],
+    "util::range_alloc::RangeAllocator": [
+      "Ref"
+    ]
+  },
+  "path": 2177,
+  "span": "ostd/src/mm/kspace/kvirt_area.rs:179:5: 194:6",
+  "src": "fn drop(&mut self) {\n        // 1. unmap all mapped pages.\n        let page_table = KERNEL_PAGE_TABLE.get().unwrap();\n        let range = self.start()..self.end();\n        let preempt_guard = disable_preempt();\n        let mut cursor = page_table.cursor_mut(&preempt_guard, &range).unwrap();\n        loop {\n            // SAFETY: The range is under `KVirtArea` so it is safe to unmap.\n            let Some(frag) = (unsafe { cursor.take_next(self.end() - cursor.virt_addr()) }) else {\n                break;\n            };\n            drop(frag);\n        }\n        // 2. free the virtual block\n        KVIRT_AREA_ALLOCATOR.free(range);\n    }",
+  "mir": "fn <mm::kspace::kvirt_area::KVirtArea as core::ops::Drop>::drop(_1: &mut mm::kspace::kvirt_area::KVirtArea) -> () {\n    let mut _0: ();\n    let  _2: &mm::page_table::PageTable<mm::kspace::KernelPtConfig>;\n    let mut _3: core::option::Option<&mm::page_table::PageTable<mm::kspace::KernelPtConfig>>;\n    let mut _4: &spin::once::Once<mm::page_table::PageTable<mm::kspace::KernelPtConfig>>;\n    let  _5: core::ops::Range<usize>;\n    let mut _6: usize;\n    let mut _7: &mm::kspace::kvirt_area::KVirtArea;\n    let mut _8: usize;\n    let mut _9: &mm::kspace::kvirt_area::KVirtArea;\n    let  _10: task::preempt::guard::DisabledPreemptGuard;\n    let mut _11: mm::page_table::cursor::CursorMut<'_, mm::kspace::KernelPtConfig>;\n    let mut _12: core::result::Result<mm::page_table::cursor::CursorMut<'_, mm::kspace::KernelPtConfig>, mm::page_table::PageTableError>;\n    let  _13: &task::preempt::guard::DisabledPreemptGuard;\n    let  _14: &core::ops::Range<usize>;\n    let  _15: mm::page_table::cursor::PageTableFrag<mm::kspace::KernelPtConfig>;\n    let mut _16: core::option::Option<mm::page_table::cursor::PageTableFrag<mm::kspace::KernelPtConfig>>;\n    let mut _17: &mut mm::page_table::cursor::CursorMut<'_, mm::kspace::KernelPtConfig>;\n    let mut _18: usize;\n    let mut _19: usize;\n    let mut _20: &mm::kspace::kvirt_area::KVirtArea;\n    let mut _21: usize;\n    let mut _22: &mm::page_table::cursor::CursorMut<'_, mm::kspace::KernelPtConfig>;\n    let mut _23: (usize, bool);\n    let mut _24: isize;\n    let  _25: ();\n    let  _26: ();\n    let mut _27: &util::range_alloc::RangeAllocator;\n    debug self => _1;\n    debug page_table => _2;\n    debug range => _5;\n    debug preempt_guard => task::preempt::guard::DisabledPreemptGuard {{ _private: () }};\n    debug cursor => _11;\n    debug frag => _15;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = {alloc1275: &spin::once::Once<mm::page_table::PageTable<mm::kspace::KernelPtConfig>>};\n        _3 = spin::once::Once::<mm::page_table::PageTable<mm::kspace::KernelPtConfig>>::get(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = core::option::Option::<&mm::page_table::PageTable<mm::kspace::KernelPtConfig>>::unwrap(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &(*_1);\n        _6 = mm::kspace::kvirt_area::KVirtArea::start(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &(*_1);\n        _8 = mm::kspace::kvirt_area::KVirtArea::end(move _9) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_9);\n        _5 = Range(move _6, move _8);\n        StorageDead(_8);\n        StorageDead(_6);\n        _10 = task::preempt::guard::disable_preempt() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_11);\n        StorageLive(_12);\n        _13 = &_10;\n        _14 = &_5;\n        _12 = mm::page_table::PageTable::<mm::kspace::KernelPtConfig>::cursor_mut::<task::preempt::guard::DisabledPreemptGuard>(_2, _13, _14) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _11 = core::result::Result::<mm::page_table::cursor::CursorMut<'_, mm::kspace::KernelPtConfig>, mm::page_table::PageTableError>::unwrap(move _12) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &mut _11;\n        StorageLive(_18);\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = &(*_1);\n        _19 = mm::kspace::kvirt_area::KVirtArea::end(move _20) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = &_11;\n        _21 = mm::page_table::cursor::CursorMut::<'_, mm::kspace::KernelPtConfig>::virt_addr(move _22) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_22);\n        _23 = CheckedSub(_19, _21);\n        assert(!move (_23.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _19, move _21) -> [success: bb11, unwind unreachable];\n    }\n    bb11: {\n        _18 = move (_23.0: usize);\n        StorageDead(_21);\n        StorageDead(_19);\n        _16 = mm::page_table::cursor::CursorMut::<'_, mm::kspace::KernelPtConfig>::take_next(move _17, move _18) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_18);\n        StorageDead(_17);\n        _24 = discriminant(_16);\n        switchInt(move _24) -> [1: bb13, 0: bb18, otherwise: bb19];\n    }\n    bb13: {\n        _15 = move ((_16 as variant#1).0: mm::page_table::cursor::PageTableFrag<mm::kspace::KernelPtConfig>);\n        StorageDead(_16);\n        _25 = core::mem::drop::<mm::page_table::cursor::PageTableFrag<mm::kspace::KernelPtConfig>>(_15) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        goto -> bb8;\n    }\n    bb15: {\n        StorageDead(_27);\n        drop(_11) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_11);\n        drop(_10) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        return;\n    }\n    bb18: {\n        StorageDead(_16);\n        StorageLive(_27);\n        _27 = {alloc1241: &util::range_alloc::RangeAllocator};\n        _26 = util::range_alloc::RangeAllocator::free(move _27, _5) -> [return: bb15, unwind unreachable];\n    }\n    bb19: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "name": "iter::traits::iterator::Iterator::try_reduce",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::Try::from_output": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from its `Output` type.\n\n This should be implemented consistently with the `branch` method\n such that applying the `?` operator will get back the original value:\n `Try::from_output(x).branch() --> ControlFlow::Continue(x)`.\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::Try;\n\n assert_eq!(<Result<_, String> as Try>::from_output(3), Ok(3));\n assert_eq!(<Option<_> as Try>::from_output(4), Some(4));\n assert_eq!(\n     <std::ops::ControlFlow<String, _> as Try>::from_output(5),\n     std::ops::ControlFlow::Continue(5),\n );\n\n # fn make_question_mark_work() -> Option<()> {\n assert_eq!(Option::from_output(4)?, 4);\n # None }\n # make_question_mark_work();\n\n // This is used, for example, on the accumulator in `try_fold`:\n let r = std::iter::empty().try_fold(4, |_, ()| -> Option<_> { unreachable!() });\n assert_eq!(r, Some(4));\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::try_fold": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An iterator method that applies a function as long as it returns\n successfully, producing a single, final value.\n\n `try_fold()` takes two arguments: an initial value, and a closure with\n two arguments: an 'accumulator', and an element. The closure either\n returns successfully, with the value that the accumulator should have\n for the next iteration, or it returns failure, with an error value that\n is propagated back to the caller immediately (short-circuiting).\n\n The initial value is the value the accumulator will have on the first\n call. If applying the closure succeeded against every element of the\n iterator, `try_fold()` returns the final accumulator as success.\n\n Folding is useful whenever you have a collection of something, and want\n to produce a single value from it.\n\n # Note to Implementors\n\n Several of the other (forward) methods have default implementations in\n terms of this one, so try to implement this explicitly if it can\n do something better than the default `for` loop implementation.\n\n In particular, try to have this call `try_fold()` on the internal parts\n from which this iterator is composed. If multiple calls are needed,\n the `?` operator may be convenient for chaining the accumulator value\n along, but beware any invariants that need to be upheld before those\n early returns. This is a `&mut self` method, so iteration needs to be\n resumable after hitting an error here.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n // the checked sum of all of the elements of the array\n let sum = a.into_iter().try_fold(0i8, |acc, x| acc.checked_add(x));\n\n assert_eq!(sum, Some(6));\n ```\n\n Short-circuiting:\n\n ```\n let a = [10, 20, 30, 100, 40, 50];\n let mut iter = a.into_iter();\n\n // This sum overflows when adding the 100 element\n let sum = iter.try_fold(0i8, |acc, x| acc.checked_add(x));\n assert_eq!(sum, None);\n\n // Because it short-circuited, the remaining elements are still\n // available through the iterator.\n assert_eq!(iter.len(), 2);\n assert_eq!(iter.next(), Some(40));\n ```\n\n While you cannot `break` from a closure, the [`ControlFlow`] type allows\n a similar idea:\n\n ```\n use std::ops::ControlFlow;\n\n let triangular = (1..30).try_fold(0_i8, |prev, x| {\n     if let Some(next) = prev.checked_add(x) {\n         ControlFlow::Continue(next)\n     } else {\n         ControlFlow::Break(prev)\n     }\n });\n assert_eq!(triangular, ControlFlow::Break(120));\n\n let triangular = (1..30).try_fold(0_u64, |prev, x| {\n     if let Some(next) = prev.checked_add(x) {\n         ControlFlow::Continue(next)\n     } else {\n         ControlFlow::Break(prev)\n     }\n });\n assert_eq!(triangular, ControlFlow::Continue(435));\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 5683, kind: Alias(Projection, AliasTy { def_id: AliasDef(DefId { id: 25924, name: \"iter::traits::iterator::Iterator::Item\" }), args: GenericArgs([Type(Ty { id: 42, kind: Param(ParamTy { index: 0, name: \"Self\" }) })]) }) })])"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 5683, kind: Alias(Projection, AliasTy { def_id: AliasDef(DefId { id: 25924, name: \"iter::traits::iterator::Iterator::Item\" }), args: GenericArgs([Type(Ty { id: 42, kind: Param(ParamTy { index: 0, name: \"Self\" }) })]) }) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4406, kind: Alias(Projection, AliasTy { def_id: AliasDef(DefId { id: 25500, name: \"ops::try_trait::Try::Residual\" }), args: GenericArgs([Type(Ty { id: 501, kind: Param(ParamTy { index: 1, name: \"R\" }) })]) }) })])"
+    ]
+  },
+  "path": "iter::traits::iterator::Iterator::try_reduce",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:2704:5: 2721:6",
+  "src": "fn try_reduce<R>(\n        &mut self,\n        f: impl FnMut(Self::Item, Self::Item) -> R,\n    ) -> ChangeOutputType<R, Option<R::Output>>\n    where\n        Self: Sized,\n        R: Try<Output = Self::Item, Residual: Residual<Option<Self::Item>>>,\n    {\n        let first = match self.next() {\n            Some(i) => i,\n            None => return Try::from_output(None),\n        };\n\n        match self.try_fold(first, f).branch() {\n            ControlFlow::Break(r) => FromResidual::from_residual(r),\n            ControlFlow::Continue(i) => Try::from_output(Some(i)),\n        }\n    }",
+  "mir": "fn iter::traits::iterator::Iterator::try_reduce(_1: &mut Self, _2: impl FnMut(Self::Item, Self::Item) -> R) -> <<R as ops::try_trait::Try>::Residual as ops::try_trait::Residual<option::Option<<Self as iter::traits::iterator::Iterator>::Item>>>::TryType {\n    let mut _0: <<R as ops::try_trait::Try>::Residual as ops::try_trait::Residual<option::Option<<Self as iter::traits::iterator::Iterator>::Item>>>::TryType;\n    let mut _3: option::Option<<Self as iter::traits::iterator::Iterator>::Item>;\n    let mut _4: isize;\n    let  _5: <Self as iter::traits::iterator::Iterator>::Item;\n    let mut _6: option::Option<<Self as iter::traits::iterator::Iterator>::Item>;\n    let mut _7: ops::control_flow::ControlFlow<<R as ops::try_trait::Try>::Residual, <Self as iter::traits::iterator::Iterator>::Item>;\n    let mut _8: R;\n    let mut _9: impl FnMut(Self::Item, Self::Item) -> R;\n    let mut _10: isize;\n    let  _11: <R as ops::try_trait::Try>::Residual;\n    let  _12: <Self as iter::traits::iterator::Iterator>::Item;\n    let mut _13: option::Option<<Self as iter::traits::iterator::Iterator>::Item>;\n    debug self => _1;\n    debug f => _2;\n    debug first => _5;\n    debug i => _5;\n    debug r => _11;\n    debug i => _12;\n    bb0: {\n        StorageLive(_3);\n        _3 = <Self as iter::traits::iterator::Iterator>::next(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = discriminant(_3);\n        switchInt(move _4) -> [0: bb3, 1: bb4, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        StorageLive(_6);\n        _6 = option::Option::None;\n        _0 = <<<R as ops::try_trait::Try>::Residual as ops::try_trait::Residual<option::Option<<Self as iter::traits::iterator::Iterator>::Item>>>::TryType as ops::try_trait::Try>::from_output(move _6) -> [return: bb5, unwind unreachable];\n    }\n    bb4: {\n        _5 = move ((_3 as variant#1).0: <Self as iter::traits::iterator::Iterator>::Item);\n        StorageDead(_3);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = move _2;\n        _8 = <Self as iter::traits::iterator::Iterator>::try_fold::<<Self as iter::traits::iterator::Iterator>::Item, impl FnMut(Self::Item, Self::Item) -> R, R>(_1, _5, move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        StorageDead(_3);\n        drop(_2) -> [return: bb13, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_9);\n        _7 = <R as ops::try_trait::Try>::branch(move _8) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_8);\n        _10 = discriminant(_7);\n        switchInt(move _10) -> [0: bb8, 1: bb9, otherwise: bb2];\n    }\n    bb8: {\n        _12 = move ((_7 as variant#0).0: <Self as iter::traits::iterator::Iterator>::Item);\n        StorageLive(_13);\n        _13 = option::Option::Some(_12);\n        _0 = <<<R as ops::try_trait::Try>::Residual as ops::try_trait::Residual<option::Option<<Self as iter::traits::iterator::Iterator>::Item>>>::TryType as ops::try_trait::Try>::from_output(move _13) -> [return: bb11, unwind unreachable];\n    }\n    bb9: {\n        _11 = move ((_7 as variant#1).0: <R as ops::try_trait::Try>::Residual);\n        _0 = <<<R as ops::try_trait::Try>::Residual as ops::try_trait::Residual<option::Option<<Self as iter::traits::iterator::Iterator>::Item>>>::TryType as ops::try_trait::FromResidual<<R as ops::try_trait::Try>::Residual>>::from_residual(_11) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        goto -> bb12;\n    }\n    bb11: {\n        StorageDead(_13);\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_7);\n        goto -> bb13;\n    }\n    bb13: {\n        return;\n    }\n}\n",
+  "doc": " Reduces the elements to a single one by repeatedly applying a reducing operation. If the\n closure returns a failure, the failure is propagated back to the caller immediately.\n\n The return type of this method depends on the return type of the closure. If the closure\n returns `Result<Self::Item, E>`, then this function will return `Result<Option<Self::Item>,\n E>`. If the closure returns `Option<Self::Item>`, then this function will return\n `Option<Option<Self::Item>>`.\n\n When called on an empty iterator, this function will return either `Some(None)` or\n `Ok(None)` depending on the type of the provided closure.\n\n For iterators with at least one element, this is essentially the same as calling\n [`try_fold()`] with the first element of the iterator as the initial accumulator value.\n\n [`try_fold()`]: Iterator::try_fold\n\n # Examples\n\n Safely calculate the sum of a series of numbers:\n\n ```\n #![feature(iterator_try_reduce)]\n\n let numbers: Vec<usize> = vec![10, 20, 5, 23, 0];\n let sum = numbers.into_iter().try_reduce(|x, y| x.checked_add(y));\n assert_eq!(sum, Some(Some(58)));\n ```\n\n Determine when a reduction short circuited:\n\n ```\n #![feature(iterator_try_reduce)]\n\n let numbers = vec![1, 2, 3, usize::MAX, 4, 5];\n let sum = numbers.into_iter().try_reduce(|x, y| x.checked_add(y));\n assert_eq!(sum, None);\n ```\n\n Determine when a reduction was not performed because there are no elements:\n\n ```\n #![feature(iterator_try_reduce)]\n\n let numbers: Vec<usize> = Vec::new();\n let sum = numbers.into_iter().try_reduce(|x, y| x.checked_add(y));\n assert_eq!(sum, Some(None));\n ```\n\n Use a [`Result`] instead of an [`Option`]:\n\n ```\n #![feature(iterator_try_reduce)]\n\n let numbers = vec![\"1\", \"2\", \"3\", \"4\", \"5\"];\n let max: Result<Option<_>, <usize as std::str::FromStr>::Err> =\n     numbers.into_iter().try_reduce(|x, y| {\n         if x.parse::<usize>()? > y.parse::<usize>()? { Ok(x) } else { Ok(y) }\n     });\n assert_eq!(max, Ok(Some(\"5\")));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

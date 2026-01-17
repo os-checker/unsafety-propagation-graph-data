@@ -1,0 +1,47 @@
+{
+  "name": "ptr::const_ptr::<impl *const T>::mask",
+  "safe": true,
+  "callees": {
+    "ptr::const_ptr::<impl *const T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "intrinsics::ptr_mask": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Masks out bits of the pointer according to a mask.\n\n Note that, unlike most intrinsics, this is safe to call;\n it does not require an `unsafe` block.\n Therefore, implementations must not require the user to uphold\n any safety invariants.\n\n Consider using [`pointer::mask`] instead.\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::with_metadata_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Uses the address value in a new pointer of another type.\n\n This operation will ignore the address part of its `meta` operand and discard existing\n metadata of `self`. For pointers to a sized types (thin pointers), this has the same effect\n as a simple cast. For pointers to an unsized type (fat pointers) this recombines the address\n with new metadata such as slice lengths or `dyn`-vtable.\n\n The resulting pointer will have provenance of `self`. This operation is semantically the\n same as creating a new pointer with the data pointer value of `self` but the metadata of\n `meta`, being fat or thin depending on the `meta` operand.\n\n # Examples\n\n This function is primarily useful for enabling pointer arithmetic on potentially fat\n pointers. The pointer is cast to a sized pointee to utilize offset operations and then\n recombined with its own original metadata.\n\n ```\n #![feature(set_ptr_value)]\n # use core::fmt::Debug;\n let arr: [i32; 3] = [1, 2, 3];\n let mut ptr = arr.as_ptr() as *const dyn Debug;\n let thin = ptr as *const u8;\n unsafe {\n     ptr = thin.add(8).with_metadata_of(ptr);\n     # assert_eq!(*(ptr as *const i32), 3);\n     println!(\"{:?}\", &*ptr); // will print \"3\"\n }\n ```\n\n # *Incorrect* usage\n\n The provenance from pointers is *not* combined. The result must only be used to refer to the\n address allowed by `self`.\n\n ```rust,no_run\n #![feature(set_ptr_value)]\n let x = 0u32;\n let y = 1u32;\n\n let x = (&x) as *const u32;\n let y = (&y) as *const u32;\n\n let offset = (x as usize - y as usize) / 4;\n let bad = x.wrapping_add(offset).with_metadata_of(y);\n\n // This dereference is UB. The pointer only has provenance for `x` but points to `y`.\n println!(\"{:?}\", unsafe { &*bad });\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 997,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/const_ptr.rs:523:5: 525:6",
+  "src": "pub fn mask(self, mask: usize) -> *const T {\n        intrinsics::ptr_mask(self.cast::<()>(), mask).with_metadata_of(self)\n    }",
+  "mir": "fn ptr::const_ptr::<impl *const T>::mask(_1: *const T, _2: usize) -> *const T {\n    let mut _0: *const T;\n    let mut _3: *const ();\n    let mut _4: *const ();\n    debug self => _1;\n    debug mask => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ptr::const_ptr::<impl *const T>::cast::<()>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = intrinsics::ptr_mask::<()>(move _4, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = ptr::const_ptr::<impl *const ()>::with_metadata_of::<T>(move _3, _1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Masks out bits of the pointer according to a mask.\n\n This is convenience for `ptr.map_addr(|a| a & mask)`.\n\n For non-`Sized` pointees this operation changes only the data pointer,\n leaving the metadata untouched.\n\n ## Examples\n\n ```\n #![feature(ptr_mask)]\n let v = 17_u32;\n let ptr: *const u32 = &v;\n\n // `u32` is 4 bytes aligned,\n // which means that lower 2 bits are always 0.\n let tag_mask = 0b11;\n let ptr_mask = !tag_mask;\n\n // We can store something in these lower bits\n let tagged_ptr = ptr.map_addr(|a| a | 0b10);\n\n // Get the \"tag\" back\n let tag = tagged_ptr.addr() & tag_mask;\n assert_eq!(tag, 0b10);\n\n // Note that `tagged_ptr` is unaligned, it's UB to read from it.\n // To get original pointer `mask` can be used:\n let masked_ptr = tagged_ptr.mask(ptr_mask);\n assert_eq!(unsafe { *masked_ptr }, 17);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

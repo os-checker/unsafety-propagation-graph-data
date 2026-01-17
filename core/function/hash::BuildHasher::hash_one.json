@@ -1,0 +1,47 @@
+{
+  "name": "hash::BuildHasher::hash_one",
+  "safe": true,
+  "callees": {
+    "hash::BuildHasher::build_hasher": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new hasher.\n\n Each call to `build_hasher` on the same instance should produce identical\n [`Hasher`]s.\n\n # Examples\n\n ```\n use std::hash::{BuildHasher, RandomState};\n\n let s = RandomState::new();\n let new_s = s.build_hasher();\n ```\n",
+      "adt": {}
+    },
+    "hash::Hash::hash": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Feeds this value into the given [`Hasher`].\n\n # Examples\n\n ```\n use std::hash::{DefaultHasher, Hash, Hasher};\n\n let mut hasher = DefaultHasher::new();\n 7920.hash(&mut hasher);\n println!(\"Hash is {:x}!\", hasher.finish());\n ```\n",
+      "adt": {}
+    },
+    "hash::Hasher::finish": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the hash value for the values written so far.\n\n Despite its name, the method does not reset the hasher’s internal\n state. Additional [`write`]s will continue from the current value.\n If you need to start a fresh hash value, you will have to create\n a new hasher.\n\n # Examples\n\n ```\n use std::hash::{DefaultHasher, Hasher};\n\n let mut hasher = DefaultHasher::new();\n hasher.write(b\"Cool!\");\n\n println!(\"Hash is {:x}!\", hasher.finish());\n ```\n\n [`write`]: Hasher::write\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": "hash::BuildHasher::hash_one",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/hash/mod.rs:695:5: 703:6",
+  "src": "fn hash_one<T: Hash>(&self, x: T) -> u64\n    where\n        Self: Sized,\n        Self::Hasher: Hasher,\n    {\n        let mut hasher = self.build_hasher();\n        x.hash(&mut hasher);\n        hasher.finish()\n    }",
+  "mir": "fn hash::BuildHasher::hash_one(_1: &Self, _2: T) -> u64 {\n    let mut _0: u64;\n    let mut _3: <Self as hash::BuildHasher>::Hasher;\n    let  _4: ();\n    let mut _5: &T;\n    let mut _6: &mut <Self as hash::BuildHasher>::Hasher;\n    let mut _7: &<Self as hash::BuildHasher>::Hasher;\n    debug self => _1;\n    debug x => _2;\n    debug hasher => _3;\n    bb0: {\n        StorageLive(_3);\n        _3 = <Self as hash::BuildHasher>::build_hasher(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = &_2;\n        _6 = &mut _3;\n        _4 = <T as hash::Hash>::hash::<<Self as hash::BuildHasher>::Hasher>(move _5, _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_7);\n        _7 = &_3;\n        _0 = <<Self as hash::BuildHasher>::Hasher as hash::Hasher>::finish(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        drop(_3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_3);\n        drop(_2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": " Calculates the hash of a single value.\n\n This is intended as a convenience for code which *consumes* hashes, such\n as the implementation of a hash table or in unit tests that check\n whether a custom [`Hash`] implementation behaves as expected.\n\n This must not be used in any code which *creates* hashes, such as in an\n implementation of [`Hash`].  The way to create a combined hash of\n multiple values is to call [`Hash::hash`] multiple times using the same\n [`Hasher`], not to call this method repeatedly and combine the results.\n\n # Example\n\n ```\n use std::cmp::{max, min};\n use std::hash::{BuildHasher, Hash, Hasher};\n struct OrderAmbivalentPair<T: Ord>(T, T);\n impl<T: Ord + Hash> Hash for OrderAmbivalentPair<T> {\n     fn hash<H: Hasher>(&self, hasher: &mut H) {\n         min(&self.0, &self.1).hash(hasher);\n         max(&self.0, &self.1).hash(hasher);\n     }\n }\n\n // Then later, in a `#[test]` for the type...\n let bh = std::hash::RandomState::new();\n assert_eq!(\n     bh.hash_one(OrderAmbivalentPair(1, 2)),\n     bh.hash_one(OrderAmbivalentPair(2, 1))\n );\n assert_eq!(\n     bh.hash_one(OrderAmbivalentPair(10, 2)),\n     bh.hash_one(&OrderAmbivalentPair(2, 10))\n );\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "name": "sync::mpmc::waker::Waker::register_with_packet",
+  "safe": true,
+  "callees": {
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::vec::Vec::<T, A>::push": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Appends an element to the back of a collection.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut vec = vec![1, 2];\n vec.push(3);\n assert_eq!(vec, [1, 2, 3]);\n ```\n\n # Time complexity\n\n Takes amortized *O*(1) time. If the vector's length would exceed its\n capacity after the push, *O*(*capacity*) time is taken to copy the\n vector's elements to a larger allocation. This expensive operation is\n offset by the *capacity* *O*(1) insertions it allows.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc_crate::vec::Vec": [
+      "MutRef"
+    ],
+    "sync::mpmc::waker::Waker": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "sync::mpmc::context::Context": [
+      "Ref",
+      "Plain"
+    ],
+    "sync::mpmc::waker::Entry": [
+      "Plain"
+    ],
+    "sync::mpmc::select::Operation": [
+      "Plain"
+    ]
+  },
+  "path": 2917,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/waker.rs:48:5: 50:6",
+  "src": "pub(crate) fn register_with_packet(&mut self, oper: Operation, packet: *mut (), cx: &Context) {\n        self.selectors.push(Entry { oper, packet, cx: cx.clone() });\n    }",
+  "mir": "fn sync::mpmc::waker::Waker::register_with_packet(_1: &mut sync::mpmc::waker::Waker, _2: sync::mpmc::select::Operation, _3: *mut (), _4: &sync::mpmc::context::Context) -> () {\n    let mut _0: ();\n    let  _5: ();\n    let mut _6: &mut alloc_crate::vec::Vec<sync::mpmc::waker::Entry>;\n    let mut _7: sync::mpmc::waker::Entry;\n    let mut _8: sync::mpmc::context::Context;\n    debug self => _1;\n    debug oper => _2;\n    debug packet => _3;\n    debug cx => _4;\n    bb0: {\n        StorageLive(_6);\n        _6 = &mut ((*_1).0: alloc_crate::vec::Vec<sync::mpmc::waker::Entry>);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = <sync::mpmc::context::Context as core::clone::Clone>::clone(_4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _7 = Entry(_2, _3, move _8);\n        StorageDead(_8);\n        _5 = alloc_crate::vec::Vec::<sync::mpmc::waker::Entry>::push(move _6, move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        StorageDead(_6);\n        return;\n    }\n}\n",
+  "doc": " Registers a select operation and a packet.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

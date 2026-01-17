@@ -1,0 +1,129 @@
+{
+  "name": "arch::irq::ipi::send_ipi",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the inner value if the [`Once`] has been initialized.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "irq::top_half::IrqLine::num": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the IRQ number.\n",
+      "adt": {
+        "irq::top_half::IrqLine": "ImmutableAsArgument"
+      }
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "arch::kernel::apic::Icr::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "arch::kernel::apic::Icr": "Constructor"
+      }
+    },
+    "arch::kernel::apic::get_or_init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the local APIC instance of the current CPU.\n\n The reference to the APIC instance will not outlive the given\n [`PinCurrentCpu`] guard and the APIC instance does not implement\n [`Sync`], so it is safe to assume that the APIC instance belongs\n to the current CPU. Note that interrupts are not disabled, so the\n APIC instance may be accessed concurrently by interrupt handlers.\n\n At the first time the function is called, the local APIC instance\n is initialized and enabled if it was not enabled beforehand.\n\n # Examples\n\n ```rust\n use ostd::{\n     arch::x86::kernel::apic,\n     task::disable_preempt,\n };\n\n let preempt_guard = disable_preempt();\n let apic = apic::get_or_init(&preempt_guard as _);\n\n let ticks = apic.timer_current_count();\n apic.set_timer_init_count(0);\n ```\n",
+      "adt": {}
+    },
+    "arch::kernel::apic::Apic::send_ipi": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Send a general inter-processor interrupt.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "irq::top_half::IrqLine": [
+      "Ref"
+    ],
+    "arch::irq::ipi::HwCpuId": [
+      "Unknown([Field(0, Ty { id: 9, kind: RigidTy(Uint(U32)) })])",
+      "Plain"
+    ],
+    "arch::kernel::apic::ApicId": [
+      "Plain"
+    ],
+    "arch::kernel::apic::DestinationShorthand": [
+      "Plain"
+    ],
+    "arch::kernel::apic::TriggerMode": [
+      "Plain"
+    ],
+    "arch::kernel::apic::Level": [
+      "Plain"
+    ],
+    "arch::kernel::apic::DeliveryStatus": [
+      "Plain"
+    ],
+    "arch::kernel::apic::DestinationMode": [
+      "Plain"
+    ],
+    "arch::kernel::apic::DeliveryMode": [
+      "Plain"
+    ],
+    "arch::kernel::apic::Icr": [
+      "Plain"
+    ]
+  },
+  "path": 1146,
+  "span": "ostd/src/arch/x86/irq/ipi.rs:35:1: 55:2",
+  "src": "pub(crate) fn send_ipi(hw_cpu_id: HwCpuId, guard: &dyn PinCurrentCpu) {\n    use crate::arch::kernel::apic::{self, Icr};\n\n    let irq_num = IPI_IRQ.get().unwrap().num();\n\n    let icr = Icr::new(\n        apic::ApicId::from(hw_cpu_id.0),\n        apic::DestinationShorthand::NoShorthand,\n        apic::TriggerMode::Edge,\n        apic::Level::Assert,\n        apic::DeliveryStatus::Idle,\n        apic::DestinationMode::Physical,\n        apic::DeliveryMode::Fixed,\n        irq_num,\n    );\n\n    let apic = apic::get_or_init(guard);\n    // SAFETY: The ICR is valid to generate the request IPI. Generating the\n    // request IPI is safe.\n    unsafe { apic.send_ipi(icr) };\n}",
+  "mir": "fn arch::irq::ipi::send_ipi(_1: arch::irq::ipi::HwCpuId, _2: &dyn cpu::id::current::PinCurrentCpu) -> () {\n    let mut _0: ();\n    let  _3: u8;\n    let  _4: &irq::top_half::IrqLine;\n    let mut _5: core::option::Option<&irq::top_half::IrqLine>;\n    let mut _6: &spin::once::Once<irq::top_half::IrqLine>;\n    let  _7: arch::kernel::apic::Icr;\n    let mut _8: arch::kernel::apic::ApicId;\n    let mut _9: u32;\n    let mut _10: arch::kernel::apic::DestinationShorthand;\n    let mut _11: arch::kernel::apic::TriggerMode;\n    let mut _12: arch::kernel::apic::Level;\n    let mut _13: arch::kernel::apic::DeliveryStatus;\n    let mut _14: arch::kernel::apic::DestinationMode;\n    let mut _15: arch::kernel::apic::DeliveryMode;\n    let  _16: &dyn arch::kernel::apic::Apic;\n    let  _17: ();\n    debug hw_cpu_id => _1;\n    debug guard => _2;\n    debug irq_num => _3;\n    debug icr => _7;\n    debug apic => _16;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = {alloc278: &spin::once::Once<irq::top_half::IrqLine>};\n        _5 = spin::once::Once::<irq::top_half::IrqLine>::get(move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        _4 = core::option::Option::<&irq::top_half::IrqLine>::unwrap(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = irq::top_half::IrqLine::num(_4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = (_1.0: u32);\n        _8 = <arch::kernel::apic::ApicId as core::convert::From<u32>>::from(move _9) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_9);\n        StorageLive(_10);\n        _10 = arch::kernel::apic::DestinationShorthand::NoShorthand;\n        StorageLive(_11);\n        _11 = arch::kernel::apic::TriggerMode::Edge;\n        StorageLive(_12);\n        _12 = arch::kernel::apic::Level::Assert;\n        StorageLive(_13);\n        _13 = arch::kernel::apic::DeliveryStatus::Idle;\n        StorageLive(_14);\n        _14 = arch::kernel::apic::DestinationMode::Physical;\n        StorageLive(_15);\n        _15 = arch::kernel::apic::DeliveryMode::Fixed;\n        _7 = arch::kernel::apic::Icr::new(move _8, move _10, move _11, move _12, move _13, move _14, move _15, _3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_15);\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_8);\n        _16 = arch::kernel::apic::get_or_init(_2) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _17 = <dyn arch::kernel::apic::Apic as arch::kernel::apic::Apic>::send_ipi(_16, _7) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        return;\n    }\n}\n",
+  "doc": " Sends a general inter-processor interrupt (IPI) to the specified CPU.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

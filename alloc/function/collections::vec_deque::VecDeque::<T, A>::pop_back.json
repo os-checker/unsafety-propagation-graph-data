@@ -1,0 +1,85 @@
+{
+  "name": "collections::vec_deque::VecDeque::<T, A>::pop_back",
+  "safe": true,
+  "callees": {
+    "collections::vec_deque::VecDeque::<T, A>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the deque is empty.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut deque = VecDeque::new();\n assert!(deque.is_empty());\n deque.push_front(1);\n assert!(!deque.is_empty());\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements the deque can hold without\n reallocating.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let buf: VecDeque<i32> = VecDeque::with_capacity(10);\n assert!(buf.capacity() >= 10);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "core::hint::assert_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Makes a *soundness* promise to the compiler that `cond` holds.\n\n This may allow the optimizer to simplify things, but it might also make the generated code\n slower. Either way, calling it will most likely make compilation take longer.\n\n You may know this from other places as\n [`llvm.assume`](https://llvm.org/docs/LangRef.html#llvm-assume-intrinsic) or, in C,\n [`__builtin_assume`](https://clang.llvm.org/docs/LanguageExtensions.html#builtin-assume).\n\n This promotes a correctness requirement to a soundness requirement. Don't do that without\n very good reason.\n\n # Usage\n\n This is a situational tool for micro-optimization, and is allowed to do nothing. Any use\n should come with a repeatable benchmark to show the value, with the expectation to drop it\n later should the optimizer get smarter and no longer need it.\n\n The more complicated the condition, the less likely this is to be useful. For example,\n `assert_unchecked(foo.is_sorted())` is a complex enough value that the compiler is unlikely\n to be able to take advantage of it.\n\n There's also no need to `assert_unchecked` basic properties of things.  For example, the\n compiler already knows the range of `count_ones`, so there is no benefit to\n `let n = u32::count_ones(x); assert_unchecked(n <= u32::BITS);`.\n\n `assert_unchecked` is logically equivalent to `if !cond { unreachable_unchecked(); }`. If\n ever you are tempted to write `assert_unchecked(false)`, you should instead use\n [`unreachable_unchecked()`] directly.\n\n # Safety\n\n `cond` must be `true`. It is immediate UB to call this with `false`.\n\n # Example\n\n ```\n use core::hint;\n\n /// # Safety\n ///\n /// `p` must be nonnull and valid\n pub unsafe fn next_value(p: *const i32) -> i32 {\n     // SAFETY: caller invariants guarantee that `p` is not null\n     unsafe { hint::assert_unchecked(!p.is_null()) }\n\n     if p.is_null() {\n         return -1;\n     } else {\n         // SAFETY: caller invariants guarantee that `p` is valid\n         unsafe { *p + 1 }\n     }\n }\n ```\n\n Without the `assert_unchecked`, the above function produces the following with optimizations\n enabled:\n\n ```asm\n next_value:\n         test    rdi, rdi\n         je      .LBB0_1\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n .LBB0_1:\n         mov     eax, -1\n         ret\n ```\n\n Adding the assertion allows the optimizer to remove the extra check:\n\n ```asm\n next_value:\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n ```\n\n This example is quite unlike anything that would be used in the real world: it is redundant\n to put an assertion right next to code that checks the same thing, and dereferencing a\n pointer already has the builtin assumption that it is nonnull. However, it illustrates the\n kind of changes the optimizer can make even when the behavior is less obviously related.\n",
+      "adt": {}
+    },
+    "collections::vec_deque::VecDeque::<T, A>::to_physical_idx": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::buffer_read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Moves an element out of the buffer\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 1496,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:2028:5: 2038:6",
+  "src": "pub fn pop_back(&mut self) -> Option<T> {\n        if self.is_empty() {\n            None\n        } else {\n            self.len -= 1;\n            unsafe {\n                core::hint::assert_unchecked(self.len < self.capacity());\n                Some(self.buffer_read(self.to_physical_idx(self.len)))\n            }\n        }\n    }",
+  "mir": "fn collections::vec_deque::VecDeque::<T, A>::pop_back(_1: &mut collections::vec_deque::VecDeque<T, A>) -> core::option::Option<T> {\n    let mut _0: core::option::Option<T>;\n    let mut _2: bool;\n    let mut _3: &collections::vec_deque::VecDeque<T, A>;\n    let mut _4: (usize, bool);\n    let  _5: ();\n    let mut _6: bool;\n    let mut _7: usize;\n    let mut _8: usize;\n    let mut _9: &collections::vec_deque::VecDeque<T, A>;\n    let mut _10: T;\n    let mut _11: usize;\n    let mut _12: &collections::vec_deque::VecDeque<T, A>;\n    let mut _13: usize;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &(*_1);\n        _2 = collections::vec_deque::VecDeque::<T, A>::is_empty(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = core::option::Option::None;\n        goto -> bb9;\n    }\n    bb3: {\n        StorageDead(_3);\n        _4 = CheckedSub(((*_1).1: usize), 1_usize);\n        assert(!move (_4.1: bool), \"attempt to compute `{} - {}`, which would overflow\", ((*_1).1: usize), 1_usize) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        ((*_1).1: usize) = move (_4.0: usize);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = ((*_1).1: usize);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &(*_1);\n        _8 = collections::vec_deque::VecDeque::<T, A>::capacity(move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        _6 = Lt(move _7, move _8);\n        StorageDead(_8);\n        StorageDead(_7);\n        _5 = core::hint::assert_unchecked(move _6) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_6);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &(*_1);\n        StorageLive(_13);\n        _13 = ((*_1).1: usize);\n        _11 = collections::vec_deque::VecDeque::<T, A>::to_physical_idx(move _12, move _13) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_13);\n        StorageDead(_12);\n        _10 = collections::vec_deque::VecDeque::<T, A>::buffer_read(_1, move _11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        _0 = core::option::Option::Some(move _10);\n        StorageDead(_10);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Removes the last element from the deque and returns it, or `None` if\n it is empty.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut buf = VecDeque::new();\n assert_eq!(buf.pop_back(), None);\n buf.push_back(1);\n buf.push_back(3);\n assert_eq!(buf.pop_back(), Some(3));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

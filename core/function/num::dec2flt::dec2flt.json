@@ -1,0 +1,214 @@
+{
+  "name": "num::dec2flt::dec2flt",
+  "safe": true,
+  "callees": {
+    "str::<impl str>::as_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unused_attributes"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unused_attributes\n"
+        ]
+      },
+      "doc": " Converts a string slice to a byte slice. To convert the byte slice back\n into a string slice, use the [`from_utf8`] function.\n\n # Examples\n\n ```\n let bytes = \"bors\".as_bytes();\n assert_eq!(b\"bors\", bytes);\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::first": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the first element of the slice, or `None` if it is empty.\n\n # Examples\n\n ```\n let v = [10, 40, 30];\n assert_eq!(Some(&10), v.first());\n\n let w: &[i32] = &[];\n assert_eq!(None, w.first());\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "num::dec2flt::pfe_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "num::dec2flt::ParseFloatError": "Constructor"
+      }
+    },
+    "ops::index::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the slice has a length of 0.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n assert!(!a.is_empty());\n\n let b: &[i32] = &[];\n assert!(b.is_empty());\n ```\n",
+      "adt": {}
+    },
+    "num::dec2flt::pfe_invalid": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "num::dec2flt::ParseFloatError": "Constructor"
+      }
+    },
+    "num::dec2flt::parse::parse_number": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Try to parse a non-special floating point number,\n as well as two slices with integer and fractional parts\n and the parsed exponent.\n",
+      "adt": {
+        "option::Option": "Constructor",
+        "num::dec2flt::decimal::Decimal": "Constructor"
+      }
+    },
+    "num::dec2flt::parse::parse_inf_nan": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Try to parse a special, non-finite float.\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "num::dec2flt::decimal::Decimal::try_fast_path": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Try turning the decimal into an exact float representation, using machine-sized integers\n and floats.\n\n This is extracted into a separate function so that it can be attempted before constructing\n a Decimal. This only works if both the mantissa and the exponent\n can be exactly represented as a machine float, since IEE-754 guarantees\n no rounding will occur.\n\n There is an exception: disguised fast-path cases, where we can shift\n powers-of-10 from the exponent to the significant digits.\n",
+      "adt": {
+        "option::Option": "Constructor",
+        "num::dec2flt::decimal::Decimal": "ImmutableAsArgument"
+      }
+    },
+    "num::dec2flt::lemire::compute_float": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compute w * 10^q using an extended-precision float representation.\n\n Fast conversion of a the significant digits and decimal exponent\n a float to an extended representation with a binary float. This\n algorithm will accurately parse the vast majority of cases,\n and uses a 128-bit representation (with a fallback 192-bit\n representation).\n\n This algorithm scales the exponent by the decimal exponent\n using pre-computed powers-of-5, and calculates if the\n representation can be unambiguously rounded to the nearest\n machine float. Near-halfway cases are not handled here,\n and are represented by a negative, biased binary exponent.\n\n The algorithm is described in detail in \"Daniel Lemire, Number Parsing\n at a Gigabyte per Second\" in section 5, \"Fast Algorithm\", and\n section 6, \"Exact Numbers And Ties\", available online:\n <https://arxiv.org/abs/2101.11408.pdf>.\n",
+      "adt": {
+        "num::dec2flt::common::BiasedFp": "Constructor"
+      }
+    },
+    "cmp::PartialEq::ne": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests for `!=`. The default implementation is almost always sufficient,\n and should not be overridden without very good reason.\n",
+      "adt": {}
+    },
+    "num::dec2flt::slow::parse_long_mantissa": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Parse the significant digits and biased, binary exponent of a float.\n\n This is a fallback algorithm that uses a big-integer representation\n of the float, and therefore is considerably slower than faster\n approximations. However, it will always determine how to round\n the significant digits to the nearest machine float, allowing\n use to handle near half-way cases.\n\n Near half-way cases are halfway between two consecutive machine floats.\n For example, the float `16777217.0` has a bitwise representation of\n `100000000000000000000000 1`. Rounding to a single-precision float,\n the trailing `1` is truncated. Using round-nearest, tie-even, any\n value above `16777217.0` must be rounded up to `16777218.0`, while\n any value before or equal to `16777217.0` must be rounded down\n to `16777216.0`. These near-halfway conversions therefore may require\n a large number of digits to unambiguously determine how to round.\n\n The algorithms described here are based on \"Processing Long Numbers Quickly\",\n available here: <https://arxiv.org/pdf/2101.11408.pdf#section.11>.\n",
+      "adt": {
+        "num::dec2flt::common::BiasedFp": "Constructor"
+      }
+    },
+    "num::dec2flt::biased_fp_to_float": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a `BiasedFp` to the closest machine float type.\n",
+      "adt": {}
+    },
+    "ops::arith::Neg::neg": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the unary `-` operation.\n\n # Example\n\n ```\n let x: i32 = 12;\n assert_eq!(-x, -12);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 447, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 46, kind: RigidTy(Uint(U8)) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 469, kind: RigidTy(Adt(AdtDef(DefId { id: 24543, name: \"num::dec2flt::decimal::Decimal\" }), GenericArgs([]))) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 467, kind: Param(ParamTy { index: 0, name: \"F\" }) })])"
+    ],
+    "num::dec2flt::ParseFloatError": [
+      "Plain"
+    ],
+    "result::Result": [
+      "Plain"
+    ],
+    "ops::range::RangeFrom": [
+      "Plain"
+    ],
+    "num::dec2flt::decimal::Decimal": [
+      "Plain",
+      "Unknown([Field(2, Ty { id: 3, kind: RigidTy(Bool) })])",
+      "Ref",
+      "Unknown([Field(0, Ty { id: 369, kind: RigidTy(Int(I64)) })])",
+      "Unknown([Field(1, Ty { id: 325, kind: RigidTy(Uint(U64)) })])",
+      "Unknown([Field(3, Ty { id: 3, kind: RigidTy(Bool) })])"
+    ],
+    "num::dec2flt::common::BiasedFp": [
+      "Plain",
+      "Unknown([Field(1, Ty { id: 19, kind: RigidTy(Int(I32)) })])",
+      "Ref"
+    ]
+  },
+  "path": 14800,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/dec2flt/mod.rs:256:1: 305:2",
+  "src": "pub fn dec2flt<F: RawFloat>(s: &str) -> Result<F, ParseFloatError> {\n    let mut s = s.as_bytes();\n    let c = if let Some(&c) = s.first() {\n        c\n    } else {\n        return Err(pfe_empty());\n    };\n    let negative = c == b'-';\n    if c == b'-' || c == b'+' {\n        s = &s[1..];\n    }\n    if s.is_empty() {\n        return Err(pfe_invalid());\n    }\n\n    let mut num = match parse_number(s) {\n        Some(r) => r,\n        None if let Some(value) = parse_inf_nan(s, negative) => return Ok(value),\n        None => return Err(pfe_invalid()),\n    };\n    num.negative = negative;\n    if !cfg!(feature = \"optimize_for_size\") {\n        if let Some(value) = num.try_fast_path::<F>() {\n            return Ok(value);\n        }\n    }\n\n    // If significant digits were truncated, then we can have rounding error\n    // only if `mantissa + 1` produces a different result. We also avoid\n    // redundantly using the Eisel-Lemire algorithm if it was unable to\n    // correctly round on the first pass.\n    let mut fp = compute_float::<F>(num.exponent, num.mantissa);\n    if num.many_digits\n        && fp.p_biased >= 0\n        && fp != compute_float::<F>(num.exponent, num.mantissa + 1)\n    {\n        fp.p_biased = -1;\n    }\n    // Unable to correctly round the float using the Eisel-Lemire algorithm.\n    // Fallback to a slower, but always correct algorithm.\n    if fp.p_biased < 0 {\n        fp = parse_long_mantissa::<F>(s);\n    }\n\n    let mut float = biased_fp_to_float::<F>(fp);\n    if num.negative {\n        float = -float;\n    }\n    Ok(float)\n}",
+  "mir": "fn num::dec2flt::dec2flt(_1: &str) -> result::Result<F, num::dec2flt::ParseFloatError> {\n    let mut _0: result::Result<F, num::dec2flt::ParseFloatError>;\n    let mut _2: &[u8];\n    let mut _3: option::Option<&u8>;\n    let mut _4: &[u8];\n    let mut _5: isize;\n    let  _6: u8;\n    let mut _7: num::dec2flt::ParseFloatError;\n    let  _8: bool;\n    let  _9: &[u8];\n    let mut _10: &[u8];\n    let mut _11: ops::range::RangeFrom<usize>;\n    let mut _12: bool;\n    let mut _13: &[u8];\n    let mut _14: num::dec2flt::ParseFloatError;\n    let mut _15: num::dec2flt::decimal::Decimal;\n    let mut _16: option::Option<num::dec2flt::decimal::Decimal>;\n    let mut _17: &[u8];\n    let mut _18: isize;\n    let  _19: num::dec2flt::decimal::Decimal;\n    let  _20: F;\n    let mut _21: option::Option<F>;\n    let mut _22: &[u8];\n    let mut _23: isize;\n    let mut _24: num::dec2flt::ParseFloatError;\n    let mut _25: option::Option<F>;\n    let mut _26: &num::dec2flt::decimal::Decimal;\n    let mut _27: isize;\n    let  _28: F;\n    let mut _29: num::dec2flt::common::BiasedFp;\n    let mut _30: i64;\n    let mut _31: u64;\n    let mut _32: bool;\n    let mut _33: bool;\n    let mut _34: i32;\n    let mut _35: bool;\n    let mut _36: &num::dec2flt::common::BiasedFp;\n    let mut _37: &num::dec2flt::common::BiasedFp;\n    let  _38: num::dec2flt::common::BiasedFp;\n    let mut _39: i64;\n    let mut _40: u64;\n    let mut _41: u64;\n    let mut _42: (u64, bool);\n    let mut _43: bool;\n    let mut _44: i32;\n    let mut _45: num::dec2flt::common::BiasedFp;\n    let mut _46: &[u8];\n    let mut _47: F;\n    let mut _48: num::dec2flt::common::BiasedFp;\n    let mut _49: bool;\n    let mut _50: F;\n    let mut _51: F;\n    let mut _52: F;\n    let mut _53: &u8;\n    debug s => _1;\n    debug s => _2;\n    debug c => _6;\n    debug c => _6;\n    debug negative => _8;\n    debug num => _15;\n    debug r => _19;\n    debug value => _20;\n    debug value => _28;\n    debug fp => _29;\n    debug float => _47;\n    bb0: {\n        StorageLive(_2);\n        _2 = str::<impl str>::as_bytes(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = _2;\n        _3 = slice::<impl [u8]>::first(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [1: bb3, 0: bb4, otherwise: bb18];\n    }\n    bb3: {\n        _53 = ((_3 as variant#1).0: &u8);\n        _6 = (*_53);\n        StorageDead(_3);\n        _8 = Eq(_6, 45_u8);\n        switchInt(_6) -> [45: bb6, otherwise: bb7];\n    }\n    bb4: {\n        StorageDead(_3);\n        StorageLive(_7);\n        _7 = num::dec2flt::pfe_empty() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = result::Result::Err(move _7);\n        StorageDead(_7);\n        goto -> bb49;\n    }\n    bb6: {\n        goto -> bb10;\n    }\n    bb7: {\n        switchInt(_6) -> [43: bb8, otherwise: bb9];\n    }\n    bb8: {\n        goto -> bb10;\n    }\n    bb9: {\n        goto -> bb12;\n    }\n    bb10: {\n        StorageLive(_10);\n        _10 = _2;\n        StorageLive(_11);\n        _11 = RangeFrom(1_usize);\n        _9 = <[u8] as ops::index::Index<ops::range::RangeFrom<usize>>>::index(move _10, move _11) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_11);\n        StorageDead(_10);\n        _2 = _9;\n        goto -> bb12;\n    }\n    bb12: {\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = _2;\n        _12 = slice::<impl [u8]>::is_empty(move _13) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        switchInt(move _12) -> [0: bb16, otherwise: bb14];\n    }\n    bb14: {\n        StorageDead(_13);\n        StorageLive(_14);\n        _14 = num::dec2flt::pfe_invalid() -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        _0 = result::Result::Err(move _14);\n        StorageDead(_14);\n        StorageDead(_12);\n        goto -> bb48;\n    }\n    bb16: {\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = _2;\n        _16 = num::dec2flt::parse::parse_number(move _17) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_17);\n        _18 = discriminant(_16);\n        switchInt(move _18) -> [0: bb19, 1: bb20, otherwise: bb18];\n    }\n    bb18: {\n        unreachable;\n    }\n    bb19: {\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = _2;\n        _21 = num::dec2flt::parse::parse_inf_nan::<F>(move _22, _8) -> [return: bb21, unwind unreachable];\n    }\n    bb20: {\n        StorageLive(_19);\n        _19 = ((_16 as variant#1).0: num::dec2flt::decimal::Decimal);\n        _15 = _19;\n        StorageDead(_19);\n        StorageDead(_16);\n        (_15.2: bool) = _8;\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = &_15;\n        _25 = num::dec2flt::decimal::Decimal::try_fast_path::<F>(move _26) -> [return: bb25, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_22);\n        _23 = discriminant(_21);\n        switchInt(move _23) -> [1: bb22, 0: bb23, otherwise: bb18];\n    }\n    bb22: {\n        _20 = ((_21 as variant#1).0: F);\n        _0 = result::Result::Ok(_20);\n        StorageDead(_21);\n        goto -> bb46;\n    }\n    bb23: {\n        StorageDead(_21);\n        StorageLive(_24);\n        _24 = num::dec2flt::pfe_invalid() -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        _0 = result::Result::Err(move _24);\n        StorageDead(_24);\n        goto -> bb46;\n    }\n    bb25: {\n        StorageDead(_26);\n        _27 = discriminant(_25);\n        switchInt(move _27) -> [1: bb26, 0: bb27, otherwise: bb18];\n    }\n    bb26: {\n        _28 = ((_25 as variant#1).0: F);\n        _0 = result::Result::Ok(_28);\n        StorageDead(_25);\n        goto -> bb47;\n    }\n    bb27: {\n        StorageDead(_25);\n        StorageLive(_29);\n        StorageLive(_30);\n        _30 = (_15.0: i64);\n        StorageLive(_31);\n        _31 = (_15.1: u64);\n        _29 = num::dec2flt::lemire::compute_float::<F>(move _30, move _31) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        StorageDead(_31);\n        StorageDead(_30);\n        StorageLive(_32);\n        _32 = (_15.3: bool);\n        switchInt(move _32) -> [0: bb37, otherwise: bb29];\n    }\n    bb29: {\n        StorageLive(_33);\n        StorageLive(_34);\n        _34 = (_29.1: i32);\n        _33 = Ge(move _34, 0_i32);\n        switchInt(move _33) -> [0: bb36, otherwise: bb30];\n    }\n    bb30: {\n        StorageDead(_34);\n        StorageLive(_35);\n        StorageLive(_36);\n        _36 = &_29;\n        StorageLive(_37);\n        StorageLive(_38);\n        StorageLive(_39);\n        _39 = (_15.0: i64);\n        StorageLive(_40);\n        StorageLive(_41);\n        _41 = (_15.1: u64);\n        _42 = CheckedAdd(_41, 1_u64);\n        assert(!move (_42.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _41, 1_u64) -> [success: bb31, unwind unreachable];\n    }\n    bb31: {\n        _40 = move (_42.0: u64);\n        StorageDead(_41);\n        _38 = num::dec2flt::lemire::compute_float::<F>(move _39, move _40) -> [return: bb32, unwind unreachable];\n    }\n    bb32: {\n        _37 = &_38;\n        StorageDead(_40);\n        StorageDead(_39);\n        _35 = <num::dec2flt::common::BiasedFp as cmp::PartialEq>::ne(move _36, move _37) -> [return: bb33, unwind unreachable];\n    }\n    bb33: {\n        switchInt(move _35) -> [0: bb35, otherwise: bb34];\n    }\n    bb34: {\n        StorageDead(_38);\n        StorageDead(_37);\n        StorageDead(_36);\n        (_29.1: i32) = -1_i32;\n        goto -> bb37;\n    }\n    bb35: {\n        StorageDead(_38);\n        StorageDead(_37);\n        StorageDead(_36);\n        goto -> bb37;\n    }\n    bb36: {\n        StorageDead(_34);\n        goto -> bb37;\n    }\n    bb37: {\n        StorageDead(_35);\n        StorageDead(_33);\n        StorageDead(_32);\n        StorageLive(_43);\n        StorageLive(_44);\n        _44 = (_29.1: i32);\n        _43 = Lt(move _44, 0_i32);\n        switchInt(move _43) -> [0: bb40, otherwise: bb38];\n    }\n    bb38: {\n        StorageDead(_44);\n        StorageLive(_45);\n        StorageLive(_46);\n        _46 = _2;\n        _45 = num::dec2flt::slow::parse_long_mantissa::<F>(move _46) -> [return: bb39, unwind unreachable];\n    }\n    bb39: {\n        StorageDead(_46);\n        _29 = move _45;\n        StorageDead(_45);\n        goto -> bb41;\n    }\n    bb40: {\n        StorageDead(_44);\n        goto -> bb41;\n    }\n    bb41: {\n        StorageDead(_43);\n        StorageLive(_47);\n        StorageLive(_48);\n        _48 = _29;\n        _47 = num::dec2flt::biased_fp_to_float::<F>(move _48) -> [return: bb42, unwind unreachable];\n    }\n    bb42: {\n        StorageDead(_48);\n        StorageLive(_49);\n        _49 = (_15.2: bool);\n        switchInt(move _49) -> [0: bb45, otherwise: bb43];\n    }\n    bb43: {\n        StorageLive(_50);\n        StorageLive(_51);\n        _51 = _47;\n        _50 = <F as ops::arith::Neg>::neg(move _51) -> [return: bb44, unwind unreachable];\n    }\n    bb44: {\n        StorageDead(_51);\n        _47 = move _50;\n        StorageDead(_50);\n        goto -> bb45;\n    }\n    bb45: {\n        StorageDead(_49);\n        StorageLive(_52);\n        _52 = _47;\n        _0 = result::Result::Ok(move _52);\n        StorageDead(_52);\n        StorageDead(_47);\n        StorageDead(_29);\n        StorageDead(_15);\n        StorageDead(_2);\n        goto -> bb50;\n    }\n    bb46: {\n        StorageDead(_16);\n        goto -> bb47;\n    }\n    bb47: {\n        StorageDead(_15);\n        goto -> bb48;\n    }\n    bb48: {\n        goto -> bb49;\n    }\n    bb49: {\n        StorageDead(_2);\n        goto -> bb50;\n    }\n    bb50: {\n        return;\n    }\n}\n",
+  "doc": " Converts a decimal string into a floating point number.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

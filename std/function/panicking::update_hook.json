@@ -1,0 +1,121 @@
+{
+  "name": "panicking::update_hook",
+  "safe": true,
+  "callees": {
+    "thread::functions::panicking": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Determines whether the current thread is unwinding because of panic.\n\n A common use of this feature is to poison shared resources when writing\n unsafe code, by checking `panicking` when the `drop` is called.\n\n This is usually not needed when writing safe code, as [`Mutex`es][Mutex]\n already poison themselves when a thread panics while holding the lock.\n\n This can also be used in multithreaded applications, in order to send a\n message to other threads warning that a thread has panicked (e.g., for\n monitoring purposes).\n\n # Examples\n\n ```should_panic\n use std::thread;\n\n struct SomeStruct;\n\n impl Drop for SomeStruct {\n     fn drop(&mut self) {\n         if thread::panicking() {\n             println!(\"dropped while unwinding\");\n         } else {\n             println!(\"dropped while not unwinding\");\n         }\n     }\n }\n\n {\n     print!(\"a: \");\n     let a = SomeStruct;\n }\n\n {\n     print!(\"b: \");\n     let b = SomeStruct;\n     panic!()\n }\n ```\n\n [Mutex]: crate::sync::Mutex\n",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {}
+    },
+    "core::panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {}
+    },
+    "sync::nonpoison::rwlock::RwLock::<T>::write": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Locks this `RwLock` with exclusive write access, blocking the current\n thread until it can be acquired.\n\n This function will not return while other writers or other readers\n currently have access to the lock.\n\n Returns an RAII guard which will drop the write access of this `RwLock`\n when dropped.\n\n # Panics\n\n This function might panic when called if the lock is already held by the current thread.\n\n # Examples\n\n ```\n #![feature(nonpoison_rwlock)]\n\n use std::sync::nonpoison::RwLock;\n\n let lock = RwLock::new(1);\n\n let mut n = lock.write();\n *n = 2;\n\n assert!(lock.try_read().is_err());\n ```\n",
+      "adt": {
+        "sync::nonpoison::rwlock::RwLock": "ImmutableAsArgument",
+        "sync::nonpoison::rwlock::RwLockWriteGuard": "Constructor"
+      }
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "core::mem::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Replaces `dest` with the default value of `T`, returning the previous `dest` value.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a passed value instead of the default value, see [`replace`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::take(&mut v);\n assert_eq!(vec![1, 2], old_v);\n assert!(v.is_empty());\n ```\n\n `take` allows taking ownership of a struct field by replacing it with an \"empty\" value.\n Without `take` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let buf = self.buf;\n         self.buf = Vec::new();\n         buf\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so it can't even clone and reset\n `self.buf`. But `take` can be used to disassociate the original value of `self.buf` from\n `self`, allowing it to be returned:\n\n ```\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         mem::take(&mut self.buf)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf.len(), 2);\n\n assert_eq!(buffer.get_and_reset(), vec![0, 1]);\n assert_eq!(buffer.buf.len(), 0);\n ```\n",
+      "adt": {}
+    },
+    "panicking::Hook::into_box": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "alloc_crate::boxed::Box": "Constructor"
+      }
+    },
+    "alloc_crate::boxed::Box::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory on the heap and then places `x` into it.\n\n This doesn't actually allocate if `T` is zero-sized.\n\n # Examples\n\n ```\n let five = Box::new(5);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::fmt::Arguments": [
+      "Plain"
+    ],
+    "sync::nonpoison::rwlock::RwLock": [
+      "Ref"
+    ],
+    "sync::nonpoison::rwlock::RwLockWriteGuard": [
+      "Plain",
+      "MutRef"
+    ],
+    "panicking::Hook": [
+      "MutRef",
+      "Plain",
+      "Deref"
+    ],
+    "alloc_crate::boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 2333,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:222:1: 236:2",
+  "src": "pub fn update_hook<F>(hook_fn: F)\nwhere\n    F: Fn(&(dyn Fn(&PanicHookInfo<'_>) + Send + Sync + 'static), &PanicHookInfo<'_>)\n        + Sync\n        + Send\n        + 'static,\n{\n    if thread::panicking() {\n        panic!(\"cannot modify the panic hook from a panicking thread\");\n    }\n\n    let mut hook = HOOK.write();\n    let prev = mem::take(&mut *hook).into_box();\n    *hook = Hook::Custom(Box::new(move |info| hook_fn(&prev, info)));\n}",
+  "mir": "fn panicking::update_hook(_1: F) -> () {\n    let mut _0: ();\n    let mut _2: bool;\n    let  _3: !;\n    let mut _4: core::fmt::Arguments<'_>;\n    let mut _5: sync::nonpoison::rwlock::RwLockWriteGuard<'_, panicking::Hook>;\n    let mut _6: &sync::nonpoison::rwlock::RwLock<panicking::Hook>;\n    let  _7: alloc_crate::boxed::Box<dyn for<'a, 'b> core::ops::Fn(&'a panic::PanicHookInfo<'b>) + core::marker::Send + core::marker::Sync>;\n    let mut _8: panicking::Hook;\n    let mut _9: &mut panicking::Hook;\n    let mut _10: &mut sync::nonpoison::rwlock::RwLockWriteGuard<'_, panicking::Hook>;\n    let mut _11: panicking::Hook;\n    let mut _12: alloc_crate::boxed::Box<dyn for<'a, 'b> core::ops::Fn(&'a panic::PanicHookInfo<'b>) + core::marker::Send + core::marker::Sync>;\n    let mut _13: alloc_crate::boxed::Box<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:235:35: 235:46}>;\n    let mut _14: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:235:35: 235:46};\n    let mut _15: &mut panicking::Hook;\n    let mut _16: &mut sync::nonpoison::rwlock::RwLockWriteGuard<'_, panicking::Hook>;\n    debug hook_fn => _1;\n    debug hook => _5;\n    debug prev => _7;\n    bb0: {\n        StorageLive(_2);\n        _2 = thread::functions::panicking() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_4);\n        _4 = core::fmt::Arguments::<'_>::from_str(\"cannot modify the panic hook from a panicking thread\") -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _3 = core::panicking::panic_fmt(move _4) -> unwind unreachable;\n    }\n    bb4: {\n        StorageDead(_2);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = {alloc632: &sync::nonpoison::rwlock::RwLock<panicking::Hook>};\n        _5 = sync::nonpoison::rwlock::RwLock::<panicking::Hook>::write(move _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_10);\n        _10 = &mut _5;\n        _9 = <sync::nonpoison::rwlock::RwLockWriteGuard<'_, panicking::Hook> as core::ops::DerefMut>::deref_mut(move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        _8 = core::mem::take::<panicking::Hook>(_9) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _7 = panicking::Hook::into_box(move _8) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_8);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:235:35: 235:46}(move _1, move _7);\n        _13 = alloc_crate::boxed::Box::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:235:35: 235:46}>::new(move _14) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _12 = move _13 as alloc_crate::boxed::Box<dyn for<'a, 'b> core::ops::Fn(&'a panic::PanicHookInfo<'b>) + core::marker::Send + core::marker::Sync>;\n        StorageDead(_14);\n        StorageDead(_13);\n        _11 = panicking::Hook::Custom(move _12);\n        StorageDead(_12);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &mut _5;\n        _15 = <sync::nonpoison::rwlock::RwLockWriteGuard<'_, panicking::Hook> as core::ops::DerefMut>::deref_mut(move _16) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_16);\n        drop((*_15)) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        (*_15) = move _11;\n        StorageDead(_11);\n        StorageDead(_15);\n        StorageDead(_7);\n        drop(_5) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": " Atomic combination of [`take_hook`] and [`set_hook`]. Use this to replace the panic handler with\n a new panic handler that does something and then executes the old handler.\n\n [`take_hook`]: ./fn.take_hook.html\n [`set_hook`]: ./fn.set_hook.html\n\n # Panics\n\n Panics if called from a panicking thread.\n\n # Examples\n\n The following will print the custom message, and then the normal output of panic.\n\n ```should_panic\n #![feature(panic_update_hook)]\n use std::panic;\n\n // Equivalent to\n // let prev = panic::take_hook();\n // panic::set_hook(Box::new(move |info| {\n //     println!(\"...\");\n //     prev(info);\n // }));\n panic::update_hook(move |prev, info| {\n     println!(\"Print custom message and execute panic handler as usual\");\n     prev(info);\n });\n\n panic!(\"Custom and then normal\");\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

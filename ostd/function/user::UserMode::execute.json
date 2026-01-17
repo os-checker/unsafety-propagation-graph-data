@@ -1,0 +1,48 @@
+{
+  "name": "user::UserMode::execute",
+  "safe": true,
+  "callees": {
+    "task::atomic_mode::might_sleep": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Marks a function as one that might sleep.\n\n This function will panic if it is executed in atomic mode.\n",
+      "adt": {}
+    },
+    "user::UserContextApiInternal::execute": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Starts executing in the user mode.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "arch::cpu::context::UserContext": [
+      "MutRef"
+    ],
+    "user::UserMode": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "user::ReturnReason": [
+      "Plain"
+    ]
+  },
+  "path": 2885,
+  "span": "ostd/src/user.rs:90:5: 96:6",
+  "src": "pub fn execute<F>(&mut self, has_kernel_event: F) -> ReturnReason\n    where\n        F: FnMut() -> bool,\n    {\n        crate::task::atomic_mode::might_sleep();\n        self.context.execute(has_kernel_event)\n    }",
+  "mir": "fn user::UserMode::execute(_1: &mut user::UserMode, _2: F) -> user::ReturnReason {\n    let mut _0: user::ReturnReason;\n    let  _3: ();\n    let mut _4: &mut arch::cpu::context::UserContext;\n    debug self => _1;\n    debug has_kernel_event => _2;\n    bb0: {\n        _3 = task::atomic_mode::might_sleep() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = &mut ((*_1).0: arch::cpu::context::UserContext);\n        _0 = <arch::cpu::context::UserContext as user::UserContextApiInternal>::execute::<F>(move _4, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Starts executing in the user mode. Make sure current task is the task in `UserMode`.\n\n The method returns for one of three possible reasons indicated by [`ReturnReason`].\n 1. A system call is issued by the user space;\n 2. A CPU exception is triggered by the user space;\n 3. A kernel event is pending, as indicated by the given closure.\n\n After handling whatever user or kernel events that\n cause the method to return\n and updating the user-mode CPU context,\n this method can be invoked again to go back to the user space.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

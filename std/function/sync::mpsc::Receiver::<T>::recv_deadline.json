@@ -1,0 +1,44 @@
+{
+  "name": "sync::mpsc::Receiver::<T>::recv_deadline",
+  "safe": true,
+  "callees": {
+    "sync::mpmc::Receiver::<T>::recv_deadline": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to wait for a value on this receiver, returning an error if the\n corresponding channel has hung up, or if `deadline` is reached.\n\n This function will always block the current thread if there is no data\n available and it's possible for more data to be sent. Once a message is\n sent to the corresponding [`Sender`], then this receiver will wake up\n and return that message.\n\n If the corresponding [`Sender`] has disconnected, or it disconnects while\n this call is blocking, this call will wake up and return [`Err`] to\n indicate that no more messages can ever be received on this channel.\n However, since channels are buffered, messages sent before the disconnect\n will still be properly received.\n\n # Examples\n\n Successfully receiving value before reaching deadline:\n\n ```no_run\n #![feature(mpmc_channel)]\n\n use std::thread;\n use std::time::{Duration, Instant};\n use std::sync::mpmc;\n\n let (send, recv) = mpmc::channel();\n\n thread::spawn(move || {\n     send.send('a').unwrap();\n });\n\n assert_eq!(\n     recv.recv_deadline(Instant::now() + Duration::from_millis(400)),\n     Ok('a')\n );\n ```\n\n Receiving an error upon reaching deadline:\n\n ```no_run\n #![feature(mpmc_channel)]\n\n use std::thread;\n use std::time::{Duration, Instant};\n use std::sync::mpmc;\n\n let (send, recv) = mpmc::channel();\n\n thread::spawn(move || {\n     thread::sleep(Duration::from_millis(800));\n     send.send('a').unwrap();\n });\n\n assert_eq!(\n     recv.recv_deadline(Instant::now() + Duration::from_millis(400)),\n     Err(mpmc::RecvTimeoutError::Timeout)\n );\n ```\n",
+      "adt": {
+        "sync::mpmc::Receiver": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sync::mpmc::Receiver": [
+      "Ref"
+    ],
+    "sync::mpsc::Receiver": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "time::Instant": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 2998,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpsc.rs:969:5: 971:6",
+  "src": "pub fn recv_deadline(&self, deadline: Instant) -> Result<T, RecvTimeoutError> {\n        self.inner.recv_deadline(deadline)\n    }",
+  "mir": "fn sync::mpsc::Receiver::<T>::recv_deadline(_1: &sync::mpsc::Receiver<T>, _2: time::Instant) -> core::result::Result<T, sync::mpsc::RecvTimeoutError> {\n    let mut _0: core::result::Result<T, sync::mpsc::RecvTimeoutError>;\n    let mut _3: &sync::mpmc::Receiver<T>;\n    debug self => _1;\n    debug deadline => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = &((*_1).0: sync::mpmc::Receiver<T>);\n        _0 = sync::mpmc::Receiver::<T>::recv_deadline(move _3, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Attempts to wait for a value on this receiver, returning an error if the\n corresponding channel has hung up, or if `deadline` is reached.\n\n This function will always block the current thread if there is no data\n available and it's possible for more data to be sent. Once a message is\n sent to the corresponding [`Sender`] (or [`SyncSender`]), then this\n receiver will wake up and return that message.\n\n If the corresponding [`Sender`] has disconnected, or it disconnects while\n this call is blocking, this call will wake up and return [`Err`] to\n indicate that no more messages can ever be received on this channel.\n However, since channels are buffered, messages sent before the disconnect\n will still be properly received.\n\n # Examples\n\n Successfully receiving value before reaching deadline:\n\n ```no_run\n #![feature(deadline_api)]\n use std::thread;\n use std::time::{Duration, Instant};\n use std::sync::mpsc;\n\n let (send, recv) = mpsc::channel();\n\n thread::spawn(move || {\n     send.send('a').unwrap();\n });\n\n assert_eq!(\n     recv.recv_deadline(Instant::now() + Duration::from_millis(400)),\n     Ok('a')\n );\n ```\n\n Receiving an error upon reaching deadline:\n\n ```no_run\n #![feature(deadline_api)]\n use std::thread;\n use std::time::{Duration, Instant};\n use std::sync::mpsc;\n\n let (send, recv) = mpsc::channel();\n\n thread::spawn(move || {\n     thread::sleep(Duration::from_millis(800));\n     send.send('a').unwrap();\n });\n\n assert_eq!(\n     recv.recv_deadline(Instant::now() + Duration::from_millis(400)),\n     Err(mpsc::RecvTimeoutError::Timeout)\n );\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

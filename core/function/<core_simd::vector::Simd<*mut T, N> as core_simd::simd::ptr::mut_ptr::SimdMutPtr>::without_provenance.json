@@ -1,0 +1,32 @@
+{
+  "name": "<core_simd::vector::Simd<*mut T, N> as core_simd::simd::ptr::mut_ptr::SimdMutPtr>::without_provenance",
+  "safe": true,
+  "callees": {
+    "mem::transmute_copy": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Interprets `src` as having type `&Dst`, and then reads `src` without moving\n the contained value.\n\n This function will unsafely assume the pointer `src` is valid for [`size_of::<Dst>`][size_of]\n bytes by transmuting `&Src` to `&Dst` and then reading the `&Dst` (except that this is done\n in a way that is correct even when `&Dst` has stricter alignment requirements than `&Src`).\n It will also unsafely create a copy of the contained value instead of moving out of `src`.\n\n It is not a compile-time error if `Src` and `Dst` have different sizes, but it\n is highly encouraged to only invoke this function where `Src` and `Dst` have the\n same size. This function triggers [undefined behavior][ub] if `Dst` is larger than\n `Src`.\n\n [ub]: ../../reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n use std::mem;\n\n #[repr(packed)]\n struct Foo {\n     bar: u8,\n }\n\n let foo_array = [10u8];\n\n unsafe {\n     // Copy the data from 'foo_array' and treat it as a 'Foo'\n     let mut foo_struct: Foo = mem::transmute_copy(&foo_array);\n     assert_eq!(foo_struct.bar, 10);\n\n     // Modify the copied data\n     foo_struct.bar = 20;\n     assert_eq!(foo_struct.bar, 20);\n }\n\n // The contents of 'foo_array' should not have changed\n assert_eq!(foo_array, [10]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_simd::vector::Simd": [
+      "Ref",
+      "Plain"
+    ]
+  },
+  "path": 12622,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/simd/ptr/mut_ptr.rs:132:5: 137:6",
+  "src": "fn without_provenance(addr: Self::Usize) -> Self {\n        // FIXME(strict_provenance_magic): I am magic and should be a compiler intrinsic.\n        // SAFETY: Integer-to-pointer transmutes are valid (if you are okay with not getting any\n        // provenance).\n        unsafe { core::mem::transmute_copy(&addr) }\n    }",
+  "mir": "fn <core_simd::vector::Simd<*mut T, N> as core_simd::simd::ptr::mut_ptr::SimdMutPtr>::without_provenance(_1: core_simd::vector::Simd<usize, N>) -> core_simd::vector::Simd<*mut T, N> {\n    let mut _0: core_simd::vector::Simd<*mut T, N>;\n    let  _2: &core_simd::vector::Simd<usize, N>;\n    debug addr => _1;\n    bb0: {\n        _2 = &_1;\n        _0 = mem::transmute_copy::<core_simd::vector::Simd<usize, N>, core_simd::vector::Simd<*mut T, N>>(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

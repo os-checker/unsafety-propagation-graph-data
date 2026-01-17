@@ -1,0 +1,40 @@
+{
+  "name": "collections::linked_list::LinkedList::<T, A>::push_front_node",
+  "safe": false,
+  "callees": {
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain"
+    ],
+    "collections::linked_list::LinkedList": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "MutRef"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 1303,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/linked_list.rs:173:5: 190:6",
+  "src": "unsafe fn push_front_node(&mut self, node: NonNull<Node<T>>) {\n        // This method takes care not to create mutable references to whole nodes,\n        // to maintain validity of aliasing pointers into `element`.\n        unsafe {\n            (*node.as_ptr()).next = self.head;\n            (*node.as_ptr()).prev = None;\n            let node = Some(node);\n\n            match self.head {\n                None => self.tail = node,\n                // Not creating new mutable (unique!) references overlapping `element`.\n                Some(head) => (*head.as_ptr()).prev = node,\n            }\n\n            self.head = node;\n            self.len += 1;\n        }\n    }",
+  "mir": "fn collections::linked_list::LinkedList::<T, A>::push_front_node(_1: &mut collections::linked_list::LinkedList<T, A>, _2: core::ptr::NonNull<collections::linked_list::Node<T>>) -> () {\n    let mut _0: ();\n    let mut _3: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>;\n    let mut _4: *mut collections::linked_list::Node<T>;\n    let mut _5: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>;\n    let mut _6: *mut collections::linked_list::Node<T>;\n    let  _7: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>;\n    let mut _8: isize;\n    let  _9: core::ptr::NonNull<collections::linked_list::Node<T>>;\n    let mut _10: *mut collections::linked_list::Node<T>;\n    let mut _11: (usize, bool);\n    debug self => _1;\n    debug node => _2;\n    debug node => _7;\n    debug head => _9;\n    bb0: {\n        StorageLive(_3);\n        _3 = ((*_1).0: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>);\n        StorageLive(_4);\n        _4 = core::ptr::NonNull::<collections::linked_list::Node<T>>::as_ptr(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        ((*_4).0: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>) = move _3;\n        StorageDead(_3);\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = core::option::Option::None;\n        StorageLive(_6);\n        _6 = core::ptr::NonNull::<collections::linked_list::Node<T>>::as_ptr(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        ((*_6).1: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>) = move _5;\n        StorageDead(_5);\n        StorageDead(_6);\n        _7 = core::option::Option::Some(_2);\n        _8 = discriminant(((*_1).0: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>));\n        switchInt(move _8) -> [0: bb5, 1: bb4, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _9 = ((((*_1).0: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>) as variant#1).0: core::ptr::NonNull<collections::linked_list::Node<T>>);\n        StorageLive(_10);\n        _10 = core::ptr::NonNull::<collections::linked_list::Node<T>>::as_ptr(_9) -> [return: bb6, unwind unreachable];\n    }\n    bb5: {\n        ((*_1).1: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>) = _7;\n        goto -> bb7;\n    }\n    bb6: {\n        ((*_10).1: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>) = _7;\n        StorageDead(_10);\n        goto -> bb7;\n    }\n    bb7: {\n        ((*_1).0: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>) = _7;\n        _11 = CheckedAdd(((*_1).2: usize), 1_usize);\n        assert(!move (_11.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).2: usize), 1_usize) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        ((*_1).2: usize) = move (_11.0: usize);\n        return;\n    }\n}\n",
+  "doc": " Adds the given node to the front of the list.\n\n # Safety\n `node` must point to a valid node that was boxed and leaked using the list's allocator.\n This method takes ownership of the node, so the pointer should not be used again.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

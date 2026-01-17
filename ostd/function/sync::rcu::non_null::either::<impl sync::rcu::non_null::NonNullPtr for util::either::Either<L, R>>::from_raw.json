@@ -1,0 +1,58 @@
+{
+  "name": "sync::rcu::non_null::either::<impl sync::rcu::non_null::NonNullPtr for util::either::Either<L, R>>::from_raw",
+  "safe": false,
+  "callees": {
+    "sync::rcu::non_null::either::remove_bits": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " # Safety\n\n The caller must ensure that removing the bits from the non-null pointer will result in another\n non-null pointer.\n",
+      "adt": {
+        "core::ptr::NonNull": "Constructor"
+      }
+    },
+    "core::ptr::NonNull::<T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"null pointer\");\n\n let casted_ptr = ptr.cast::<i8>();\n let raw_ptr: *mut i8 = casted_ptr.as_ptr();\n ```\n",
+      "adt": {}
+    },
+    "sync::rcu::non_null::NonNullPtr::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts back from a raw pointer.\n\n # Safety\n\n 1. The raw pointer must have been previously returned by a call to\n    `into_raw`.\n 2. The raw pointer must not be used after calling `from_raw`.\n\n Note that the second point is a hard requirement: Even if the\n resulting value has not (yet) been dropped, the pointer cannot be\n used because it may break Rust aliasing rules (e.g., `Box<T>`\n requires the pointer to be unique and thus _never_ aliased).\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(1, Ty { id: 6635, kind: RigidTy(Adt(AdtDef(DefId { id: 3282, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 6640, kind: RigidTy(Adt(AdtDef(DefId { id: 4650, name: \"core::marker::PhantomData\" }), GenericArgs([Type(Ty { id: 6636, kind: RigidTy(Adt(AdtDef(DefId { id: 5727, name: \"util::either::Either\" }), GenericArgs([Type(Ty { id: 6630, kind: Param(ParamTy { index: 0, name: \"L\" }) }), Type(Ty { id: 54, kind: Param(ParamTy { index: 1, name: \"R\" }) })]))) })]))) })]))) })])"
+    ],
+    "util::either::Either": [
+      "Plain"
+    ]
+  },
+  "path": 2900,
+  "span": "ostd/src/sync/rcu/non_null/either.rs:33:5: 47:6",
+  "src": "unsafe fn from_raw(ptr: NonNull<Self::Target>) -> Self {\n        // SAFETY: The caller ensures that the pointer comes from `Self::into_raw`, which\n        // guarantees that `real_ptr` is a non-null pointer.\n        let (is_right, real_ptr) = unsafe { remove_bits(ptr, 1 << Self::ALIGN_BITS) };\n\n        if is_right == 0 {\n            // SAFETY: `Self::into_raw` guarantees that `real_ptr` comes from `L::into_raw`. Other\n            // safety requirements are upheld by the caller.\n            Either::Left(unsafe { L::from_raw(real_ptr.cast()) })\n        } else {\n            // SAFETY: `Self::into_raw` guarantees that `real_ptr` comes from `R::into_raw`. Other\n            // safety requirements are upheld by the caller.\n            Either::Right(unsafe { R::from_raw(real_ptr.cast()) })\n        }\n    }",
+  "mir": "fn sync::rcu::non_null::either::<impl sync::rcu::non_null::NonNullPtr for util::either::Either<L, R>>::from_raw(_1: core::ptr::NonNull<core::marker::PhantomData<util::either::Either<L, R>>>) -> util::either::Either<L, R> {\n    let mut _0: util::either::Either<L, R>;\n    let  _2: usize;\n    let  _3: core::ptr::NonNull<core::marker::PhantomData<util::either::Either<L, R>>>;\n    let mut _4: (usize, core::ptr::NonNull<core::marker::PhantomData<util::either::Either<L, R>>>);\n    let mut _5: usize;\n    let mut _6: bool;\n    let mut _7: L;\n    let mut _8: core::ptr::NonNull<<L as sync::rcu::non_null::NonNullPtr>::Target>;\n    let mut _9: R;\n    let mut _10: core::ptr::NonNull<<R as sync::rcu::non_null::NonNullPtr>::Target>;\n    debug ptr => _1;\n    debug is_right => _2;\n    debug real_ptr => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _6 = Lt(<util::either::Either<L, R> as sync::rcu::non_null::NonNullPtr>::ALIGN_BITS, 64_u32);\n        assert(move _6, \"attempt to shift left by `{}`, which would overflow\", <util::either::Either<L, R> as sync::rcu::non_null::NonNullPtr>::ALIGN_BITS) -> [success: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = Shl(1_usize, <util::either::Either<L, R> as sync::rcu::non_null::NonNullPtr>::ALIGN_BITS);\n        _4 = sync::rcu::non_null::either::remove_bits::<core::marker::PhantomData<util::either::Either<L, R>>>(_1, move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _2 = (_4.0: usize);\n        _3 = (_4.1: core::ptr::NonNull<core::marker::PhantomData<util::either::Either<L, R>>>);\n        StorageDead(_4);\n        switchInt(_2) -> [0: bb3, otherwise: bb6];\n    }\n    bb3: {\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = core::ptr::NonNull::<core::marker::PhantomData<util::either::Either<L, R>>>::cast::<<L as sync::rcu::non_null::NonNullPtr>::Target>(_3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _7 = <L as sync::rcu::non_null::NonNullPtr>::from_raw(move _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_8);\n        _0 = util::either::Either::Left(move _7);\n        StorageDead(_7);\n        goto -> bb9;\n    }\n    bb6: {\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = core::ptr::NonNull::<core::marker::PhantomData<util::either::Either<L, R>>>::cast::<<R as sync::rcu::non_null::NonNullPtr>::Target>(_3) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _9 = <R as sync::rcu::non_null::NonNullPtr>::from_raw(move _10) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_10);\n        _0 = util::either::Either::Right(move _9);\n        StorageDead(_9);\n        goto -> bb9;\n    }\n    bb9: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

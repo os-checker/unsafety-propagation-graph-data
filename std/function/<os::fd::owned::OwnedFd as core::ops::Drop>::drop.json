@@ -1,0 +1,55 @@
+{
+  "name": "<os::fd::owned::OwnedFd as core::ops::Drop>::drop",
+  "safe": true,
+  "callees": {
+    "core::num::niche_types::I32NotAllOnes::as_inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "sys::fs::unix::debug_assert_fd_is_open": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Aborts the process if a file desceriptor is not open, if debug asserts are enabled\n\n Many IO syscalls can't be fully trusted about EBADF error codes because those\n might get bubbled up from a remote FUSE server rather than the file descriptor\n in the current process being invalid.\n\n So we check file flags instead which live on the file descriptor and not the underlying file.\n The downside is that it costs an extra syscall, so we only do it for debug.\n",
+      "adt": {}
+    },
+    "libc::close": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::num::niche_types::I32NotAllOnes": [
+      "Plain"
+    ],
+    "os::fd::owned::OwnedFd": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ]
+  },
+  "path": 2025,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/os/fd/owned.rs:190:5: 213:6",
+  "src": "fn drop(&mut self) {\n        unsafe {\n            // Note that errors are ignored when closing a file descriptor. According to POSIX 2024,\n            // we can and indeed should retry `close` on `EINTR`\n            // (https://pubs.opengroup.org/onlinepubs/9799919799.2024edition/functions/close.html),\n            // but it is not clear yet how well widely-used implementations are conforming with this\n            // mandate since older versions of POSIX left the state of the FD after an `EINTR`\n            // unspecified. Ignoring errors is \"fine\" because some of the major Unices (in\n            // particular, Linux) do make sure to always close the FD, even when `close()` is\n            // interrupted, and the scenario is rare to begin with. If we retried on a\n            // not-POSIX-compliant implementation, the consequences could be really bad since we may\n            // close the wrong FD. Helpful link to an epic discussion by POSIX workgroup that led to\n            // the latest POSIX wording: http://austingroupbugs.net/view.php?id=529\n            #[cfg(not(target_os = \"hermit\"))]\n            {\n                #[cfg(unix)]\n                crate::sys::fs::debug_assert_fd_is_open(self.fd.as_inner());\n\n                let _ = libc::close(self.fd.as_inner());\n            }\n            #[cfg(target_os = \"hermit\")]\n            let _ = hermit_abi::close(self.fd.as_inner());\n        }\n    }",
+  "mir": "fn <os::fd::owned::OwnedFd as core::ops::Drop>::drop(_1: &mut os::fd::owned::OwnedFd) -> () {\n    let mut _0: ();\n    let  _2: ();\n    let mut _3: i32;\n    let mut _4: core::num::niche_types::I32NotAllOnes;\n    let mut _5: i32;\n    let mut _6: i32;\n    let mut _7: core::num::niche_types::I32NotAllOnes;\n    debug self => _1;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).0: core::num::niche_types::I32NotAllOnes);\n        _3 = core::num::niche_types::I32NotAllOnes::as_inner(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = sys::fs::unix::debug_assert_fd_is_open(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = ((*_1).0: core::num::niche_types::I32NotAllOnes);\n        _6 = core::num::niche_types::I32NotAllOnes::as_inner(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        _5 = libc::close(move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

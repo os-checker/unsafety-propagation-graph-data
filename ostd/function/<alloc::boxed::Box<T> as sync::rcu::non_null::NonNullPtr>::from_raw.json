@@ -1,0 +1,44 @@
+{
+  "name": "<alloc::boxed::Box<T> as sync::rcu::non_null::NonNullPtr>::from_raw",
+  "safe": false,
+  "callees": {
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "alloc::boxed::Box::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a box from a raw pointer.\n\n After calling this function, the raw pointer is owned by the\n resulting `Box`. Specifically, the `Box` destructor will call\n the destructor of `T` and free the allocated memory. For this\n to be safe, the memory must have been allocated in accordance\n with the [memory layout] used by `Box` .\n\n # Safety\n\n This function is unsafe because improper use may lead to\n memory problems. For example, a double-free may occur if the\n function is called twice on the same raw pointer.\n\n The raw pointer must point to a block of memory allocated by the global allocator.\n\n The safety conditions are described in the [memory layout] section.\n\n # Examples\n\n Recreate a `Box` which was previously converted to a raw pointer\n using [`Box::into_raw`]:\n ```\n let x = Box::new(5);\n let ptr = Box::into_raw(x);\n let x = unsafe { Box::from_raw(ptr) };\n ```\n Manually create a `Box` from scratch by using the global allocator:\n ```\n use std::alloc::{alloc, Layout};\n\n unsafe {\n     let ptr = alloc(Layout::new::<i32>()) as *mut i32;\n     // In general .write is required to avoid attempting to destruct\n     // the (uninitialized) previous contents of `ptr`, though for this\n     // simple example `*ptr = 5` would have worked as well.\n     ptr.write(5);\n     let x = Box::from_raw(ptr);\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "alloc::boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 2595,
+  "span": "ostd/src/sync/rcu/non_null/mod.rs:121:5: 126:6",
+  "src": "unsafe fn from_raw(ptr: NonNull<Self::Target>) -> Self {\n        let ptr = ptr.as_ptr();\n\n        // SAFETY: The safety is upheld by the caller.\n        unsafe { Box::from_raw(ptr) }\n    }",
+  "mir": "fn <alloc::boxed::Box<T> as sync::rcu::non_null::NonNullPtr>::from_raw(_1: core::ptr::NonNull<T>) -> alloc::boxed::Box<T> {\n    let mut _0: alloc::boxed::Box<T>;\n    let  _2: *mut T;\n    debug ptr => _1;\n    debug ptr => _2;\n    bb0: {\n        _2 = core::ptr::NonNull::<T>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = alloc::boxed::Box::<T>::from_raw(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

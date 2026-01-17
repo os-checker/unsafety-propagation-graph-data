@@ -1,0 +1,112 @@
+{
+  "name": "sync::once_lock::OnceLock::<T>::get_or_try_init",
+  "safe": true,
+  "callees": {
+    "sync::once_lock::OnceLock::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the reference to the underlying value.\n\n Returns `None` if the cell is uninitialized, or being initialized.\n This method never blocks.\n",
+      "adt": {
+        "sync::once_lock::OnceLock": "ImmutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    },
+    "sync::once_lock::OnceLock::<T>::initialize": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::once_lock::OnceLock": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "sync::once_lock::OnceLock::<T>::is_initialized": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::once_lock::OnceLock": "ImmutableAsArgument"
+      }
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "sync::once_lock::OnceLock::<T>::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " # Safety\n\n The cell must be initialized\n",
+      "adt": {
+        "sync::once_lock::OnceLock": "ImmutableAsArgument"
+      }
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::once_lock::OnceLock": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 419, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 9, kind: Param(ParamTy { index: 0, name: \"T\" }) }, Not)) })])"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 11627, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 11612, kind: Param(ParamTy { index: 2, name: \"E\" }) })]))) })])"
+    ]
+  },
+  "path": 3176,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/once_lock.rs:397:5: 415:6",
+  "src": "pub fn get_or_try_init<F, E>(&self, f: F) -> Result<&T, E>\n    where\n        F: FnOnce() -> Result<T, E>,\n    {\n        // Fast path check\n        // NOTE: We need to perform an acquire on the state in this method\n        // in order to correctly synchronize `LazyLock::force`. This is\n        // currently done by calling `self.get()`, which in turn calls\n        // `self.is_initialized()`, which in turn performs the acquire.\n        if let Some(value) = self.get() {\n            return Ok(value);\n        }\n        self.initialize(f)?;\n\n        debug_assert!(self.is_initialized());\n\n        // SAFETY: The inner value has been initialized\n        Ok(unsafe { self.get_unchecked() })\n    }",
+  "mir": "fn sync::once_lock::OnceLock::<T>::get_or_try_init(_1: &sync::once_lock::OnceLock<T>, _2: F) -> core::result::Result<&T, E> {\n    let mut _0: core::result::Result<&T, E>;\n    let mut _3: core::option::Option<&T>;\n    let mut _4: isize;\n    let  _5: &T;\n    let mut _6: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, E>>;\n    let mut _7: core::result::Result<(), E>;\n    let mut _8: F;\n    let mut _9: isize;\n    let  _10: core::result::Result<core::convert::Infallible, E>;\n    let mut _11: bool;\n    let mut _12: !;\n    let  _13: &T;\n    let mut _14: bool;\n    debug self => _1;\n    debug f => _2;\n    debug value => _5;\n    debug residual => _10;\n    debug val => ();\n    bb0: {\n        _14 = false;\n        _14 = true;\n        StorageLive(_3);\n        _3 = sync::once_lock::OnceLock::<T>::get(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = discriminant(_3);\n        switchInt(move _4) -> [1: bb2, 0: bb3, otherwise: bb6];\n    }\n    bb2: {\n        _5 = ((_3 as variant#1).0: &T);\n        _0 = core::result::Result::Ok(_5);\n        StorageDead(_3);\n        goto -> bb16;\n    }\n    bb3: {\n        StorageDead(_3);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _14 = false;\n        _8 = move _2;\n        _7 = sync::once_lock::OnceLock::<T>::initialize::<F, E>(_1, move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        _6 = <core::result::Result<(), E> as core::ops::Try>::branch(move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        _9 = discriminant(_6);\n        switchInt(move _9) -> [0: bb7, 1: bb8, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        StorageDead(_6);\n        StorageLive(_11);\n        _11 = sync::once_lock::OnceLock::<T>::is_initialized(_1) -> [return: bb10, unwind unreachable];\n    }\n    bb8: {\n        _10 = move ((_6 as variant#1).0: core::result::Result<core::convert::Infallible, E>);\n        _0 = <core::result::Result<&T, E> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, E>>>::from_residual(_10) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_6);\n        goto -> bb16;\n    }\n    bb10: {\n        switchInt(move _11) -> [0: bb12, otherwise: bb11];\n    }\n    bb11: {\n        StorageDead(_11);\n        _13 = sync::once_lock::OnceLock::<T>::get_unchecked(_1) -> [return: bb13, unwind unreachable];\n    }\n    bb12: {\n        _12 = core::panicking::panic(\"assertion failed: self.is_initialized()\") -> unwind unreachable;\n    }\n    bb13: {\n        _0 = core::result::Result::Ok(_13);\n        goto -> bb14;\n    }\n    bb14: {\n        return;\n    }\n    bb15: {\n        drop(_2) -> [return: bb14, unwind unreachable];\n    }\n    bb16: {\n        switchInt(_14) -> [0: bb14, otherwise: bb15];\n    }\n}\n",
+  "doc": " Gets the contents of the cell, initializing it to `f()` if\n the cell was uninitialized. If the cell was uninitialized\n and `f()` failed, an error is returned.\n\n # Panics\n\n If `f()` panics, the panic is propagated to the caller, and\n the cell remains uninitialized.\n\n It is an error to reentrantly initialize the cell from `f`.\n The exact outcome is unspecified. Current implementation\n deadlocks, but this may be changed to a panic in the future.\n\n # Examples\n\n ```\n #![feature(once_cell_try)]\n\n use std::sync::OnceLock;\n\n let cell = OnceLock::new();\n assert_eq!(cell.get_or_try_init(|| Err(())), Err(()));\n assert!(cell.get().is_none());\n let value = cell.get_or_try_init(|| -> Result<i32, ()> {\n     Ok(92)\n });\n assert_eq!(value, Ok(&92));\n assert_eq!(cell.get(), Some(&92))\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

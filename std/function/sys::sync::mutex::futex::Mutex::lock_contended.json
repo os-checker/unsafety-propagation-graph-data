@@ -1,0 +1,80 @@
+{
+  "name": "sys::sync::mutex::futex::Mutex::lock_contended",
+  "safe": true,
+  "callees": {
+    "sys::sync::mutex::futex::Mutex::spin": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::sync::mutex::futex::Mutex": "ImmutableAsArgument"
+      }
+    },
+    "core::sync::atomic::AtomicU32::compare_exchange": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer if the current value is the same as\n the `current` value.\n\n The return value is a result indicating whether the new value was written and\n containing the previous value. On success this value is guaranteed to be equal to\n `current`.\n\n `compare_exchange` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. `success` describes the required ordering for the\n read-modify-write operation that takes place if the comparison with `current` succeeds.\n `failure` describes the required ordering for the load operation that takes place when\n the comparison fails. Using [`Acquire`] as success ordering makes the store part\n of this operation [`Relaxed`], and using [`Release`] makes the successful load\n [`Relaxed`]. The failure ordering can only be [`SeqCst`], [`Acquire`] or [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.compare_exchange(5, 10,\n                                      Ordering::Acquire,\n                                      Ordering::Relaxed),\n            Ok(5));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n\n assert_eq!(some_var.compare_exchange(6, 12,\n                                      Ordering::SeqCst,\n                                      Ordering::Acquire),\n            Err(10));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n\n # Considerations\n\n `compare_exchange` is a [compare-and-swap operation] and thus exhibits the usual downsides\n of CAS operations. In particular, a load of the value followed by a successful\n `compare_exchange` with the previous load *does not ensure* that other threads have not\n changed the value in the interim! This is usually important when the *equality* check in\n the `compare_exchange` is being used to check the *identity* of a value, but equality\n does not necessarily imply identity. This is a particularly common case for pointers, as\n a pointer holding the same address does not imply that the same object exists at that\n address! In this case, `compare_exchange` can lead to the [ABA problem].\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicU32::swap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer, returning the previous value.\n\n `swap` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.swap(10, Ordering::Relaxed), 5);\n ```\n",
+      "adt": {}
+    },
+    "sys::pal::unix::futex::futex_wait": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Waits for a `futex_wake` operation to wake us.\n\n Returns directly if the futex doesn't hold the expected value.\n\n Returns false on timeout, and true in all other cases.\n",
+      "adt": {
+        "core::sync::atomic::AtomicU32": "MutableAsArgument",
+        "core::option::Option": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "sys::sync::mutex::futex::Mutex": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::sync::atomic::AtomicU32": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 608, kind: RigidTy(Uint(U32)) })])"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 4277,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/sync/mutex/futex.rs:38:5: 66:6",
+  "src": "fn lock_contended(&self) {\n        // Spin first to speed things up if the lock is released quickly.\n        let mut state = self.spin();\n\n        // If it's unlocked now, attempt to take the lock\n        // without marking it as contended.\n        if state == UNLOCKED {\n            match self.futex.compare_exchange(UNLOCKED, LOCKED, Acquire, Relaxed) {\n                Ok(_) => return, // Locked!\n                Err(s) => state = s,\n            }\n        }\n\n        loop {\n            // Put the lock in contended state.\n            // We avoid an unnecessary write if it as already set to CONTENDED,\n            // to be friendlier for the caches.\n            if state != CONTENDED && self.futex.swap(CONTENDED, Acquire) == UNLOCKED {\n                // We changed it from UNLOCKED to CONTENDED, so we just successfully locked it.\n                return;\n            }\n\n            // Wait for the futex to change state, assuming it is still CONTENDED.\n            futex_wait(&self.futex, CONTENDED, None);\n\n            // Spin again after waking up.\n            state = self.spin();\n        }\n    }",
+  "mir": "fn sys::sync::mutex::futex::Mutex::lock_contended(_1: &sys::sync::mutex::futex::Mutex) -> () {\n    let mut _0: ();\n    let mut _2: u32;\n    let mut _3: bool;\n    let mut _4: u32;\n    let mut _5: core::result::Result<u32, u32>;\n    let mut _6: &core::sync::atomic::AtomicU32;\n    let mut _7: core::sync::atomic::Ordering;\n    let mut _8: core::sync::atomic::Ordering;\n    let mut _9: isize;\n    let  _10: u32;\n    let mut _11: bool;\n    let mut _12: u32;\n    let mut _13: bool;\n    let mut _14: u32;\n    let mut _15: &core::sync::atomic::AtomicU32;\n    let mut _16: core::sync::atomic::Ordering;\n    let  _17: bool;\n    let  _18: &core::sync::atomic::AtomicU32;\n    let mut _19: core::option::Option<core::time::Duration>;\n    let mut _20: u32;\n    debug self => _1;\n    debug state => _2;\n    debug s => _10;\n    bb0: {\n        StorageLive(_2);\n        _2 = sys::sync::mutex::futex::Mutex::spin(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = _2;\n        _3 = Eq(move _4, sys::sync::mutex::futex::UNLOCKED);\n        switchInt(move _3) -> [0: bb7, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &((*_1).0: core::sync::atomic::AtomicU32);\n        StorageLive(_7);\n        _7 = core::sync::atomic::Ordering::Acquire;\n        StorageLive(_8);\n        _8 = core::sync::atomic::Ordering::Relaxed;\n        _5 = core::sync::atomic::AtomicU32::compare_exchange(move _6, sys::sync::mutex::futex::UNLOCKED, sys::sync::mutex::futex::LOCKED, move _7, move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_6);\n        _9 = discriminant(_5);\n        switchInt(move _9) -> [0: bb6, 1: bb5, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _10 = ((_5 as variant#1).0: u32);\n        _2 = _10;\n        StorageDead(_5);\n        goto -> bb8;\n    }\n    bb6: {\n        StorageDead(_5);\n        StorageDead(_3);\n        goto -> bb18;\n    }\n    bb7: {\n        StorageDead(_4);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageDead(_3);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = _2;\n        _11 = Ne(move _12, sys::sync::mutex::futex::CONTENDED);\n        switchInt(move _11) -> [0: bb14, otherwise: bb10];\n    }\n    bb10: {\n        StorageDead(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = &((*_1).0: core::sync::atomic::AtomicU32);\n        StorageLive(_16);\n        _16 = core::sync::atomic::Ordering::Acquire;\n        _14 = core::sync::atomic::AtomicU32::swap(move _15, sys::sync::mutex::futex::CONTENDED, move _16) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_16);\n        StorageDead(_15);\n        _13 = Eq(move _14, sys::sync::mutex::futex::UNLOCKED);\n        switchInt(move _13) -> [0: bb13, otherwise: bb12];\n    }\n    bb12: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_11);\n        goto -> bb18;\n    }\n    bb13: {\n        StorageDead(_14);\n        goto -> bb15;\n    }\n    bb14: {\n        StorageDead(_12);\n        goto -> bb15;\n    }\n    bb15: {\n        StorageDead(_13);\n        StorageDead(_11);\n        StorageLive(_17);\n        _18 = &((*_1).0: core::sync::atomic::AtomicU32);\n        StorageLive(_19);\n        _19 = core::option::Option::None;\n        _17 = sys::pal::unix::futex::futex_wait(_18, sys::sync::mutex::futex::CONTENDED, move _19) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_19);\n        StorageDead(_17);\n        StorageLive(_20);\n        _20 = sys::sync::mutex::futex::Mutex::spin(_1) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        _2 = move _20;\n        StorageDead(_20);\n        goto -> bb9;\n    }\n    bb18: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "panicking::catch_unwind::cleanup",
+  "safe": false,
+  "callees": {
+    "panicking::__rust_panic_cleanup": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "alloc_crate::boxed::Box::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a box from a raw pointer.\n\n After calling this function, the raw pointer is owned by the\n resulting `Box`. Specifically, the `Box` destructor will call\n the destructor of `T` and free the allocated memory. For this\n to be safe, the memory must have been allocated in accordance\n with the [memory layout] used by `Box` .\n\n # Safety\n\n This function is unsafe because improper use may lead to\n memory problems. For example, a double-free may occur if the\n function is called twice on the same raw pointer.\n\n The raw pointer must point to a block of memory allocated by the global allocator.\n\n The safety conditions are described in the [memory layout] section.\n\n # Examples\n\n Recreate a `Box` which was previously converted to a raw pointer\n using [`Box::into_raw`]:\n ```\n let x = Box::new(5);\n let ptr = Box::into_raw(x);\n let x = unsafe { Box::from_raw(ptr) };\n ```\n Manually create a `Box` from scratch by using the global allocator:\n ```\n use std::alloc::{alloc, Layout};\n\n unsafe {\n     let ptr = alloc(Layout::new::<i32>()) as *mut i32;\n     // In general .write is required to avoid attempting to destruct\n     // the (uninitialized) previous contents of `ptr`, though for this\n     // simple example `*ptr = 5` would have worked as well.\n     ptr.write(5);\n     let x = Box::from_raw(ptr);\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+      "adt": {}
+    },
+    "panicking::panic_count::decrease": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc_crate::boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 2321,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:557:5: 565:6",
+  "src": "unsafe fn cleanup(payload: *mut u8) -> Box<dyn Any + Send + 'static> {\n        // SAFETY: The whole unsafe block hinges on a correct implementation of\n        // the panic handler `__rust_panic_cleanup`. As such we can only\n        // assume it returns the correct thing for `Box::from_raw` to work\n        // without undefined behavior.\n        let obj = unsafe { Box::from_raw(__rust_panic_cleanup(payload)) };\n        panic_count::decrease();\n        obj\n    }",
+  "mir": "fn panicking::catch_unwind::cleanup(_1: *mut u8) -> alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send> {\n    let mut _0: alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>;\n    let mut _2: *mut dyn core::any::Any + core::marker::Send;\n    let  _3: ();\n    debug payload => _1;\n    debug obj => _0;\n    bb0: {\n        StorageLive(_2);\n        _2 = panicking::__rust_panic_cleanup(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = alloc_crate::boxed::Box::<dyn core::any::Any + core::marker::Send>::from_raw(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        _3 = panicking::panic_count::decrease() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

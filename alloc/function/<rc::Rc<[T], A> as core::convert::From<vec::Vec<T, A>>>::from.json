@@ -1,0 +1,80 @@
+{
+  "name": "<rc::Rc<[T], A> as core::convert::From<vec::Vec<T, A>>>::from",
+  "safe": true,
+  "callees": {
+    "vec::Vec::<T, A>::into_raw_parts_with_alloc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Decomposes a `Vec<T>` into its raw components: `(pointer, length, capacity, allocator)`.\n\n Returns the raw pointer to the underlying data, the length of the vector (in elements),\n the allocated capacity of the data (in elements), and the allocator. These are the same\n arguments in the same order as the arguments to [`from_raw_parts_in`].\n\n After calling this function, the caller is responsible for the\n memory previously managed by the `Vec`. The only way to do\n this is to convert the raw pointer, length, and capacity back\n into a `Vec` with the [`from_raw_parts_in`] function, allowing\n the destructor to perform the cleanup.\n\n [`from_raw_parts_in`]: Vec::from_raw_parts_in\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let mut v: Vec<i32, System> = Vec::new_in(System);\n v.push(-1);\n v.push(0);\n v.push(1);\n\n let (ptr, len, cap, alloc) = v.into_raw_parts_with_alloc();\n\n let rebuilt = unsafe {\n     // We can now make changes to the components, such as\n     // transmuting the raw pointer to a compatible type.\n     let ptr = ptr as *mut u32;\n\n     Vec::from_raw_parts_in(ptr, len, cap, alloc)\n };\n assert_eq!(rebuilt, [4294967295, 0, 1]);\n ```\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "rc::Rc::<[T], A>::allocate_for_slice_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates an `RcInner<[T]>` with the given length.\n",
+      "adt": {}
+    },
+    "core::ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::from_raw_parts_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a `Vec<T, A>` directly from a pointer, a length, a capacity,\n and an allocator.\n\n # Safety\n\n This is highly unsafe, due to the number of invariants that aren't\n checked:\n\n * `ptr` must be [*currently allocated*] via the given allocator `alloc`.\n * `T` needs to have the same alignment as what `ptr` was allocated with.\n   (`T` having a less strict alignment is not sufficient, the alignment really\n   needs to be equal to satisfy the [`dealloc`] requirement that memory must be\n   allocated and deallocated with the same layout.)\n * The size of `T` times the `capacity` (ie. the allocated size in bytes) needs\n   to be the same size as the pointer was allocated with. (Because similar to\n   alignment, [`dealloc`] must be called with the same layout `size`.)\n * `length` needs to be less than or equal to `capacity`.\n * The first `length` values must be properly initialized values of type `T`.\n * `capacity` needs to [*fit*] the layout size that the pointer was allocated with.\n * The allocated size in bytes must be no larger than `isize::MAX`.\n   See the safety documentation of [`pointer::offset`].\n\n These requirements are always upheld by any `ptr` that has been allocated\n via `Vec<T, A>`. Other allocation sources are allowed if the invariants are\n upheld.\n\n Violating these may cause problems like corrupting the allocator's\n internal data structures. For example it is **not** safe\n to build a `Vec<u8>` from a pointer to a C `char` array with length `size_t`.\n It's also not safe to build one from a `Vec<u16>` and its length, because\n the allocator cares about the alignment, and these two types have different\n alignments. The buffer was allocated with alignment 2 (for `u16`), but after\n turning it into a `Vec<u8>` it'll be deallocated with alignment 1.\n\n The ownership of `ptr` is effectively transferred to the\n `Vec<T>` which may then deallocate, reallocate or change the\n contents of memory pointed to by the pointer at will. Ensure\n that nothing else uses the pointer after calling this\n function.\n\n [`String`]: crate::string::String\n [`dealloc`]: crate::alloc::GlobalAlloc::dealloc\n [*currently allocated*]: crate::alloc::Allocator#currently-allocated-memory\n [*fit*]: crate::alloc::Allocator#memory-fitting\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n use std::ptr;\n\n let mut v = Vec::with_capacity_in(3, System);\n v.push(1);\n v.push(2);\n v.push(3);\n\n // Deconstruct the vector into parts.\n let (p, len, cap, alloc) = v.into_raw_parts_with_alloc();\n\n unsafe {\n     // Overwrite memory with 4, 5, 6\n     for i in 0..len {\n         ptr::write(p.add(i), 4 + i);\n     }\n\n     // Put everything back together into a Vec\n     let rebuilt = Vec::from_raw_parts_in(p, len, cap, alloc.clone());\n     assert_eq!(rebuilt, [4, 5, 6]);\n }\n ```\n\n Using memory that was allocated elsewhere:\n\n ```rust\n #![feature(allocator_api)]\n\n use std::alloc::{AllocError, Allocator, Global, Layout};\n\n fn main() {\n     let layout = Layout::array::<u32>(16).expect(\"overflow cannot happen\");\n\n     let vec = unsafe {\n         let mem = match Global.allocate(layout) {\n             Ok(mem) => mem.cast::<u32>().as_ptr(),\n             Err(AllocError) => return,\n         };\n\n         mem.write(1_000_000);\n\n         Vec::from_raw_parts_in(mem, 1, 16, Global)\n     };\n\n     assert_eq!(vec, &[1_000_000]);\n     assert_eq!(vec.capacity(), 16);\n }\n ```\n",
+      "adt": {
+        "vec::Vec": "Constructor"
+      }
+    },
+    "rc::Rc::<T, A>::from_ptr_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "rc::Rc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Plain"
+    ],
+    "rc::Rc": [
+      "Plain"
+    ]
+  },
+  "path": 1716,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2985:5: 2998:6",
+  "src": "fn from(v: Vec<T, A>) -> Rc<[T], A> {\n        unsafe {\n            let (vec_ptr, len, cap, alloc) = v.into_raw_parts_with_alloc();\n\n            let rc_ptr = Self::allocate_for_slice_in(len, &alloc);\n            ptr::copy_nonoverlapping(vec_ptr, (&raw mut (*rc_ptr).value) as *mut T, len);\n\n            // Create a `Vec<T, &A>` with length 0, to deallocate the buffer\n            // without dropping its contents or the allocator\n            let _ = Vec::from_raw_parts_in(vec_ptr, 0, cap, &alloc);\n\n            Self::from_ptr_in(rc_ptr, alloc)\n        }\n    }",
+  "mir": "fn <rc::Rc<[T], A> as core::convert::From<vec::Vec<T, A>>>::from(_1: vec::Vec<T, A>) -> rc::Rc<[T], A> {\n    let mut _0: rc::Rc<[T], A>;\n    let  _2: *mut T;\n    let  _3: usize;\n    let  _4: usize;\n    let  _5: A;\n    let mut _6: (*mut T, usize, usize, A);\n    let  _7: *mut rc::RcInner<[T]>;\n    let  _8: &A;\n    let  _9: ();\n    let mut _10: *const T;\n    let mut _11: *mut T;\n    let mut _12: *mut [T];\n    let mut _13: vec::Vec<T, &A>;\n    let mut _14: &A;\n    let mut _15: A;\n    debug v => _1;\n    debug vec_ptr => _2;\n    debug len => _3;\n    debug cap => _4;\n    debug alloc => _5;\n    debug rc_ptr => _7;\n    bb0: {\n        StorageLive(_6);\n        _6 = vec::Vec::<T, A>::into_raw_parts_with_alloc(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = (_6.0: *mut T);\n        _3 = (_6.1: usize);\n        _4 = (_6.2: usize);\n        StorageLive(_5);\n        _5 = move (_6.3: A);\n        StorageDead(_6);\n        _8 = &_5;\n        _7 = rc::Rc::<[T], A>::allocate_for_slice_in(_3, _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_10);\n        _10 = _2 as *const T;\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &raw mut ((*_7).2: [T]);\n        _11 = move _12 as *mut T;\n        StorageDead(_12);\n        _9 = core::ptr::copy_nonoverlapping::<T>(move _10, move _11, _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = &_5;\n        _13 = vec::Vec::<T, &A>::from_raw_parts_in(_2, 0_usize, _4, move _14) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_14);\n        drop(_13) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_13);\n        StorageLive(_15);\n        _15 = move _5;\n        _0 = rc::Rc::<[T], A>::from_ptr_in(_7, move _15) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_15);\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": " Allocates a reference-counted slice and moves `v`'s items into it.\n\n # Example\n\n ```\n # use std::rc::Rc;\n let unique: Vec<i32> = vec![1, 2, 3];\n let shared: Rc<[i32]> = Rc::from(unique);\n assert_eq!(&[1, 2, 3], &shared[..]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

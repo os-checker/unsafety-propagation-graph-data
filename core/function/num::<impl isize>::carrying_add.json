@@ -1,0 +1,27 @@
+{
+  "name": "num::<impl isize>::carrying_add",
+  "safe": true,
+  "callees": {
+    "num::<impl isize>::overflowing_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calculates `self` + `rhs`.\n\n Returns a tuple of the addition along with a boolean indicating\n whether an arithmetic overflow would occur. If an overflow would have\n occurred then the wrapped value is returned.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 2930,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/int_macros.rs:2517:9: 2523:10",
+  "src": "pub const fn carrying_add(self, rhs: Self, carry: bool) -> (Self, bool) {\n            // note: longer-term this should be done via an intrinsic.\n            // note: no intermediate overflow is required (https://github.com/rust-lang/rust/issues/85532#issuecomment-1032214946).\n            let (a, b) = self.overflowing_add(rhs);\n            let (c, d) = a.overflowing_add(carry as $SelfT);\n            (c, b != d)\n        }",
+  "mir": "fn num::<impl isize>::carrying_add(_1: isize, _2: isize, _3: bool) -> (isize, bool) {\n    let mut _0: (isize, bool);\n    let  _4: isize;\n    let  _5: bool;\n    let mut _6: (isize, bool);\n    let  _7: isize;\n    let  _8: bool;\n    let mut _9: (isize, bool);\n    let mut _10: isize;\n    let mut _11: bool;\n    debug self => _1;\n    debug rhs => _2;\n    debug carry => _3;\n    debug a => _4;\n    debug b => _5;\n    debug c => _7;\n    debug d => _8;\n    bb0: {\n        StorageLive(_6);\n        _6 = num::<impl isize>::overflowing_add(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = (_6.0: isize);\n        _5 = (_6.1: bool);\n        StorageDead(_6);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = _3 as isize;\n        _9 = num::<impl isize>::overflowing_add(_4, move _10) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_10);\n        _7 = (_9.0: isize);\n        _8 = (_9.1: bool);\n        StorageDead(_9);\n        StorageLive(_11);\n        _11 = Ne(_5, _8);\n        _0 = (_7, move _11);\n        StorageDead(_11);\n        return;\n    }\n}\n",
+  "doc": " Calculates `self` + `rhs` + `carry` and checks for overflow.\n\n Performs \"ternary addition\" of two integer operands and a carry-in\n bit, and returns a tuple of the sum along with a boolean indicating\n whether an arithmetic overflow would occur. On overflow, the wrapped\n value is returned.\n\n This allows chaining together multiple additions to create a wider\n addition, and can be useful for bignum addition. This method should\n only be used for the most significant word; for the less significant\n words the unsigned method\n should be used.\n\n The output boolean returned by this method is *not* a carry flag,\n and should *not* be added to a more significant word.\n\n If the input carry is false, this method is equivalent to\n [`overflowing_add`](Self::overflowing_add).\n\n # Examples\n\n ```\n #![feature(bigint_helper_methods)]\n // Only the most significant word is signed.\n //\n // ---------\n\n let carry0 = false;\n\n let (sum0, carry1) = a0.carrying_add(b0, carry0);\n assert_eq!(carry1, true);\n\n let (sum1, overflow) = a1.carrying_add(b1, carry1);\n assert_eq!(overflow, false);\n\n assert_eq!((sum1, sum0), (6, 8));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

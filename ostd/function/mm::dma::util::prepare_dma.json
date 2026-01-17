@@ -1,0 +1,49 @@
+{
+  "name": "mm::dma::util::prepare_dma",
+  "safe": false,
+  "callees": {
+    "mm::dma::util::alloc_unprotect_physical_range": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Marks a physical address range as used (also unprotected if in TDX guest).\n\n # Safety\n\n The provided physical address range must be untyped DMA memory that\n outlives the following [`dealloc_protect_physical_range()`] call.\n",
+      "adt": {
+        "core::ops::Range": "ImmutableAsArgument"
+      }
+    },
+    "mm::dma::util::dma_remap": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates device addresses and maps them to the given physical address range.\n\n # Safety\n\n The provided physical address range must be untyped DMA memory that\n outlives the following [`unmap_dma_remap()`] call.\n",
+      "adt": {
+        "core::ops::Range": "ImmutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::ops::Range": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 1898,
+  "span": "ostd/src/mm/dma/util.rs:129:1: 138:2",
+  "src": "pub(super) unsafe fn prepare_dma(pa_range: &Range<Paddr>) -> Option<Daddr> {\n    // SAFETY: The safety condition is upheld by the caller.\n    #[cfg(any(debug_assertions, all(target_arch = \"x86_64\", feature = \"cvm_guest\")))]\n    unsafe {\n        alloc_unprotect_physical_range(pa_range);\n    }\n\n    // SAFETY: The safety condition is upheld by the caller.\n    unsafe { dma_remap(pa_range) }\n}",
+  "mir": "fn mm::dma::util::prepare_dma(_1: &core::ops::Range<usize>) -> core::option::Option<usize> {\n    let mut _0: core::option::Option<usize>;\n    let  _2: ();\n    debug pa_range => _1;\n    bb0: {\n        _2 = mm::dma::util::alloc_unprotect_physical_range(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = mm::dma::util::dma_remap(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Prepares a physical address range for DMA mapping.\n\n If DMA remapping is enabled, the function allocates device addresses, maps\n the given physical address range to them, and returns the start device\n address.\n\n # Safety\n\n The provided physical address range must be untyped DMA memory that\n outlives the following [`unprepare_dma()`] call.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

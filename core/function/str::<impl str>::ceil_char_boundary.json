@@ -1,0 +1,67 @@
+{
+  "name": "str::<impl str>::ceil_char_boundary",
+  "safe": true,
+  "callees": {
+    "str::<impl str>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of `self`.\n\n This length is in bytes, not [`char`]s or graphemes. In other words,\n it might not be what a human considers the length of the string.\n\n [`char`]: prim@char\n\n # Examples\n\n ```\n let len = \"foo\".len();\n assert_eq!(3, len);\n\n assert_eq!(\"ƒoo\".len(), 4); // fancy f!\n assert_eq!(\"ƒoo\".chars().count(), 3);\n ```\n",
+      "adt": {}
+    },
+    "str::<impl str>::as_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unused_attributes"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unused_attributes\n"
+        ]
+      },
+      "doc": " Converts a string slice to a byte slice. To convert the byte slice back\n into a string slice, use the [`from_utf8`] function.\n\n # Examples\n\n ```\n let bytes = \"bors\".as_bytes();\n assert_eq!(b\"bors\", bytes);\n ```\n",
+      "adt": {}
+    },
+    "num::<impl u8>::is_utf8_char_boundary": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 3085,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/str/mod.rs:453:5: 470:6",
+  "src": "pub const fn ceil_char_boundary(&self, index: usize) -> usize {\n        if index >= self.len() {\n            self.len()\n        } else {\n            let mut i = index;\n            while i < self.len() {\n                if self.as_bytes()[i].is_utf8_char_boundary() {\n                    break;\n                }\n                i += 1;\n            }\n\n            //  The character boundary will be within four bytes of the index\n            debug_assert!(i <= index + 3);\n\n            i\n        }\n    }",
+  "mir": "fn str::<impl str>::ceil_char_boundary(_1: &str, _2: usize) -> usize {\n    let mut _0: usize;\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: usize;\n    let mut _6: bool;\n    let mut _7: usize;\n    let mut _8: usize;\n    let mut _9: bool;\n    let mut _10: u8;\n    let mut _11: &[u8];\n    let  _12: usize;\n    let mut _13: usize;\n    let mut _14: bool;\n    let mut _15: (usize, bool);\n    let mut _16: bool;\n    let mut _17: usize;\n    let mut _18: usize;\n    let mut _19: (usize, bool);\n    let mut _20: !;\n    debug self => _1;\n    debug index => _2;\n    debug i => _5;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = str::<impl str>::len(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = Ge(_2, move _4);\n        switchInt(move _3) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = str::<impl str>::len(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        goto -> bb19;\n    }\n    bb4: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = _2;\n        goto -> bb5;\n    }\n    bb5: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = _5;\n        StorageLive(_8);\n        _8 = str::<impl str>::len(_1) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _6 = Lt(move _7, move _8);\n        switchInt(move _6) -> [0: bb14, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = str::<impl str>::as_bytes(_1) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageLive(_12);\n        _12 = _5;\n        _13 = PtrMetadata(_11);\n        _14 = Lt(_12, _13);\n        assert(move _14, \"index out of bounds: the length is {} but the index is {}\", move _13, _12) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        _10 = (*_11)[_12];\n        _9 = num::<impl u8>::is_utf8_char_boundary(move _10) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        switchInt(move _9) -> [0: bb12, otherwise: bb11];\n    }\n    bb11: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_9);\n        goto -> bb15;\n    }\n    bb12: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_9);\n        _15 = CheckedAdd(_5, 1_usize);\n        assert(!move (_15.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _5, 1_usize) -> [success: bb13, unwind unreachable];\n    }\n    bb13: {\n        _5 = move (_15.0: usize);\n        StorageDead(_6);\n        goto -> bb5;\n    }\n    bb14: {\n        StorageDead(_8);\n        StorageDead(_7);\n        goto -> bb15;\n    }\n    bb15: {\n        StorageDead(_6);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = _5;\n        StorageLive(_18);\n        _19 = CheckedAdd(_2, 3_usize);\n        assert(!move (_19.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _2, 3_usize) -> [success: bb16, unwind unreachable];\n    }\n    bb16: {\n        _18 = move (_19.0: usize);\n        _16 = Le(move _17, move _18);\n        switchInt(move _16) -> [0: bb18, otherwise: bb17];\n    }\n    bb17: {\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageDead(_16);\n        _0 = _5;\n        StorageDead(_5);\n        goto -> bb19;\n    }\n    bb18: {\n        StorageDead(_18);\n        StorageDead(_17);\n        _20 = panicking::panic(\"assertion failed: i <= index + 3\") -> unwind unreachable;\n    }\n    bb19: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Finds the closest `x` not below `index` where [`is_char_boundary(x)`] is `true`.\n\n If `index` is greater than the length of the string, this returns the length of the string.\n\n This method is the natural complement to [`floor_char_boundary`]. See that method\n for more details.\n\n [`floor_char_boundary`]: str::floor_char_boundary\n [`is_char_boundary(x)`]: Self::is_char_boundary\n\n # Examples\n\n ```\n let s = \"❤️🧡💛💚💙💜\";\n assert_eq!(s.len(), 26);\n assert!(!s.is_char_boundary(13));\n\n let closest = s.ceil_char_boundary(13);\n assert_eq!(closest, 14);\n assert_eq!(&s[..closest], \"❤️🧡💛\");\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

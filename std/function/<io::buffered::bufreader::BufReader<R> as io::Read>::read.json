@@ -1,0 +1,135 @@
+{
+  "name": "<io::buffered::bufreader::BufReader<R> as io::Read>::read",
+  "safe": true,
+  "callees": {
+    "io::buffered::bufreader::buffer::Buffer::pos": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::buffered::bufreader::buffer::Buffer": "ImmutableAsArgument"
+      }
+    },
+    "io::buffered::bufreader::buffer::Buffer::filled": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::buffered::bufreader::buffer::Buffer": "ImmutableAsArgument"
+      }
+    },
+    "io::buffered::bufreader::BufReader::<R>::capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of bytes the internal buffer can hold at once.\n\n # Examples\n\n ```no_run\n use std::io::{BufReader, BufRead};\n use std::fs::File;\n\n fn main() -> std::io::Result<()> {\n     let f = File::open(\"log.txt\")?;\n     let mut reader = BufReader::new(f);\n\n     let capacity = reader.capacity();\n     let buffer = reader.fill_buf()?;\n     assert!(buffer.len() <= capacity);\n     Ok(())\n }\n ```\n",
+      "adt": {
+        "io::buffered::bufreader::BufReader": "ImmutableAsArgument"
+      }
+    },
+    "io::buffered::bufreader::BufReader::<R>::discard_buffer": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Invalidates all data in the internal buffer.\n",
+      "adt": {
+        "io::buffered::bufreader::BufReader": "MutableAsArgument"
+      }
+    },
+    "io::Read::read": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Pull some bytes from this source into the specified buffer, returning\n how many bytes were read.\n\n This function does not provide any guarantees about whether it blocks\n waiting for data, but if an object needs to block for a read and cannot,\n it will typically signal this via an [`Err`] return value.\n\n If the return value of this method is [`Ok(n)`], then implementations must\n guarantee that `0 <= n <= buf.len()`. A nonzero `n` value indicates\n that the buffer `buf` has been filled in with `n` bytes of data from this\n source. If `n` is `0`, then it can indicate one of two scenarios:\n\n 1. This reader has reached its \"end of file\" and will likely no longer\n    be able to produce bytes. Note that this does not mean that the\n    reader will *always* no longer be able to produce bytes. As an example,\n    on Linux, this method will call the `recv` syscall for a [`TcpStream`],\n    where returning zero indicates the connection was shut down correctly. While\n    for [`File`], it is possible to reach the end of file and get zero as result,\n    but if more data is appended to the file, future calls to `read` will return\n    more data.\n 2. The buffer specified was 0 bytes in length.\n\n It is not an error if the returned value `n` is smaller than the buffer size,\n even when the reader is not at the end of the stream yet.\n This may happen for example because fewer bytes are actually available right now\n (e. g. being close to end-of-file) or because read() was interrupted by a signal.\n\n As this trait is safe to implement, callers in unsafe code cannot rely on\n `n <= buf.len()` for safety.\n Extra care needs to be taken when `unsafe` functions are used to access the read bytes.\n Callers have to ensure that no unchecked out-of-bounds accesses are possible even if\n `n > buf.len()`.\n\n *Implementations* of this method can make no assumptions about the contents of `buf` when\n this function is called. It is recommended that implementations only write data to `buf`\n instead of reading its contents.\n\n Correspondingly, however, *callers* of this method in unsafe code must not assume\n any guarantees about how the implementation uses `buf`. The trait is safe to implement,\n so it is possible that the code that's supposed to write to the buffer might also read\n from it. It is your responsibility to make sure that `buf` is initialized\n before calling `read`. Calling `read` with an uninitialized `buf` (of the kind one\n obtains via [`MaybeUninit<T>`]) is not safe, and can lead to undefined behavior.\n\n [`MaybeUninit<T>`]: crate::mem::MaybeUninit\n\n # Errors\n\n If this function encounters any form of I/O or other error, an error\n variant will be returned. If an error is returned then it must be\n guaranteed that no bytes were read.\n\n An error of the [`ErrorKind::Interrupted`] kind is non-fatal and the read\n operation should be retried if there is nothing else to do.\n\n # Examples\n\n [`File`]s implement `Read`:\n\n [`Ok(n)`]: Ok\n [`File`]: crate::fs::File\n [`TcpStream`]: crate::net::TcpStream\n\n ```no_run\n use std::io;\n use std::io::prelude::*;\n use std::fs::File;\n\n fn main() -> io::Result<()> {\n     let mut f = File::open(\"foo.txt\")?;\n     let mut buffer = [0; 10];\n\n     // read up to 10 bytes\n     let n = f.read(&mut buffer[..])?;\n\n     println!(\"The bytes: {:?}\", &buffer[..n]);\n     Ok(())\n }\n ```\n",
+      "adt": {}
+    },
+    "io::BufRead::fill_buf": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contents of the internal buffer, filling it with more data, via `Read` methods, if empty.\n\n This is a lower-level method and is meant to be used together with [`consume`],\n which can be used to mark bytes that should not be returned by subsequent calls to `read`.\n\n [`consume`]: BufRead::consume\n\n Returns an empty buffer when the stream has reached EOF.\n\n # Errors\n\n This function will return an I/O error if a `Read` method was called, but returned an error.\n\n # Examples\n\n A locked standard input implements `BufRead`:\n\n ```no_run\n use std::io;\n use std::io::prelude::*;\n\n let stdin = io::stdin();\n let mut stdin = stdin.lock();\n\n let buffer = stdin.fill_buf()?;\n\n // work with buffer\n println!(\"{buffer:?}\");\n\n // mark the bytes we worked with as read\n let length = buffer.len();\n stdin.consume(length);\n # std::io::Result::Ok(())\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "io::BufRead::consume": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Marks the given `amount` of additional bytes from the internal buffer as having been read.\n Subsequent calls to `read` only return bytes that have not been marked as read.\n\n This is a lower-level method and is meant to be used together with [`fill_buf`],\n which can be used to fill the internal buffer via `Read` methods.\n\n It is a logic error if `amount` exceeds the number of unread bytes in the internal buffer, which is returned by [`fill_buf`].\n\n # Examples\n\n Since `consume()` is meant to be used with [`fill_buf`],\n that method's example includes an example of `consume()`.\n\n [`fill_buf`]: BufRead::fill_buf\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "io::buffered::bufreader::buffer::Buffer": [
+      "Ref"
+    ],
+    "io::buffered::bufreader::BufReader": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref",
+      "Deref",
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 992, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 993, kind: RigidTy(Slice(Ty { id: 35, kind: RigidTy(Uint(U8)) })) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])"
+    ]
+  },
+  "path": 1291,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/buffered/bufreader.rs:329:5: 341:6",
+  "src": "fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {\n        // If we don't have any buffered data and we're doing a massive read\n        // (larger than our internal buffer), bypass our internal buffer\n        // entirely.\n        if self.buf.pos() == self.buf.filled() && buf.len() >= self.capacity() {\n            self.discard_buffer();\n            return self.inner.read(buf);\n        }\n        let mut rem = self.fill_buf()?;\n        let nread = rem.read(buf)?;\n        self.consume(nread);\n        Ok(nread)\n    }",
+  "mir": "fn <io::buffered::bufreader::BufReader<R> as io::Read>::read(_1: &mut io::buffered::bufreader::BufReader<R>, _2: &mut [u8]) -> core::result::Result<usize, io::error::Error> {\n    let mut _0: core::result::Result<usize, io::error::Error>;\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: &io::buffered::bufreader::buffer::Buffer;\n    let mut _6: usize;\n    let mut _7: &io::buffered::bufreader::buffer::Buffer;\n    let mut _8: bool;\n    let mut _9: usize;\n    let mut _10: &[u8];\n    let mut _11: usize;\n    let mut _12: &io::buffered::bufreader::BufReader<R>;\n    let  _13: ();\n    let mut _14: &mut R;\n    let mut _15: &[u8];\n    let mut _16: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, &[u8]>;\n    let mut _17: core::result::Result<&[u8], io::error::Error>;\n    let mut _18: isize;\n    let  _19: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _20: &[u8];\n    let mut _21: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, usize>;\n    let mut _22: core::result::Result<usize, io::error::Error>;\n    let mut _23: &mut &[u8];\n    let mut _24: isize;\n    let  _25: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _26: usize;\n    let  _27: ();\n    debug self => _1;\n    debug buf => _2;\n    debug rem => _15;\n    debug residual => _19;\n    debug val => _20;\n    debug nread => _26;\n    debug residual => _25;\n    debug val => _26;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_1).0: io::buffered::bufreader::buffer::Buffer);\n        _4 = io::buffered::bufreader::buffer::Buffer::pos(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).0: io::buffered::bufreader::buffer::Buffer);\n        _6 = io::buffered::bufreader::buffer::Buffer::filled(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _3 = Eq(move _4, move _6);\n        switchInt(move _3) -> [0: bb9, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_4);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &(*_2);\n        _9 = PtrMetadata(move _10);\n        StorageDead(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &(*_1);\n        _11 = io::buffered::bufreader::BufReader::<R>::capacity(move _12) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_12);\n        _8 = Ge(move _9, move _11);\n        switchInt(move _8) -> [0: bb8, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_11);\n        StorageDead(_9);\n        _13 = io::buffered::bufreader::BufReader::<R>::discard_buffer(_1) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_14);\n        _14 = &mut ((*_1).1: R);\n        _0 = <R as io::Read>::read(move _14, _2) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_14);\n        StorageDead(_8);\n        StorageDead(_3);\n        goto -> bb24;\n    }\n    bb8: {\n        StorageDead(_11);\n        StorageDead(_9);\n        goto -> bb10;\n    }\n    bb9: {\n        StorageDead(_6);\n        StorageDead(_4);\n        goto -> bb10;\n    }\n    bb10: {\n        StorageDead(_8);\n        StorageDead(_3);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = <io::buffered::bufreader::BufReader<R> as io::BufRead>::fill_buf(_1) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _16 = <core::result::Result<&[u8], io::error::Error> as core::ops::Try>::branch(move _17) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_17);\n        _18 = discriminant(_16);\n        switchInt(move _18) -> [0: bb14, 1: bb15, otherwise: bb13];\n    }\n    bb13: {\n        unreachable;\n    }\n    bb14: {\n        StorageLive(_20);\n        _20 = ((_16 as variant#0).0: &[u8]);\n        _15 = _20;\n        StorageDead(_20);\n        StorageDead(_16);\n        StorageLive(_21);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = &mut _15;\n        _22 = <&[u8] as io::Read>::read(move _23, _2) -> [return: bb17, unwind unreachable];\n    }\n    bb15: {\n        _19 = move ((_16 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<usize, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_19) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_16);\n        goto -> bb23;\n    }\n    bb17: {\n        StorageDead(_23);\n        _21 = <core::result::Result<usize, io::error::Error> as core::ops::Try>::branch(move _22) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_22);\n        _24 = discriminant(_21);\n        switchInt(move _24) -> [0: bb19, 1: bb20, otherwise: bb13];\n    }\n    bb19: {\n        _26 = ((_21 as variant#0).0: usize);\n        StorageDead(_21);\n        _27 = <io::buffered::bufreader::BufReader<R> as io::BufRead>::consume(_1, _26) -> [return: bb22, unwind unreachable];\n    }\n    bb20: {\n        _25 = move ((_21 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<usize, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_25) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_21);\n        goto -> bb23;\n    }\n    bb22: {\n        _0 = core::result::Result::Ok(_26);\n        StorageDead(_15);\n        goto -> bb24;\n    }\n    bb23: {\n        StorageDead(_15);\n        goto -> bb24;\n    }\n    bb24: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "sync::atomic::AtomicBool::load",
+  "safe": true,
+  "callees": {
+    "cell::UnsafeCell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the wrapped value.\n\n This can be cast to a pointer of any kind. When creating references, you must uphold the\n aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and\n caveats.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let five = uc.get();\n ```\n",
+      "adt": {
+        "cell::UnsafeCell": "MutableAsArgument"
+      }
+    },
+    "sync::atomic::atomic_load": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "cell::UnsafeCell": [
+      "Ref"
+    ],
+    "sync::atomic::AtomicBool": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "sync::atomic::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 17207,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/sync/atomic.rs:726:5: 730:6",
+  "src": "pub fn load(&self, order: Ordering) -> bool {\n        // SAFETY: any data races are prevented by atomic intrinsics and the raw\n        // pointer passed in is valid because we got it from a reference.\n        unsafe { atomic_load(self.v.get(), order) != 0 }\n    }",
+  "mir": "fn sync::atomic::AtomicBool::load(_1: &sync::atomic::AtomicBool, _2: sync::atomic::Ordering) -> bool {\n    let mut _0: bool;\n    let mut _3: u8;\n    let mut _4: *const u8;\n    let mut _5: *mut u8;\n    let mut _6: &cell::UnsafeCell<u8>;\n    debug self => _1;\n    debug order => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &((*_1).0: cell::UnsafeCell<u8>);\n        _5 = cell::UnsafeCell::<u8>::get(move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = move _5 as *const u8;\n        StorageDead(_6);\n        StorageDead(_5);\n        _3 = sync::atomic::atomic_load::<u8>(move _4, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = Ne(move _3, 0_u8);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Loads a value from the bool.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n use std::sync::atomic::{AtomicBool, Ordering};\n\n let some_bool = AtomicBool::new(true);\n\n assert_eq!(some_bool.load(Ordering::Relaxed), true);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

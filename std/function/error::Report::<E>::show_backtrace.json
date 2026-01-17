@@ -1,0 +1,21 @@
+{
+  "name": "error::Report::<E>::show_backtrace",
+  "safe": true,
+  "callees": {},
+  "adts": {
+    "error::Report": [
+      "Unknown([Field(1, Ty { id: 128, kind: RigidTy(Bool) })])",
+      "Plain"
+    ]
+  },
+  "path": 956,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/error.rs:439:5: 442:6",
+  "src": "pub fn show_backtrace(mut self, show_backtrace: bool) -> Self {\n        self.show_backtrace = show_backtrace;\n        self\n    }",
+  "mir": "fn error::Report::<E>::show_backtrace(_1: error::Report<E>, _2: bool) -> error::Report<E> {\n    let mut _0: error::Report<E>;\n    debug self => _1;\n    debug show_backtrace => _2;\n    bb0: {\n        (_1.1: bool) = _2;\n        _0 = move _1;\n        return;\n    }\n}\n",
+  "doc": " Display backtrace if available when using pretty output format.\n\n # Examples\n\n **Note**: Report will search for the first `Backtrace` it can find starting from the\n outermost error. In this example it will display the backtrace from the second error in the\n sources, `SuperErrorSideKick`.\n\n ```rust\n #![feature(error_reporter)]\n #![feature(error_generic_member_access)]\n # use std::error::Error;\n # use std::fmt;\n use std::error::Request;\n use std::error::Report;\n use std::backtrace::Backtrace;\n\n # #[derive(Debug)]\n # struct SuperError {\n #     source: SuperErrorSideKick,\n # }\n # impl fmt::Display for SuperError {\n #     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n #         write!(f, \"SuperError is here!\")\n #     }\n # }\n # impl Error for SuperError {\n #     fn source(&self) -> Option<&(dyn Error + 'static)> {\n #         Some(&self.source)\n #     }\n # }\n #[derive(Debug)]\n struct SuperErrorSideKick {\n     backtrace: Backtrace,\n }\n\n impl SuperErrorSideKick {\n     fn new() -> SuperErrorSideKick {\n         SuperErrorSideKick { backtrace: Backtrace::force_capture() }\n     }\n }\n\n impl Error for SuperErrorSideKick {\n     fn provide<'a>(&'a self, request: &mut Request<'a>) {\n         request.provide_ref::<Backtrace>(&self.backtrace);\n     }\n }\n\n // The rest of the example is unchanged ...\n # impl fmt::Display for SuperErrorSideKick {\n #     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n #         write!(f, \"SuperErrorSideKick is here!\")\n #     }\n # }\n\n let source = SuperErrorSideKick::new();\n let error = SuperError { source };\n let report = Report::new(error).pretty(true).show_backtrace(true);\n eprintln!(\"Error: {report:?}\");\n ```\n\n This example produces something similar to the following output:\n\n ```console\n Error: SuperError is here!\n\n Caused by:\n       SuperErrorSideKick is here!\n\n Stack backtrace:\n    0: rust_out::main::_doctest_main_src_error_rs_1158_0::SuperErrorSideKick::new\n    1: rust_out::main::_doctest_main_src_error_rs_1158_0\n    2: rust_out::main\n    3: core::ops::function::FnOnce::call_once\n    4: std::sys::backtrace::__rust_begin_short_backtrace\n    5: std::rt::lang_start::{{closure}}\n    6: std::panicking::try\n    7: std::rt::lang_start_internal\n    8: std::rt::lang_start\n    9: main\n   10: __libc_start_main\n   11: _start\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

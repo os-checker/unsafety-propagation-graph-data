@@ -1,0 +1,70 @@
+{
+  "name": "mm::tlb::TlbFlusher::<'a, G>::new",
+  "safe": true,
+  "callees": {
+    "util::id_set::IdSet::<I>::new_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `IdSet` with no IDs in the system.\n",
+      "adt": {
+        "util::id_set::IdSet": "Constructor"
+      }
+    },
+    "mm::tlb::OpsStack::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "mm::tlb::OpsStack": "Constructor"
+      }
+    },
+    "spin::once::Once::<T, R>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the inner value if the [`Once`] has been initialized.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "util::id_set::IdSet": [
+      "Plain"
+    ],
+    "mm::tlb::OpsStack": [
+      "Plain"
+    ],
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "mm::tlb::TlbFlusher": [
+      "Plain"
+    ],
+    "util::id_set::AtomicIdSet": [
+      "Ref"
+    ]
+  },
+  "path": 2461,
+  "span": "ostd/src/mm/tlb.rs:44:5: 52:6",
+  "src": "pub fn new(target_cpus: &'a AtomicCpuSet, pin_current_guard: G) -> Self {\n        Self {\n            target_cpus,\n            have_unsynced_flush: CpuSet::new_empty(),\n            ops_stack: OpsStack::new(),\n            ipi_sender: crate::smp::IPI_SENDER.get(),\n            _pin_current: pin_current_guard,\n        }\n    }",
+  "mir": "fn mm::tlb::TlbFlusher::<'a, G>::new(_1: &util::id_set::AtomicIdSet<cpu::id::CpuId>, _2: G) -> mm::tlb::TlbFlusher<'_, G> {\n    let mut _0: mm::tlb::TlbFlusher<'_, G>;\n    let mut _3: util::id_set::IdSet<cpu::id::CpuId>;\n    let mut _4: mm::tlb::OpsStack;\n    let mut _5: core::option::Option<&smp::IpiSender>;\n    let mut _6: &spin::once::Once<smp::IpiSender>;\n    debug target_cpus => _1;\n    debug pin_current_guard => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = util::id_set::IdSet::<cpu::id::CpuId>::new_empty() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = mm::tlb::OpsStack::new() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = {alloc1417: &spin::once::Once<smp::IpiSender>};\n        _5 = spin::once::Once::<smp::IpiSender>::get(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _0 = TlbFlusher(_1, move _3, move _4, move _5, _2);\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Creates a new TLB flusher with the specified CPUs to be flushed.\n\n The target CPUs should be a reference to an [`AtomicCpuSet`] that will\n be loaded upon [`Self::dispatch_tlb_flush`].\n\n The flusher needs to stick to the current CPU. So please provide a\n guard that implements [`PinCurrentCpu`].\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

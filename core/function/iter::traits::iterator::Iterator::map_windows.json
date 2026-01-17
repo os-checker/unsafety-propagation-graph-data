@@ -1,0 +1,33 @@
+{
+  "name": "iter::traits::iterator::Iterator::map_windows",
+  "safe": true,
+  "callees": {
+    "iter::adapters::map_windows::MapWindows::<I, F, N>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "iter::adapters::map_windows::MapWindows": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "iter::adapters::map_windows::MapWindows": [
+      "Plain"
+    ]
+  },
+  "path": "iter::traits::iterator::Iterator::map_windows",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:1713:5: 1719:6",
+  "src": "fn map_windows<F, R, const N: usize>(self, f: F) -> MapWindows<Self, F, N>\n    where\n        Self: Sized,\n        F: FnMut(&[Self::Item; N]) -> R,\n    {\n        MapWindows::new(self, f)\n    }",
+  "mir": "fn iter::traits::iterator::Iterator::map_windows(_1: Self, _2: F) -> iter::adapters::map_windows::MapWindows<Self, F, N> {\n    let mut _0: iter::adapters::map_windows::MapWindows<Self, F, N>;\n    debug self => _1;\n    debug f => _2;\n    bb0: {\n        _0 = iter::adapters::map_windows::MapWindows::<Self, F, N>::new(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Calls the given function `f` for each contiguous window of size `N` over\n `self` and returns an iterator over the outputs of `f`. Like [`slice::windows()`],\n the windows during mapping overlap as well.\n\n In the following example, the closure is called three times with the\n arguments `&['a', 'b']`, `&['b', 'c']` and `&['c', 'd']` respectively.\n\n ```\n #![feature(iter_map_windows)]\n\n let strings = \"abcd\".chars()\n     .map_windows(|[x, y]| format!(\"{}+{}\", x, y))\n     .collect::<Vec<String>>();\n\n assert_eq!(strings, vec![\"a+b\", \"b+c\", \"c+d\"]);\n ```\n\n Note that the const parameter `N` is usually inferred by the\n destructured argument in the closure.\n\n The returned iterator yields 𝑘 − `N` + 1 items (where 𝑘 is the number of\n items yielded by `self`). If 𝑘 is less than `N`, this method yields an\n empty iterator.\n\n The returned iterator implements [`FusedIterator`], because once `self`\n returns `None`, even if it returns a `Some(T)` again in the next iterations,\n we cannot put it into a contiguous array buffer, and thus the returned iterator\n should be fused.\n\n [`slice::windows()`]: slice::windows\n [`FusedIterator`]: crate::iter::FusedIterator\n\n # Panics\n\n Panics if `N` is zero. This check will most probably get changed to a\n compile time error before this method gets stabilized.\n\n ```should_panic\n #![feature(iter_map_windows)]\n\n let iter = std::iter::repeat(0).map_windows(|&[]| ());\n ```\n\n # Examples\n\n Building the sums of neighboring numbers.\n\n ```\n #![feature(iter_map_windows)]\n\n let mut it = [1, 3, 8, 1].iter().map_windows(|&[a, b]| a + b);\n assert_eq!(it.next(), Some(4));  // 1 + 3\n assert_eq!(it.next(), Some(11)); // 3 + 8\n assert_eq!(it.next(), Some(9));  // 8 + 1\n assert_eq!(it.next(), None);\n ```\n\n Since the elements in the following example implement `Copy`, we can\n just copy the array and get an iterator over the windows.\n\n ```\n #![feature(iter_map_windows)]\n\n let mut it = \"ferris\".chars().map_windows(|w: &[_; 3]| *w);\n assert_eq!(it.next(), Some(['f', 'e', 'r']));\n assert_eq!(it.next(), Some(['e', 'r', 'r']));\n assert_eq!(it.next(), Some(['r', 'r', 'i']));\n assert_eq!(it.next(), Some(['r', 'i', 's']));\n assert_eq!(it.next(), None);\n ```\n\n You can also use this function to check the sortedness of an iterator.\n For the simple case, rather use [`Iterator::is_sorted`].\n\n ```\n #![feature(iter_map_windows)]\n\n let mut it = [0.5, 1.0, 3.5, 3.0, 8.5, 8.5, f32::NAN].iter()\n     .map_windows(|[a, b]| a <= b);\n\n assert_eq!(it.next(), Some(true));  // 0.5 <= 1.0\n assert_eq!(it.next(), Some(true));  // 1.0 <= 3.5\n assert_eq!(it.next(), Some(false)); // 3.5 <= 3.0\n assert_eq!(it.next(), Some(true));  // 3.0 <= 8.5\n assert_eq!(it.next(), Some(true));  // 8.5 <= 8.5\n assert_eq!(it.next(), Some(false)); // 8.5 <= NAN\n assert_eq!(it.next(), None);\n ```\n\n For non-fused iterators, they are fused after `map_windows`.\n\n ```\n #![feature(iter_map_windows)]\n\n #[derive(Default)]\n struct NonFusedIterator {\n     state: i32,\n }\n\n impl Iterator for NonFusedIterator {\n     type Item = i32;\n\n     fn next(&mut self) -> Option<i32> {\n         let val = self.state;\n         self.state = self.state + 1;\n\n         // yields `0..5` first, then only even numbers since `6..`.\n         if val < 5 || val % 2 == 0 {\n             Some(val)\n         } else {\n             None\n         }\n     }\n }\n\n\n let mut iter = NonFusedIterator::default();\n\n // yields 0..5 first.\n assert_eq!(iter.next(), Some(0));\n assert_eq!(iter.next(), Some(1));\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(3));\n assert_eq!(iter.next(), Some(4));\n // then we can see our iterator going back and forth\n assert_eq!(iter.next(), None);\n assert_eq!(iter.next(), Some(6));\n assert_eq!(iter.next(), None);\n assert_eq!(iter.next(), Some(8));\n assert_eq!(iter.next(), None);\n\n // however, with `.map_windows()`, it is fused.\n let mut iter = NonFusedIterator::default()\n     .map_windows(|arr: &[_; 2]| *arr);\n\n assert_eq!(iter.next(), Some([0, 1]));\n assert_eq!(iter.next(), Some([1, 2]));\n assert_eq!(iter.next(), Some([2, 3]));\n assert_eq!(iter.next(), Some([3, 4]));\n assert_eq!(iter.next(), None);\n\n // it will always return `None` after the first time.\n assert_eq!(iter.next(), None);\n assert_eq!(iter.next(), None);\n assert_eq!(iter.next(), None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

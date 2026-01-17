@@ -1,0 +1,47 @@
+{
+  "name": "str::iter::Chars::<'a>::as_str",
+  "safe": true,
+  "callees": {
+    "slice::iter::Iter::<'a, T>::as_slice": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Views the underlying data as a subslice of the original data.\n\n # Examples\n\n Basic usage:\n\n ```\n // First, we need a slice to call the `iter` method on:\n let slice = &[1, 2, 3];\n\n // Then we call `iter` on the slice to get the `Iter` iterator:\n let mut iter = slice.iter();\n // Here `as_slice` still returns the whole slice, so this prints \"[1, 2, 3]\":\n println!(\"{:?}\", iter.as_slice());\n\n // Now, we call the `next` method to remove the first element from the iterator:\n iter.next();\n // Here the iterator does not contain the first element of the slice any more,\n // so `as_slice` only returns the last two elements of the slice,\n // and so this prints \"[2, 3]\":\n println!(\"{:?}\", iter.as_slice());\n\n // The underlying slice has not been modified and still contains three elements,\n // so this prints \"[1, 2, 3]\":\n println!(\"{:?}\", slice);\n ```\n",
+      "adt": {
+        "slice::iter::Iter": "ImmutableAsArgument"
+      }
+    },
+    "str::converts::from_utf8_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a slice of bytes to a string slice without checking\n that the string contains valid UTF-8.\n\n This is an alias to [`str::from_utf8_unchecked`].\n\n See the safe version, [`from_utf8`], for more information.\n\n # Safety\n\n The bytes passed in must be valid UTF-8.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::str;\n\n // some bytes, in a vector\n let sparkle_heart = vec![240, 159, 146, 150];\n\n let sparkle_heart = unsafe {\n     str::from_utf8_unchecked(&sparkle_heart)\n };\n\n assert_eq!(\"💖\", sparkle_heart);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::Iter": [
+      "Ref"
+    ],
+    "str::iter::Chars": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ]
+  },
+  "path": 16834,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/str/iter.rs:159:5: 162:6",
+  "src": "pub fn as_str(&self) -> &'a str {\n        // SAFETY: `Chars` is only made from a str, which guarantees the iter is valid UTF-8.\n        unsafe { from_utf8_unchecked(self.iter.as_slice()) }\n    }",
+  "mir": "fn str::iter::Chars::<'a>::as_str(_1: &str::iter::Chars<'_>) -> &str {\n    let mut _0: &str;\n    let  _2: &[u8];\n    let mut _3: &slice::iter::Iter<'_, u8>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_3);\n        _3 = &((*_1).0: slice::iter::Iter<'_, u8>);\n        _2 = slice::iter::Iter::<'_, u8>::as_slice(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _0 = str::converts::from_utf8_unchecked(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Views the underlying data as a subslice of the original data.\n\n This has the same lifetime as the original slice, and so the\n iterator can continue to be used while this exists.\n\n # Examples\n\n ```\n let mut chars = \"abc\".chars();\n\n assert_eq!(chars.as_str(), \"abc\");\n chars.next();\n assert_eq!(chars.as_str(), \"bc\");\n chars.next();\n chars.next();\n assert_eq!(chars.as_str(), \"\");\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

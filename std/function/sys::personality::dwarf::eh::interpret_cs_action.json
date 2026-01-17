@@ -1,0 +1,59 @@
+{
+  "name": "sys::personality::dwarf::eh::interpret_cs_action",
+  "safe": false,
+  "callees": {
+    "core::ptr::const_ptr::<impl *const T>::offset": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"123\";\n let ptr: *const u8 = s.as_ptr();\n\n unsafe {\n     assert_eq!(*ptr.offset(1) as char, '2');\n     assert_eq!(*ptr.offset(2) as char, '3');\n }\n ```\n",
+      "adt": {}
+    },
+    "sys::personality::dwarf::DwarfReader::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::personality::dwarf::DwarfReader": "Constructor"
+      }
+    },
+    "sys::personality::dwarf::DwarfReader::read_sleb128": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::personality::dwarf::DwarfReader": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "sys::personality::dwarf::eh::EHAction": [
+      "Plain"
+    ],
+    "sys::personality::dwarf::DwarfReader": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 4059,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/personality/dwarf/eh.rs:148:1: 172:2",
+  "src": "unsafe fn interpret_cs_action(\n    action_table: *const u8,\n    cs_action_entry: u64,\n    lpad: LPad,\n) -> EHAction {\n    if cs_action_entry == 0 {\n        // If cs_action_entry is 0 then this is a cleanup (Drop::drop). We run these\n        // for both Rust panics and foreign exceptions.\n        EHAction::Cleanup(lpad)\n    } else {\n        // If lpad != 0 and cs_action_entry != 0, we have to check ttype_index.\n        // If ttype_index == 0 under the condition, we take cleanup action.\n        let action_record = unsafe { action_table.offset(cs_action_entry as isize - 1) };\n        let mut action_reader = DwarfReader::new(action_record);\n        let ttype_index = unsafe { action_reader.read_sleb128() };\n        if ttype_index == 0 {\n            EHAction::Cleanup(lpad)\n        } else if ttype_index > 0 {\n            // Stop unwinding Rust panics at catch_unwind.\n            EHAction::Catch(lpad)\n        } else {\n            EHAction::Filter(lpad)\n        }\n    }\n}",
+  "mir": "fn sys::personality::dwarf::eh::interpret_cs_action(_1: *const u8, _2: u64, _3: *const u8) -> sys::personality::dwarf::eh::EHAction {\n    let mut _0: sys::personality::dwarf::eh::EHAction;\n    let  _4: *const u8;\n    let mut _5: isize;\n    let mut _6: isize;\n    let mut _7: (isize, bool);\n    let mut _8: sys::personality::dwarf::DwarfReader;\n    let  _9: i64;\n    let mut _10: &mut sys::personality::dwarf::DwarfReader;\n    let mut _11: bool;\n    debug action_table => _1;\n    debug cs_action_entry => _2;\n    debug lpad => _3;\n    debug action_record => _4;\n    debug action_reader => _8;\n    debug ttype_index => _9;\n    bb0: {\n        switchInt(_2) -> [0: bb1, otherwise: bb2];\n    }\n    bb1: {\n        _0 = sys::personality::dwarf::eh::EHAction::Cleanup(_3);\n        goto -> bb13;\n    }\n    bb2: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = _2 as isize;\n        _7 = CheckedSub(_6, 1_isize);\n        assert(!move (_7.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _6, 1_isize) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _5 = move (_7.0: isize);\n        StorageDead(_6);\n        _4 = core::ptr::const_ptr::<impl *const u8>::offset(_1, move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageLive(_8);\n        _8 = sys::personality::dwarf::DwarfReader::new(_4) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_10);\n        _10 = &mut _8;\n        _9 = sys::personality::dwarf::DwarfReader::read_sleb128(move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        switchInt(_9) -> [0: bb7, otherwise: bb8];\n    }\n    bb7: {\n        _0 = sys::personality::dwarf::eh::EHAction::Cleanup(_3);\n        goto -> bb12;\n    }\n    bb8: {\n        StorageLive(_11);\n        _11 = Gt(_9, 0_i64);\n        switchInt(move _11) -> [0: bb10, otherwise: bb9];\n    }\n    bb9: {\n        _0 = sys::personality::dwarf::eh::EHAction::Catch(_3);\n        goto -> bb11;\n    }\n    bb10: {\n        _0 = sys::personality::dwarf::eh::EHAction::Filter(_3);\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_11);\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_8);\n        goto -> bb13;\n    }\n    bb13: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

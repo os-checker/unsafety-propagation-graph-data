@@ -1,0 +1,103 @@
+{
+  "name": "io::impls::<impl io::Read for &[u8]>::read_to_string",
+  "safe": true,
+  "callees": {
+    "core::str::from_utf8": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a slice of bytes to a string slice.\n\n This is an alias to [`str::from_utf8`].\n\n A string slice ([`&str`]) is made of bytes ([`u8`]), and a byte slice\n ([`&[u8]`][byteslice]) is made of bytes, so this function converts between\n the two. Not all byte slices are valid string slices, however: [`&str`] requires\n that it is valid UTF-8. `from_utf8()` checks to ensure that the bytes are valid\n UTF-8, and then does the conversion.\n\n [`&str`]: str\n [byteslice]: slice\n\n If you are sure that the byte slice is valid UTF-8, and you don't want to\n incur the overhead of the validity check, there is an unsafe version of\n this function, [`from_utf8_unchecked`], which has the same\n behavior but skips the check.\n\n If you need a `String` instead of a `&str`, consider\n [`String::from_utf8`][string].\n\n [string]: ../../std/string/struct.String.html#method.from_utf8\n\n Because you can stack-allocate a `[u8; N]`, and you can take a\n [`&[u8]`][byteslice] of it, this function is one way to have a\n stack-allocated string. There is an example of this in the\n examples section below.\n\n [byteslice]: slice\n\n # Errors\n\n Returns `Err` if the slice is not UTF-8 with a description as to why the\n provided slice is not UTF-8.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::str;\n\n // some bytes, in a vector\n let sparkle_heart = vec![240, 159, 146, 150];\n\n // We can use the ? (try) operator to check if the bytes are valid\n let sparkle_heart = str::from_utf8(&sparkle_heart)?;\n\n assert_eq!(\"💖\", sparkle_heart);\n # Ok::<_, str::Utf8Error>(())\n ```\n\n Incorrect bytes:\n\n ```\n use std::str;\n\n // some invalid bytes, in a vector\n let sparkle_heart = vec![0, 159, 146, 150];\n\n assert!(str::from_utf8(&sparkle_heart).is_err());\n ```\n\n See the docs for [`Utf8Error`] for more details on the kinds of\n errors that can be returned.\n\n A \"stack allocated string\":\n\n ```\n use std::str;\n\n // some bytes, in a stack-allocated array\n let sparkle_heart = [240, 159, 146, 150];\n\n // We know these bytes are valid, so just use `unwrap()`.\n let sparkle_heart: &str = str::from_utf8(&sparkle_heart).unwrap();\n\n assert_eq!(\"💖\", sparkle_heart);\n ```\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::map_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<T, F>` by applying a function to a\n contained [`Err`] value, leaving an [`Ok`] value untouched.\n\n This function can be used to pass through a successful result while handling\n an error.\n\n\n # Examples\n\n ```\n fn stringify(x: u32) -> String { format!(\"error code: {x}\") }\n\n let x: Result<u32, u32> = Ok(2);\n assert_eq!(x.map_err(stringify), Ok(2));\n\n let x: Result<u32, u32> = Err(13);\n assert_eq!(x.map_err(stringify), Err(\"error code: 13\".to_string()));\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::string::String::try_reserve": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tries to reserve capacity for at least `additional` bytes more than the\n current length. The allocator may reserve more space to speculatively\n avoid frequent allocations. After calling `try_reserve`, capacity will be\n greater than or equal to `self.len() + additional` if it returns\n `Ok(())`. Does nothing if capacity is already sufficient. This method\n preserves the contents even if an error occurs.\n\n # Errors\n\n If the capacity overflows, or the allocator reports a failure, then an error\n is returned.\n\n # Examples\n\n ```\n use std::collections::TryReserveError;\n\n fn process_data(data: &str) -> Result<String, TryReserveError> {\n     let mut output = String::new();\n\n     // Pre-reserve the memory, exiting if we can't\n     output.try_reserve(data.len())?;\n\n     // Now we know this can't OOM in the middle of our complex work\n     output.push_str(data);\n\n     Ok(output)\n }\n # process_data(\"rust\").expect(\"why is the test harness OOMing on 4 bytes?\");\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::string::String::push_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Appends a given string slice onto the end of this `String`.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut s = String::from(\"foo\");\n\n s.push_str(\"bar\");\n\n assert_eq!(\"foobar\", s);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 7, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 17, kind: RigidTy(Str) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 3680, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 1482, kind: RigidTy(Adt(AdtDef(DefId { id: 5039, name: \"alloc_crate::collections::TryReserveError\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "alloc_crate::string::String": [
+      "MutRef"
+    ],
+    "core::ops::RangeFrom": [
+      "Plain"
+    ]
+  },
+  "path": 65,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/impls.rs:395:5: 402:6",
+  "src": "fn read_to_string(&mut self, buf: &mut String) -> io::Result<usize> {\n        let content = str::from_utf8(self).map_err(|_| io::Error::INVALID_UTF8)?;\n        let len = self.len();\n        buf.try_reserve(len)?;\n        buf.push_str(content);\n        *self = &self[len..];\n        Ok(len)\n    }",
+  "mir": "fn io::impls::<impl io::Read for &[u8]>::read_to_string(_1: &mut &[u8], _2: &mut alloc_crate::string::String) -> core::result::Result<usize, io::error::Error> {\n    let mut _0: core::result::Result<usize, io::error::Error>;\n    let mut _3: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, &str>;\n    let mut _4: core::result::Result<&str, io::error::Error>;\n    let mut _5: core::result::Result<&str, core::str::Utf8Error>;\n    let mut _6: isize;\n    let  _7: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _8: &str;\n    let  _9: usize;\n    let mut _10: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, alloc_crate::collections::TryReserveError>>;\n    let mut _11: core::result::Result<(), alloc_crate::collections::TryReserveError>;\n    let mut _12: isize;\n    let  _13: core::result::Result<core::convert::Infallible, alloc_crate::collections::TryReserveError>;\n    let  _14: ();\n    let  _15: &[u8];\n    let mut _16: core::ops::RangeFrom<usize>;\n    let mut _17: &[u8];\n    let mut _18: &[u8];\n    let mut _19: &[u8];\n    debug self => _1;\n    debug buf => _2;\n    debug content => _8;\n    debug residual => _7;\n    debug val => _8;\n    debug len => _9;\n    debug residual => _13;\n    debug val => ();\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _17 = (*_1);\n        _5 = core::str::from_utf8(_17) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = core::result::Result::<&str, core::str::Utf8Error>::map_err::<io::error::Error, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/impls.rs:396:52: 396:55}>(move _5, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/impls.rs:396:52: 396:55}) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = <core::result::Result<&str, io::error::Error> as core::ops::Try>::branch(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _6 = discriminant(_3);\n        switchInt(move _6) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _8 = ((_3 as variant#0).0: &str);\n        StorageDead(_3);\n        _18 = (*_1);\n        _9 = PtrMetadata(_18);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = alloc_crate::string::String::try_reserve(_2, _9) -> [return: bb8, unwind unreachable];\n    }\n    bb6: {\n        _7 = move ((_3 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<usize, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_7) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_3);\n        goto -> bb15;\n    }\n    bb8: {\n        _10 = <core::result::Result<(), alloc_crate::collections::TryReserveError> as core::ops::Try>::branch(move _11) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_11);\n        _12 = discriminant(_10);\n        switchInt(move _12) -> [0: bb10, 1: bb11, otherwise: bb4];\n    }\n    bb10: {\n        StorageDead(_10);\n        _14 = alloc_crate::string::String::push_str(_2, _8) -> [return: bb13, unwind unreachable];\n    }\n    bb11: {\n        _13 = move ((_10 as variant#1).0: core::result::Result<core::convert::Infallible, alloc_crate::collections::TryReserveError>);\n        _0 = <core::result::Result<usize, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, alloc_crate::collections::TryReserveError>>>::from_residual(_13) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_10);\n        goto -> bb15;\n    }\n    bb13: {\n        _19 = (*_1);\n        StorageLive(_16);\n        _16 = RangeFrom(_9);\n        _15 = <[u8] as core::ops::Index<core::ops::RangeFrom<usize>>>::index(_19, move _16) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_16);\n        (*_1) = _15;\n        _0 = core::result::Result::Ok(_9);\n        goto -> bb16;\n    }\n    bb15: {\n        goto -> bb16;\n    }\n    bb16: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

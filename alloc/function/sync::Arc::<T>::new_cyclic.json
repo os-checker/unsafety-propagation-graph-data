@@ -1,0 +1,33 @@
+{
+  "name": "sync::Arc::<T>::new_cyclic",
+  "safe": true,
+  "callees": {
+    "sync::Arc::<T, A>::new_cyclic_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new `Arc<T, A>` in the given allocator while giving you a `Weak<T, A>` to the allocation,\n to allow you to construct a `T` which holds a weak pointer to itself.\n\n Generally, a structure circularly referencing itself, either directly or\n indirectly, should not hold a strong reference to itself to prevent a memory leak.\n Using this function, you get access to the weak pointer during the\n initialization of `T`, before the `Arc<T, A>` is created, such that you can\n clone and store it inside the `T`.\n\n `new_cyclic_in` first allocates the managed allocation for the `Arc<T, A>`,\n then calls your closure, giving it a `Weak<T, A>` to this allocation,\n and only afterwards completes the construction of the `Arc<T, A>` by placing\n the `T` returned from your closure into the allocation.\n\n Since the new `Arc<T, A>` is not fully-constructed until `Arc<T, A>::new_cyclic_in`\n returns, calling [`upgrade`] on the weak reference inside your closure will\n fail and result in a `None` value.\n\n # Panics\n\n If `data_fn` panics, the panic is propagated to the caller, and the\n temporary [`Weak<T>`] is dropped normally.\n\n # Example\n\n See [`new_cyclic`]\n\n [`new_cyclic`]: Arc::new_cyclic\n [`upgrade`]: Weak::upgrade\n",
+      "adt": {
+        "sync::Arc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sync::Arc": [
+      "Plain"
+    ]
+  },
+  "path": 2084,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:484:5: 489:6",
+  "src": "pub fn new_cyclic<F>(data_fn: F) -> Arc<T>\n    where\n        F: FnOnce(&Weak<T>) -> T,\n    {\n        Self::new_cyclic_in(data_fn, Global)\n    }",
+  "mir": "fn sync::Arc::<T>::new_cyclic(_1: F) -> sync::Arc<T> {\n    let mut _0: sync::Arc<T>;\n    debug data_fn => _1;\n    bb0: {\n        _0 = sync::Arc::<T>::new_cyclic_in::<F>(_1, alloc::Global) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Constructs a new `Arc<T>` while giving you a `Weak<T>` to the allocation,\n to allow you to construct a `T` which holds a weak pointer to itself.\n\n Generally, a structure circularly referencing itself, either directly or\n indirectly, should not hold a strong reference to itself to prevent a memory leak.\n Using this function, you get access to the weak pointer during the\n initialization of `T`, before the `Arc<T>` is created, such that you can\n clone and store it inside the `T`.\n\n `new_cyclic` first allocates the managed allocation for the `Arc<T>`,\n then calls your closure, giving it a `Weak<T>` to this allocation,\n and only afterwards completes the construction of the `Arc<T>` by placing\n the `T` returned from your closure into the allocation.\n\n Since the new `Arc<T>` is not fully-constructed until `Arc<T>::new_cyclic`\n returns, calling [`upgrade`] on the weak reference inside your closure will\n fail and result in a `None` value.\n\n # Panics\n\n If `data_fn` panics, the panic is propagated to the caller, and the\n temporary [`Weak<T>`] is dropped normally.\n\n # Example\n\n ```\n # #![allow(dead_code)]\n use std::sync::{Arc, Weak};\n\n struct Gadget {\n     me: Weak<Gadget>,\n }\n\n impl Gadget {\n     /// Constructs a reference counted Gadget.\n     fn new() -> Arc<Self> {\n         // `me` is a `Weak<Gadget>` pointing at the new allocation of the\n         // `Arc` we're constructing.\n         Arc::new_cyclic(|me| {\n             // Create the actual struct here.\n             Gadget { me: me.clone() }\n         })\n     }\n\n     /// Returns a reference counted pointer to Self.\n     fn me(&self) -> Arc<Self> {\n         self.me.upgrade().unwrap()\n     }\n }\n ```\n [`upgrade`]: Weak::upgrade\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

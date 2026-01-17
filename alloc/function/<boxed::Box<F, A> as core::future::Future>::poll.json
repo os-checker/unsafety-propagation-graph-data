@@ -1,0 +1,64 @@
+{
+  "name": "<boxed::Box<F, A> as core::future::Future>::poll",
+  "safe": true,
+  "callees": {
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "core::pin::Pin::<Ptr>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new `Pin<Ptr>` around a pointer to some data of a type that\n implements [`Unpin`].\n\n Unlike `Pin::new_unchecked`, this method is safe because the pointer\n `Ptr` dereferences to an [`Unpin`] type, which cancels the pinning guarantees.\n\n # Examples\n\n ```\n use std::pin::Pin;\n\n let mut val: u8 = 5;\n\n // Since `val` doesn't care about being moved, we can safely create a \"facade\" `Pin`\n // which will allow `val` to participate in `Pin`-bound apis  without checking that\n // pinning guarantees are actually upheld.\n let mut pinned: Pin<&mut u8> = Pin::new(&mut val);\n ```\n",
+      "adt": {}
+    },
+    "core::future::Future::poll": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to resolve the future to a final value, registering\n the current task for wakeup if the value is not yet available.\n\n # Return value\n\n This function returns:\n\n - [`Poll::Pending`] if the future is not ready yet\n - [`Poll::Ready(val)`] with the result `val` of this future if it\n   finished successfully.\n\n Once a future has finished, clients should not `poll` it again.\n\n When a future is not ready yet, `poll` returns `Poll::Pending` and\n stores a clone of the [`Waker`] copied from the current [`Context`].\n This [`Waker`] is then woken once the future can make progress.\n For example, a future waiting for a socket to become\n readable would call `.clone()` on the [`Waker`] and store it.\n When a signal arrives elsewhere indicating that the socket is readable,\n [`Waker::wake`] is called and the socket future's task is awoken.\n Once a task has been woken up, it should attempt to `poll` the future\n again, which may or may not produce a final value.\n\n Note that on multiple calls to `poll`, only the [`Waker`] from the\n [`Context`] passed to the most recent call should be scheduled to\n receive a wakeup.\n\n # Runtime characteristics\n\n Futures alone are *inert*; they must be *actively* `poll`ed for the\n underlying computation to make progress, meaning that each time the\n current task is woken up, it should actively re-`poll` pending futures\n that it still has an interest in.\n\n Having said that, some Futures may represent a value that is being\n computed in a different task. In this case, the future's underlying\n computation is simply acting as a conduit for a value being computed\n by that other task, which will proceed independently of the Future.\n Futures of this kind are typically obtained when spawning a new task into an\n async runtime.\n\n The `poll` function should not be called repeatedly in a tight loop --\n instead, it should only be called when the future indicates that it is\n ready to make progress (by calling `wake()`). If you're familiar with the\n `poll(2)` or `select(2)` syscalls on Unix it's worth noting that futures\n typically do *not* suffer the same problems of \"all wakeups must poll\n all events\"; they are more like `epoll(4)`.\n\n An implementation of `poll` should strive to return quickly, and should\n not block. Returning quickly prevents unnecessarily clogging up\n threads or event loops. If it is known ahead of time that a call to\n `poll` may end up taking a while, the work should be offloaded to a\n thread pool (or something similar) to ensure that `poll` can return\n quickly.\n\n # Panics\n\n Once a future has completed (returned `Ready` from `poll`), calling its\n `poll` method again may panic, block forever, or cause other kinds of\n problems; the `Future` trait places no requirements on the effects of\n such a call. However, as the `poll` method is not marked `unsafe`,\n Rust's usual rules apply: calls must never cause undefined behavior\n (memory corruption, incorrect use of `unsafe` functions, or the like),\n regardless of the future's state.\n\n [`Poll::Ready(val)`]: Poll::Ready\n [`Waker`]: crate::task::Waker\n [`Waker::wake`]: crate::task::Waker::wake\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::pin::Pin": [
+      "MutRef",
+      "Plain"
+    ],
+    "boxed::Box": [
+      "MutRef",
+      "Plain",
+      "Deref",
+      "Unknown([Field(0, Ty { id: 1570, kind: RigidTy(Adt(AdtDef(DefId { id: 2645, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 1581, kind: Param(ParamTy { index: 0, name: \"F\" }) })]))) }), Field(0, Ty { id: 1571, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 1581, kind: Param(ParamTy { index: 0, name: \"F\" }) })]))) })])"
+    ],
+    "core::task::Context": [
+      "MutRef"
+    ],
+    "core::task::Poll": [
+      "Plain"
+    ]
+  },
+  "path": 313,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed.rs:2345:5: 2347:6",
+  "src": "fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {\n        F::poll(Pin::new(&mut *self), cx)\n    }",
+  "mir": "fn <boxed::Box<F, A> as core::future::Future>::poll(_1: core::pin::Pin<&mut boxed::Box<F, A>>, _2: &mut core::task::Context<'_>) -> core::task::Poll<<F as core::future::Future>::Output> {\n    let mut _0: core::task::Poll<<F as core::future::Future>::Output>;\n    let mut _3: core::pin::Pin<&mut F>;\n    let mut _4: &mut F;\n    let mut _5: &mut boxed::Box<F, A>;\n    let mut _6: &mut core::pin::Pin<&mut boxed::Box<F, A>>;\n    let mut _7: boxed::Box<F, A>;\n    let mut _8: *const F;\n    debug self => _1;\n    debug cx => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_6);\n        _6 = &mut _1;\n        _5 = <core::pin::Pin<&mut boxed::Box<F, A>> as core::ops::DerefMut>::deref_mut(move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        _7 = (*_5);\n        _8 = ((_7.0: core::ptr::Unique<F>).0: core::ptr::NonNull<F>) as *const F;\n        _4 = &mut (*_8);\n        _3 = core::pin::Pin::<&mut F>::new(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = <F as core::future::Future>::poll(move _3, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

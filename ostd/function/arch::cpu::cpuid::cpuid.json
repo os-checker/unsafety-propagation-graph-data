@@ -1,0 +1,49 @@
+{
+  "name": "arch::cpu::cpuid::cpuid",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    },
+    "arch::cpu::cpuid::cpuid::raw_cpuid": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::arch::x86_64::CpuidResult": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::arch::x86_64::CpuidResult": [
+      "Plain"
+    ]
+  },
+  "path": 381,
+  "span": "ostd/src/arch/x86/cpu/cpuid.rs:26:1: 48:2",
+  "src": "pub fn cpuid(leaf: u32, subleaf: u32) -> Option<CpuidResult> {\n    fn raw_cpuid(leaf: u32, subleaf: u32) -> CpuidResult {\n        // SAFETY: It is safe to execute the CPUID instruction.\n        unsafe { core::arch::x86_64::__cpuid_count(leaf, subleaf) }\n    }\n\n    let max_leaf = if leaf < Leaf::HypervisorBase as u32 {\n        // Standard leaves (0x0000_0000 - 0x3FFF_FFFF)\n        *MAX_LEAF.call_once(|| raw_cpuid(Leaf::Base as u32, 0).eax)\n    } else if leaf < Leaf::ExtBase as u32 {\n        // Hypervisor leaves (0x4000_0000 - 0x7FFF_FFFF)\n        *MAX_HYPERVISOR_LEAF.call_once(|| raw_cpuid(Leaf::HypervisorBase as u32, 0).eax)\n    } else {\n        // Extended leaves (0x8000_0000 - 0xFFFF_FFFF)\n        *MAX_EXTENDED_LEAF.call_once(|| raw_cpuid(Leaf::ExtBase as u32, 0).eax)\n    };\n\n    if leaf > max_leaf {\n        None\n    } else {\n        Some(raw_cpuid(leaf, subleaf))\n    }\n}",
+  "mir": "fn arch::cpu::cpuid::cpuid(_1: u32, _2: u32) -> core::option::Option<core::arch::x86_64::CpuidResult> {\n    let mut _0: core::option::Option<core::arch::x86_64::CpuidResult>;\n    let  _3: u32;\n    let mut _4: bool;\n    let mut _5: u32;\n    let mut _6: (u32, bool);\n    let mut _7: &u32;\n    let mut _8: &spin::once::Once<u32>;\n    let mut _9: bool;\n    let mut _10: u32;\n    let mut _11: (u32, bool);\n    let mut _12: &u32;\n    let mut _13: &spin::once::Once<u32>;\n    let mut _14: &u32;\n    let mut _15: &spin::once::Once<u32>;\n    let mut _16: bool;\n    let mut _17: u32;\n    let mut _18: core::arch::x86_64::CpuidResult;\n    debug leaf => _1;\n    debug subleaf => _2;\n    debug max_leaf => _3;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _6 = CheckedAdd(arch::cpu::cpuid::Leaf::HypervisorBase::{constant#0}, 0_u32);\n        assert(!move (_6.1: bool), \"attempt to compute `{} + {}`, which would overflow\", arch::cpu::cpuid::Leaf::HypervisorBase::{constant#0}, 0_u32) -> [success: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = move (_6.0: u32);\n        _4 = Lt(_1, _5);\n        switchInt(move _4) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = {alloc58: &spin::once::Once<u32>};\n        _7 = spin::once::Once::<u32>::call_once::<{closure@ostd/src/arch/x86/cpu/cpuid.rs:34:29: 34:31}>(move _8, ZeroSized: {closure@ostd/src/arch/x86/cpu/cpuid.rs:34:29: 34:31}) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        _3 = (*_7);\n        StorageDead(_7);\n        goto -> bb11;\n    }\n    bb4: {\n        StorageLive(_9);\n        _11 = CheckedAdd(arch::cpu::cpuid::Leaf::ExtBase::{constant#0}, 0_u32);\n        assert(!move (_11.1: bool), \"attempt to compute `{} + {}`, which would overflow\", arch::cpu::cpuid::Leaf::ExtBase::{constant#0}, 0_u32) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _10 = move (_11.0: u32);\n        _9 = Lt(_1, _10);\n        switchInt(move _9) -> [0: bb8, otherwise: bb6];\n    }\n    bb6: {\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = {alloc75: &spin::once::Once<u32>};\n        _12 = spin::once::Once::<u32>::call_once::<{closure@ostd/src/arch/x86/cpu/cpuid.rs:37:40: 37:42}>(move _13, ZeroSized: {closure@ostd/src/arch/x86/cpu/cpuid.rs:37:40: 37:42}) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_13);\n        _3 = (*_12);\n        StorageDead(_12);\n        goto -> bb10;\n    }\n    bb8: {\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = {alloc78: &spin::once::Once<u32>};\n        _14 = spin::once::Once::<u32>::call_once::<{closure@ostd/src/arch/x86/cpu/cpuid.rs:40:38: 40:40}>(move _15, ZeroSized: {closure@ostd/src/arch/x86/cpu/cpuid.rs:40:38: 40:40}) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_15);\n        _3 = (*_14);\n        StorageDead(_14);\n        goto -> bb10;\n    }\n    bb10: {\n        StorageDead(_9);\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_4);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = _3;\n        _16 = Gt(_1, move _17);\n        switchInt(move _16) -> [0: bb13, otherwise: bb12];\n    }\n    bb12: {\n        StorageDead(_17);\n        _0 = core::option::Option::None;\n        goto -> bb15;\n    }\n    bb13: {\n        StorageDead(_17);\n        StorageLive(_18);\n        _18 = arch::cpu::cpuid::cpuid::raw_cpuid(_1, _2) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        _0 = core::option::Option::Some(move _18);\n        StorageDead(_18);\n        goto -> bb15;\n    }\n    bb15: {\n        StorageDead(_16);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Executes the CPUID instruction for the given leaf and subleaf.\n\n This method will return `None` if the leaf is not supported.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

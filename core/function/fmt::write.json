@@ -1,0 +1,261 @@
+{
+  "name": "fmt::write",
+  "safe": true,
+  "callees": {
+    "fmt::Arguments::<'a>::as_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the formatted string, if it has no arguments to be formatted at runtime.\n\n This can be used to avoid allocations in some cases.\n\n # Guarantees\n\n For `format_args!(\"just a literal\")`, this function is guaranteed to\n return `Some(\"just a literal\")`.\n\n For most cases with placeholders, this function will return `None`.\n\n However, the compiler may perform optimizations that can cause this\n function to return `Some(_)` even if the format string contains\n placeholders. For example, `format_args!(\"Hello, {}!\", \"world\")` may be\n optimized to `format_args!(\"Hello, world!\")`, such that `as_str()`\n returns `Some(\"Hello, world!\")`.\n\n The behavior for anything but the trivial case (without placeholders)\n is not guaranteed, and should not be relied upon for anything other\n than optimization.\n\n # Examples\n\n ```rust\n use std::fmt::Arguments;\n\n fn write_str(_: &str) { /* ... */ }\n\n fn write_fmt(args: &Arguments<'_>) {\n     if let Some(s) = args.as_str() {\n         write_str(s)\n     } else {\n         write_str(&args.to_string());\n     }\n }\n ```\n\n ```rust\n assert_eq!(format_args!(\"hello\").as_str(), Some(\"hello\"));\n assert_eq!(format_args!(\"\").as_str(), Some(\"\"));\n assert_eq!(format_args!(\"{:?}\", std::env::current_dir()).as_str(), None);\n ```\n",
+      "adt": {
+        "fmt::Arguments": "ImmutableAsArgument",
+        "option::Option": "Constructor"
+      }
+    },
+    "fmt::Write::write_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a string slice into this writer, returning whether the write\n succeeded.\n\n This method can only succeed if the entire string slice was successfully\n written, and this method will not return until all data has been\n written or an error occurs.\n\n # Errors\n\n This function will return an instance of [`std::fmt::Error`][Error] on error.\n\n The purpose of that error is to abort the formatting operation when the underlying\n destination encounters some error preventing it from accepting more text;\n in particular, it does not communicate any information about *what* error occurred.\n It should generally be propagated rather than handled, at least when implementing\n formatting traits.\n\n # Examples\n\n ```\n use std::fmt::{Error, Write};\n\n fn writer<W: Write>(f: &mut W, s: &str) -> Result<(), Error> {\n     f.write_str(s)\n }\n\n let mut buf = String::new();\n writer(&mut buf, \"hola\")?;\n assert_eq!(&buf, \"hola\");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `self` without moving it. This leaves the\n memory in `self` unchanged.\n\n See [`ptr::read`] for safety concerns and examples.\n\n [`ptr::read`]: crate::ptr::read()\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds an offset to a pointer (convenience for `.offset(count as isize)`).\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n If any of the following conditions are violated, the result is Undefined Behavior:\n\n * The computed offset, `count * size_of::<T>()` bytes, must not overflow `isize`.\n\n * If the computed offset is non-zero, then `self` must be derived from a pointer to some\n   [allocation], and the entire memory range between `self` and the result must be in\n   bounds of that allocation. In particular, this range must not \"wrap around\" the edge\n   of the address space.\n\n Allocations can never be larger than `isize::MAX` bytes, so if the computed offset\n stays in bounds of the allocation, it is guaranteed to satisfy the first requirement.\n This implies, for instance, that `vec.as_ptr().add(vec.len())` (for `vec: Vec<T>`) is always\n safe.\n\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let s: &str = \"123\";\n let ptr: NonNull<u8> = NonNull::new(s.as_ptr().cast_mut()).unwrap();\n\n unsafe {\n     println!(\"{}\", ptr.add(1).read() as char);\n     println!(\"{}\", ptr.add(2).read() as char);\n }\n ```\n",
+      "adt": {
+        "ptr::non_null::NonNull": "Constructor"
+      }
+    },
+    "ptr::non_null::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "str::converts::from_raw_parts": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a `&str` from a pointer and a length.\n\n The pointed-to bytes must be valid UTF-8.\n If this might not be the case, use `str::from_utf8(slice::from_raw_parts(ptr, len))`,\n which will return an `Err` if the data isn't valid UTF-8.\n\n This function is the `str` equivalent of [`slice::from_raw_parts`](crate::slice::from_raw_parts).\n See that function's documentation for safety concerns and examples.\n\n The mutable version of this function is [`from_raw_parts_mut`].\n",
+      "adt": {}
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::cast_array": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts from a pointer-to-`T` to a pointer-to-`[T; N]`.\n",
+      "adt": {
+        "ptr::non_null::NonNull": "Constructor"
+      }
+    },
+    "num::<impl u16>::from_le_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a native endian integer value from its representation\n as a byte array in little endian.\n\n\n # Examples\n\n ```\n ```\n\n When starting from a slice rather than an array, fallible conversion APIs can be used:\n\n ```\n     *input = rest;\n }\n ```\n",
+      "adt": {}
+    },
+    "convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::as_ref": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a shared reference to the value. If the value may be uninitialized, [`as_uninit_ref`]\n must be used instead.\n\n For the mutable counterpart see [`as_mut`].\n\n [`as_uninit_ref`]: NonNull::as_uninit_ref\n [`as_mut`]: NonNull::as_mut\n\n # Safety\n\n When calling this method, you have to ensure that\n the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"ptr is null!\");\n\n let ref_x = unsafe { ptr.as_ref() };\n println!(\"{ref_x}\");\n ```\n\n [the module documentation]: crate::ptr#safety\n",
+      "adt": {
+        "ptr::non_null::NonNull": "MutableAsArgument"
+      }
+    },
+    "fmt::FormattingOptions::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Construct a new `FormatterBuilder` with the supplied `Write` trait\n object for output that is equivalent to the `{}` formatting\n specifier:\n\n - no flags,\n - filled with spaces,\n - no alignment,\n - no width,\n - no precision, and\n - no [`DebugAsHex`] output mode.\n",
+      "adt": {
+        "fmt::FormattingOptions": "Constructor"
+      }
+    },
+    "fmt::Formatter::<'a>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new formatter with given [`FormattingOptions`].\n\n If `write` is a reference to a formatter, it is recommended to use\n [`Formatter::with_options`] instead as this can borrow the underlying\n `write`, thereby bypassing one layer of indirection.\n\n You may alternatively use [`FormattingOptions::create_formatter()`].\n",
+      "adt": {
+        "fmt::Formatter": "Constructor"
+      }
+    },
+    "fmt::rt::Argument::<'_>::fmt": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Format this placeholder argument.\n\n # Safety\n\n This argument must actually be a placeholder argument.\n",
+      "adt": {
+        "result::Result": "Constructor",
+        "fmt::rt::Argument": "ImmutableAsArgument",
+        "fmt::Formatter": "MutableAsArgument"
+      }
+    },
+    "hint::assert_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Makes a *soundness* promise to the compiler that `cond` holds.\n\n This may allow the optimizer to simplify things, but it might also make the generated code\n slower. Either way, calling it will most likely make compilation take longer.\n\n You may know this from other places as\n [`llvm.assume`](https://llvm.org/docs/LangRef.html#llvm-assume-intrinsic) or, in C,\n [`__builtin_assume`](https://clang.llvm.org/docs/LanguageExtensions.html#builtin-assume).\n\n This promotes a correctness requirement to a soundness requirement. Don't do that without\n very good reason.\n\n # Usage\n\n This is a situational tool for micro-optimization, and is allowed to do nothing. Any use\n should come with a repeatable benchmark to show the value, with the expectation to drop it\n later should the optimizer get smarter and no longer need it.\n\n The more complicated the condition, the less likely this is to be useful. For example,\n `assert_unchecked(foo.is_sorted())` is a complex enough value that the compiler is unlikely\n to be able to take advantage of it.\n\n There's also no need to `assert_unchecked` basic properties of things.  For example, the\n compiler already knows the range of `count_ones`, so there is no benefit to\n `let n = u32::count_ones(x); assert_unchecked(n <= u32::BITS);`.\n\n `assert_unchecked` is logically equivalent to `if !cond { unreachable_unchecked(); }`. If\n ever you are tempted to write `assert_unchecked(false)`, you should instead use\n [`unreachable_unchecked()`] directly.\n\n # Safety\n\n `cond` must be `true`. It is immediate UB to call this with `false`.\n\n # Example\n\n ```\n use core::hint;\n\n /// # Safety\n ///\n /// `p` must be nonnull and valid\n pub unsafe fn next_value(p: *const i32) -> i32 {\n     // SAFETY: caller invariants guarantee that `p` is not null\n     unsafe { hint::assert_unchecked(!p.is_null()) }\n\n     if p.is_null() {\n         return -1;\n     } else {\n         // SAFETY: caller invariants guarantee that `p` is valid\n         unsafe { *p + 1 }\n     }\n }\n ```\n\n Without the `assert_unchecked`, the above function produces the following with optimizations\n enabled:\n\n ```asm\n next_value:\n         test    rdi, rdi\n         je      .LBB0_1\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n .LBB0_1:\n         mov     eax, -1\n         ret\n ```\n\n Adding the assertion allows the optimizer to remove the extra check:\n\n ```asm\n next_value:\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n ```\n\n This example is quite unlike anything that would be used in the real world: it is redundant\n to put an assertion right next to code that checks the same thing, and dereferencing a\n pointer already has the builtin assumption that it is nonnull. However, it illustrates the\n kind of changes the optimizer can make even when the behavior is less obviously related.\n",
+      "adt": {}
+    },
+    "num::<impl u32>::from_le_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a native endian integer value from its representation\n as a byte array in little endian.\n\n\n # Examples\n\n ```\n ```\n\n When starting from a slice rather than an array, fallible conversion APIs can be used:\n\n ```\n     *input = rest;\n }\n ```\n",
+      "adt": {}
+    },
+    "fmt::rt::Argument::<'_>::as_u16": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "option::Option": "Constructor",
+        "fmt::rt::Argument": "ImmutableAsArgument"
+      }
+    },
+    "option::Option::<T>::unwrap_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value,\n without checking that the value is not [`None`].\n\n # Safety\n\n Calling this method on [`None`] is *[undefined behavior]*.\n\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(unsafe { x.unwrap_unchecked() }, \"air\");\n ```\n\n ```no_run\n let x: Option<&str> = None;\n assert_eq!(unsafe { x.unwrap_unchecked() }, \"air\"); // Undefined behavior!\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "fmt::Arguments": [
+      "Ref",
+      "Plain",
+      "Unknown([Field(0, Ty { id: 5817, kind: RigidTy(Adt(AdtDef(DefId { id: 25106, name: \"ptr::non_null::NonNull\" }), GenericArgs([Type(Ty { id: 46, kind: RigidTy(Uint(U8)) })]))) })])",
+      "Unknown([Field(1, Ty { id: 11566, kind: RigidTy(Adt(AdtDef(DefId { id: 25106, name: \"ptr::non_null::NonNull\" }), GenericArgs([Type(Ty { id: 1753, kind: RigidTy(Adt(AdtDef(DefId { id: 25071, name: \"fmt::rt::Argument\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })]))) })])"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 81, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 84, kind: RigidTy(Str) }, Not)) })])"
+    ],
+    "result::Result": [
+      "Plain"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain",
+      "Ref"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain"
+    ],
+    "fmt::rt::Argument": [
+      "Ref"
+    ],
+    "fmt::FormattingOptions": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 20, kind: RigidTy(Uint(U32)) })])",
+      "Unknown([Field(1, Ty { id: 136, kind: RigidTy(Uint(U16)) })])",
+      "Unknown([Field(2, Ty { id: 136, kind: RigidTy(Uint(U16)) })])"
+    ],
+    "fmt::Formatter": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 12981,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:1630:1: 1739:2",
+  "src": "pub fn write(output: &mut dyn Write, fmt: Arguments<'_>) -> Result {\n    if let Some(s) = fmt.as_str() {\n        return output.write_str(s);\n    }\n\n    let mut template = fmt.template;\n    let args = fmt.args;\n\n    let mut arg_index = 0;\n\n    // See comment on `fmt::Arguments` for the details of how the template is encoded.\n\n    // This must match the encoding from `expand_format_args` in\n    // compiler/rustc_ast_lowering/src/format.rs.\n    loop {\n        // SAFETY: We can assume the template is valid.\n        let n = unsafe {\n            let n = template.read();\n            template = template.add(1);\n            n\n        };\n\n        if n == 0 {\n            // End of template.\n            return Ok(());\n        } else if n < 0x80 {\n            // Literal string piece of length `n`.\n\n            // SAFETY: We can assume the strings in the template are valid.\n            let s = unsafe {\n                let s = crate::str::from_raw_parts(template.as_ptr(), n as usize);\n                template = template.add(n as usize);\n                s\n            };\n            output.write_str(s)?;\n        } else if n == 0x80 {\n            // Literal string piece with a 16-bit length.\n\n            // SAFETY: We can assume the strings in the template are valid.\n            let s = unsafe {\n                let len = usize::from(u16::from_le_bytes(template.cast_array().read()));\n                template = template.add(2);\n                let s = crate::str::from_raw_parts(template.as_ptr(), len);\n                template = template.add(len);\n                s\n            };\n            output.write_str(s)?;\n        } else if n == 0xC0 {\n            // Placeholder for next argument with default options.\n            //\n            // Having this as a separate case improves performance for the common case.\n\n            // SAFETY: We can assume the template only refers to arguments that exist.\n            unsafe {\n                args.add(arg_index)\n                    .as_ref()\n                    .fmt(&mut Formatter::new(output, FormattingOptions::new()))?;\n            }\n            arg_index += 1;\n        } else {\n            // SAFETY: We can assume the template is valid.\n            unsafe { assert_unchecked(n > 0xC0) };\n\n            // Placeholder with custom options.\n\n            let mut opt = FormattingOptions::new();\n\n            // SAFETY: We can assume the template is valid.\n            unsafe {\n                if n & 1 != 0 {\n                    opt.flags = u32::from_le_bytes(template.cast_array().read());\n                    template = template.add(4);\n                }\n                if n & 2 != 0 {\n                    opt.width = u16::from_le_bytes(template.cast_array().read());\n                    template = template.add(2);\n                }\n                if n & 4 != 0 {\n                    opt.precision = u16::from_le_bytes(template.cast_array().read());\n                    template = template.add(2);\n                }\n                if n & 8 != 0 {\n                    arg_index = usize::from(u16::from_le_bytes(template.cast_array().read()));\n                    template = template.add(2);\n                }\n            }\n            if n & 16 != 0 {\n                // Dynamic width from a usize argument.\n                // SAFETY: We can assume the template only refers to arguments that exist.\n                unsafe {\n                    opt.width = args.add(opt.width as usize).as_ref().as_u16().unwrap_unchecked();\n                }\n            }\n            if n & 32 != 0 {\n                // Dynamic precision from a usize argument.\n                // SAFETY: We can assume the template only refers to arguments that exist.\n                unsafe {\n                    opt.precision =\n                        args.add(opt.precision as usize).as_ref().as_u16().unwrap_unchecked();\n                }\n            }\n\n            // SAFETY: We can assume the template only refers to arguments that exist.\n            unsafe {\n                args.add(arg_index).as_ref().fmt(&mut Formatter::new(output, opt))?;\n            }\n            arg_index += 1;\n        }\n    }\n}",
+  "mir": "fn fmt::write(_1: &mut dyn fmt::Write, _2: fmt::Arguments<'_>) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    let mut _3: option::Option<&str>;\n    let mut _4: &fmt::Arguments<'_>;\n    let mut _5: isize;\n    let  _6: &str;\n    let mut _7: ptr::non_null::NonNull<u8>;\n    let  _8: ptr::non_null::NonNull<fmt::rt::Argument<'_>>;\n    let mut _9: usize;\n    let  _10: u8;\n    let mut _11: ptr::non_null::NonNull<u8>;\n    let mut _12: ptr::non_null::NonNull<u8>;\n    let mut _13: ptr::non_null::NonNull<u8>;\n    let mut _14: bool;\n    let  _15: &str;\n    let mut _16: *const u8;\n    let mut _17: *mut u8;\n    let mut _18: ptr::non_null::NonNull<u8>;\n    let mut _19: usize;\n    let mut _20: ptr::non_null::NonNull<u8>;\n    let mut _21: ptr::non_null::NonNull<u8>;\n    let mut _22: usize;\n    let mut _23: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _24: result::Result<(), fmt::Error>;\n    let mut _25: isize;\n    let  _26: usize;\n    let mut _27: u16;\n    let mut _28: [u8; 2];\n    let mut _29: ptr::non_null::NonNull<[u8; 2]>;\n    let mut _30: ptr::non_null::NonNull<u8>;\n    let mut _31: ptr::non_null::NonNull<u8>;\n    let mut _32: ptr::non_null::NonNull<u8>;\n    let  _33: &str;\n    let mut _34: *const u8;\n    let mut _35: *mut u8;\n    let mut _36: ptr::non_null::NonNull<u8>;\n    let mut _37: ptr::non_null::NonNull<u8>;\n    let mut _38: ptr::non_null::NonNull<u8>;\n    let mut _39: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _40: result::Result<(), fmt::Error>;\n    let mut _41: isize;\n    let mut _42: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _43: result::Result<(), fmt::Error>;\n    let  _44: &fmt::rt::Argument<'_>;\n    let mut _45: &ptr::non_null::NonNull<fmt::rt::Argument<'_>>;\n    let  _46: ptr::non_null::NonNull<fmt::rt::Argument<'_>>;\n    let mut _47: usize;\n    let mut _48: &mut fmt::Formatter<'_>;\n    let mut _49: fmt::Formatter<'_>;\n    let mut _50: fmt::FormattingOptions;\n    let mut _51: isize;\n    let mut _52: (usize, bool);\n    let  _53: ();\n    let mut _54: bool;\n    let mut _55: fmt::FormattingOptions;\n    let mut _56: u8;\n    let mut _57: u32;\n    let mut _58: [u8; 4];\n    let mut _59: ptr::non_null::NonNull<[u8; 4]>;\n    let mut _60: ptr::non_null::NonNull<u8>;\n    let mut _61: ptr::non_null::NonNull<u8>;\n    let mut _62: ptr::non_null::NonNull<u8>;\n    let mut _63: u8;\n    let mut _64: u16;\n    let mut _65: [u8; 2];\n    let mut _66: ptr::non_null::NonNull<[u8; 2]>;\n    let mut _67: ptr::non_null::NonNull<u8>;\n    let mut _68: ptr::non_null::NonNull<u8>;\n    let mut _69: ptr::non_null::NonNull<u8>;\n    let mut _70: u8;\n    let mut _71: u16;\n    let mut _72: [u8; 2];\n    let mut _73: ptr::non_null::NonNull<[u8; 2]>;\n    let mut _74: ptr::non_null::NonNull<u8>;\n    let mut _75: ptr::non_null::NonNull<u8>;\n    let mut _76: ptr::non_null::NonNull<u8>;\n    let mut _77: u8;\n    let mut _78: usize;\n    let mut _79: u16;\n    let mut _80: [u8; 2];\n    let mut _81: ptr::non_null::NonNull<[u8; 2]>;\n    let mut _82: ptr::non_null::NonNull<u8>;\n    let mut _83: ptr::non_null::NonNull<u8>;\n    let mut _84: ptr::non_null::NonNull<u8>;\n    let mut _85: u8;\n    let mut _86: u16;\n    let mut _87: option::Option<u16>;\n    let  _88: &fmt::rt::Argument<'_>;\n    let mut _89: &ptr::non_null::NonNull<fmt::rt::Argument<'_>>;\n    let  _90: ptr::non_null::NonNull<fmt::rt::Argument<'_>>;\n    let mut _91: usize;\n    let mut _92: u16;\n    let mut _93: u8;\n    let mut _94: u16;\n    let mut _95: option::Option<u16>;\n    let  _96: &fmt::rt::Argument<'_>;\n    let mut _97: &ptr::non_null::NonNull<fmt::rt::Argument<'_>>;\n    let  _98: ptr::non_null::NonNull<fmt::rt::Argument<'_>>;\n    let mut _99: usize;\n    let mut _100: u16;\n    let mut _101: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _102: result::Result<(), fmt::Error>;\n    let  _103: &fmt::rt::Argument<'_>;\n    let mut _104: &ptr::non_null::NonNull<fmt::rt::Argument<'_>>;\n    let  _105: ptr::non_null::NonNull<fmt::rt::Argument<'_>>;\n    let mut _106: usize;\n    let mut _107: &mut fmt::Formatter<'_>;\n    let mut _108: fmt::Formatter<'_>;\n    let mut _109: fmt::FormattingOptions;\n    let mut _110: isize;\n    let mut _111: (usize, bool);\n    debug output => _1;\n    debug fmt => _2;\n    debug s => _6;\n    debug template => _7;\n    debug args => _8;\n    debug arg_index => _9;\n    debug n => _10;\n    debug n => _10;\n    debug s => _15;\n    debug s => _15;\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    debug s => _33;\n    debug len => _26;\n    debug s => _33;\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    debug opt => _55;\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &_2;\n        _3 = fmt::Arguments::<'_>::as_str(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [1: bb2, 0: bb4, otherwise: bb16];\n    }\n    bb2: {\n        _6 = ((_3 as variant#1).0: &str);\n        _0 = <dyn fmt::Write as fmt::Write>::write_str(_1, _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        goto -> bb109;\n    }\n    bb4: {\n        StorageDead(_3);\n        StorageLive(_7);\n        _7 = (_2.0: ptr::non_null::NonNull<u8>);\n        _8 = (_2.1: ptr::non_null::NonNull<fmt::rt::Argument<'_>>);\n        StorageLive(_9);\n        _9 = 0_usize;\n        goto -> bb5;\n    }\n    bb5: {\n        StorageLive(_11);\n        _11 = _7;\n        _10 = ptr::non_null::NonNull::<u8>::read(move _11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = _7;\n        _12 = ptr::non_null::NonNull::<u8>::add(move _13, 1_usize) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_13);\n        _7 = move _12;\n        StorageDead(_12);\n        switchInt(_10) -> [0: bb8, otherwise: bb9];\n    }\n    bb8: {\n        _0 = result::Result::Ok(());\n        goto -> bb108;\n    }\n    bb9: {\n        StorageLive(_14);\n        _14 = Lt(_10, 128_u8);\n        switchInt(move _14) -> [0: bb20, otherwise: bb10];\n    }\n    bb10: {\n        StorageLive(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = _7;\n        _17 = ptr::non_null::NonNull::<u8>::as_ptr(move _18) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _16 = move _17 as *const u8;\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageLive(_19);\n        _19 = _10 as usize;\n        _15 = str::converts::from_raw_parts::<'_>(move _16, move _19) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_19);\n        StorageDead(_16);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = _7;\n        StorageLive(_22);\n        _22 = _10 as usize;\n        _20 = ptr::non_null::NonNull::<u8>::add(move _21, move _22) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_22);\n        StorageDead(_21);\n        _7 = move _20;\n        StorageDead(_20);\n        StorageLive(_23);\n        StorageLive(_24);\n        _24 = <dyn fmt::Write as fmt::Write>::write_str(_1, _15) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        _23 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _24) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_24);\n        _25 = discriminant(_23);\n        switchInt(move _25) -> [0: bb17, 1: bb18, otherwise: bb16];\n    }\n    bb16: {\n        unreachable;\n    }\n    bb17: {\n        StorageDead(_23);\n        goto -> bb104;\n    }\n    bb18: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_23);\n        goto -> bb107;\n    }\n    bb20: {\n        switchInt(_10) -> [128: bb21, otherwise: bb35];\n    }\n    bb21: {\n        StorageLive(_27);\n        StorageLive(_28);\n        StorageLive(_29);\n        StorageLive(_30);\n        _30 = _7;\n        _29 = ptr::non_null::NonNull::<u8>::cast_array::<2>(move _30) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_30);\n        _28 = ptr::non_null::NonNull::<[u8; 2]>::read(move _29) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_29);\n        _27 = num::<impl u16>::from_le_bytes(move _28) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        StorageDead(_28);\n        _26 = <usize as convert::From<u16>>::from(move _27) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_27);\n        StorageLive(_31);\n        StorageLive(_32);\n        _32 = _7;\n        _31 = ptr::non_null::NonNull::<u8>::add(move _32, 2_usize) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_32);\n        _7 = move _31;\n        StorageDead(_31);\n        StorageLive(_34);\n        StorageLive(_35);\n        StorageLive(_36);\n        _36 = _7;\n        _35 = ptr::non_null::NonNull::<u8>::as_ptr(move _36) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        _34 = move _35 as *const u8;\n        StorageDead(_36);\n        StorageDead(_35);\n        _33 = str::converts::from_raw_parts::<'_>(move _34, _26) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        StorageDead(_34);\n        StorageLive(_37);\n        StorageLive(_38);\n        _38 = _7;\n        _37 = ptr::non_null::NonNull::<u8>::add(move _38, _26) -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        StorageDead(_38);\n        _7 = move _37;\n        StorageDead(_37);\n        StorageLive(_39);\n        StorageLive(_40);\n        _40 = <dyn fmt::Write as fmt::Write>::write_str(_1, _33) -> [return: bb30, unwind unreachable];\n    }\n    bb30: {\n        _39 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _40) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        StorageDead(_40);\n        _41 = discriminant(_39);\n        switchInt(move _41) -> [0: bb32, 1: bb33, otherwise: bb16];\n    }\n    bb32: {\n        StorageDead(_39);\n        goto -> bb103;\n    }\n    bb33: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb34, unwind unreachable];\n    }\n    bb34: {\n        StorageDead(_39);\n        goto -> bb106;\n    }\n    bb35: {\n        switchInt(_10) -> [192: bb36, otherwise: bb47];\n    }\n    bb36: {\n        StorageLive(_42);\n        StorageLive(_43);\n        StorageLive(_45);\n        StorageLive(_46);\n        StorageLive(_47);\n        _47 = _9;\n        _46 = ptr::non_null::NonNull::<fmt::rt::Argument<'_>>::add(_8, move _47) -> [return: bb37, unwind unreachable];\n    }\n    bb37: {\n        _45 = &_46;\n        StorageDead(_47);\n        _44 = ptr::non_null::NonNull::<fmt::rt::Argument<'_>>::as_ref::<'_>(move _45) -> [return: bb38, unwind unreachable];\n    }\n    bb38: {\n        StorageDead(_45);\n        StorageLive(_49);\n        StorageLive(_50);\n        _50 = fmt::FormattingOptions::new() -> [return: bb39, unwind unreachable];\n    }\n    bb39: {\n        _49 = fmt::Formatter::<'_>::new(_1, move _50) -> [return: bb40, unwind unreachable];\n    }\n    bb40: {\n        StorageDead(_50);\n        _48 = &mut _49;\n        _43 = fmt::rt::Argument::<'_>::fmt(_44, _48) -> [return: bb41, unwind unreachable];\n    }\n    bb41: {\n        _42 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _43) -> [return: bb42, unwind unreachable];\n    }\n    bb42: {\n        StorageDead(_43);\n        _51 = discriminant(_42);\n        switchInt(move _51) -> [0: bb43, 1: bb44, otherwise: bb16];\n    }\n    bb43: {\n        StorageDead(_49);\n        StorageDead(_46);\n        StorageDead(_42);\n        _52 = CheckedAdd(_9, 1_usize);\n        assert(!move (_52.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _9, 1_usize) -> [success: bb46, unwind unreachable];\n    }\n    bb44: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb45, unwind unreachable];\n    }\n    bb45: {\n        StorageDead(_49);\n        StorageDead(_46);\n        StorageDead(_42);\n        goto -> bb105;\n    }\n    bb46: {\n        _9 = move (_52.0: usize);\n        goto -> bb102;\n    }\n    bb47: {\n        StorageLive(_54);\n        _54 = Gt(_10, 192_u8);\n        _53 = hint::assert_unchecked(move _54) -> [return: bb48, unwind unreachable];\n    }\n    bb48: {\n        StorageDead(_54);\n        StorageLive(_55);\n        _55 = fmt::FormattingOptions::new() -> [return: bb49, unwind unreachable];\n    }\n    bb49: {\n        StorageLive(_56);\n        _56 = BitAnd(_10, 1_u8);\n        switchInt(move _56) -> [0: bb55, otherwise: bb50];\n    }\n    bb50: {\n        StorageDead(_56);\n        StorageLive(_57);\n        StorageLive(_58);\n        StorageLive(_59);\n        StorageLive(_60);\n        _60 = _7;\n        _59 = ptr::non_null::NonNull::<u8>::cast_array::<4>(move _60) -> [return: bb51, unwind unreachable];\n    }\n    bb51: {\n        StorageDead(_60);\n        _58 = ptr::non_null::NonNull::<[u8; 4]>::read(move _59) -> [return: bb52, unwind unreachable];\n    }\n    bb52: {\n        StorageDead(_59);\n        _57 = num::<impl u32>::from_le_bytes(move _58) -> [return: bb53, unwind unreachable];\n    }\n    bb53: {\n        StorageDead(_58);\n        (_55.0: u32) = move _57;\n        StorageDead(_57);\n        StorageLive(_61);\n        StorageLive(_62);\n        _62 = _7;\n        _61 = ptr::non_null::NonNull::<u8>::add(move _62, 4_usize) -> [return: bb54, unwind unreachable];\n    }\n    bb54: {\n        StorageDead(_62);\n        _7 = move _61;\n        StorageDead(_61);\n        goto -> bb56;\n    }\n    bb55: {\n        StorageDead(_56);\n        goto -> bb56;\n    }\n    bb56: {\n        StorageLive(_63);\n        _63 = BitAnd(_10, 2_u8);\n        switchInt(move _63) -> [0: bb62, otherwise: bb57];\n    }\n    bb57: {\n        StorageDead(_63);\n        StorageLive(_64);\n        StorageLive(_65);\n        StorageLive(_66);\n        StorageLive(_67);\n        _67 = _7;\n        _66 = ptr::non_null::NonNull::<u8>::cast_array::<2>(move _67) -> [return: bb58, unwind unreachable];\n    }\n    bb58: {\n        StorageDead(_67);\n        _65 = ptr::non_null::NonNull::<[u8; 2]>::read(move _66) -> [return: bb59, unwind unreachable];\n    }\n    bb59: {\n        StorageDead(_66);\n        _64 = num::<impl u16>::from_le_bytes(move _65) -> [return: bb60, unwind unreachable];\n    }\n    bb60: {\n        StorageDead(_65);\n        (_55.1: u16) = move _64;\n        StorageDead(_64);\n        StorageLive(_68);\n        StorageLive(_69);\n        _69 = _7;\n        _68 = ptr::non_null::NonNull::<u8>::add(move _69, 2_usize) -> [return: bb61, unwind unreachable];\n    }\n    bb61: {\n        StorageDead(_69);\n        _7 = move _68;\n        StorageDead(_68);\n        goto -> bb63;\n    }\n    bb62: {\n        StorageDead(_63);\n        goto -> bb63;\n    }\n    bb63: {\n        StorageLive(_70);\n        _70 = BitAnd(_10, 4_u8);\n        switchInt(move _70) -> [0: bb69, otherwise: bb64];\n    }\n    bb64: {\n        StorageDead(_70);\n        StorageLive(_71);\n        StorageLive(_72);\n        StorageLive(_73);\n        StorageLive(_74);\n        _74 = _7;\n        _73 = ptr::non_null::NonNull::<u8>::cast_array::<2>(move _74) -> [return: bb65, unwind unreachable];\n    }\n    bb65: {\n        StorageDead(_74);\n        _72 = ptr::non_null::NonNull::<[u8; 2]>::read(move _73) -> [return: bb66, unwind unreachable];\n    }\n    bb66: {\n        StorageDead(_73);\n        _71 = num::<impl u16>::from_le_bytes(move _72) -> [return: bb67, unwind unreachable];\n    }\n    bb67: {\n        StorageDead(_72);\n        (_55.2: u16) = move _71;\n        StorageDead(_71);\n        StorageLive(_75);\n        StorageLive(_76);\n        _76 = _7;\n        _75 = ptr::non_null::NonNull::<u8>::add(move _76, 2_usize) -> [return: bb68, unwind unreachable];\n    }\n    bb68: {\n        StorageDead(_76);\n        _7 = move _75;\n        StorageDead(_75);\n        goto -> bb70;\n    }\n    bb69: {\n        StorageDead(_70);\n        goto -> bb70;\n    }\n    bb70: {\n        StorageLive(_77);\n        _77 = BitAnd(_10, 8_u8);\n        switchInt(move _77) -> [0: bb77, otherwise: bb71];\n    }\n    bb71: {\n        StorageDead(_77);\n        StorageLive(_78);\n        StorageLive(_79);\n        StorageLive(_80);\n        StorageLive(_81);\n        StorageLive(_82);\n        _82 = _7;\n        _81 = ptr::non_null::NonNull::<u8>::cast_array::<2>(move _82) -> [return: bb72, unwind unreachable];\n    }\n    bb72: {\n        StorageDead(_82);\n        _80 = ptr::non_null::NonNull::<[u8; 2]>::read(move _81) -> [return: bb73, unwind unreachable];\n    }\n    bb73: {\n        StorageDead(_81);\n        _79 = num::<impl u16>::from_le_bytes(move _80) -> [return: bb74, unwind unreachable];\n    }\n    bb74: {\n        StorageDead(_80);\n        _78 = <usize as convert::From<u16>>::from(move _79) -> [return: bb75, unwind unreachable];\n    }\n    bb75: {\n        StorageDead(_79);\n        _9 = move _78;\n        StorageDead(_78);\n        StorageLive(_83);\n        StorageLive(_84);\n        _84 = _7;\n        _83 = ptr::non_null::NonNull::<u8>::add(move _84, 2_usize) -> [return: bb76, unwind unreachable];\n    }\n    bb76: {\n        StorageDead(_84);\n        _7 = move _83;\n        StorageDead(_83);\n        goto -> bb78;\n    }\n    bb77: {\n        StorageDead(_77);\n        goto -> bb78;\n    }\n    bb78: {\n        StorageLive(_85);\n        _85 = BitAnd(_10, 16_u8);\n        switchInt(move _85) -> [0: bb84, otherwise: bb79];\n    }\n    bb79: {\n        StorageDead(_85);\n        StorageLive(_86);\n        StorageLive(_87);\n        StorageLive(_89);\n        StorageLive(_90);\n        StorageLive(_91);\n        StorageLive(_92);\n        _92 = (_55.1: u16);\n        _91 = move _92 as usize;\n        StorageDead(_92);\n        _90 = ptr::non_null::NonNull::<fmt::rt::Argument<'_>>::add(_8, move _91) -> [return: bb80, unwind unreachable];\n    }\n    bb80: {\n        _89 = &_90;\n        StorageDead(_91);\n        _88 = ptr::non_null::NonNull::<fmt::rt::Argument<'_>>::as_ref::<'_>(move _89) -> [return: bb81, unwind unreachable];\n    }\n    bb81: {\n        StorageDead(_89);\n        _87 = fmt::rt::Argument::<'_>::as_u16(_88) -> [return: bb82, unwind unreachable];\n    }\n    bb82: {\n        _86 = option::Option::<u16>::unwrap_unchecked(move _87) -> [return: bb83, unwind unreachable];\n    }\n    bb83: {\n        StorageDead(_87);\n        (_55.1: u16) = move _86;\n        StorageDead(_86);\n        StorageDead(_90);\n        goto -> bb85;\n    }\n    bb84: {\n        StorageDead(_85);\n        goto -> bb85;\n    }\n    bb85: {\n        StorageLive(_93);\n        _93 = BitAnd(_10, 32_u8);\n        switchInt(move _93) -> [0: bb91, otherwise: bb86];\n    }\n    bb86: {\n        StorageDead(_93);\n        StorageLive(_94);\n        StorageLive(_95);\n        StorageLive(_97);\n        StorageLive(_98);\n        StorageLive(_99);\n        StorageLive(_100);\n        _100 = (_55.2: u16);\n        _99 = move _100 as usize;\n        StorageDead(_100);\n        _98 = ptr::non_null::NonNull::<fmt::rt::Argument<'_>>::add(_8, move _99) -> [return: bb87, unwind unreachable];\n    }\n    bb87: {\n        _97 = &_98;\n        StorageDead(_99);\n        _96 = ptr::non_null::NonNull::<fmt::rt::Argument<'_>>::as_ref::<'_>(move _97) -> [return: bb88, unwind unreachable];\n    }\n    bb88: {\n        StorageDead(_97);\n        _95 = fmt::rt::Argument::<'_>::as_u16(_96) -> [return: bb89, unwind unreachable];\n    }\n    bb89: {\n        _94 = option::Option::<u16>::unwrap_unchecked(move _95) -> [return: bb90, unwind unreachable];\n    }\n    bb90: {\n        StorageDead(_95);\n        (_55.2: u16) = move _94;\n        StorageDead(_94);\n        StorageDead(_98);\n        goto -> bb92;\n    }\n    bb91: {\n        StorageDead(_93);\n        goto -> bb92;\n    }\n    bb92: {\n        StorageLive(_101);\n        StorageLive(_102);\n        StorageLive(_104);\n        StorageLive(_105);\n        StorageLive(_106);\n        _106 = _9;\n        _105 = ptr::non_null::NonNull::<fmt::rt::Argument<'_>>::add(_8, move _106) -> [return: bb93, unwind unreachable];\n    }\n    bb93: {\n        _104 = &_105;\n        StorageDead(_106);\n        _103 = ptr::non_null::NonNull::<fmt::rt::Argument<'_>>::as_ref::<'_>(move _104) -> [return: bb94, unwind unreachable];\n    }\n    bb94: {\n        StorageDead(_104);\n        StorageLive(_108);\n        StorageLive(_109);\n        _109 = _55;\n        _108 = fmt::Formatter::<'_>::new(_1, move _109) -> [return: bb95, unwind unreachable];\n    }\n    bb95: {\n        StorageDead(_109);\n        _107 = &mut _108;\n        _102 = fmt::rt::Argument::<'_>::fmt(_103, _107) -> [return: bb96, unwind unreachable];\n    }\n    bb96: {\n        _101 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _102) -> [return: bb97, unwind unreachable];\n    }\n    bb97: {\n        StorageDead(_102);\n        _110 = discriminant(_101);\n        switchInt(move _110) -> [0: bb98, 1: bb99, otherwise: bb16];\n    }\n    bb98: {\n        StorageDead(_108);\n        StorageDead(_105);\n        StorageDead(_101);\n        _111 = CheckedAdd(_9, 1_usize);\n        assert(!move (_111.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _9, 1_usize) -> [success: bb101, unwind unreachable];\n    }\n    bb99: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb100, unwind unreachable];\n    }\n    bb100: {\n        StorageDead(_108);\n        StorageDead(_105);\n        StorageDead(_101);\n        StorageDead(_55);\n        goto -> bb105;\n    }\n    bb101: {\n        _9 = move (_111.0: usize);\n        StorageDead(_55);\n        goto -> bb102;\n    }\n    bb102: {\n        goto -> bb103;\n    }\n    bb103: {\n        goto -> bb104;\n    }\n    bb104: {\n        StorageDead(_14);\n        goto -> bb5;\n    }\n    bb105: {\n        goto -> bb106;\n    }\n    bb106: {\n        goto -> bb107;\n    }\n    bb107: {\n        StorageDead(_14);\n        goto -> bb108;\n    }\n    bb108: {\n        StorageDead(_9);\n        StorageDead(_7);\n        goto -> bb109;\n    }\n    bb109: {\n        return;\n    }\n}\n",
+  "doc": " Takes an output stream and an `Arguments` struct that can be precompiled with\n the `format_args!` macro.\n\n The arguments will be formatted according to the specified format string\n into the output stream provided.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::fmt;\n\n let mut output = String::new();\n fmt::write(&mut output, format_args!(\"Hello {}!\", \"world\"))\n     .expect(\"Error occurred while trying to write in String\");\n assert_eq!(output, \"Hello world!\");\n ```\n\n Please note that using [`write!`] might be preferable. Example:\n\n ```\n use std::fmt::Write;\n\n let mut output = String::new();\n write!(&mut output, \"Hello {}!\", \"world\")\n     .expect(\"Error occurred while trying to write in String\");\n assert_eq!(output, \"Hello world!\");\n ```\n\n [`write!`]: crate::write!\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

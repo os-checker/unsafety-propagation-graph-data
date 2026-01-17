@@ -1,0 +1,128 @@
+{
+  "name": "<[u128] as slice::specialize::SpecFill<u128>>::spec_fill",
+  "safe": true,
+  "callees": {
+    "intrinsics::is_val_statically_known": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns whether the argument's value is statically known at\n compile-time.\n\n This is useful when there is a way of writing the code that will\n be *faster* when some variables have known values, but *slower*\n in the general case: an `if is_val_statically_known(var)` can be used\n to select between these two variants. The `if` will be optimized away\n and only the desired branch remains.\n\n Formally speaking, this function non-deterministically returns `true`\n or `false`, and the caller has to ensure sound behavior for both cases.\n In other words, the following code has *Undefined Behavior*:\n\n ```no_run\n #![feature(core_intrinsics)]\n # #![allow(internal_features)]\n use std::hint::unreachable_unchecked;\n use std::intrinsics::is_val_statically_known;\n\n if !is_val_statically_known(0) { unsafe { unreachable_unchecked(); } }\n ```\n\n This also means that the following code's behavior is unspecified; it\n may panic, or it may not:\n\n ```no_run\n #![feature(core_intrinsics)]\n # #![allow(internal_features)]\n use std::intrinsics::is_val_statically_known;\n\n assert_eq!(is_val_statically_known(0), is_val_statically_known(0));\n ```\n\n Unsafe code may not rely on `is_val_statically_known` returning any\n particular value, ever. However, the compiler will generally make it\n return `true` only if the value of the argument is actually known.\n\n # Stability concerns\n\n While it is safe to call, this intrinsic may behave differently in\n a `const` context than otherwise. See the [`const_eval_select()`]\n documentation for an explanation of the issues this can cause. Unlike\n `const_eval_select`, this intrinsic isn't guaranteed to behave\n deterministically even in a `const` context.\n\n # Type Requirements\n\n `T` must be either a `bool`, a `char`, a primitive numeric type (e.g. `f32`,\n but not `NonZeroISize`), or any thin pointer (e.g. `*mut String`).\n Any other argument types *may* cause a compiler error.\n\n ## Pointers\n\n When the input is a pointer, only the pointer itself is\n ever considered. The pointee has no effect. Currently, these functions\n behave identically:\n\n ```\n #![feature(core_intrinsics)]\n # #![allow(internal_features)]\n use std::intrinsics::is_val_statically_known;\n\n fn foo(x: &i32) -> bool {\n     is_val_statically_known(x)\n }\n\n fn bar(x: &i32) -> bool {\n     is_val_statically_known(\n         (x as *const i32).addr()\n     )\n }\n # _ = foo(&5_i32);\n # _ = bar(&5_i32);\n ```\n",
+      "adt": {}
+    },
+    "num::<impl u128>::to_ne_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unnecessary_transmutes"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unnecessary_transmutes\n"
+        ]
+      },
+      "doc": " Returns the memory representation of this integer as a byte array in\n native byte order.\n\n As the target platform's native endianness is used, portable code\n should use [`to_be_bytes`] or [`to_le_bytes`], as appropriate,\n instead.\n\n\n [`to_be_bytes`]: Self::to_be_bytes\n [`to_le_bytes`]: Self::to_le_bytes\n\n # Examples\n\n ```\n assert_eq!(\n     bytes,\n     if cfg!(target_endian = \"big\") {\n     } else {\n     }\n );\n ```\n",
+      "adt": {}
+    },
+    "num::<impl u128>::from_ne_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unnecessary_transmutes"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unnecessary_transmutes\n"
+        ]
+      },
+      "doc": " Creates a native endian integer value from its memory representation\n as a byte array in native endianness.\n\n As the target platform's native endianness is used, portable code\n likely wants to use [`from_be_bytes`] or [`from_le_bytes`], as\n appropriate instead.\n\n [`from_be_bytes`]: Self::from_be_bytes\n [`from_le_bytes`]: Self::from_le_bytes\n\n\n # Examples\n\n ```\n } else {\n });\n ```\n\n When starting from a slice rather than an array, fallible conversion APIs can be used:\n\n ```\n     *input = rest;\n }\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unsafe mutable pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n let x_ptr = x.as_mut_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         *x_ptr.add(i) += 2;\n     }\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {}
+    },
+    "intrinsics::write_bytes": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " This is an accidentally-stable alias to [`ptr::write_bytes`]; use that instead.\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::iter_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator that allows modifying each value.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n for elem in x.iter_mut() {\n     *elem += 2;\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {
+        "slice::iter::IterMut": "Constructor"
+      }
+    },
+    "iter::traits::collect::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::IterMut": [
+      "Plain",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 26590, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 15, kind: RigidTy(Uint(U128)) }, Mut)) })])"
+    ]
+  },
+  "path": 1376,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/specialize.rs:52:13: 68:14",
+  "src": "fn spec_fill(&mut self, value: $type) {\n                // We always take this fastpath in Miri for long slices as the manual `for`\n                // loop can be prohibitively slow.\n                if (cfg!(miri) && self.len() > 32) || crate::intrinsics::is_val_statically_known(value) {\n                    let bytes = value.to_ne_bytes();\n                    if value == <$type>::from_ne_bytes([bytes[0]; size_of::<$type>()]) {\n                        // SAFETY: The pointer is derived from a reference, so it's writable.\n                        unsafe {\n                            crate::intrinsics::write_bytes(self.as_mut_ptr(), bytes[0], self.len());\n                        }\n                        return;\n                    }\n                }\n                for item in self.iter_mut() {\n                    *item = value;\n                }\n            }",
+  "mir": "fn <[u128] as slice::specialize::SpecFill<u128>>::spec_fill(_1: &mut [u128], _2: u128) -> () {\n    let mut _0: ();\n    let mut _3: bool;\n    let  _4: [u8; 16];\n    let mut _5: bool;\n    let mut _6: u128;\n    let mut _7: [u8; 16];\n    let mut _8: u8;\n    let  _9: usize;\n    let mut _10: bool;\n    let  _11: ();\n    let mut _12: *mut u128;\n    let mut _13: u8;\n    let  _14: usize;\n    let mut _15: bool;\n    let mut _16: usize;\n    let mut _17: &[u128];\n    let mut _18: slice::iter::IterMut<'_, u128>;\n    let mut _19: slice::iter::IterMut<'_, u128>;\n    let mut _20: slice::iter::IterMut<'_, u128>;\n    let mut _21: option::Option<&mut u128>;\n    let mut _22: &mut slice::iter::IterMut<'_, u128>;\n    let mut _23: isize;\n    let  _24: &mut u128;\n    debug self => _1;\n    debug value => _2;\n    debug bytes => _4;\n    debug iter => _20;\n    debug item => _24;\n    bb0: {\n        StorageLive(_3);\n        _3 = intrinsics::is_val_statically_known::<u128>(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb11, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_4);\n        _4 = num::<impl u128>::to_ne_bytes(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = 0_usize;\n        _10 = Lt(_9, 16_usize);\n        assert(move _10, \"index out of bounds: the length is {} but the index is {}\", 16_usize, _9) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _8 = _4[_9];\n        _7 = [move _8; 16];\n        StorageDead(_8);\n        _6 = num::<impl u128>::from_ne_bytes(move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        _5 = Eq(_2, move _6);\n        switchInt(move _5) -> [0: bb10, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_9);\n        StorageDead(_6);\n        StorageLive(_12);\n        _12 = slice::<impl [u128]>::as_mut_ptr(_1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = 0_usize;\n        _15 = Lt(_14, 16_usize);\n        assert(move _15, \"index out of bounds: the length is {} but the index is {}\", 16_usize, _14) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _13 = _4[_14];\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &(*_1);\n        _16 = PtrMetadata(move _17);\n        StorageDead(_17);\n        _11 = intrinsics::write_bytes::<u128>(move _12, move _13, move _16) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_16);\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageDead(_14);\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb20;\n    }\n    bb10: {\n        StorageDead(_9);\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_4);\n        goto -> bb12;\n    }\n    bb11: {\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_3);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = slice::<impl [u128]>::iter_mut(_1) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        _18 = <slice::iter::IterMut<'_, u128> as iter::traits::collect::IntoIterator>::into_iter(move _19) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_19);\n        StorageLive(_20);\n        _20 = move _18;\n        goto -> bb15;\n    }\n    bb15: {\n        StorageLive(_21);\n        _22 = &mut _20;\n        _21 = <slice::iter::IterMut<'_, u128> as iter::traits::iterator::Iterator>::next(_22) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        _23 = discriminant(_21);\n        switchInt(move _23) -> [0: bb19, 1: bb18, otherwise: bb17];\n    }\n    bb17: {\n        unreachable;\n    }\n    bb18: {\n        StorageLive(_24);\n        _24 = move ((_21 as variant#1).0: &mut u128);\n        (*_24) = _2;\n        StorageDead(_24);\n        StorageDead(_21);\n        goto -> bb15;\n    }\n    bb19: {\n        StorageDead(_21);\n        StorageDead(_20);\n        StorageDead(_18);\n        goto -> bb20;\n    }\n    bb20: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

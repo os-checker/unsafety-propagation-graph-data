@@ -1,0 +1,37 @@
+{
+  "name": "ptr::const_ptr::<impl *const T>::with_metadata_of",
+  "safe": true,
+  "callees": {
+    "ptr::metadata::metadata": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the metadata component of a pointer.\n\n Values of type `*mut T`, `&T`, or `&mut T` can be passed directly to this function\n as they implicitly coerce to `*const T`.\n\n # Example\n\n ```\n #![feature(ptr_metadata)]\n\n assert_eq!(std::ptr::metadata(\"foo\"), 3_usize);\n ```\n",
+      "adt": {}
+    },
+    "ptr::metadata::from_raw_parts": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forms a (possibly-wide) raw pointer from a data pointer and metadata.\n\n This function is safe but the returned pointer is not necessarily safe to dereference.\n For slices, see the documentation of [`slice::from_raw_parts`] for safety requirements.\n For trait objects, the metadata must come from a pointer to the same underlying erased type.\n\n If you are attempting to deconstruct a DST in a generic context to be reconstructed later,\n a thin pointer can always be obtained by casting `*const T` to `*const ()`.\n\n [`slice::from_raw_parts`]: crate::slice::from_raw_parts\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1008,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/const_ptr.rs:130:5: 135:6",
+  "src": "pub const fn with_metadata_of<U>(self, meta: *const U) -> *const U\n    where\n        U: PointeeSized,\n    {\n        from_raw_parts::<U>(self as *const (), metadata(meta))\n    }",
+  "mir": "fn ptr::const_ptr::<impl *const T>::with_metadata_of(_1: *const T, _2: *const U) -> *const U {\n    let mut _0: *const U;\n    let mut _3: *const ();\n    let mut _4: <U as ptr::metadata::Pointee>::Metadata;\n    debug self => _1;\n    debug meta => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = _1 as *const ();\n        StorageLive(_4);\n        _4 = ptr::metadata::metadata::<U>(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = ptr::metadata::from_raw_parts::<U, ()>(move _3, move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Uses the address value in a new pointer of another type.\n\n This operation will ignore the address part of its `meta` operand and discard existing\n metadata of `self`. For pointers to a sized types (thin pointers), this has the same effect\n as a simple cast. For pointers to an unsized type (fat pointers) this recombines the address\n with new metadata such as slice lengths or `dyn`-vtable.\n\n The resulting pointer will have provenance of `self`. This operation is semantically the\n same as creating a new pointer with the data pointer value of `self` but the metadata of\n `meta`, being fat or thin depending on the `meta` operand.\n\n # Examples\n\n This function is primarily useful for enabling pointer arithmetic on potentially fat\n pointers. The pointer is cast to a sized pointee to utilize offset operations and then\n recombined with its own original metadata.\n\n ```\n #![feature(set_ptr_value)]\n # use core::fmt::Debug;\n let arr: [i32; 3] = [1, 2, 3];\n let mut ptr = arr.as_ptr() as *const dyn Debug;\n let thin = ptr as *const u8;\n unsafe {\n     ptr = thin.add(8).with_metadata_of(ptr);\n     # assert_eq!(*(ptr as *const i32), 3);\n     println!(\"{:?}\", &*ptr); // will print \"3\"\n }\n ```\n\n # *Incorrect* usage\n\n The provenance from pointers is *not* combined. The result must only be used to refer to the\n address allowed by `self`.\n\n ```rust,no_run\n #![feature(set_ptr_value)]\n let x = 0u32;\n let y = 1u32;\n\n let x = (&x) as *const u32;\n let y = (&y) as *const u32;\n\n let offset = (x as usize - y as usize) / 4;\n let bad = x.wrapping_add(offset).with_metadata_of(y);\n\n // This dereference is UB. The pointer only has provenance for `x` but points to `y`.\n println!(\"{:?}\", unsafe { &*bad });\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

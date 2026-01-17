@@ -1,0 +1,66 @@
+{
+  "name": "io::impls::<impl io::Read for &[u8]>::read_buf",
+  "safe": true,
+  "callees": {
+    "core::io::BorrowedCursor::<'a>::capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the available space in the cursor.\n",
+      "adt": {}
+    },
+    "core::cmp::min": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the minimum of two values.\n\n Returns the first argument if the comparison determines them to be equal.\n\n Internally uses an alias to [`Ord::min`].\n\n # Examples\n\n ```\n use std::cmp;\n\n assert_eq!(cmp::min(1, 2), 1);\n assert_eq!(cmp::min(2, 2), 2);\n ```\n ```\n use std::cmp::{self, Ordering};\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(cmp::min(Equal(\"v1\"), Equal(\"v2\")).0, \"v1\");\n ```\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::split_at": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.  For a non-panicking alternative see\n [`split_at_checked`](slice::split_at_checked).\n\n # Examples\n\n ```\n let v = ['a', 'b', 'c'];\n\n {\n    let (left, right) = v.split_at(0);\n    assert_eq!(left, []);\n    assert_eq!(right, ['a', 'b', 'c']);\n }\n\n {\n     let (left, right) = v.split_at(2);\n     assert_eq!(left, ['a', 'b']);\n     assert_eq!(right, ['c']);\n }\n\n {\n     let (left, right) = v.split_at(3);\n     assert_eq!(left, ['a', 'b', 'c']);\n     assert_eq!(right, []);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::io::BorrowedCursor::<'a>::append": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Appends data to the cursor, advancing position within its buffer.\n\n # Panics\n\n Panics if `self.capacity()` is less than `buf.len()`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::io::BorrowedCursor": [
+      "Ref",
+      "Plain",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 61,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/impls.rs:318:5: 326:6",
+  "src": "fn read_buf(&mut self, mut cursor: BorrowedCursor<'_>) -> io::Result<()> {\n        let amt = cmp::min(cursor.capacity(), self.len());\n        let (a, b) = self.split_at(amt);\n\n        cursor.append(a);\n\n        *self = b;\n        Ok(())\n    }",
+  "mir": "fn io::impls::<impl io::Read for &[u8]>::read_buf(_1: &mut &[u8], _2: core::io::BorrowedCursor<'_>) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let  _3: usize;\n    let mut _4: usize;\n    let mut _5: &core::io::BorrowedCursor<'_>;\n    let mut _6: usize;\n    let  _7: &[u8];\n    let  _8: &[u8];\n    let mut _9: (&[u8], &[u8]);\n    let  _10: ();\n    let mut _11: &mut core::io::BorrowedCursor<'_>;\n    let mut _12: &[u8];\n    let mut _13: &[u8];\n    debug self => _1;\n    debug cursor => _2;\n    debug amt => _3;\n    debug a => _7;\n    debug b => _8;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &_2;\n        _4 = core::io::BorrowedCursor::<'_>::capacity(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageLive(_6);\n        _12 = (*_1);\n        _6 = PtrMetadata(_12);\n        _3 = core::cmp::min::<usize>(move _4, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_4);\n        StorageLive(_9);\n        _13 = (*_1);\n        _9 = core::slice::<impl [u8]>::split_at(_13, _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _7 = (_9.0: &[u8]);\n        _8 = (_9.1: &[u8]);\n        StorageDead(_9);\n        StorageLive(_11);\n        _11 = &mut _2;\n        _10 = core::io::BorrowedCursor::<'_>::append(move _11, _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_11);\n        (*_1) = _8;\n        _0 = core::result::Result::Ok(());\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

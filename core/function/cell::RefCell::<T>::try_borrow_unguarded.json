@@ -1,0 +1,66 @@
+{
+  "name": "cell::RefCell::<T>::try_borrow_unguarded",
+  "safe": false,
+  "callees": {
+    "cell::Cell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a copy of the contained value.\n\n # Examples\n\n ```\n use std::cell::Cell;\n\n let c = Cell::new(5);\n\n let five = c.get();\n ```\n",
+      "adt": {
+        "cell::Cell": "ImmutableAsArgument"
+      }
+    },
+    "cell::is_writing": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "cell::UnsafeCell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the wrapped value.\n\n This can be cast to a pointer of any kind. When creating references, you must uphold the\n aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and\n caveats.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let five = uc.get();\n ```\n",
+      "adt": {
+        "cell::UnsafeCell": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "cell::Cell": [
+      "Ref"
+    ],
+    "cell::RefCell": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Ref"
+    ],
+    "result::Result": [
+      "Plain"
+    ],
+    "cell::UnsafeCell": [
+      "Ref"
+    ]
+  },
+  "path": 4800,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell.rs:1370:5: 1386:6",
+  "src": "pub const unsafe fn try_borrow_unguarded(&self) -> Result<&T, BorrowError> {\n        if !is_writing(self.borrow.get()) {\n            // SAFETY: We check that nobody is actively writing now, but it is\n            // the caller's responsibility to ensure that nobody writes until\n            // the returned reference is no longer in use.\n            // Also, `self.value.get()` refers to the value owned by `self`\n            // and is thus guaranteed to be valid for the lifetime of `self`.\n            Ok(unsafe { &*self.value.get() })\n        } else {\n            Err(BorrowError {\n                // If a borrow occurred, then we must already have an outstanding borrow,\n                // so `borrowed_at` will be `Some`\n                #[cfg(feature = \"debug_refcell\")]\n                location: self.borrowed_at.get().unwrap(),\n            })\n        }\n    }",
+  "mir": "fn cell::RefCell::<T>::try_borrow_unguarded(_1: &cell::RefCell<T>) -> result::Result<&T, cell::BorrowError> {\n    let mut _0: result::Result<&T, cell::BorrowError>;\n    let mut _2: bool;\n    let mut _3: isize;\n    let mut _4: &cell::Cell<isize>;\n    let  _5: &T;\n    let  _6: *mut T;\n    let mut _7: &cell::UnsafeCell<T>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &((*_1).0: cell::Cell<isize>);\n        _3 = cell::Cell::<isize>::get(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = cell::is_writing(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _2) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_3);\n        _0 = result::Result::Err(cell::BorrowError {{  }});\n        goto -> bb6;\n    }\n    bb4: {\n        StorageDead(_3);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).1: cell::UnsafeCell<T>);\n        _6 = cell::UnsafeCell::<T>::get(move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        _5 = &(*_6);\n        StorageDead(_6);\n        _0 = result::Result::Ok(_5);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Immutably borrows the wrapped value, returning an error if the value is\n currently mutably borrowed.\n\n # Safety\n\n Unlike `RefCell::borrow`, this method is unsafe because it does not\n return a `Ref`, thus leaving the borrow flag untouched. Mutably\n borrowing the `RefCell` while the reference returned by this method\n is alive is undefined behavior.\n\n # Examples\n\n ```\n use std::cell::RefCell;\n\n let c = RefCell::new(5);\n\n {\n     let m = c.borrow_mut();\n     assert!(unsafe { c.try_borrow_unguarded() }.is_err());\n }\n\n {\n     let m = c.borrow();\n     assert!(unsafe { c.try_borrow_unguarded() }.is_ok());\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

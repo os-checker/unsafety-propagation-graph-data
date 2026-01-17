@@ -1,0 +1,119 @@
+{
+  "name": "sync::mpmc::array::Channel::<T>::recv",
+  "safe": true,
+  "callees": {
+    "core::default::Default::default": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the \"default value\" for a type.\n\n Default values are often some kind of initial value, identity value, or anything else that\n may make sense as a default.\n\n # Examples\n\n Using built-in default values:\n\n ```\n let i: i8 = Default::default();\n let (x, y): (Option<String>, f64) = Default::default();\n let (a, b, (c, d)): (i32, u32, (bool, bool)) = Default::default();\n ```\n\n Making your own:\n\n ```\n # #[allow(dead_code)]\n enum Kind {\n     A,\n     B,\n     C,\n }\n\n impl Default for Kind {\n     fn default() -> Self { Kind::A }\n }\n ```\n",
+      "adt": {}
+    },
+    "sync::mpmc::array::Channel::<T>::start_recv": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to reserve a slot for receiving a message.\n",
+      "adt": {
+        "sync::mpmc::select::Token": "MutableAsArgument",
+        "sync::mpmc::array::Channel": "ImmutableAsArgument"
+      }
+    },
+    "sync::mpmc::array::Channel::<T>::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads a message from the channel.\n",
+      "adt": {
+        "sync::mpmc::select::Token": "MutableAsArgument",
+        "sync::mpmc::array::Channel": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::map_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<T, F>` by applying a function to a\n contained [`Err`] value, leaving an [`Ok`] value untouched.\n\n This function can be used to pass through a successful result while handling\n an error.\n\n\n # Examples\n\n ```\n fn stringify(x: u32) -> String { format!(\"error code: {x}\") }\n\n let x: Result<u32, u32> = Ok(2);\n assert_eq!(x.map_err(stringify), Ok(2));\n\n let x: Result<u32, u32> = Err(13);\n assert_eq!(x.map_err(stringify), Err(\"error code: 13\".to_string()));\n ```\n",
+      "adt": {}
+    },
+    "time::Instant::now": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an instant corresponding to \"now\".\n\n # Examples\n\n ```\n use std::time::Instant;\n\n let now = Instant::now();\n ```\n",
+      "adt": {
+        "time::Instant": "Constructor"
+      }
+    },
+    "core::cmp::PartialOrd::ge": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests greater than or equal to (for `self` and `other`) and is used by\n the `>=` operator.\n\n # Examples\n\n ```\n assert_eq!(1.0 >= 1.0, true);\n assert_eq!(1.0 >= 2.0, false);\n assert_eq!(2.0 >= 1.0, true);\n ```\n",
+      "adt": {}
+    },
+    "sync::mpmc::context::Context::with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new context for the duration of the closure.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::mpmc::select::Token": [
+      "Plain",
+      "MutRef"
+    ],
+    "sync::mpmc::array::Channel": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 613, kind: RigidTy(Adt(AdtDef(DefId { id: 4610, name: \"time::Instant\" }), GenericArgs([]))) })])",
+      "Ref"
+    ],
+    "time::Instant": [
+      "Plain",
+      "Ref"
+    ],
+    "sync::mpsc::RecvTimeoutError": [
+      "Plain"
+    ]
+  },
+  "path": 2792,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/array.rs:375:5: 415:6",
+  "src": "pub(crate) fn recv(&self, deadline: Option<Instant>) -> Result<T, RecvTimeoutError> {\n        let token = &mut Token::default();\n        loop {\n            // Try receiving a message.\n            if self.start_recv(token) {\n                let res = unsafe { self.read(token) };\n                return res.map_err(|_| RecvTimeoutError::Disconnected);\n            }\n\n            if let Some(d) = deadline {\n                if Instant::now() >= d {\n                    return Err(RecvTimeoutError::Timeout);\n                }\n            }\n\n            Context::with(|cx| {\n                // Prepare for blocking until a sender wakes us up.\n                let oper = Operation::hook(token);\n                self.receivers.register(oper, cx);\n\n                // Has the channel become ready just now?\n                if !self.is_empty() || self.is_disconnected() {\n                    let _ = cx.try_select(Selected::Aborted);\n                }\n\n                // Block the current thread.\n                // SAFETY: the context belongs to the current thread.\n                let sel = unsafe { cx.wait_until(deadline) };\n\n                match sel {\n                    Selected::Waiting => unreachable!(),\n                    Selected::Aborted | Selected::Disconnected => {\n                        self.receivers.unregister(oper).unwrap();\n                        // If the channel was disconnected, we still have to check for remaining\n                        // messages.\n                    }\n                    Selected::Operation(_) => {}\n                }\n            });\n        }\n    }",
+  "mir": "fn sync::mpmc::array::Channel::<T>::recv(_1: &sync::mpmc::array::Channel<T>, _2: core::option::Option<time::Instant>) -> core::result::Result<T, sync::mpsc::RecvTimeoutError> {\n    let mut _0: core::result::Result<T, sync::mpsc::RecvTimeoutError>;\n    let  _3: &mut sync::mpmc::select::Token;\n    let mut _4: sync::mpmc::select::Token;\n    let mut _5: bool;\n    let  _6: core::result::Result<T, ()>;\n    let mut _7: isize;\n    let  _8: time::Instant;\n    let mut _9: bool;\n    let mut _10: &time::Instant;\n    let  _11: time::Instant;\n    let mut _12: &time::Instant;\n    let mut _13: sync::mpsc::RecvTimeoutError;\n    let  _14: ();\n    let mut _15: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/array.rs:390:27: 390:31};\n    let mut _16: &core::option::Option<time::Instant>;\n    debug self => _1;\n    debug deadline => _2;\n    debug token => _3;\n    debug res => _6;\n    debug d => _8;\n    bb0: {\n        StorageLive(_4);\n        _4 = <sync::mpmc::select::Token as core::default::Default>::default() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = &mut _4;\n        goto -> bb2;\n    }\n    bb2: {\n        StorageLive(_5);\n        _5 = sync::mpmc::array::Channel::<T>::start_recv(_1, _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _5) -> [0: bb7, otherwise: bb4];\n    }\n    bb4: {\n        _6 = sync::mpmc::array::Channel::<T>::read(_1, _3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = core::result::Result::<T, ()>::map_err::<sync::mpsc::RecvTimeoutError, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/array.rs:381:36: 381:39}>(_6, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/array.rs:381:36: 381:39}) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_5);\n        goto -> bb15;\n    }\n    bb7: {\n        StorageDead(_5);\n        _7 = discriminant(_2);\n        switchInt(move _7) -> [1: bb8, 0: bb13, otherwise: bb16];\n    }\n    bb8: {\n        StorageLive(_8);\n        _8 = ((_2 as variant#1).0: time::Instant);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = time::Instant::now() -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _10 = &_11;\n        StorageLive(_12);\n        _12 = &_8;\n        _9 = <time::Instant as core::cmp::PartialOrd>::ge(move _10, move _12) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        switchInt(move _9) -> [0: bb12, otherwise: bb11];\n    }\n    bb11: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageLive(_13);\n        _13 = sync::mpsc::RecvTimeoutError::Timeout;\n        _0 = core::result::Result::Err(move _13);\n        StorageDead(_13);\n        StorageDead(_9);\n        StorageDead(_8);\n        goto -> bb15;\n    }\n    bb12: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_8);\n        goto -> bb13;\n    }\n    bb13: {\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &_2;\n        _15 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/array.rs:390:27: 390:31}(_3, _1, move _16);\n        StorageDead(_16);\n        _14 = sync::mpmc::context::Context::with::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/array.rs:390:27: 390:31}, ()>(move _15) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_15);\n        goto -> bb2;\n    }\n    bb15: {\n        StorageDead(_4);\n        return;\n    }\n    bb16: {\n        unreachable;\n    }\n}\n",
+  "doc": " Receives a message from the channel.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

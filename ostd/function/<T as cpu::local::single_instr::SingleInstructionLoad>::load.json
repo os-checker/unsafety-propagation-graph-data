@@ -1,0 +1,53 @@
+{
+  "name": "<T as cpu::local::single_instr::SingleInstructionLoad>::load",
+  "safe": false,
+  "callees": {
+    "irq::guard::disable_local": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disables all IRQs on the current CPU (i.e., locally).\n\n This function returns a guard object, which will automatically enable local IRQs again when\n it is dropped. This function works correctly even when it is called in a _nested_ way.\n The local IRQs shall only be re-enabled when the most outer guard is dropped.\n\n This function can play nicely with [`SpinLock`] as the type uses this function internally.\n One can invoke this function even after acquiring a spin lock. And the reversed order is also ok.\n\n [`SpinLock`]: crate::sync::SpinLock\n\n # Example\n\n ```rust\n use ostd::irq;\n\n {\n     let _ = irq::disable_local();\n     todo!(\"do something when irqs are disabled\");\n }\n ```\n",
+      "adt": {
+        "irq::guard::DisabledLocalIrqGuard": "Constructor"
+      }
+    },
+    "arch::cpu::local::get_base": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the base address for the CPU local storage by reading the GS base model-specific register.\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `self` without moving it. This leaves the\n memory in `self` unchanged.\n\n See [`ptr::read`] for safety concerns and examples.\n\n [`ptr::read`]: crate::ptr::read()\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "irq::guard::DisabledLocalIrqGuard": [
+      "Plain"
+    ]
+  },
+  "path": 36,
+  "span": "ostd/src/cpu/local/single_instr.rs:149:5: 155:6",
+  "src": "default unsafe fn load(offset: usize) -> Self {\n        let _guard = crate::irq::disable_local();\n        let base = crate::arch::cpu::local::get_base() as usize;\n        let ptr = (base + offset) as *const Self;\n        // SAFETY: Same as `add_assign`.\n        unsafe { ptr.read() }\n    }",
+  "mir": "fn <T as cpu::local::single_instr::SingleInstructionLoad>::load(_1: usize) -> T {\n    let mut _0: T;\n    let  _2: irq::guard::DisabledLocalIrqGuard;\n    let  _3: usize;\n    let mut _4: u64;\n    let  _5: *const T;\n    let mut _6: usize;\n    let mut _7: (usize, bool);\n    debug offset => _1;\n    debug _guard => _2;\n    debug base => _3;\n    debug ptr => _5;\n    bb0: {\n        StorageLive(_2);\n        _2 = irq::guard::disable_local() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = arch::cpu::local::get_base() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = move _4 as usize;\n        StorageDead(_4);\n        StorageLive(_6);\n        _7 = CheckedAdd(_3, _1);\n        assert(!move (_7.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _3, _1) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = move (_7.0: usize);\n        _5 = move _6 as *const T;\n        StorageDead(_6);\n        _0 = core::ptr::const_ptr::<impl *const T>::read(_5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        drop(_2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

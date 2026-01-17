@@ -1,0 +1,97 @@
+{
+  "name": "arch::boot::multiboot2::__multiboot2_entry",
+  "safe": false,
+  "callees": {
+    "multiboot2::BootInformation::<'a>::load": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads the [`BootInformation`] from a pointer. The pointer must be valid\n and aligned to an 8-byte boundary, as defined by the spec.\n\n ## Example\n\n ```rust\n use multiboot2::{BootInformation, BootInformationHeader};\n\n fn kernel_entry(mb_magic: u32, mbi_ptr: u32) {\n     if mb_magic == multiboot2::MAGIC {\n         let boot_info = unsafe { BootInformation::load(mbi_ptr as *const BootInformationHeader).unwrap() };\n         let _cmd = boot_info.command_line_tag();\n     } else { /* Panic or use multiboot1 flow. */ }\n }\n ```\n\n ## Safety\n * `ptr` must be valid for reading. Otherwise, this function might cause\n   invalid machine state or crash your binary (kernel). This can be the\n   case in environments with standard environment (segfault), but also in\n   boot environments, such as UEFI.\n * The memory at `ptr` must not be modified after calling `load` or the\n   program may observe unsynchronized mutation.\n",
+      "adt": {}
+    },
+    "core::panicking::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Internal function for `assert_eq!` and `assert_ne!` macros\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    },
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    },
+    "boot::call_ostd_main": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calls the OSTD-user defined entrypoint of the actual kernel.\n\n Any kernel that uses the `ostd` crate should define a function marked with\n `ostd::main` as the entrypoint.\n\n This function should be only called from the bootloader-specific module.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::panicking::AssertKind": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "multiboot2::BootInformation": [
+      "Plain",
+      "Ref"
+    ],
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "boot::EarlyBootInfo": [
+      "Ref"
+    ]
+  },
+  "path": 158,
+  "span": "ostd/src/arch/x86/boot/multiboot2/mod.rs:148:1: 165:2",
+  "src": "unsafe extern \"sysv64\" fn __multiboot2_entry(boot_magic: u32, boot_params: u64) -> ! {\n    assert_eq!(boot_magic, multiboot2::MAGIC);\n    let mb2_info =\n        unsafe { BootInformation::load(boot_params as *const BootInformationHeader).unwrap() };\n\n    use crate::boot::{EARLY_INFO, EarlyBootInfo, call_ostd_main};\n\n    EARLY_INFO.call_once(|| EarlyBootInfo {\n        bootloader_name: parse_bootloader_name(&mb2_info).unwrap_or(\"Unknown Multiboot2 Loader\"),\n        kernel_cmdline: parse_kernel_commandline(&mb2_info).unwrap_or(\"\"),\n        initramfs: parse_initramfs(&mb2_info),\n        acpi_arg: parse_acpi_arg(&mb2_info),\n        framebuffer_arg: parse_framebuffer_info(&mb2_info),\n        memory_regions: parse_memory_regions(&mb2_info),\n    });\n\n    call_ostd_main();\n}",
+  "mir": "fn arch::boot::multiboot2::__multiboot2_entry(_1: u32, _2: u64) -> ! {\n    let mut _0: !;\n    let mut _3: (&u32, &u32);\n    let mut _4: &u32;\n    let mut _5: &u32;\n    let  _6: &u32;\n    let  _7: &u32;\n    let mut _8: bool;\n    let mut _9: u32;\n    let mut _10: u32;\n    let  _11: core::panicking::AssertKind;\n    let  _12: !;\n    let mut _13: core::option::Option<core::fmt::Arguments<'_>>;\n    let  _14: multiboot2::BootInformation<'_>;\n    let mut _15: core::result::Result<multiboot2::BootInformation<'_>, multiboot2::LoadError>;\n    let mut _16: *const multiboot2::BootInformationHeader;\n    let  _17: &boot::EarlyBootInfo;\n    let mut _18: &spin::once::Once<boot::EarlyBootInfo>;\n    let mut _19: {closure@ostd/src/arch/x86/boot/multiboot2/mod.rs:155:26: 155:28};\n    let mut _20: &multiboot2::BootInformation<'_>;\n    let  _21: !;\n    debug boot_magic => _1;\n    debug boot_params => _2;\n    debug left_val => _6;\n    debug right_val => _7;\n    debug kind => _11;\n    debug mb2_info => _14;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &_1;\n        StorageLive(_5);\n        _5 = arch::boot::multiboot2::__multiboot2_entry::promoted[0];\n        _3 = (move _4, move _5);\n        StorageDead(_5);\n        StorageDead(_4);\n        _6 = (_3.0: &u32);\n        _7 = (_3.1: &u32);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = (*_6);\n        StorageLive(_10);\n        _10 = (*_7);\n        _8 = Eq(move _9, move _10);\n        switchInt(move _8) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_3);\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = _2 as *const multiboot2::BootInformationHeader;\n        _15 = multiboot2::BootInformation::<'_>::load(move _16) -> [return: bb3, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_10);\n        StorageDead(_9);\n        _11 = core::panicking::AssertKind::Eq;\n        StorageLive(_13);\n        _13 = core::option::Option::None;\n        _12 = core::panicking::assert_failed::<u32, u32>(_11, _6, _7, move _13) -> unwind unreachable;\n    }\n    bb3: {\n        StorageDead(_16);\n        _14 = core::result::Result::<multiboot2::BootInformation<'_>, multiboot2::LoadError>::unwrap(move _15) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_15);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = {alloc733: &spin::once::Once<boot::EarlyBootInfo>};\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = &_14;\n        _19 = {closure@ostd/src/arch/x86/boot/multiboot2/mod.rs:155:26: 155:28}(move _20);\n        StorageDead(_20);\n        _17 = spin::once::Once::<boot::EarlyBootInfo>::call_once::<{closure@ostd/src/arch/x86/boot/multiboot2/mod.rs:155:26: 155:28}>(move _18, move _19) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_19);\n        StorageDead(_18);\n        StorageDead(_17);\n        _21 = boot::call_ostd_main() -> unwind unreachable;\n    }\n}\n",
+  "doc": " The entry point of the Rust code portion of Asterinas (with multiboot2 parameters).\n\n # Safety\n\n - This function must be called only once at a proper timing in the BSP's boot assembly code.\n - The caller must follow C calling conventions and put the right arguments in registers.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

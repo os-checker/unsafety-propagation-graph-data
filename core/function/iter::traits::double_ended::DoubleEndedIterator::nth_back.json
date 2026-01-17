@@ -1,0 +1,59 @@
+{
+  "name": "iter::traits::double_ended::DoubleEndedIterator::nth_back",
+  "safe": true,
+  "callees": {
+    "iter::traits::double_ended::DoubleEndedIterator::advance_back_by": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator from the back by `n` elements.\n\n `advance_back_by` is the reverse version of [`advance_by`]. This method will\n eagerly skip `n` elements starting from the back by calling [`next_back`] up\n to `n` times until [`None`] is encountered.\n\n `advance_back_by(n)` will return `Ok(())` if the iterator successfully advances by\n `n` elements, or a `Err(NonZero<usize>)` with value `k` if [`None`] is encountered, where `k`\n is remaining number of steps that could not be advanced because the iterator ran out.\n If `self` is empty and `n` is non-zero, then this returns `Err(n)`.\n Otherwise, `k` is always less than `n`.\n\n Calling `advance_back_by(0)` can do meaningful work, for example [`Flatten`] can advance its\n outer iterator until it finds an inner iterator that is not empty, which then often\n allows it to return a more accurate `size_hint()` than in its initial state.\n\n [`advance_by`]: Iterator::advance_by\n [`Flatten`]: crate::iter::Flatten\n [`next_back`]: DoubleEndedIterator::next_back\n\n # Examples\n\n Basic usage:\n\n ```\n #![feature(iter_advance_by)]\n\n use std::num::NonZero;\n\n let a = [3, 4, 5, 6];\n let mut iter = a.iter();\n\n assert_eq!(iter.advance_back_by(2), Ok(()));\n assert_eq!(iter.next_back(), Some(&4));\n assert_eq!(iter.advance_back_by(0), Ok(()));\n assert_eq!(iter.advance_back_by(100), Err(NonZero::new(99).unwrap())); // only `&3` was skipped\n ```\n\n [`Ok(())`]: Ok\n [`Err(k)`]: Err\n",
+      "adt": {
+        "result::Result": "Constructor"
+      }
+    },
+    "result::Result::<T, E>::is_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the result is [`Err`].\n\n # Examples\n\n ```\n let x: Result<i32, &str> = Ok(-3);\n assert_eq!(x.is_err(), false);\n\n let x: Result<i32, &str> = Err(\"Some error message\");\n assert_eq!(x.is_err(), true);\n ```\n",
+      "adt": {
+        "result::Result": "ImmutableAsArgument"
+      }
+    },
+    "iter::traits::double_ended::DoubleEndedIterator::next_back": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Removes and returns an element from the end of the iterator.\n\n Returns `None` when there are no more elements.\n\n The [trait-level] docs contain more details.\n\n [trait-level]: DoubleEndedIterator\n\n # Examples\n\n Basic usage:\n\n ```\n let numbers = vec![1, 2, 3, 4, 5, 6];\n\n let mut iter = numbers.iter();\n\n assert_eq!(Some(&1), iter.next());\n assert_eq!(Some(&6), iter.next_back());\n assert_eq!(Some(&5), iter.next_back());\n assert_eq!(Some(&2), iter.next());\n assert_eq!(Some(&3), iter.next());\n assert_eq!(Some(&4), iter.next());\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next_back());\n ```\n\n # Remarks\n\n The elements yielded by `DoubleEndedIterator`'s methods may differ from\n the ones yielded by [`Iterator`]'s methods:\n\n ```\n let vec = vec![(1, 'a'), (1, 'b'), (1, 'c'), (2, 'a'), (2, 'b')];\n let uniq_by_fst_comp = || {\n     let mut seen = std::collections::HashSet::new();\n     vec.iter().copied().filter(move |x| seen.insert(x.0))\n };\n\n assert_eq!(uniq_by_fst_comp().last(), Some((2, 'a')));\n assert_eq!(uniq_by_fst_comp().next_back(), Some((2, 'b')));\n\n assert_eq!(\n     uniq_by_fst_comp().fold(vec![], |mut v, x| {v.push(x); v}),\n     vec![(1, 'a'), (2, 'a')]\n );\n assert_eq!(\n     uniq_by_fst_comp().rfold(vec![], |mut v, x| {v.push(x); v}),\n     vec![(2, 'b'), (1, 'c')]\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "result::Result": [
+      "Plain",
+      "Ref"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": "iter::traits::double_ended::DoubleEndedIterator::nth_back",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/double_ended.rs:191:5: 196:6",
+  "src": "fn nth_back(&mut self, n: usize) -> Option<Self::Item> {\n        if self.advance_back_by(n).is_err() {\n            return None;\n        }\n        self.next_back()\n    }",
+  "mir": "fn iter::traits::double_ended::DoubleEndedIterator::nth_back(_1: &mut Self, _2: usize) -> option::Option<<Self as iter::traits::iterator::Iterator>::Item> {\n    let mut _0: option::Option<<Self as iter::traits::iterator::Iterator>::Item>;\n    let mut _3: bool;\n    let mut _4: &result::Result<(), num::nonzero::NonZero<usize>>;\n    let  _5: result::Result<(), num::nonzero::NonZero<usize>>;\n    debug self => _1;\n    debug n => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = <Self as iter::traits::double_ended::DoubleEndedIterator>::advance_back_by(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = &_5;\n        _3 = result::Result::<(), num::nonzero::NonZero<usize>>::is_err(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _3) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _0 = option::Option::None;\n        StorageDead(_3);\n        goto -> bb6;\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageDead(_3);\n        _0 = <Self as iter::traits::double_ended::DoubleEndedIterator>::next_back(_1) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        goto -> bb6;\n    }\n    bb6: {\n        return;\n    }\n}\n",
+  "doc": " Returns the `n`th element from the end of the iterator.\n\n This is essentially the reversed version of [`Iterator::nth()`].\n Although like most indexing operations, the count starts from zero, so\n `nth_back(0)` returns the first value from the end, `nth_back(1)` the\n second, and so on.\n\n Note that all elements between the end and the returned element will be\n consumed, including the returned element. This also means that calling\n `nth_back(0)` multiple times on the same iterator will return different\n elements.\n\n `nth_back()` will return [`None`] if `n` is greater than or equal to the\n length of the iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n assert_eq!(a.iter().nth_back(2), Some(&1));\n ```\n\n Calling `nth_back()` multiple times doesn't rewind the iterator:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.iter();\n\n assert_eq!(iter.nth_back(1), Some(&2));\n assert_eq!(iter.nth_back(1), None);\n ```\n\n Returning `None` if there are less than `n + 1` elements:\n\n ```\n let a = [1, 2, 3];\n assert_eq!(a.iter().nth_back(10), None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

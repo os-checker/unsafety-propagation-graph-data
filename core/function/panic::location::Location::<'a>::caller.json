@@ -1,0 +1,31 @@
+{
+  "name": "panic::location::Location::<'a>::caller",
+  "safe": true,
+  "callees": {
+    "intrinsics::caller_location": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a reference to a static `Location` indicating where it was called.\n\n Note that, unlike most intrinsics, this is safe to call;\n it does not require an `unsafe` block.\n Therefore, implementations must not require the user to uphold\n any safety invariants.\n\n Consider using [`core::panic::Location::caller`] instead.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "panic::location::Location": [
+      "Ref"
+    ]
+  },
+  "path": 15779,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/panic/location.rs:180:5: 182:6",
+  "src": "pub const fn caller() -> &'static Location<'static> {\n        crate::intrinsics::caller_location()\n    }",
+  "mir": "fn panic::location::Location::<'a>::caller() -> &panic::location::Location<'_> {\n    let mut _0: &panic::location::Location<'_>;\n    bb0: {\n        _0 = intrinsics::caller_location() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Returns the source location of the caller of this function. If that function's caller is\n annotated then its call location will be returned, and so on up the stack to the first call\n within a non-tracked function body.\n\n # Examples\n\n ```standalone_crate\n use std::panic::Location;\n\n /// ```\n ///      |1        |11       |21       |31       |41\n ///    +-|---------|---------|---------|---------|--------\n /// 15 | #[track_caller]\n /// 16 | fn new_location() -> &'static Location<'static> {\n /// 17 |     Location::caller()\n ///    |     ------------------| the value of this expression depends on the caller,\n ///    |                       | since the function is marked #[track_caller]\n /// 18 | }\n /// ```\n #[track_caller]\n fn new_location() -> &'static Location<'static> {\n     Location::caller()\n }\n\n /// ```\n ///      |1  |5    |11       |21       |31       |41       |51\n ///    +-|---|-----|---------|---------|---------|---------|---\n /// 29 | fn constant_location() -> &'static Location<'static> {\n /// 30 |     new_location()\n ///    |     ^ any invocation of constant_location() points here,\n ///    |       no matter the location it is called from\n /// 31 | }\n /// ```\n fn constant_location() -> &'static Location<'static> {\n     new_location()\n }\n\n fn main() {\n     //      |1  |5    |11       |21       |31       |41       |51\n     //    +-|---|-----|---------|---------|---------|---------|---\n     // 29 | fn constant_location() -> &'static Location<'static> {\n     // 30 |     new_location()\n     //    |     ^ `let constant` points here\n     // 31 | }\n     let constant = constant_location();\n     assert_eq!(constant.file(), file!());\n     assert_eq!((constant.line(), constant.column()), (30, 5));\n\n     let constant_2 = constant_location();\n     assert_eq!(\n         (constant.file(), constant.line(), constant.column()),\n         (constant_2.file(), constant_2.line(), constant_2.column())\n     );\n\n     //      |1        |11  |16  |21       |31\n     //    +-|---------|----|----|---------|------\n     // 55 |     let here = new_location();\n     //    |                ^ `let here` points here, as `new_location()` is the callsite\n     // 56 |     assert_eq!(here.file(), file!());\n     let here = new_location();\n     assert_eq!(here.file(), file!());\n     assert_eq!((here.line(), here.column()), (55, 16));\n\n     //      |1        |11       |21       ||32      |41       |51\n     //    +-|---------|---------|---------||--------|---------|------\n     // 64 |     let yet_another_location = new_location();\n     //    |                                ^ `let yet_another_location` points here\n     // 65 |     assert_eq!(here.file(), yet_another_location.file());\n     let yet_another_location = new_location();\n     assert_eq!(here.file(), yet_another_location.file());\n     assert_ne!(\n         (here.line(), here.column()),\n         (yet_another_location.line(), yet_another_location.column())\n     );\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

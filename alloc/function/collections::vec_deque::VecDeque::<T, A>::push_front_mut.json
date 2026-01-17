@@ -1,0 +1,73 @@
+{
+  "name": "collections::vec_deque::VecDeque::<T, A>::push_front_mut",
+  "safe": true,
+  "callees": {
+    "collections::vec_deque::VecDeque::<T, A>::is_full": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the buffer is at full capacity.\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::grow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::wrap_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the index in the underlying buffer for a given logical element\n index - subtrahend.\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::buffer_write": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes an element into the buffer, moving it and returning a pointer to it.\n # Safety\n\n May only be called if `off < self.capacity()`.\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "Ref",
+      "Deref",
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ]
+  },
+  "path": 1506,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:2116:5: 2125:6",
+  "src": "pub fn push_front_mut(&mut self, value: T) -> &mut T {\n        if self.is_full() {\n            self.grow();\n        }\n\n        self.head = self.wrap_sub(self.head, 1);\n        self.len += 1;\n        // SAFETY: We know that self.head is within range of the deque.\n        unsafe { self.buffer_write(self.head, value) }\n    }",
+  "mir": "fn collections::vec_deque::VecDeque::<T, A>::push_front_mut(_1: &mut collections::vec_deque::VecDeque<T, A>, _2: T) -> &mut T {\n    let mut _0: &mut T;\n    let mut _3: bool;\n    let mut _4: &collections::vec_deque::VecDeque<T, A>;\n    let  _5: ();\n    let mut _6: usize;\n    let mut _7: &collections::vec_deque::VecDeque<T, A>;\n    let mut _8: usize;\n    let mut _9: (usize, bool);\n    let mut _10: usize;\n    debug self => _1;\n    debug value => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &(*_1);\n        _3 = collections::vec_deque::VecDeque::<T, A>::is_full(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        _5 = collections::vec_deque::VecDeque::<T, A>::grow(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        goto -> bb5;\n    }\n    bb4: {\n        StorageDead(_4);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_3);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &(*_1);\n        StorageLive(_8);\n        _8 = ((*_1).0: usize);\n        _6 = collections::vec_deque::VecDeque::<T, A>::wrap_sub(move _7, move _8, 1_usize) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_8);\n        StorageDead(_7);\n        ((*_1).0: usize) = move _6;\n        StorageDead(_6);\n        _9 = CheckedAdd(((*_1).1: usize), 1_usize);\n        assert(!move (_9.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).1: usize), 1_usize) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        ((*_1).1: usize) = move (_9.0: usize);\n        StorageLive(_10);\n        _10 = ((*_1).0: usize);\n        _0 = collections::vec_deque::VecDeque::<T, A>::buffer_write(_1, move _10, _2) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_10);\n        return;\n    }\n}\n",
+  "doc": " Prepends an element to the deque, returning a reference to it.\n\n # Examples\n\n ```\n #![feature(push_mut)]\n use std::collections::VecDeque;\n\n let mut d = VecDeque::from([1, 2, 3]);\n let x = d.push_front_mut(8);\n *x -= 1;\n assert_eq!(d.front(), Some(&7));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "<T as cpu::local::single_instr::SingleInstructionStore>::store",
+  "safe": false,
+  "callees": {
+    "irq::guard::disable_local": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disables all IRQs on the current CPU (i.e., locally).\n\n This function returns a guard object, which will automatically enable local IRQs again when\n it is dropped. This function works correctly even when it is called in a _nested_ way.\n The local IRQs shall only be re-enabled when the most outer guard is dropped.\n\n This function can play nicely with [`SpinLock`] as the type uses this function internally.\n One can invoke this function even after acquiring a spin lock. And the reversed order is also ok.\n\n [`SpinLock`]: crate::sync::SpinLock\n\n # Example\n\n ```rust\n use ostd::irq;\n\n {\n     let _ = irq::disable_local();\n     todo!(\"do something when irqs are disabled\");\n }\n ```\n",
+      "adt": {
+        "irq::guard::DisabledLocalIrqGuard": "Constructor"
+      }
+    },
+    "arch::cpu::local::get_base": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the base address for the CPU local storage by reading the GS base model-specific register.\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::write": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Overwrites a memory location with the given value without reading or\n dropping the old value.\n\n See [`ptr::write`] for safety concerns and examples.\n\n [`ptr::write`]: crate::ptr::write()\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "irq::guard::DisabledLocalIrqGuard": [
+      "Plain"
+    ]
+  },
+  "path": 37,
+  "span": "ostd/src/cpu/local/single_instr.rs:169:5: 175:6",
+  "src": "default unsafe fn store(offset: usize, val: Self) {\n        let _guard = crate::irq::disable_local();\n        let base = crate::arch::cpu::local::get_base() as usize;\n        let ptr = (base + offset) as *mut Self;\n        // SAFETY: Same as `add_assign`.\n        unsafe { ptr.write(val) };\n    }",
+  "mir": "fn <T as cpu::local::single_instr::SingleInstructionStore>::store(_1: usize, _2: T) -> () {\n    let mut _0: ();\n    let  _3: irq::guard::DisabledLocalIrqGuard;\n    let  _4: usize;\n    let mut _5: u64;\n    let  _6: *mut T;\n    let mut _7: usize;\n    let mut _8: (usize, bool);\n    let  _9: ();\n    debug offset => _1;\n    debug val => _2;\n    debug _guard => _3;\n    debug base => _4;\n    debug ptr => _6;\n    bb0: {\n        StorageLive(_3);\n        _3 = irq::guard::disable_local() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = arch::cpu::local::get_base() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = move _5 as usize;\n        StorageDead(_5);\n        StorageLive(_7);\n        _8 = CheckedAdd(_4, _1);\n        assert(!move (_8.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _4, _1) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _7 = move (_8.0: usize);\n        _6 = move _7 as *mut T;\n        StorageDead(_7);\n        _9 = core::ptr::mut_ptr::<impl *mut T>::write(_6, _2) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        drop(_3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

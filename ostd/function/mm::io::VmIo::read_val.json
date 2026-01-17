@@ -1,0 +1,77 @@
+{
+  "name": "mm::io::VmIo::read_val",
+  "safe": true,
+  "callees": {
+    "ostd_pod::Pod::new_zeroed": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new instance of Pod type that is filled with zeroes.\n",
+      "adt": {}
+    },
+    "ostd_pod::Pod::as_bytes_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " As a mutable slice of bytes.\n",
+      "adt": {}
+    },
+    "mm::io::VmIo::read_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads a specified number of bytes at a specified offset into a given buffer.\n\n # No short reads\n\n Similar to [`read`].\n\n [`read`]: VmIo::read\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 1912, kind: RigidTy(Adt(AdtDef(DefId { id: 2763, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 31, kind: RigidTy(Adt(AdtDef(DefId { id: 3443, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 979, kind: RigidTy(Adt(AdtDef(DefId { id: 3864, name: \"error::Error\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": "mm::io::VmIo::read_val",
+  "span": "ostd/src/mm/io.rs:92:5: 114:6",
+  "src": "fn read_val<T: Pod>(&self, offset: usize) -> Result<T> {\n        // Why not use `MaybeUninit` for a faster implementation?\n        //\n        // ```rust\n        // let mut val: MaybeUninit<T> = MaybeUninit::uninit();\n        // let writer = unsafe {\n        //     VmWriter::from_kernel_space(val.as_mut_ptr().cast(), size_of::<T>())\n        // };\n        // self.read(offset, &mut writer.to_fallible())?;\n        // Ok(unsafe { val.assume_init() })\n        // ```\n        //\n        // The above implementation avoids initializing `val` upfront,\n        // so it is more efficient than our actual implementation.\n        // Unfortunately, it is unsound.\n        // This is because the `read` method,\n        // which could be implemented outside OSTD and thus is untrusted,\n        // may not really initialize the bits of `val` at all!\n\n        let mut val = T::new_zeroed();\n        self.read_bytes(offset, val.as_bytes_mut())?;\n        Ok(val)\n    }",
+  "mir": "fn mm::io::VmIo::read_val(_1: &Self, _2: usize) -> core::result::Result<T, error::Error> {\n    let mut _0: core::result::Result<T, error::Error>;\n    let mut _3: T;\n    let mut _4: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, error::Error>>;\n    let mut _5: core::result::Result<(), error::Error>;\n    let mut _6: &mut [u8];\n    let mut _7: &mut T;\n    let mut _8: isize;\n    let  _9: core::result::Result<core::convert::Infallible, error::Error>;\n    let mut _10: T;\n    debug self => _1;\n    debug offset => _2;\n    debug val => _3;\n    debug residual => _9;\n    debug val => ();\n    bb0: {\n        StorageLive(_3);\n        _3 = <T as ostd_pod::Pod>::new_zeroed() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_7);\n        _7 = &mut _3;\n        _6 = <T as ostd_pod::Pod>::as_bytes_mut(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = <Self as mm::io::VmIo>::read_bytes(_1, _2, _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _4 = <core::result::Result<(), error::Error> as core::ops::Try>::branch(move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        _8 = discriminant(_4);\n        switchInt(move _8) -> [0: bb6, 1: bb7, otherwise: bb5];\n    }\n    bb5: {\n        unreachable;\n    }\n    bb6: {\n        StorageDead(_4);\n        StorageLive(_10);\n        _10 = _3;\n        _0 = core::result::Result::Ok(move _10);\n        StorageDead(_10);\n        StorageDead(_3);\n        goto -> bb9;\n    }\n    bb7: {\n        _9 = ((_4 as variant#1).0: core::result::Result<core::convert::Infallible, error::Error>);\n        _0 = <core::result::Result<T, error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, error::Error>>>::from_residual(_9) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb9;\n    }\n    bb9: {\n        return;\n    }\n}\n",
+  "doc": " Reads a value of a specified type at a specified offset.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

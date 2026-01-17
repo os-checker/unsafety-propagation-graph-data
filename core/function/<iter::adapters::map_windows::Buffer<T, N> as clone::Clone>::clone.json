@@ -1,0 +1,73 @@
+{
+  "name": "<iter::adapters::map_windows::Buffer<T, N> as clone::Clone>::clone",
+  "safe": true,
+  "callees": {
+    "iter::adapters::map_windows::Buffer::<T, N>::as_uninit_array_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "iter::adapters::map_windows::Buffer": "MutableAsArgument"
+      }
+    },
+    "iter::adapters::map_windows::Buffer::<T, N>::as_array_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "iter::adapters::map_windows::Buffer": "ImmutableAsArgument"
+      }
+    },
+    "clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "mem::maybe_uninit::MaybeUninit::<T>::write": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets the value of the `MaybeUninit<T>`.\n\n This overwrites any previous value without dropping it, so be careful\n not to use this twice unless you want to skip running the destructor.\n For your convenience, this also returns a mutable reference to the\n (now safely initialized) contents of `self`.\n\n As the content is stored inside a `ManuallyDrop`, the destructor is not\n run for the inner data if the MaybeUninit leaves scope without a call to\n [`assume_init`], [`assume_init_drop`], or similar. Code that receives\n the mutable reference returned by this function needs to keep this in\n mind. The safety model of Rust regards leaks as safe, but they are\n usually still undesirable. This being said, the mutable reference\n behaves like any other mutable reference would, so assigning a new value\n to it will drop the old content.\n\n [`assume_init`]: Self::assume_init\n [`assume_init_drop`]: Self::assume_init_drop\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u8>>::uninit();\n\n {\n     let hello = x.write((&b\"Hello, world!\").to_vec());\n     // Setting hello does not leak prior allocations, but drops them\n     *hello = (&b\"Hello\").to_vec();\n     hello[0] = 'h' as u8;\n }\n // x is initialized now:\n let s = unsafe { x.assume_init() };\n assert_eq!(b\"hello\", s.as_slice());\n ```\n\n This usage of the method causes a leak:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<String>::uninit();\n\n x.write(\"Hello\".to_string());\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n // This leaks the contained string:\n x.write(\"hello\".to_string());\n // x is initialized now:\n let s = unsafe { x.assume_init() };\n ```\n\n This method can be used to avoid unsafe in some cases. The example below\n shows a part of an implementation of a fixed sized arena that lends out\n pinned references.\n With `write`, we can avoid the need to write through a raw pointer:\n\n ```rust\n use core::pin::Pin;\n use core::mem::MaybeUninit;\n\n struct PinArena<T> {\n     memory: Box<[MaybeUninit<T>]>,\n     len: usize,\n }\n\n impl <T> PinArena<T> {\n     pub fn capacity(&self) -> usize {\n         self.memory.len()\n     }\n     pub fn push(&mut self, val: T) -> Pin<&mut T> {\n         if self.len >= self.capacity() {\n             panic!(\"Attempted to push to a full pin arena!\");\n         }\n         let ref_ = self.memory[self.len].write(val);\n         self.len += 1;\n         unsafe { Pin::new_unchecked(ref_) }\n     }\n }\n ```\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "iter::adapters::map_windows::Buffer": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "mem::maybe_uninit::MaybeUninit": [
+      "MutRef"
+    ]
+  },
+  "path": 13948,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/map_windows.rs:203:5: 210:6",
+  "src": "fn clone(&self) -> Self {\n        let mut buffer = Buffer {\n            buffer: [[const { MaybeUninit::uninit() }; N], [const { MaybeUninit::uninit() }; N]],\n            start: self.start,\n        };\n        buffer.as_uninit_array_mut().write(self.as_array_ref().clone());\n        buffer\n    }",
+  "mir": "fn <iter::adapters::map_windows::Buffer<T, N> as clone::Clone>::clone(_1: &iter::adapters::map_windows::Buffer<T, N>) -> iter::adapters::map_windows::Buffer<T, N> {\n    let mut _0: iter::adapters::map_windows::Buffer<T, N>;\n    let mut _2: iter::adapters::map_windows::Buffer<T, N>;\n    let mut _3: [[mem::maybe_uninit::MaybeUninit<T>; N]; 2];\n    let mut _4: [mem::maybe_uninit::MaybeUninit<T>; N];\n    let mut _5: [mem::maybe_uninit::MaybeUninit<T>; N];\n    let mut _6: usize;\n    let  _7: &mut [T; N];\n    let mut _8: &mut mem::maybe_uninit::MaybeUninit<[T; N]>;\n    let mut _9: &mut iter::adapters::map_windows::Buffer<T, N>;\n    let mut _10: [T; N];\n    let  _11: &[T; N];\n    debug self => _1;\n    debug buffer => _2;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = [<iter::adapters::map_windows::Buffer<T, N> as clone::Clone>::clone::{constant#0}; N];\n        StorageLive(_5);\n        _5 = [<iter::adapters::map_windows::Buffer<T, N> as clone::Clone>::clone::{constant#2}; N];\n        _3 = [move _4, move _5];\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = ((*_1).1: usize);\n        _2 = Buffer(move _3, move _6);\n        StorageDead(_6);\n        StorageDead(_3);\n        StorageLive(_7);\n        StorageLive(_9);\n        _9 = &mut _2;\n        _8 = iter::adapters::map_windows::Buffer::<T, N>::as_uninit_array_mut(move _9) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_9);\n        StorageLive(_10);\n        _11 = iter::adapters::map_windows::Buffer::<T, N>::as_array_ref(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _10 = <[T; N] as clone::Clone>::clone(_11) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _7 = mem::maybe_uninit::MaybeUninit::<[T; N]>::write(_8, move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        StorageDead(_7);\n        _0 = move _2;\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

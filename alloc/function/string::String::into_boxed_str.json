@@ -1,0 +1,53 @@
+{
+  "name": "string::String::into_boxed_str",
+  "safe": true,
+  "callees": {
+    "vec::Vec::<T, A>::into_boxed_slice": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts the vector into [`Box<[T]>`][owned slice].\n\n Before doing the conversion, this method discards excess capacity like [`shrink_to_fit`].\n\n [owned slice]: Box\n [`shrink_to_fit`]: Vec::shrink_to_fit\n\n # Examples\n\n ```\n let v = vec![1, 2, 3];\n\n let slice = v.into_boxed_slice();\n ```\n\n Any excess capacity is removed:\n\n ```\n let mut vec = Vec::with_capacity(10);\n vec.extend([1, 2, 3]);\n\n assert!(vec.capacity() >= 10);\n let slice = vec.into_boxed_slice();\n assert_eq!(slice.into_vec().capacity(), 3);\n ```\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument",
+        "boxed::Box": "Constructor"
+      }
+    },
+    "str::from_boxed_utf8_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a boxed slice of bytes to a boxed string slice without checking\n that the string contains valid UTF-8.\n\n # Safety\n\n * The provided bytes must contain a valid UTF-8 sequence.\n\n # Examples\n\n ```\n let smile_utf8 = Box::new([226, 152, 186]);\n let smile = unsafe { std::str::from_boxed_utf8_unchecked(smile_utf8) };\n\n assert_eq!(\"☺\", &*smile);\n ```\n",
+      "adt": {
+        "boxed::Box": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Plain"
+    ],
+    "string::String": [
+      "Unknown([Field(0, Ty { id: 1639, kind: RigidTy(Adt(AdtDef(DefId { id: 2824, name: \"vec::Vec\" }), GenericArgs([Type(Ty { id: 93, kind: RigidTy(Uint(U8)) }), Type(Ty { id: 17, kind: RigidTy(Adt(AdtDef(DefId { id: 2583, name: \"alloc::Global\" }), GenericArgs([]))) })]))) })])",
+      "Plain"
+    ],
+    "boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 1972,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:2171:5: 2174:6",
+  "src": "pub fn into_boxed_str(self) -> Box<str> {\n        let slice = self.vec.into_boxed_slice();\n        unsafe { from_boxed_utf8_unchecked(slice) }\n    }",
+  "mir": "fn string::String::into_boxed_str(_1: string::String) -> boxed::Box<str> {\n    let mut _0: boxed::Box<str>;\n    let  _2: boxed::Box<[u8]>;\n    let mut _3: vec::Vec<u8>;\n    debug self => _1;\n    debug slice => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = move (_1.0: vec::Vec<u8>);\n        _2 = vec::Vec::<u8>::into_boxed_slice(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _0 = str::from_boxed_utf8_unchecked(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Converts this `String` into a <code>[Box]<[str]></code>.\n\n Before doing the conversion, this method discards excess capacity like [`shrink_to_fit`].\n Note that this call may reallocate and copy the bytes of the string.\n\n [`shrink_to_fit`]: String::shrink_to_fit\n [str]: prim@str \"str\"\n\n # Examples\n\n ```\n let s = String::from(\"hello\");\n\n let b = s.into_boxed_str();\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "boxed::Box::<T, A>::from_raw_in",
+  "safe": false,
+  "callees": {
+    "core::ptr::Unique::<T>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `Unique`.\n\n # Safety\n\n `ptr` must be non-null.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::Unique": [
+      "Plain"
+    ],
+    "boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 362,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed.rs:1492:5: 1494:6",
+  "src": "pub unsafe fn from_raw_in(raw: *mut T, alloc: A) -> Self {\n        Box(unsafe { Unique::new_unchecked(raw) }, alloc)\n    }",
+  "mir": "fn boxed::Box::<T, A>::from_raw_in(_1: *mut T, _2: A) -> boxed::Box<T, A> {\n    let mut _0: boxed::Box<T, A>;\n    let mut _3: core::ptr::Unique<T>;\n    debug raw => _1;\n    debug alloc => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = core::ptr::Unique::<T>::new_unchecked(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = Box(move _3, _2);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Constructs a box from a raw pointer in the given allocator.\n\n After calling this function, the raw pointer is owned by the\n resulting `Box`. Specifically, the `Box` destructor will call\n the destructor of `T` and free the allocated memory. For this\n to be safe, the memory must have been allocated in accordance\n with the [memory layout] used by `Box` .\n\n # Safety\n\n This function is unsafe because improper use may lead to\n memory problems. For example, a double-free may occur if the\n function is called twice on the same raw pointer.\n\n The raw pointer must point to a block of memory allocated by `alloc`.\n\n # Examples\n\n Recreate a `Box` which was previously converted to a raw pointer\n using [`Box::into_raw_with_allocator`]:\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let x = Box::new_in(5, System);\n let (ptr, alloc) = Box::into_raw_with_allocator(x);\n let x = unsafe { Box::from_raw_in(ptr, alloc) };\n ```\n Manually create a `Box` from scratch by using the system allocator:\n ```\n #![feature(allocator_api, slice_ptr_get)]\n\n use std::alloc::{Allocator, Layout, System};\n\n unsafe {\n     let ptr = System.allocate(Layout::new::<i32>())?.as_mut_ptr() as *mut i32;\n     // In general .write is required to avoid attempting to destruct\n     // the (uninitialized) previous contents of `ptr`, though for this\n     // simple example `*ptr = 5` would have worked as well.\n     ptr.write(5);\n     let x = Box::from_raw_in(ptr, System);\n }\n # Ok::<(), std::alloc::AllocError>(())\n ```\n\n [memory layout]: self#memory-layout\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

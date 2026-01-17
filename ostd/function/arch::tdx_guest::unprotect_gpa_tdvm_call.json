@@ -1,0 +1,61 @@
+{
+  "name": "arch::tdx_guest::unprotect_gpa_tdvm_call",
+  "safe": false,
+  "callees": {
+    "core::num::<impl usize>::is_multiple_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if `self` is an integer multiple of `rhs`, and false otherwise.\n\n This function is equivalent to `self % rhs == 0`, except that it will not panic\n for `rhs == 0`. Instead, `0.is_multiple_of(0) == true`, and for any non-zero `n`,\n `n.is_multiple_of(0) == false`.\n\n # Examples\n\n ```\n\n ```\n",
+      "adt": {}
+    },
+    "tdx_guest::tdvmcall::map_gpa": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " MapGPA TDG.VP.VMCALL is used to help request the host VMM to map a GPA range as private\n or shared-memory mappings. This API may also be used to convert page mappings from\n private to shared. The GPA range passed in this operation can indicate if the mapping is\n requested for a shared or private memory via the GPA.Shared bit in the start address.\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::map_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<T, F>` by applying a function to a\n contained [`Err`] value, leaving an [`Ok`] value untouched.\n\n This function can be used to pass through a successful result while handling\n an error.\n\n\n # Examples\n\n ```\n fn stringify(x: u32) -> String { format!(\"error code: {x}\") }\n\n let x: Result<u32, u32> = Ok(2);\n assert_eq!(x.map_err(stringify), Ok(2));\n\n let x: Result<u32, u32> = Err(13);\n assert_eq!(x.map_err(stringify), Err(\"error code: 13\".to_string()));\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1462,
+  "span": "ostd/src/arch/x86/tdx_guest.rs:31:1: 35:2",
+  "src": "pub unsafe fn unprotect_gpa_tdvm_call(gpa: Paddr, size: usize) -> Result<(), PageConvertError> {\n    debug_assert!(gpa.is_multiple_of(PAGE_SIZE));\n\n    map_gpa(gpa as u64 | SHARED_MASK, size as u64).map_err(|_| PageConvertError::TdVmcall)\n}",
+  "mir": "fn arch::tdx_guest::unprotect_gpa_tdvm_call(_1: usize, _2: usize) -> core::result::Result<(), arch::tdx_guest::PageConvertError> {\n    let mut _0: core::result::Result<(), arch::tdx_guest::PageConvertError>;\n    let mut _3: bool;\n    let mut _4: !;\n    let mut _5: core::result::Result<(), (u64, tdx_guest::tdvmcall::TdVmcallError)>;\n    let mut _6: u64;\n    let mut _7: u64;\n    let mut _8: u64;\n    debug gpa => _1;\n    debug size => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = core::num::<impl usize>::is_multiple_of(_1, mm::PAGE_SIZE) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = _1 as u64;\n        _6 = BitOr(move _7, arch::tdx_guest::SHARED_MASK);\n        StorageDead(_7);\n        StorageLive(_8);\n        _8 = _2 as u64;\n        _5 = tdx_guest::tdvmcall::map_gpa(move _6, move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        _4 = core::panicking::panic(\"assertion failed: gpa.is_multiple_of(PAGE_SIZE)\") -> unwind unreachable;\n    }\n    bb4: {\n        StorageDead(_8);\n        StorageDead(_6);\n        _0 = core::result::Result::<(), (u64, tdx_guest::tdvmcall::TdVmcallError)>::map_err::<arch::tdx_guest::PageConvertError, {closure@ostd/src/arch/x86/tdx_guest.rs:34:60: 34:63}>(move _5, ZeroSized: {closure@ostd/src/arch/x86/tdx_guest.rs:34:60: 34:63}) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": " Converts physical pages to Intel TDX shared pages.\n\n It invokes the [`map_gpa`] TDVMCALL to convert those pages into Intel TDX\n shared pages. Due to the conversion, any existing data on the pages will\n be lost.\n\n # Safety\n\n The caller must ensure that:\n  - The provided physical address is page aligned.\n  - The provided physical address range is in bounds, i.e., it should fall\n    within the maximum Guest Physical Address (GPA) limit.\n  - All of the physical pages are untyped memory. Therefore, converting and\n    erasing the data will not cause memory safety issues.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

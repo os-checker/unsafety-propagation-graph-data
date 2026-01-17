@@ -1,0 +1,141 @@
+{
+  "name": "path::compare_components",
+  "safe": true,
+  "callees": {
+    "core::option::Option::<T>::is_none": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the option is a [`None`] value.\n\n # Examples\n\n ```\n let x: Option<u32> = Some(2);\n assert_eq!(x.is_none(), false);\n\n let x: Option<u32> = None;\n assert_eq!(x.is_none(), true);\n ```\n",
+      "adt": {}
+    },
+    "core::cmp::PartialEq::eq": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests for `self` and `other` values to be equal, and is used by `==`.\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the slice.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let mut iterator = x.iter();\n\n assert_eq!(iterator.next(), Some(&1));\n assert_eq!(iterator.next(), Some(&2));\n assert_eq!(iterator.next(), Some(&4));\n assert_eq!(iterator.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::zip": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " 'Zips up' two iterators into a single iterator of pairs.\n\n `zip()` returns a new iterator that will iterate over two other\n iterators, returning a tuple where the first element comes from the\n first iterator, and the second element comes from the second iterator.\n\n In other words, it zips two iterators together, into a single one.\n\n If either iterator returns [`None`], [`next`] from the zipped iterator\n will return [`None`].\n If the zipped iterator has no more elements to return then each further attempt to advance\n it will first try to advance the first iterator at most one time and if it still yielded an item\n try to advance the second iterator at most one time.\n\n To 'undo' the result of zipping up two iterators, see [`unzip`].\n\n [`unzip`]: Iterator::unzip\n\n # Examples\n\n Basic usage:\n\n ```\n let s1 = \"abc\".chars();\n let s2 = \"def\".chars();\n\n let mut iter = s1.zip(s2);\n\n assert_eq!(iter.next(), Some(('a', 'd')));\n assert_eq!(iter.next(), Some(('b', 'e')));\n assert_eq!(iter.next(), Some(('c', 'f')));\n assert_eq!(iter.next(), None);\n ```\n\n Since the argument to `zip()` uses [`IntoIterator`], we can pass\n anything that can be converted into an [`Iterator`], not just an\n [`Iterator`] itself. For example, arrays (`[T]`) implement\n [`IntoIterator`], and so can be passed to `zip()` directly:\n\n ```\n let a1 = [1, 2, 3];\n let a2 = [4, 5, 6];\n\n let mut iter = a1.into_iter().zip(a2);\n\n assert_eq!(iter.next(), Some((1, 4)));\n assert_eq!(iter.next(), Some((2, 5)));\n assert_eq!(iter.next(), Some((3, 6)));\n assert_eq!(iter.next(), None);\n ```\n\n `zip()` is often used to zip an infinite iterator to a finite one.\n This works because the finite iterator will eventually return [`None`],\n ending the zipper. Zipping with `(0..)` can look a lot like [`enumerate`]:\n\n ```\n let enumerate: Vec<_> = \"foo\".chars().enumerate().collect();\n\n let zipper: Vec<_> = (0..).zip(\"foo\".chars()).collect();\n\n assert_eq!((0, 'f'), enumerate[0]);\n assert_eq!((0, 'f'), zipper[0]);\n\n assert_eq!((1, 'o'), enumerate[1]);\n assert_eq!((1, 'o'), zipper[1]);\n\n assert_eq!((2, 'o'), enumerate[2]);\n assert_eq!((2, 'o'), zipper[2]);\n ```\n\n If both iterators have roughly equivalent syntax, it may be more readable to use [`zip`]:\n\n ```\n use std::iter::zip;\n\n let a = [1, 2, 3];\n let b = [2, 3, 4];\n\n let mut zipped = zip(\n     a.into_iter().map(|x| x * 2).skip(1),\n     b.into_iter().map(|x| x * 2).skip(1),\n );\n\n assert_eq!(zipped.next(), Some((4, 6)));\n assert_eq!(zipped.next(), Some((6, 8)));\n assert_eq!(zipped.next(), None);\n ```\n\n compared to:\n\n ```\n # let a = [1, 2, 3];\n # let b = [2, 3, 4];\n #\n let mut zipped = a\n     .into_iter()\n     .map(|x| x * 2)\n     .skip(1)\n     .zip(b.into_iter().map(|x| x * 2).skip(1));\n #\n # assert_eq!(zipped.next(), Some((4, 6)));\n # assert_eq!(zipped.next(), Some((6, 8)));\n # assert_eq!(zipped.next(), None);\n ```\n\n [`enumerate`]: Iterator::enumerate\n [`next`]: Iterator::next\n [`zip`]: crate::iter::zip\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::position": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Searches for an element in an iterator, returning its index.\n\n `position()` takes a closure that returns `true` or `false`. It applies\n this closure to each element of the iterator, and if one of them\n returns `true`, then `position()` returns [`Some(index)`]. If all of\n them return `false`, it returns [`None`].\n\n `position()` is short-circuiting; in other words, it will stop\n processing as soon as it finds a `true`.\n\n # Overflow Behavior\n\n The method does no guarding against overflows, so if there are more\n than [`usize::MAX`] non-matching elements, it either produces the wrong\n result or panics. If overflow checks are enabled, a panic is\n guaranteed.\n\n # Panics\n\n This function might panic if the iterator has more than `usize::MAX`\n non-matching elements.\n\n [`Some(index)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n assert_eq!(a.into_iter().position(|x| x == 2), Some(1));\n\n assert_eq!(a.into_iter().position(|x| x == 5), None);\n ```\n\n Stopping at the first `true`:\n\n ```\n let a = [1, 2, 3, 4];\n\n let mut iter = a.into_iter();\n\n assert_eq!(iter.position(|x| x >= 2), Some(1));\n\n // we can still use `iter`, as there are more elements.\n assert_eq!(iter.next(), Some(3));\n\n // The returned index depends on iterator state\n assert_eq!(iter.position(|x| x == 4), Some(0));\n\n ```\n",
+      "adt": {}
+    },
+    "core::cmp::Ord::min": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the minimum of two values.\n\n Returns the first argument if the comparison determines them to be equal.\n\n # Examples\n\n ```\n assert_eq!(1.min(2), 1);\n assert_eq!(2.min(2), 2);\n ```\n ```\n use std::cmp::Ordering;\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(Equal(\"self\").min(Equal(\"other\")).0, \"self\");\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::rposition": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Searches for an element in an iterator from the right, returning its\n index.\n\n `rposition()` takes a closure that returns `true` or `false`. It applies\n this closure to each element of the iterator, starting from the end,\n and if one of them returns `true`, then `rposition()` returns\n [`Some(index)`]. If all of them return `false`, it returns [`None`].\n\n `rposition()` is short-circuiting; in other words, it will stop\n processing as soon as it finds a `true`.\n\n [`Some(index)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n assert_eq!(a.into_iter().rposition(|x| x == 3), Some(2));\n\n assert_eq!(a.into_iter().rposition(|x| x == 5), None);\n ```\n\n Stopping at the first `true`:\n\n ```\n let a = [-1, 2, 3, 4];\n\n let mut iter = a.into_iter();\n\n assert_eq!(iter.rposition(|x| x >= 2), Some(3));\n\n // we can still use `iter`, as there are more elements.\n assert_eq!(iter.next(), Some(-1));\n assert_eq!(iter.next_back(), Some(3));\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::cmp": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " [Lexicographically](Ord#lexicographical-comparison) compares the elements of this [`Iterator`] with those\n of another.\n\n # Examples\n\n ```\n use std::cmp::Ordering;\n\n assert_eq!([1].iter().cmp([1].iter()), Ordering::Equal);\n assert_eq!([1].iter().cmp([1, 2].iter()), Ordering::Less);\n assert_eq!([1, 2].iter().cmp([1].iter()), Ordering::Greater);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Ref",
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "path::Components": [
+      "Unknown([Field(1, Ty { id: 9344, kind: RigidTy(Adt(AdtDef(DefId { id: 4387, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 9312, kind: RigidTy(Adt(AdtDef(DefId { id: 8706, name: \"path::Prefix\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })]))) })])",
+      "Unknown([Field(3, Ty { id: 9446, kind: RigidTy(Adt(AdtDef(DefId { id: 8775, name: \"path::State\" }), GenericArgs([]))) })])",
+      "Unknown([Field(0, Ty { id: 992, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 993, kind: RigidTy(Slice(Ty { id: 35, kind: RigidTy(Uint(U8)) })) }, Not)) })])",
+      "Ref",
+      "Plain"
+    ],
+    "path::State": [
+      "Ref",
+      "Plain"
+    ],
+    "core::slice::Iter": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::iter::Zip": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::cmp::Ordering": [
+      "Plain"
+    ],
+    "core::ops::RangeTo": [
+      "Plain"
+    ],
+    "core::ops::RangeFrom": [
+      "Plain"
+    ]
+  },
+  "path": 2350,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:1046:1: 1076:2",
+  "src": "fn compare_components(mut left: Components<'_>, mut right: Components<'_>) -> cmp::Ordering {\n    // Fast path for long shared prefixes\n    //\n    // - compare raw bytes to find first mismatch\n    // - backtrack to find separator before mismatch to avoid ambiguous parsings of '.' or '..' characters\n    // - if found update state to only do a component-wise comparison on the remainder,\n    //   otherwise do it on the full path\n    //\n    // The fast path isn't taken for paths with a PrefixComponent to avoid backtracking into\n    // the middle of one\n    if left.prefix.is_none() && right.prefix.is_none() && left.front == right.front {\n        // possible future improvement: a [u8]::first_mismatch simd implementation\n        let first_difference = match left.path.iter().zip(right.path).position(|(&a, &b)| a != b) {\n            None if left.path.len() == right.path.len() => return cmp::Ordering::Equal,\n            None => left.path.len().min(right.path.len()),\n            Some(diff) => diff,\n        };\n\n        if let Some(previous_sep) =\n            left.path[..first_difference].iter().rposition(|&b| left.is_sep_byte(b))\n        {\n            let mismatched_component_start = previous_sep + 1;\n            left.path = &left.path[mismatched_component_start..];\n            left.front = State::Body;\n            right.path = &right.path[mismatched_component_start..];\n            right.front = State::Body;\n        }\n    }\n\n    Iterator::cmp(left, right)\n}",
+  "mir": "fn path::compare_components(_1: path::Components<'_>, _2: path::Components<'_>) -> core::cmp::Ordering {\n    let mut _0: core::cmp::Ordering;\n    let mut _3: bool;\n    let mut _4: &core::option::Option<path::Prefix<'_>>;\n    let mut _5: bool;\n    let mut _6: &core::option::Option<path::Prefix<'_>>;\n    let mut _7: bool;\n    let mut _8: &path::State;\n    let mut _9: &path::State;\n    let  _10: usize;\n    let mut _11: core::option::Option<usize>;\n    let mut _12: &mut core::iter::Zip<core::slice::Iter<'_, u8>, core::slice::Iter<'_, u8>>;\n    let mut _13: core::iter::Zip<core::slice::Iter<'_, u8>, core::slice::Iter<'_, u8>>;\n    let mut _14: core::slice::Iter<'_, u8>;\n    let mut _15: &[u8];\n    let mut _16: isize;\n    let mut _17: bool;\n    let mut _18: usize;\n    let mut _19: usize;\n    let mut _20: usize;\n    let mut _21: usize;\n    let  _22: usize;\n    let mut _23: core::option::Option<usize>;\n    let mut _24: &mut core::slice::Iter<'_, u8>;\n    let mut _25: core::slice::Iter<'_, u8>;\n    let  _26: &[u8];\n    let mut _27: core::ops::RangeTo<usize>;\n    let mut _28: usize;\n    let mut _29: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:1065:60: 1065:64};\n    let mut _30: &path::Components<'_>;\n    let mut _31: isize;\n    let  _32: usize;\n    let  _33: usize;\n    let mut _34: (usize, bool);\n    let  _35: &[u8];\n    let mut _36: core::ops::RangeFrom<usize>;\n    let mut _37: path::State;\n    let  _38: &[u8];\n    let mut _39: core::ops::RangeFrom<usize>;\n    let mut _40: path::State;\n    let mut _41: path::Components<'_>;\n    let mut _42: path::Components<'_>;\n    let mut _43: &[u8];\n    let mut _44: &[u8];\n    let mut _45: &[u8];\n    let mut _46: &[u8];\n    let mut _47: &[u8];\n    let mut _48: &[u8];\n    let mut _49: &[u8];\n    let mut _50: &[u8];\n    debug left => _1;\n    debug right => _2;\n    debug first_difference => _10;\n    debug diff => _22;\n    debug previous_sep => _32;\n    debug mismatched_component_start => _33;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &(_1.1: core::option::Option<path::Prefix<'_>>);\n        _3 = core::option::Option::<path::Prefix<'_>>::is_none(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb28, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &(_2.1: core::option::Option<path::Prefix<'_>>);\n        _5 = core::option::Option::<path::Prefix<'_>>::is_none(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _5) -> [0: bb27, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &(_1.3: path::State);\n        StorageLive(_9);\n        _9 = &(_2.3: path::State);\n        _7 = <path::State as core::cmp::PartialEq>::eq(move _8, move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        switchInt(move _7) -> [0: bb26, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _43 = (_1.0: &[u8]);\n        _14 = core::slice::<impl [u8]>::iter(_43) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageLive(_15);\n        _15 = (_2.0: &[u8]);\n        _13 = <core::slice::Iter<'_, u8> as core::iter::Iterator>::zip::<&[u8]>(move _14, move _15) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _12 = &mut _13;\n        StorageDead(_15);\n        StorageDead(_14);\n        _11 = <core::iter::Zip<core::slice::Iter<'_, u8>, core::slice::Iter<'_, u8>> as core::iter::Iterator>::position::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:1058:80: 1058:90}>(move _12, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:1058:80: 1058:90}) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_12);\n        _16 = discriminant(_11);\n        switchInt(move _16) -> [0: bb12, 1: bb11, otherwise: bb10];\n    }\n    bb10: {\n        unreachable;\n    }\n    bb11: {\n        StorageLive(_22);\n        _22 = ((_11 as variant#1).0: usize);\n        _10 = _22;\n        StorageDead(_22);\n        goto -> bb16;\n    }\n    bb12: {\n        StorageLive(_17);\n        StorageLive(_18);\n        _44 = (_1.0: &[u8]);\n        _18 = PtrMetadata(_44);\n        StorageLive(_19);\n        _45 = (_2.0: &[u8]);\n        _19 = PtrMetadata(_45);\n        _17 = Eq(move _18, move _19);\n        switchInt(move _17) -> [0: bb14, otherwise: bb13];\n    }\n    bb13: {\n        StorageDead(_19);\n        StorageDead(_18);\n        StorageDead(_17);\n        _0 = core::cmp::Ordering::Equal;\n        StorageDead(_13);\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageDead(_3);\n        goto -> bb31;\n    }\n    bb14: {\n        StorageDead(_19);\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageLive(_20);\n        _46 = (_1.0: &[u8]);\n        _20 = PtrMetadata(_46);\n        StorageLive(_21);\n        _47 = (_2.0: &[u8]);\n        _21 = PtrMetadata(_47);\n        _10 = <usize as core::cmp::Ord>::min(move _20, move _21) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_21);\n        StorageDead(_20);\n        goto -> bb16;\n    }\n    bb16: {\n        StorageDead(_13);\n        StorageDead(_11);\n        StorageLive(_23);\n        StorageLive(_24);\n        StorageLive(_25);\n        _48 = (_1.0: &[u8]);\n        StorageLive(_27);\n        StorageLive(_28);\n        _28 = _10;\n        _27 = RangeTo(move _28);\n        StorageDead(_28);\n        _26 = <[u8] as core::ops::Index<core::ops::RangeTo<usize>>>::index(_48, move _27) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_27);\n        _25 = core::slice::<impl [u8]>::iter(_26) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        _24 = &mut _25;\n        StorageLive(_29);\n        StorageLive(_30);\n        _30 = &_1;\n        _29 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:1065:60: 1065:64}(move _30);\n        StorageDead(_30);\n        _23 = <core::slice::Iter<'_, u8> as core::iter::Iterator>::rposition::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:1065:60: 1065:64}>(move _24, move _29) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_29);\n        StorageDead(_24);\n        _31 = discriminant(_23);\n        switchInt(move _31) -> [1: bb20, 0: bb24, otherwise: bb10];\n    }\n    bb20: {\n        _32 = ((_23 as variant#1).0: usize);\n        _34 = CheckedAdd(_32, 1_usize);\n        assert(!move (_34.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _32, 1_usize) -> [success: bb21, unwind unreachable];\n    }\n    bb21: {\n        _33 = move (_34.0: usize);\n        _49 = (_1.0: &[u8]);\n        StorageLive(_36);\n        _36 = RangeFrom(_33);\n        _35 = <[u8] as core::ops::Index<core::ops::RangeFrom<usize>>>::index(_49, move _36) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_36);\n        (_1.0: &[u8]) = _35;\n        StorageLive(_37);\n        _37 = path::State::Body;\n        (_1.3: path::State) = move _37;\n        StorageDead(_37);\n        _50 = (_2.0: &[u8]);\n        StorageLive(_39);\n        _39 = RangeFrom(_33);\n        _38 = <[u8] as core::ops::Index<core::ops::RangeFrom<usize>>>::index(_50, move _39) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_39);\n        (_2.0: &[u8]) = _38;\n        StorageLive(_40);\n        _40 = path::State::Body;\n        (_2.3: path::State) = move _40;\n        StorageDead(_40);\n        StorageDead(_25);\n        StorageDead(_23);\n        goto -> bb25;\n    }\n    bb24: {\n        StorageDead(_25);\n        StorageDead(_23);\n        goto -> bb25;\n    }\n    bb25: {\n        StorageDead(_10);\n        goto -> bb29;\n    }\n    bb26: {\n        StorageDead(_9);\n        StorageDead(_8);\n        goto -> bb29;\n    }\n    bb27: {\n        StorageDead(_6);\n        goto -> bb29;\n    }\n    bb28: {\n        StorageDead(_4);\n        goto -> bb29;\n    }\n    bb29: {\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageLive(_41);\n        _41 = move _1;\n        StorageLive(_42);\n        _42 = move _2;\n        _0 = <path::Components<'_> as core::iter::Iterator>::cmp::<path::Components<'_>>(move _41, move _42) -> [return: bb30, unwind unreachable];\n    }\n    bb30: {\n        StorageDead(_42);\n        StorageDead(_41);\n        goto -> bb31;\n    }\n    bb31: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

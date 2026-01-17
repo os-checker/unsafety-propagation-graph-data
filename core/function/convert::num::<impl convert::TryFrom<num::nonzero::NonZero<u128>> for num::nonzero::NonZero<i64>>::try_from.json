@@ -1,0 +1,80 @@
+{
+  "name": "convert::num::<impl convert::TryFrom<num::nonzero::NonZero<u128>> for num::nonzero::NonZero<i64>>::try_from",
+  "safe": true,
+  "callees": {
+    "num::nonzero::NonZero::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained value as a primitive type.\n",
+      "adt": {}
+    },
+    "convert::TryFrom::try_from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the conversion.\n",
+      "adt": {}
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "num::nonzero::NonZero::<T>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a non-zero without checking whether the value is non-zero.\n This results in undefined behavior if the value is zero.\n\n # Safety\n\n The value must not be zero.\n",
+      "adt": {
+        "num::nonzero::NonZero": "Constructor"
+      }
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "num::nonzero::NonZero": [
+      "Plain"
+    ],
+    "result::Result": [
+      "Plain"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 369, kind: RigidTy(Int(I64)) })])"
+    ]
+  },
+  "path": 15172,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/convert/num.rs:560:13: 563:14",
+  "src": "fn try_from(value: NonZero<$source>) -> Result<Self, Self::Error> {\n                // SAFETY: Input is guaranteed to be non-zero.\n                Ok(unsafe { Self::new_unchecked(<$target>::try_from(value.get())?) })\n            }",
+  "mir": "fn convert::num::<impl convert::TryFrom<num::nonzero::NonZero<u128>> for num::nonzero::NonZero<i64>>::try_from(_1: num::nonzero::NonZero<u128>) -> result::Result<num::nonzero::NonZero<i64>, num::error::TryFromIntError> {\n    let mut _0: result::Result<num::nonzero::NonZero<i64>, num::error::TryFromIntError>;\n    let mut _2: num::nonzero::NonZero<i64>;\n    let mut _3: ops::control_flow::ControlFlow<result::Result<convert::Infallible, num::error::TryFromIntError>, i64>;\n    let mut _4: result::Result<i64, num::error::TryFromIntError>;\n    let mut _5: u128;\n    let mut _6: isize;\n    let  _7: i64;\n    debug value => _1;\n    debug residual => result::Result::<convert::Infallible, num::error::TryFromIntError>::Err(num::error::TryFromIntError(()));\n    debug val => _7;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = num::nonzero::NonZero::<u128>::get(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = <i64 as convert::TryFrom<u128>>::try_from(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = <result::Result<i64, num::error::TryFromIntError> as ops::try_trait::Try>::branch(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _6 = discriminant(_3);\n        switchInt(move _6) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _7 = ((_3 as variant#0).0: i64);\n        _2 = num::nonzero::NonZero::<i64>::new_unchecked(_7) -> [return: bb8, unwind unreachable];\n    }\n    bb6: {\n        _0 = <result::Result<num::nonzero::NonZero<i64>, num::error::TryFromIntError> as ops::try_trait::FromResidual<result::Result<convert::Infallible, num::error::TryFromIntError>>>::from_residual(result::Result::<convert::Infallible, num::error::TryFromIntError>::Err(num::error::TryFromIntError(()))) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_3);\n        StorageDead(_2);\n        goto -> bb9;\n    }\n    bb8: {\n        StorageDead(_3);\n        _0 = result::Result::Ok(move _2);\n        StorageDead(_2);\n        goto -> bb9;\n    }\n    bb9: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

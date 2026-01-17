@@ -1,0 +1,135 @@
+{
+  "name": "sys::net::connection::socket::sockname",
+  "safe": false,
+  "callees": {
+    "core::mem::MaybeUninit::<T>::zeroed": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `MaybeUninit<T>` in an uninitialized state, with the memory being\n filled with `0` bytes. It depends on `T` whether that already makes for\n proper initialization. For example, `MaybeUninit<usize>::zeroed()` is initialized,\n but `MaybeUninit<&'static i32>::zeroed()` is not because references must not\n be null.\n\n Note that if `T` has padding bytes, those bytes are *not* preserved when the\n `MaybeUninit<T>` value is returned from this function, so those bytes will *not* be zeroed.\n\n Note that dropping a `MaybeUninit<T>` will never call `T`'s drop code.\n It is your responsibility to make sure `T` gets dropped if it got initialized.\n\n # Example\n\n Correct usage of this function: initializing a struct with zero, where all\n fields of the struct can hold the bit-pattern 0 as a valid value.\n\n ```rust\n use std::mem::MaybeUninit;\n\n let x = MaybeUninit::<(u8, bool)>::zeroed();\n let x = unsafe { x.assume_init() };\n assert_eq!(x, (0, false));\n ```\n\n This can be used in const contexts, such as to indicate the end of static arrays for\n plugin registration.\n\n *Incorrect* usage of this function: calling `x.zeroed().assume_init()`\n when `0` is not a valid bit-pattern for the type:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n enum NotZero { One = 1, Two = 2 }\n\n let x = MaybeUninit::<(u8, NotZero)>::zeroed();\n let x = unsafe { x.assume_init() };\n // Inside a pair, we create a `NotZero` that does not have a valid discriminant.\n // This is undefined behavior. ⚠️\n ```\n",
+      "adt": {}
+    },
+    "core::mem::size_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of a type in bytes.\n\n More specifically, this is the offset in bytes between successive elements\n in an array with that item type including alignment padding. Thus, for any\n type `T` and length `n`, `[T; n]` has a size of `n * size_of::<T>()`.\n\n In general, the size of a type is not stable across compilations, but\n specific types such as primitives are.\n\n The following table gives the size for primitives.\n\n Type | `size_of::<Type>()`\n ---- | ---------------\n () | 0\n bool | 1\n u8 | 1\n u16 | 2\n u32 | 4\n u64 | 8\n u128 | 16\n i8 | 1\n i16 | 2\n i32 | 4\n i64 | 8\n i128 | 16\n f32 | 4\n f64 | 8\n char | 4\n\n Furthermore, `usize` and `isize` have the same size.\n\n The types [`*const T`], `&T`, [`Box<T>`], [`Option<&T>`], and `Option<Box<T>>` all have\n the same size. If `T` is `Sized`, all of those types have the same size as `usize`.\n\n The mutability of a pointer does not change its size. As such, `&T` and `&mut T`\n have the same size. Likewise for `*const T` and `*mut T`.\n\n # Size of `#[repr(C)]` items\n\n The `C` representation for items has a defined layout. With this layout,\n the size of items is also stable as long as all fields have a stable size.\n\n ## Size of Structs\n\n For `struct`s, the size is determined by the following algorithm.\n\n For each field in the struct ordered by declaration order:\n\n 1. Add the size of the field.\n 2. Round up the current size to the nearest multiple of the next field's [alignment].\n\n Finally, round the size of the struct to the nearest multiple of its [alignment].\n The alignment of the struct is usually the largest alignment of all its\n fields; this can be changed with the use of `repr(align(N))`.\n\n Unlike `C`, zero sized structs are not rounded up to one byte in size.\n\n ## Size of Enums\n\n Enums that carry no data other than the discriminant have the same size as C enums\n on the platform they are compiled for.\n\n ## Size of Unions\n\n The size of a union is the size of its largest field.\n\n Unlike `C`, zero sized unions are not rounded up to one byte in size.\n\n # Examples\n\n ```\n // Some primitives\n assert_eq!(4, size_of::<i32>());\n assert_eq!(8, size_of::<f64>());\n assert_eq!(0, size_of::<()>());\n\n // Some arrays\n assert_eq!(8, size_of::<[i32; 2]>());\n assert_eq!(12, size_of::<[i32; 3]>());\n assert_eq!(0, size_of::<[i32; 0]>());\n\n\n // Pointer size equality\n assert_eq!(size_of::<&i32>(), size_of::<*const i32>());\n assert_eq!(size_of::<&i32>(), size_of::<Box<i32>>());\n assert_eq!(size_of::<&i32>(), size_of::<Option<&i32>>());\n assert_eq!(size_of::<Box<i32>>(), size_of::<Option<Box<i32>>>());\n ```\n\n Using `#[repr(C)]`.\n\n ```\n #[repr(C)]\n struct FieldStruct {\n     first: u8,\n     second: u16,\n     third: u8\n }\n\n // The size of the first field is 1, so add 1 to the size. Size is 1.\n // The alignment of the second field is 2, so add 1 to the size for padding. Size is 2.\n // The size of the second field is 2, so add 2 to the size. Size is 4.\n // The alignment of the third field is 1, so add 0 to the size for padding. Size is 4.\n // The size of the third field is 1, so add 1 to the size. Size is 5.\n // Finally, the alignment of the struct is 2 (because the largest alignment amongst its\n // fields is 2), so add 1 to the size for padding. Size is 6.\n assert_eq!(6, size_of::<FieldStruct>());\n\n #[repr(C)]\n struct TupleStruct(u8, u16, u8);\n\n // Tuple structs follow the same rules.\n assert_eq!(6, size_of::<TupleStruct>());\n\n // Note that reordering the fields can lower the size. We can remove both padding bytes\n // by putting `third` before `second`.\n #[repr(C)]\n struct FieldStructOptimized {\n     first: u8,\n     third: u8,\n     second: u16\n }\n\n assert_eq!(4, size_of::<FieldStructOptimized>());\n\n // Union size is the size of the largest field.\n #[repr(C)]\n union ExampleUnion {\n     smaller: u8,\n     larger: u16\n }\n\n assert_eq!(2, size_of::<ExampleUnion>());\n ```\n\n [alignment]: align_of\n [`*const T`]: primitive@pointer\n [`Box<T>`]: ../../std/boxed/struct.Box.html\n [`Option<&T>`]: crate::option::Option\n\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<Vec<u32>>`.\n // This is okay because we initialized it.\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n x_vec.push(3);\n assert_eq!(x_vec.len(), 4);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "core::ops::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "sys::pal::unix::cvt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts native return values to Result using the *-1 means error is in `errno`*  convention.\n Non-error values are `Ok`-wrapped.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n Writing to memory that this pointer (non-transitively) points to is undefined behavior\n (except inside an `UnsafeCell<T>`).\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<T>`. This is okay because we initialized it.\n let x_vec = unsafe { &*x.as_ptr() };\n assert_eq!(x_vec.len(), 3);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &*x.as_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "sys::net::connection::socket::socket_addr_from_c": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts the C socket address stored in `storage` to a Rust `SocketAddr`.\n\n # Safety\n * `storage` must contain a valid C socket address whose length is no larger\n   than `len`.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::mem::MaybeUninit": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 44, kind: RigidTy(Int(I32)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 3734,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/net/connection/socket/mod.rs:286:1: 297:2",
+  "src": "unsafe fn sockname<F>(f: F) -> io::Result<SocketAddr>\nwhere\n    F: FnOnce(*mut c::sockaddr, *mut c::socklen_t) -> c_int,\n{\n    let mut storage = MaybeUninit::<c::sockaddr_storage>::zeroed();\n    let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;\n    cvt(f(storage.as_mut_ptr().cast(), &mut len))?;\n    // SAFETY:\n    // The caller guarantees that the storage has been successfully initialized\n    // and its size written to `len` if `f` returns a success.\n    unsafe { socket_addr_from_c(storage.as_ptr(), len as usize) }\n}",
+  "mir": "fn sys::net::connection::socket::sockname(_1: F) -> core::result::Result<core::net::SocketAddr, io::error::Error> {\n    let mut _0: core::result::Result<core::net::SocketAddr, io::error::Error>;\n    let mut _2: core::mem::MaybeUninit<libc::sockaddr_storage>;\n    let mut _3: u32;\n    let mut _4: usize;\n    let mut _5: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, i32>;\n    let mut _6: core::result::Result<i32, io::error::Error>;\n    let mut _7: i32;\n    let mut _8: (*mut libc::sockaddr, *mut u32);\n    let mut _9: *mut libc::sockaddr;\n    let mut _10: *mut libc::sockaddr_storage;\n    let mut _11: &mut core::mem::MaybeUninit<libc::sockaddr_storage>;\n    let mut _12: *mut u32;\n    let mut _13: &mut u32;\n    let mut _14: isize;\n    let  _15: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _16: i32;\n    let mut _17: *const libc::sockaddr_storage;\n    let mut _18: &core::mem::MaybeUninit<libc::sockaddr_storage>;\n    let mut _19: usize;\n    let mut _20: u32;\n    debug f => _1;\n    debug storage => _2;\n    debug len => _3;\n    debug residual => _15;\n    debug val => _16;\n    bb0: {\n        StorageLive(_2);\n        _2 = core::mem::MaybeUninit::<libc::sockaddr_storage>::zeroed() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = core::mem::size_of::<libc::sockaddr_storage>() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = move _4 as u32;\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &mut _2;\n        _10 = core::mem::MaybeUninit::<libc::sockaddr_storage>::as_mut_ptr(move _11) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_11);\n        _9 = core::ptr::mut_ptr::<impl *mut libc::sockaddr_storage>::cast::<libc::sockaddr>(move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &mut _3;\n        _12 = &raw mut (*_13);\n        _8 = (move _9, move _12);\n        _7 = <F as core::ops::FnOnce<(*mut libc::sockaddr, *mut u32)>>::call_once(_1, move _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        StorageDead(_9);\n        StorageDead(_8);\n        _6 = sys::pal::unix::cvt::<i32>(move _7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_7);\n        _5 = <core::result::Result<i32, io::error::Error> as core::ops::Try>::branch(move _6) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_6);\n        _14 = discriminant(_5);\n        switchInt(move _14) -> [0: bb9, 1: bb10, otherwise: bb8];\n    }\n    bb8: {\n        unreachable;\n    }\n    bb9: {\n        StorageLive(_16);\n        _16 = ((_5 as variant#0).0: i32);\n        StorageDead(_16);\n        StorageDead(_13);\n        StorageDead(_5);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = &_2;\n        _17 = core::mem::MaybeUninit::<libc::sockaddr_storage>::as_ptr(move _18) -> [return: bb12, unwind unreachable];\n    }\n    bb10: {\n        _15 = move ((_5 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<core::net::SocketAddr, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_15) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_13);\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageDead(_2);\n        goto -> bb14;\n    }\n    bb12: {\n        StorageDead(_18);\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = _3;\n        _19 = move _20 as usize;\n        StorageDead(_20);\n        _0 = sys::net::connection::socket::socket_addr_from_c(move _17, move _19) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_19);\n        StorageDead(_17);\n        StorageDead(_3);\n        StorageDead(_2);\n        goto -> bb14;\n    }\n    bb14: {\n        return;\n    }\n}\n",
+  "doc": " Wraps a call to a platform function that returns a socket address.\n\n # Safety\n * if `f` returns a success (i.e. `cvt` returns `Ok` when called on the\n   return value), the buffer provided to `f` must have been initialized\n   with a valid C socket address, the length of which must be written\n   to the second argument.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

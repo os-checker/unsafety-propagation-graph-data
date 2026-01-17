@@ -1,0 +1,60 @@
+{
+  "name": "sync::Weak::<T, A>::weak_count",
+  "safe": true,
+  "callees": {
+    "sync::Weak::<T, A>::inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `None` when the pointer is dangling and there is no allocated `ArcInner`,\n (i.e., when this `Weak` was created by `Weak::new`).\n",
+      "adt": {
+        "sync::Weak": "ImmutableAsArgument",
+        "core::option::Option": "Constructor",
+        "sync::WeakInner": "Constructor"
+      }
+    },
+    "core::sync::atomic::AtomicUsize::load": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads a value from the atomic integer.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering of this operation.\n Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.load(Ordering::Relaxed), 5);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::Weak": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 9740, kind: RigidTy(Adt(AdtDef(DefId { id: 5759, name: \"sync::WeakInner\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])"
+    ],
+    "sync::WeakInner": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 9469, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 9365, kind: RigidTy(Adt(AdtDef(DefId { id: 5675, name: \"core::sync::atomic::AtomicUsize\" }), GenericArgs([]))) }, Not)) })])",
+      "Unknown([Field(1, Ty { id: 9469, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 9365, kind: RigidTy(Adt(AdtDef(DefId { id: 5675, name: \"core::sync::atomic::AtomicUsize\" }), GenericArgs([]))) }, Not)) })])"
+    ],
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 2174,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:3303:5: 3320:6",
+  "src": "pub fn weak_count(&self) -> usize {\n        if let Some(inner) = self.inner() {\n            let weak = inner.weak.load(Acquire);\n            let strong = inner.strong.load(Relaxed);\n            if strong == 0 {\n                0\n            } else {\n                // Since we observed that there was at least one strong pointer\n                // after reading the weak count, we know that the implicit weak\n                // reference (present whenever any strong references are alive)\n                // was still around when we observed the weak count, and can\n                // therefore safely subtract it.\n                weak - 1\n            }\n        } else {\n            0\n        }\n    }",
+  "mir": "fn sync::Weak::<T, A>::weak_count(_1: &sync::Weak<T, A>) -> usize {\n    let mut _0: usize;\n    let mut _2: core::option::Option<sync::WeakInner<'_>>;\n    let mut _3: isize;\n    let  _4: sync::WeakInner<'_>;\n    let  _5: usize;\n    let mut _6: core::sync::atomic::Ordering;\n    let  _7: usize;\n    let mut _8: core::sync::atomic::Ordering;\n    let mut _9: (usize, bool);\n    let mut _10: &core::sync::atomic::AtomicUsize;\n    let mut _11: &core::sync::atomic::AtomicUsize;\n    debug self => _1;\n    debug inner => _4;\n    debug weak => _5;\n    debug strong => _7;\n    bb0: {\n        StorageLive(_2);\n        _2 = sync::Weak::<T, A>::inner(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = discriminant(_2);\n        switchInt(move _3) -> [1: bb2, 0: bb9, otherwise: bb11];\n    }\n    bb2: {\n        StorageLive(_4);\n        _4 = move ((_2 as variant#1).0: sync::WeakInner<'_>);\n        _10 = (_4.0: &core::sync::atomic::AtomicUsize);\n        StorageLive(_6);\n        _6 = core::sync::atomic::Ordering::Acquire;\n        _5 = core::sync::atomic::AtomicUsize::load(_10, move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _11 = (_4.1: &core::sync::atomic::AtomicUsize);\n        StorageLive(_8);\n        _8 = core::sync::atomic::Ordering::Relaxed;\n        _7 = core::sync::atomic::AtomicUsize::load(_11, move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        switchInt(_7) -> [0: bb5, otherwise: bb6];\n    }\n    bb5: {\n        _0 = 0_usize;\n        goto -> bb8;\n    }\n    bb6: {\n        _9 = CheckedSub(_5, 1_usize);\n        assert(!move (_9.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _5, 1_usize) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _0 = move (_9.0: usize);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageDead(_4);\n        StorageDead(_2);\n        goto -> bb10;\n    }\n    bb9: {\n        StorageDead(_2);\n        _0 = 0_usize;\n        goto -> bb10;\n    }\n    bb10: {\n        return;\n    }\n    bb11: {\n        unreachable;\n    }\n}\n",
+  "doc": " Gets an approximation of the number of `Weak` pointers pointing to this\n allocation.\n\n If `self` was created using [`Weak::new`], or if there are no remaining\n strong pointers, this will return 0.\n\n # Accuracy\n\n Due to implementation details, the returned value can be off by 1 in\n either direction when other threads are manipulating any `Arc`s or\n `Weak`s pointing to the same allocation.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

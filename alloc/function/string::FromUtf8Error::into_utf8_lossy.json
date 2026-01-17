@@ -1,0 +1,193 @@
+{
+  "name": "string::FromUtf8Error::into_utf8_lossy",
+  "safe": true,
+  "callees": {
+    "vec::Vec::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the vector, also referred to\n as its 'length'.\n\n # Examples\n\n ```\n let a = vec![1, 2, 3];\n assert_eq!(a.len(), 3);\n ```\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "vec::Vec::<T>::with_capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new, empty `Vec<T>` with at least the specified capacity.\n\n The vector will be able to hold at least `capacity` elements without\n reallocating. This method is allowed to allocate for more elements than\n `capacity`. If `capacity` is zero, the vector will not allocate.\n\n It is important to note that although the returned vector has the\n minimum *capacity* specified, the vector will have a zero *length*. For\n an explanation of the difference between length and capacity, see\n *[Capacity and reallocation]*.\n\n If it is important to know the exact allocated capacity of a `Vec`,\n always use the [`capacity`] method after construction.\n\n For `Vec<T>` where `T` is a zero-sized type, there will be no allocation\n and the capacity will always be `usize::MAX`.\n\n [Capacity and reallocation]: #capacity-and-reallocation\n [`capacity`]: Vec::capacity\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut vec = Vec::with_capacity(10);\n\n // The vector contains no items, even though it has capacity for more\n assert_eq!(vec.len(), 0);\n assert!(vec.capacity() >= 10);\n\n // These are all done without reallocating...\n for i in 0..10 {\n     vec.push(i);\n }\n assert_eq!(vec.len(), 10);\n assert!(vec.capacity() >= 10);\n\n // ...but this may make the vector reallocate\n vec.push(11);\n assert_eq!(vec.len(), 11);\n assert!(vec.capacity() >= 11);\n\n // A vector of a zero-sized type will always over-allocate, since no\n // allocation is necessary\n let vec_units = Vec::<()>::with_capacity(10);\n assert_eq!(vec_units.capacity(), usize::MAX);\n ```\n",
+      "adt": {
+        "vec::Vec": "Constructor"
+      }
+    },
+    "core::str::Utf8Error::valid_up_to": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the index in the given string up to which valid UTF-8 was\n verified.\n\n It is the maximum index such that `from_utf8(&input[..index])`\n would return `Ok(_)`.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::str;\n\n // some invalid bytes, in a vector\n let sparkle_heart = vec![0, 159, 146, 150];\n\n // std::str::from_utf8 returns a Utf8Error\n let error = str::from_utf8(&sparkle_heart).unwrap_err();\n\n // the second byte is invalid here\n assert_eq!(1, error.valid_up_to());\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::extend_from_slice": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Clones and appends all elements in a slice to the `Vec`.\n\n Iterates over the slice `other`, clones each element, and then appends\n it to this `Vec`. The `other` slice is traversed in-order.\n\n Note that this function is the same as [`extend`],\n except that it also works with slice elements that are Clone but not Copy.\n If Rust gets specialization this function may be deprecated.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut vec = vec![1];\n vec.extend_from_slice(&[2, 3, 4]);\n assert_eq!(vec, [1, 2, 3, 4]);\n ```\n\n [`extend`]: Vec::extend\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "string::String::from_utf8_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a vector of bytes to a `String` without checking that the\n string contains valid UTF-8.\n\n See the safe version, [`from_utf8`], for more details.\n\n [`from_utf8`]: String::from_utf8\n\n # Safety\n\n This function is unsafe because it does not check that the bytes passed\n to it are valid UTF-8. If this constraint is violated, it may cause\n memory unsafety issues with future users of the `String`, as the rest of\n the standard library assumes that `String`s are valid UTF-8.\n\n # Examples\n\n ```\n // some bytes, in a vector\n let sparkle_heart = vec![240, 159, 146, 150];\n\n let sparkle_heart = unsafe {\n     String::from_utf8_unchecked(sparkle_heart)\n };\n\n assert_eq!(\"💖\", sparkle_heart);\n ```\n",
+      "adt": {
+        "string::String": "Constructor"
+      }
+    },
+    "core::str::lossy::<impl [u8]>::utf8_chunks": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator over the contiguous valid UTF-8 ranges of this\n slice, and the non-UTF-8 fragments in between.\n\n See the [`Utf8Chunk`] type for documentation of the items yielded by this iterator.\n\n # Examples\n\n This function formats arbitrary but mostly-UTF-8 bytes into Rust source\n code in the form of a C-string literal (`c\"...\"`).\n\n ```\n use std::fmt::Write as _;\n\n pub fn cstr_literal(bytes: &[u8]) -> String {\n     let mut repr = String::new();\n     repr.push_str(\"c\\\"\");\n     for chunk in bytes.utf8_chunks() {\n         for ch in chunk.valid().chars() {\n             // Escapes \\0, \\t, \\r, \\n, \\\\, \\', \\\", and uses \\u{...} for non-printable characters.\n             write!(repr, \"{}\", ch.escape_debug()).unwrap();\n         }\n         for byte in chunk.invalid() {\n             write!(repr, \"\\\\x{:02X}\", byte).unwrap();\n         }\n     }\n     repr.push('\"');\n     repr\n }\n\n fn main() {\n     let lit = cstr_literal(b\"\\xferris the \\xf0\\x9f\\xa6\\x80\\x07\");\n     let expected = stringify!(c\"\\xFErris the 🦀\\u{7}\");\n     assert_eq!(lit, expected);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::str::Utf8Chunk::<'a>::valid": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the next validated UTF-8 substring.\n\n This substring can be empty at the start of the string or between\n broken UTF-8 characters.\n",
+      "adt": {}
+    },
+    "string::String::push_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Appends a given string slice onto the end of this `String`.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut s = String::from(\"foo\");\n\n s.push_str(\"bar\");\n\n assert_eq!(\"foobar\", s);\n ```\n",
+      "adt": {
+        "string::String": "MutableAsArgument"
+      }
+    },
+    "core::str::Utf8Chunk::<'a>::invalid": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the invalid sequence that caused a failure.\n\n The returned slice will have a maximum length of 3 and starts after the\n substring given by [`valid`]. Decoding will resume after this sequence.\n\n If empty, this is the last chunk in the string. If non-empty, an\n unexpected byte was encountered or the end of the input was reached\n unexpectedly.\n\n Lossy decoding would replace this sequence with [`U+FFFD REPLACEMENT\n CHARACTER`].\n\n [`valid`]: Self::valid\n [`U+FFFD REPLACEMENT CHARACTER`]: crate::char::REPLACEMENT_CHARACTER\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the slice has a length of 0.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n assert!(!a.is_empty());\n\n let b: &[i32] = &[];\n assert!(b.is_empty());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Ref",
+      "Plain",
+      "MutRef"
+    ],
+    "string::FromUtf8Error": [
+      "Unknown([Field(0, Ty { id: 1639, kind: RigidTy(Adt(AdtDef(DefId { id: 2824, name: \"vec::Vec\" }), GenericArgs([Type(Ty { id: 93, kind: RigidTy(Uint(U8)) }), Type(Ty { id: 17, kind: RigidTy(Adt(AdtDef(DefId { id: 2583, name: \"alloc::Global\" }), GenericArgs([]))) })]))) })])",
+      "Unknown([Field(1, Ty { id: 1846, kind: RigidTy(Adt(AdtDef(DefId { id: 3273, name: \"core::str::Utf8Error\" }), GenericArgs([]))) })])",
+      "Plain"
+    ],
+    "core::str::Utf8Error": [
+      "Ref"
+    ],
+    "core::ops::RangeTo": [
+      "Plain"
+    ],
+    "string::String": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::ops::RangeFrom": [
+      "Plain"
+    ],
+    "core::str::Utf8Chunks": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 8727, kind: RigidTy(Adt(AdtDef(DefId { id: 5418, name: \"core::str::Utf8Chunk\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])"
+    ],
+    "core::str::Utf8Chunk": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 1905,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:2247:5: 2273:6",
+  "src": "pub fn into_utf8_lossy(self) -> String {\n        const REPLACEMENT: &str = \"\\u{FFFD}\";\n\n        let mut res = {\n            let mut v = Vec::with_capacity(self.bytes.len());\n\n            // `Utf8Error::valid_up_to` returns the maximum index of validated\n            // UTF-8 bytes. Copy the valid bytes into the output buffer.\n            v.extend_from_slice(&self.bytes[..self.error.valid_up_to()]);\n\n            // SAFETY: This is safe because the only bytes present in the buffer\n            // were validated as UTF-8 by the call to `String::from_utf8` which\n            // produced this `FromUtf8Error`.\n            unsafe { String::from_utf8_unchecked(v) }\n        };\n\n        let iter = self.bytes[self.error.valid_up_to()..].utf8_chunks();\n\n        for chunk in iter {\n            res.push_str(chunk.valid());\n            if !chunk.invalid().is_empty() {\n                res.push_str(REPLACEMENT);\n            }\n        }\n\n        res\n    }",
+  "mir": "fn string::FromUtf8Error::into_utf8_lossy(_1: string::FromUtf8Error) -> string::String {\n    let mut _0: string::String;\n    let mut _2: string::String;\n    let mut _3: vec::Vec<u8>;\n    let mut _4: usize;\n    let mut _5: &vec::Vec<u8>;\n    let  _6: ();\n    let mut _7: &mut vec::Vec<u8>;\n    let  _8: &[u8];\n    let mut _9: &vec::Vec<u8>;\n    let mut _10: core::ops::RangeTo<usize>;\n    let mut _11: usize;\n    let mut _12: &core::str::Utf8Error;\n    let mut _13: vec::Vec<u8>;\n    let  _14: core::str::Utf8Chunks<'_>;\n    let  _15: &[u8];\n    let mut _16: &vec::Vec<u8>;\n    let mut _17: core::ops::RangeFrom<usize>;\n    let mut _18: usize;\n    let mut _19: &core::str::Utf8Error;\n    let mut _20: core::str::Utf8Chunks<'_>;\n    let mut _21: core::str::Utf8Chunks<'_>;\n    let mut _22: core::option::Option<core::str::Utf8Chunk<'_>>;\n    let mut _23: &mut core::str::Utf8Chunks<'_>;\n    let mut _24: isize;\n    let  _25: core::str::Utf8Chunk<'_>;\n    let  _26: ();\n    let mut _27: &mut string::String;\n    let  _28: &str;\n    let mut _29: &core::str::Utf8Chunk<'_>;\n    let mut _30: bool;\n    let  _31: &[u8];\n    let mut _32: &core::str::Utf8Chunk<'_>;\n    let  _33: ();\n    let mut _34: &mut string::String;\n    let mut _35: &str;\n    debug self => _1;\n    debug res => _2;\n    debug v => _3;\n    debug iter => _14;\n    debug iter => _21;\n    debug chunk => _25;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(_1.0: vec::Vec<u8>);\n        _4 = vec::Vec::<u8>::len(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = vec::Vec::<u8>::with_capacity(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_7);\n        _7 = &mut _3;\n        StorageLive(_9);\n        _9 = &(_1.0: vec::Vec<u8>);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &(_1.1: core::str::Utf8Error);\n        _11 = core::str::Utf8Error::valid_up_to(move _12) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_12);\n        _10 = RangeTo(move _11);\n        StorageDead(_11);\n        _8 = <vec::Vec<u8> as core::ops::Index<core::ops::RangeTo<usize>>>::index(move _9, move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        StorageDead(_9);\n        _6 = vec::Vec::<u8>::extend_from_slice(move _7, _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageLive(_13);\n        _13 = move _3;\n        _2 = string::String::from_utf8_unchecked(move _13) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_13);\n        StorageDead(_3);\n        StorageLive(_16);\n        _16 = &(_1.0: vec::Vec<u8>);\n        StorageLive(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = &(_1.1: core::str::Utf8Error);\n        _18 = core::str::Utf8Error::valid_up_to(move _19) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_19);\n        _17 = RangeFrom(move _18);\n        StorageDead(_18);\n        _15 = <vec::Vec<u8> as core::ops::Index<core::ops::RangeFrom<usize>>>::index(move _16, move _17) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_17);\n        StorageDead(_16);\n        _14 = core::str::lossy::<impl [u8]>::utf8_chunks(_15) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageLive(_20);\n        _20 = <core::str::Utf8Chunks<'_> as core::iter::IntoIterator>::into_iter(_14) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageLive(_21);\n        _21 = move _20;\n        goto -> bb11;\n    }\n    bb11: {\n        StorageLive(_22);\n        _23 = &mut _21;\n        _22 = <core::str::Utf8Chunks<'_> as core::iter::Iterator>::next(_23) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        _24 = discriminant(_22);\n        switchInt(move _24) -> [0: bb15, 1: bb14, otherwise: bb13];\n    }\n    bb13: {\n        unreachable;\n    }\n    bb14: {\n        StorageLive(_25);\n        _25 = move ((_22 as variant#1).0: core::str::Utf8Chunk<'_>);\n        StorageLive(_27);\n        _27 = &mut _2;\n        StorageLive(_29);\n        _29 = &_25;\n        _28 = core::str::Utf8Chunk::<'_>::valid(move _29) -> [return: bb16, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_22);\n        StorageDead(_21);\n        StorageDead(_20);\n        _0 = move _2;\n        StorageDead(_2);\n        drop(_1) -> [return: bb24, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_29);\n        _26 = string::String::push_str(move _27, _28) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_27);\n        StorageLive(_30);\n        StorageLive(_32);\n        _32 = &_25;\n        _31 = core::str::Utf8Chunk::<'_>::invalid(move _32) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_32);\n        _30 = core::slice::<impl [u8]>::is_empty(_31) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        switchInt(move _30) -> [0: bb21, otherwise: bb20];\n    }\n    bb20: {\n        goto -> bb23;\n    }\n    bb21: {\n        StorageLive(_34);\n        _34 = &mut _2;\n        StorageLive(_35);\n        _35 = string::FromUtf8Error::into_utf8_lossy::REPLACEMENT;\n        _33 = string::String::push_str(move _34, move _35) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_35);\n        StorageDead(_34);\n        goto -> bb23;\n    }\n    bb23: {\n        StorageDead(_30);\n        StorageDead(_25);\n        StorageDead(_22);\n        goto -> bb11;\n    }\n    bb24: {\n        return;\n    }\n}\n",
+  "doc": " Converts the bytes into a `String` lossily, substituting invalid UTF-8\n sequences with replacement characters.\n\n See [`String::from_utf8_lossy`] for more details on replacement of\n invalid sequences, and [`String::from_utf8_lossy_owned`] for the\n `String` function which corresponds to this function.\n\n # Examples\n\n ```\n #![feature(string_from_utf8_lossy_owned)]\n // some invalid bytes\n let input: Vec<u8> = b\"Hello \\xF0\\x90\\x80World\".into();\n let output = String::from_utf8(input).unwrap_or_else(|e| e.into_utf8_lossy());\n\n assert_eq!(String::from(\"Hello �World\"), output);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

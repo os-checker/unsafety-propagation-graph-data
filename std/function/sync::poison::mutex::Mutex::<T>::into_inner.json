@@ -1,0 +1,67 @@
+{
+  "name": "sync::poison::mutex::Mutex::<T>::into_inner",
+  "safe": true,
+  "callees": {
+    "core::cell::UnsafeCell::<T>::into_inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Unwraps the value, consuming the cell.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let five = uc.into_inner();\n ```\n",
+      "adt": {}
+    },
+    "sync::poison::Flag::borrow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checks the flag for an unguarded borrow, where we only care about existing poison.\n",
+      "adt": {
+        "sync::poison::Flag": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "sync::poison::map_result": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::cell::UnsafeCell": [
+      "Plain"
+    ],
+    "sync::poison::mutex::Mutex": [
+      "Unknown([Field(2, Ty { id: 743, kind: RigidTy(Adt(AdtDef(DefId { id: 4658, name: \"core::cell::UnsafeCell\" }), GenericArgs([Type(Ty { id: 9, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])",
+      "Unknown([Field(1, Ty { id: 12076, kind: RigidTy(Adt(AdtDef(DefId { id: 9911, name: \"sync::poison::Flag\" }), GenericArgs([]))) })])",
+      "Plain"
+    ],
+    "sync::poison::Flag": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 3219,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/mutex.rs:631:5: 637:6",
+  "src": "pub fn into_inner(self) -> LockResult<T>\n    where\n        T: Sized,\n    {\n        let data = self.data.into_inner();\n        poison::map_result(self.poison.borrow(), |()| data)\n    }",
+  "mir": "fn sync::poison::mutex::Mutex::<T>::into_inner(_1: sync::poison::mutex::Mutex<T>) -> core::result::Result<T, sync::poison::PoisonError<T>> {\n    let mut _0: core::result::Result<T, sync::poison::PoisonError<T>>;\n    let  _2: T;\n    let mut _3: core::cell::UnsafeCell<T>;\n    let mut _4: core::result::Result<(), sync::poison::PoisonError<()>>;\n    let mut _5: &sync::poison::Flag;\n    let mut _6: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/mutex.rs:636:50: 636:54};\n    debug self => _1;\n    debug data => _2;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = move (_1.2: core::cell::UnsafeCell<T>);\n        _2 = core::cell::UnsafeCell::<T>::into_inner(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = &(_1.1: sync::poison::Flag);\n        _4 = sync::poison::Flag::borrow(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_6);\n        _6 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/mutex.rs:636:50: 636:54}(move _2);\n        _0 = sync::poison::map_result::<(), T, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/mutex.rs:636:50: 636:54}>(core::result::Result::<(), sync::poison::PoisonError<()>>::Ok(()), move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Consumes this mutex, returning the underlying data.\n\n # Errors\n\n If another user of this mutex panicked while holding the mutex, then\n this call will return an error containing the underlying data\n instead.\n\n # Examples\n\n ```\n use std::sync::Mutex;\n\n let mutex = Mutex::new(0);\n assert_eq!(mutex.into_inner().unwrap(), 0);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

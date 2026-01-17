@@ -1,0 +1,44 @@
+{
+  "name": "panicking::panic_count::count_is_zero",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicUsize::load": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads a value from the atomic integer.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering of this operation.\n Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.load(Ordering::Relaxed), 5);\n ```\n",
+      "adt": {}
+    },
+    "panicking::panic_count::is_zero_slow_path": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 2295,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:463:5: 478:6",
+  "src": "pub fn count_is_zero() -> bool {\n        if GLOBAL_PANIC_COUNT.load(Ordering::Relaxed) & !ALWAYS_ABORT_FLAG == 0 {\n            // Fast path: if `GLOBAL_PANIC_COUNT` is zero, all threads\n            // (including the current one) will have `LOCAL_PANIC_COUNT`\n            // equal to zero, so TLS access can be avoided.\n            //\n            // In terms of performance, a relaxed atomic load is similar to a normal\n            // aligned memory read (e.g., a mov instruction in x86), but with some\n            // compiler optimization restrictions. On the other hand, a TLS access\n            // might require calling a non-inlinable function (such as `__tls_get_addr`\n            // when using the GD TLS model).\n            true\n        } else {\n            is_zero_slow_path()\n        }\n    }",
+  "mir": "fn panicking::panic_count::count_is_zero() -> bool {\n    let mut _0: bool;\n    let mut _1: usize;\n    let mut _2: usize;\n    let mut _3: &core::sync::atomic::AtomicUsize;\n    let mut _4: core::sync::atomic::Ordering;\n    let mut _5: usize;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = {alloc673: &core::sync::atomic::AtomicUsize};\n        StorageLive(_4);\n        _4 = core::sync::atomic::Ordering::Relaxed;\n        _2 = core::sync::atomic::AtomicUsize::load(move _3, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = Not(panicking::panic_count::ALWAYS_ABORT_FLAG);\n        _1 = BitAnd(move _2, move _5);\n        StorageDead(_5);\n        StorageDead(_2);\n        switchInt(move _1) -> [0: bb2, otherwise: bb3];\n    }\n    bb2: {\n        StorageDead(_1);\n        _0 = true;\n        goto -> bb4;\n    }\n    bb3: {\n        StorageDead(_1);\n        _0 = panicking::panic_count::is_zero_slow_path() -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

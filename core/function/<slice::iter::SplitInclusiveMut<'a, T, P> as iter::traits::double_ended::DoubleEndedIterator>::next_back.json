@@ -1,0 +1,120 @@
+{
+  "name": "<slice::iter::SplitInclusiveMut<'a, T, P> as iter::traits::double_ended::DoubleEndedIterator>::next_back",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the slice has a length of 0.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n assert!(!a.is_empty());\n\n let b: &[i32] = &[];\n assert!(b.is_empty());\n ```\n",
+      "adt": {}
+    },
+    "ops::index::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the slice.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let mut iterator = x.iter();\n\n assert_eq!(iterator.next(), Some(&1));\n assert_eq!(iterator.next(), Some(&2));\n assert_eq!(iterator.next(), Some(&4));\n assert_eq!(iterator.next(), None);\n ```\n",
+      "adt": {
+        "slice::iter::Iter": "Constructor"
+      }
+    },
+    "iter::traits::iterator::Iterator::rposition": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Searches for an element in an iterator from the right, returning its\n index.\n\n `rposition()` takes a closure that returns `true` or `false`. It applies\n this closure to each element of the iterator, starting from the end,\n and if one of them returns `true`, then `rposition()` returns\n [`Some(index)`]. If all of them return `false`, it returns [`None`].\n\n `rposition()` is short-circuiting; in other words, it will stop\n processing as soon as it finds a `true`.\n\n [`Some(index)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n assert_eq!(a.into_iter().rposition(|x| x == 3), Some(2));\n\n assert_eq!(a.into_iter().rposition(|x| x == 5), None);\n ```\n\n Stopping at the first `true`:\n\n ```\n let a = [-1, 2, 3, 4];\n\n let mut iter = a.into_iter();\n\n assert_eq!(iter.rposition(|x| x >= 2), Some(3));\n\n // we can still use `iter`, as there are more elements.\n assert_eq!(iter.next(), Some(-1));\n assert_eq!(iter.next_back(), Some(3));\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).\n\n # Examples\n\n Calculates the length of an <code>Option<[String]></code> as an\n <code>Option<[usize]></code>, consuming the original:\n\n [String]: ../../std/string/struct.String.html \"String\"\n ```\n let maybe_some_string = Some(String::from(\"Hello, World!\"));\n // `Option::map` takes self *by value*, consuming `maybe_some_string`\n let maybe_some_len = maybe_some_string.map(|s| s.len());\n assert_eq!(maybe_some_len, Some(13));\n\n let x: Option<&str> = None;\n assert_eq!(x.map(|s| s.len()), None);\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::unwrap_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value or a provided default.\n\n Arguments passed to `unwrap_or` are eagerly evaluated; if you are passing\n the result of a function call, it is recommended to use [`unwrap_or_else`],\n which is lazily evaluated.\n\n [`unwrap_or_else`]: Option::unwrap_or_else\n\n # Examples\n\n ```\n assert_eq!(Some(\"car\").unwrap_or(\"bike\"), \"car\");\n assert_eq!(None.unwrap_or(\"bike\"), \"bike\");\n ```\n",
+      "adt": {}
+    },
+    "mem::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Replaces `dest` with the default value of `T`, returning the previous `dest` value.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a passed value instead of the default value, see [`replace`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::take(&mut v);\n assert_eq!(vec![1, 2], old_v);\n assert!(v.is_empty());\n ```\n\n `take` allows taking ownership of a struct field by replacing it with an \"empty\" value.\n Without `take` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let buf = self.buf;\n         self.buf = Vec::new();\n         buf\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so it can't even clone and reset\n `self.buf`. But `take` can be used to disassociate the original value of `self.buf` from\n `self`, allowing it to be returned:\n\n ```\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         mem::take(&mut self.buf)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf.len(), 2);\n\n assert_eq!(buffer.get_and_reset(), vec![0, 1]);\n assert_eq!(buffer.buf.len(), 0);\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::split_at_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.  For a non-panicking alternative see\n [`split_at_mut_checked`](slice::split_at_mut_checked).\n\n # Examples\n\n ```\n let mut v = [1, 0, 3, 0, 5, 6];\n let (left, right) = v.split_at_mut(2);\n assert_eq!(left, [1, 0]);\n assert_eq!(right, [3, 0, 5, 6]);\n left[1] = 2;\n right[1] = 4;\n assert_eq!(v, [1, 2, 3, 4, 5, 6]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::SplitInclusiveMut": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ],
+    "ops::range::RangeTo": [
+      "Plain"
+    ],
+    "slice::iter::Iter": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 16594,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:884:5: 909:6",
+  "src": "fn next_back(&mut self) -> Option<&'a mut [T]> {\n        if self.finished {\n            return None;\n        }\n\n        let idx_opt = if self.v.is_empty() {\n            None\n        } else {\n            // work around borrowck limitations\n            let pred = &mut self.pred;\n\n            // The last index of self.v is already checked and found to match\n            // by the last iteration, so we start searching a new match\n            // one index to the left.\n            let remainder = &self.v[..(self.v.len() - 1)];\n            remainder.iter().rposition(|x| (*pred)(x))\n        };\n        let idx = idx_opt.map(|idx| idx + 1).unwrap_or(0);\n        if idx == 0 {\n            self.finished = true;\n        }\n        let tmp = mem::take(&mut self.v);\n        let (head, tail) = tmp.split_at_mut(idx);\n        self.v = head;\n        Some(tail)\n    }",
+  "mir": "fn <slice::iter::SplitInclusiveMut<'a, T, P> as iter::traits::double_ended::DoubleEndedIterator>::next_back(_1: &mut slice::iter::SplitInclusiveMut<'_, T, P>) -> option::Option<&mut [T]> {\n    let mut _0: option::Option<&mut [T]>;\n    let mut _2: bool;\n    let  _3: option::Option<usize>;\n    let mut _4: bool;\n    let mut _5: &[T];\n    let  _6: &mut P;\n    let  _7: &[T];\n    let mut _8: &[T];\n    let mut _9: ops::range::RangeTo<usize>;\n    let mut _10: usize;\n    let mut _11: usize;\n    let mut _12: &[T];\n    let mut _13: (usize, bool);\n    let mut _14: &mut slice::iter::Iter<'_, T>;\n    let mut _15: slice::iter::Iter<'_, T>;\n    let mut _16: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:899:40: 899:43};\n    let  _17: usize;\n    let mut _18: option::Option<usize>;\n    let mut _19: option::Option<usize>;\n    let  _20: &mut [T];\n    let mut _21: &mut &mut [T];\n    let  _22: &mut [T];\n    let  _23: &mut [T];\n    let mut _24: (&mut [T], &mut [T]);\n    let mut _25: &mut [T];\n    let mut _26: &mut [T];\n    let mut _27: &mut [T];\n    debug self => _1;\n    debug idx_opt => _3;\n    debug pred => _6;\n    debug remainder => _7;\n    debug idx => _17;\n    debug tmp => _20;\n    debug head => _22;\n    debug tail => _23;\n    bb0: {\n        StorageLive(_2);\n        _2 = ((*_1).2: bool);\n        switchInt(move _2) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        _0 = option::Option::None;\n        StorageDead(_2);\n        goto -> bb18;\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _25 = ((*_1).0: &mut [T]);\n        _5 = &(*_25);\n        _4 = slice::<impl [T]>::is_empty(move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _4) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_5);\n        _3 = option::Option::None;\n        goto -> bb10;\n    }\n    bb5: {\n        StorageDead(_5);\n        _6 = &mut ((*_1).1: P);\n        StorageLive(_8);\n        _26 = ((*_1).0: &mut [T]);\n        _8 = &(*_26);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _27 = ((*_1).0: &mut [T]);\n        _12 = &(*_27);\n        _11 = PtrMetadata(move _12);\n        StorageDead(_12);\n        _13 = CheckedSub(_11, 1_usize);\n        assert(!move (_13.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _11, 1_usize) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _10 = move (_13.0: usize);\n        StorageDead(_11);\n        _9 = RangeTo(move _10);\n        StorageDead(_10);\n        _7 = <[T] as ops::index::Index<ops::range::RangeTo<usize>>>::index(move _8, move _9) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = slice::<impl [T]>::iter(_7) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _14 = &mut _15;\n        StorageLive(_16);\n        _16 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:899:40: 899:43}(_6);\n        _3 = <slice::iter::Iter<'_, T> as iter::traits::iterator::Iterator>::rposition::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:899:40: 899:43}>(move _14, move _16) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_16);\n        StorageDead(_15);\n        StorageDead(_14);\n        goto -> bb10;\n    }\n    bb10: {\n        StorageDead(_4);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = _3;\n        _18 = option::Option::<usize>::map::<usize, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:901:31: 901:36}>(move _19, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:901:31: 901:36}) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_19);\n        _17 = option::Option::<usize>::unwrap_or(move _18, 0_usize) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_18);\n        switchInt(_17) -> [0: bb13, otherwise: bb14];\n    }\n    bb13: {\n        ((*_1).2: bool) = true;\n        goto -> bb15;\n    }\n    bb14: {\n        goto -> bb15;\n    }\n    bb15: {\n        _21 = &mut ((*_1).0: &mut [T]);\n        _20 = mem::take::<&mut [T]>(_21) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageLive(_24);\n        _24 = slice::<impl [T]>::split_at_mut(_20, _17) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        _22 = move (_24.0: &mut [T]);\n        _23 = move (_24.1: &mut [T]);\n        StorageDead(_24);\n        ((*_1).0: &mut [T]) = _22;\n        _0 = option::Option::Some(_23);\n        StorageDead(_3);\n        goto -> bb18;\n    }\n    bb18: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

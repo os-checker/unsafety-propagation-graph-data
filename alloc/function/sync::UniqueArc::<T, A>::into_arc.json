@@ -1,0 +1,102 @@
+{
+  "name": "sync::UniqueArc::<T, A>::into_arc",
+  "safe": true,
+  "callees": {
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::ptr::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `src` without moving it. This leaves the\n memory in `src` unchanged.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads.\n\n * `src` must be properly aligned. Use [`read_unaligned`] if this is not the\n   case.\n\n * `src` must point to a properly initialized value of type `T`.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n # Examples\n\n Basic usage:\n\n ```\n let x = 12;\n let y = &x as *const i32;\n\n unsafe {\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n\n ## Ownership of the Returned Value\n\n `read` creates a bitwise copy of `T`, regardless of whether `T` is [`Copy`].\n If `T` is not [`Copy`], using both the returned value and the value at\n `*src` can violate memory safety. Note that assigning to `*src` counts as a\n use because it will attempt to drop the value at `*src`.\n\n [`write()`] can be used to overwrite data without causing it to be dropped.\n\n ```\n use std::ptr;\n\n let mut s = String::from(\"foo\");\n unsafe {\n     // `s2` now points to the same underlying memory as `s`.\n     let mut s2: String = ptr::read(&s);\n\n     assert_eq!(s2, \"foo\");\n\n     // Assigning to `s2` causes its original value to be dropped. Beyond\n     // this point, `s` must no longer be used, as the underlying memory has\n     // been freed.\n     s2 = String::default();\n     assert_eq!(s2, \"\");\n\n     // Assigning to `s` would cause the old value to be dropped again,\n     // resulting in undefined behavior.\n     // s = String::from(\"bar\"); // ERROR\n\n     // `ptr::write` can be used to overwrite a value without dropping it.\n     ptr::write(&mut s, String::from(\"bar\"));\n }\n\n assert_eq!(s, \"bar\");\n ```\n\n [valid]: self#safety\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicUsize::store": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer.\n\n `store` takes an [`Ordering`] argument which describes the memory ordering of this operation.\n  Possible values are [`SeqCst`], [`Release`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Acquire`] or [`AcqRel`].\n\n # Examples\n\n ```\n\n\n some_var.store(10, Ordering::Relaxed);\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n",
+      "adt": {}
+    },
+    "sync::Arc::<T, A>::from_inner_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::Arc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sync::UniqueArc": [
+      "Plain",
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "sync::Arc": [
+      "Plain"
+    ]
+  },
+  "path": 2142,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:4757:5: 4771:6",
+  "src": "pub fn into_arc(this: Self) -> Arc<T, A> {\n        let this = ManuallyDrop::new(this);\n\n        // Move the allocator out.\n        // SAFETY: `this.alloc` will not be accessed again, nor dropped because it is in\n        // a `ManuallyDrop`.\n        let alloc: A = unsafe { ptr::read(&this.alloc) };\n\n        // SAFETY: This pointer was allocated at creation time so we know it is valid.\n        unsafe {\n            // Convert our weak reference into a strong reference\n            (*this.ptr.as_ptr()).strong.store(1, Release);\n            Arc::from_inner_in(this.ptr, alloc)\n        }\n    }",
+  "mir": "fn sync::UniqueArc::<T, A>::into_arc(_1: sync::UniqueArc<T, A>) -> sync::Arc<T, A> {\n    let mut _0: sync::Arc<T, A>;\n    let  _2: core::mem::ManuallyDrop<sync::UniqueArc<T, A>>;\n    let  _3: A;\n    let mut _4: *const A;\n    let  _5: &A;\n    let  _6: &sync::UniqueArc<T, A>;\n    let mut _7: &core::mem::ManuallyDrop<sync::UniqueArc<T, A>>;\n    let  _8: ();\n    let mut _9: &core::sync::atomic::AtomicUsize;\n    let  _10: *mut sync::ArcInner<T>;\n    let mut _11: core::ptr::NonNull<sync::ArcInner<T>>;\n    let mut _12: &sync::UniqueArc<T, A>;\n    let mut _13: &core::mem::ManuallyDrop<sync::UniqueArc<T, A>>;\n    let mut _14: core::sync::atomic::Ordering;\n    let mut _15: core::ptr::NonNull<sync::ArcInner<T>>;\n    let mut _16: &sync::UniqueArc<T, A>;\n    let mut _17: &core::mem::ManuallyDrop<sync::UniqueArc<T, A>>;\n    debug this => _1;\n    debug this => _2;\n    debug alloc => _3;\n    bb0: {\n        StorageLive(_2);\n        _2 = core::mem::ManuallyDrop::<sync::UniqueArc<T, A>>::new(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &_2;\n        _6 = <core::mem::ManuallyDrop<sync::UniqueArc<T, A>> as core::ops::Deref>::deref(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = &((*_6).3: A);\n        _4 = &raw const (*_5);\n        _3 = core::ptr::read::<A>(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &_2;\n        _12 = <core::mem::ManuallyDrop<sync::UniqueArc<T, A>> as core::ops::Deref>::deref(move _13) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_13);\n        _11 = ((*_12).0: core::ptr::NonNull<sync::ArcInner<T>>);\n        _10 = core::ptr::NonNull::<sync::ArcInner<T>>::as_ptr(move _11) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        _9 = &((*_10).0: core::sync::atomic::AtomicUsize);\n        StorageLive(_14);\n        _14 = core::sync::atomic::Ordering::Release;\n        _8 = core::sync::atomic::AtomicUsize::store(move _9, 1_usize, move _14) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_14);\n        StorageDead(_9);\n        StorageDead(_12);\n        StorageDead(_10);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &_2;\n        _16 = <core::mem::ManuallyDrop<sync::UniqueArc<T, A>> as core::ops::Deref>::deref(move _17) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_17);\n        _15 = ((*_16).0: core::ptr::NonNull<sync::ArcInner<T>>);\n        _0 = sync::Arc::<T, A>::from_inner_in(move _15, _3) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_16);\n        StorageDead(_15);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Converts the `UniqueArc` into a regular [`Arc`].\n\n This consumes the `UniqueArc` and returns a regular [`Arc`] that contains the `value` that\n is passed to `into_arc`.\n\n Any weak references created before this method is called can now be upgraded to strong\n references.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

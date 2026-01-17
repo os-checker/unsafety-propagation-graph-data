@@ -1,0 +1,121 @@
+{
+  "name": "cpu::local::dyn_cpu_local::<impl cpu::local::CpuLocal<T, cpu::local::dyn_cpu_local::DynamicStorage<T>>>::__new_dynamic",
+  "safe": false,
+  "callees": {
+    "core::ptr::NonNull::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `NonNull` if `ptr` is non-null.\n\n # Panics during const evaluation\n\n This method will panic during const evaluation if the pointer cannot be\n determined to be null or not. See [`is_null`] for more information.\n\n [`is_null`]: ../primitive.pointer.html#method.is_null-1\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::<u32>::new(&mut x as *mut _).expect(\"ptr is null!\");\n\n if let Some(ptr) = NonNull::<u32>::new(std::ptr::null_mut()) {\n     unreachable!();\n }\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "cpu::id::all_cpus": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over all CPUs.\n",
+      "adt": {
+        "core::iter::Map": "Constructor"
+      }
+    },
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "cpu::local::AnyStorage::get_mut_ptr_on_target": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the `mut` pointer for the object on a target CPU.\n\n This method is intended for use when initializing or dropping the storage.\n",
+      "adt": {}
+    },
+    "core::ops::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "core::ptr::write": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Overwrites a memory location with the given value without reading or\n dropping the old value.\n\n `write` does not drop the contents of `dst`. This is safe, but it could leak\n allocations or resources, so care should be taken not to overwrite an object\n that should be dropped.\n\n Additionally, it does not drop `src`. Semantically, `src` is moved into the\n location pointed to by `dst`.\n\n This is appropriate for initializing uninitialized memory, or overwriting\n memory that has previously been [`read`] from.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `dst` must be [valid] for writes.\n\n * `dst` must be properly aligned. Use [`write_unaligned`] if this is not the\n   case.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n [valid]: self#safety\n\n # Examples\n\n Basic usage:\n\n ```\n let mut x = 0;\n let y = &mut x as *mut i32;\n let z = 12;\n\n unsafe {\n     std::ptr::write(y, z);\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 2350, kind: RigidTy(Adt(AdtDef(DefId { id: 4216, name: \"cpu::id::CpuId\" }), GenericArgs([]))) })])"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "cpu::local::dyn_cpu_local::DynamicStorage": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::iter::Map": [
+      "Plain",
+      "MutRef"
+    ],
+    "cpu::id::CpuId": [
+      "Plain"
+    ],
+    "cpu::local::CpuLocal": [
+      "Plain"
+    ]
+  },
+  "path": 1709,
+  "span": "ostd/src/cpu/local/dyn_cpu_local.rs:88:5: 110:6",
+  "src": "unsafe fn __new_dynamic(ptr: *mut T, init_values: &mut impl FnMut(CpuId) -> T) -> Self {\n        let mut storage = DynamicStorage(NonNull::new(ptr).unwrap());\n        for cpu in all_cpus() {\n            let ptr = storage.get_mut_ptr_on_target(cpu);\n            // SAFETY:\n            //  - `ptr` is valid for writes, because:\n            //    - The `DynCpuLocalChunk` slot is non-null and dereferenceable.\n            //    - This initialization occurs before any other code can access\n            //      the memory. References to the data may only be created\n            //      after `Self` is created, ensuring exclusive access by the\n            //      current task.\n            //  - `ptr` is properly aligned, as the caller guarantees that the\n            //    layout requirement is satisfied.\n            unsafe {\n                core::ptr::write(ptr, init_values(cpu));\n            }\n        }\n\n        Self {\n            storage,\n            phantom: PhantomData,\n        }\n    }",
+  "mir": "fn cpu::local::dyn_cpu_local::<impl cpu::local::CpuLocal<T, cpu::local::dyn_cpu_local::DynamicStorage<T>>>::__new_dynamic(_1: *mut T, _2: &mut impl FnMut(CpuId) -> T) -> cpu::local::CpuLocal<T, cpu::local::dyn_cpu_local::DynamicStorage<T>> {\n    let mut _0: cpu::local::CpuLocal<T, cpu::local::dyn_cpu_local::DynamicStorage<T>>;\n    let mut _3: cpu::local::dyn_cpu_local::DynamicStorage<T>;\n    let mut _4: core::ptr::NonNull<T>;\n    let mut _5: core::option::Option<core::ptr::NonNull<T>>;\n    let mut _6: core::iter::Map<core::ops::Range<usize>, {closure@ostd/src/cpu/id.rs:76:25: 76:33}>;\n    let mut _7: core::iter::Map<core::ops::Range<usize>, {closure@ostd/src/cpu/id.rs:76:25: 76:33}>;\n    let mut _8: core::iter::Map<core::ops::Range<usize>, {closure@ostd/src/cpu/id.rs:76:25: 76:33}>;\n    let mut _9: core::option::Option<cpu::id::CpuId>;\n    let mut _10: &mut core::iter::Map<core::ops::Range<usize>, {closure@ostd/src/cpu/id.rs:76:25: 76:33}>;\n    let mut _11: isize;\n    let  _12: cpu::id::CpuId;\n    let  _13: *mut T;\n    let mut _14: &mut cpu::local::dyn_cpu_local::DynamicStorage<T>;\n    let  _15: ();\n    let mut _16: T;\n    let mut _17: (cpu::id::CpuId,);\n    let mut _18: cpu::local::dyn_cpu_local::DynamicStorage<T>;\n    debug ptr => _1;\n    debug init_values => _2;\n    debug storage => _3;\n    debug iter => _8;\n    debug cpu => _12;\n    debug ptr => _13;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = core::ptr::NonNull::<T>::new(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = core::option::Option::<core::ptr::NonNull<T>>::unwrap(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = DynamicStorage(move _4);\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = cpu::id::all_cpus() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = <core::iter::Map<core::ops::Range<usize>, {closure@ostd/src/cpu/id.rs:76:25: 76:33}> as core::iter::IntoIterator>::into_iter(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        StorageLive(_8);\n        _8 = move _6;\n        goto -> bb5;\n    }\n    bb5: {\n        StorageLive(_9);\n        _10 = &mut _8;\n        _9 = <core::iter::Map<core::ops::Range<usize>, {closure@ostd/src/cpu/id.rs:76:25: 76:33}> as core::iter::Iterator>::next(_10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _11 = discriminant(_9);\n        switchInt(move _11) -> [0: bb9, 1: bb8, otherwise: bb7];\n    }\n    bb7: {\n        unreachable;\n    }\n    bb8: {\n        _12 = ((_9 as variant#1).0: cpu::id::CpuId);\n        StorageLive(_14);\n        _14 = &mut _3;\n        _13 = <cpu::local::dyn_cpu_local::DynamicStorage<T> as cpu::local::AnyStorage<T>>::get_mut_ptr_on_target(move _14, _12) -> [return: bb10, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_6);\n        StorageLive(_18);\n        _18 = move _3;\n        _0 = CpuLocal(move _18, ZeroSized: core::marker::PhantomData<T>);\n        StorageDead(_18);\n        StorageDead(_3);\n        return;\n    }\n    bb10: {\n        StorageDead(_14);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = (_12);\n        _16 = <impl FnMut(CpuId) -> T as core::ops::FnMut<(cpu::id::CpuId,)>>::call_mut(_2, move _17) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_17);\n        _15 = core::ptr::write::<T>(_13, move _16) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_16);\n        StorageDead(_9);\n        goto -> bb5;\n    }\n}\n",
+  "doc": " Creates a new dynamically-allocated CPU-local object, and\n initializes it with `init_values`.\n\n The given `ptr` points to the variable located on the BSP.\n\n Please do not call this function directly. Instead, use\n [`DynCpuLocalChunk::alloc`].\n\n # Safety\n\n The caller must ensure that\n  - the new per-CPU object belongs to an existing\n    [`DynCpuLocalChunk`], and does not overlap with any\n    existing CPU-local object;\n  - the `ITEM_SIZE` of the [`DynCpuLocalChunk`] satisfies\n    the layout requirement of `T`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

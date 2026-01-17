@@ -1,0 +1,40 @@
+{
+  "name": "sync::atomic::AtomicPtr::<T>::try_update",
+  "safe": true,
+  "callees": {
+    "sync::atomic::AtomicPtr::<T>::fetch_update": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Fetches the value, and applies a function to it that returns an optional\n new value. Returns a `Result` of `Ok(previous_value)` if the function\n returned `Some(_)`, else `Err(previous_value)`.\n\n Note: This may call the function multiple times if the value has been\n changed from other threads in the meantime, as long as the function\n returns `Some(_)`, but the function will have been applied only once to\n the stored value.\n\n `fetch_update` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. The first describes the required ordering for\n when the operation finally succeeds while the second describes the\n required ordering for loads. These correspond to the success and failure\n orderings of [`AtomicPtr::compare_exchange`] respectively.\n\n Using [`Acquire`] as success ordering makes the store part of this\n operation [`Relaxed`], and using [`Release`] makes the final successful\n load [`Relaxed`]. The (failed) load ordering can only be [`SeqCst`],\n [`Acquire`] or [`Relaxed`].\n\n **Note:** This method is only available on platforms that support atomic\n operations on pointers.\n\n # Considerations\n\n This method is not magic; it is not provided by the hardware, and does not act like a\n critical section or mutex.\n\n It is implemented on top of an atomic [compare-and-swap operation], and thus is subject to\n the usual drawbacks of CAS operations. In particular, be careful of the [ABA problem],\n which is a particularly common pitfall for pointers!\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n\n # Examples\n\n ```rust\n use std::sync::atomic::{AtomicPtr, Ordering};\n\n let ptr: *mut _ = &mut 5;\n let some_ptr = AtomicPtr::new(ptr);\n\n let new: *mut _ = &mut 10;\n assert_eq!(some_ptr.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |_| None), Err(ptr));\n let result = some_ptr.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| {\n     if x == ptr {\n         Some(new)\n     } else {\n         None\n     }\n });\n assert_eq!(result, Ok(ptr));\n assert_eq!(some_ptr.load(Ordering::SeqCst), new);\n ```\n",
+      "adt": {
+        "sync::atomic::AtomicPtr": "ImmutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sync::atomic::AtomicPtr": [
+      "Ref"
+    ],
+    "sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 17385,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/sync/atomic.rs:2126:5: 2135:6",
+  "src": "pub fn try_update(\n        &self,\n        set_order: Ordering,\n        fetch_order: Ordering,\n        f: impl FnMut(*mut T) -> Option<*mut T>,\n    ) -> Result<*mut T, *mut T> {\n        // FIXME(atomic_try_update): this is currently an unstable alias to `fetch_update`;\n        //      when stabilizing, turn `fetch_update` into a deprecated alias to `try_update`.\n        self.fetch_update(set_order, fetch_order, f)\n    }",
+  "mir": "fn sync::atomic::AtomicPtr::<T>::try_update(_1: &sync::atomic::AtomicPtr<T>, _2: sync::atomic::Ordering, _3: sync::atomic::Ordering, _4: impl FnMut(*mut T) -> Option<*mut T>) -> result::Result<*mut T, *mut T> {\n    let mut _0: result::Result<*mut T, *mut T>;\n    debug self => _1;\n    debug set_order => _2;\n    debug fetch_order => _3;\n    debug f => _4;\n    bb0: {\n        _0 = sync::atomic::AtomicPtr::<T>::fetch_update::<impl FnMut(*mut T) -> Option<*mut T>>(_1, _2, _3, _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Fetches the value, and applies a function to it that returns an optional\n new value. Returns a `Result` of `Ok(previous_value)` if the function\n returned `Some(_)`, else `Err(previous_value)`.\n\n See also: [`update`](`AtomicPtr::update`).\n\n Note: This may call the function multiple times if the value has been\n changed from other threads in the meantime, as long as the function\n returns `Some(_)`, but the function will have been applied only once to\n the stored value.\n\n `try_update` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. The first describes the required ordering for\n when the operation finally succeeds while the second describes the\n required ordering for loads. These correspond to the success and failure\n orderings of [`AtomicPtr::compare_exchange`] respectively.\n\n Using [`Acquire`] as success ordering makes the store part of this\n operation [`Relaxed`], and using [`Release`] makes the final successful\n load [`Relaxed`]. The (failed) load ordering can only be [`SeqCst`],\n [`Acquire`] or [`Relaxed`].\n\n **Note:** This method is only available on platforms that support atomic\n operations on pointers.\n\n # Considerations\n\n This method is not magic; it is not provided by the hardware, and does not act like a\n critical section or mutex.\n\n It is implemented on top of an atomic [compare-and-swap operation], and thus is subject to\n the usual drawbacks of CAS operations. In particular, be careful of the [ABA problem],\n which is a particularly common pitfall for pointers!\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n\n # Examples\n\n ```rust\n #![feature(atomic_try_update)]\n use std::sync::atomic::{AtomicPtr, Ordering};\n\n let ptr: *mut _ = &mut 5;\n let some_ptr = AtomicPtr::new(ptr);\n\n let new: *mut _ = &mut 10;\n assert_eq!(some_ptr.try_update(Ordering::SeqCst, Ordering::SeqCst, |_| None), Err(ptr));\n let result = some_ptr.try_update(Ordering::SeqCst, Ordering::SeqCst, |x| {\n     if x == ptr {\n         Some(new)\n     } else {\n         None\n     }\n });\n assert_eq!(result, Ok(ptr));\n assert_eq!(some_ptr.load(Ordering::SeqCst), new);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

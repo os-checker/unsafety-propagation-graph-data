@@ -1,0 +1,71 @@
+{
+  "name": "array::iter::IntoIter::<T, N>::new_unchecked",
+  "safe": false,
+  "callees": {
+    "ops::index_range::IndexRange::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " # Safety\n - `start <= end`\n",
+      "adt": {
+        "ops::index_range::IndexRange": "Constructor"
+      }
+    },
+    "array::iter::iter_inner::PolymorphicIter::<[mem::maybe_uninit::MaybeUninit<T>; N]>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " # Safety\n `data[alive]` are all initialized.\n",
+      "adt": {
+        "array::iter::iter_inner::PolymorphicIter": "Constructor"
+      }
+    },
+    "mem::manually_drop::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {
+        "mem::manually_drop::ManuallyDrop": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "ops::range::Range": [
+      "Unknown([Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(1, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Plain"
+    ],
+    "ops::index_range::IndexRange": [
+      "Plain"
+    ],
+    "array::iter::iter_inner::PolymorphicIter": [
+      "Plain"
+    ],
+    "mem::manually_drop::ManuallyDrop": [
+      "Plain"
+    ],
+    "array::iter::IntoIter": [
+      "Plain"
+    ]
+  },
+  "path": 4545,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/array/iter.rs:141:5: 150:6",
+  "src": "pub const unsafe fn new_unchecked(\n        buffer: [MaybeUninit<T>; N],\n        initialized: Range<usize>,\n    ) -> Self {\n        // SAFETY: one of our safety conditions is that the range is canonical.\n        let alive = unsafe { IndexRange::new_unchecked(initialized.start, initialized.end) };\n        // SAFETY: one of our safety condition is that these items are initialized.\n        let inner = unsafe { InnerSized::new_unchecked(alive, buffer) };\n        IntoIter { inner: ManuallyDrop::new(inner) }\n    }",
+  "mir": "fn array::iter::IntoIter::<T, N>::new_unchecked(_1: [mem::maybe_uninit::MaybeUninit<T>; N], _2: ops::range::Range<usize>) -> array::iter::IntoIter<T, N> {\n    let mut _0: array::iter::IntoIter<T, N>;\n    let  _3: ops::index_range::IndexRange;\n    let mut _4: usize;\n    let mut _5: usize;\n    let  _6: array::iter::iter_inner::PolymorphicIter<[mem::maybe_uninit::MaybeUninit<T>; N]>;\n    let mut _7: mem::manually_drop::ManuallyDrop<array::iter::iter_inner::PolymorphicIter<[mem::maybe_uninit::MaybeUninit<T>; N]>>;\n    debug buffer => _1;\n    debug initialized => _2;\n    debug alive => _3;\n    debug inner => _6;\n    bb0: {\n        StorageLive(_4);\n        _4 = (_2.0: usize);\n        StorageLive(_5);\n        _5 = (_2.1: usize);\n        _3 = ops::index_range::IndexRange::new_unchecked(move _4, move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _6 = array::iter::iter_inner::PolymorphicIter::<[mem::maybe_uninit::MaybeUninit<T>; N]>::new_unchecked(_3, _1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_7);\n        _7 = mem::manually_drop::ManuallyDrop::<array::iter::iter_inner::PolymorphicIter<[mem::maybe_uninit::MaybeUninit<T>; N]>>::new(_6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _0 = IntoIter(move _7);\n        StorageDead(_7);\n        return;\n    }\n}\n",
+  "doc": " Creates an iterator over the elements in a partially-initialized buffer.\n\n If you have a fully-initialized array, then use [`IntoIterator`].\n But this is useful for returning partial results from unsafe code.\n\n # Safety\n\n - The `buffer[initialized]` elements must all be initialized.\n - The range must be canonical, with `initialized.start <= initialized.end`.\n - The range must be in-bounds for the buffer, with `initialized.end <= N`.\n   (Like how indexing `[0][100..100]` fails despite the range being empty.)\n\n It's sound to have more elements initialized than mentioned, though that\n will most likely result in them being leaked.\n\n # Examples\n\n ```\n #![feature(array_into_iter_constructors)]\n #![feature(maybe_uninit_uninit_array_transpose)]\n use std::array::IntoIter;\n use std::mem::MaybeUninit;\n\n # // Hi!  Thanks for reading the code. This is restricted to `Copy` because\n # // otherwise it could leak. A fully-general version this would need a drop\n # // guard to handle panics from the iterator, but this works for an example.\n fn next_chunk<T: Copy, const N: usize>(\n     it: &mut impl Iterator<Item = T>,\n ) -> Result<[T; N], IntoIter<T, N>> {\n     let mut buffer = [const { MaybeUninit::uninit() }; N];\n     let mut i = 0;\n     while i < N {\n         match it.next() {\n             Some(x) => {\n                 buffer[i].write(x);\n                 i += 1;\n             }\n             None => {\n                 // SAFETY: We've initialized the first `i` items\n                 unsafe {\n                     return Err(IntoIter::new_unchecked(buffer, 0..i));\n                 }\n             }\n         }\n     }\n\n     // SAFETY: We've initialized all N items\n     unsafe { Ok(buffer.transpose().assume_init()) }\n }\n\n let r: [_; 4] = next_chunk(&mut (10..16)).unwrap();\n assert_eq!(r, [10, 11, 12, 13]);\n let r: IntoIter<_, 40> = next_chunk(&mut (10..16)).unwrap_err();\n assert_eq!(r.collect::<Vec<_>>(), vec![10, 11, 12, 13, 14, 15]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

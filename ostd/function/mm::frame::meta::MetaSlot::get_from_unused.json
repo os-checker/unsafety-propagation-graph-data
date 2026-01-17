@@ -1,0 +1,112 @@
+{
+  "name": "mm::frame::meta::MetaSlot::get_from_unused",
+  "safe": true,
+  "callees": {
+    "mm::frame::meta::get_slot": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the reference to a metadata slot.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicU64::compare_exchange": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer if the current value is the same as\n the `current` value.\n\n The return value is a result indicating whether the new value was written and\n containing the previous value. On success this value is guaranteed to be equal to\n `current`.\n\n `compare_exchange` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. `success` describes the required ordering for the\n read-modify-write operation that takes place if the comparison with `current` succeeds.\n `failure` describes the required ordering for the load operation that takes place when\n the comparison fails. Using [`Acquire`] as success ordering makes the store part\n of this operation [`Relaxed`], and using [`Release`] makes the successful load\n [`Relaxed`]. The failure ordering can only be [`SeqCst`], [`Acquire`] or [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.compare_exchange(5, 10,\n                                      Ordering::Acquire,\n                                      Ordering::Relaxed),\n            Ok(5));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n\n assert_eq!(some_var.compare_exchange(6, 12,\n                                      Ordering::SeqCst,\n                                      Ordering::Acquire),\n            Err(10));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n\n # Considerations\n\n `compare_exchange` is a [compare-and-swap operation] and thus exhibits the usual downsides\n of CAS operations. In particular, a load of the value followed by a successful\n `compare_exchange` with the previous load *does not ensure* that other threads have not\n changed the value in the interim! This is usually important when the *equality* check in\n the `compare_exchange` is being used to check the *identity* of a value, but equality\n does not necessarily imply identity. This is a particularly common case for pointers, as\n a pointer holding the same address does not imply that the same object exists at that\n address! In this case, `compare_exchange` can lead to the [ABA problem].\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::map_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<T, F>` by applying a function to a\n contained [`Err`] value, leaving an [`Ok`] value untouched.\n\n This function can be used to pass through a successful result while handling\n an error.\n\n\n # Examples\n\n ```\n fn stringify(x: u32) -> String { format!(\"error code: {x}\") }\n\n let x: Result<u32, u32> = Ok(2);\n assert_eq!(x.map_err(stringify), Ok(2));\n\n let x: Result<u32, u32> = Err(13);\n assert_eq!(x.map_err(stringify), Err(\"error code: 13\".to_string()));\n ```\n",
+      "adt": {}
+    },
+    "mm::frame::meta::MetaSlot::write_meta": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes the metadata to the slot without reading or dropping the previous value.\n\n # Safety\n\n The caller should have exclusive access to the metadata slot's fields.\n",
+      "adt": {
+        "mm::frame::meta::MetaSlot": "ImmutableAsArgument"
+      }
+    },
+    "core::sync::atomic::AtomicU64::store": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer.\n\n `store` takes an [`Ordering`] argument which describes the memory ordering of this operation.\n  Possible values are [`SeqCst`], [`Release`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Acquire`] or [`AcqRel`].\n\n # Examples\n\n ```\n\n\n some_var.store(10, Ordering::Relaxed);\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 4389, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 4392, kind: RigidTy(Adt(AdtDef(DefId { id: 5045, name: \"mm::frame::meta::MetaSlot\" }), GenericArgs([]))) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4515, kind: RigidTy(Adt(AdtDef(DefId { id: 2763, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 31, kind: RigidTy(Adt(AdtDef(DefId { id: 3443, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 4393, kind: RigidTy(Adt(AdtDef(DefId { id: 5079, name: \"mm::frame::meta::GetFrameError\" }), GenericArgs([]))) })]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 59, kind: RigidTy(Uint(U64)) })])"
+    ],
+    "mm::frame::meta::MetaSlot": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Deref"
+    ],
+    "core::sync::atomic::AtomicU64": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 1985,
+  "span": "ostd/src/mm/frame/meta.rs:233:5: 265:6",
+  "src": "pub(super) fn get_from_unused<M: AnyFrameMeta>(\n        paddr: Paddr,\n        metadata: M,\n        as_unique_ptr: bool,\n    ) -> Result<*const Self, GetFrameError> {\n        let slot = get_slot(paddr)?;\n\n        // `Acquire` pairs with the `Release` in `drop_last_in_place` and ensures the metadata\n        // initialization won't be reordered before this memory compare-and-exchange.\n        slot.ref_count\n            .compare_exchange(REF_COUNT_UNUSED, 0, Ordering::Acquire, Ordering::Relaxed)\n            .map_err(|val| match val {\n                REF_COUNT_UNIQUE => GetFrameError::Unique,\n                0 => GetFrameError::Busy,\n                _ => GetFrameError::InUse,\n            })?;\n\n        // SAFETY: The slot now has a reference count of `0`, other threads will\n        // not access the metadata slot so it is safe to have a mutable reference.\n        unsafe { slot.write_meta(metadata) };\n\n        if as_unique_ptr {\n            // No one can create a `Frame` instance directly from the page\n            // address, so `Relaxed` is fine here.\n            slot.ref_count.store(REF_COUNT_UNIQUE, Ordering::Relaxed);\n        } else {\n            // `Release` is used to ensure that the metadata initialization\n            // won't be reordered after this memory store.\n            slot.ref_count.store(1, Ordering::Release);\n        }\n\n        Ok(slot as *const MetaSlot)\n    }",
+  "mir": "fn mm::frame::meta::MetaSlot::get_from_unused(_1: usize, _2: M, _3: bool) -> core::result::Result<*const mm::frame::meta::MetaSlot, mm::frame::meta::GetFrameError> {\n    let mut _0: core::result::Result<*const mm::frame::meta::MetaSlot, mm::frame::meta::GetFrameError>;\n    let mut _4: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, mm::frame::meta::GetFrameError>, &mm::frame::meta::MetaSlot>;\n    let mut _5: core::result::Result<&mm::frame::meta::MetaSlot, mm::frame::meta::GetFrameError>;\n    let mut _6: isize;\n    let  _7: core::result::Result<core::convert::Infallible, mm::frame::meta::GetFrameError>;\n    let  _8: &mm::frame::meta::MetaSlot;\n    let mut _9: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, mm::frame::meta::GetFrameError>, u64>;\n    let mut _10: core::result::Result<u64, mm::frame::meta::GetFrameError>;\n    let mut _11: core::result::Result<u64, u64>;\n    let mut _12: &core::sync::atomic::AtomicU64;\n    let mut _13: core::sync::atomic::Ordering;\n    let mut _14: core::sync::atomic::Ordering;\n    let mut _15: isize;\n    let  _16: core::result::Result<core::convert::Infallible, mm::frame::meta::GetFrameError>;\n    let  _17: u64;\n    let  _18: ();\n    let mut _19: M;\n    let  _20: ();\n    let mut _21: &core::sync::atomic::AtomicU64;\n    let mut _22: core::sync::atomic::Ordering;\n    let  _23: ();\n    let mut _24: &core::sync::atomic::AtomicU64;\n    let mut _25: core::sync::atomic::Ordering;\n    let mut _26: *const mm::frame::meta::MetaSlot;\n    debug paddr => _1;\n    debug metadata => _2;\n    debug as_unique_ptr => _3;\n    debug slot => _8;\n    debug residual => _7;\n    debug val => _8;\n    debug residual => _16;\n    debug val => _17;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = mm::frame::meta::get_slot(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = <core::result::Result<&mm::frame::meta::MetaSlot, mm::frame::meta::GetFrameError> as core::ops::Try>::branch(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _6 = discriminant(_4);\n        switchInt(move _6) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _8 = ((_4 as variant#0).0: &mm::frame::meta::MetaSlot);\n        StorageDead(_4);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &((*_8).1: core::sync::atomic::AtomicU64);\n        StorageLive(_13);\n        _13 = core::sync::atomic::Ordering::Acquire;\n        StorageLive(_14);\n        _14 = core::sync::atomic::Ordering::Relaxed;\n        _11 = core::sync::atomic::AtomicU64::compare_exchange(move _12, mm::frame::meta::REF_COUNT_UNUSED, 0_u64, move _13, move _14) -> [return: bb7, unwind unreachable];\n    }\n    bb5: {\n        _7 = move ((_4 as variant#1).0: core::result::Result<core::convert::Infallible, mm::frame::meta::GetFrameError>);\n        _0 = <core::result::Result<*const mm::frame::meta::MetaSlot, mm::frame::meta::GetFrameError> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, mm::frame::meta::GetFrameError>>>::from_residual(_7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_4);\n        goto -> bb19;\n    }\n    bb7: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_12);\n        _10 = core::result::Result::<u64, u64>::map_err::<mm::frame::meta::GetFrameError, {closure@ostd/src/mm/frame/meta.rs:244:22: 244:27}>(move _11, ZeroSized: {closure@ostd/src/mm/frame/meta.rs:244:22: 244:27}) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        _9 = <core::result::Result<u64, mm::frame::meta::GetFrameError> as core::ops::Try>::branch(move _10) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_10);\n        _15 = discriminant(_9);\n        switchInt(move _15) -> [0: bb10, 1: bb11, otherwise: bb3];\n    }\n    bb10: {\n        StorageLive(_17);\n        _17 = ((_9 as variant#0).0: u64);\n        StorageDead(_17);\n        StorageDead(_9);\n        StorageLive(_19);\n        _19 = move _2;\n        _18 = mm::frame::meta::MetaSlot::write_meta::<M>(_8, move _19) -> [return: bb13, unwind unreachable];\n    }\n    bb11: {\n        _16 = move ((_9 as variant#1).0: core::result::Result<core::convert::Infallible, mm::frame::meta::GetFrameError>);\n        _0 = <core::result::Result<*const mm::frame::meta::MetaSlot, mm::frame::meta::GetFrameError> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, mm::frame::meta::GetFrameError>>>::from_residual(_16) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_9);\n        goto -> bb19;\n    }\n    bb13: {\n        StorageDead(_19);\n        switchInt(_3) -> [0: bb16, otherwise: bb14];\n    }\n    bb14: {\n        StorageLive(_21);\n        _21 = &((*_8).1: core::sync::atomic::AtomicU64);\n        StorageLive(_22);\n        _22 = core::sync::atomic::Ordering::Relaxed;\n        _20 = core::sync::atomic::AtomicU64::store(move _21, mm::frame::meta::REF_COUNT_UNIQUE, move _22) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_22);\n        StorageDead(_21);\n        goto -> bb18;\n    }\n    bb16: {\n        StorageLive(_24);\n        _24 = &((*_8).1: core::sync::atomic::AtomicU64);\n        StorageLive(_25);\n        _25 = core::sync::atomic::Ordering::Release;\n        _23 = core::sync::atomic::AtomicU64::store(move _24, 1_u64, move _25) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_25);\n        StorageDead(_24);\n        goto -> bb18;\n    }\n    bb18: {\n        StorageLive(_26);\n        _26 = &raw const (*_8);\n        _0 = core::result::Result::Ok(move _26);\n        StorageDead(_26);\n        goto -> bb20;\n    }\n    bb19: {\n        drop(_2) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        return;\n    }\n}\n",
+  "doc": " Initializes the metadata slot of a frame assuming it is unused.\n\n If successful, the function returns a pointer to the metadata slot.\n And the slot is initialized with the given metadata.\n\n The resulting reference count held by the returned pointer is\n [`REF_COUNT_UNIQUE`] if `as_unique_ptr` is `true`, otherwise `1`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

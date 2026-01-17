@@ -1,0 +1,42 @@
+{
+  "name": "core_simd::swizzle_dyn::transize",
+  "safe": false,
+  "callees": {
+    "mem::transmute_copy": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Interprets `src` as having type `&Dst`, and then reads `src` without moving\n the contained value.\n\n This function will unsafely assume the pointer `src` is valid for [`size_of::<Dst>`][size_of]\n bytes by transmuting `&Src` to `&Dst` and then reading the `&Dst` (except that this is done\n in a way that is correct even when `&Dst` has stricter alignment requirements than `&Src`).\n It will also unsafely create a copy of the contained value instead of moving out of `src`.\n\n It is not a compile-time error if `Src` and `Dst` have different sizes, but it\n is highly encouraged to only invoke this function where `Src` and `Dst` have the\n same size. This function triggers [undefined behavior][ub] if `Dst` is larger than\n `Src`.\n\n [ub]: ../../reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n use std::mem;\n\n #[repr(packed)]\n struct Foo {\n     bar: u8,\n }\n\n let foo_array = [10u8];\n\n unsafe {\n     // Copy the data from 'foo_array' and treat it as a 'Foo'\n     let mut foo_struct: Foo = mem::transmute_copy(&foo_array);\n     assert_eq!(foo_struct.bar, 10);\n\n     // Modify the copied data\n     foo_struct.bar = 20;\n     assert_eq!(foo_struct.bar, 20);\n }\n\n // The contents of 'foo_array' should not have changed\n assert_eq!(foo_array, [10]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_simd::vector::Simd": [
+      "Ref",
+      "Plain"
+    ]
+  },
+  "path": 12503,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/swizzle_dyn.rs:183:1: 193:2",
+  "src": "unsafe fn transize<T, const N: usize>(\n    f: unsafe fn(T, T) -> T,\n    a: Simd<u8, N>,\n    b: Simd<u8, N>,\n) -> Simd<u8, N>\nwhere\n    LaneCount<N>: SupportedLaneCount,\n{\n    // SAFETY: Same obligation to use this function as to use mem::transmute_copy.\n    unsafe { mem::transmute_copy(&f(mem::transmute_copy(&a), mem::transmute_copy(&b))) }\n}",
+  "mir": "fn core_simd::swizzle_dyn::transize(_1: unsafe fn(T, T) -> T, _2: core_simd::vector::Simd<u8, N>, _3: core_simd::vector::Simd<u8, N>) -> core_simd::vector::Simd<u8, N> {\n    let mut _0: core_simd::vector::Simd<u8, N>;\n    let  _4: &T;\n    let  _5: T;\n    let mut _6: T;\n    let  _7: &core_simd::vector::Simd<u8, N>;\n    let mut _8: T;\n    let  _9: &core_simd::vector::Simd<u8, N>;\n    debug f => _1;\n    debug a => _2;\n    debug b => _3;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _7 = &_2;\n        _6 = mem::transmute_copy::<core_simd::vector::Simd<u8, N>, T>(_7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_8);\n        _9 = &_3;\n        _8 = mem::transmute_copy::<core_simd::vector::Simd<u8, N>, T>(_9) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = _1(move _6, move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageDead(_6);\n        _4 = &_5;\n        _0 = mem::transmute_copy::<T, core_simd::vector::Simd<u8, N>>(_4) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        drop(_5) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": " This sets up a call to an architecture-specific function, and in doing so\n it persuades rustc that everything is the correct size. Which it is.\n This would not be needed if one could convince Rust that, by matching on N,\n N is that value, and thus it would be valid to substitute e.g. 16.\n\n # Safety\n The correctness of this function hinges on the sizes agreeing in actuality.\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "dead_code"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* dead_code\n"
+    ]
+  }
+}

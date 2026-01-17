@@ -1,0 +1,96 @@
+{
+  "name": "mm::page_table::cursor::Cursor::<'rcu, C>::jump",
+  "safe": true,
+  "callees": {
+    "core::num::<impl usize>::is_multiple_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if `self` is an integer multiple of `rhs`, and false otherwise.\n\n This function is equivalent to `self % rhs == 0`, except that it will not panic\n for `rhs == 0`. Instead, `0.is_multiple_of(0) == true`, and for any non-zero `n`,\n `n.is_multiple_of(0) == false`.\n\n # Examples\n\n ```\n\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Range::<Idx>::contains": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if `item` is contained in the range.\n\n # Examples\n\n ```\n assert!(!(3..5).contains(&2));\n assert!( (3..5).contains(&3));\n assert!( (3..5).contains(&4));\n assert!(!(3..5).contains(&5));\n\n assert!(!(3..3).contains(&3));\n assert!(!(3..2).contains(&3));\n\n assert!( (0.0..1.0).contains(&0.5));\n assert!(!(0.0..1.0).contains(&f32::NAN));\n assert!(!(0.0..f32::NAN).contains(&0.5));\n assert!(!(f32::NAN..1.0).contains(&0.5));\n ```\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "mm::page_table::cursor::Cursor::<'rcu, C>::pop_level": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Goes up a level.\n",
+      "adt": {
+        "mm::page_table::cursor::Cursor": "MutableAsArgument"
+      }
+    },
+    "mm::page_size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The page size at a given level.\n",
+      "adt": {}
+    },
+    "align_ext::AlignExt::align_down": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns to the greatest number that is smaller than or equal to\n `self` and is a multiple of the given power of two.\n\n The method panics if `power_of_two` is not a\n power of two or is smaller than 2 or the calculation overflows\n because `self` is too large. In release mode,\n\n # Examples\n\n ```\n use crate::align_ext::AlignExt;\n assert_eq!(12usize.align_down(2), 12);\n assert_eq!(12usize.align_down(4), 12);\n assert_eq!(12usize.align_down(8), 8);\n assert_eq!(12usize.align_down(16), 0);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ops::Range": [
+      "Ref"
+    ],
+    "mm::page_table::cursor::Cursor": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(5)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(4)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "MutRef"
+    ],
+    "mm::page_table::PageTableError": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 2352,
+  "span": "ostd/src/mm/page_table/cursor/mod.rs:283:5: 312:6",
+  "src": "pub fn jump(&mut self, va: Vaddr) -> Result<(), PageTableError> {\n        assert!(va.is_multiple_of(C::BASE_PAGE_SIZE));\n        if !self.barrier_va.contains(&va) {\n            return Err(PageTableError::InvalidVaddr(va));\n        }\n\n        // FIXME: Maintain the `self.barrier_va.contains(self.va)` invariant:\n        // <https://github.com/asterinas/asterinas/pull/2613>.\n        if self.va == self.barrier_va.end {\n            while self.level < self.guard_level {\n                self.pop_level();\n            }\n            self.va = va;\n            return Ok(());\n        }\n\n        debug_assert!(self.barrier_va.contains(&self.va));\n\n        loop {\n            let node_size = page_size::<C>(self.level + 1);\n            let node_start = self.va.align_down(node_size);\n            // If the address is within the current node, we can jump directly.\n            if node_start <= va && va < node_start + node_size {\n                self.va = va;\n                return Ok(());\n            }\n\n            self.pop_level();\n        }\n    }",
+  "mir": "fn mm::page_table::cursor::Cursor::<'rcu, C>::jump(_1: &mut mm::page_table::cursor::Cursor<'_, C>, _2: usize) -> core::result::Result<(), mm::page_table::PageTableError> {\n    let mut _0: core::result::Result<(), mm::page_table::PageTableError>;\n    let mut _3: bool;\n    let mut _4: !;\n    let mut _5: bool;\n    let mut _6: &core::ops::Range<usize>;\n    let  _7: &usize;\n    let mut _8: mm::page_table::PageTableError;\n    let mut _9: bool;\n    let mut _10: usize;\n    let mut _11: usize;\n    let mut _12: bool;\n    let mut _13: u8;\n    let mut _14: u8;\n    let  _15: ();\n    let mut _16: bool;\n    let mut _17: &core::ops::Range<usize>;\n    let  _18: &usize;\n    let mut _19: !;\n    let  _20: usize;\n    let mut _21: u8;\n    let mut _22: u8;\n    let mut _23: (u8, bool);\n    let  _24: usize;\n    let mut _25: usize;\n    let mut _26: bool;\n    let mut _27: bool;\n    let mut _28: usize;\n    let mut _29: (usize, bool);\n    let  _30: ();\n    debug self => _1;\n    debug va => _2;\n    debug node_size => _20;\n    debug node_start => _24;\n    bb0: {\n        StorageLive(_3);\n        _3 = core::num::<impl usize>::is_multiple_of(_2, <C as mm::PagingConstsTrait>::BASE_PAGE_SIZE) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &((*_1).5: core::ops::Range<usize>);\n        _7 = &_2;\n        _5 = core::ops::Range::<usize>::contains::<usize>(move _6, _7) -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        _4 = core::panicking::panic(\"assertion failed: va.is_multiple_of(C::BASE_PAGE_SIZE)\") -> unwind unreachable;\n    }\n    bb4: {\n        switchInt(move _5) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = ((*_1).4: usize);\n        StorageLive(_11);\n        _11 = (((*_1).5: core::ops::Range<usize>).1: usize);\n        _9 = Eq(move _10, move _11);\n        switchInt(move _9) -> [0: bb8, otherwise: bb7];\n    }\n    bb6: {\n        StorageDead(_6);\n        StorageLive(_8);\n        _8 = mm::page_table::PageTableError::InvalidVaddr(_2);\n        _0 = core::result::Result::Err(move _8);\n        StorageDead(_8);\n        StorageDead(_5);\n        goto -> bb27;\n    }\n    bb7: {\n        StorageDead(_11);\n        StorageDead(_10);\n        goto -> bb9;\n    }\n    bb8: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &((*_1).5: core::ops::Range<usize>);\n        _18 = &((*_1).4: usize);\n        _16 = core::ops::Range::<usize>::contains::<usize>(move _17, _18) -> [return: bb13, unwind unreachable];\n    }\n    bb9: {\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = ((*_1).2: u8);\n        StorageLive(_14);\n        _14 = ((*_1).3: u8);\n        _12 = Lt(move _13, move _14);\n        switchInt(move _12) -> [0: bb12, otherwise: bb10];\n    }\n    bb10: {\n        StorageDead(_14);\n        StorageDead(_13);\n        _15 = mm::page_table::cursor::Cursor::<'_, C>::pop_level(_1) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_12);\n        goto -> bb9;\n    }\n    bb12: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_12);\n        ((*_1).4: usize) = _2;\n        _0 = core::result::Result::Ok(());\n        StorageDead(_9);\n        goto -> bb27;\n    }\n    bb13: {\n        switchInt(move _16) -> [0: bb15, otherwise: bb14];\n    }\n    bb14: {\n        StorageDead(_17);\n        StorageDead(_16);\n        goto -> bb16;\n    }\n    bb15: {\n        StorageDead(_17);\n        _19 = core::panicking::panic(\"assertion failed: self.barrier_va.contains(&self.va)\") -> unwind unreachable;\n    }\n    bb16: {\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = ((*_1).2: u8);\n        _23 = CheckedAdd(_22, 1_u8);\n        assert(!move (_23.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _22, 1_u8) -> [success: bb17, unwind unreachable];\n    }\n    bb17: {\n        _21 = move (_23.0: u8);\n        StorageDead(_22);\n        _20 = mm::page_size::<C>(move _21) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_21);\n        StorageLive(_25);\n        _25 = ((*_1).4: usize);\n        _24 = <usize as align_ext::AlignExt>::align_down(move _25, _20) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_25);\n        StorageLive(_26);\n        _26 = Le(_24, _2);\n        switchInt(move _26) -> [0: bb24, otherwise: bb20];\n    }\n    bb20: {\n        StorageLive(_27);\n        StorageLive(_28);\n        _29 = CheckedAdd(_24, _20);\n        assert(!move (_29.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _24, _20) -> [success: bb21, unwind unreachable];\n    }\n    bb21: {\n        _28 = move (_29.0: usize);\n        _27 = Lt(_2, move _28);\n        switchInt(move _27) -> [0: bb23, otherwise: bb22];\n    }\n    bb22: {\n        StorageDead(_28);\n        ((*_1).4: usize) = _2;\n        _0 = core::result::Result::Ok(());\n        StorageDead(_27);\n        StorageDead(_26);\n        goto -> bb27;\n    }\n    bb23: {\n        StorageDead(_28);\n        goto -> bb25;\n    }\n    bb24: {\n        goto -> bb25;\n    }\n    bb25: {\n        StorageDead(_27);\n        StorageDead(_26);\n        _30 = mm::page_table::cursor::Cursor::<'_, C>::pop_level(_1) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        goto -> bb16;\n    }\n    bb27: {\n        return;\n    }\n}\n",
+  "doc": " Jumps to the given virtual address.\n If the target address is out of the range, this method will return `Err`.\n\n # Panics\n\n This method panics if the address has bad alignment.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

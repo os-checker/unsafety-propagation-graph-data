@@ -1,0 +1,43 @@
+{
+  "name": "rc::Rc::<T, A>::allocate_for_ptr_in",
+  "safe": false,
+  "callees": {
+    "core::alloc::Layout::for_value_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Produces layout describing a record that could be used to\n allocate backing structure for `T` (which could be a trait\n or other unsized type like a slice).\n\n # Safety\n\n This function is only safe to call if the following conditions hold:\n\n - If `T` is `Sized`, this function is always safe to call.\n - If the unsized tail of `T` is:\n     - a [slice], then the length of the slice tail must be an initialized\n       integer, and the size of the *entire value*\n       (dynamic tail length + statically sized prefix) must fit in `isize`.\n       For the special case where the dynamic tail length is 0, this function\n       is safe to call.\n     - a [trait object], then the vtable part of the pointer must point\n       to a valid vtable for the type `T` acquired by an unsizing coercion,\n       and the size of the *entire value*\n       (dynamic tail length + statically sized prefix) must fit in `isize`.\n     - an (unstable) [extern type], then this function is always safe to\n       call, but may panic or otherwise return the wrong value, as the\n       extern type's layout is not known. This is the same behavior as\n       [`Layout::for_value`] on a reference to an extern type tail.\n     - otherwise, it is conservatively not allowed to call this function.\n\n [trait object]: ../../book/ch17-02-trait-objects.html\n [extern type]: ../../unstable-book/language-features/extern-types.html\n",
+      "adt": {}
+    },
+    "rc::Rc::<T>::allocate_for_layout": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates an `RcInner<T>` with sufficient space for\n a possibly-unsized inner value where the value has the layout provided.\n\n The function `mem_to_rc_inner` is called with the data pointer\n and must return back a (potentially fat)-pointer for the `RcInner<T>`.\n",
+      "adt": {
+        "core::alloc::Layout": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "core::alloc::Layout": [
+      "Plain"
+    ]
+  },
+  "path": 1727,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2261:5: 2270:6",
+  "src": "unsafe fn allocate_for_ptr_in(ptr: *const T, alloc: &A) -> *mut RcInner<T> {\n        // Allocate for the `RcInner<T>` using the given value.\n        unsafe {\n            Rc::<T>::allocate_for_layout(\n                Layout::for_value_raw(ptr),\n                |layout| alloc.allocate(layout),\n                |mem| mem.with_metadata_of(ptr as *const RcInner<T>),\n            )\n        }\n    }",
+  "mir": "fn rc::Rc::<T, A>::allocate_for_ptr_in(_1: *const T, _2: &A) -> *mut rc::RcInner<T> {\n    let mut _0: *mut rc::RcInner<T>;\n    let mut _3: core::alloc::Layout;\n    let mut _4: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2266:17: 2266:25};\n    let mut _5: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2267:17: 2267:22};\n    let mut _6: &*const T;\n    debug ptr => _1;\n    debug alloc => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = core::alloc::Layout::for_value_raw::<T>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2266:17: 2266:25}(_2);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &_1;\n        _5 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2267:17: 2267:22}(move _6);\n        StorageDead(_6);\n        _0 = rc::Rc::<T>::allocate_for_layout::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2266:17: 2266:25}, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2267:17: 2267:22}>(move _3, move _4, move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Allocates an `RcInner<T>` with sufficient space for an unsized inner value\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

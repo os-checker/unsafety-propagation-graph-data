@@ -1,0 +1,55 @@
+{
+  "name": "slice::<impl [T]>::split_first_chunk",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::split_at_checked": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one slice into two at an index, returning `None` if the slice is\n too short.\n\n If `mid ≤ len` returns a pair of slices where the first will contain all\n indices from `[0, mid)` (excluding the index `mid` itself) and the\n second will contain all indices from `[mid, len)` (excluding the index\n `len` itself).\n\n Otherwise, if `mid > len`, returns `None`.\n\n # Examples\n\n ```\n let v = [1, -2, 3, -4, 5, -6];\n\n {\n    let (left, right) = v.split_at_checked(0).unwrap();\n    assert_eq!(left, []);\n    assert_eq!(right, [1, -2, 3, -4, 5, -6]);\n }\n\n {\n     let (left, right) = v.split_at_checked(2).unwrap();\n     assert_eq!(left, [1, -2]);\n     assert_eq!(right, [3, -4, 5, -6]);\n }\n\n {\n     let (left, right) = v.split_at_checked(6).unwrap();\n     assert_eq!(left, [1, -2, 3, -4, 5, -6]);\n     assert_eq!(right, []);\n }\n\n assert_eq!(None, v.split_at_checked(7));\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::cast_array": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts from a pointer-to-`T` to a pointer-to-`[T; N]`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 13664, kind: RigidTy(Tuple([Ty { id: 1487, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 1489, kind: RigidTy(Slice(Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) })) }, Not)) }, Ty { id: 1487, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 1489, kind: RigidTy(Slice(Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) })) }, Not)) }])) }), Field(0, Ty { id: 1487, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 1489, kind: RigidTy(Slice(Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) })) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 13664, kind: RigidTy(Tuple([Ty { id: 1487, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 1489, kind: RigidTy(Slice(Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) })) }, Not)) }, Ty { id: 1487, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 1489, kind: RigidTy(Slice(Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) })) }, Not)) }])) }), Field(1, Ty { id: 1487, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 1489, kind: RigidTy(Slice(Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) })) }, Not)) })])"
+    ]
+  },
+  "path": 1310,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:386:5: 392:6",
+  "src": "pub const fn split_first_chunk<const N: usize>(&self) -> Option<(&[T; N], &[T])> {\n        let Some((first, tail)) = self.split_at_checked(N) else { return None };\n\n        // SAFETY: We explicitly check for the correct number of elements,\n        //   and do not let the references outlive the slice.\n        Some((unsafe { &*(first.as_ptr().cast_array()) }, tail))\n    }",
+  "mir": "fn slice::<impl [T]>::split_first_chunk(_1: &[T]) -> option::Option<(&[T; N], &[T])> {\n    let mut _0: option::Option<(&[T; N], &[T])>;\n    let  _2: &[T];\n    let  _3: &[T];\n    let mut _4: option::Option<(&[T], &[T])>;\n    let mut _5: isize;\n    let mut _6: (&[T; N], &[T]);\n    let  _7: &[T; N];\n    let  _8: *const [T; N];\n    let mut _9: *const T;\n    debug self => _1;\n    debug first => _2;\n    debug tail => _3;\n    bb0: {\n        StorageLive(_4);\n        _4 = slice::<impl [T]>::split_at_checked(_1, N) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = discriminant(_4);\n        switchInt(move _5) -> [1: bb2, 0: bb3, otherwise: bb7];\n    }\n    bb2: {\n        _2 = (((_4 as variant#1).0: (&[T], &[T])).0: &[T]);\n        _3 = (((_4 as variant#1).0: (&[T], &[T])).1: &[T]);\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = slice::<impl [T]>::as_ptr(_2) -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _0 = option::Option::None;\n        goto -> bb6;\n    }\n    bb4: {\n        _8 = ptr::const_ptr::<impl *const T>::cast_array::<N>(move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        _7 = &(*_8);\n        StorageDead(_8);\n        _6 = (_7, _3);\n        _0 = option::Option::Some(move _6);\n        StorageDead(_6);\n        goto -> bb6;\n    }\n    bb6: {\n        return;\n    }\n    bb7: {\n        unreachable;\n    }\n}\n",
+  "doc": " Returns an array reference to the first `N` items in the slice and the remaining slice.\n\n If the slice is not at least `N` in length, this will return `None`.\n\n # Examples\n\n ```\n let x = &[0, 1, 2];\n\n if let Some((first, elements)) = x.split_first_chunk::<2>() {\n     assert_eq!(first, &[0, 1]);\n     assert_eq!(elements, &[2]);\n }\n\n assert_eq!(None, x.split_first_chunk::<4>());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

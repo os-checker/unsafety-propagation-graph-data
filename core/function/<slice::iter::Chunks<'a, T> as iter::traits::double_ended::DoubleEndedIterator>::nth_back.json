@@ -1,0 +1,62 @@
+{
+  "name": "<slice::iter::Chunks<'a, T> as iter::traits::double_ended::DoubleEndedIterator>::nth_back",
+  "safe": true,
+  "callees": {
+    "iter::traits::exact_size::ExactSizeIterator::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the exact remaining length of the iterator.\n\n The implementation ensures that the iterator will return exactly `len()`\n more times a [`Some(T)`] value, before returning [`None`].\n This method has a default implementation, so you usually should not\n implement it directly. However, if you can provide a more efficient\n implementation, you can do so. See the [trait-level] docs for an\n example.\n\n This function has the same safety guarantees as the\n [`Iterator::size_hint`] function.\n\n [trait-level]: ExactSizeIterator\n [`Some(T)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n // a finite range knows exactly how many times it will iterate\n let mut range = 0..5;\n\n assert_eq!(5, range.len());\n let _ = range.next();\n assert_eq!(4, range.len());\n ```\n",
+      "adt": {}
+    },
+    "cmp::Ord::min": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the minimum of two values.\n\n Returns the first argument if the comparison determines them to be equal.\n\n # Examples\n\n ```\n assert_eq!(1.min(2), 1);\n assert_eq!(2.min(2), 2);\n ```\n ```\n use std::cmp::Ordering;\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(Equal(\"self\").min(Equal(\"other\")).0, \"self\");\n ```\n",
+      "adt": {}
+    },
+    "ops::index::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::Chunks": [
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "ops::range::Range": [
+      "Plain"
+    ],
+    "ops::range::RangeTo": [
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 16382,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:1602:5: 1614:6",
+  "src": "fn nth_back(&mut self, n: usize) -> Option<Self::Item> {\n        let len = self.len();\n        if n < len {\n            let start = (len - 1 - n) * self.chunk_size;\n            let end = start + (self.v.len() - start).min(self.chunk_size);\n            let nth_back = &self.v[start..end];\n            self.v = &self.v[..start];\n            Some(nth_back)\n        } else {\n            self.v = &self.v[..0]; // cheaper than &[]\n            None\n        }\n    }",
+  "mir": "fn <slice::iter::Chunks<'a, T> as iter::traits::double_ended::DoubleEndedIterator>::nth_back(_1: &mut slice::iter::Chunks<'_, T>, _2: usize) -> option::Option<&[T]> {\n    let mut _0: option::Option<&[T]>;\n    let  _3: usize;\n    let mut _4: &&mut slice::iter::Chunks<'_, T>;\n    let mut _5: bool;\n    let  _6: usize;\n    let mut _7: usize;\n    let mut _8: usize;\n    let mut _9: (usize, bool);\n    let mut _10: (usize, bool);\n    let mut _11: usize;\n    let mut _12: (usize, bool);\n    let  _13: usize;\n    let mut _14: usize;\n    let mut _15: usize;\n    let mut _16: usize;\n    let mut _17: (usize, bool);\n    let mut _18: usize;\n    let mut _19: (usize, bool);\n    let  _20: &[T];\n    let mut _21: ops::range::Range<usize>;\n    let  _22: &[T];\n    let mut _23: ops::range::RangeTo<usize>;\n    let  _24: &[T];\n    let mut _25: ops::range::RangeTo<usize>;\n    let mut _26: &[T];\n    let mut _27: &[T];\n    let mut _28: &[T];\n    let mut _29: &[T];\n    debug self => _1;\n    debug n => _2;\n    debug len => _3;\n    debug start => _6;\n    debug end => _13;\n    debug nth_back => _20;\n    bb0: {\n        StorageLive(_4);\n        _4 = &_1;\n        _3 = <&mut slice::iter::Chunks<'_, T> as iter::traits::exact_size::ExactSizeIterator>::len(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = Lt(_2, _3);\n        switchInt(move _5) -> [0: bb11, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_7);\n        StorageLive(_8);\n        _9 = CheckedSub(_3, 1_usize);\n        assert(!move (_9.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _3, 1_usize) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _8 = move (_9.0: usize);\n        _10 = CheckedSub(_8, _2);\n        assert(!move (_10.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _8, _2) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _7 = move (_10.0: usize);\n        StorageDead(_8);\n        StorageLive(_11);\n        _11 = ((*_1).1: usize);\n        _12 = CheckedMul(_7, _11);\n        assert(!move (_12.1: bool), \"attempt to compute `{} * {}`, which would overflow\", move _7, move _11) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _6 = move (_12.0: usize);\n        StorageDead(_11);\n        StorageDead(_7);\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        _26 = ((*_1).0: &[T]);\n        _16 = PtrMetadata(_26);\n        _17 = CheckedSub(_16, _6);\n        assert(!move (_17.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _16, _6) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _15 = move (_17.0: usize);\n        StorageDead(_16);\n        StorageLive(_18);\n        _18 = ((*_1).1: usize);\n        _14 = <usize as cmp::Ord>::min(move _15, move _18) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_18);\n        StorageDead(_15);\n        _19 = CheckedAdd(_6, _14);\n        assert(!move (_19.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _6, move _14) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _13 = move (_19.0: usize);\n        StorageDead(_14);\n        _27 = ((*_1).0: &[T]);\n        StorageLive(_21);\n        _21 = Range(_6, _13);\n        _20 = <[T] as ops::index::Index<ops::range::Range<usize>>>::index(_27, move _21) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_21);\n        _28 = ((*_1).0: &[T]);\n        StorageLive(_23);\n        _23 = RangeTo(_6);\n        _22 = <[T] as ops::index::Index<ops::range::RangeTo<usize>>>::index(_28, move _23) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_23);\n        ((*_1).0: &[T]) = _22;\n        _0 = option::Option::Some(_20);\n        goto -> bb13;\n    }\n    bb11: {\n        _29 = ((*_1).0: &[T]);\n        StorageLive(_25);\n        _25 = RangeTo(0_usize);\n        _24 = <[T] as ops::index::Index<ops::range::RangeTo<usize>>>::index(_29, move _25) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_25);\n        ((*_1).0: &[T]) = _24;\n        _0 = option::Option::None;\n        goto -> bb13;\n    }\n    bb13: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

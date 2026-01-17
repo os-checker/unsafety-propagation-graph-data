@@ -1,0 +1,21 @@
+{
+  "name": "mem::maybe_uninit::MaybeUninit::<T>::as_ptr",
+  "safe": true,
+  "callees": {},
+  "adts": {
+    "mem::maybe_uninit::MaybeUninit": [
+      "Deref",
+      "Ref"
+    ]
+  },
+  "path": 14428,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/mem/maybe_uninit.rs:607:5: 610:6",
+  "src": "pub const fn as_ptr(&self) -> *const T {\n        // `MaybeUninit` and `ManuallyDrop` are both `repr(transparent)` so we can cast the pointer.\n        self as *const _ as *const T\n    }",
+  "mir": "fn mem::maybe_uninit::MaybeUninit::<T>::as_ptr(_1: &mem::maybe_uninit::MaybeUninit<T>) -> *const T {\n    let mut _0: *const T;\n    let mut _2: *const mem::maybe_uninit::MaybeUninit<T>;\n    debug self => _1;\n    bb0: {\n        _2 = &raw const (*_1);\n        _0 = _2 as *const T;\n        return;\n    }\n}\n",
+  "doc": " Gets a pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n Writing to memory that this pointer (non-transitively) points to is undefined behavior\n (except inside an `UnsafeCell<T>`).\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<T>`. This is okay because we initialized it.\n let x_vec = unsafe { &*x.as_ptr() };\n assert_eq!(x_vec.len(), 3);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &*x.as_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

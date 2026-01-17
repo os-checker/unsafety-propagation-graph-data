@@ -1,0 +1,64 @@
+{
+  "name": "arch::cpu::cpuid::query_tsc_freq",
+  "safe": true,
+  "callees": {
+    "arch::cpu::cpuid::cpuid": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Executes the CPUID instruction for the given leaf and subleaf.\n\n This method will return `None` if the leaf is not supported.\n",
+      "adt": {
+        "core::option::Option": "Constructor",
+        "core::arch::x86_64::CpuidResult": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 782, kind: RigidTy(Adt(AdtDef(DefId { id: 3332, name: \"core::arch::x86_64::CpuidResult\" }), GenericArgs([]))) })])"
+    ],
+    "core::arch::x86_64::CpuidResult": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 9, kind: RigidTy(Uint(U32)) })])",
+      "Unknown([Field(1, Ty { id: 9, kind: RigidTy(Uint(U32)) })])",
+      "Unknown([Field(2, Ty { id: 9, kind: RigidTy(Uint(U32)) })])"
+    ]
+  },
+  "path": 383,
+  "span": "ostd/src/arch/x86/cpu/cpuid.rs:57:1: 85:2",
+  "src": "pub(in crate::arch) fn query_tsc_freq() -> Option<u64> {\n    let CpuidResult {\n        eax: denominator,\n        ebx: numerator,\n        ecx: crystal_freq,\n        ..\n    } = cpuid(Leaf::Tsc as u32, 0)?;\n\n    if denominator == 0 || numerator == 0 {\n        return None;\n    }\n\n    // If the nominal core crystal clock frequency is not enumerated, we can either obtain that\n    // information from a hardcoded table or rely on the processor base frequency. The Intel\n    // documentation recommends the first approach [1], but Linux uses the second approach because\n    // the first approach is difficult to implement correctly for all corner cases [2]. However,\n    // the second approach does not provide 100% accurate frequencies, so Linux must adjust them at\n    // runtime [2]. For now, we avoid these headaches by faithfully reporting that the TSC\n    // frequency is unavailable.\n    //\n    // [1]: Intel(R) 64 and IA-32 Architectures Software Developer’s Manual,\n    //      Section 20.7.3, Determining the Processor Base Frequency\n    // [2]: https://github.com/torvalds/linux/commit/604dc9170f2435d27da5039a3efd757dceadc684\n    if crystal_freq == 0 {\n        return None;\n    }\n\n    Some((crystal_freq as u64) * (numerator as u64) / (denominator as u64))\n}",
+  "mir": "fn arch::cpu::cpuid::query_tsc_freq() -> core::option::Option<u64> {\n    let mut _0: core::option::Option<u64>;\n    let  _1: u32;\n    let  _2: u32;\n    let  _3: u32;\n    let mut _4: core::ops::ControlFlow<core::option::Option<core::convert::Infallible>, core::arch::x86_64::CpuidResult>;\n    let mut _5: core::option::Option<core::arch::x86_64::CpuidResult>;\n    let mut _6: u32;\n    let mut _7: (u32, bool);\n    let mut _8: isize;\n    let  _9: core::arch::x86_64::CpuidResult;\n    let mut _10: u64;\n    let mut _11: u64;\n    let mut _12: u64;\n    let mut _13: u64;\n    let mut _14: (u64, bool);\n    let mut _15: u64;\n    let mut _16: bool;\n    debug denominator => _1;\n    debug numerator => _2;\n    debug crystal_freq => _3;\n    debug residual => core::option::Option::<core::convert::Infallible>::None;\n    debug val => _9;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _7 = CheckedAdd(arch::cpu::cpuid::Leaf::Tsc::{constant#0}, 0_u32);\n        assert(!move (_7.1: bool), \"attempt to compute `{} + {}`, which would overflow\", arch::cpu::cpuid::Leaf::Tsc::{constant#0}, 0_u32) -> [success: bb1, unwind unreachable];\n    }\n    bb1: {\n        _6 = move (_7.0: u32);\n        _5 = arch::cpu::cpuid::cpuid(_6, 0_u32) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = <core::option::Option<core::arch::x86_64::CpuidResult> as core::ops::Try>::branch(move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        _8 = discriminant(_4);\n        switchInt(move _8) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _9 = ((_4 as variant#0).0: core::arch::x86_64::CpuidResult);\n        _1 = (_9.0: u32);\n        _2 = (_9.1: u32);\n        _3 = (_9.2: u32);\n        StorageDead(_4);\n        switchInt(_1) -> [0: bb8, otherwise: bb9];\n    }\n    bb6: {\n        _0 = <core::option::Option<u64> as core::ops::FromResidual<core::option::Option<core::convert::Infallible>>>::from_residual(core::option::Option::<core::convert::Infallible>::None) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_4);\n        goto -> bb18;\n    }\n    bb8: {\n        goto -> bb12;\n    }\n    bb9: {\n        switchInt(_2) -> [0: bb10, otherwise: bb11];\n    }\n    bb10: {\n        goto -> bb12;\n    }\n    bb11: {\n        switchInt(_3) -> [0: bb13, otherwise: bb14];\n    }\n    bb12: {\n        _0 = core::option::Option::None;\n        goto -> bb17;\n    }\n    bb13: {\n        _0 = core::option::Option::None;\n        goto -> bb17;\n    }\n    bb14: {\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = _3 as u64;\n        StorageLive(_13);\n        _13 = _2 as u64;\n        _14 = CheckedMul(_12, _13);\n        assert(!move (_14.1: bool), \"attempt to compute `{} * {}`, which would overflow\", move _12, move _13) -> [success: bb15, unwind unreachable];\n    }\n    bb15: {\n        _11 = move (_14.0: u64);\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageLive(_15);\n        _15 = _1 as u64;\n        _16 = Eq(_15, 0_u64);\n        assert(!move _16, \"attempt to divide `{}` by zero\", _11) -> [success: bb16, unwind unreachable];\n    }\n    bb16: {\n        _10 = Div(move _11, move _15);\n        StorageDead(_15);\n        StorageDead(_11);\n        _0 = core::option::Option::Some(move _10);\n        StorageDead(_10);\n        goto -> bb18;\n    }\n    bb17: {\n        goto -> bb18;\n    }\n    bb18: {\n        return;\n    }\n}\n",
+  "doc": " Queries the frequency in Hz of the Time Stamp Counter (TSC).\n\n This is based on the information given by the CPUID instruction in the Time Stamp Counter and\n Nominal Core Crystal Clock Information Leaf.\n\n Note that the CPUID leaf is currently only supported by new Intel CPUs. This method will return\n `None` if it is not supported.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

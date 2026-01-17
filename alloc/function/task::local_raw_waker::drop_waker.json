@@ -1,0 +1,27 @@
+{
+  "name": "task::local_raw_waker::drop_waker",
+  "safe": false,
+  "callees": {
+    "rc::Rc::<T>::decrement_strong_count": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Decrements the strong reference count on the `Rc<T>` associated with the\n provided pointer by one.\n\n # Safety\n\n The pointer must have been obtained through `Rc::into_raw`and must satisfy the\n same layout requirements specified in [`Rc::from_raw_in`][from_raw_in].\n The associated `Rc` instance must be valid (i.e. the strong count must be at\n least 1) when invoking this method, and `ptr` must point to a block of memory\n allocated by the global allocator. This method can be used to release the final `Rc` and\n backing storage, but **should not** be called after the final `Rc` has been released.\n\n [from_raw_in]: Rc::from_raw_in\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let five = Rc::new(5);\n\n unsafe {\n     let ptr = Rc::into_raw(five);\n     Rc::increment_strong_count(ptr);\n\n     let five = Rc::from_raw(ptr);\n     assert_eq!(2, Rc::strong_count(&five));\n     Rc::decrement_strong_count(ptr);\n     assert_eq!(1, Rc::strong_count(&five));\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 2181,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/task.rs:342:5: 344:6",
+  "src": "unsafe fn drop_waker<W: LocalWake + 'static>(waker: *const ()) {\n        unsafe { Rc::decrement_strong_count(waker as *const W) };\n    }",
+  "mir": "fn task::local_raw_waker::drop_waker(_1: *const ()) -> () {\n    let mut _0: ();\n    let  _2: ();\n    let mut _3: *const W;\n    debug waker => _1;\n    bb0: {\n        StorageLive(_3);\n        _3 = _1 as *const W;\n        _2 = rc::Rc::<W>::decrement_strong_count(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

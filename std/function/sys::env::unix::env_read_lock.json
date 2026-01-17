@@ -1,0 +1,61 @@
+{
+  "name": "sys::env::unix::env_read_lock",
+  "safe": true,
+  "callees": {
+    "sync::poison::rwlock::RwLock::<T>::read": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Locks this `RwLock` with shared read access, blocking the current thread\n until it can be acquired.\n\n The calling thread will be blocked until there are no more writers which\n hold the lock. There may be other readers currently inside the lock when\n this method returns. This method does not provide any guarantees with\n respect to the ordering of whether contentious readers or writers will\n acquire the lock first.\n\n Returns an RAII guard which will release this thread's shared access\n once it is dropped.\n\n # Errors\n\n This function will return an error if the `RwLock` is poisoned. An\n `RwLock` is poisoned whenever a writer panics while holding an exclusive\n lock. The failure will occur immediately after the lock has been\n acquired. The acquired lock guard will be contained in the returned\n error.\n\n # Panics\n\n This function might panic when called if the lock is already held by the current thread.\n\n # Examples\n\n ```\n use std::sync::{Arc, RwLock};\n use std::thread;\n\n let lock = Arc::new(RwLock::new(1));\n let c_lock = Arc::clone(&lock);\n\n let n = lock.read().unwrap();\n assert_eq!(*n, 1);\n\n thread::spawn(move || {\n     let r = c_lock.read();\n     assert!(r.is_ok());\n }).join().unwrap();\n ```\n",
+      "adt": {
+        "sync::poison::rwlock::RwLock": "ImmutableAsArgument",
+        "core::result::Result": "Constructor",
+        "sync::poison::rwlock::RwLockReadGuard": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::unwrap_or_else": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value or computes it from a closure.\n\n\n # Examples\n\n ```\n fn count(x: &str) -> usize { x.len() }\n\n assert_eq!(Ok(2).unwrap_or_else(count), 2);\n assert_eq!(Err(\"foo\").unwrap_or_else(count), 3);\n ```\n",
+      "adt": {}
+    },
+    "sync::poison::PoisonError::<T>::into_inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes this error indicating that a lock is poisoned, returning the\n associated data.\n\n # Examples\n\n ```\n use std::collections::HashSet;\n use std::sync::{Arc, Mutex};\n use std::thread;\n\n let mutex = Arc::new(Mutex::new(HashSet::new()));\n\n // poison the mutex\n let c_mutex = Arc::clone(&mutex);\n let _ = thread::spawn(move || {\n     let mut data = c_mutex.lock().unwrap();\n     data.insert(10);\n     panic!();\n }).join();\n\n let p_err = mutex.lock().unwrap_err();\n let data = p_err.into_inner();\n println!(\"recovered {} items\", data.len());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::poison::rwlock::RwLock": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "sync::poison::rwlock::RwLockReadGuard": [
+      "Plain"
+    ]
+  },
+  "path": 3392,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/env/unix.rs:52:1: 54:2",
+  "src": "pub fn env_read_lock() -> impl Drop {\n    ENV_LOCK.read().unwrap_or_else(PoisonError::into_inner)\n}",
+  "mir": "fn sys::env::unix::env_read_lock() -> sync::poison::rwlock::RwLockReadGuard<'_, ()> {\n    let mut _0: sync::poison::rwlock::RwLockReadGuard<'_, ()>;\n    let mut _1: core::result::Result<sync::poison::rwlock::RwLockReadGuard<'_, ()>, sync::poison::PoisonError<sync::poison::rwlock::RwLockReadGuard<'_, ()>>>;\n    let mut _2: &sync::poison::rwlock::RwLock<()>;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        _2 = {alloc1: &sync::poison::rwlock::RwLock<()>};\n        _1 = sync::poison::rwlock::RwLock::<()>::read(move _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_2);\n        _0 = core::result::Result::<sync::poison::rwlock::RwLockReadGuard<'_, ()>, sync::poison::PoisonError<sync::poison::rwlock::RwLockReadGuard<'_, ()>>>::unwrap_or_else::<fn(sync::poison::PoisonError<sync::poison::rwlock::RwLockReadGuard<'_, ()>>) -> sync::poison::rwlock::RwLockReadGuard<'_, ()> {sync::poison::PoisonError::<sync::poison::rwlock::RwLockReadGuard<'_, ()>>::into_inner}>(move _1, sync::poison::PoisonError::<sync::poison::rwlock::RwLockReadGuard<'_, ()>>::into_inner) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

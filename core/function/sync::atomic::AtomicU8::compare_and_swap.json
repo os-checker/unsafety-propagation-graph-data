@@ -1,0 +1,54 @@
+{
+  "name": "sync::atomic::AtomicU8::compare_and_swap",
+  "safe": true,
+  "callees": {
+    "sync::atomic::strongest_failure_ordering": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::atomic::Ordering": "Constructor"
+      }
+    },
+    "sync::atomic::AtomicU8::compare_exchange": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer if the current value is the same as\n the `current` value.\n\n The return value is a result indicating whether the new value was written and\n containing the previous value. On success this value is guaranteed to be equal to\n `current`.\n\n `compare_exchange` takes two [`Ordering`] arguments to describe the memory\n ordering of this operation. `success` describes the required ordering for the\n read-modify-write operation that takes place if the comparison with `current` succeeds.\n `failure` describes the required ordering for the load operation that takes place when\n the comparison fails. Using [`Acquire`] as success ordering makes the store part\n of this operation [`Relaxed`], and using [`Release`] makes the successful load\n [`Relaxed`]. The failure ordering can only be [`SeqCst`], [`Acquire`] or [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.compare_exchange(5, 10,\n                                      Ordering::Acquire,\n                                      Ordering::Relaxed),\n            Ok(5));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n\n assert_eq!(some_var.compare_exchange(6, 12,\n                                      Ordering::SeqCst,\n                                      Ordering::Acquire),\n            Err(10));\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n\n # Considerations\n\n `compare_exchange` is a [compare-and-swap operation] and thus exhibits the usual downsides\n of CAS operations. In particular, a load of the value followed by a successful\n `compare_exchange` with the previous load *does not ensure* that other threads have not\n changed the value in the interim! This is usually important when the *equality* check in\n the `compare_exchange` is being used to check the *identity* of a value, but equality\n does not necessarily imply identity. This is a particularly common case for pointers, as\n a pointer holding the same address does not imply that the same object exists at that\n address! In this case, `compare_exchange` can lead to the [ABA problem].\n\n [ABA Problem]: https://en.wikipedia.org/wiki/ABA_problem\n [compare-and-swap operation]: https://en.wikipedia.org/wiki/Compare-and-swap\n",
+      "adt": {
+        "sync::atomic::AtomicU8": "ImmutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "sync::atomic::AtomicU8": [
+      "Ref"
+    ],
+    "result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 46, kind: RigidTy(Uint(U8)) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 46, kind: RigidTy(Uint(U8)) })])"
+    ]
+  },
+  "path": 17479,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/sync/atomic.rs:3042:13: 3053:14",
+  "src": "pub fn compare_and_swap(&self,\n                                    current: $int_type,\n                                    new: $int_type,\n                                    order: Ordering) -> $int_type {\n                match self.compare_exchange(current,\n                                            new,\n                                            order,\n                                            strongest_failure_ordering(order)) {\n                    Ok(x) => x,\n                    Err(x) => x,\n                }\n            }",
+  "mir": "fn sync::atomic::AtomicU8::compare_and_swap(_1: &sync::atomic::AtomicU8, _2: u8, _3: u8, _4: sync::atomic::Ordering) -> u8 {\n    let mut _0: u8;\n    let mut _5: result::Result<u8, u8>;\n    let mut _6: sync::atomic::Ordering;\n    let mut _7: isize;\n    let  _8: u8;\n    let  _9: u8;\n    debug self => _1;\n    debug current => _2;\n    debug new => _3;\n    debug order => _4;\n    debug x => _8;\n    debug x => _9;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = sync::atomic::strongest_failure_ordering(_4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = sync::atomic::AtomicU8::compare_exchange(_1, _2, _3, _4, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _7 = discriminant(_5);\n        switchInt(move _7) -> [0: bb5, 1: bb4, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        StorageLive(_9);\n        _9 = ((_5 as variant#1).0: u8);\n        _0 = _9;\n        StorageDead(_9);\n        goto -> bb6;\n    }\n    bb5: {\n        StorageLive(_8);\n        _8 = ((_5 as variant#0).0: u8);\n        _0 = _8;\n        StorageDead(_8);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": " Stores a value into the atomic integer if the current value is the same as\n the `current` value.\n\n The return value is always the previous value. If it is equal to `current`, then the\n value was updated.\n\n `compare_and_swap` also takes an [`Ordering`] argument which describes the memory\n ordering of this operation. Notice that even when using [`AcqRel`], the operation\n might fail and hence just perform an `Acquire` load, but not have `Release` semantics.\n Using [`Acquire`] makes the store part of this operation [`Relaxed`] if it\n happens, and using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Migrating to `compare_exchange` and `compare_exchange_weak`\n\n `compare_and_swap` is equivalent to `compare_exchange` with the following mapping for\n memory orderings:\n\n Original | Success | Failure\n -------- | ------- | -------\n Relaxed  | Relaxed | Relaxed\n Acquire  | Acquire | Acquire\n Release  | Release | Relaxed\n AcqRel   | AcqRel  | Acquire\n SeqCst   | SeqCst  | SeqCst\n\n `compare_and_swap` and `compare_exchange` also differ in their return type. You can use\n `compare_exchange(...).unwrap_or_else(|x| x)` to recover the behavior of `compare_and_swap`,\n but in most cases it is more idiomatic to check whether the return value is `Ok` or `Err`\n rather than to infer success vs failure based on the value that was read.\n\n During migration, consider whether it makes sense to use `compare_exchange_weak` instead.\n `compare_exchange_weak` is allowed to fail spuriously even when the comparison succeeds,\n which allows the compiler to generate better assembly code when the compare and swap\n is used in a loop.\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.compare_and_swap(5, 10, Ordering::Relaxed), 5);\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n\n assert_eq!(some_var.compare_and_swap(6, 12, Ordering::Relaxed), 10);\n assert_eq!(some_var.load(Ordering::Relaxed), 10);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

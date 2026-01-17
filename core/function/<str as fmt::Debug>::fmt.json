@@ -1,0 +1,262 @@
+{
+  "name": "<str as fmt::Debug>::fmt",
+  "safe": true,
+  "callees": {
+    "fmt::Write::write_char": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a [`char`] into this writer, returning whether the write succeeded.\n\n A single [`char`] may be encoded as more than one byte.\n This method can only succeed if the entire byte sequence was successfully\n written, and this method will not return until all data has been\n written or an error occurs.\n\n # Errors\n\n This function will return an instance of [`Error`] on error.\n\n # Examples\n\n ```\n use std::fmt::{Error, Write};\n\n fn writer<W: Write>(f: &mut W, c: char) -> Result<(), Error> {\n     f.write_char(c)\n }\n\n let mut buf = String::new();\n writer(&mut buf, 'a')?;\n writer(&mut buf, 'b')?;\n assert_eq!(&buf, \"ab\");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {
+        "result::Result": "Constructor"
+      }
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "str::<impl str>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of `self`.\n\n This length is in bytes, not [`char`]s or graphemes. In other words,\n it might not be what a human considers the length of the string.\n\n [`char`]: prim@char\n\n # Examples\n\n ```\n let len = \"foo\".len();\n assert_eq!(3, len);\n\n assert_eq!(\"ƒoo\".len(), 4); // fancy f!\n assert_eq!(\"ƒoo\".chars().count(), 3);\n ```\n",
+      "adt": {}
+    },
+    "str::<impl str>::as_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unused_attributes"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unused_attributes\n"
+        ]
+      },
+      "doc": " Converts a string slice to a byte slice. To convert the byte slice back\n into a string slice, use the [`from_utf8`] function.\n\n # Examples\n\n ```\n let bytes = \"bors\".as_bytes();\n assert_eq!(b\"bors\", bytes);\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the slice.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let mut iterator = x.iter();\n\n assert_eq!(iterator.next(), Some(&1));\n assert_eq!(iterator.next(), Some(&2));\n assert_eq!(iterator.next(), Some(&4));\n assert_eq!(iterator.next(), None);\n ```\n",
+      "adt": {
+        "slice::iter::Iter": "Constructor"
+      }
+    },
+    "iter::traits::iterator::Iterator::position": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Searches for an element in an iterator, returning its index.\n\n `position()` takes a closure that returns `true` or `false`. It applies\n this closure to each element of the iterator, and if one of them\n returns `true`, then `position()` returns [`Some(index)`]. If all of\n them return `false`, it returns [`None`].\n\n `position()` is short-circuiting; in other words, it will stop\n processing as soon as it finds a `true`.\n\n # Overflow Behavior\n\n The method does no guarding against overflows, so if there are more\n than [`usize::MAX`] non-matching elements, it either produces the wrong\n result or panics. If overflow checks are enabled, a panic is\n guaranteed.\n\n # Panics\n\n This function might panic if the iterator has more than `usize::MAX`\n non-matching elements.\n\n [`Some(index)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n assert_eq!(a.into_iter().position(|x| x == 2), Some(1));\n\n assert_eq!(a.into_iter().position(|x| x == 5), None);\n ```\n\n Stopping at the first `true`:\n\n ```\n let a = [1, 2, 3, 4];\n\n let mut iter = a.into_iter();\n\n assert_eq!(iter.position(|x| x >= 2), Some(1));\n\n // we can still use `iter`, as there are more elements.\n assert_eq!(iter.next(), Some(3));\n\n // The returned index depends on iterator state\n assert_eq!(iter.position(|x| x == 4), Some(0));\n\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "str::<impl str>::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unchecked subslice of `str`.\n\n This is the unchecked alternative to indexing the `str`.\n\n # Safety\n\n Callers of this function are responsible that these preconditions are\n satisfied:\n\n * The starting index must not exceed the ending index;\n * Indexes must be within bounds of the original slice;\n * Indexes must lie on UTF-8 sequence boundaries.\n\n Failing that, the returned string slice may reference invalid memory or\n violate the invariants communicated by the `str` type.\n\n # Examples\n\n ```\n let v = \"🗻∈🌏\";\n unsafe {\n     assert_eq!(\"🗻\", v.get_unchecked(0..4));\n     assert_eq!(\"∈\", v.get_unchecked(4..7));\n     assert_eq!(\"🌏\", v.get_unchecked(7..11));\n }\n ```\n",
+      "adt": {}
+    },
+    "str::<impl str>::chars": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the [`char`]s of a string slice.\n\n As a string slice consists of valid UTF-8, we can iterate through a\n string slice by [`char`]. This method returns such an iterator.\n\n It's important to remember that [`char`] represents a Unicode Scalar\n Value, and might not match your idea of what a 'character' is. Iteration\n over grapheme clusters may be what you actually want. This functionality\n is not provided by Rust's standard library, check crates.io instead.\n\n # Examples\n\n Basic usage:\n\n ```\n let word = \"goodbye\";\n\n let count = word.chars().count();\n assert_eq!(7, count);\n\n let mut chars = word.chars();\n\n assert_eq!(Some('g'), chars.next());\n assert_eq!(Some('o'), chars.next());\n assert_eq!(Some('o'), chars.next());\n assert_eq!(Some('d'), chars.next());\n assert_eq!(Some('b'), chars.next());\n assert_eq!(Some('y'), chars.next());\n assert_eq!(Some('e'), chars.next());\n\n assert_eq!(None, chars.next());\n ```\n\n Remember, [`char`]s might not match your intuition about characters:\n\n [`char`]: prim@char\n\n ```\n let y = \"y̆\";\n\n let mut chars = y.chars();\n\n assert_eq!(Some('y'), chars.next()); // not 'y̆'\n assert_eq!(Some('\\u{0306}'), chars.next());\n\n assert_eq!(None, chars.next());\n ```\n",
+      "adt": {
+        "str::iter::Chars": "Constructor"
+      }
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "char::methods::<impl char>::escape_debug_ext": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An extended version of `escape_debug` that optionally permits escaping\n Extended Grapheme codepoints, single quotes, and double quotes. This\n allows us to format characters like nonspacing marks better when they're\n at the start of a string, and allows escaping single quotes in\n characters, and double quotes in strings.\n",
+      "adt": {
+        "char::EscapeDebug": "Constructor"
+      }
+    },
+    "iter::traits::exact_size::ExactSizeIterator::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the exact remaining length of the iterator.\n\n The implementation ensures that the iterator will return exactly `len()`\n more times a [`Some(T)`] value, before returning [`None`].\n This method has a default implementation, so you usually should not\n implement it directly. However, if you can provide a more efficient\n implementation, you can do so. See the [trait-level] docs for an\n example.\n\n This function has the same safety guarantees as the\n [`Iterator::size_hint`] function.\n\n [trait-level]: ExactSizeIterator\n [`Some(T)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n // a finite range knows exactly how many times it will iterate\n let mut range = 0..5;\n\n assert_eq!(5, range.len());\n let _ = range.next();\n assert_eq!(4, range.len());\n ```\n",
+      "adt": {}
+    },
+    "clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "ops::index::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "fmt::Formatter::<'a>::write_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes some data to the underlying buffer contained within this\n formatter.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Foo;\n\n impl fmt::Display for Foo {\n     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {\n         formatter.write_str(\"Foo\")\n         // This is equivalent to:\n         // write!(formatter, \"Foo\")\n     }\n }\n\n assert_eq!(format!(\"{Foo}\"), \"Foo\");\n assert_eq!(format!(\"{Foo:0>8}\"), \"Foo\");\n ```\n",
+      "adt": {
+        "fmt::Formatter": "MutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    },
+    "fmt::Display::fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n use std::fmt;\n\n struct Position {\n     longitude: f32,\n     latitude: f32,\n }\n\n impl fmt::Display for Position {\n     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n         write!(f, \"({}, {})\", self.longitude, self.latitude)\n     }\n }\n\n assert_eq!(\n     \"(1.987, 2.983)\",\n     format!(\"{}\", Position { longitude: 1.987, latitude: 2.983, }),\n );\n ```\n",
+      "adt": {}
+    },
+    "char::methods::<impl char>::len_utf8": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of bytes this `char` would need if encoded in UTF-8.\n\n That number of bytes is always between 1 and 4, inclusive.\n\n # Examples\n\n Basic usage:\n\n ```\n let len = 'A'.len_utf8();\n assert_eq!(len, 1);\n\n let len = 'ß'.len_utf8();\n assert_eq!(len, 2);\n\n let len = 'ℝ'.len_utf8();\n assert_eq!(len, 3);\n\n let len = '💣'.len_utf8();\n assert_eq!(len, 4);\n ```\n\n The `&str` type guarantees that its contents are UTF-8, and so we can compare the length it\n would take if each code point was represented as a `char` vs in the `&str` itself:\n\n ```\n // as chars\n let eastern = '東';\n let capital = '京';\n\n // both can be represented as three bytes\n assert_eq!(3, eastern.len_utf8());\n assert_eq!(3, capital.len_utf8());\n\n // as a &str, these two are encoded in UTF-8\n let tokyo = \"東京\";\n\n let len = eastern.len_utf8() + capital.len_utf8();\n\n // we can see that they take six bytes total...\n assert_eq!(6, tokyo.len());\n\n // ... just like the &str\n assert_eq!(len, tokyo.len());\n ```\n",
+      "adt": {}
+    },
+    "str::iter::Chars::<'a>::as_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Views the underlying data as a subslice of the original data.\n\n This has the same lifetime as the original slice, and so the\n iterator can continue to be used while this exists.\n\n # Examples\n\n ```\n let mut chars = \"abc\".chars();\n\n assert_eq!(chars.as_str(), \"abc\");\n chars.next();\n assert_eq!(chars.as_str(), \"bc\");\n chars.next();\n chars.next();\n assert_eq!(chars.as_str(), \"\");\n ```\n",
+      "adt": {
+        "str::iter::Chars": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "fmt::Formatter": [
+      "MutRef"
+    ],
+    "result::Result": [
+      "Plain"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain"
+    ],
+    "ops::range::Range": [
+      "Plain",
+      "Unknown([Field(1, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Ref",
+      "Unknown([Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "slice::iter::Iter": [
+      "Plain",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4458, kind: RigidTy(Char) })])"
+    ],
+    "ops::range::RangeFrom": [
+      "Plain"
+    ],
+    "str::iter::Chars": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "char::methods::EscapeDebugExtArgs": [
+      "Plain"
+    ],
+    "char::EscapeDebug": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 3072,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:2910:5: 2954:6",
+  "src": "fn fmt(&self, f: &mut Formatter<'_>) -> Result {\n        f.write_char('\"')?;\n\n        // substring we know is printable\n        let mut printable_range = 0..0;\n\n        fn needs_escape(b: u8) -> bool {\n            b > 0x7E || b < 0x20 || b == b'\\\\' || b == b'\"'\n        }\n\n        // the loop here first skips over runs of printable ASCII as a fast path.\n        // other chars (unicode, or ASCII that needs escaping) are then handled per-`char`.\n        let mut rest = self;\n        while rest.len() > 0 {\n            let Some(non_printable_start) = rest.as_bytes().iter().position(|&b| needs_escape(b))\n            else {\n                printable_range.end += rest.len();\n                break;\n            };\n\n            printable_range.end += non_printable_start;\n            // SAFETY: the position was derived from an iterator, so is known to be within bounds, and at a char boundary\n            rest = unsafe { rest.get_unchecked(non_printable_start..) };\n\n            let mut chars = rest.chars();\n            if let Some(c) = chars.next() {\n                let esc = c.escape_debug_ext(EscapeDebugExtArgs {\n                    escape_grapheme_extended: true,\n                    escape_single_quote: false,\n                    escape_double_quote: true,\n                });\n                if esc.len() != 1 {\n                    f.write_str(&self[printable_range.clone()])?;\n                    Display::fmt(&esc, f)?;\n                    printable_range.start = printable_range.end + c.len_utf8();\n                }\n                printable_range.end += c.len_utf8();\n            }\n            rest = chars.as_str();\n        }\n\n        f.write_str(&self[printable_range])?;\n\n        f.write_char('\"')\n    }",
+  "mir": "fn <str as fmt::Debug>::fmt(_1: &str, _2: &mut fmt::Formatter<'_>) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    let mut _3: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _4: result::Result<(), fmt::Error>;\n    let mut _5: isize;\n    let mut _6: ops::range::Range<usize>;\n    let mut _7: &str;\n    let mut _8: bool;\n    let mut _9: usize;\n    let mut _10: &str;\n    let mut _11: usize;\n    let mut _12: &str;\n    let mut _13: (usize, bool);\n    let  _14: usize;\n    let mut _15: option::Option<usize>;\n    let mut _16: &mut slice::iter::Iter<'_, u8>;\n    let mut _17: slice::iter::Iter<'_, u8>;\n    let  _18: &[u8];\n    let mut _19: &str;\n    let mut _20: isize;\n    let mut _21: (usize, bool);\n    let  _22: &str;\n    let mut _23: &str;\n    let mut _24: ops::range::RangeFrom<usize>;\n    let mut _25: str::iter::Chars<'_>;\n    let mut _26: &str;\n    let mut _27: option::Option<char>;\n    let mut _28: &mut str::iter::Chars<'_>;\n    let mut _29: isize;\n    let  _30: char;\n    let  _31: char::EscapeDebug;\n    let mut _32: char::methods::EscapeDebugExtArgs;\n    let mut _33: usize;\n    let mut _34: &char::EscapeDebug;\n    let mut _35: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _36: result::Result<(), fmt::Error>;\n    let  _37: &str;\n    let mut _38: ops::range::Range<usize>;\n    let mut _39: &ops::range::Range<usize>;\n    let mut _40: isize;\n    let mut _41: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _42: result::Result<(), fmt::Error>;\n    let  _43: &char::EscapeDebug;\n    let mut _44: isize;\n    let mut _45: usize;\n    let mut _46: usize;\n    let mut _47: (usize, bool);\n    let mut _48: usize;\n    let mut _49: (usize, bool);\n    let  _50: &str;\n    let mut _51: &str::iter::Chars<'_>;\n    let mut _52: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _53: result::Result<(), fmt::Error>;\n    let  _54: &str;\n    let mut _55: ops::range::Range<usize>;\n    let mut _56: isize;\n    debug self => _1;\n    debug f => _2;\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    debug printable_range => _6;\n    debug rest => _7;\n    debug non_printable_start => _14;\n    debug chars => _25;\n    debug c => _30;\n    debug esc => _31;\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = <fmt::Formatter<'_> as fmt::Write>::write_char(_2, '\"') -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        StorageDead(_3);\n        StorageLive(_6);\n        _6 = Range(0_usize, 0_usize);\n        StorageLive(_7);\n        _7 = _1;\n        goto -> bb7;\n    }\n    bb5: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_3);\n        goto -> bb57;\n    }\n    bb7: {\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = _7;\n        _9 = str::<impl str>::len(move _10) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_10);\n        _8 = Gt(move _9, 0_usize);\n        switchInt(move _8) -> [0: bb46, otherwise: bb9];\n    }\n    bb9: {\n        StorageDead(_9);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        StorageLive(_19);\n        _19 = _7;\n        _18 = str::<impl str>::as_bytes(move _19) -> [return: bb12, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_12);\n        _13 = CheckedAdd((_6.1: usize), _11);\n        assert(!move (_13.1: bool), \"attempt to compute `{} + {}`, which would overflow\", (_6.1: usize), move _11) -> [success: bb11, unwind unreachable];\n    }\n    bb11: {\n        (_6.1: usize) = move (_13.0: usize);\n        StorageDead(_11);\n        goto -> bb47;\n    }\n    bb12: {\n        StorageDead(_19);\n        _17 = slice::<impl [u8]>::iter(_18) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        _16 = &mut _17;\n        _15 = <slice::iter::Iter<'_, u8> as iter::traits::iterator::Iterator>::position::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:2924:77: 2924:81}>(move _16, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:2924:77: 2924:81}) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_16);\n        _20 = discriminant(_15);\n        switchInt(move _20) -> [1: bb15, 0: bb16, otherwise: bb3];\n    }\n    bb15: {\n        _14 = ((_15 as variant#1).0: usize);\n        StorageDead(_17);\n        StorageDead(_15);\n        _21 = CheckedAdd((_6.1: usize), _14);\n        assert(!move (_21.1: bool), \"attempt to compute `{} + {}`, which would overflow\", (_6.1: usize), _14) -> [success: bb17, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_17);\n        StorageDead(_15);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = _7;\n        _11 = str::<impl str>::len(move _12) -> [return: bb10, unwind unreachable];\n    }\n    bb17: {\n        (_6.1: usize) = move (_21.0: usize);\n        StorageLive(_23);\n        _23 = _7;\n        StorageLive(_24);\n        _24 = RangeFrom(_14);\n        _22 = str::<impl str>::get_unchecked::<ops::range::RangeFrom<usize>>(move _23, move _24) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_24);\n        StorageDead(_23);\n        _7 = _22;\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = _7;\n        _25 = str::<impl str>::chars(move _26) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_26);\n        StorageLive(_27);\n        StorageLive(_28);\n        _28 = &mut _25;\n        _27 = <str::iter::Chars<'_> as iter::traits::iterator::Iterator>::next(move _28) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_28);\n        _29 = discriminant(_27);\n        switchInt(move _29) -> [1: bb21, 0: bb43, otherwise: bb3];\n    }\n    bb21: {\n        _30 = ((_27 as variant#1).0: char);\n        StorageLive(_31);\n        StorageLive(_32);\n        _32 = EscapeDebugExtArgs(true, false, true);\n        _31 = char::methods::<impl char>::escape_debug_ext(_30, move _32) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_32);\n        StorageLive(_33);\n        StorageLive(_34);\n        _34 = &_31;\n        _33 = <char::EscapeDebug as iter::traits::exact_size::ExactSizeIterator>::len(move _34) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_34);\n        switchInt(move _33) -> [1: bb39, otherwise: bb24];\n    }\n    bb24: {\n        StorageDead(_33);\n        StorageLive(_35);\n        StorageLive(_36);\n        StorageLive(_38);\n        StorageLive(_39);\n        _39 = &_6;\n        _38 = <ops::range::Range<usize> as clone::Clone>::clone(move _39) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_39);\n        _37 = <str as ops::index::Index<ops::range::Range<usize>>>::index(_1, move _38) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_38);\n        _36 = fmt::Formatter::<'_>::write_str(_2, _37) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        _35 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _36) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        StorageDead(_36);\n        _40 = discriminant(_35);\n        switchInt(move _40) -> [0: bb29, 1: bb30, otherwise: bb3];\n    }\n    bb29: {\n        StorageDead(_35);\n        StorageLive(_41);\n        StorageLive(_42);\n        _43 = &_31;\n        _42 = <char::EscapeDebug as fmt::Display>::fmt(_43, _2) -> [return: bb32, unwind unreachable];\n    }\n    bb30: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        StorageDead(_35);\n        goto -> bb55;\n    }\n    bb32: {\n        _41 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _42) -> [return: bb33, unwind unreachable];\n    }\n    bb33: {\n        StorageDead(_42);\n        _44 = discriminant(_41);\n        switchInt(move _44) -> [0: bb34, 1: bb35, otherwise: bb3];\n    }\n    bb34: {\n        StorageDead(_41);\n        StorageLive(_45);\n        _45 = (_6.1: usize);\n        StorageLive(_46);\n        _46 = char::methods::<impl char>::len_utf8(_30) -> [return: bb37, unwind unreachable];\n    }\n    bb35: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb36, unwind unreachable];\n    }\n    bb36: {\n        StorageDead(_41);\n        goto -> bb55;\n    }\n    bb37: {\n        _47 = CheckedAdd(_45, _46);\n        assert(!move (_47.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _45, move _46) -> [success: bb38, unwind unreachable];\n    }\n    bb38: {\n        (_6.0: usize) = move (_47.0: usize);\n        StorageDead(_46);\n        StorageDead(_45);\n        goto -> bb40;\n    }\n    bb39: {\n        StorageDead(_33);\n        goto -> bb40;\n    }\n    bb40: {\n        StorageLive(_48);\n        _48 = char::methods::<impl char>::len_utf8(_30) -> [return: bb41, unwind unreachable];\n    }\n    bb41: {\n        _49 = CheckedAdd((_6.1: usize), _48);\n        assert(!move (_49.1: bool), \"attempt to compute `{} + {}`, which would overflow\", (_6.1: usize), move _48) -> [success: bb42, unwind unreachable];\n    }\n    bb42: {\n        (_6.1: usize) = move (_49.0: usize);\n        StorageDead(_48);\n        StorageDead(_31);\n        StorageDead(_27);\n        goto -> bb44;\n    }\n    bb43: {\n        StorageDead(_27);\n        goto -> bb44;\n    }\n    bb44: {\n        StorageLive(_51);\n        _51 = &_25;\n        _50 = str::iter::Chars::<'_>::as_str(move _51) -> [return: bb45, unwind unreachable];\n    }\n    bb45: {\n        StorageDead(_51);\n        _7 = _50;\n        StorageDead(_25);\n        StorageDead(_8);\n        goto -> bb7;\n    }\n    bb46: {\n        StorageDead(_9);\n        goto -> bb47;\n    }\n    bb47: {\n        StorageDead(_8);\n        StorageLive(_52);\n        StorageLive(_53);\n        StorageLive(_55);\n        _55 = move _6;\n        _54 = <str as ops::index::Index<ops::range::Range<usize>>>::index(_1, move _55) -> [return: bb48, unwind unreachable];\n    }\n    bb48: {\n        StorageDead(_55);\n        _53 = fmt::Formatter::<'_>::write_str(_2, _54) -> [return: bb49, unwind unreachable];\n    }\n    bb49: {\n        _52 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _53) -> [return: bb50, unwind unreachable];\n    }\n    bb50: {\n        StorageDead(_53);\n        _56 = discriminant(_52);\n        switchInt(move _56) -> [0: bb51, 1: bb52, otherwise: bb3];\n    }\n    bb51: {\n        StorageDead(_52);\n        _0 = <fmt::Formatter<'_> as fmt::Write>::write_char(_2, '\"') -> [return: bb54, unwind unreachable];\n    }\n    bb52: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb53, unwind unreachable];\n    }\n    bb53: {\n        StorageDead(_52);\n        goto -> bb56;\n    }\n    bb54: {\n        StorageDead(_7);\n        StorageDead(_6);\n        goto -> bb57;\n    }\n    bb55: {\n        StorageDead(_31);\n        StorageDead(_27);\n        StorageDead(_25);\n        StorageDead(_8);\n        goto -> bb56;\n    }\n    bb56: {\n        StorageDead(_7);\n        StorageDead(_6);\n        goto -> bb57;\n    }\n    bb57: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

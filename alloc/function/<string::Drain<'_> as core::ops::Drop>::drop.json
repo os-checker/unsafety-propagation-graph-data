@@ -1,0 +1,75 @@
+{
+  "name": "<string::Drain<'_> as core::ops::Drop>::drop",
+  "safe": true,
+  "callees": {
+    "string::String::as_mut_vec": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to the contents of this `String`.\n\n # Safety\n\n This function is unsafe because the returned `&mut Vec` allows writing\n bytes which are not valid UTF-8. If this constraint is violated, using\n the original `String` after dropping the `&mut Vec` may violate memory\n safety, as the rest of the standard library assumes that `String`s are\n valid UTF-8.\n\n # Examples\n\n ```\n let mut s = String::from(\"hello\");\n\n unsafe {\n     let vec = s.as_mut_vec();\n     assert_eq!(&[104, 101, 108, 108, 111][..], &vec[..]);\n\n     vec.reverse();\n }\n assert_eq!(s, \"olleh\");\n ```\n",
+      "adt": {
+        "string::String": "MutableAsArgument"
+      }
+    },
+    "vec::Vec::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the vector, also referred to\n as its 'length'.\n\n # Examples\n\n ```\n let a = vec![1, 2, 3];\n assert_eq!(a.len(), 3);\n ```\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "vec::Vec::<T, A>::drain": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Removes the subslice indicated by the given range from the vector,\n returning a double-ended iterator over the removed subslice.\n\n If the iterator is dropped before being fully consumed,\n it drops the remaining removed elements.\n\n The returned iterator keeps a mutable borrow on the vector to optimize\n its implementation.\n\n # Panics\n\n Panics if the range has `start_bound > end_bound`, or, if the range is\n bounded on either end and past the length of the vector.\n\n # Leaking\n\n If the returned iterator goes out of scope without being dropped (due to\n [`mem::forget`], for example), the vector may have lost and leaked\n elements arbitrarily, including elements outside the range.\n\n # Examples\n\n ```\n let mut v = vec![1, 2, 3];\n let u: Vec<_> = v.drain(1..).collect();\n assert_eq!(v, &[1]);\n assert_eq!(u, &[2, 3]);\n\n // A full range clears the vector, like `clear()` does\n v.drain(..);\n assert_eq!(v, &[]);\n ```\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument",
+        "vec::drain::Drain": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "string::Drain": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "MutRef"
+    ],
+    "string::String": [
+      "MutRef"
+    ],
+    "vec::Vec": [
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "core::ops::Range": [
+      "Plain"
+    ],
+    "vec::drain::Drain": [
+      "Plain"
+    ]
+  },
+  "path": 1892,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:3489:5: 3498:6",
+  "src": "fn drop(&mut self) {\n        unsafe {\n            // Use Vec::drain. \"Reaffirm\" the bounds checks to avoid\n            // panic code being inserted again.\n            let self_vec = (*self.string).as_mut_vec();\n            if self.start <= self.end && self.end <= self_vec.len() {\n                self_vec.drain(self.start..self.end);\n            }\n        }\n    }",
+  "mir": "fn <string::Drain<'_> as core::ops::Drop>::drop(_1: &mut string::Drain<'_>) -> () {\n    let mut _0: ();\n    let  _2: &mut vec::Vec<u8>;\n    let mut _3: &mut string::String;\n    let mut _4: bool;\n    let mut _5: usize;\n    let mut _6: usize;\n    let mut _7: bool;\n    let mut _8: usize;\n    let mut _9: usize;\n    let mut _10: &vec::Vec<u8>;\n    let  _11: vec::drain::Drain<'_, u8>;\n    let mut _12: core::ops::Range<usize>;\n    let mut _13: usize;\n    let mut _14: usize;\n    let mut _15: *mut string::String;\n    debug self => _1;\n    debug self_vec => _2;\n    bb0: {\n        StorageLive(_3);\n        _15 = ((*_1).0: *mut string::String);\n        _3 = &mut (*_15);\n        _2 = string::String::as_mut_vec(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = ((*_1).1: usize);\n        StorageLive(_6);\n        _6 = ((*_1).2: usize);\n        _4 = Le(move _5, move _6);\n        switchInt(move _4) -> [0: bb8, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = ((*_1).2: usize);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &(*_2);\n        _9 = vec::Vec::<u8>::len(move _10) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        _7 = Le(move _8, move _9);\n        switchInt(move _7) -> [0: bb7, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = ((*_1).1: usize);\n        StorageLive(_14);\n        _14 = ((*_1).2: usize);\n        _12 = Range(move _13, move _14);\n        StorageDead(_14);\n        StorageDead(_13);\n        _11 = vec::Vec::<u8>::drain::<core::ops::Range<usize>>(_2, move _12) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        drop(_11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        goto -> bb9;\n    }\n    bb7: {\n        StorageDead(_9);\n        StorageDead(_8);\n        goto -> bb9;\n    }\n    bb8: {\n        StorageDead(_6);\n        StorageDead(_5);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_7);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

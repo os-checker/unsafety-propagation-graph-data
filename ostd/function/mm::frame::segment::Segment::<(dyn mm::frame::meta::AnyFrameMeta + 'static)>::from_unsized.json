@@ -1,0 +1,61 @@
+{
+  "name": "mm::frame::segment::Segment::<(dyn mm::frame::meta::AnyFrameMeta + 'static)>::from_unsized",
+  "safe": true,
+  "callees": {
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::frame::segment::Segment": [
+      "Plain",
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "core::ops::Range": [
+      "Ref",
+      "Plain"
+    ]
+  },
+  "path": 2009,
+  "span": "ostd/src/mm/frame/segment.rs:198:5: 206:6",
+  "src": "pub fn from_unsized<M: AnyFrameMeta + ?Sized>(\n        segment: Segment<M>,\n    ) -> Segment<dyn AnyFrameMeta> {\n        let seg = ManuallyDrop::new(segment);\n        Self {\n            range: seg.range.clone(),\n            _marker: core::marker::PhantomData,\n        }\n    }",
+  "mir": "fn mm::frame::segment::Segment::<(dyn mm::frame::meta::AnyFrameMeta + 'static)>::from_unsized(_1: mm::frame::segment::Segment<M>) -> mm::frame::segment::Segment<dyn mm::frame::meta::AnyFrameMeta> {\n    let mut _0: mm::frame::segment::Segment<dyn mm::frame::meta::AnyFrameMeta>;\n    let  _2: core::mem::ManuallyDrop<mm::frame::segment::Segment<M>>;\n    let mut _3: core::ops::Range<usize>;\n    let mut _4: &core::ops::Range<usize>;\n    let  _5: &mm::frame::segment::Segment<M>;\n    let mut _6: &core::mem::ManuallyDrop<mm::frame::segment::Segment<M>>;\n    debug segment => _1;\n    debug seg => _2;\n    bb0: {\n        StorageLive(_2);\n        _2 = core::mem::ManuallyDrop::<mm::frame::segment::Segment<M>>::new(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &_2;\n        _5 = <core::mem::ManuallyDrop<mm::frame::segment::Segment<M>> as core::ops::Deref>::deref(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _4 = &((*_5).0: core::ops::Range<usize>);\n        _3 = <core::ops::Range<usize> as core::clone::Clone>::clone(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _0 = Segment(move _3, core::marker::PhantomData::<dyn mm::frame::meta::AnyFrameMeta>);\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Converts a [`Segment`] with a specific metadata type into a\n [`Segment<dyn AnyFrameMeta>`].\n\n This exists because:\n\n ```ignore\n impl<M: AnyFrameMeta + ?Sized> From<Segment<M>> for Segment<dyn AnyFrameMeta>\n ```\n\n will conflict with `impl<T> core::convert::From<T> for T` in crate `core`.\n\n See also [`Frame::from_unsized`].\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

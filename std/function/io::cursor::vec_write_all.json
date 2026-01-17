@@ -1,0 +1,96 @@
+{
+  "name": "io::cursor::vec_write_all",
+  "safe": true,
+  "callees": {
+    "io::cursor::reserve_and_pad": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reserves the required space, and pads the vec with 0s if necessary.\n",
+      "adt": {
+        "alloc_crate::vec::Vec": "MutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "io::cursor::vec_write_all_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes the slice to the vec without allocating.\n\n # Safety\n\n `vec` must have `buf.len()` spare capacity.\n",
+      "adt": {
+        "alloc_crate::vec::Vec": "MutableAsArgument"
+      }
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::vec::Vec::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the vector, also referred to\n as its 'length'.\n\n # Examples\n\n ```\n let a = vec![1, 2, 3];\n assert_eq!(a.len(), 3);\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::vec::Vec::<T, A>::set_len": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forces the length of the vector to `new_len`.\n\n This is a low-level operation that maintains none of the normal\n invariants of the type. Normally changing the length of a vector\n is done using one of the safe operations instead, such as\n [`truncate`], [`resize`], [`extend`], or [`clear`].\n\n [`truncate`]: Vec::truncate\n [`resize`]: Vec::resize\n [`extend`]: Extend::extend\n [`clear`]: Vec::clear\n\n # Safety\n\n - `new_len` must be less than or equal to [`capacity()`].\n - The elements at `old_len..new_len` must be initialized.\n\n [`capacity()`]: Vec::capacity\n\n # Examples\n\n See [`spare_capacity_mut()`] for an example with safe\n initialization of capacity elements and use of this method.\n\n `set_len()` can be useful for situations in which the vector\n is serving as a buffer for other code, particularly over FFI:\n\n ```no_run\n # #![allow(dead_code)]\n # // This is just a minimal skeleton for the doc example;\n # // don't use this as a starting point for a real library.\n # pub struct StreamWrapper { strm: *mut std::ffi::c_void }\n # const Z_OK: i32 = 0;\n # unsafe extern \"C\" {\n #     fn deflateGetDictionary(\n #         strm: *mut std::ffi::c_void,\n #         dictionary: *mut u8,\n #         dictLength: *mut usize,\n #     ) -> i32;\n # }\n # impl StreamWrapper {\n pub fn get_dictionary(&self) -> Option<Vec<u8>> {\n     // Per the FFI method's docs, \"32768 bytes is always enough\".\n     let mut dict = Vec::with_capacity(32_768);\n     let mut dict_length = 0;\n     // SAFETY: When `deflateGetDictionary` returns `Z_OK`, it holds that:\n     // 1. `dict_length` elements were initialized.\n     // 2. `dict_length` <= the capacity (32_768)\n     // which makes `set_len` safe to call.\n     unsafe {\n         // Make the FFI call...\n         let r = deflateGetDictionary(self.strm, dict.as_mut_ptr(), &mut dict_length);\n         if r == Z_OK {\n             // ...and update the length to what was initialized.\n             dict.set_len(dict_length);\n             Some(dict)\n         } else {\n             None\n         }\n     }\n }\n # }\n ```\n\n While the following example is sound, there is a memory leak since\n the inner vectors were not freed prior to the `set_len` call:\n\n ```\n let mut vec = vec![vec![1, 0, 0],\n                    vec![0, 1, 0],\n                    vec![0, 0, 1]];\n // SAFETY:\n // 1. `old_len..0` is empty so no elements need to be initialized.\n // 2. `0 <= capacity` always holds whatever `capacity` is.\n unsafe {\n     vec.set_len(0);\n #   // FIXME(https://github.com/rust-lang/miri/issues/3670):\n #   // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n #   vec.set_len(3);\n }\n ```\n\n Normally, here, one would use [`clear`] instead to correctly drop\n the contents and thus not leak memory.\n\n [`spare_capacity_mut()`]: Vec::spare_capacity_mut\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc_crate::vec::Vec": [
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 1415,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/cursor.rs:528:1: 548:2",
+  "src": "fn vec_write_all<A>(pos_mut: &mut u64, vec: &mut Vec<u8, A>, buf: &[u8]) -> io::Result<usize>\nwhere\n    A: Allocator,\n{\n    let buf_len = buf.len();\n    let mut pos = reserve_and_pad(pos_mut, vec, buf_len)?;\n\n    // Write the buf then progress the vec forward if necessary\n    // Safety: we have ensured that the capacity is available\n    // and that all bytes get written up to pos\n    unsafe {\n        pos = vec_write_all_unchecked(pos, vec, buf);\n        if pos > vec.len() {\n            vec.set_len(pos);\n        }\n    };\n\n    // Bump us forward\n    *pos_mut += buf_len as u64;\n    Ok(buf_len)\n}",
+  "mir": "fn io::cursor::vec_write_all(_1: &mut u64, _2: &mut alloc_crate::vec::Vec<u8, A>, _3: &[u8]) -> core::result::Result<usize, io::error::Error> {\n    let mut _0: core::result::Result<usize, io::error::Error>;\n    let  _4: usize;\n    let mut _5: usize;\n    let mut _6: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, usize>;\n    let mut _7: core::result::Result<usize, io::error::Error>;\n    let mut _8: isize;\n    let  _9: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _10: usize;\n    let mut _11: usize;\n    let mut _12: usize;\n    let mut _13: bool;\n    let mut _14: usize;\n    let mut _15: usize;\n    let mut _16: &alloc_crate::vec::Vec<u8, A>;\n    let  _17: ();\n    let mut _18: usize;\n    let mut _19: u64;\n    let mut _20: (u64, bool);\n    debug pos_mut => _1;\n    debug vec => _2;\n    debug buf => _3;\n    debug buf_len => _4;\n    debug pos => _5;\n    debug residual => _9;\n    debug val => _10;\n    bb0: {\n        _4 = PtrMetadata(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = io::cursor::reserve_and_pad::<A>(_1, _2, _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _6 = <core::result::Result<usize, io::error::Error> as core::ops::Try>::branch(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _8 = discriminant(_6);\n        switchInt(move _8) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        StorageLive(_10);\n        _10 = ((_6 as variant#0).0: usize);\n        _5 = _10;\n        StorageDead(_10);\n        StorageDead(_6);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = _5;\n        _11 = io::cursor::vec_write_all_unchecked::<A>(move _12, _2, _3) -> [return: bb7, unwind unreachable];\n    }\n    bb5: {\n        _9 = move ((_6 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<usize, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_6);\n        StorageDead(_5);\n        goto -> bb14;\n    }\n    bb7: {\n        StorageDead(_12);\n        _5 = move _11;\n        StorageDead(_11);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = _5;\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &(*_2);\n        _15 = alloc_crate::vec::Vec::<u8, A>::len(move _16) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_16);\n        _13 = Gt(move _14, move _15);\n        switchInt(move _13) -> [0: bb11, otherwise: bb9];\n    }\n    bb9: {\n        StorageDead(_15);\n        StorageDead(_14);\n        StorageLive(_18);\n        _18 = _5;\n        _17 = alloc_crate::vec::Vec::<u8, A>::set_len(_2, move _18) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_18);\n        goto -> bb12;\n    }\n    bb11: {\n        StorageDead(_15);\n        StorageDead(_14);\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_13);\n        StorageLive(_19);\n        _19 = _4 as u64;\n        _20 = CheckedAdd((*_1), _19);\n        assert(!move (_20.1: bool), \"attempt to compute `{} + {}`, which would overflow\", (*_1), move _19) -> [success: bb13, unwind unreachable];\n    }\n    bb13: {\n        (*_1) = move (_20.0: u64);\n        StorageDead(_19);\n        _0 = core::result::Result::Ok(_4);\n        StorageDead(_5);\n        goto -> bb14;\n    }\n    bb14: {\n        return;\n    }\n}\n",
+  "doc": " Resizing `write_all` implementation for [`Cursor`].\n\n Cursor is allowed to have a pre-allocated and initialised\n vector body, but with a position of 0. This means the [`Write`]\n will overwrite the contents of the vec.\n\n This also allows for the vec body to be empty, but with a position of N.\n This means that [`Write`] will pad the vec with 0 initially,\n before writing anything from that point\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

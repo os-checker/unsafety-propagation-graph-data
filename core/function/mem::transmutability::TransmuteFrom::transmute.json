@@ -1,0 +1,47 @@
+{
+  "name": "mem::transmutability::TransmuteFrom::transmute",
+  "safe": false,
+  "callees": {
+    "mem::manually_drop::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {
+        "mem::manually_drop::ManuallyDrop": "Constructor"
+      }
+    },
+    "mem::manually_drop::ManuallyDrop::<T>::into_inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the value from the `ManuallyDrop` container.\n\n This allows the value to be dropped again.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let x = ManuallyDrop::new(Box::new(()));\n let _: Box<()> = ManuallyDrop::into_inner(x); // This drops the `Box`.\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mem::manually_drop::ManuallyDrop": [
+      "Plain"
+    ],
+    "mem::transmutability::TransmuteFrom::transmute::Transmute": [
+      "Plain",
+      "Unknown([Field(1, Ty { id: 1602, kind: RigidTy(Adt(AdtDef(DefId { id: 24961, name: \"mem::manually_drop::ManuallyDrop\" }), GenericArgs([Type(Ty { id: 42, kind: Param(ParamTy { index: 0, name: \"Self\" }) })]))) })])"
+    ]
+  },
+  "path": "mem::transmutability::TransmuteFrom::transmute",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/mem/transmutability.rs:116:5: 141:6",
+  "src": "unsafe fn transmute(src: Src) -> Self\n    where\n        Src: Sized,\n        Self: Sized,\n    {\n        use super::ManuallyDrop;\n\n        #[repr(C)]\n        union Transmute<Src, Dst> {\n            src: ManuallyDrop<Src>,\n            dst: ManuallyDrop<Dst>,\n        }\n\n        let transmute = Transmute { src: ManuallyDrop::new(src) };\n\n        // SAFETY: It is safe to reinterpret the bits of `src` as a value of\n        // type `Self`, because, by combination of invariant on this trait and\n        // contract on the caller, `src` has been proven to satisfy both the\n        // language and library invariants of `Self`. For all invariants not\n        // `ASSUME`'d by the caller, the safety obligation is supplied by the\n        // compiler. Conversely, for all invariants `ASSUME`'d by the caller,\n        // the safety obligation is supplied by contract on the caller.\n        let dst = unsafe { transmute.dst };\n\n        ManuallyDrop::into_inner(dst)\n    }",
+  "mir": "fn mem::transmutability::TransmuteFrom::transmute(_1: Src) -> Self {\n    let mut _0: Self;\n    let  _2: mem::transmutability::TransmuteFrom::transmute::Transmute<Src, Self>;\n    let mut _3: mem::manually_drop::ManuallyDrop<Src>;\n    let  _4: mem::manually_drop::ManuallyDrop<Self>;\n    debug src => _1;\n    debug transmute => _2;\n    debug dst => _4;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = mem::manually_drop::ManuallyDrop::<Src>::new(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = Transmute(move _3);\n        StorageDead(_3);\n        _4 = move (_2.1: mem::manually_drop::ManuallyDrop<Self>);\n        _0 = mem::manually_drop::ManuallyDrop::<Self>::into_inner(_4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Transmutes a `Src` value into a `Self`.\n\n # Safety\n\n The safety obligations of the caller depend on the value of `ASSUME`:\n - If [`ASSUME.alignment`](Assume::alignment), the caller must guarantee\n   that the addresses of references in the returned `Self` satisfy the\n   alignment requirements of their referent types.\n - If [`ASSUME.lifetimes`](Assume::lifetimes), the caller must guarantee\n   that references in the returned `Self` will not outlive their\n   referents.\n - If [`ASSUME.safety`](Assume::safety), the returned value might not\n   satisfy the library safety invariants of `Self`, and the caller must\n   guarantee that undefined behavior does not arise from uses of the\n   returned value.\n - If [`ASSUME.validity`](Assume::validity), the caller must guarantee\n   that `src` is a bit-valid instance of `Self`.\n\n When satisfying the above obligations (if any), the caller must *not*\n assume that this trait provides any inherent guarantee of layout\n [portability](#portability) or [stability](#stability).\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

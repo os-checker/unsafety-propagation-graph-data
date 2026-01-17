@@ -1,0 +1,89 @@
+{
+  "name": "mm::frame::allocator::early_alloc",
+  "safe": true,
+  "callees": {
+    "spin::mutex::Mutex::<T, R>::lock": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Locks the [`Mutex`] and returns a guard that permits access to the inner data.\n\n The returned value may be dereferenced for data access\n and the lock will be dropped when the guard falls out of scope.\n\n ```\n let lock = spin::Mutex::new(0);\n {\n     let mut data = lock.lock();\n     // The lock is now locked and the data can be accessed\n     *data += 1;\n     // The lock is implicitly dropped at the end of the scope\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::as_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts from `&mut Option<T>` to `Option<&mut T>`.\n\n # Examples\n\n ```\n let mut x = Some(2);\n match x.as_mut() {\n     Some(v) => *v = 42,\n     None => {},\n }\n assert_eq!(x, Some(42));\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "mm::frame::allocator::EarlyFrameAllocator::alloc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates a contiguous range of frames.\n",
+      "adt": {
+        "core::option::Option": "Constructor",
+        "mm::frame::allocator::EarlyFrameAllocator": "MutableAsArgument",
+        "core::alloc::Layout": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "spin::mutex::Mutex": [
+      "Ref"
+    ],
+    "spin::MutexGuard": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "MutRef",
+      "Plain"
+    ],
+    "mm::frame::allocator::EarlyFrameAllocator": [
+      "MutRef"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ]
+  },
+  "path": 1905,
+  "span": "ostd/src/mm/frame/allocator.rs:345:1: 348:2",
+  "src": "pub(crate) fn early_alloc(layout: Layout) -> Option<Paddr> {\n    let mut early_allocator = EARLY_ALLOCATOR.lock();\n    early_allocator.as_mut().unwrap().alloc(layout)\n}",
+  "mir": "fn mm::frame::allocator::early_alloc(_1: core::alloc::Layout) -> core::option::Option<usize> {\n    let mut _0: core::option::Option<usize>;\n    let mut _2: spin::MutexGuard<'_, core::option::Option<mm::frame::allocator::EarlyFrameAllocator>>;\n    let mut _3: &spin::mutex::Mutex<core::option::Option<mm::frame::allocator::EarlyFrameAllocator>>;\n    let mut _4: &mut mm::frame::allocator::EarlyFrameAllocator;\n    let mut _5: core::option::Option<&mut mm::frame::allocator::EarlyFrameAllocator>;\n    let mut _6: &mut core::option::Option<mm::frame::allocator::EarlyFrameAllocator>;\n    let mut _7: &mut spin::MutexGuard<'_, core::option::Option<mm::frame::allocator::EarlyFrameAllocator>>;\n    debug layout => _1;\n    debug early_allocator => _2;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = {alloc1161: &spin::mutex::Mutex<core::option::Option<mm::frame::allocator::EarlyFrameAllocator>>};\n        _2 = spin::mutex::Mutex::<core::option::Option<mm::frame::allocator::EarlyFrameAllocator>>::lock(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_7);\n        _7 = &mut _2;\n        _6 = <spin::MutexGuard<'_, core::option::Option<mm::frame::allocator::EarlyFrameAllocator>> as core::ops::DerefMut>::deref_mut(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = core::option::Option::<mm::frame::allocator::EarlyFrameAllocator>::as_mut(_6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _4 = core::option::Option::<&mut mm::frame::allocator::EarlyFrameAllocator>::unwrap(move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        _0 = mm::frame::allocator::EarlyFrameAllocator::alloc(_4, _1) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        drop(_2) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Allocates a contiguous range of frames in the early boot phase.\n\n The early allocated frames will not be reclaimable, until the metadata is\n initialized by [`super::meta::init`]. Then we can use [`Frame::from_raw`]\n to free the frames.\n\n # Panics\n\n This function panics if:\n  - it is called before [`init_early_allocator`],\n  - or if is called after [`init`].\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "name": "thread::current::current_or_unnamed",
+  "safe": true,
+  "callees": {
+    "sys::thread_local::native::LocalPointer::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::thread_local::native::LocalPointer": "ImmutableAsArgument"
+      }
+    },
+    "thread::thread::Thread::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `Thread` from a raw pointer.\n\n The raw pointer must have been previously returned\n by a call to [`Thread::into_raw`].\n\n # Safety\n\n This function is unsafe because improper use may lead\n to memory unsafety, even if the returned `Thread` is never\n accessed.\n\n Creating a `Thread` from a pointer other than one returned\n from [`Thread::into_raw`] is **undefined behavior**.\n\n Calling this function twice on the same raw pointer can lead\n to a double-free if both `Thread` instances are dropped.\n",
+      "adt": {
+        "thread::thread::Thread": "Constructor"
+      }
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "thread::current::id::get_or_init": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "thread::id::ThreadId": "Constructor"
+      }
+    },
+    "thread::thread::Thread::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "thread::thread::Thread": "Constructor"
+      }
+    },
+    "thread::current::init_current": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "thread::thread::Thread": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sys::thread_local::native::LocalPointer": [
+      "Ref"
+    ],
+    "thread::thread::Thread": [
+      "Plain",
+      "Ref"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "thread::id::ThreadId": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 4451,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/current.rs:241:1: 253:2",
+  "src": "pub(crate) fn current_or_unnamed() -> Thread {\n    let current = CURRENT.get();\n    if current > DESTROYED {\n        unsafe {\n            let current = ManuallyDrop::new(Thread::from_raw(current));\n            (*current).clone()\n        }\n    } else if current == DESTROYED {\n        Thread::new(id::get_or_init(), None)\n    } else {\n        init_current(current)\n    }\n}",
+  "mir": "fn thread::current::current_or_unnamed() -> thread::thread::Thread {\n    let mut _0: thread::thread::Thread;\n    let  _1: *mut ();\n    let  _2: &sys::thread_local::native::LocalPointer;\n    let mut _3: bool;\n    let  _4: core::mem::ManuallyDrop<thread::thread::Thread>;\n    let mut _5: thread::thread::Thread;\n    let mut _6: *const ();\n    let  _7: &thread::thread::Thread;\n    let mut _8: &core::mem::ManuallyDrop<thread::thread::Thread>;\n    let mut _9: bool;\n    let mut _10: thread::id::ThreadId;\n    let mut _11: core::option::Option<alloc_crate::string::String>;\n    debug current => _1;\n    debug current => _4;\n    bb0: {\n        _2 = thread_local_refCrateItem(DefId { id: 4573, name: \"thread::current::CURRENT\" });\n        _1 = sys::thread_local::native::LocalPointer::get(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        _3 = Gt(_1, thread::current::DESTROYED);\n        switchInt(move _3) -> [0: bb7, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = _1 as *const ();\n        _5 = thread::thread::Thread::from_raw(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _4 = core::mem::ManuallyDrop::<thread::thread::Thread>::new(move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageLive(_8);\n        _8 = &_4;\n        _7 = <core::mem::ManuallyDrop<thread::thread::Thread> as core::ops::Deref>::deref(move _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_8);\n        _0 = <thread::thread::Thread as core::clone::Clone>::clone(_7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_4);\n        goto -> bb14;\n    }\n    bb7: {\n        StorageLive(_9);\n        _9 = Eq(_1, thread::current::DESTROYED);\n        switchInt(move _9) -> [0: bb11, otherwise: bb8];\n    }\n    bb8: {\n        StorageLive(_10);\n        _10 = thread::current::id::get_or_init() -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageLive(_11);\n        _11 = core::option::Option::None;\n        _0 = thread::thread::Thread::new(move _10, move _11) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_11);\n        StorageDead(_10);\n        goto -> bb13;\n    }\n    bb11: {\n        _0 = thread::current::init_current(_1) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        goto -> bb13;\n    }\n    bb13: {\n        StorageDead(_9);\n        goto -> bb14;\n    }\n    bb14: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Gets a handle to the thread that invokes it. If the handle stored in thread-\n local storage was already destroyed, this creates a new unnamed temporary\n handle to allow thread parking in nearly all situations.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

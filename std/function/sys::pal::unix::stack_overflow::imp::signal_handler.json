@@ -1,0 +1,97 @@
+{
+  "name": "sys::pal::unix::stack_overflow::imp::signal_handler",
+  "safe": false,
+  "callees": {
+    "core::ptr::mut_ptr::<impl *mut T>::addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n [without_provenance]: without_provenance_mut\n",
+      "adt": {}
+    },
+    "sys::pal::unix::stack_overflow::thread_info::with_current_info": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Get the current thread's information, if available.\n\n Calling this function might freeze other threads if they attempt to modify\n their thread information. Thus, the caller should ensure that the process\n is aborted shortly after this function is called.\n\n This function is guaranteed to be async-signal-safe if `f` is too.\n",
+      "adt": {}
+    },
+    "core::mem::zeroed": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the value of type `T` represented by the all-zero byte-pattern.\n\n This means that, for example, the padding byte in `(u8, u16)` is not\n necessarily zeroed.\n\n There is no guarantee that an all-zero byte-pattern represents a valid value\n of some type `T`. For example, the all-zero byte-pattern is not a valid value\n for reference types (`&T`, `&mut T`) and function pointers. Using `zeroed`\n on such types causes immediate [undefined behavior][ub] because [the Rust\n compiler assumes][inv] that there always is a valid value in a variable it\n considers initialized.\n\n This has the same effect as [`MaybeUninit::zeroed().assume_init()`][zeroed].\n It is useful for FFI sometimes, but should generally be avoided.\n\n [zeroed]: MaybeUninit::zeroed\n [ub]: ../../reference/behavior-considered-undefined.html\n [inv]: MaybeUninit#initialization-invariant\n\n # Examples\n\n Correct usage of this function: initializing an integer with zero.\n\n ```\n use std::mem;\n\n let x: i32 = unsafe { mem::zeroed() };\n assert_eq!(0, x);\n ```\n\n *Incorrect* usage of this function: initializing a reference with zero.\n\n ```rust,no_run\n # #![allow(invalid_value)]\n use std::mem;\n\n let _x: &i32 = unsafe { mem::zeroed() }; // Undefined behavior!\n let _y: fn() = unsafe { mem::zeroed() }; // And again!\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::null_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a null mutable raw pointer.\n\n This function is equivalent to zero-initializing the pointer:\n `MaybeUninit::<*mut T>::zeroed().assume_init()`.\n The resulting pointer has the address 0.\n\n # Examples\n\n ```\n use std::ptr;\n\n let p: *mut i32 = ptr::null_mut();\n assert!(p.is_null());\n assert_eq!(p as usize, 0); // this pointer has the address 0\n ```\n",
+      "adt": {}
+    },
+    "libc::sigaction": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "libc::unix::linux_like::linux::gnu::<impl libc::siginfo_t>::si_addr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "libc::sigaction": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])",
+      "Ref",
+      "Deref"
+    ],
+    "libc::siginfo_t": [
+      "Ref"
+    ]
+  },
+  "path": 3968,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/stack_overflow.rs:101:5: 143:6",
+  "src": "unsafe extern \"C\" fn signal_handler(\n        signum: libc::c_int,\n        info: *mut libc::siginfo_t,\n        _data: *mut libc::c_void,\n    ) {\n        // SAFETY: this pointer is provided by the system and will always point to a valid `siginfo_t`.\n        let fault_addr = unsafe { (*info).si_addr().addr() };\n\n        // `with_current_info` expects that the process aborts after it is\n        // called. If the signal was not caused by a memory access, this might\n        // not be true. We detect this by noticing that the `si_addr` field is\n        // zero if the signal is synthetic.\n        if fault_addr != 0 {\n            with_current_info(|thread_info| {\n                // If the faulting address is within the guard page, then we print a\n                // message saying so and abort.\n                if let Some(thread_info) = thread_info\n                    && thread_info.guard_page_range.contains(&fault_addr)\n                {\n                    // Hey you! Yes, you modifying the stack overflow message!\n                    // Please make sure that all functions called here are\n                    // actually async-signal-safe. If they're not, try retrieving\n                    // the information beforehand and storing it in `ThreadInfo`.\n                    // Thank you!\n                    // - says Jonas after having had to watch his carefully\n                    //   written code get made unsound again.\n                    let tid = thread_info.tid;\n                    let name = thread_info.name.as_deref().unwrap_or(\"<unknown>\");\n                    rtprintpanic!(\"\\nthread '{name}' ({tid}) has overflowed its stack\\n\");\n                    rtabort!(\"stack overflow\");\n                }\n            })\n        }\n\n        // Unregister ourselves by reverting back to the default behavior.\n        // SAFETY: assuming all platforms define struct sigaction as \"zero-initializable\"\n        let mut action: sigaction = unsafe { mem::zeroed() };\n        action.sa_sigaction = SIG_DFL;\n        // SAFETY: pray this is a well-behaved POSIX implementation of fn sigaction\n        unsafe { sigaction(signum, &action, ptr::null_mut()) };\n\n        // See comment above for why this function returns.\n    }",
+  "mir": "fn sys::pal::unix::stack_overflow::imp::signal_handler(_1: i32, _2: *mut libc::siginfo_t, _3: *mut libc::c_void) -> () {\n    let mut _0: ();\n    let  _4: usize;\n    let mut _5: *mut libc::c_void;\n    let mut _6: &libc::siginfo_t;\n    let  _7: ();\n    let mut _8: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/stack_overflow.rs:114:31: 114:44};\n    let mut _9: &usize;\n    let mut _10: libc::sigaction;\n    let  _11: i32;\n    let mut _12: *const libc::sigaction;\n    let  _13: &libc::sigaction;\n    let mut _14: *mut libc::sigaction;\n    let mut _15: *const ();\n    let mut _16: usize;\n    let mut _17: usize;\n    let mut _18: usize;\n    let mut _19: bool;\n    let mut _20: *const ();\n    let mut _21: usize;\n    let mut _22: bool;\n    let mut _23: bool;\n    let mut _24: bool;\n    debug signum => _1;\n    debug info => _2;\n    debug _data => _3;\n    debug fault_addr => _4;\n    debug action => _10;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _15 = _2 as *const ();\n        _16 = _15 as usize;\n        _17 = Sub(<libc::siginfo_t as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _18 = BitAnd(_16, _17);\n        _19 = Eq(_18, 0_usize);\n        assert(_19, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<libc::siginfo_t as core::mem::SizedTypeProperties>::ALIGN, _16) -> [success: bb10, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        _4 = core::ptr::mut_ptr::<impl *mut libc::c_void>::addr(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        switchInt(_4) -> [0: bb5, otherwise: bb3];\n    }\n    bb3: {\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &_4;\n        _8 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/stack_overflow.rs:114:31: 114:44}(move _9);\n        StorageDead(_9);\n        _7 = sys::pal::unix::stack_overflow::thread_info::with_current_info::<(), {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/stack_overflow.rs:114:31: 114:44}>(move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        goto -> bb6;\n    }\n    bb5: {\n        goto -> bb6;\n    }\n    bb6: {\n        StorageLive(_10);\n        _10 = core::mem::zeroed::<libc::sigaction>() -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        (_10.0: usize) = libc::SIG_DFL;\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &_10;\n        _12 = &raw const (*_13);\n        StorageLive(_14);\n        _14 = core::ptr::null_mut::<libc::sigaction>() -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _11 = libc::sigaction(_1, move _12, move _14) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        return;\n    }\n    bb10: {\n        _20 = _2 as *const ();\n        _21 = _20 as usize;\n        _22 = Eq(_21, 0_usize);\n        _23 = BitAnd(_22, true);\n        _24 = Not(_23);\n        assert(_24, \"null pointer dereference occurred\") -> [success: bb11, unwind unreachable];\n    }\n    bb11: {\n        _6 = &(*_2);\n        _5 = libc::unix::linux_like::linux::gnu::<impl libc::siginfo_t>::si_addr(move _6) -> [return: bb1, unwind unreachable];\n    }\n}\n",
+  "doc": " SIGSEGV/SIGBUS entry point\n # Safety\n Rust doesn't call this, it *gets called*.\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "unsafe_op_in_unsafe_fn"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* unsafe_op_in_unsafe_fn\n"
+    ]
+  }
+}

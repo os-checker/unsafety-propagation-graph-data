@@ -1,0 +1,77 @@
+{
+  "name": "slice::<impl [T]>::as_chunks_unchecked_mut",
+  "safe": false,
+  "callees": {
+    "ub_checks::check_language_ub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Determines whether we should check for language UB.\n\n The intention is to not do that when running in the interpreter, as that one has its own\n language UB checks which generally produce better errors.\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_chunks_unchecked_mut::precondition_check": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "intrinsics::exact_div": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an exact division, resulting in undefined behavior where\n `x % y != 0` or `y == 0` or `x == T::MIN && y == -1`\n\n This intrinsic does not have a stable counterpart.\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unsafe mutable pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n let x_ptr = x.as_mut_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         *x_ptr.add(i) += 2;\n     }\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "slice::raw::from_raw_parts_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the same functionality as [`from_raw_parts`], except that a\n mutable slice is returned.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for both reads and writes for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be accessed through any other pointer\n   (not derived from the return value) for the duration of lifetime `'a`.\n   Both read and write accesses are forbidden.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1232,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:1497:5: 1508:6",
+  "src": "pub const unsafe fn as_chunks_unchecked_mut<const N: usize>(&mut self) -> &mut [[T; N]] {\n        assert_unsafe_precondition!(\n            check_language_ub,\n            \"slice::as_chunks_unchecked requires `N != 0` and the slice to split exactly into `N`-element chunks\",\n            (n: usize = N, len: usize = self.len()) => n != 0 && len.is_multiple_of(n)\n        );\n        // SAFETY: Caller must guarantee that `N` is nonzero and exactly divides the slice length\n        let new_len = unsafe { exact_div(self.len(), N) };\n        // SAFETY: We cast a slice of `new_len * N` elements into\n        // a slice of `new_len` many `N` elements chunks.\n        unsafe { from_raw_parts_mut(self.as_mut_ptr().cast(), new_len) }\n    }",
+  "mir": "fn slice::<impl [T]>::as_chunks_unchecked_mut(_1: &mut [T]) -> &mut [[T; N]] {\n    let mut _0: &mut [[T; N]];\n    let mut _2: bool;\n    let  _3: ();\n    let mut _4: usize;\n    let mut _5: &[T];\n    let  _6: usize;\n    let mut _7: usize;\n    let mut _8: &[T];\n    let mut _9: *mut [T; N];\n    let mut _10: *mut T;\n    debug self => _1;\n    debug new_len => _6;\n    bb0: {\n        StorageLive(_2);\n        _2 = ub_checks::check_language_ub() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = PtrMetadata(move _5);\n        StorageDead(_5);\n        _3 = slice::<impl [T]>::as_chunks_unchecked_mut::precondition_check(N, move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        goto -> bb4;\n    }\n    bb4: {\n        StorageDead(_2);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &(*_1);\n        _7 = PtrMetadata(move _8);\n        StorageDead(_8);\n        _6 = intrinsics::exact_div::<usize>(move _7, N) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = slice::<impl [T]>::as_mut_ptr(_1) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _9 = ptr::mut_ptr::<impl *mut T>::cast::<[T; N]>(move _10) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_10);\n        _0 = slice::raw::from_raw_parts_mut::<'_, [T; N]>(move _9, _6) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_9);\n        return;\n    }\n}\n",
+  "doc": " Splits the slice into a slice of `N`-element arrays,\n assuming that there's no remainder.\n\n This is the inverse operation to [`as_flattened_mut`].\n\n [`as_flattened_mut`]: slice::as_flattened_mut\n\n As this is `unsafe`, consider whether you could use [`as_chunks_mut`] or\n [`as_rchunks_mut`] instead, perhaps via something like\n `if let (chunks, []) = slice.as_chunks_mut()` or\n `let (chunks, []) = slice.as_chunks_mut() else { unreachable!() };`.\n\n [`as_chunks_mut`]: slice::as_chunks_mut\n [`as_rchunks_mut`]: slice::as_rchunks_mut\n\n # Safety\n\n This may only be called when\n - The slice splits exactly into `N`-element chunks (aka `self.len() % N == 0`).\n - `N != 0`.\n\n # Examples\n\n ```\n let slice: &mut [char] = &mut ['l', 'o', 'r', 'e', 'm', '!'];\n let chunks: &mut [[char; 1]] =\n     // SAFETY: 1-element chunks never have remainder\n     unsafe { slice.as_chunks_unchecked_mut() };\n chunks[0] = ['L'];\n assert_eq!(chunks, &[['L'], ['o'], ['r'], ['e'], ['m'], ['!']]);\n let chunks: &mut [[char; 3]] =\n     // SAFETY: The slice length (6) is a multiple of 3\n     unsafe { slice.as_chunks_unchecked_mut() };\n chunks[1] = ['a', 'x', '?'];\n assert_eq!(slice, &['L', 'o', 'r', 'a', 'x', '?']);\n\n // These would be unsound:\n // let chunks: &[[_; 5]] = slice.as_chunks_unchecked_mut() // The slice length is not a multiple of 5\n // let chunks: &[[_; 0]] = slice.as_chunks_unchecked_mut() // Zero-length chunks are never allowed\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

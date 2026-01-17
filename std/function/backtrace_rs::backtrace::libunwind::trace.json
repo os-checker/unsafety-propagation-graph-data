@@ -1,0 +1,53 @@
+{
+  "name": "backtrace_rs::backtrace::libunwind::trace",
+  "safe": false,
+  "callees": {
+    "backtrace_rs::backtrace::libunwind::trace::trace_fn": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "backtrace_rs::backtrace::libunwind::uw::_Unwind_Reason_Code": "Constructor"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "backtrace_rs::backtrace::libunwind::uw::_Unwind_Backtrace": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "backtrace_rs::backtrace::libunwind::uw::_Unwind_Reason_Code": [
+      "Plain"
+    ]
+  },
+  "path": 450,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/backtrace/libunwind.rs:115:1: 139:2",
+  "src": "pub unsafe fn trace(mut cb: &mut dyn FnMut(&super::Frame) -> bool) {\n    unsafe {\n        uw::_Unwind_Backtrace(trace_fn, addr_of_mut!(cb).cast());\n    }\n\n    extern \"C\" fn trace_fn(\n        ctx: *mut uw::_Unwind_Context,\n        arg: *mut c_void,\n    ) -> uw::_Unwind_Reason_Code {\n        let cb = unsafe { &mut *arg.cast::<&mut dyn FnMut(&super::Frame) -> bool>() };\n        let cx = super::Frame {\n            inner: Frame::Raw(ctx),\n        };\n\n        let mut bomb = Bomb { enabled: true };\n        let keep_going = cb(&cx);\n        bomb.enabled = false;\n\n        if keep_going {\n            uw::_URC_NO_REASON\n        } else {\n            uw::_URC_FAILURE\n        }\n    }\n}",
+  "mir": "fn backtrace_rs::backtrace::libunwind::trace(_1: &mut dyn for<'a> core::ops::FnMut(&'a backtrace_rs::backtrace::Frame) -> bool) -> () {\n    let mut _0: ();\n    let  _2: backtrace_rs::backtrace::libunwind::uw::_Unwind_Reason_Code;\n    let mut _3: extern \"C\" fn(*mut backtrace_rs::backtrace::libunwind::uw::_Unwind_Context, *mut libc::c_void) -> backtrace_rs::backtrace::libunwind::uw::_Unwind_Reason_Code;\n    let mut _4: *mut libc::c_void;\n    let mut _5: *mut &mut dyn for<'a> core::ops::FnMut(&'a backtrace_rs::backtrace::Frame) -> bool;\n    debug cb => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = backtrace_rs::backtrace::libunwind::trace::trace_fn as extern \"C\" fn(*mut backtrace_rs::backtrace::libunwind::uw::_Unwind_Context, *mut libc::c_void) -> backtrace_rs::backtrace::libunwind::uw::_Unwind_Reason_Code;\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &raw mut _1;\n        _4 = core::ptr::mut_ptr::<impl *mut &mut dyn for<'a> core::ops::FnMut(&'a backtrace_rs::backtrace::Frame) -> bool>::cast::<libc::c_void>(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _2 = backtrace_rs::backtrace::libunwind::uw::_Unwind_Backtrace(move _3, move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

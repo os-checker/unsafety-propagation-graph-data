@@ -1,0 +1,49 @@
+{
+  "name": "<pin::Pin<P> as async_iter::async_iter::AsyncIterator>::poll_next",
+  "safe": true,
+  "callees": {
+    "pin::Pin::<Ptr>::as_deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets `Pin<&mut T>` to the underlying pinned value from this nested `Pin`-pointer.\n\n This is a generic method to go from `Pin<&mut Pin<Pointer<T>>>` to `Pin<&mut T>`. It is\n safe because the existence of a `Pin<Pointer<T>>` ensures that the pointee, `T`, cannot\n move in the future, and this method does not enable the pointee to move. \"Malicious\"\n implementations of `Ptr::DerefMut` are likewise ruled out by the contract of\n `Pin::new_unchecked`.\n",
+      "adt": {
+        "pin::Pin": "Constructor"
+      }
+    },
+    "async_iter::async_iter::AsyncIterator::poll_next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to pull out the next value of this async iterator, registering the\n current task for wakeup if the value is not yet available, and returning\n `None` if the async iterator is exhausted.\n\n # Return value\n\n There are several possible return values, each indicating a distinct\n async iterator state:\n\n - `Poll::Pending` means that this async iterator's next value is not ready\n   yet. Implementations will ensure that the current task will be notified\n   when the next value may be ready.\n\n - `Poll::Ready(Some(val))` means that the async iterator has successfully\n   produced a value, `val`, and may produce further values on subsequent\n   `poll_next` calls.\n\n - `Poll::Ready(None)` means that the async iterator has terminated, and\n   `poll_next` should not be invoked again.\n\n # Panics\n\n Once an async iterator has finished (returned `Ready(None)` from `poll_next`), calling its\n `poll_next` method again may panic, block forever, or cause other kinds of\n problems; the `AsyncIterator` trait places no requirements on the effects of\n such a call. However, as the `poll_next` method is not marked `unsafe`,\n Rust's usual rules apply: calls must never cause undefined behavior\n (memory corruption, incorrect use of `unsafe` functions, or the like),\n regardless of the async iterator's state.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "pin::Pin": [
+      "Plain"
+    ],
+    "task::wake::Context": [
+      "MutRef"
+    ],
+    "task::poll::Poll": [
+      "Plain"
+    ]
+  },
+  "path": 15882,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/async_iter/async_iter.rs:106:5: 108:6",
+  "src": "fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {\n        <P::Target as AsyncIterator>::poll_next(self.as_deref_mut(), cx)\n    }",
+  "mir": "fn <pin::Pin<P> as async_iter::async_iter::AsyncIterator>::poll_next(_1: pin::Pin<&mut pin::Pin<P>>, _2: &mut task::wake::Context<'_>) -> task::poll::Poll<option::Option<<<P as ops::deref::Deref>::Target as async_iter::async_iter::AsyncIterator>::Item>> {\n    let mut _0: task::poll::Poll<option::Option<<<P as ops::deref::Deref>::Target as async_iter::async_iter::AsyncIterator>::Item>>;\n    let mut _3: pin::Pin<&mut <P as ops::deref::Deref>::Target>;\n    debug self => _1;\n    debug cx => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = pin::Pin::<P>::as_deref_mut(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = <<P as ops::deref::Deref>::Target as async_iter::async_iter::AsyncIterator>::poll_next(move _3, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

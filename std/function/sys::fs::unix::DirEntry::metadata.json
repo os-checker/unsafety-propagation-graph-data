@@ -1,0 +1,172 @@
+{
+  "name": "sys::fs::unix::DirEntry::metadata",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "libc::dirfd": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "sys::pal::unix::cvt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts native return values to Result using the *-1 means error is in `errno`*  convention.\n Non-error values are `Ok`-wrapped.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "sys::fs::unix::DirEntry::name_cstr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::fs::unix::DirEntry": "ImmutableAsArgument"
+      }
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ffi::CStr::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the inner pointer to this C string.\n\n The returned pointer will be valid for as long as `self` is, and points\n to a contiguous region of memory terminated with a 0 byte to represent\n the end of the string.\n\n The type of the returned pointer is\n [`*const c_char`][crate::ffi::c_char], and whether it's\n an alias for `*const i8` or `*const u8` is platform-specific.\n\n **WARNING**\n\n The returned pointer is read-only; writing to it (including passing it\n to C code that writes to it) causes undefined behavior.\n\n It is your responsibility to make sure that the underlying memory is not\n freed too early. For example, the following code will cause undefined\n behavior when `ptr` is used inside the `unsafe` block:\n\n ```no_run\n # #![expect(dangling_pointers_from_temporaries)]\n use std::ffi::{CStr, CString};\n\n // 💀 The meaning of this entire program is undefined,\n // 💀 and nothing about its behavior is guaranteed,\n // 💀 not even that its behavior resembles the code as written,\n // 💀 just because it contains a single instance of undefined behavior!\n\n // 🚨 creates a dangling pointer to a temporary `CString`\n // 🚨 that is deallocated at the end of the statement\n let ptr = CString::new(\"Hi!\".to_uppercase()).unwrap().as_ptr();\n\n // without undefined behavior, you would expect that `ptr` equals:\n dbg!(CStr::from_bytes_with_nul(b\"HI!\\0\").unwrap());\n\n // 🙏 Possibly the program behaved as expected so far,\n // 🙏 and this just shows `ptr` is now garbage..., but\n // 💀 this violates `CStr::from_ptr`'s safety contract\n // 💀 leading to a dereference of a dangling pointer,\n // 💀 which is immediate undefined behavior.\n // 💀 *BOOM*, you're dead, your entire program has no meaning.\n dbg!(unsafe { CStr::from_ptr(ptr) });\n ```\n\n This happens because, the pointer returned by `as_ptr` does not carry any\n lifetime information, and the `CString` is deallocated immediately after\n the expression that it is part of has been evaluated.\n To fix the problem, bind the `CString` to a local variable:\n\n ```\n use std::ffi::{CStr, CString};\n\n let c_str = CString::new(\"Hi!\".to_uppercase()).unwrap();\n let ptr = c_str.as_ptr();\n\n assert_eq!(unsafe { CStr::from_ptr(ptr) }, c\"HI!\");\n ```\n",
+      "adt": {}
+    },
+    "sys::fs::unix::try_statx": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "core::option::Option": "Constructor",
+        "sys::fs::unix::FileAttr": "Constructor"
+      }
+    },
+    "libc::fstatat64": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "sys::fs::unix::FileAttr::from_stat64": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::fs::unix::FileAttr": "Constructor"
+      }
+    },
+    "core::mem::zeroed": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the value of type `T` represented by the all-zero byte-pattern.\n\n This means that, for example, the padding byte in `(u8, u16)` is not\n necessarily zeroed.\n\n There is no guarantee that an all-zero byte-pattern represents a valid value\n of some type `T`. For example, the all-zero byte-pattern is not a valid value\n for reference types (`&T`, `&mut T`) and function pointers. Using `zeroed`\n on such types causes immediate [undefined behavior][ub] because [the Rust\n compiler assumes][inv] that there always is a valid value in a variable it\n considers initialized.\n\n This has the same effect as [`MaybeUninit::zeroed().assume_init()`][zeroed].\n It is useful for FFI sometimes, but should generally be avoided.\n\n [zeroed]: MaybeUninit::zeroed\n [ub]: ../../reference/behavior-considered-undefined.html\n [inv]: MaybeUninit#initialization-invariant\n\n # Examples\n\n Correct usage of this function: initializing an integer with zero.\n\n ```\n use std::mem;\n\n let x: i32 = unsafe { mem::zeroed() };\n assert_eq!(0, x);\n ```\n\n *Incorrect* usage of this function: initializing a reference with zero.\n\n ```rust,no_run\n # #![allow(invalid_value)]\n use std::mem;\n\n let _x: &i32 = unsafe { mem::zeroed() }; // Undefined behavior!\n let _y: fn() = unsafe { mem::zeroed() }; // And again!\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc_crate::sync::Arc": [
+      "Ref"
+    ],
+    "sys::fs::unix::DirEntry": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "sys::fs::unix::InnerReadDir": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 44, kind: RigidTy(Int(I32)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "core::ffi::CStr": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 3837, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 3838, kind: RigidTy(Adt(AdtDef(DefId { id: 6196, name: \"sys::fs::unix::FileAttr\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "libc::stat64": [
+      "MutRef",
+      "Plain",
+      "Deref"
+    ],
+    "sys::fs::unix::FileAttr": [
+      "Plain"
+    ]
+  },
+  "path": 3500,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/fs/unix.rs:915:5: 933:6",
+  "src": "pub fn metadata(&self) -> io::Result<FileAttr> {\n        let fd = cvt(unsafe { dirfd(self.dir.dirp.0) })?;\n        let name = self.name_cstr().as_ptr();\n\n        cfg_has_statx! {\n            if let Some(ret) = unsafe { try_statx(\n                fd,\n                name,\n                libc::AT_SYMLINK_NOFOLLOW | libc::AT_STATX_SYNC_AS_STAT,\n                libc::STATX_BASIC_STATS | libc::STATX_BTIME,\n            ) } {\n                return ret;\n            }\n        }\n\n        let mut stat: stat64 = unsafe { mem::zeroed() };\n        cvt(unsafe { fstatat64(fd, name, &mut stat, libc::AT_SYMLINK_NOFOLLOW) })?;\n        Ok(FileAttr::from_stat64(stat))\n    }",
+  "mir": "fn sys::fs::unix::DirEntry::metadata(_1: &sys::fs::unix::DirEntry) -> core::result::Result<sys::fs::unix::FileAttr, io::error::Error> {\n    let mut _0: core::result::Result<sys::fs::unix::FileAttr, io::error::Error>;\n    let mut _2: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, i32>;\n    let mut _3: core::result::Result<i32, io::error::Error>;\n    let mut _4: i32;\n    let mut _5: *mut libc::DIR;\n    let mut _6: &sys::fs::unix::InnerReadDir;\n    let mut _7: &alloc_crate::sync::Arc<sys::fs::unix::InnerReadDir>;\n    let mut _8: isize;\n    let  _9: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _10: i32;\n    let  _11: *const u8;\n    let  _12: &core::ffi::CStr;\n    let mut _13: core::option::Option<core::result::Result<sys::fs::unix::FileAttr, io::error::Error>>;\n    let mut _14: i32;\n    let mut _15: u32;\n    let mut _16: isize;\n    let  _17: core::result::Result<sys::fs::unix::FileAttr, io::error::Error>;\n    let mut _18: libc::stat64;\n    let mut _19: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, i32>;\n    let mut _20: core::result::Result<i32, io::error::Error>;\n    let mut _21: i32;\n    let mut _22: *mut libc::stat64;\n    let mut _23: &mut libc::stat64;\n    let mut _24: isize;\n    let  _25: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _26: i32;\n    let mut _27: sys::fs::unix::FileAttr;\n    let mut _28: libc::stat64;\n    debug self => _1;\n    debug fd => _10;\n    debug residual => _9;\n    debug val => _10;\n    debug name => _11;\n    debug ret => _17;\n    debug stat => _18;\n    debug residual => _25;\n    debug val => _26;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).0: alloc_crate::sync::Arc<sys::fs::unix::InnerReadDir>);\n        _6 = <alloc_crate::sync::Arc<sys::fs::unix::InnerReadDir> as core::ops::Deref>::deref(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        _5 = (((*_6).0: sys::fs::unix::Dir).0: *mut libc::DIR);\n        _4 = libc::dirfd(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_5);\n        _3 = sys::pal::unix::cvt::<i32>(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _2 = <core::result::Result<i32, io::error::Error> as core::ops::Try>::branch(move _3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_3);\n        _8 = discriminant(_2);\n        switchInt(move _8) -> [0: bb6, 1: bb7, otherwise: bb5];\n    }\n    bb5: {\n        unreachable;\n    }\n    bb6: {\n        _10 = ((_2 as variant#0).0: i32);\n        StorageDead(_2);\n        _12 = sys::fs::unix::DirEntry::name_cstr(_1) -> [return: bb9, unwind unreachable];\n    }\n    bb7: {\n        _9 = move ((_2 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<sys::fs::unix::FileAttr, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_9) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_2);\n        goto -> bb22;\n    }\n    bb9: {\n        _11 = core::ffi::CStr::as_ptr(_12) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = BitOr(libc::AT_SYMLINK_NOFOLLOW, libc::AT_STATX_SYNC_AS_STAT);\n        StorageLive(_15);\n        _15 = BitOr(libc::STATX_BASIC_STATS, libc::STATX_BTIME);\n        _13 = sys::fs::unix::try_statx(_10, _11, move _14, move _15) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_15);\n        StorageDead(_14);\n        _16 = discriminant(_13);\n        switchInt(move _16) -> [1: bb12, 0: bb24, otherwise: bb5];\n    }\n    bb12: {\n        StorageLive(_17);\n        _17 = move ((_13 as variant#1).0: core::result::Result<sys::fs::unix::FileAttr, io::error::Error>);\n        _0 = move _17;\n        StorageDead(_17);\n        StorageDead(_13);\n        goto -> bb21;\n    }\n    bb13: {\n        StorageLive(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = &mut _18;\n        _22 = &raw mut (*_23);\n        _21 = libc::fstatat64(_10, _11, move _22, libc::AT_SYMLINK_NOFOLLOW) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_23);\n        StorageDead(_22);\n        _20 = sys::pal::unix::cvt::<i32>(move _21) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_21);\n        _19 = <core::result::Result<i32, io::error::Error> as core::ops::Try>::branch(move _20) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_20);\n        _24 = discriminant(_19);\n        switchInt(move _24) -> [0: bb17, 1: bb18, otherwise: bb5];\n    }\n    bb17: {\n        StorageLive(_26);\n        _26 = ((_19 as variant#0).0: i32);\n        StorageDead(_26);\n        StorageDead(_19);\n        StorageLive(_27);\n        StorageLive(_28);\n        _28 = _18;\n        _27 = sys::fs::unix::FileAttr::from_stat64(move _28) -> [return: bb20, unwind unreachable];\n    }\n    bb18: {\n        _25 = move ((_19 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<sys::fs::unix::FileAttr, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_25) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_19);\n        StorageDead(_18);\n        goto -> bb21;\n    }\n    bb20: {\n        StorageDead(_28);\n        _0 = core::result::Result::Ok(move _27);\n        StorageDead(_27);\n        StorageDead(_18);\n        goto -> bb23;\n    }\n    bb21: {\n        goto -> bb22;\n    }\n    bb22: {\n        goto -> bb23;\n    }\n    bb23: {\n        return;\n    }\n    bb24: {\n        StorageDead(_13);\n        StorageLive(_18);\n        _18 = core::mem::zeroed::<libc::stat64>() -> [return: bb13, unwind unreachable];\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

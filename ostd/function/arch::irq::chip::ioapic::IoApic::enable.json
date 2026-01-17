@@ -1,0 +1,101 @@
+{
+  "name": "arch::irq::chip::ioapic::IoApic::enable",
+  "safe": true,
+  "callees": {
+    "arch::irq::chip::ioapic::IoApicAccess::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "arch::irq::chip::ioapic::IoApicAccess": "MutableAsArgument"
+      }
+    },
+    "bit_field::BitField::get_bits": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Obtains the range of bits specified by `range`; note that index 0 is the least significant\n bit, while index `length() - 1` is the most significant bit.\n\n ```rust\n use bit_field::BitField;\n\n let value: u32 = 0b110101;\n\n assert_eq!(value.get_bits(0..3), 0b101);\n assert_eq!(value.get_bits(2..6), 0b1101);\n assert_eq!(value.get_bits(..), 0b110101);\n assert_eq!(value.get_bits(3..=3), value.get_bit(3) as u32);\n ```\n\n ## Panics\n\n This method will panic if the start or end indexes of the range are out of bounds of the\n bit field.\n",
+      "adt": {}
+    },
+    "irq::top_half::IrqLine::remapping_index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the remapping index of the IRQ line.\n\n This method will return `None` if interrupt remapping is disabled or\n not supported by the architecture.\n",
+      "adt": {
+        "irq::top_half::IrqLine": "ImmutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    },
+    "irq::top_half::IrqLine::num": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the IRQ number.\n",
+      "adt": {
+        "irq::top_half::IrqLine": "ImmutableAsArgument"
+      }
+    },
+    "arch::irq::chip::ioapic::IoApicAccess::write": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "arch::irq::chip::ioapic::IoApicAccess": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "arch::irq::chip::ioapic::IoApic": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "error::Error": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "arch::irq::chip::ioapic::IoApicAccess": [
+      "MutRef"
+    ],
+    "core::ops::Range": [
+      "Plain"
+    ],
+    "irq::top_half::IrqLine": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 74, kind: RigidTy(Uint(U16)) })])"
+    ]
+  },
+  "path": 1119,
+  "span": "ostd/src/arch/x86/irq/chip/ioapic.rs:70:5: 116:6",
+  "src": "pub(super) fn enable(&mut self, index: u8, irq: &IrqLine) -> Result<()> {\n        if index > self.max_redirection_entry {\n            return Err(Error::InvalidArgs);\n        }\n\n        // SAFETY: `index` is inbound. The redirection table is safe to read.\n        let value = unsafe { self.access.read(IoApicAccess::IOREDTBL + 2 * index) };\n        if value.get_bits(0..8) as u8 != 0 {\n            return Err(Error::AccessDenied);\n        }\n\n        if let Some(remapping_index) = irq.remapping_index() {\n            // Intel(R) Virtualization Technology for Directed I/O (Revision 5.0), Section 5.1.5.1\n            // I/OxAPIC Programming says \"Bit 48 in the I/OxAPIC RTE is Set to indicate the\n            // Interrupt is in Remappable format.\"\n            let mut value: u64 = irq.num() as u64 | 0x1_0000_0000_0000;\n\n            // \"The Interrupt_Index[14:0] is programmed in bits 63:49 of the I/OxAPIC RTE. The most\n            // significant bit of the Interrupt_Index (Interrupt_Index[15]) is programmed in bit 11\n            // of the I/OxAPIC RTE.\"\n            value |= ((remapping_index & 0x8000) >> 4) as u64;\n            value |= (remapping_index as u64 & 0x7FFF) << 49;\n\n            // SAFETY: `index` is inbound. It is safe to enable the redirection entry with the\n            // correct remapping index.\n            unsafe {\n                self.access.write(\n                    IoApicAccess::IOREDTBL + 2 * index,\n                    value.get_bits(0..32) as u32,\n                );\n                self.access.write(\n                    IoApicAccess::IOREDTBL + 2 * index + 1,\n                    value.get_bits(32..64) as u32,\n                );\n            }\n        } else {\n            // SAFETY: `index` is inbound. It is safe to enable the redirection entry with the\n            // legal IRQ number.\n            unsafe {\n                self.access\n                    .write(IoApicAccess::IOREDTBL + 2 * index, irq.num() as u32);\n                self.access.write(IoApicAccess::IOREDTBL + 2 * index + 1, 0);\n            }\n        }\n\n        Ok(())\n    }",
+  "mir": "fn arch::irq::chip::ioapic::IoApic::enable(_1: &mut arch::irq::chip::ioapic::IoApic, _2: u8, _3: &irq::top_half::IrqLine) -> core::result::Result<(), error::Error> {\n    let mut _0: core::result::Result<(), error::Error>;\n    let mut _4: bool;\n    let mut _5: u8;\n    let mut _6: error::Error;\n    let  _7: u32;\n    let mut _8: &mut arch::irq::chip::ioapic::IoApicAccess;\n    let mut _9: u8;\n    let mut _10: u8;\n    let mut _11: (u8, bool);\n    let mut _12: (u8, bool);\n    let mut _13: u8;\n    let mut _14: u32;\n    let mut _15: &u32;\n    let mut _16: core::ops::Range<usize>;\n    let mut _17: error::Error;\n    let mut _18: core::option::Option<u16>;\n    let mut _19: isize;\n    let  _20: u16;\n    let mut _21: u64;\n    let mut _22: u64;\n    let mut _23: u8;\n    let mut _24: u64;\n    let mut _25: u16;\n    let mut _26: u16;\n    let mut _27: u32;\n    let mut _28: bool;\n    let mut _29: u64;\n    let mut _30: u64;\n    let mut _31: u64;\n    let mut _32: u32;\n    let mut _33: bool;\n    let  _34: ();\n    let mut _35: &mut arch::irq::chip::ioapic::IoApicAccess;\n    let mut _36: u8;\n    let mut _37: u8;\n    let mut _38: (u8, bool);\n    let mut _39: (u8, bool);\n    let mut _40: u32;\n    let mut _41: u64;\n    let mut _42: &u64;\n    let mut _43: core::ops::Range<usize>;\n    let  _44: ();\n    let mut _45: &mut arch::irq::chip::ioapic::IoApicAccess;\n    let mut _46: u8;\n    let mut _47: u8;\n    let mut _48: u8;\n    let mut _49: (u8, bool);\n    let mut _50: (u8, bool);\n    let mut _51: (u8, bool);\n    let mut _52: u32;\n    let mut _53: u64;\n    let mut _54: &u64;\n    let mut _55: core::ops::Range<usize>;\n    let  _56: ();\n    let mut _57: &mut arch::irq::chip::ioapic::IoApicAccess;\n    let mut _58: u8;\n    let mut _59: u8;\n    let mut _60: (u8, bool);\n    let mut _61: (u8, bool);\n    let mut _62: u32;\n    let mut _63: u8;\n    let  _64: ();\n    let mut _65: &mut arch::irq::chip::ioapic::IoApicAccess;\n    let mut _66: u8;\n    let mut _67: u8;\n    let mut _68: u8;\n    let mut _69: (u8, bool);\n    let mut _70: (u8, bool);\n    let mut _71: (u8, bool);\n    debug self => _1;\n    debug index => _2;\n    debug irq => _3;\n    debug value => _7;\n    debug remapping_index => _20;\n    debug value => _21;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = ((*_1).2: u8);\n        _4 = Gt(_2, move _5);\n        switchInt(move _4) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageLive(_6);\n        _6 = error::Error::InvalidArgs;\n        _0 = core::result::Result::Err(move _6);\n        StorageDead(_6);\n        StorageDead(_4);\n        goto -> bb33;\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &mut ((*_1).0: arch::irq::chip::ioapic::IoApicAccess);\n        StorageLive(_9);\n        StorageLive(_10);\n        _11 = CheckedMul(2_u8, _2);\n        assert(!move (_11.1: bool), \"attempt to compute `{} * {}`, which would overflow\", 2_u8, _2) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _10 = move (_11.0: u8);\n        _12 = CheckedAdd(arch::irq::chip::ioapic::IoApicAccess::IOREDTBL, _10);\n        assert(!move (_12.1: bool), \"attempt to compute `{} + {}`, which would overflow\", arch::irq::chip::ioapic::IoApicAccess::IOREDTBL, move _10) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _9 = move (_12.0: u8);\n        StorageDead(_10);\n        _7 = arch::irq::chip::ioapic::IoApicAccess::read(move _8, move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_13);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = &_7;\n        StorageLive(_16);\n        _16 = Range(0_usize, 8_usize);\n        _14 = <u32 as bit_field::BitField>::get_bits::<core::ops::Range<usize>>(move _15, move _16) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_16);\n        StorageDead(_15);\n        _13 = move _14 as u8;\n        StorageDead(_14);\n        switchInt(move _13) -> [0: bb8, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_13);\n        StorageLive(_17);\n        _17 = error::Error::AccessDenied;\n        _0 = core::result::Result::Err(move _17);\n        StorageDead(_17);\n        StorageDead(_7);\n        goto -> bb33;\n    }\n    bb8: {\n        StorageDead(_13);\n        StorageLive(_18);\n        _18 = irq::top_half::IrqLine::remapping_index(_3) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _19 = discriminant(_18);\n        switchInt(move _19) -> [1: bb10, 0: bb23, otherwise: bb34];\n    }\n    bb10: {\n        _20 = ((_18 as variant#1).0: u16);\n        StorageLive(_21);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = irq::top_half::IrqLine::num(_3) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _22 = move _23 as u64;\n        StorageDead(_23);\n        _21 = BitOr(move _22, 281474976710656_u64);\n        StorageDead(_22);\n        StorageLive(_24);\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = BitAnd(_20, 32768_u16);\n        _27 = 4_i32 as u32;\n        _28 = Lt(move _27, 16_u32);\n        assert(move _28, \"attempt to shift right by `{}`, which would overflow\", 4_i32) -> [success: bb12, unwind unreachable];\n    }\n    bb12: {\n        _25 = Shr(move _26, 4_i32);\n        StorageDead(_26);\n        _24 = move _25 as u64;\n        StorageDead(_25);\n        _21 = BitOr(_21, move _24);\n        StorageDead(_24);\n        StorageLive(_29);\n        StorageLive(_30);\n        StorageLive(_31);\n        _31 = _20 as u64;\n        _30 = BitAnd(move _31, 32767_u64);\n        StorageDead(_31);\n        _32 = 49_i32 as u32;\n        _33 = Lt(move _32, 64_u32);\n        assert(move _33, \"attempt to shift left by `{}`, which would overflow\", 49_i32) -> [success: bb13, unwind unreachable];\n    }\n    bb13: {\n        _29 = Shl(move _30, 49_i32);\n        StorageDead(_30);\n        _21 = BitOr(_21, move _29);\n        StorageDead(_29);\n        StorageLive(_35);\n        _35 = &mut ((*_1).0: arch::irq::chip::ioapic::IoApicAccess);\n        StorageLive(_36);\n        StorageLive(_37);\n        _38 = CheckedMul(2_u8, _2);\n        assert(!move (_38.1: bool), \"attempt to compute `{} * {}`, which would overflow\", 2_u8, _2) -> [success: bb14, unwind unreachable];\n    }\n    bb14: {\n        _37 = move (_38.0: u8);\n        _39 = CheckedAdd(arch::irq::chip::ioapic::IoApicAccess::IOREDTBL, _37);\n        assert(!move (_39.1: bool), \"attempt to compute `{} + {}`, which would overflow\", arch::irq::chip::ioapic::IoApicAccess::IOREDTBL, move _37) -> [success: bb15, unwind unreachable];\n    }\n    bb15: {\n        _36 = move (_39.0: u8);\n        StorageDead(_37);\n        StorageLive(_40);\n        StorageLive(_41);\n        StorageLive(_42);\n        _42 = &_21;\n        StorageLive(_43);\n        _43 = Range(0_usize, 32_usize);\n        _41 = <u64 as bit_field::BitField>::get_bits::<core::ops::Range<usize>>(move _42, move _43) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_43);\n        StorageDead(_42);\n        _40 = move _41 as u32;\n        StorageDead(_41);\n        _34 = arch::irq::chip::ioapic::IoApicAccess::write(move _35, move _36, move _40) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_40);\n        StorageDead(_36);\n        StorageDead(_35);\n        StorageLive(_45);\n        _45 = &mut ((*_1).0: arch::irq::chip::ioapic::IoApicAccess);\n        StorageLive(_46);\n        StorageLive(_47);\n        StorageLive(_48);\n        _49 = CheckedMul(2_u8, _2);\n        assert(!move (_49.1: bool), \"attempt to compute `{} * {}`, which would overflow\", 2_u8, _2) -> [success: bb18, unwind unreachable];\n    }\n    bb18: {\n        _48 = move (_49.0: u8);\n        _50 = CheckedAdd(arch::irq::chip::ioapic::IoApicAccess::IOREDTBL, _48);\n        assert(!move (_50.1: bool), \"attempt to compute `{} + {}`, which would overflow\", arch::irq::chip::ioapic::IoApicAccess::IOREDTBL, move _48) -> [success: bb19, unwind unreachable];\n    }\n    bb19: {\n        _47 = move (_50.0: u8);\n        StorageDead(_48);\n        _51 = CheckedAdd(_47, 1_u8);\n        assert(!move (_51.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _47, 1_u8) -> [success: bb20, unwind unreachable];\n    }\n    bb20: {\n        _46 = move (_51.0: u8);\n        StorageDead(_47);\n        StorageLive(_52);\n        StorageLive(_53);\n        StorageLive(_54);\n        _54 = &_21;\n        StorageLive(_55);\n        _55 = Range(32_usize, 64_usize);\n        _53 = <u64 as bit_field::BitField>::get_bits::<core::ops::Range<usize>>(move _54, move _55) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_55);\n        StorageDead(_54);\n        _52 = move _53 as u32;\n        StorageDead(_53);\n        _44 = arch::irq::chip::ioapic::IoApicAccess::write(move _45, move _46, move _52) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_52);\n        StorageDead(_46);\n        StorageDead(_45);\n        StorageDead(_21);\n        StorageDead(_18);\n        goto -> bb32;\n    }\n    bb23: {\n        StorageDead(_18);\n        StorageLive(_57);\n        _57 = &mut ((*_1).0: arch::irq::chip::ioapic::IoApicAccess);\n        StorageLive(_58);\n        StorageLive(_59);\n        _60 = CheckedMul(2_u8, _2);\n        assert(!move (_60.1: bool), \"attempt to compute `{} * {}`, which would overflow\", 2_u8, _2) -> [success: bb24, unwind unreachable];\n    }\n    bb24: {\n        _59 = move (_60.0: u8);\n        _61 = CheckedAdd(arch::irq::chip::ioapic::IoApicAccess::IOREDTBL, _59);\n        assert(!move (_61.1: bool), \"attempt to compute `{} + {}`, which would overflow\", arch::irq::chip::ioapic::IoApicAccess::IOREDTBL, move _59) -> [success: bb25, unwind unreachable];\n    }\n    bb25: {\n        _58 = move (_61.0: u8);\n        StorageDead(_59);\n        StorageLive(_62);\n        StorageLive(_63);\n        _63 = irq::top_half::IrqLine::num(_3) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        _62 = move _63 as u32;\n        StorageDead(_63);\n        _56 = arch::irq::chip::ioapic::IoApicAccess::write(move _57, move _58, move _62) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        StorageDead(_62);\n        StorageDead(_58);\n        StorageDead(_57);\n        StorageLive(_65);\n        _65 = &mut ((*_1).0: arch::irq::chip::ioapic::IoApicAccess);\n        StorageLive(_66);\n        StorageLive(_67);\n        StorageLive(_68);\n        _69 = CheckedMul(2_u8, _2);\n        assert(!move (_69.1: bool), \"attempt to compute `{} * {}`, which would overflow\", 2_u8, _2) -> [success: bb28, unwind unreachable];\n    }\n    bb28: {\n        _68 = move (_69.0: u8);\n        _70 = CheckedAdd(arch::irq::chip::ioapic::IoApicAccess::IOREDTBL, _68);\n        assert(!move (_70.1: bool), \"attempt to compute `{} + {}`, which would overflow\", arch::irq::chip::ioapic::IoApicAccess::IOREDTBL, move _68) -> [success: bb29, unwind unreachable];\n    }\n    bb29: {\n        _67 = move (_70.0: u8);\n        StorageDead(_68);\n        _71 = CheckedAdd(_67, 1_u8);\n        assert(!move (_71.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _67, 1_u8) -> [success: bb30, unwind unreachable];\n    }\n    bb30: {\n        _66 = move (_71.0: u8);\n        StorageDead(_67);\n        _64 = arch::irq::chip::ioapic::IoApicAccess::write(move _65, move _66, 0_u32) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        StorageDead(_66);\n        StorageDead(_65);\n        goto -> bb32;\n    }\n    bb32: {\n        _0 = core::result::Result::Ok(());\n        StorageDead(_7);\n        goto -> bb33;\n    }\n    bb33: {\n        return;\n    }\n    bb34: {\n        unreachable;\n    }\n}\n",
+  "doc": " Enables an entry.\n\n The caller should ensure that the IRQ line is not released before the entry is disabled.\n Otherwise, it will be considered a logical error.\n\n # Errors\n\n This method will fail if the index exceeds the I/O APIC's maximum redirection entry, or if\n the entry is in use.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

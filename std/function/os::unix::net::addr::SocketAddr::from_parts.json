@@ -1,0 +1,63 @@
+{
+  "name": "os::unix::net::addr::SocketAddr::from_parts",
+  "safe": true,
+  "callees": {
+    "io::error::Error::from_static_message": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Creates a new I/O error from a known kind of error as well as a constant\n message.\n\n This function does not allocate.\n\n You should not use this directly, and instead use the `const_error!`\n macro: `io::const_error!(ErrorKind::Something, \"some_message\")`.\n\n This function should maybe change to `from_static_message<const MSG: &'static\n str>(kind: ErrorKind)` in the future, when const generics allow that.\n",
+      "adt": {
+        "io::error::Error": "Constructor"
+      }
+    },
+    "core::hint::must_use": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An identity function that causes an `unused_must_use` warning to be\n triggered if the given value is not used (returned, stored in a variable,\n etc) by the caller.\n\n This is primarily intended for use in macro-generated code, in which a\n [`#[must_use]` attribute][must_use] either on a type or a function would not\n be convenient.\n\n [must_use]: https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute\n\n # Example\n\n ```\n #![feature(hint_must_use)]\n\n use core::fmt;\n\n pub struct Error(/* ... */);\n\n #[macro_export]\n macro_rules! make_error {\n     ($($args:expr),*) => {\n         core::hint::must_use({\n             let error = $crate::make_error(core::format_args!($($args),*));\n             error\n         })\n     };\n }\n\n // Implementation detail of make_error! macro.\n #[doc(hidden)]\n pub fn make_error(args: fmt::Arguments<'_>) -> Error {\n     Error(/* ... */)\n }\n\n fn demo() -> Option<Error> {\n     if true {\n         // Oops, meant to write `return Some(make_error!(\"...\"));`\n         Some(make_error!(\"...\"));\n     }\n     None\n }\n #\n # // Make rustdoc not wrap the whole snippet in fn main, so that $crate::make_error works\n # fn main() {}\n ```\n\n In the above example, we'd like an `unused_must_use` lint to apply to the\n value created by `make_error!`. However, neither `#[must_use]` on a struct\n nor `#[must_use]` on a function is appropriate here, so the macro expands\n using `core::hint::must_use` instead.\n\n - We wouldn't want `#[must_use]` on the `struct Error` because that would\n   make the following unproblematic code trigger a warning:\n\n   ```\n   # struct Error;\n   #\n   fn f(arg: &str) -> Result<(), Error>\n   # { Ok(()) }\n\n   #[test]\n   fn t() {\n       // Assert that `f` returns error if passed an empty string.\n       // A value of type `Error` is unused here but that's not a problem.\n       f(\"\").unwrap_err();\n   }\n   ```\n\n - Using `#[must_use]` on `fn make_error` can't help because the return value\n   *is* used, as the right-hand side of a `let` statement. The `let`\n   statement looks useless but is in fact necessary for ensuring that\n   temporaries within the `format_args` expansion are not kept alive past the\n   creation of the `Error`, as keeping them alive past that point can cause\n   autotrait issues in async code:\n\n   ```\n   # #![feature(hint_must_use)]\n   #\n   # struct Error;\n   #\n   # macro_rules! make_error {\n   #     ($($args:expr),*) => {\n   #         core::hint::must_use({\n   #             // If `let` isn't used, then `f()` produces a non-Send future.\n   #             let error = make_error(core::format_args!($($args),*));\n   #             error\n   #         })\n   #     };\n   # }\n   #\n   # fn make_error(args: core::fmt::Arguments<'_>) -> Error {\n   #     Error\n   # }\n   #\n   async fn f() {\n       // Using `let` inside the make_error expansion causes temporaries like\n       // `unsync()` to drop at the semicolon of that `let` statement, which\n       // is prior to the await point. They would otherwise stay around until\n       // the semicolon on *this* statement, which is after the await point,\n       // and the enclosing Future would not implement Send.\n       log(make_error!(\"look: {:p}\", unsync())).await;\n   }\n\n   async fn log(error: Error) {/* ... */}\n\n   // Returns something without a Sync impl.\n   fn unsync() -> *const () {\n       0 as *const ()\n   }\n   #\n   # fn test() {\n   #     fn assert_send(_: impl Send) {}\n   #     assert_send(f());\n   # }\n   ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "libc::sockaddr_un": [
+      "Unknown([Field(0, Ty { id: 1225, kind: RigidTy(Uint(U16)) })])",
+      "Plain"
+    ],
+    "io::error::Error": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "os::unix::net::addr::SocketAddr": [
+      "Plain"
+    ]
+  },
+  "path": 2106,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/os/unix/net/addr.rs:104:5: 130:6",
+  "src": "pub(super) fn from_parts(\n        addr: libc::sockaddr_un,\n        mut len: libc::socklen_t,\n    ) -> io::Result<SocketAddr> {\n        if cfg!(target_os = \"openbsd\") {\n            // on OpenBSD, getsockname(2) returns the actual size of the socket address,\n            // and not the len of the content. Figure out the length for ourselves.\n            // https://marc.info/?l=openbsd-bugs&m=170105481926736&w=2\n            let sun_path: &[u8] =\n                unsafe { mem::transmute::<&[libc::c_char], &[u8]>(&addr.sun_path) };\n            len = core::slice::memchr::memchr(0, sun_path)\n                .map_or(len, |new_len| (new_len + SUN_PATH_OFFSET) as libc::socklen_t);\n        }\n\n        if len == 0 {\n            // When there is a datagram from unnamed unix socket\n            // linux returns zero bytes of address\n            len = SUN_PATH_OFFSET as libc::socklen_t; // i.e., zero-length address\n        } else if addr.sun_family != libc::AF_UNIX as libc::sa_family_t {\n            return Err(io::const_error!(\n                io::ErrorKind::InvalidInput,\n                \"file descriptor did not correspond to a Unix socket\",\n            ));\n        }\n\n        Ok(SocketAddr { addr, len })\n    }",
+  "mir": "fn os::unix::net::addr::SocketAddr::from_parts(_1: libc::sockaddr_un, _2: u32) -> core::result::Result<os::unix::net::addr::SocketAddr, io::error::Error> {\n    let mut _0: core::result::Result<os::unix::net::addr::SocketAddr, io::error::Error>;\n    let  _3: &[u8];\n    let mut _4: u32;\n    let mut _5: bool;\n    let mut _6: u16;\n    let mut _7: u16;\n    let mut _8: io::error::Error;\n    let mut _9: io::error::Error;\n    let mut _10: os::unix::net::addr::SocketAddr;\n    let mut _11: u32;\n    debug addr => _1;\n    debug len => _2;\n    debug sun_path => _3;\n    bb0: {\n        StorageLive(_4);\n        _4 = _2;\n        switchInt(move _4) -> [0: bb1, otherwise: bb2];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = os::unix::net::addr::SUN_PATH_OFFSET as u32;\n        goto -> bb7;\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = (_1.0: u16);\n        StorageLive(_7);\n        _7 = libc::AF_UNIX as u16;\n        _5 = Ne(move _6, move _7);\n        switchInt(move _5) -> [0: bb6, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = io::error::Error::from_static_message(os::unix::net::addr::SocketAddr::from_parts::{constant#0}) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _8 = core::hint::must_use::<io::error::Error>(move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        _0 = core::result::Result::Err(move _8);\n        StorageDead(_8);\n        StorageDead(_5);\n        goto -> bb8;\n    }\n    bb6: {\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_5);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = _2;\n        _10 = SocketAddr(_1, move _11);\n        StorageDead(_11);\n        _0 = core::result::Result::Ok(move _10);\n        StorageDead(_10);\n        goto -> bb8;\n    }\n    bb8: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

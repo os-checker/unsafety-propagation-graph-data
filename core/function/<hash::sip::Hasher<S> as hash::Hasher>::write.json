@@ -1,0 +1,118 @@
+{
+  "name": "<hash::sip::Hasher<S> as hash::Hasher>::write",
+  "safe": true,
+  "callees": {
+    "cmp::min": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the minimum of two values.\n\n Returns the first argument if the comparison determines them to be equal.\n\n Internally uses an alias to [`Ord::min`].\n\n # Examples\n\n ```\n use std::cmp;\n\n assert_eq!(cmp::min(1, 2), 1);\n assert_eq!(cmp::min(2, 2), 2);\n ```\n ```\n use std::cmp::{self, Ordering};\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(cmp::min(Equal(\"v1\"), Equal(\"v2\")).0, \"v1\");\n ```\n",
+      "adt": {}
+    },
+    "hash::sip::u8to64_le": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads a u64 using up to 7 bytes of a byte slice. It looks clumsy but the\n `copy_nonoverlapping` calls that occur (via `load_int_le!`) all have fixed\n sizes and avoid calling `memcpy`, which is good for speed.\n\n Safety: this performs unchecked indexing of `buf` at `start..start+len`, so\n that must be in-bounds.\n",
+      "adt": {}
+    },
+    "hash::sip::Sip::c_rounds": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "mem::size_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of a type in bytes.\n\n More specifically, this is the offset in bytes between successive elements\n in an array with that item type including alignment padding. Thus, for any\n type `T` and length `n`, `[T; n]` has a size of `n * size_of::<T>()`.\n\n In general, the size of a type is not stable across compilations, but\n specific types such as primitives are.\n\n The following table gives the size for primitives.\n\n Type | `size_of::<Type>()`\n ---- | ---------------\n () | 0\n bool | 1\n u8 | 1\n u16 | 2\n u32 | 4\n u64 | 8\n u128 | 16\n i8 | 1\n i16 | 2\n i32 | 4\n i64 | 8\n i128 | 16\n f32 | 4\n f64 | 8\n char | 4\n\n Furthermore, `usize` and `isize` have the same size.\n\n The types [`*const T`], `&T`, [`Box<T>`], [`Option<&T>`], and `Option<Box<T>>` all have\n the same size. If `T` is `Sized`, all of those types have the same size as `usize`.\n\n The mutability of a pointer does not change its size. As such, `&T` and `&mut T`\n have the same size. Likewise for `*const T` and `*mut T`.\n\n # Size of `#[repr(C)]` items\n\n The `C` representation for items has a defined layout. With this layout,\n the size of items is also stable as long as all fields have a stable size.\n\n ## Size of Structs\n\n For `struct`s, the size is determined by the following algorithm.\n\n For each field in the struct ordered by declaration order:\n\n 1. Add the size of the field.\n 2. Round up the current size to the nearest multiple of the next field's [alignment].\n\n Finally, round the size of the struct to the nearest multiple of its [alignment].\n The alignment of the struct is usually the largest alignment of all its\n fields; this can be changed with the use of `repr(align(N))`.\n\n Unlike `C`, zero sized structs are not rounded up to one byte in size.\n\n ## Size of Enums\n\n Enums that carry no data other than the discriminant have the same size as C enums\n on the platform they are compiled for.\n\n ## Size of Unions\n\n The size of a union is the size of its largest field.\n\n Unlike `C`, zero sized unions are not rounded up to one byte in size.\n\n # Examples\n\n ```\n // Some primitives\n assert_eq!(4, size_of::<i32>());\n assert_eq!(8, size_of::<f64>());\n assert_eq!(0, size_of::<()>());\n\n // Some arrays\n assert_eq!(8, size_of::<[i32; 2]>());\n assert_eq!(12, size_of::<[i32; 3]>());\n assert_eq!(0, size_of::<[i32; 0]>());\n\n\n // Pointer size equality\n assert_eq!(size_of::<&i32>(), size_of::<*const i32>());\n assert_eq!(size_of::<&i32>(), size_of::<Box<i32>>());\n assert_eq!(size_of::<&i32>(), size_of::<Option<&i32>>());\n assert_eq!(size_of::<Box<i32>>(), size_of::<Option<Box<i32>>>());\n ```\n\n Using `#[repr(C)]`.\n\n ```\n #[repr(C)]\n struct FieldStruct {\n     first: u8,\n     second: u16,\n     third: u8\n }\n\n // The size of the first field is 1, so add 1 to the size. Size is 1.\n // The alignment of the second field is 2, so add 1 to the size for padding. Size is 2.\n // The size of the second field is 2, so add 2 to the size. Size is 4.\n // The alignment of the third field is 1, so add 0 to the size for padding. Size is 4.\n // The size of the third field is 1, so add 1 to the size. Size is 5.\n // Finally, the alignment of the struct is 2 (because the largest alignment amongst its\n // fields is 2), so add 1 to the size for padding. Size is 6.\n assert_eq!(6, size_of::<FieldStruct>());\n\n #[repr(C)]\n struct TupleStruct(u8, u16, u8);\n\n // Tuple structs follow the same rules.\n assert_eq!(6, size_of::<TupleStruct>());\n\n // Note that reordering the fields can lower the size. We can remove both padding bytes\n // by putting `third` before `second`.\n #[repr(C)]\n struct FieldStructOptimized {\n     first: u8,\n     third: u8,\n     second: u16\n }\n\n assert_eq!(4, size_of::<FieldStructOptimized>());\n\n // Union size is the size of the largest field.\n #[repr(C)]\n union ExampleUnion {\n     smaller: u8,\n     larger: u16\n }\n\n assert_eq!(2, size_of::<ExampleUnion>());\n ```\n\n [alignment]: align_of\n [`*const T`]: primitive@pointer\n [`Box<T>`]: ../../std/boxed/struct.Box.html\n [`Option<&T>`]: crate::option::Option\n\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"123\";\n let ptr: *const u8 = s.as_ptr();\n\n unsafe {\n     assert_eq!(*ptr.add(1), b'2');\n     assert_eq!(*ptr.add(2), b'3');\n }\n ```\n",
+      "adt": {}
+    },
+    "ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "num::<impl u64>::to_le": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts `self` to little endian from the target's endianness.\n\n On little endian this is a no-op. On big endian the bytes are\n swapped.\n\n # Examples\n\n ```\n\n if cfg!(target_endian = \"little\") {\n     assert_eq!(n.to_le(), n)\n } else {\n     assert_eq!(n.to_le(), n.swap_bytes())\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "hash::sip::Hasher": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(5)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(4)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "MutRef"
+    ],
+    "hash::sip::State": [
+      "MutRef"
+    ]
+  },
+  "path": 13143,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/hash/sip.rs:255:5: 299:6",
+  "src": "fn write(&mut self, msg: &[u8]) {\n        let length = msg.len();\n        self.length += length;\n\n        let mut needed = 0;\n\n        if self.ntail != 0 {\n            needed = 8 - self.ntail;\n            // SAFETY: `cmp::min(length, needed)` is guaranteed to not be over `length`\n            self.tail |= unsafe { u8to64_le(msg, 0, cmp::min(length, needed)) } << (8 * self.ntail);\n            if length < needed {\n                self.ntail += length;\n                return;\n            } else {\n                self.state.v3 ^= self.tail;\n                S::c_rounds(&mut self.state);\n                self.state.v0 ^= self.tail;\n                self.ntail = 0;\n            }\n        }\n\n        // Buffered tail is now flushed, process new input.\n        let len = length - needed;\n        let left = len & 0x7; // len % 8\n\n        let mut i = needed;\n        while i < len - left {\n            // SAFETY: because `len - left` is the biggest multiple of 8 under\n            // `len`, and because `i` starts at `needed` where `len` is `length - needed`,\n            // `i + 8` is guaranteed to be less than or equal to `length`.\n            let mi = unsafe { load_int_le!(msg, i, u64) };\n\n            self.state.v3 ^= mi;\n            S::c_rounds(&mut self.state);\n            self.state.v0 ^= mi;\n\n            i += 8;\n        }\n\n        // SAFETY: `i` is now `needed + len.div_euclid(8) * 8`,\n        // so `i + left` = `needed + len` = `length`, which is by\n        // definition equal to `msg.len()`.\n        self.tail = unsafe { u8to64_le(msg, i, left) };\n        self.ntail = left;\n    }",
+  "mir": "fn <hash::sip::Hasher<S> as hash::Hasher>::write(_1: &mut hash::sip::Hasher<S>, _2: &[u8]) -> () {\n    let mut _0: ();\n    let  _3: usize;\n    let mut _4: (usize, bool);\n    let mut _5: usize;\n    let mut _6: usize;\n    let mut _7: usize;\n    let mut _8: (usize, bool);\n    let mut _9: u64;\n    let mut _10: u64;\n    let mut _11: usize;\n    let mut _12: usize;\n    let mut _13: usize;\n    let mut _14: usize;\n    let mut _15: (usize, bool);\n    let mut _16: bool;\n    let mut _17: bool;\n    let mut _18: usize;\n    let mut _19: (usize, bool);\n    let mut _20: u64;\n    let  _21: ();\n    let mut _22: &mut hash::sip::State;\n    let mut _23: u64;\n    let  _24: usize;\n    let mut _25: usize;\n    let mut _26: (usize, bool);\n    let  _27: usize;\n    let mut _28: usize;\n    let mut _29: bool;\n    let mut _30: usize;\n    let mut _31: usize;\n    let mut _32: (usize, bool);\n    let  _33: u64;\n    let mut _34: bool;\n    let mut _35: usize;\n    let mut _36: usize;\n    let mut _37: usize;\n    let mut _38: (usize, bool);\n    let mut _39: usize;\n    let mut _40: !;\n    let mut _41: u64;\n    let  _42: ();\n    let mut _43: *const u8;\n    let mut _44: *const u8;\n    let mut _45: usize;\n    let mut _46: *mut u8;\n    let mut _47: *mut u64;\n    let mut _48: &mut u64;\n    let mut _49: usize;\n    let mut _50: u64;\n    let  _51: ();\n    let mut _52: &mut hash::sip::State;\n    let mut _53: (usize, bool);\n    let mut _54: u64;\n    let mut _55: usize;\n    debug self => _1;\n    debug msg => _2;\n    debug length => _3;\n    debug needed => _5;\n    debug len => _24;\n    debug left => _27;\n    debug i => _28;\n    debug mi => _33;\n    debug data => _41;\n    bb0: {\n        _3 = PtrMetadata(_2);\n        _4 = CheckedAdd(((*_1).2: usize), _3);\n        assert(!move (_4.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).2: usize), _3) -> [success: bb1, unwind unreachable];\n    }\n    bb1: {\n        ((*_1).2: usize) = move (_4.0: usize);\n        StorageLive(_5);\n        _5 = 0_usize;\n        StorageLive(_6);\n        _6 = ((*_1).5: usize);\n        switchInt(move _6) -> [0: bb12, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageLive(_7);\n        _7 = ((*_1).5: usize);\n        _8 = CheckedSub(8_usize, _7);\n        assert(!move (_8.1: bool), \"attempt to compute `{} - {}`, which would overflow\", 8_usize, move _7) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _5 = move (_8.0: usize);\n        StorageDead(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = _5;\n        _11 = cmp::min::<usize>(_3, move _12) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_12);\n        _10 = hash::sip::u8to64_le(_2, 0_usize, move _11) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = ((*_1).5: usize);\n        _15 = CheckedMul(8_usize, _14);\n        assert(!move (_15.1: bool), \"attempt to compute `{} * {}`, which would overflow\", 8_usize, move _14) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _13 = move (_15.0: usize);\n        StorageDead(_14);\n        _16 = Lt(_13, 64_usize);\n        assert(move _16, \"attempt to shift left by `{}`, which would overflow\", _13) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _9 = Shl(move _10, move _13);\n        StorageDead(_13);\n        StorageDead(_10);\n        ((*_1).4: u64) = BitOr(((*_1).4: u64), move _9);\n        StorageDead(_9);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = _5;\n        _17 = Lt(_3, move _18);\n        switchInt(move _17) -> [0: bb10, otherwise: bb8];\n    }\n    bb8: {\n        StorageDead(_18);\n        _19 = CheckedAdd(((*_1).5: usize), _3);\n        assert(!move (_19.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).5: usize), _3) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        ((*_1).5: usize) = move (_19.0: usize);\n        StorageDead(_17);\n        StorageDead(_5);\n        goto -> bb31;\n    }\n    bb10: {\n        StorageDead(_18);\n        StorageLive(_20);\n        _20 = ((*_1).4: u64);\n        (((*_1).3: hash::sip::State).3: u64) = BitXor((((*_1).3: hash::sip::State).3: u64), move _20);\n        StorageDead(_20);\n        _22 = &mut ((*_1).3: hash::sip::State);\n        _21 = <S as hash::sip::Sip>::c_rounds(_22) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageLive(_23);\n        _23 = ((*_1).4: u64);\n        (((*_1).3: hash::sip::State).0: u64) = BitXor((((*_1).3: hash::sip::State).0: u64), move _23);\n        StorageDead(_23);\n        ((*_1).5: usize) = 0_usize;\n        StorageDead(_17);\n        goto -> bb13;\n    }\n    bb12: {\n        StorageDead(_6);\n        goto -> bb13;\n    }\n    bb13: {\n        StorageLive(_25);\n        _25 = _5;\n        _26 = CheckedSub(_3, _25);\n        assert(!move (_26.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _3, move _25) -> [success: bb14, unwind unreachable];\n    }\n    bb14: {\n        _24 = move (_26.0: usize);\n        StorageDead(_25);\n        _27 = BitAnd(_24, 7_usize);\n        StorageLive(_28);\n        _28 = _5;\n        goto -> bb15;\n    }\n    bb15: {\n        StorageLive(_29);\n        StorageLive(_30);\n        _30 = _28;\n        StorageLive(_31);\n        _32 = CheckedSub(_24, _27);\n        assert(!move (_32.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _24, _27) -> [success: bb16, unwind unreachable];\n    }\n    bb16: {\n        _31 = move (_32.0: usize);\n        _29 = Lt(move _30, move _31);\n        switchInt(move _29) -> [0: bb29, otherwise: bb17];\n    }\n    bb17: {\n        StorageDead(_31);\n        StorageDead(_30);\n        StorageLive(_34);\n        StorageLive(_35);\n        StorageLive(_36);\n        _36 = _28;\n        StorageLive(_37);\n        _37 = mem::size_of::<u64>() -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        _38 = CheckedAdd(_36, _37);\n        assert(!move (_38.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _36, move _37) -> [success: bb19, unwind unreachable];\n    }\n    bb19: {\n        _35 = move (_38.0: usize);\n        StorageDead(_37);\n        StorageDead(_36);\n        StorageLive(_39);\n        _39 = PtrMetadata(_2);\n        _34 = Le(move _35, move _39);\n        switchInt(move _34) -> [0: bb21, otherwise: bb20];\n    }\n    bb20: {\n        StorageDead(_39);\n        StorageDead(_35);\n        StorageDead(_34);\n        StorageLive(_41);\n        _41 = 0_u64;\n        StorageLive(_43);\n        StorageLive(_44);\n        _44 = slice::<impl [u8]>::as_ptr(_2) -> [return: bb22, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_39);\n        StorageDead(_35);\n        _40 = panicking::panic(\"assertion failed: i + size_of::<u64>() <= msg.len()\") -> unwind unreachable;\n    }\n    bb22: {\n        StorageLive(_45);\n        _45 = _28;\n        _43 = ptr::const_ptr::<impl *const u8>::add(move _44, move _45) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_45);\n        StorageDead(_44);\n        StorageLive(_46);\n        StorageLive(_48);\n        _48 = &mut _41;\n        _47 = &raw mut (*_48);\n        _46 = _47 as *mut u8;\n        StorageLive(_49);\n        _49 = mem::size_of::<u64>() -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        _42 = ptr::copy_nonoverlapping::<u8>(move _43, move _46, move _49) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_49);\n        StorageDead(_46);\n        StorageDead(_43);\n        StorageDead(_48);\n        StorageLive(_50);\n        _50 = _41;\n        _33 = num::<impl u64>::to_le(move _50) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_50);\n        StorageDead(_41);\n        (((*_1).3: hash::sip::State).3: u64) = BitXor((((*_1).3: hash::sip::State).3: u64), _33);\n        _52 = &mut ((*_1).3: hash::sip::State);\n        _51 = <S as hash::sip::Sip>::c_rounds(_52) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        (((*_1).3: hash::sip::State).0: u64) = BitXor((((*_1).3: hash::sip::State).0: u64), _33);\n        _53 = CheckedAdd(_28, 8_usize);\n        assert(!move (_53.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _28, 8_usize) -> [success: bb28, unwind unreachable];\n    }\n    bb28: {\n        _28 = move (_53.0: usize);\n        StorageDead(_29);\n        goto -> bb15;\n    }\n    bb29: {\n        StorageDead(_31);\n        StorageDead(_30);\n        StorageDead(_29);\n        StorageLive(_54);\n        StorageLive(_55);\n        _55 = _28;\n        _54 = hash::sip::u8to64_le(_2, move _55, _27) -> [return: bb30, unwind unreachable];\n    }\n    bb30: {\n        StorageDead(_55);\n        ((*_1).4: u64) = move _54;\n        StorageDead(_54);\n        ((*_1).5: usize) = _27;\n        StorageDead(_28);\n        StorageDead(_5);\n        goto -> bb31;\n    }\n    bb31: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

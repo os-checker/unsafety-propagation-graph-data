@@ -1,0 +1,87 @@
+{
+  "name": "string::String::replace_first",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::str::<impl str>::match_indices": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the disjoint matches of a pattern within this string\n slice as well as the index that the match starts at.\n\n For matches of `pat` within `self` that overlap, only the indices\n corresponding to the first match are returned.\n\n The [pattern] can be a `&str`, [`char`], a slice of [`char`]s, or a\n function or closure that determines if a character matches.\n\n [`char`]: prim@char\n [pattern]: self::pattern\n\n # Iterator behavior\n\n The returned iterator will be a [`DoubleEndedIterator`] if the pattern\n allows a reverse search and forward/reverse search yields the same\n elements. This is true for, e.g., [`char`], but not for `&str`.\n\n If the pattern allows a reverse search but its results might differ\n from a forward search, the [`rmatch_indices`] method can be used.\n\n [`rmatch_indices`]: str::rmatch_indices\n\n # Examples\n\n ```\n let v: Vec<_> = \"abcXXXabcYYYabc\".match_indices(\"abc\").collect();\n assert_eq!(v, [(0, \"abc\"), (6, \"abc\"), (12, \"abc\")]);\n\n let v: Vec<_> = \"1abcabc2\".match_indices(\"abc\").collect();\n assert_eq!(v, [(1, \"abc\"), (4, \"abc\")]);\n\n let v: Vec<_> = \"ababa\".match_indices(\"aba\").collect();\n assert_eq!(v, [(0, \"aba\")]); // only the first `aba`\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::str::<impl str>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of `self`.\n\n This length is in bytes, not [`char`]s or graphemes. In other words,\n it might not be what a human considers the length of the string.\n\n [`char`]: prim@char\n\n # Examples\n\n ```\n let len = \"foo\".len();\n assert_eq!(3, len);\n\n assert_eq!(\"ƒoo\".len(), 4); // fancy f!\n assert_eq!(\"ƒoo\".chars().count(), 3);\n ```\n",
+      "adt": {}
+    },
+    "string::String::replace_range": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Removes the specified range in the string,\n and replaces it with the given string.\n The given string doesn't need to be the same length as the range.\n\n # Panics\n\n Panics if the range has `start_bound > end_bound`, or, if the range is\n bounded on either end and does not lie on a [`char`] boundary.\n\n # Examples\n\n ```\n let mut s = String::from(\"α is alpha, β is beta\");\n let beta_offset = s.find('β').unwrap_or(s.len());\n\n // Replace the range up until the β from the string\n s.replace_range(..beta_offset, \"Α is capital alpha; \");\n assert_eq!(s, \"Α is capital alpha; β is beta\");\n ```\n",
+      "adt": {
+        "string::String": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "string::String": [
+      "Ref",
+      "Deref",
+      "MutRef"
+    ],
+    "core::str::MatchIndices": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 8575, kind: RigidTy(Tuple([Ty { id: 14, kind: RigidTy(Uint(Usize)) }, Ty { id: 1, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 5, kind: RigidTy(Str) }, Not)) }])) }), Field(0, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 8575, kind: RigidTy(Tuple([Ty { id: 14, kind: RigidTy(Uint(Usize)) }, Ty { id: 1, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 5, kind: RigidTy(Str) }, Not)) }])) }), Field(1, Ty { id: 1, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 5, kind: RigidTy(Str) }, Not)) })])"
+    ],
+    "core::ops::Range": [
+      "Plain"
+    ]
+  },
+  "path": 1985,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:2114:5: 2121:6",
+  "src": "pub fn replace_first<P: Pattern>(&mut self, from: P, to: &str) {\n        let range = match self.match_indices(from).next() {\n            Some((start, match_str)) => start..start + match_str.len(),\n            None => return,\n        };\n\n        self.replace_range(range, to);\n    }",
+  "mir": "fn string::String::replace_first(_1: &mut string::String, _2: P, _3: &str) -> () {\n    let mut _0: ();\n    let  _4: core::ops::Range<usize>;\n    let mut _5: core::option::Option<(usize, &str)>;\n    let mut _6: &mut core::str::MatchIndices<'_, P>;\n    let mut _7: core::str::MatchIndices<'_, P>;\n    let  _8: &str;\n    let mut _9: &string::String;\n    let mut _10: isize;\n    let  _11: usize;\n    let  _12: &str;\n    let mut _13: usize;\n    let mut _14: usize;\n    let mut _15: (usize, bool);\n    let  _16: ();\n    debug self => _1;\n    debug from => _2;\n    debug to => _3;\n    debug range => _4;\n    debug start => _11;\n    debug match_str => _12;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_9);\n        _9 = &(*_1);\n        _8 = <string::String as core::ops::Deref>::deref(move _9) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_9);\n        _7 = core::str::<impl str>::match_indices::<P>(_8, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _6 = &mut _7;\n        _5 = <core::str::MatchIndices<'_, P> as core::iter::Iterator>::next(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _10 = discriminant(_5);\n        switchInt(move _10) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        drop(_7) -> [return: bb11, unwind unreachable];\n    }\n    bb6: {\n        _11 = (((_5 as variant#1).0: (usize, &str)).0: usize);\n        _12 = (((_5 as variant#1).0: (usize, &str)).1: &str);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = core::str::<impl str>::len(_12) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _15 = CheckedAdd(_11, _14);\n        assert(!move (_15.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _11, move _14) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _13 = move (_15.0: usize);\n        StorageDead(_14);\n        _4 = Range(_11, move _13);\n        StorageDead(_13);\n        drop(_7) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_7);\n        StorageDead(_5);\n        _16 = string::String::replace_range::<core::ops::Range<usize>>(_1, _4, _3) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        goto -> bb12;\n    }\n    bb11: {\n        StorageDead(_7);\n        StorageDead(_5);\n        goto -> bb12;\n    }\n    bb12: {\n        return;\n    }\n}\n",
+  "doc": " Replaces the leftmost occurrence of a pattern with another string, in-place.\n\n This method can be preferred over [`string = string.replacen(..., 1);`][replacen],\n as it can use the `String`'s existing capacity to prevent a reallocation if\n sufficient space is available.\n\n # Examples\n\n Basic usage:\n\n ```\n #![feature(string_replace_in_place)]\n\n let mut s = String::from(\"Test Results: ❌❌❌\");\n\n // Replace the leftmost ❌ with a ✅\n s.replace_first('❌', \"✅\");\n assert_eq!(s, \"Test Results: ✅❌❌\");\n ```\n\n [replacen]: ../../std/primitive.str.html#method.replacen\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

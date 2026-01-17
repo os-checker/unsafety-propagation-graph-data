@@ -1,0 +1,41 @@
+{
+  "name": "fmt::Formatter::<'a>::write_formatted_parts::write_bytes",
+  "safe": false,
+  "callees": {
+    "str::converts::from_utf8_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a slice of bytes to a string slice without checking\n that the string contains valid UTF-8.\n\n This is an alias to [`str::from_utf8_unchecked`].\n\n See the safe version, [`from_utf8`], for more information.\n\n # Safety\n\n The bytes passed in must be valid UTF-8.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::str;\n\n // some bytes, in a vector\n let sparkle_heart = vec![240, 159, 146, 150];\n\n let sparkle_heart = unsafe {\n     str::from_utf8_unchecked(&sparkle_heart)\n };\n\n assert_eq!(\"💖\", sparkle_heart);\n ```\n",
+      "adt": {}
+    },
+    "fmt::Write::write_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a string slice into this writer, returning whether the write\n succeeded.\n\n This method can only succeed if the entire string slice was successfully\n written, and this method will not return until all data has been\n written or an error occurs.\n\n # Errors\n\n This function will return an instance of [`std::fmt::Error`][Error] on error.\n\n The purpose of that error is to abort the formatting operation when the underlying\n destination encounters some error preventing it from accepting more text;\n in particular, it does not communicate any information about *what* error occurred.\n It should generally be propagated rather than handled, at least when implementing\n formatting traits.\n\n # Examples\n\n ```\n use std::fmt::{Error, Write};\n\n fn writer<W: Write>(f: &mut W, s: &str) -> Result<(), Error> {\n     f.write_str(s)\n }\n\n let mut buf = String::new();\n writer(&mut buf, \"hola\")?;\n assert_eq!(&buf, \"hola\");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 12982,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:2025:9: 2031:10",
+  "src": "unsafe fn write_bytes(buf: &mut dyn Write, s: &[u8]) -> Result {\n            // SAFETY: This is used for `numfmt::Part::Num` and `numfmt::Part::Copy`.\n            // It's safe to use for `numfmt::Part::Num` since every char `c` is between\n            // `b'0'` and `b'9'`, which means `s` is valid UTF-8. It's safe to use for\n            // `numfmt::Part::Copy` due to this function's precondition.\n            buf.write_str(unsafe { str::from_utf8_unchecked(s) })\n        }",
+  "mir": "fn fmt::Formatter::<'a>::write_formatted_parts::write_bytes(_1: &mut dyn fmt::Write, _2: &[u8]) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    let  _3: &str;\n    debug buf => _1;\n    debug s => _2;\n    bb0: {\n        _3 = str::converts::from_utf8_unchecked(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = <dyn fmt::Write as fmt::Write>::write_str(_1, _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

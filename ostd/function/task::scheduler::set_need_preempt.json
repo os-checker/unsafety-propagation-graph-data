@@ -1,0 +1,96 @@
+{
+  "name": "task::scheduler::set_need_preempt",
+  "safe": true,
+  "callees": {
+    "task::preempt::guard::disable_preempt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disables preemption.\n",
+      "adt": {
+        "task::preempt::guard::DisabledPreemptGuard": "Constructor"
+      }
+    },
+    "cpu::id::current::PinCurrentCpu::current_cpu": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the ID of the current CPU.\n",
+      "adt": {
+        "cpu::id::CpuId": "Constructor"
+      }
+    },
+    "core::cmp::PartialEq::eq": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests for `self` and `other` values to be equal, and is used by `==`.\n",
+      "adt": {}
+    },
+    "task::preempt::cpu_local::set_need_preempt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "smp::inter_processor_call": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Executes a function on other processors.\n\n The provided function `f` will be executed on all target processors\n specified by `targets`. It can also be executed on the current processor.\n The function should be short and non-blocking, as it will be executed in\n interrupt context with interrupts disabled.\n\n This function does not block until all the target processors acknowledges\n the interrupt. So if any of the target processors disables IRQs for too\n long that the controller cannot queue them, the function will not be\n executed.\n\n The function `f` will be executed asynchronously on the target processors.\n However if called on the current processor, it will be synchronous.\n",
+      "adt": {
+        "util::id_set::IdSet": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "task::preempt::guard::DisabledPreemptGuard": [
+      "Plain",
+      "Ref"
+    ],
+    "cpu::id::CpuId": [
+      "Plain",
+      "Ref"
+    ],
+    "util::id_set::IdSet": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 2824,
+  "span": "ostd/src/task/scheduler/mod.rs:491:1: 501:2",
+  "src": "fn set_need_preempt(cpu_id: CpuId) {\n    let preempt_guard = disable_preempt();\n\n    if preempt_guard.current_cpu() == cpu_id {\n        cpu_local::set_need_preempt();\n    } else {\n        crate::smp::inter_processor_call(&CpuSet::from(cpu_id), || {\n            cpu_local::set_need_preempt();\n        });\n    }\n}",
+  "mir": "fn task::scheduler::set_need_preempt(_1: cpu::id::CpuId) -> () {\n    let mut _0: ();\n    let  _2: task::preempt::guard::DisabledPreemptGuard;\n    let mut _3: bool;\n    let mut _4: &cpu::id::CpuId;\n    let  _5: cpu::id::CpuId;\n    let mut _6: &task::preempt::guard::DisabledPreemptGuard;\n    let mut _7: &cpu::id::CpuId;\n    let  _8: ();\n    let  _9: ();\n    let  _10: &util::id_set::IdSet<cpu::id::CpuId>;\n    let  _11: util::id_set::IdSet<cpu::id::CpuId>;\n    let mut _12: fn();\n    debug cpu_id => _1;\n    debug preempt_guard => task::preempt::guard::DisabledPreemptGuard {{ _private: () }};\n    bb0: {\n        _2 = task::preempt::guard::disable_preempt() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &_2;\n        _5 = <task::preempt::guard::DisabledPreemptGuard as cpu::id::current::PinCurrentCpu>::current_cpu(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = &_5;\n        StorageDead(_6);\n        StorageLive(_7);\n        _7 = &_1;\n        _3 = <cpu::id::CpuId as core::cmp::PartialEq>::eq(move _4, move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _3) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageDead(_4);\n        _8 = task::preempt::cpu_local::set_need_preempt() -> [return: bb9, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_11);\n        _11 = <util::id_set::IdSet<cpu::id::CpuId> as core::convert::From<cpu::id::CpuId>>::from(_1) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _10 = &_11;\n        StorageLive(_12);\n        _12 = ZeroSized: {closure@ostd/src/task/scheduler/mod.rs:497:65: 497:67} as fn();\n        _9 = smp::inter_processor_call(_10, move _12) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        drop(_11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_3);\n        drop(_2) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

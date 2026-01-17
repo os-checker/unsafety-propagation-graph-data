@@ -1,0 +1,82 @@
+{
+  "name": "<string::IntoChars as core::iter::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "string::IntoChars::iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "string::IntoChars": "ImmutableAsArgument",
+        "core::str::CharIndices": "Constructor"
+      }
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::str::CharIndices::<'a>::offset": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the byte position of the next character, or the length\n of the underlying string if there are no more characters.\n\n This means that, when the iterator has not been fully consumed,\n the returned value will match the index that will be returned\n by the next call to [`next()`](Self::next).\n\n # Examples\n\n ```\n let mut chars = \"a楽\".char_indices();\n\n // `next()` has not been called yet, so `offset()` returns the byte\n // index of the first character of the string, which is always 0.\n assert_eq!(chars.offset(), 0);\n // As expected, the first call to `next()` also returns 0 as index.\n assert_eq!(chars.next(), Some((0, 'a')));\n\n // `next()` has been called once, so `offset()` returns the byte index\n // of the second character ...\n assert_eq!(chars.offset(), 1);\n // ... which matches the index returned by the next call to `next()`.\n assert_eq!(chars.next(), Some((1, '楽')));\n\n // Once the iterator has been consumed, `offset()` returns the length\n // in bytes of the string.\n assert_eq!(chars.offset(), 4);\n assert_eq!(chars.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::advance_by": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator by `n` elements.\n\n This method will eagerly skip `n` elements by calling [`next`] up to `n`\n times until [`None`] is encountered.\n\n `advance_by(n)` will return `Ok(())` if the iterator successfully advances by\n `n` elements, or a `Err(NonZero<usize>)` with value `k` if [`None`] is encountered,\n where `k` is remaining number of steps that could not be advanced because the iterator ran out.\n If `self` is empty and `n` is non-zero, then this returns `Err(n)`.\n Otherwise, `k` is always less than `n`.\n\n Calling `advance_by(0)` can do meaningful work, for example [`Flatten`]\n can advance its outer iterator until it finds an inner iterator that is not empty, which\n then often allows it to return a more accurate `size_hint()` than in its initial state.\n\n [`Flatten`]: crate::iter::Flatten\n [`next`]: Iterator::next\n\n # Examples\n\n ```\n #![feature(iter_advance_by)]\n\n use std::num::NonZero;\n\n let a = [1, 2, 3, 4];\n let mut iter = a.into_iter();\n\n assert_eq!(iter.advance_by(2), Ok(()));\n assert_eq!(iter.next(), Some(3));\n assert_eq!(iter.advance_by(0), Ok(()));\n assert_eq!(iter.advance_by(100), Err(NonZero::new(99).unwrap())); // only `4` was skipped\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "string::IntoChars": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "core::str::CharIndices": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 8614, kind: RigidTy(Tuple([Ty { id: 14, kind: RigidTy(Uint(Usize)) }, Ty { id: 904, kind: RigidTy(Char) }])) }), Field(1, Ty { id: 904, kind: RigidTy(Char) })])"
+    ],
+    "vec::into_iter::IntoIter": [
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1913,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:3408:5: 3419:6",
+  "src": "fn next(&mut self) -> Option<char> {\n        let mut iter = self.iter();\n        match iter.next() {\n            None => None,\n            Some((_, ch)) => {\n                let offset = iter.offset();\n                // `offset` is a valid index.\n                let _ = self.bytes.advance_by(offset);\n                Some(ch)\n            }\n        }\n    }",
+  "mir": "fn <string::IntoChars as core::iter::Iterator>::next(_1: &mut string::IntoChars) -> core::option::Option<char> {\n    let mut _0: core::option::Option<char>;\n    let mut _2: core::str::CharIndices<'_>;\n    let mut _3: &string::IntoChars;\n    let mut _4: core::option::Option<(usize, char)>;\n    let mut _5: &mut core::str::CharIndices<'_>;\n    let mut _6: isize;\n    let  _7: char;\n    let  _8: usize;\n    let mut _9: &core::str::CharIndices<'_>;\n    let mut _10: core::result::Result<(), core::num::NonZero<usize>>;\n    let mut _11: &mut vec::into_iter::IntoIter<u8>;\n    debug self => _1;\n    debug iter => _2;\n    debug ch => _7;\n    debug offset => _8;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &(*_1);\n        _2 = string::IntoChars::iter(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &mut _2;\n        _4 = <core::str::CharIndices<'_> as core::iter::Iterator>::next(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _6 = discriminant(_4);\n        switchInt(move _6) -> [0: bb5, 1: bb4, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _7 = (((_4 as variant#1).0: (usize, char)).1: char);\n        StorageLive(_9);\n        _9 = &_2;\n        _8 = core::str::CharIndices::<'_>::offset(move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb5: {\n        _0 = core::option::Option::None;\n        goto -> bb8;\n    }\n    bb6: {\n        StorageDead(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &mut ((*_1).0: vec::into_iter::IntoIter<u8>);\n        _10 = <vec::into_iter::IntoIter<u8> as core::iter::Iterator>::advance_by(move _11, _8) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_11);\n        StorageDead(_10);\n        _0 = core::option::Option::Some(_7);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageDead(_4);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

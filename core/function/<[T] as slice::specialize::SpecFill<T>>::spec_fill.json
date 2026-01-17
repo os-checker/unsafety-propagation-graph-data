@@ -1,0 +1,68 @@
+{
+  "name": "<[T] as slice::specialize::SpecFill<T>>::spec_fill",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::iter_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator that allows modifying each value.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n for elem in x.iter_mut() {\n     *elem += 2;\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {
+        "slice::iter::IterMut": "Constructor"
+      }
+    },
+    "iter::traits::collect::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "ptr::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `src` without moving it. This leaves the\n memory in `src` unchanged.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads.\n\n * `src` must be properly aligned. Use [`read_unaligned`] if this is not the\n   case.\n\n * `src` must point to a properly initialized value of type `T`.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n # Examples\n\n Basic usage:\n\n ```\n let x = 12;\n let y = &x as *const i32;\n\n unsafe {\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n\n ## Ownership of the Returned Value\n\n `read` creates a bitwise copy of `T`, regardless of whether `T` is [`Copy`].\n If `T` is not [`Copy`], using both the returned value and the value at\n `*src` can violate memory safety. Note that assigning to `*src` counts as a\n use because it will attempt to drop the value at `*src`.\n\n [`write()`] can be used to overwrite data without causing it to be dropped.\n\n ```\n use std::ptr;\n\n let mut s = String::from(\"foo\");\n unsafe {\n     // `s2` now points to the same underlying memory as `s`.\n     let mut s2: String = ptr::read(&s);\n\n     assert_eq!(s2, \"foo\");\n\n     // Assigning to `s2` causes its original value to be dropped. Beyond\n     // this point, `s` must no longer be used, as the underlying memory has\n     // been freed.\n     s2 = String::default();\n     assert_eq!(s2, \"\");\n\n     // Assigning to `s` would cause the old value to be dropped again,\n     // resulting in undefined behavior.\n     // s = String::from(\"bar\"); // ERROR\n\n     // `ptr::write` can be used to overwrite a value without dropping it.\n     ptr::write(&mut s, String::from(\"bar\"));\n }\n\n assert_eq!(s, \"bar\");\n ```\n\n [valid]: self#safety\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::IterMut": [
+      "Plain",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 1178, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) }, Mut)) })])"
+    ]
+  },
+  "path": 1221,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/specialize.rs:21:5: 27:6",
+  "src": "default fn spec_fill(&mut self, value: T) {\n        for item in self.iter_mut() {\n            // SAFETY: `TrivialClone` indicates that this is equivalent to\n            // calling `Clone::clone`\n            *item = unsafe { ptr::read(&value) };\n        }\n    }",
+  "mir": "fn <[T] as slice::specialize::SpecFill<T>>::spec_fill(_1: &mut [T], _2: T) -> () {\n    let mut _0: ();\n    let mut _3: slice::iter::IterMut<'_, T>;\n    let mut _4: slice::iter::IterMut<'_, T>;\n    let mut _5: slice::iter::IterMut<'_, T>;\n    let mut _6: option::Option<&mut T>;\n    let mut _7: &mut slice::iter::IterMut<'_, T>;\n    let mut _8: isize;\n    let  _9: &mut T;\n    let mut _10: T;\n    let mut _11: *const T;\n    let  _12: &T;\n    debug self => _1;\n    debug value => _2;\n    debug iter => _5;\n    debug item => _9;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = slice::<impl [T]>::iter_mut(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = <slice::iter::IterMut<'_, T> as iter::traits::collect::IntoIterator>::into_iter(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = move _3;\n        goto -> bb3;\n    }\n    bb3: {\n        StorageLive(_6);\n        _7 = &mut _5;\n        _6 = <slice::iter::IterMut<'_, T> as iter::traits::iterator::Iterator>::next(_7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _8 = discriminant(_6);\n        switchInt(move _8) -> [0: bb7, 1: bb6, otherwise: bb5];\n    }\n    bb5: {\n        unreachable;\n    }\n    bb6: {\n        StorageLive(_9);\n        _9 = move ((_6 as variant#1).0: &mut T);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &_2;\n        _11 = &raw const (*_12);\n        _10 = ptr::read::<T>(move _11) -> [return: bb8, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_3);\n        drop(_2) -> [return: bb10, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_12);\n        StorageDead(_11);\n        drop((*_9)) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        (*_9) = move _10;\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_6);\n        goto -> bb3;\n    }\n    bb10: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "name": "sys::pal::unix::pipe::read2::read",
+  "safe": true,
+  "callees": {
+    "sys::fd::unix::FileDesc::read_to_end": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::fd::unix::FileDesc": "ImmutableAsArgument",
+        "alloc_crate::vec::Vec": "MutableAsArgument",
+        "core::result::Result": "Constructor",
+        "io::error::Error": "Constructor"
+      }
+    },
+    "io::error::Error::raw_os_error": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the OS error that this error represents (if any).\n\n If this [`Error`] was constructed via [`last_os_error`] or\n [`from_raw_os_error`], then this function will return [`Some`], otherwise\n it will return [`None`].\n\n [`last_os_error`]: Error::last_os_error\n [`from_raw_os_error`]: Error::from_raw_os_error\n\n # Examples\n\n ```\n use std::io::{Error, ErrorKind};\n\n fn print_os_error(err: &Error) {\n     if let Some(raw_os_err) = err.raw_os_error() {\n         println!(\"raw OS error: {raw_os_err:?}\");\n     } else {\n         println!(\"Not an OS error\");\n     }\n }\n\n fn main() {\n     // Will print \"raw OS error: ...\".\n     print_os_error(&Error::last_os_error());\n     // Will print \"Not an OS error\".\n     print_os_error(&Error::new(ErrorKind::Other, \"oh no!\"));\n }\n ```\n",
+      "adt": {
+        "io::error::Error": "ImmutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::cmp::PartialEq::eq": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests for `self` and `other` values to be equal, and is used by `==`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sys::fd::unix::FileDesc": [
+      "Ref"
+    ],
+    "alloc_crate::vec::Vec": [
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })])"
+    ],
+    "io::error::Error": [
+      "Plain",
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 3934,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/pal/unix/pipe.rs:139:5: 152:6",
+  "src": "fn read(fd: &FileDesc, dst: &mut Vec<u8>) -> Result<bool, io::Error> {\n        match fd.read_to_end(dst) {\n            Ok(_) => Ok(true),\n            Err(e) => {\n                if e.raw_os_error() == Some(libc::EWOULDBLOCK)\n                    || e.raw_os_error() == Some(libc::EAGAIN)\n                {\n                    Ok(false)\n                } else {\n                    Err(e)\n                }\n            }\n        }\n    }",
+  "mir": "fn sys::pal::unix::pipe::read2::read(_1: &sys::fd::unix::FileDesc, _2: &mut alloc_crate::vec::Vec<u8>) -> core::result::Result<bool, io::error::Error> {\n    let mut _0: core::result::Result<bool, io::error::Error>;\n    let mut _3: core::result::Result<usize, io::error::Error>;\n    let mut _4: isize;\n    let  _5: io::error::Error;\n    let mut _6: bool;\n    let mut _7: &core::option::Option<i32>;\n    let  _8: core::option::Option<i32>;\n    let mut _9: &io::error::Error;\n    let mut _10: &core::option::Option<i32>;\n    let mut _11: bool;\n    let mut _12: &core::option::Option<i32>;\n    let  _13: core::option::Option<i32>;\n    let mut _14: &io::error::Error;\n    let mut _15: &core::option::Option<i32>;\n    let mut _16: io::error::Error;\n    let mut _17: bool;\n    debug fd => _1;\n    debug dst => _2;\n    debug e => _5;\n    bb0: {\n        _17 = false;\n        StorageLive(_3);\n        _3 = sys::fd::unix::FileDesc::read_to_end(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = discriminant(_3);\n        switchInt(move _4) -> [0: bb4, 1: bb3, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        StorageLive(_5);\n        _17 = true;\n        _5 = move ((_3 as variant#1).0: io::error::Error);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &_5;\n        _8 = io::error::Error::raw_os_error(move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb4: {\n        _0 = core::result::Result::Ok(true);\n        goto -> bb17;\n    }\n    bb5: {\n        _7 = &_8;\n        StorageDead(_9);\n        StorageLive(_10);\n        _10 = sys::pal::unix::pipe::read2::read::promoted[1];\n        _6 = <core::option::Option<i32> as core::cmp::PartialEq>::eq(move _7, move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        switchInt(move _6) -> [0: bb8, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageDead(_8);\n        StorageDead(_7);\n        goto -> bb12;\n    }\n    bb8: {\n        StorageDead(_10);\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = &_5;\n        _13 = io::error::Error::raw_os_error(move _14) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _12 = &_13;\n        StorageDead(_14);\n        StorageLive(_15);\n        _15 = sys::pal::unix::pipe::read2::read::promoted[0];\n        _11 = <core::option::Option<i32> as core::cmp::PartialEq>::eq(move _12, move _15) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        switchInt(move _11) -> [0: bb13, otherwise: bb11];\n    }\n    bb11: {\n        StorageDead(_15);\n        StorageDead(_13);\n        StorageDead(_12);\n        goto -> bb12;\n    }\n    bb12: {\n        _0 = core::result::Result::Ok(false);\n        goto -> bb14;\n    }\n    bb13: {\n        StorageDead(_15);\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageLive(_16);\n        _17 = false;\n        _16 = move _5;\n        _0 = core::result::Result::Err(move _16);\n        StorageDead(_16);\n        goto -> bb14;\n    }\n    bb14: {\n        StorageDead(_11);\n        StorageDead(_6);\n        switchInt(_17) -> [0: bb15, otherwise: bb16];\n    }\n    bb15: {\n        _17 = false;\n        StorageDead(_5);\n        goto -> bb17;\n    }\n    bb16: {\n        drop(_5) -> [return: bb15, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

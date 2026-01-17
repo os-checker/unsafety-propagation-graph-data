@@ -1,0 +1,94 @@
+{
+  "name": "<io::Chain<T, U> as io::BufRead>::read_until",
+  "safe": true,
+  "callees": {
+    "io::BufRead::read_until": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads all bytes into `buf` until the delimiter `byte` or EOF is reached.\n\n This function will read bytes from the underlying stream until the\n delimiter or EOF is found. Once found, all bytes up to, and including,\n the delimiter (if found) will be appended to `buf`.\n\n If successful, this function will return the total number of bytes read.\n\n This function is blocking and should be used carefully: it is possible for\n an attacker to continuously send bytes without ever sending the delimiter\n or EOF.\n\n # Errors\n\n This function will ignore all instances of [`ErrorKind::Interrupted`] and\n will otherwise return any errors returned by [`fill_buf`].\n\n If an I/O error is encountered then all bytes read so far will be\n present in `buf` and its length will have been adjusted appropriately.\n\n [`fill_buf`]: BufRead::fill_buf\n\n # Examples\n\n [`std::io::Cursor`][`Cursor`] is a type that implements `BufRead`. In\n this example, we use [`Cursor`] to read all the bytes in a byte slice\n in hyphen delimited segments:\n\n ```\n use std::io::{self, BufRead};\n\n let mut cursor = io::Cursor::new(b\"lorem-ipsum\");\n let mut buf = vec![];\n\n // cursor is at 'l'\n let num_bytes = cursor.read_until(b'-', &mut buf)\n     .expect(\"reading from cursor won't fail\");\n assert_eq!(num_bytes, 6);\n assert_eq!(buf, b\"lorem-\");\n buf.clear();\n\n // cursor is at 'i'\n let num_bytes = cursor.read_until(b'-', &mut buf)\n     .expect(\"reading from cursor won't fail\");\n assert_eq!(num_bytes, 5);\n assert_eq!(buf, b\"ipsum\");\n buf.clear();\n\n // cursor is at EOF\n let num_bytes = cursor.read_until(b'-', &mut buf)\n     .expect(\"reading from cursor won't fail\");\n assert_eq!(num_bytes, 0);\n assert_eq!(buf, b\"\");\n ```\n",
+      "adt": {
+        "alloc_crate::vec::Vec": "MutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::last": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the last element of the slice, or `None` if it is empty.\n\n # Examples\n\n ```\n let v = [10, 40, 30];\n assert_eq!(Some(&30), v.last());\n\n let w: &[i32] = &[];\n assert_eq!(None, w.last());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "io::Chain": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "alloc_crate::vec::Vec": [
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4948, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 35, kind: RigidTy(Uint(U8)) }, Not)) })])"
+    ]
+  },
+  "path": 1747,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/mod.rs:2853:5: 2866:6",
+  "src": "fn read_until(&mut self, byte: u8, buf: &mut Vec<u8>) -> Result<usize> {\n        let mut read = 0;\n        if !self.done_first {\n            let n = self.first.read_until(byte, buf)?;\n            read += n;\n\n            match buf.last() {\n                Some(b) if *b == byte && n != 0 => return Ok(read),\n                _ => self.done_first = true,\n            }\n        }\n        read += self.second.read_until(byte, buf)?;\n        Ok(read)\n    }",
+  "mir": "fn <io::Chain<T, U> as io::BufRead>::read_until(_1: &mut io::Chain<T, U>, _2: u8, _3: &mut alloc_crate::vec::Vec<u8>) -> core::result::Result<usize, io::error::Error> {\n    let mut _0: core::result::Result<usize, io::error::Error>;\n    let mut _4: usize;\n    let mut _5: bool;\n    let mut _6: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, usize>;\n    let mut _7: core::result::Result<usize, io::error::Error>;\n    let mut _8: &mut T;\n    let mut _9: isize;\n    let  _10: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _11: usize;\n    let mut _12: (usize, bool);\n    let mut _13: core::option::Option<&u8>;\n    let  _14: &[u8];\n    let mut _15: &alloc_crate::vec::Vec<u8>;\n    let mut _16: isize;\n    let  _17: &u8;\n    let  _18: &&u8;\n    let mut _19: bool;\n    let mut _20: u8;\n    let mut _21: usize;\n    let mut _22: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, usize>;\n    let mut _23: core::result::Result<usize, io::error::Error>;\n    let mut _24: &mut U;\n    let mut _25: isize;\n    let  _26: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _27: usize;\n    let mut _28: (usize, bool);\n    let mut _29: usize;\n    let mut _30: &u8;\n    debug self => _1;\n    debug byte => _2;\n    debug buf => _3;\n    debug read => _4;\n    debug n => _11;\n    debug residual => _10;\n    debug val => _11;\n    debug b => _17;\n    debug b => _18;\n    debug residual => _26;\n    debug val => _27;\n    bb0: {\n        StorageLive(_4);\n        _4 = 0_usize;\n        StorageLive(_5);\n        _5 = ((*_1).2: bool);\n        switchInt(move _5) -> [0: bb1, otherwise: bb18];\n    }\n    bb1: {\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &mut ((*_1).0: T);\n        _7 = <T as io::BufRead>::read_until(move _8, _2, _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        _6 = <core::result::Result<usize, io::error::Error> as core::ops::Try>::branch(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        _9 = discriminant(_6);\n        switchInt(move _9) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _11 = ((_6 as variant#0).0: usize);\n        StorageDead(_6);\n        _12 = CheckedAdd(_4, _11);\n        assert(!move (_12.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _4, _11) -> [success: bb8, unwind unreachable];\n    }\n    bb6: {\n        _10 = move ((_6 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<usize, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_10) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_6);\n        goto -> bb25;\n    }\n    bb8: {\n        _4 = move (_12.0: usize);\n        StorageLive(_13);\n        StorageLive(_15);\n        _15 = &(*_3);\n        _14 = <alloc_crate::vec::Vec<u8> as core::ops::Deref>::deref(move _15) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_15);\n        _13 = core::slice::<impl [u8]>::last(_14) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _16 = discriminant(_13);\n        switchInt(move _16) -> [1: bb12, 0: bb11, otherwise: bb4];\n    }\n    bb11: {\n        ((*_1).2: bool) = true;\n        StorageDead(_13);\n        goto -> bb18;\n    }\n    bb12: {\n        StorageLive(_18);\n        _18 = &((_13 as variant#1).0: &u8);\n        StorageLive(_19);\n        StorageLive(_20);\n        _30 = (*_18);\n        _20 = (*_30);\n        _19 = Eq(move _20, _2);\n        switchInt(move _19) -> [0: bb16, otherwise: bb13];\n    }\n    bb13: {\n        StorageDead(_20);\n        StorageDead(_19);\n        switchInt(_11) -> [0: bb15, otherwise: bb14];\n    }\n    bb14: {\n        StorageLive(_17);\n        _17 = ((_13 as variant#1).0: &u8);\n        StorageLive(_21);\n        _21 = _4;\n        _0 = core::result::Result::Ok(move _21);\n        StorageDead(_21);\n        StorageDead(_17);\n        StorageDead(_18);\n        StorageDead(_13);\n        goto -> bb25;\n    }\n    bb15: {\n        goto -> bb17;\n    }\n    bb16: {\n        StorageDead(_20);\n        StorageDead(_19);\n        goto -> bb17;\n    }\n    bb17: {\n        StorageDead(_18);\n        goto -> bb11;\n    }\n    bb18: {\n        StorageDead(_5);\n        StorageLive(_22);\n        StorageLive(_23);\n        StorageLive(_24);\n        _24 = &mut ((*_1).1: U);\n        _23 = <U as io::BufRead>::read_until(move _24, _2, _3) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_24);\n        _22 = <core::result::Result<usize, io::error::Error> as core::ops::Try>::branch(move _23) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_23);\n        _25 = discriminant(_22);\n        switchInt(move _25) -> [0: bb21, 1: bb22, otherwise: bb4];\n    }\n    bb21: {\n        _27 = ((_22 as variant#0).0: usize);\n        _28 = CheckedAdd(_4, _27);\n        assert(!move (_28.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _4, _27) -> [success: bb24, unwind unreachable];\n    }\n    bb22: {\n        _26 = move ((_22 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<usize, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_26) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_22);\n        goto -> bb26;\n    }\n    bb24: {\n        _4 = move (_28.0: usize);\n        StorageDead(_22);\n        StorageLive(_29);\n        _29 = _4;\n        _0 = core::result::Result::Ok(move _29);\n        StorageDead(_29);\n        StorageDead(_4);\n        goto -> bb27;\n    }\n    bb25: {\n        StorageDead(_5);\n        goto -> bb26;\n    }\n    bb26: {\n        StorageDead(_4);\n        goto -> bb27;\n    }\n    bb27: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "name": "<panicking::panic_handler::FormatStringPayload<'_> as core::panic::PanicPayload>::take_box",
+  "safe": true,
+  "callees": {
+    "panicking::panic_handler::FormatStringPayload::<'_>::fill": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "panicking::panic_handler::FormatStringPayload": "MutableAsArgument"
+      }
+    },
+    "core::mem::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Replaces `dest` with the default value of `T`, returning the previous `dest` value.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a passed value instead of the default value, see [`replace`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::take(&mut v);\n assert_eq!(vec![1, 2], old_v);\n assert!(v.is_empty());\n ```\n\n `take` allows taking ownership of a struct field by replacing it with an \"empty\" value.\n Without `take` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let buf = self.buf;\n         self.buf = Vec::new();\n         buf\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so it can't even clone and reset\n `self.buf`. But `take` can be used to disassociate the original value of `self.buf` from\n `self`, allowing it to be returned:\n\n ```\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         mem::take(&mut self.buf)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf.len(), 2);\n\n assert_eq!(buffer.get_and_reset(), vec![0, 1]);\n assert_eq!(buffer.buf.len(), 0);\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::boxed::Box::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory on the heap and then places `x` into it.\n\n This doesn't actually allocate if `T` is zero-sized.\n\n # Examples\n\n ```\n let five = Box::new(5);\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::boxed::Box::<T>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the `Box`, returning a wrapped raw pointer.\n\n The pointer will be properly aligned and non-null.\n\n After calling this function, the caller is responsible for the\n memory previously managed by the `Box`. In particular, the\n caller should properly destroy `T` and release the memory, taking\n into account the [memory layout] used by `Box`. The easiest way to\n do this is to convert the raw pointer back into a `Box` with the\n [`Box::from_raw`] function, allowing the `Box` destructor to perform\n the cleanup.\n\n Note: this is an associated function, which means that you have\n to call it as `Box::into_raw(b)` instead of `b.into_raw()`. This\n is so that there is no conflict with a method on the inner type.\n\n # Examples\n Converting the raw pointer back into a `Box` with [`Box::from_raw`]\n for automatic cleanup:\n ```\n let x = Box::new(String::from(\"Hello\"));\n let ptr = Box::into_raw(x);\n let x = unsafe { Box::from_raw(ptr) };\n ```\n Manual cleanup by explicitly running the destructor and deallocating\n the memory:\n ```\n use std::alloc::{dealloc, Layout};\n use std::ptr;\n\n let x = Box::new(String::from(\"Hello\"));\n let ptr = Box::into_raw(x);\n unsafe {\n     ptr::drop_in_place(ptr);\n     dealloc(ptr as *mut u8, Layout::new::<String>());\n }\n ```\n Note: This is equivalent to the following:\n ```\n let x = Box::new(String::from(\"Hello\"));\n let ptr = Box::into_raw(x);\n unsafe {\n     drop(Box::from_raw(ptr));\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "panicking::panic_handler::FormatStringPayload": [
+      "MutRef"
+    ],
+    "alloc_crate::string::String": [
+      "MutRef",
+      "Plain"
+    ],
+    "alloc_crate::boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 2307,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:642:9: 648:10",
+  "src": "fn take_box(&mut self) -> *mut (dyn Any + Send) {\n            // We do two allocations here, unfortunately. But (a) they're required with the current\n            // scheme, and (b) we don't handle panic + OOM properly anyway (see comment in\n            // begin_panic below).\n            let contents = mem::take(self.fill());\n            Box::into_raw(Box::new(contents))\n        }",
+  "mir": "fn <panicking::panic_handler::FormatStringPayload<'_> as core::panic::PanicPayload>::take_box(_1: &mut panicking::panic_handler::FormatStringPayload<'_>) -> *mut dyn core::any::Any + core::marker::Send {\n    let mut _0: *mut dyn core::any::Any + core::marker::Send;\n    let  _2: alloc_crate::string::String;\n    let mut _3: &mut alloc_crate::string::String;\n    let mut _4: alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>;\n    let mut _5: alloc_crate::boxed::Box<alloc_crate::string::String>;\n    debug self => _1;\n    debug contents => _2;\n    bb0: {\n        _3 = panicking::panic_handler::FormatStringPayload::<'_>::fill(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = core::mem::take::<alloc_crate::string::String>(_3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = alloc_crate::boxed::Box::<alloc_crate::string::String>::new(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _4 = move _5 as alloc_crate::boxed::Box<dyn core::any::Any + core::marker::Send>;\n        StorageDead(_5);\n        _0 = alloc_crate::boxed::Box::<dyn core::any::Any + core::marker::Send>::into_raw(move _4) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

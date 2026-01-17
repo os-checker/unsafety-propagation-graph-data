@@ -1,0 +1,47 @@
+{
+  "name": "cell::once::OnceCell::<T>::take",
+  "safe": true,
+  "callees": {
+    "mem::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Replaces `dest` with the default value of `T`, returning the previous `dest` value.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a passed value instead of the default value, see [`replace`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::take(&mut v);\n assert_eq!(vec![1, 2], old_v);\n assert!(v.is_empty());\n ```\n\n `take` allows taking ownership of a struct field by replacing it with an \"empty\" value.\n Without `take` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let buf = self.buf;\n         self.buf = Vec::new();\n         buf\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so it can't even clone and reset\n `self.buf`. But `take` can be used to disassociate the original value of `self.buf` from\n `self`, allowing it to be returned:\n\n ```\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn get_and_reset(&mut self) -> Vec<T> {\n         mem::take(&mut self.buf)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf.len(), 2);\n\n assert_eq!(buffer.get_and_reset(), vec![0, 1]);\n assert_eq!(buffer.buf.len(), 0);\n ```\n",
+      "adt": {}
+    },
+    "cell::once::OnceCell::<T>::into_inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the cell, returning the wrapped value.\n\n Returns `None` if the cell was uninitialized.\n\n # Examples\n\n ```\n use std::cell::OnceCell;\n\n let cell: OnceCell<String> = OnceCell::new();\n assert_eq!(cell.into_inner(), None);\n\n let cell = OnceCell::new();\n let _ = cell.set(\"hello\".to_owned());\n assert_eq!(cell.into_inner(), Some(\"hello\".to_owned()));\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "cell::once::OnceCell": [
+      "MutRef",
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 4713,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell/once.rs:350:5: 352:6",
+  "src": "pub fn take(&mut self) -> Option<T> {\n        mem::take(self).into_inner()\n    }",
+  "mir": "fn cell::once::OnceCell::<T>::take(_1: &mut cell::once::OnceCell<T>) -> option::Option<T> {\n    let mut _0: option::Option<T>;\n    let mut _2: cell::once::OnceCell<T>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = mem::take::<cell::once::OnceCell<T>>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = cell::once::OnceCell::<T>::into_inner(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Takes the value out of this `OnceCell`, moving it back to an uninitialized state.\n\n Has no effect and returns `None` if the `OnceCell` is uninitialized.\n\n Safety is guaranteed by requiring a mutable reference.\n\n # Examples\n\n ```\n use std::cell::OnceCell;\n\n let mut cell: OnceCell<String> = OnceCell::new();\n assert_eq!(cell.take(), None);\n\n let mut cell = OnceCell::new();\n let _ = cell.set(\"hello\".to_owned());\n assert_eq!(cell.take(), Some(\"hello\".to_owned()));\n assert_eq!(cell.get(), None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

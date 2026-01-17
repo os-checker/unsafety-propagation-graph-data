@@ -1,0 +1,95 @@
+{
+  "name": "sync::wait::WaitQueue::enqueue",
+  "safe": true,
+  "callees": {
+    "sync::spin::SpinLock::<T, G>::lock": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the spin lock.\n",
+      "adt": {
+        "sync::spin::SpinLock": "ImmutableAsArgument",
+        "sync::spin::SpinLockGuard": "Constructor"
+      }
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "alloc::collections::VecDeque::<T, A>::push_back": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Appends an element to the back of the deque.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut buf = VecDeque::new();\n buf.push_back(1);\n buf.push_back(3);\n assert_eq!(3, *buf.back().unwrap());\n ```\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicU32::fetch_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds to the current value, returning the previous value.\n\n This operation wraps around on overflow.\n\n `fetch_add` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n assert_eq!(foo.fetch_add(10, Ordering::SeqCst), 0);\n assert_eq!(foo.load(Ordering::SeqCst), 10);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::spin::SpinLock": [
+      "Ref"
+    ],
+    "sync::wait::WaitQueue": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "sync::spin::SpinLockGuard": [
+      "Plain",
+      "MutRef"
+    ],
+    "alloc::collections::VecDeque": [
+      "MutRef"
+    ],
+    "alloc::sync::Arc": [
+      "Plain"
+    ],
+    "core::sync::atomic::AtomicU32": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 2736,
+  "span": "ostd/src/sync/wait.rs:145:5: 149:6",
+  "src": "pub fn enqueue(&self, waker: Arc<Waker>) {\n        let mut wakers = self.wakers.lock();\n        wakers.push_back(waker);\n        self.num_wakers.fetch_add(1, Ordering::Acquire);\n    }",
+  "mir": "fn sync::wait::WaitQueue::enqueue(_1: &sync::wait::WaitQueue, _2: alloc::sync::Arc<sync::wait::Waker>) -> () {\n    let mut _0: ();\n    let mut _3: sync::spin::SpinLockGuard<'_, alloc::collections::VecDeque<alloc::sync::Arc<sync::wait::Waker>>, sync::guard::LocalIrqDisabled>;\n    let mut _4: &sync::spin::SpinLock<alloc::collections::VecDeque<alloc::sync::Arc<sync::wait::Waker>>, sync::guard::LocalIrqDisabled>;\n    let  _5: ();\n    let mut _6: &mut alloc::collections::VecDeque<alloc::sync::Arc<sync::wait::Waker>>;\n    let mut _7: &mut sync::spin::SpinLockGuard<'_, alloc::collections::VecDeque<alloc::sync::Arc<sync::wait::Waker>>, sync::guard::LocalIrqDisabled>;\n    let  _8: u32;\n    let mut _9: &core::sync::atomic::AtomicU32;\n    let mut _10: core::sync::atomic::Ordering;\n    debug self => _1;\n    debug waker => _2;\n    debug wakers => _3;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &((*_1).1: sync::spin::SpinLock<alloc::collections::VecDeque<alloc::sync::Arc<sync::wait::Waker>>, sync::guard::LocalIrqDisabled>);\n        _3 = sync::spin::SpinLock::<alloc::collections::VecDeque<alloc::sync::Arc<sync::wait::Waker>>, sync::guard::LocalIrqDisabled>::lock(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_7);\n        _7 = &mut _3;\n        _6 = <sync::spin::SpinLockGuard<'_, alloc::collections::VecDeque<alloc::sync::Arc<sync::wait::Waker>>, sync::guard::LocalIrqDisabled> as core::ops::DerefMut>::deref_mut(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = alloc::collections::VecDeque::<alloc::sync::Arc<sync::wait::Waker>>::push_back(_6, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &((*_1).0: core::sync::atomic::AtomicU32);\n        StorageLive(_10);\n        _10 = core::sync::atomic::Ordering::Acquire;\n        _8 = core::sync::atomic::AtomicU32::fetch_add(move _9, 1_u32, move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_8);\n        drop(_3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Enqueues the input [`Waker`] to the wait queue.\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "hidden"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* hidden\n"
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "array::repeat",
+  "safe": true,
+  "callees": {
+    "iter::sources::repeat_n::repeat_n": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new iterator that repeats a single element a given number of times.\n\n The `repeat_n()` function repeats a single value exactly `n` times.\n\n This is very similar to using [`repeat()`] with [`Iterator::take()`],\n but `repeat_n()` can return the original value, rather than always cloning.\n\n [`repeat()`]: crate::iter::repeat\n\n # Examples\n\n Basic usage:\n\n ```\n use std::iter;\n\n // four of the number four:\n let mut four_fours = iter::repeat_n(4, 4);\n\n assert_eq!(Some(4), four_fours.next());\n assert_eq!(Some(4), four_fours.next());\n assert_eq!(Some(4), four_fours.next());\n assert_eq!(Some(4), four_fours.next());\n\n // no more fours\n assert_eq!(None, four_fours.next());\n ```\n\n For non-`Copy` types,\n\n ```\n use std::iter;\n\n let v: Vec<i32> = Vec::with_capacity(123);\n let mut it = iter::repeat_n(v, 5);\n\n for i in 0..4 {\n     // It starts by cloning things\n     let cloned = it.next().unwrap();\n     assert_eq!(cloned.len(), 0);\n     assert_eq!(cloned.capacity(), 0);\n }\n\n // ... but the last item is the original one\n let last = it.next().unwrap();\n assert_eq!(last.len(), 0);\n assert_eq!(last.capacity(), 123);\n\n // ... and now we're done\n assert_eq!(None, it.next());\n ```\n",
+      "adt": {
+        "iter::sources::repeat_n::RepeatN": "Constructor"
+      }
+    },
+    "array::from_trusted_iterator": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Populate an array from the first `N` elements of `iter`\n\n # Panics\n\n If the iterator doesn't actually have enough items.\n\n By depending on `TrustedLen`, however, we can do that check up-front (where\n it easily optimizes away) so it doesn't impact the loop that fills the array.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "iter::sources::repeat_n::RepeatN": [
+      "Plain"
+    ]
+  },
+  "path": 4556,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/array/mod.rs:54:1: 56:2",
+  "src": "pub fn repeat<T: Clone, const N: usize>(val: T) -> [T; N] {\n    from_trusted_iterator(repeat_n(val, N))\n}",
+  "mir": "fn array::repeat(_1: T) -> [T; N] {\n    let mut _0: [T; N];\n    let mut _2: iter::sources::repeat_n::RepeatN<T>;\n    debug val => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = iter::sources::repeat_n::repeat_n::<T>(_1, N) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = array::from_trusted_iterator::<T, N, iter::sources::repeat_n::RepeatN<T>>(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Creates an array of type `[T; N]` by repeatedly cloning a value.\n\n This is the same as `[val; N]`, but it also works for types that do not\n implement [`Copy`].\n\n The provided value will be used as an element of the resulting array and\n will be cloned N - 1 times to fill up the rest. If N is zero, the value\n will be dropped.\n\n # Example\n\n Creating multiple copies of a `String`:\n ```rust\n use std::array;\n\n let string = \"Hello there!\".to_string();\n let strings = array::repeat(string);\n assert_eq!(strings, [\"Hello there!\", \"Hello there!\"]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

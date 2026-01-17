@@ -1,0 +1,125 @@
+{
+  "name": "core_simd::swizzle_dyn::avx2_pshufb",
+  "safe": false,
+  "callees": {
+    "core_simd::vector::Simd::<T, N>::splat": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new SIMD vector with all elements set to the given value.\n\n # Examples\n\n ```\n # #![feature(portable_simd)]\n # #[cfg(feature = \"as_crate\")] use core_simd::simd;\n # #[cfg(not(feature = \"as_crate\"))] use core::simd;\n # use simd::u32x4;\n let v = u32x4::splat(8);\n assert_eq!(v.as_array(), &[8, 8, 8, 8]);\n ```\n",
+      "adt": {
+        "core_simd::vector::Simd": "Constructor"
+      }
+    },
+    "ops::arith::Add::add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the `+` operation.\n\n # Example\n\n ```\n assert_eq!(12 + 1, 13);\n ```\n",
+      "adt": {}
+    },
+    "convert::Into::into": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "core_arch::x86::avx2::_mm256_permute2x128_si256": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Shuffles 128-bits of integer data selected by `imm8` from `a` and `b`.\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_permute2x128_si256)\n",
+      "adt": {
+        "core_arch::x86::__m256i": "Constructor"
+      }
+    },
+    "core_arch::x86::avx2::_mm256_shuffle_epi8": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Shuffles bytes from `a` according to the content of `b`.\n\n For each of the 128-bit low and high halves of the vectors, the last\n 4 bits of each byte of `b` are used as addresses into the respective\n low or high 16 bytes of `a`. That is, the halves are shuffled separately.\n\n In addition, if the highest significant bit of a byte of `b` is set, the\n respective destination byte is set to 0.\n\n Picturing `a` and `b` as `[u8; 32]`, `_mm256_shuffle_epi8` is logically\n equivalent to:\n\n ```\n fn mm256_shuffle_epi8(a: [u8; 32], b: [u8; 32]) -> [u8; 32] {\n     let mut r = [0; 32];\n     for i in 0..16 {\n         // if the most significant bit of b is set,\n         // then the destination byte is set to 0.\n         if b[i] & 0x80 == 0u8 {\n             r[i] = a[(b[i] % 16) as usize];\n         }\n         if b[i + 16] & 0x80 == 0u8 {\n             r[i + 16] = a[(b[i + 16] % 16 + 16) as usize];\n         }\n     }\n     r\n }\n ```\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_shuffle_epi8)\n",
+      "adt": {
+        "core_arch::x86::__m256i": "Constructor"
+      }
+    },
+    "convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "core_simd::simd::cmp::ord::SimdPartialOrd::simd_lt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Test if each element is less than the corresponding element in `other`.\n",
+      "adt": {}
+    },
+    "core_simd::select::<impl core_simd::masks::Mask<T, N>>::select": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Choose elements from two vectors.\n\n For each element in the mask, choose the corresponding element from `true_values` if\n that element mask is true, and `false_values` if that element mask is false.\n\n # Examples\n ```\n # #![feature(portable_simd)]\n # use core::simd::{Simd, Mask};\n let a = Simd::from_array([0, 1, 2, 3]);\n let b = Simd::from_array([4, 5, 6, 7]);\n let mask = Mask::from_array([true, false, false, true]);\n let c = mask.select(a, b);\n assert_eq!(c.to_array(), [0, 5, 6, 3]);\n ```\n",
+      "adt": {
+        "core_simd::vector::Simd": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core_simd::vector::Simd": [
+      "Plain"
+    ],
+    "core_arch::x86::__m256i": [
+      "Plain"
+    ],
+    "core_simd::masks::Mask": [
+      "Plain"
+    ]
+  },
+  "path": 12502,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/swizzle_dyn.rs:141:1: 172:2",
+  "src": "unsafe fn avx2_pshufb(bytes: Simd<u8, 32>, idxs: Simd<u8, 32>) -> Simd<u8, 32> {\n    use crate::simd::cmp::SimdPartialOrd;\n    #[cfg(target_arch = \"x86\")]\n    use core::arch::x86;\n    #[cfg(target_arch = \"x86_64\")]\n    use core::arch::x86_64 as x86;\n    use x86::_mm256_permute2x128_si256 as avx2_cross_shuffle;\n    use x86::_mm256_shuffle_epi8 as avx2_half_pshufb;\n    let mid = Simd::splat(16u8);\n    let high = mid + mid;\n    // SAFETY: Caller promised AVX2\n    unsafe {\n        // This is ordering sensitive, and LLVM will order these how you put them.\n        // Most AVX2 impls use ~5 \"ports\", and only 1 or 2 are capable of permutes.\n        // But the \"compose\" step will lower to ops that can also use at least 1 other port.\n        // So this tries to break up permutes so composition flows through \"open\" ports.\n        // Comparative benches should be done on multiple AVX2 CPUs before reordering this\n\n        let hihi = avx2_cross_shuffle::<0x11>(bytes.into(), bytes.into());\n        let hi_shuf = Simd::from(avx2_half_pshufb(\n            hihi,        // duplicate the vector's top half\n            idxs.into(), // so that using only 4 bits of an index still picks bytes 16-31\n        ));\n        // A zero-fill during the compose step gives the \"all-Neon-like\" OOB-is-0 semantics\n        let compose = idxs.simd_lt(high).select(hi_shuf, Simd::splat(0));\n        let lolo = avx2_cross_shuffle::<0x00>(bytes.into(), bytes.into());\n        let lo_shuf = Simd::from(avx2_half_pshufb(lolo, idxs.into()));\n        // Repeat, then pick indices < 16, overwriting indices 0-15 from previous compose step\n        let compose = idxs.simd_lt(mid).select(lo_shuf, compose);\n        compose\n    }\n}",
+  "mir": "fn core_simd::swizzle_dyn::avx2_pshufb(_1: core_simd::vector::Simd<u8, 32>, _2: core_simd::vector::Simd<u8, 32>) -> core_simd::vector::Simd<u8, 32> {\n    let mut _0: core_simd::vector::Simd<u8, 32>;\n    let  _3: core_simd::vector::Simd<u8, 32>;\n    let  _4: core_simd::vector::Simd<u8, 32>;\n    let  _5: core_arch::x86::__m256i;\n    let mut _6: core_arch::x86::__m256i;\n    let mut _7: core_arch::x86::__m256i;\n    let  _8: core_simd::vector::Simd<u8, 32>;\n    let mut _9: core_arch::x86::__m256i;\n    let mut _10: core_arch::x86::__m256i;\n    let  _11: core_simd::vector::Simd<u8, 32>;\n    let mut _12: core_simd::masks::Mask<i8, 32>;\n    let mut _13: core_simd::vector::Simd<u8, 32>;\n    let  _14: core_arch::x86::__m256i;\n    let mut _15: core_arch::x86::__m256i;\n    let mut _16: core_arch::x86::__m256i;\n    let  _17: core_simd::vector::Simd<u8, 32>;\n    let mut _18: core_arch::x86::__m256i;\n    let mut _19: core_arch::x86::__m256i;\n    let mut _20: core_simd::masks::Mask<i8, 32>;\n    debug bytes => _1;\n    debug idxs => _2;\n    debug mid => _3;\n    debug high => _4;\n    debug hihi => _5;\n    debug hi_shuf => _8;\n    debug compose => _11;\n    debug lolo => _14;\n    debug lo_shuf => _17;\n    debug compose => _0;\n    bb0: {\n        _3 = core_simd::vector::Simd::<u8, 32>::splat(16_u8) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = <core_simd::vector::Simd<u8, 32> as ops::arith::Add>::add(_3, _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_6);\n        _6 = <core_simd::vector::Simd<u8, 32> as convert::Into<core_arch::x86::__m256i>>::into(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_7);\n        _7 = <core_simd::vector::Simd<u8, 32> as convert::Into<core_arch::x86::__m256i>>::into(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _5 = core_arch::x86::avx2::_mm256_permute2x128_si256::<17>(move _6, move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = <core_simd::vector::Simd<u8, 32> as convert::Into<core_arch::x86::__m256i>>::into(_2) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _9 = core_arch::x86::avx2::_mm256_shuffle_epi8(_5, move _10) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_10);\n        _8 = <core_simd::vector::Simd<u8, 32> as convert::From<core_arch::x86::__m256i>>::from(move _9) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_9);\n        StorageLive(_12);\n        _12 = <core_simd::vector::Simd<u8, 32> as core_simd::simd::cmp::ord::SimdPartialOrd>::simd_lt(_2, _4) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageLive(_13);\n        _13 = core_simd::vector::Simd::<u8, 32>::splat(0_u8) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _11 = core_simd::select::<impl core_simd::masks::Mask<i8, 32>>::select::<u8>(move _12, _8, move _13) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageLive(_15);\n        _15 = <core_simd::vector::Simd<u8, 32> as convert::Into<core_arch::x86::__m256i>>::into(_1) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageLive(_16);\n        _16 = <core_simd::vector::Simd<u8, 32> as convert::Into<core_arch::x86::__m256i>>::into(_1) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        _14 = core_arch::x86::avx2::_mm256_permute2x128_si256::<0>(move _15, move _16) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_16);\n        StorageDead(_15);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = <core_simd::vector::Simd<u8, 32> as convert::Into<core_arch::x86::__m256i>>::into(_2) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        _18 = core_arch::x86::avx2::_mm256_shuffle_epi8(_14, move _19) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_19);\n        _17 = <core_simd::vector::Simd<u8, 32> as convert::From<core_arch::x86::__m256i>>::from(move _18) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_18);\n        StorageLive(_20);\n        _20 = <core_simd::vector::Simd<u8, 32> as core_simd::simd::cmp::ord::SimdPartialOrd>::simd_lt(_2, _3) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        _0 = core_simd::select::<impl core_simd::masks::Mask<i8, 32>>::select::<u8>(move _20, _17, _11) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_20);\n        return;\n    }\n}\n",
+  "doc": " \"vpshufb like it was meant to be\" on AVX2\n\n # Safety\n This requires AVX2 to work\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "unused"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* unused\n"
+    ]
+  }
+}

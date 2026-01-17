@@ -1,0 +1,47 @@
+{
+  "name": "slice::sort::unstable::quicksort::partition",
+  "safe": true,
+  "callees": {
+    "intrinsics::abort": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Aborts the execution of the process.\n\n Note that, unlike most intrinsics, this is safe to call;\n it does not require an `unsafe` block.\n Therefore, implementations must not require the user to uphold\n any safety invariants.\n\n [`std::process::abort`](../../std/process/fn.abort.html) is to be preferred if possible,\n as its behavior is more user-friendly and more stable.\n\n The current implementation of `intrinsics::abort` is to invoke an invalid instruction,\n on most platforms.\n On Unix, the\n process will probably terminate with a signal like `SIGABRT`, `SIGILL`, `SIGTRAP`, `SIGSEGV` or\n `SIGBUS`.  The precise behavior is not guaranteed and not stable.\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::swap_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Swaps two elements in the slice, without doing bounds checking.\n\n For a safe alternative see [`swap`].\n\n # Arguments\n\n * a - The index of the first element\n * b - The index of the second element\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*.\n The caller has to ensure that `a < self.len()` and `b < self.len()`.\n\n # Examples\n\n ```\n #![feature(slice_swap_unchecked)]\n\n let mut v = [\"a\", \"b\", \"c\", \"d\"];\n // SAFETY: we know that 1 and 3 are both indices of the slice\n unsafe { v.swap_unchecked(1, 3) };\n assert!(v == [\"a\", \"d\", \"c\", \"b\"]);\n ```\n\n [`swap`]: slice::swap\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::split_at_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.  For a non-panicking alternative see\n [`split_at_mut_checked`](slice::split_at_mut_checked).\n\n # Examples\n\n ```\n let mut v = [1, 0, 3, 0, 5, 6];\n let (left, right) = v.split_at_mut(2);\n assert_eq!(left, [1, 0]);\n assert_eq!(right, [3, 0, 5, 6]);\n left[1] = 2;\n right[1] = 4;\n assert_eq!(v, [1, 2, 3, 4, 5, 6]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 16733,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/unstable/quicksort.rs:93:1: 137:2",
+  "src": "pub(crate) fn partition<T, F>(v: &mut [T], pivot: usize, is_less: &mut F) -> usize\nwhere\n    F: FnMut(&T, &T) -> bool,\n{\n    let len = v.len();\n\n    // Allows for panic-free code-gen by proving this property to the compiler.\n    if len == 0 {\n        return 0;\n    }\n\n    if pivot >= len {\n        intrinsics::abort();\n    }\n\n    // SAFETY: We checked that `pivot` is in-bounds.\n    unsafe {\n        // Place the pivot at the beginning of slice.\n        v.swap_unchecked(0, pivot);\n    }\n    let (pivot, v_without_pivot) = v.split_at_mut(1);\n\n    // Assuming that Rust generates noalias LLVM IR we can be sure that a partition function\n    // signature of the form `(v: &mut [T], pivot: &T)` guarantees that pivot and v can't alias.\n    // Having this guarantee is crucial for optimizations. It's possible to copy the pivot value\n    // into a stack value, but this creates issues for types with interior mutability mandating\n    // a drop guard.\n    let pivot = &mut pivot[0];\n\n    // This construct is used to limit the LLVM IR generated, which saves large amounts of\n    // compile-time by only instantiating the code that is needed. Idea by Frank Steffahn.\n    let num_lt = (const { inst_partition::<T, F>() })(v_without_pivot, pivot, is_less);\n\n    if num_lt >= len {\n        intrinsics::abort();\n    }\n\n    // SAFETY: We checked that `num_lt` is in-bounds.\n    unsafe {\n        // Place the pivot between the two partitions.\n        v.swap_unchecked(0, num_lt);\n    }\n\n    num_lt\n}",
+  "mir": "fn slice::sort::unstable::quicksort::partition(_1: &mut [T], _2: usize, _3: &mut F) -> usize {\n    let mut _0: usize;\n    let  _4: usize;\n    let mut _5: &[T];\n    let mut _6: bool;\n    let  _7: !;\n    let  _8: ();\n    let  _9: &mut [T];\n    let  _10: &mut [T];\n    let mut _11: (&mut [T], &mut [T]);\n    let  _12: &mut T;\n    let  _13: usize;\n    let mut _14: *const [T];\n    let mut _15: usize;\n    let mut _16: bool;\n    let  _17: usize;\n    let mut _18: &T;\n    let mut _19: bool;\n    let  _20: !;\n    let  _21: ();\n    debug v => _1;\n    debug pivot => _2;\n    debug is_less => _3;\n    debug len => _4;\n    debug pivot => _9;\n    debug v_without_pivot => _10;\n    debug pivot => _12;\n    debug num_lt => _17;\n    bb0: {\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = PtrMetadata(move _5);\n        StorageDead(_5);\n        switchInt(_4) -> [0: bb1, otherwise: bb2];\n    }\n    bb1: {\n        _0 = 0_usize;\n        goto -> bb12;\n    }\n    bb2: {\n        StorageLive(_6);\n        _6 = Ge(_2, _4);\n        switchInt(move _6) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        _7 = intrinsics::abort() -> unwind unreachable;\n    }\n    bb4: {\n        StorageDead(_6);\n        _8 = slice::<impl [T]>::swap_unchecked(_1, 0_usize, _2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_11);\n        _11 = slice::<impl [T]>::split_at_mut(_1, 1_usize) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_9);\n        _9 = move (_11.0: &mut [T]);\n        _10 = move (_11.1: &mut [T]);\n        StorageDead(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = 0_usize;\n        _14 = &raw const (fake) (*_9);\n        _15 = PtrMetadata(move _14);\n        _16 = Lt(_13, _15);\n        assert(move _16, \"index out of bounds: the length is {} but the index is {}\", move _15, _13) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _12 = &mut (*_9)[_13];\n        StorageDead(_13);\n        StorageLive(_18);\n        _18 = &(*_12);\n        _17 = slice::sort::unstable::quicksort::partition::<T, F>::{constant#0}(_10, move _18, _3) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_18);\n        StorageLive(_19);\n        _19 = Ge(_17, _4);\n        switchInt(move _19) -> [0: bb10, otherwise: bb9];\n    }\n    bb9: {\n        _20 = intrinsics::abort() -> unwind unreachable;\n    }\n    bb10: {\n        StorageDead(_19);\n        _21 = slice::<impl [T]>::swap_unchecked(_1, 0_usize, _17) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _0 = _17;\n        StorageDead(_12);\n        StorageDead(_9);\n        goto -> bb12;\n    }\n    bb12: {\n        return;\n    }\n}\n",
+  "doc": " Takes the input slice `v` and re-arranges elements such that when the call returns normally\n all elements that compare true for `is_less(elem, pivot)` where `pivot == v[pivot_pos]` are\n on the left side of `v` followed by the other elements, notionally considered greater or\n equal to `pivot`.\n\n Returns the number of elements that are compared true for `is_less(elem, pivot)`.\n\n If `is_less` does not implement a total order the resulting order and return value are\n unspecified. All original elements will remain in `v` and any possible modifications via\n interior mutability will be observable. Same is true if `is_less` panics or `v.len()`\n exceeds `scratch.len()`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

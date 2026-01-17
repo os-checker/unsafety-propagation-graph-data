@@ -1,0 +1,68 @@
+{
+  "name": "io::stdio::print_to_buffer_if_capture_used",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicBool::load": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads a value from the bool.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n use std::sync::atomic::{AtomicBool, Ordering};\n\n let some_bool = AtomicBool::new(true);\n\n assert_eq!(some_bool.load(Ordering::Relaxed), true);\n ```\n",
+      "adt": {}
+    },
+    "thread::local::LocalKey::<T>::try_with": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires a reference to the value in this TLS key.\n\n This will lazily initialize the value if this thread has not referenced\n this key yet. If the key has been destroyed (which may happen if this is called\n in a destructor), this function will return an [`AccessError`].\n\n # Panics\n\n This function will still `panic!()` if the key is uninitialized and the\n key's initializer panics.\n\n # Examples\n\n ```\n thread_local! {\n     pub static STATIC: String = String::from(\"I am\");\n }\n\n assert_eq!(\n     STATIC.try_with(|original_value| format!(\"{original_value} initialized\")),\n     Ok(String::from(\"I am initialized\")),\n );\n ```\n",
+      "adt": {
+        "thread::local::LocalKey": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::cmp::PartialEq::eq": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests for `self` and `other` values to be equal, and is used by `==`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicBool": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "thread::local::LocalKey": [
+      "Ref"
+    ],
+    "core::fmt::Arguments": [
+      "Ref",
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 1544,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/stdio.rs:1169:1: 1180:2",
+  "src": "fn print_to_buffer_if_capture_used(args: fmt::Arguments<'_>) -> bool {\n    OUTPUT_CAPTURE_USED.load(Ordering::Relaxed)\n        && OUTPUT_CAPTURE.try_with(|s| {\n            // Note that we completely remove a local sink to write to in case\n            // our printing recursively panics/prints, so the recursive\n            // panic/print goes to the global sink instead of our local sink.\n            s.take().map(|w| {\n                let _ = w.lock().unwrap_or_else(|e| e.into_inner()).write_fmt(args);\n                s.set(Some(w));\n            })\n        }) == Ok(Some(()))\n}",
+  "mir": "fn io::stdio::print_to_buffer_if_capture_used(_1: core::fmt::Arguments<'_>) -> bool {\n    let mut _0: bool;\n    let mut _2: bool;\n    let mut _3: &core::sync::atomic::AtomicBool;\n    let mut _4: core::sync::atomic::Ordering;\n    let mut _5: &core::result::Result<core::option::Option<()>, thread::local::AccessError>;\n    let  _6: core::result::Result<core::option::Option<()>, thread::local::AccessError>;\n    let mut _7: &thread::local::LocalKey<core::cell::Cell<core::option::Option<alloc_crate::sync::Arc<sync::poison::mutex::Mutex<alloc_crate::vec::Vec<u8>>>>>>;\n    let mut _8: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/stdio.rs:1171:36: 1171:39};\n    let mut _9: &core::fmt::Arguments<'_>;\n    let mut _10: &core::result::Result<core::option::Option<()>, thread::local::AccessError>;\n    debug args => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = {alloc190: &core::sync::atomic::AtomicBool};\n        StorageLive(_4);\n        _4 = core::sync::atomic::Ordering::Relaxed;\n        _2 = core::sync::atomic::AtomicBool::load(move _3, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = io::stdio::print_to_buffer_if_capture_used::promoted[1];\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &_1;\n        _8 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/stdio.rs:1171:36: 1171:39}(move _9);\n        StorageDead(_9);\n        _6 = thread::local::LocalKey::<core::cell::Cell<core::option::Option<alloc_crate::sync::Arc<sync::poison::mutex::Mutex<alloc_crate::vec::Vec<u8>>>>>>::try_with::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/stdio.rs:1171:36: 1171:39}, core::option::Option<()>>(move _7, move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_3);\n        _0 = false;\n        goto -> bb6;\n    }\n    bb4: {\n        _5 = &_6;\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageLive(_10);\n        _10 = io::stdio::print_to_buffer_if_capture_used::promoted[0];\n        _0 = <core::result::Result<core::option::Option<()>, thread::local::AccessError> as core::cmp::PartialEq>::eq(move _5, move _10) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_10);\n        StorageDead(_6);\n        StorageDead(_5);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

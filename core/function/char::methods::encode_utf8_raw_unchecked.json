@@ -1,0 +1,47 @@
+{
+  "name": "char::methods::encode_utf8_raw_unchecked",
+  "safe": false,
+  "callees": {
+    "char::methods::len_utf8": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 4878,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/char/methods.rs:1910:1: 1943:2",
+  "src": "pub const unsafe fn encode_utf8_raw_unchecked(code: u32, dst: *mut u8) {\n    let len = len_utf8(code);\n    // SAFETY: The caller must guarantee that the buffer pointed to by `dst`\n    // is at least `len` bytes long.\n    unsafe {\n        if len == 1 {\n            *dst = code as u8;\n            return;\n        }\n\n        let last1 = (code >> 0 & 0x3F) as u8 | TAG_CONT;\n        let last2 = (code >> 6 & 0x3F) as u8 | TAG_CONT;\n        let last3 = (code >> 12 & 0x3F) as u8 | TAG_CONT;\n        let last4 = (code >> 18 & 0x3F) as u8 | TAG_FOUR_B;\n\n        if len == 2 {\n            *dst = last2 | TAG_TWO_B;\n            *dst.add(1) = last1;\n            return;\n        }\n\n        if len == 3 {\n            *dst = last3 | TAG_THREE_B;\n            *dst.add(1) = last2;\n            *dst.add(2) = last1;\n            return;\n        }\n\n        *dst = last4;\n        *dst.add(1) = last3;\n        *dst.add(2) = last2;\n        *dst.add(3) = last1;\n    }\n}",
+  "mir": "fn char::methods::encode_utf8_raw_unchecked(_1: u32, _2: *mut u8) -> () {\n    let mut _0: ();\n    let  _3: usize;\n    let  _4: u8;\n    let mut _5: u8;\n    let mut _6: u32;\n    let mut _7: u32;\n    let mut _8: u32;\n    let mut _9: bool;\n    let  _10: u8;\n    let mut _11: u8;\n    let mut _12: u32;\n    let mut _13: u32;\n    let mut _14: u32;\n    let mut _15: bool;\n    let  _16: u8;\n    let mut _17: u8;\n    let mut _18: u32;\n    let mut _19: u32;\n    let mut _20: u32;\n    let mut _21: bool;\n    let  _22: u8;\n    let mut _23: u8;\n    let mut _24: u32;\n    let mut _25: u32;\n    let mut _26: u32;\n    let mut _27: bool;\n    let mut _28: *mut u8;\n    let mut _29: *mut u8;\n    let mut _30: *mut u8;\n    let mut _31: *mut u8;\n    let mut _32: *mut u8;\n    let mut _33: *mut u8;\n    debug code => _1;\n    debug dst => _2;\n    debug len => _3;\n    debug last1 => _4;\n    debug last2 => _10;\n    debug last3 => _16;\n    debug last4 => _22;\n    bb0: {\n        _3 = char::methods::len_utf8(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(_3) -> [1: bb2, otherwise: bb3];\n    }\n    bb2: {\n        (*_2) = _1 as u8;\n        goto -> bb19;\n    }\n    bb3: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _8 = 0_i32 as u32;\n        _9 = Lt(move _8, 32_u32);\n        assert(move _9, \"attempt to shift right by `{}`, which would overflow\", 0_i32) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _7 = Shr(_1, 0_i32);\n        _6 = BitAnd(move _7, 63_u32);\n        StorageDead(_7);\n        _5 = move _6 as u8;\n        StorageDead(_6);\n        _4 = BitOr(move _5, char::TAG_CONT);\n        StorageDead(_5);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _14 = 6_i32 as u32;\n        _15 = Lt(move _14, 32_u32);\n        assert(move _15, \"attempt to shift right by `{}`, which would overflow\", 6_i32) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _13 = Shr(_1, 6_i32);\n        _12 = BitAnd(move _13, 63_u32);\n        StorageDead(_13);\n        _11 = move _12 as u8;\n        StorageDead(_12);\n        _10 = BitOr(move _11, char::TAG_CONT);\n        StorageDead(_11);\n        StorageLive(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        _20 = 12_i32 as u32;\n        _21 = Lt(move _20, 32_u32);\n        assert(move _21, \"attempt to shift right by `{}`, which would overflow\", 12_i32) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _19 = Shr(_1, 12_i32);\n        _18 = BitAnd(move _19, 63_u32);\n        StorageDead(_19);\n        _17 = move _18 as u8;\n        StorageDead(_18);\n        _16 = BitOr(move _17, char::TAG_CONT);\n        StorageDead(_17);\n        StorageLive(_23);\n        StorageLive(_24);\n        StorageLive(_25);\n        _26 = 18_i32 as u32;\n        _27 = Lt(move _26, 32_u32);\n        assert(move _27, \"attempt to shift right by `{}`, which would overflow\", 18_i32) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _25 = Shr(_1, 18_i32);\n        _24 = BitAnd(move _25, 63_u32);\n        StorageDead(_25);\n        _23 = move _24 as u8;\n        StorageDead(_24);\n        _22 = BitOr(move _23, char::TAG_FOUR_B);\n        StorageDead(_23);\n        switchInt(_3) -> [2: bb8, otherwise: bb10];\n    }\n    bb8: {\n        (*_2) = BitOr(_10, char::TAG_TWO_B);\n        StorageLive(_28);\n        _28 = ptr::mut_ptr::<impl *mut u8>::add(_2, 1_usize) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        (*_28) = _4;\n        StorageDead(_28);\n        goto -> bb18;\n    }\n    bb10: {\n        switchInt(_3) -> [3: bb11, otherwise: bb12];\n    }\n    bb11: {\n        (*_2) = BitOr(_16, char::TAG_THREE_B);\n        StorageLive(_29);\n        _29 = ptr::mut_ptr::<impl *mut u8>::add(_2, 1_usize) -> [return: bb13, unwind unreachable];\n    }\n    bb12: {\n        (*_2) = _22;\n        StorageLive(_31);\n        _31 = ptr::mut_ptr::<impl *mut u8>::add(_2, 1_usize) -> [return: bb15, unwind unreachable];\n    }\n    bb13: {\n        (*_29) = _10;\n        StorageDead(_29);\n        StorageLive(_30);\n        _30 = ptr::mut_ptr::<impl *mut u8>::add(_2, 2_usize) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        (*_30) = _4;\n        StorageDead(_30);\n        goto -> bb18;\n    }\n    bb15: {\n        (*_31) = _16;\n        StorageDead(_31);\n        StorageLive(_32);\n        _32 = ptr::mut_ptr::<impl *mut u8>::add(_2, 2_usize) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        (*_32) = _10;\n        StorageDead(_32);\n        StorageLive(_33);\n        _33 = ptr::mut_ptr::<impl *mut u8>::add(_2, 3_usize) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        (*_33) = _4;\n        StorageDead(_33);\n        goto -> bb20;\n    }\n    bb18: {\n        goto -> bb19;\n    }\n    bb19: {\n        goto -> bb20;\n    }\n    bb20: {\n        return;\n    }\n}\n",
+  "doc": " Encodes a raw `u32` value as UTF-8 into the byte buffer pointed to by `dst`.\n\n Unlike `char::encode_utf8`, this method also handles codepoints in the surrogate range.\n (Creating a `char` in the surrogate range is UB.)\n The result is valid [generalized UTF-8] but not valid UTF-8.\n\n [generalized UTF-8]: https://simonsapin.github.io/wtf-8/#generalized-utf8\n\n # Safety\n\n The behavior is undefined if the buffer pointed to by `dst` is not\n large enough to hold the encoded codepoint. A buffer of length four\n is large enough to encode any `char`.\n\n For a safe version of this function, see the [`encode_utf8_raw`] function.\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "hidden"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* hidden\n"
+    ]
+  }
+}

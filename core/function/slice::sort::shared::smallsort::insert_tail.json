@@ -1,0 +1,88 @@
+{
+  "name": "slice::sort::shared::smallsort::insert_tail",
+  "safe": false,
+  "callees": {
+    "ptr::mut_ptr::<impl *mut T>::sub": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts an unsigned offset from a pointer.\n\n This can only move the pointer backward (or not move it). If you need to move forward or\n backward depending on the value, then you might want [`offset`](#method.offset) instead\n which takes a signed offset.\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n If any of the following conditions are violated, the result is Undefined Behavior:\n\n * The offset in bytes, `count * size_of::<T>()`, computed on mathematical integers (without\n   \"wrapping around\"), must fit in an `isize`.\n\n * If the computed offset is non-zero, then `self` must be [derived from][crate::ptr#provenance] a pointer to some\n   [allocation], and the entire memory range between `self` and the result must be in\n   bounds of that allocation. In particular, this range must not \"wrap around\" the edge\n   of the address space.\n\n Allocations can never be larger than `isize::MAX` bytes, so if the computed offset\n stays in bounds of the allocation, it is guaranteed to satisfy the first requirement.\n This implies, for instance, that `vec.as_ptr().add(vec.len())` (for `vec: Vec<T>`) is always\n safe.\n\n Consider using [`wrapping_sub`] instead if these constraints are\n difficult to satisfy. The only advantage of this method is that it\n enables more aggressive compiler optimizations.\n\n [`wrapping_sub`]: #method.wrapping_sub\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n let s: &str = \"123\";\n\n unsafe {\n     let end: *const u8 = s.as_ptr().add(3);\n     assert_eq!('3', *end.sub(1) as char);\n     assert_eq!('2', *end.sub(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "ops::function::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `self` without moving it. This leaves the\n memory in `self` unchanged.\n\n See [`ptr::read`] for safety concerns and examples.\n\n [`ptr::read`]: crate::ptr::read()\n",
+      "adt": {}
+    },
+    "mem::manually_drop::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {
+        "mem::manually_drop::ManuallyDrop": "Constructor"
+      }
+    },
+    "ops::deref::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mem::manually_drop::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "slice::sort::shared::smallsort::CopyOnDrop": [
+      "Plain",
+      "Unknown([Field(1, Ty { id: 1181, kind: RigidTy(RawPtr(Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) }, Mut)) })])"
+    ]
+  },
+  "path": 16670,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/shared/smallsort.rs:542:1: 577:2",
+  "src": "unsafe fn insert_tail<T, F: FnMut(&T, &T) -> bool>(begin: *mut T, tail: *mut T, is_less: &mut F) {\n    // SAFETY: see individual comments.\n    unsafe {\n        // SAFETY: in-bounds as tail > begin.\n        let mut sift = tail.sub(1);\n        if !is_less(&*tail, &*sift) {\n            return;\n        }\n\n        // SAFETY: after this read tail is never read from again, as we only ever\n        // read from sift, sift < tail and we only ever decrease sift. Thus this is\n        // effectively a move, not a copy. Should a panic occur, or we have found\n        // the correct insertion position, gap_guard ensures the element is moved\n        // back into the array.\n        let tmp = ManuallyDrop::new(tail.read());\n        let mut gap_guard = CopyOnDrop { src: &*tmp, dst: tail, len: 1 };\n\n        loop {\n            // SAFETY: we move sift into the gap (which is valid), and point the\n            // gap guard destination at sift, ensuring that if a panic occurs the\n            // gap is once again filled.\n            ptr::copy_nonoverlapping(sift, gap_guard.dst, 1);\n            gap_guard.dst = sift;\n\n            if sift == begin {\n                break;\n            }\n\n            // SAFETY: we checked that sift != begin, thus this is in-bounds.\n            sift = sift.sub(1);\n            if !is_less(&tmp, &*sift) {\n                break;\n            }\n        }\n    }\n}",
+  "mir": "fn slice::sort::shared::smallsort::insert_tail(_1: *mut T, _2: *mut T, _3: &mut F) -> () {\n    let mut _0: ();\n    let mut _4: *mut T;\n    let mut _5: bool;\n    let mut _6: (&T, &T);\n    let  _7: &T;\n    let  _8: &T;\n    let  _9: mem::manually_drop::ManuallyDrop<T>;\n    let mut _10: T;\n    let mut _11: slice::sort::shared::smallsort::CopyOnDrop<T>;\n    let mut _12: *const T;\n    let  _13: &T;\n    let mut _14: &mem::manually_drop::ManuallyDrop<T>;\n    let  _15: ();\n    let mut _16: *const T;\n    let mut _17: *mut T;\n    let mut _18: *mut T;\n    let mut _19: *mut T;\n    let mut _20: bool;\n    let mut _21: *mut T;\n    let mut _22: *mut T;\n    let mut _23: *mut T;\n    let mut _24: bool;\n    let mut _25: (&T, &T);\n    let  _26: &T;\n    let  _27: &mem::manually_drop::ManuallyDrop<T>;\n    let  _28: &T;\n    debug begin => _1;\n    debug tail => _2;\n    debug is_less => _3;\n    debug sift => _4;\n    debug tmp => _9;\n    debug gap_guard => _11;\n    bb0: {\n        StorageLive(_4);\n        _4 = ptr::mut_ptr::<impl *mut T>::sub(_2, 1_usize) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _7 = &(*_2);\n        _8 = &(*_4);\n        _6 = (_7, _8);\n        _5 = <F as ops::function::FnMut<(&T, &T)>>::call_mut(_3, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _5) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = ptr::mut_ptr::<impl *mut T>::read(_2) -> [return: bb5, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_4);\n        goto -> bb19;\n    }\n    bb5: {\n        _9 = mem::manually_drop::ManuallyDrop::<T>::new(move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_14);\n        _14 = &_9;\n        _13 = <mem::manually_drop::ManuallyDrop<T> as ops::deref::Deref>::deref(move _14) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_14);\n        _12 = &raw const (*_13);\n        _11 = CopyOnDrop(move _12, _2, 1_usize);\n        StorageDead(_12);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = _4;\n        _16 = move _17 as *const T;\n        StorageDead(_17);\n        StorageLive(_18);\n        _18 = (_11.1: *mut T);\n        _15 = ptr::copy_nonoverlapping::<T>(move _16, move _18, 1_usize) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_18);\n        StorageDead(_16);\n        StorageLive(_19);\n        _19 = _4;\n        (_11.1: *mut T) = move _19;\n        StorageDead(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = _4;\n        _20 = Eq(move _21, _1);\n        switchInt(move _20) -> [0: bb11, otherwise: bb10];\n    }\n    bb10: {\n        StorageDead(_21);\n        StorageDead(_20);\n        goto -> bb17;\n    }\n    bb11: {\n        StorageDead(_21);\n        StorageDead(_20);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = _4;\n        _22 = ptr::mut_ptr::<impl *mut T>::sub(move _23, 1_usize) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_23);\n        _4 = move _22;\n        StorageDead(_22);\n        StorageLive(_24);\n        StorageLive(_25);\n        _27 = &_9;\n        _26 = <mem::manually_drop::ManuallyDrop<T> as ops::deref::Deref>::deref(_27) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        _28 = &(*_4);\n        _25 = (_26, _28);\n        _24 = <F as ops::function::FnMut<(&T, &T)>>::call_mut(_3, move _25) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        switchInt(move _24) -> [0: bb16, otherwise: bb15];\n    }\n    bb15: {\n        StorageDead(_25);\n        StorageDead(_24);\n        goto -> bb8;\n    }\n    bb16: {\n        StorageDead(_25);\n        StorageDead(_24);\n        goto -> bb17;\n    }\n    bb17: {\n        drop(_11) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_11);\n        StorageDead(_9);\n        StorageDead(_4);\n        goto -> bb19;\n    }\n    bb19: {\n        return;\n    }\n}\n",
+  "doc": " Sorts range [begin, tail] assuming [begin, tail) is already sorted.\n\n # Safety\n begin < tail and p must be valid and initialized for all begin <= p <= tail.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

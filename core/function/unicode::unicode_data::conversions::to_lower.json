@@ -1,0 +1,75 @@
+{
+  "name": "unicode::unicode_data::conversions::to_lower",
+  "safe": true,
+  "callees": {
+    "char::methods::<impl char>::is_ascii": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checks if the value is within the ASCII range.\n\n # Examples\n\n ```\n let ascii = 'a';\n let non_ascii = '❤';\n\n assert!(ascii.is_ascii());\n assert!(!non_ascii.is_ascii());\n ```\n",
+      "adt": {}
+    },
+    "num::<impl u8>::to_ascii_lowercase": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Makes a copy of the value in its ASCII lower case equivalent.\n\n ASCII letters 'A' to 'Z' are mapped to 'a' to 'z',\n but non-ASCII letters are unchanged.\n\n To lowercase the value in-place, use [`make_ascii_lowercase`].\n\n # Examples\n\n ```\n let uppercase_a = 65u8;\n\n assert_eq!(97, uppercase_a.to_ascii_lowercase());\n ```\n\n [`make_ascii_lowercase`]: Self::make_ascii_lowercase\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::binary_search_by": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Binary searches this slice with a comparator function.\n\n The comparator function should return an order code that indicates\n whether its argument is `Less`, `Equal` or `Greater` the desired\n target.\n If the slice is not sorted or if the comparator function does not\n implement an order consistent with the sort order of the underlying\n slice, the returned result is unspecified and meaningless.\n\n If the value is found then [`Result::Ok`] is returned, containing the\n index of the matching element. If there are multiple matches, then any\n one of the matches could be returned. The index is chosen\n deterministically, but is subject to change in future versions of Rust.\n If the value is not found then [`Result::Err`] is returned, containing\n the index where a matching element could be inserted while maintaining\n sorted order.\n\n See also [`binary_search`], [`binary_search_by_key`], and [`partition_point`].\n\n [`binary_search`]: slice::binary_search\n [`binary_search_by_key`]: slice::binary_search_by_key\n [`partition_point`]: slice::partition_point\n\n # Examples\n\n Looks up a series of four elements. The first is found, with a\n uniquely determined position; the second and third are not\n found; the fourth could match any position in `[1, 4]`.\n\n ```\n let s = [0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55];\n\n let seek = 13;\n assert_eq!(s.binary_search_by(|probe| probe.cmp(&seek)), Ok(9));\n let seek = 4;\n assert_eq!(s.binary_search_by(|probe| probe.cmp(&seek)), Err(7));\n let seek = 100;\n assert_eq!(s.binary_search_by(|probe| probe.cmp(&seek)), Err(13));\n let seek = 1;\n let r = s.binary_search_by(|probe| probe.cmp(&seek));\n assert!(match r { Ok(1..=4) => true, _ => false, });\n ```\n",
+      "adt": {
+        "result::Result": "Constructor"
+      }
+    },
+    "result::Result::<T, E>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<U, E>` by applying a function to a\n contained [`Ok`] value, leaving an [`Err`] value untouched.\n\n This function can be used to compose the results of two functions.\n\n # Examples\n\n Print the numbers on each line of a string multiplied by two.\n\n ```\n let line = \"1\\n2\\n3\\n4\\n\";\n\n for num in line.lines() {\n     match num.parse::<i32>().map(|i| i * 2) {\n         Ok(n) => println!(\"{n}\"),\n         Err(..) => {}\n     }\n }\n ```\n",
+      "adt": {
+        "result::Result": "Constructor"
+      }
+    },
+    "result::Result::<T, E>::unwrap_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value or a provided default.\n\n Arguments passed to `unwrap_or` are eagerly evaluated; if you are passing\n the result of a function call, it is recommended to use [`unwrap_or_else`],\n which is lazily evaluated.\n\n [`unwrap_or_else`]: Result::unwrap_or_else\n\n # Examples\n\n ```\n let default = 2;\n let x: Result<u32, &str> = Ok(9);\n assert_eq!(x.unwrap_or(default), 9);\n\n let x: Result<u32, &str> = Err(\"error\");\n assert_eq!(x.unwrap_or(default), default);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 17731,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/unicode/unicode_data.rs:763:5: 778:6",
+  "src": "pub fn to_lower(c: char) -> [char; 3] {\n        if c.is_ascii() {\n            [(c as u8).to_ascii_lowercase() as char, '\\0', '\\0']\n        } else {\n            LOWERCASE_TABLE\n                .binary_search_by(|&(key, _)| key.cmp(&c))\n                .map(|i| {\n                    let u = LOWERCASE_TABLE[i].1;\n                    char::from_u32(u).map(|c| [c, '\\0', '\\0']).unwrap_or_else(|| {\n                        // SAFETY: Index comes from statically generated table\n                        unsafe { *LOWERCASE_TABLE_MULTI.get_unchecked((u & (INDEX_MASK - 1)) as usize) }\n                    })\n                })\n                .unwrap_or([c, '\\0', '\\0'])\n        }\n    }",
+  "mir": "fn unicode::unicode_data::conversions::to_lower(_1: char) -> [char; 3] {\n    let mut _0: [char; 3];\n    let mut _2: bool;\n    let mut _3: &char;\n    let mut _4: char;\n    let mut _5: u8;\n    let mut _6: &u8;\n    let  _7: u8;\n    let mut _8: result::Result<[char; 3], usize>;\n    let mut _9: result::Result<usize, usize>;\n    let mut _10: &[(char, u32)];\n    let  _11: &&[(char, u32); 1462];\n    let mut _12: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/unicode/unicode_data.rs:768:35: 768:46};\n    let mut _13: &char;\n    let mut _14: [char; 3];\n    let mut _15: &[(char, u32); 1462];\n    debug c => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &_1;\n        _2 = char::methods::<impl char>::is_ascii(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = _1 as u8;\n        _6 = &_7;\n        _5 = num::<impl u8>::to_ascii_lowercase(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _4 = move _5 as char;\n        StorageDead(_5);\n        _0 = [move _4, '\\0', '\\0'];\n        StorageDead(_7);\n        StorageDead(_4);\n        goto -> bb8;\n    }\n    bb4: {\n        StorageDead(_3);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = {alloc2534: &&[(char, u32); 1462]};\n        _15 = (*_11);\n        _10 = _15 as &[(char, u32)];\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &_1;\n        _12 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/unicode/unicode_data.rs:768:35: 768:46}(move _13);\n        StorageDead(_13);\n        _9 = slice::<impl [(char, u32)]>::binary_search_by::<'_, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/unicode/unicode_data.rs:768:35: 768:46}>(move _10, move _12) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        StorageDead(_10);\n        _8 = result::Result::<usize, usize>::map::<[char; 3], {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/unicode/unicode_data.rs:769:22: 769:25}>(move _9, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/unicode/unicode_data.rs:769:22: 769:25}) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_9);\n        StorageLive(_14);\n        _14 = [_1, '\\0', '\\0'];\n        _0 = result::Result::<[char; 3], usize>::unwrap_or(move _8, move _14) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_14);\n        StorageDead(_11);\n        StorageDead(_8);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

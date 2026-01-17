@@ -1,0 +1,77 @@
+{
+  "name": "str::iter::SplitInternal::<'a, P>::next",
+  "safe": true,
+  "callees": {
+    "str::pattern::Searcher::haystack": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Getter for the underlying string to be searched in\n\n Will always return the same [`&str`][str].\n",
+      "adt": {}
+    },
+    "str::pattern::Searcher::next_match": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Finds the next [`Match`][SearchStep::Match] result. See [`next()`][Searcher::next].\n\n Unlike [`next()`][Searcher::next], there is no guarantee that the returned ranges\n of this and [`next_reject`][Searcher::next_reject] will overlap. This will return\n `(start_match, end_match)`, where start_match is the index of where\n the match begins, and end_match is the index after the end of the match.\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "str::iter::SplitInternal::<'a, P>::get_end": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "str::iter::SplitInternal": "MutableAsArgument",
+        "option::Option": "Constructor"
+      }
+    },
+    "str::<impl str>::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unchecked subslice of `str`.\n\n This is the unchecked alternative to indexing the `str`.\n\n # Safety\n\n Callers of this function are responsible that these preconditions are\n satisfied:\n\n * The starting index must not exceed the ending index;\n * Indexes must be within bounds of the original slice;\n * Indexes must lie on UTF-8 sequence boundaries.\n\n Failing that, the returned string slice may reference invalid memory or\n violate the invariants communicated by the `str` type.\n\n # Examples\n\n ```\n let v = \"🗻∈🌏\";\n unsafe {\n     assert_eq!(\"🗻\", v.get_unchecked(0..4));\n     assert_eq!(\"∈\", v.get_unchecked(4..7));\n     assert_eq!(\"🌏\", v.get_unchecked(7..11));\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "str::iter::SplitInternal": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(4)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4835, kind: RigidTy(Tuple([Ty { id: 47, kind: RigidTy(Uint(Usize)) }, Ty { id: 47, kind: RigidTy(Uint(Usize)) }])) }), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4835, kind: RigidTy(Tuple([Ty { id: 47, kind: RigidTy(Uint(Usize)) }, Ty { id: 47, kind: RigidTy(Uint(Usize)) }])) }), Field(1, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "ops::range::Range": [
+      "Plain"
+    ]
+  },
+  "path": 16949,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/str/iter.rs:660:5: 675:6",
+  "src": "fn next(&mut self) -> Option<&'a str> {\n        if self.finished {\n            return None;\n        }\n\n        let haystack = self.matcher.haystack();\n        match self.matcher.next_match() {\n            // SAFETY: `Searcher` guarantees that `a` and `b` lie on unicode boundaries.\n            Some((a, b)) => unsafe {\n                let elt = haystack.get_unchecked(self.start..a);\n                self.start = b;\n                Some(elt)\n            },\n            None => self.get_end(),\n        }\n    }",
+  "mir": "fn str::iter::SplitInternal::<'a, P>::next(_1: &mut str::iter::SplitInternal<'_, P>) -> option::Option<&str> {\n    let mut _0: option::Option<&str>;\n    let mut _2: bool;\n    let  _3: &str;\n    let mut _4: &<P as str::pattern::Pattern>::Searcher<'_>;\n    let mut _5: option::Option<(usize, usize)>;\n    let mut _6: &mut <P as str::pattern::Pattern>::Searcher<'_>;\n    let mut _7: isize;\n    let  _8: usize;\n    let  _9: usize;\n    let  _10: &str;\n    let mut _11: ops::range::Range<usize>;\n    let mut _12: usize;\n    debug self => _1;\n    debug haystack => _3;\n    debug a => _8;\n    debug b => _9;\n    debug elt => _10;\n    bb0: {\n        StorageLive(_2);\n        _2 = ((*_1).4: bool);\n        switchInt(move _2) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        _0 = option::Option::None;\n        StorageDead(_2);\n        goto -> bb11;\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_4);\n        _4 = &((*_1).2: <P as str::pattern::Pattern>::Searcher<'_>);\n        _3 = <<P as str::pattern::Pattern>::Searcher<'_> as str::pattern::Searcher<'_>>::haystack(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut ((*_1).2: <P as str::pattern::Pattern>::Searcher<'_>);\n        _5 = <<P as str::pattern::Pattern>::Searcher<'_> as str::pattern::Searcher<'_>>::next_match(move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        _7 = discriminant(_5);\n        switchInt(move _7) -> [0: bb6, 1: bb7, otherwise: bb5];\n    }\n    bb5: {\n        unreachable;\n    }\n    bb6: {\n        _0 = str::iter::SplitInternal::<'_, P>::get_end(_1) -> [return: bb9, unwind unreachable];\n    }\n    bb7: {\n        _8 = (((_5 as variant#1).0: (usize, usize)).0: usize);\n        _9 = (((_5 as variant#1).0: (usize, usize)).1: usize);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = ((*_1).0: usize);\n        _11 = Range(move _12, _8);\n        StorageDead(_12);\n        _10 = str::<impl str>::get_unchecked::<ops::range::Range<usize>>(_3, move _11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        ((*_1).0: usize) = _9;\n        _0 = option::Option::Some(_10);\n        goto -> bb10;\n    }\n    bb9: {\n        goto -> bb10;\n    }\n    bb10: {\n        StorageDead(_5);\n        goto -> bb11;\n    }\n    bb11: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

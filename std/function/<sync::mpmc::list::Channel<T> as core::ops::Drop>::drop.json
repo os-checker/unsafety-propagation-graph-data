@@ -1,0 +1,163 @@
+{
+  "name": "<sync::mpmc::list::Channel<T> as core::ops::Drop>::drop",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicUsize::load": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads a value from the atomic integer.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering of this operation.\n Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.load(Ordering::Relaxed), 5);\n ```\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicPtr::<T>::load": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Loads a value from the pointer.\n\n `load` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. Possible values are [`SeqCst`], [`Acquire`] and [`Relaxed`].\n\n # Panics\n\n Panics if `order` is [`Release`] or [`AcqRel`].\n\n # Examples\n\n ```\n use std::sync::atomic::{AtomicPtr, Ordering};\n\n let ptr = &mut 5;\n let some_ptr = AtomicPtr::new(ptr);\n\n let value = some_ptr.load(Ordering::Relaxed);\n ```\n",
+      "adt": {}
+    },
+    "core::cell::UnsafeCell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the wrapped value.\n\n This can be cast to a pointer of any kind. When creating references, you must uphold the\n aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and\n caveats.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let five = uc.get();\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::drop_in_place": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Executes the destructor (if any) of the pointed-to value.\n\n See [`ptr::drop_in_place`] for safety concerns and examples.\n\n [`ptr::drop_in_place`]: crate::ptr::drop_in_place()\n",
+      "adt": {}
+    },
+    "alloc_crate::boxed::Box::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a box from a raw pointer.\n\n After calling this function, the raw pointer is owned by the\n resulting `Box`. Specifically, the `Box` destructor will call\n the destructor of `T` and free the allocated memory. For this\n to be safe, the memory must have been allocated in accordance\n with the [memory layout] used by `Box` .\n\n # Safety\n\n This function is unsafe because improper use may lead to\n memory problems. For example, a double-free may occur if the\n function is called twice on the same raw pointer.\n\n The raw pointer must point to a block of memory allocated by the global allocator.\n\n The safety conditions are described in the [memory layout] section.\n\n # Examples\n\n Recreate a `Box` which was previously converted to a raw pointer\n using [`Box::into_raw`]:\n ```\n let x = Box::new(5);\n let ptr = Box::into_raw(x);\n let x = unsafe { Box::from_raw(ptr) };\n ```\n Manually create a `Box` from scratch by using the global allocator:\n ```\n use std::alloc::{alloc, Layout};\n\n unsafe {\n     let ptr = alloc(Layout::new::<i32>()) as *mut i32;\n     // In general .write is required to avoid attempting to destruct\n     // the (uninitialized) previous contents of `ptr`, though for this\n     // simple example `*ptr = 5` would have worked as well.\n     ptr.write(5);\n     let x = Box::from_raw(ptr);\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+      "adt": {}
+    },
+    "core::mem::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disposes of a value.\n\n This effectively does nothing for types which implement `Copy`, e.g.\n integers. Such values are copied and _then_ moved into the function, so the\n value persists after this function call.\n\n This function is not magic; it is literally defined as\n\n ```\n pub fn drop<T>(_x: T) {}\n ```\n\n Because `_x` is moved into the function, it is automatically [dropped][drop] before\n the function returns.\n\n [drop]: Drop\n\n # Examples\n\n Basic usage:\n\n ```\n let v = vec![1, 2, 3];\n\n drop(v); // explicitly drop the vector\n ```\n\n Since [`RefCell`] enforces the borrow rules at runtime, `drop` can\n release a [`RefCell`] borrow:\n\n ```\n use std::cell::RefCell;\n\n let x = RefCell::new(1);\n\n let mut mutable_borrow = x.borrow_mut();\n *mutable_borrow = 1;\n\n drop(mutable_borrow); // relinquish the mutable borrow on this slot\n\n let borrow = x.borrow();\n println!(\"{}\", *borrow);\n ```\n\n Integers and other types implementing [`Copy`] are unaffected by `drop`.\n\n ```\n # #![allow(dropping_copy_types)]\n #[derive(Copy, Clone)]\n struct Foo(u8);\n\n let x = 1;\n let y = Foo(2);\n drop(x); // a copy of `x` is moved and dropped\n drop(y); // a copy of `y` is moved and dropped\n\n println!(\"x: {}, y: {}\", x, y.0); // still available\n ```\n\n [`RefCell`]: crate::cell::RefCell\n",
+      "adt": {}
+    },
+    "core::num::<impl usize>::wrapping_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrapping (modular) addition. Computes `self + rhs`,\n wrapping around at the boundary of the type.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::is_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s = [1, 2, 3];\n let ptr: *mut u32 = s.as_mut_ptr();\n assert!(!ptr.is_null());\n ```\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to an element or subslice, without doing bounds\n checking.\n\n For a safe alternative see [`get`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used.\n\n You can think of this like `.get(index).unwrap_unchecked()`.  It's UB\n to call `.get_unchecked(len)`, even if you immediately convert to a\n pointer.  And it's UB to call `.get_unchecked(..len + 1)`,\n `.get_unchecked(..=len)`, or similar.\n\n [`get`]: slice::get\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n\n unsafe {\n     assert_eq!(x.get_unchecked(1), &2);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<Vec<u32>>`.\n // This is okay because we initialized it.\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n x_vec.push(3);\n assert_eq!(x_vec.len(), 4);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::mpmc::utils::CachePadded": [
+      "Ref"
+    ],
+    "sync::mpmc::list::Channel": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "sync::mpmc::list::Position": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ],
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::sync::atomic::AtomicPtr": [
+      "Ref"
+    ],
+    "core::cell::UnsafeCell": [
+      "Ref"
+    ],
+    "sync::mpmc::list::Slot": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "alloc_crate::boxed::Box": [
+      "Plain"
+    ],
+    "core::mem::MaybeUninit": [
+      "MutRef"
+    ]
+  },
+  "path": 2845,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/list.rs:633:5: 667:6",
+  "src": "fn drop(&mut self) {\n        let mut head = self.head.index.load(Ordering::Relaxed);\n        let mut tail = self.tail.index.load(Ordering::Relaxed);\n        let mut block = self.head.block.load(Ordering::Relaxed);\n\n        // Erase the lower bits.\n        head &= !((1 << SHIFT) - 1);\n        tail &= !((1 << SHIFT) - 1);\n\n        unsafe {\n            // Drop all messages between head and tail and deallocate the heap-allocated blocks.\n            while head != tail {\n                let offset = (head >> SHIFT) % LAP;\n\n                if offset < BLOCK_CAP {\n                    // Drop the message in the slot.\n                    let slot = (*block).slots.get_unchecked(offset);\n                    let p = &mut *slot.msg.get();\n                    p.as_mut_ptr().drop_in_place();\n                } else {\n                    // Deallocate the block and move to the next one.\n                    let next = (*block).next.load(Ordering::Relaxed);\n                    drop(Box::from_raw(block));\n                    block = next;\n                }\n\n                head = head.wrapping_add(1 << SHIFT);\n            }\n\n            // Deallocate the last remaining block.\n            if !block.is_null() {\n                drop(Box::from_raw(block));\n            }\n        }\n    }",
+  "mir": "fn <sync::mpmc::list::Channel<T> as core::ops::Drop>::drop(_1: &mut sync::mpmc::list::Channel<T>) -> () {\n    let mut _0: ();\n    let mut _2: usize;\n    let mut _3: &core::sync::atomic::AtomicUsize;\n    let  _4: &sync::mpmc::list::Position<T>;\n    let mut _5: &sync::mpmc::utils::CachePadded<sync::mpmc::list::Position<T>>;\n    let mut _6: core::sync::atomic::Ordering;\n    let mut _7: usize;\n    let mut _8: &core::sync::atomic::AtomicUsize;\n    let  _9: &sync::mpmc::list::Position<T>;\n    let mut _10: &sync::mpmc::utils::CachePadded<sync::mpmc::list::Position<T>>;\n    let mut _11: core::sync::atomic::Ordering;\n    let mut _12: *mut sync::mpmc::list::Block<T>;\n    let mut _13: &core::sync::atomic::AtomicPtr<sync::mpmc::list::Block<T>>;\n    let  _14: &sync::mpmc::list::Position<T>;\n    let mut _15: &sync::mpmc::utils::CachePadded<sync::mpmc::list::Position<T>>;\n    let mut _16: core::sync::atomic::Ordering;\n    let mut _17: usize;\n    let mut _18: usize;\n    let mut _19: usize;\n    let mut _20: bool;\n    let mut _21: (usize, bool);\n    let mut _22: usize;\n    let mut _23: usize;\n    let mut _24: usize;\n    let mut _25: bool;\n    let mut _26: (usize, bool);\n    let mut _27: bool;\n    let mut _28: usize;\n    let mut _29: usize;\n    let  _30: usize;\n    let mut _31: usize;\n    let mut _32: usize;\n    let mut _33: bool;\n    let mut _34: bool;\n    let mut _35: bool;\n    let  _36: &sync::mpmc::list::Slot<T>;\n    let mut _37: &[sync::mpmc::list::Slot<T>];\n    let mut _38: &[sync::mpmc::list::Slot<T>; 31];\n    let  _39: &mut core::mem::MaybeUninit<T>;\n    let mut _40: *mut core::mem::MaybeUninit<T>;\n    let mut _41: &core::cell::UnsafeCell<core::mem::MaybeUninit<T>>;\n    let  _42: ();\n    let mut _43: *mut T;\n    let  _44: *mut sync::mpmc::list::Block<T>;\n    let mut _45: &core::sync::atomic::AtomicPtr<sync::mpmc::list::Block<T>>;\n    let mut _46: core::sync::atomic::Ordering;\n    let  _47: ();\n    let mut _48: alloc_crate::boxed::Box<sync::mpmc::list::Block<T>>;\n    let mut _49: *mut sync::mpmc::list::Block<T>;\n    let mut _50: usize;\n    let mut _51: usize;\n    let mut _52: usize;\n    let mut _53: bool;\n    let mut _54: bool;\n    let mut _55: *mut sync::mpmc::list::Block<T>;\n    let  _56: ();\n    let mut _57: alloc_crate::boxed::Box<sync::mpmc::list::Block<T>>;\n    let mut _58: *mut sync::mpmc::list::Block<T>;\n    let mut _59: *const ();\n    let mut _60: usize;\n    let mut _61: usize;\n    let mut _62: usize;\n    let mut _63: bool;\n    let mut _64: *const ();\n    let mut _65: usize;\n    let mut _66: usize;\n    let mut _67: usize;\n    let mut _68: bool;\n    let mut _69: *const ();\n    let mut _70: usize;\n    let mut _71: usize;\n    let mut _72: usize;\n    let mut _73: bool;\n    let mut _74: *const ();\n    let mut _75: usize;\n    let mut _76: bool;\n    let mut _77: bool;\n    let mut _78: bool;\n    let mut _79: *const ();\n    let mut _80: usize;\n    let mut _81: bool;\n    let mut _82: bool;\n    let mut _83: bool;\n    let mut _84: *const ();\n    let mut _85: usize;\n    let mut _86: bool;\n    let mut _87: bool;\n    let mut _88: bool;\n    debug self => _1;\n    debug head => _2;\n    debug tail => _7;\n    debug block => _12;\n    debug offset => _30;\n    debug slot => _36;\n    debug p => _39;\n    debug next => _44;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &((*_1).0: sync::mpmc::utils::CachePadded<sync::mpmc::list::Position<T>>);\n        _4 = <sync::mpmc::utils::CachePadded<sync::mpmc::list::Position<T>> as core::ops::Deref>::deref(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = &((*_4).0: core::sync::atomic::AtomicUsize);\n        StorageLive(_6);\n        _6 = core::sync::atomic::Ordering::Relaxed;\n        _2 = core::sync::atomic::AtomicUsize::load(move _3, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_3);\n        StorageDead(_4);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &((*_1).1: sync::mpmc::utils::CachePadded<sync::mpmc::list::Position<T>>);\n        _9 = <sync::mpmc::utils::CachePadded<sync::mpmc::list::Position<T>> as core::ops::Deref>::deref(move _10) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        _8 = &((*_9).0: core::sync::atomic::AtomicUsize);\n        StorageLive(_11);\n        _11 = core::sync::atomic::Ordering::Relaxed;\n        _7 = core::sync::atomic::AtomicUsize::load(move _8, move _11) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_11);\n        StorageDead(_8);\n        StorageDead(_9);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = &((*_1).0: sync::mpmc::utils::CachePadded<sync::mpmc::list::Position<T>>);\n        _14 = <sync::mpmc::utils::CachePadded<sync::mpmc::list::Position<T>> as core::ops::Deref>::deref(move _15) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_15);\n        _13 = &((*_14).1: core::sync::atomic::AtomicPtr<sync::mpmc::list::Block<T>>);\n        StorageLive(_16);\n        _16 = core::sync::atomic::Ordering::Relaxed;\n        _12 = core::sync::atomic::AtomicPtr::<sync::mpmc::list::Block<T>>::load(move _13, move _16) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_16);\n        StorageDead(_13);\n        StorageDead(_14);\n        StorageLive(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        _20 = Lt(sync::mpmc::list::SHIFT, 64_usize);\n        assert(move _20, \"attempt to shift left by `{}`, which would overflow\", sync::mpmc::list::SHIFT) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _19 = Shl(1_usize, sync::mpmc::list::SHIFT);\n        _21 = CheckedSub(_19, 1_usize);\n        assert(!move (_21.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _19, 1_usize) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _18 = move (_21.0: usize);\n        StorageDead(_19);\n        _17 = Not(move _18);\n        StorageDead(_18);\n        _2 = BitAnd(_2, move _17);\n        StorageDead(_17);\n        StorageLive(_22);\n        StorageLive(_23);\n        StorageLive(_24);\n        _25 = Lt(sync::mpmc::list::SHIFT, 64_usize);\n        assert(move _25, \"attempt to shift left by `{}`, which would overflow\", sync::mpmc::list::SHIFT) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        _24 = Shl(1_usize, sync::mpmc::list::SHIFT);\n        _26 = CheckedSub(_24, 1_usize);\n        assert(!move (_26.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _24, 1_usize) -> [success: bb10, unwind unreachable];\n    }\n    bb10: {\n        _23 = move (_26.0: usize);\n        StorageDead(_24);\n        _22 = Not(move _23);\n        StorageDead(_23);\n        _7 = BitAnd(_7, move _22);\n        StorageDead(_22);\n        goto -> bb11;\n    }\n    bb11: {\n        StorageLive(_27);\n        StorageLive(_28);\n        _28 = _2;\n        StorageLive(_29);\n        _29 = _7;\n        _27 = Ne(move _28, move _29);\n        switchInt(move _27) -> [0: bb27, otherwise: bb12];\n    }\n    bb12: {\n        StorageDead(_29);\n        StorageDead(_28);\n        StorageLive(_31);\n        StorageLive(_32);\n        _32 = _2;\n        _33 = Lt(sync::mpmc::list::SHIFT, 64_usize);\n        assert(move _33, \"attempt to shift right by `{}`, which would overflow\", sync::mpmc::list::SHIFT) -> [success: bb13, unwind unreachable];\n    }\n    bb13: {\n        _31 = Shr(move _32, sync::mpmc::list::SHIFT);\n        StorageDead(_32);\n        _34 = Eq(sync::mpmc::list::LAP, 0_usize);\n        assert(!move _34, \"attempt to calculate the remainder of `{}` with a divisor of zero\", _31) -> [success: bb14, unwind unreachable];\n    }\n    bb14: {\n        _30 = Rem(move _31, sync::mpmc::list::LAP);\n        StorageDead(_31);\n        StorageLive(_35);\n        _35 = Lt(_30, sync::mpmc::list::BLOCK_CAP);\n        switchInt(move _35) -> [0: bb20, otherwise: bb15];\n    }\n    bb15: {\n        StorageLive(_36);\n        StorageLive(_37);\n        StorageLive(_38);\n        _69 = _12 as *const ();\n        _70 = _69 as usize;\n        _71 = Sub(<[sync::mpmc::list::Slot<T>; 31] as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _72 = BitAnd(_70, _71);\n        _73 = Eq(_72, 0_usize);\n        assert(_73, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<[sync::mpmc::list::Slot<T>; 31] as core::mem::SizedTypeProperties>::ALIGN, _70) -> [success: bb36, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_37);\n        StorageLive(_40);\n        StorageLive(_41);\n        _41 = &((*_36).0: core::cell::UnsafeCell<core::mem::MaybeUninit<T>>);\n        _40 = core::cell::UnsafeCell::<core::mem::MaybeUninit<T>>::get(move _41) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_41);\n        _64 = _40 as *const ();\n        _65 = _64 as usize;\n        _66 = Sub(<core::mem::MaybeUninit<T> as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _67 = BitAnd(_65, _66);\n        _68 = Eq(_67, 0_usize);\n        assert(_68, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<core::mem::MaybeUninit<T> as core::mem::SizedTypeProperties>::ALIGN, _65) -> [success: bb35, unwind unreachable];\n    }\n    bb18: {\n        _42 = core::ptr::mut_ptr::<impl *mut T>::drop_in_place(move _43) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_43);\n        StorageDead(_40);\n        StorageDead(_36);\n        goto -> bb24;\n    }\n    bb20: {\n        StorageLive(_45);\n        _59 = _12 as *const ();\n        _60 = _59 as usize;\n        _61 = Sub(<core::sync::atomic::AtomicPtr<sync::mpmc::list::Block<T>> as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _62 = BitAnd(_60, _61);\n        _63 = Eq(_62, 0_usize);\n        assert(_63, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<core::sync::atomic::AtomicPtr<sync::mpmc::list::Block<T>> as core::mem::SizedTypeProperties>::ALIGN, _60) -> [success: bb34, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_46);\n        StorageDead(_45);\n        StorageLive(_48);\n        StorageLive(_49);\n        _49 = _12;\n        _48 = alloc_crate::boxed::Box::<sync::mpmc::list::Block<T>>::from_raw(move _49) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_49);\n        _47 = core::mem::drop::<alloc_crate::boxed::Box<sync::mpmc::list::Block<T>>>(move _48) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_48);\n        _12 = _44;\n        goto -> bb24;\n    }\n    bb24: {\n        StorageDead(_35);\n        StorageLive(_50);\n        StorageLive(_51);\n        _51 = _2;\n        StorageLive(_52);\n        _53 = Lt(sync::mpmc::list::SHIFT, 64_usize);\n        assert(move _53, \"attempt to shift left by `{}`, which would overflow\", sync::mpmc::list::SHIFT) -> [success: bb25, unwind unreachable];\n    }\n    bb25: {\n        _52 = Shl(1_usize, sync::mpmc::list::SHIFT);\n        _50 = core::num::<impl usize>::wrapping_add(move _51, move _52) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_52);\n        StorageDead(_51);\n        _2 = move _50;\n        StorageDead(_50);\n        StorageDead(_27);\n        goto -> bb11;\n    }\n    bb27: {\n        StorageDead(_29);\n        StorageDead(_28);\n        StorageDead(_27);\n        StorageLive(_54);\n        StorageLive(_55);\n        _55 = _12;\n        _54 = core::ptr::mut_ptr::<impl *mut sync::mpmc::list::Block<T>>::is_null(move _55) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        switchInt(move _54) -> [0: bb30, otherwise: bb29];\n    }\n    bb29: {\n        StorageDead(_55);\n        goto -> bb33;\n    }\n    bb30: {\n        StorageDead(_55);\n        StorageLive(_57);\n        StorageLive(_58);\n        _58 = _12;\n        _57 = alloc_crate::boxed::Box::<sync::mpmc::list::Block<T>>::from_raw(move _58) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        StorageDead(_58);\n        _56 = core::mem::drop::<alloc_crate::boxed::Box<sync::mpmc::list::Block<T>>>(move _57) -> [return: bb32, unwind unreachable];\n    }\n    bb32: {\n        StorageDead(_57);\n        goto -> bb33;\n    }\n    bb33: {\n        StorageDead(_54);\n        StorageDead(_12);\n        StorageDead(_7);\n        StorageDead(_2);\n        return;\n    }\n    bb34: {\n        _84 = _12 as *const ();\n        _85 = _84 as usize;\n        _86 = Eq(_85, 0_usize);\n        _87 = BitAnd(_86, true);\n        _88 = Not(_87);\n        assert(_88, \"null pointer dereference occurred\") -> [success: bb39, unwind unreachable];\n    }\n    bb35: {\n        _79 = _40 as *const ();\n        _80 = _79 as usize;\n        _81 = Eq(_80, 0_usize);\n        _82 = BitAnd(_81, true);\n        _83 = Not(_82);\n        assert(_83, \"null pointer dereference occurred\") -> [success: bb38, unwind unreachable];\n    }\n    bb36: {\n        _74 = _12 as *const ();\n        _75 = _74 as usize;\n        _76 = Eq(_75, 0_usize);\n        _77 = BitAnd(_76, true);\n        _78 = Not(_77);\n        assert(_78, \"null pointer dereference occurred\") -> [success: bb37, unwind unreachable];\n    }\n    bb37: {\n        _38 = &((*_12).1: [sync::mpmc::list::Slot<T>; 31]);\n        _37 = move _38 as &[sync::mpmc::list::Slot<T>];\n        StorageDead(_38);\n        _36 = core::slice::<impl [sync::mpmc::list::Slot<T>]>::get_unchecked::<usize>(move _37, _30) -> [return: bb16, unwind unreachable];\n    }\n    bb38: {\n        _39 = &mut (*_40);\n        StorageLive(_43);\n        _43 = core::mem::MaybeUninit::<T>::as_mut_ptr(_39) -> [return: bb18, unwind unreachable];\n    }\n    bb39: {\n        _45 = &((*_12).0: core::sync::atomic::AtomicPtr<sync::mpmc::list::Block<T>>);\n        StorageLive(_46);\n        _46 = core::sync::atomic::Ordering::Relaxed;\n        _44 = core::sync::atomic::AtomicPtr::<sync::mpmc::list::Block<T>>::load(move _45, move _46) -> [return: bb21, unwind unreachable];\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

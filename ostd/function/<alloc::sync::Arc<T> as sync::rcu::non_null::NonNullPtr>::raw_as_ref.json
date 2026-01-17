@@ -1,0 +1,60 @@
+{
+  "name": "<alloc::sync::Arc<T> as sync::rcu::non_null::NonNullPtr>::raw_as_ref",
+  "safe": false,
+  "callees": {
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "alloc::sync::Arc::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs an `Arc<T>` from a raw pointer.\n\n The raw pointer must have been previously returned by a call to\n [`Arc<U>::into_raw`][into_raw] with the following requirements:\n\n * If `U` is sized, it must have the same size and alignment as `T`. This\n   is trivially true if `U` is `T`.\n * If `U` is unsized, its data pointer must have the same size and\n   alignment as `T`. This is trivially true if `Arc<U>` was constructed\n   through `Arc<T>` and then converted to `Arc<U>` through an [unsized\n   coercion].\n\n Note that if `U` or `U`'s data pointer is not `T` but has the same size\n and alignment, this is basically like transmuting references of\n different types. See [`mem::transmute`][transmute] for more information\n on what restrictions apply in this case.\n\n The raw pointer must point to a block of memory allocated by the global allocator.\n\n The user of `from_raw` has to make sure a specific value of `T` is only\n dropped once.\n\n This function is unsafe because improper use may lead to memory unsafety,\n even if the returned `Arc<T>` is never accessed.\n\n [into_raw]: Arc::into_raw\n [transmute]: core::mem::transmute\n [unsized coercion]: https://doc.rust-lang.org/reference/type-coercions.html#unsized-coercions\n\n # Examples\n\n ```\n use std::sync::Arc;\n\n let x = Arc::new(\"hello\".to_owned());\n let x_ptr = Arc::into_raw(x);\n\n unsafe {\n     // Convert back to an `Arc` to prevent leak.\n     let x = Arc::from_raw(x_ptr);\n     assert_eq!(&*x, \"hello\");\n\n     // Further calls to `Arc::from_raw(x_ptr)` would be memory-unsafe.\n }\n\n // The memory was freed when `x` went out of scope above, so `x_ptr` is now dangling!\n ```\n\n Convert a slice back into its original array:\n\n ```\n use std::sync::Arc;\n\n let x: Arc<[u32]> = Arc::new([1, 2, 3]);\n let x_ptr: *const [u32] = Arc::into_raw(x);\n\n unsafe {\n     let x: Arc<[u32; 3]> = Arc::from_raw(x_ptr.cast::<[u32; 3]>());\n     assert_eq!(&*x, &[1, 2, 3]);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "alloc::sync::Arc": [
+      "Plain"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain"
+    ],
+    "sync::rcu::non_null::ArcRef": [
+      "Plain"
+    ]
+  },
+  "path": 2601,
+  "span": "ostd/src/sync/rcu/non_null/mod.rs:190:5: 198:6",
+  "src": "unsafe fn raw_as_ref<'a>(raw: NonNull<Self::Target>) -> Self::Ref<'a> {\n        // SAFETY: The safety is upheld by the caller.\n        unsafe {\n            ArcRef {\n                inner: ManuallyDrop::new(Arc::from_raw(raw.as_ptr())),\n                _marker: PhantomData,\n            }\n        }\n    }",
+  "mir": "fn <alloc::sync::Arc<T> as sync::rcu::non_null::NonNullPtr>::raw_as_ref(_1: core::ptr::NonNull<T>) -> sync::rcu::non_null::ArcRef<'_, T> {\n    let mut _0: sync::rcu::non_null::ArcRef<'_, T>;\n    let mut _2: core::mem::ManuallyDrop<alloc::sync::Arc<T>>;\n    let mut _3: alloc::sync::Arc<T>;\n    let mut _4: *const T;\n    let mut _5: *mut T;\n    debug raw => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = core::ptr::NonNull::<T>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = move _5 as *const T;\n        StorageDead(_5);\n        _3 = alloc::sync::Arc::<T>::from_raw(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _2 = core::mem::ManuallyDrop::<alloc::sync::Arc<T>>::new(move _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        _0 = ArcRef(move _2, ZeroSized: core::marker::PhantomData<&alloc::sync::Arc<T>>);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

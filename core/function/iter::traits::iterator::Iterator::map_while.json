@@ -1,0 +1,33 @@
+{
+  "name": "iter::traits::iterator::Iterator::map_while",
+  "safe": true,
+  "callees": {
+    "iter::adapters::map_while::MapWhile::<I, P>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "iter::adapters::map_while::MapWhile": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "iter::adapters::map_while::MapWhile": [
+      "Plain"
+    ]
+  },
+  "path": "iter::traits::iterator::Iterator::map_while",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:1287:5: 1293:6",
+  "src": "fn map_while<B, P>(self, predicate: P) -> MapWhile<Self, P>\n    where\n        Self: Sized,\n        P: FnMut(Self::Item) -> Option<B>,\n    {\n        MapWhile::new(self, predicate)\n    }",
+  "mir": "fn iter::traits::iterator::Iterator::map_while(_1: Self, _2: P) -> iter::adapters::map_while::MapWhile<Self, P> {\n    let mut _0: iter::adapters::map_while::MapWhile<Self, P>;\n    debug self => _1;\n    debug predicate => _2;\n    bb0: {\n        _0 = iter::adapters::map_while::MapWhile::<Self, P>::new(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Creates an iterator that both yields elements based on a predicate and maps.\n\n `map_while()` takes a closure as an argument. It will call this\n closure on each element of the iterator, and yield elements\n while it returns [`Some(_)`][`Some`].\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [-1i32, 4, 0, 1];\n\n let mut iter = a.into_iter().map_while(|x| 16i32.checked_div(x));\n\n assert_eq!(iter.next(), Some(-16));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), None);\n ```\n\n Here's the same example, but with [`take_while`] and [`map`]:\n\n [`take_while`]: Iterator::take_while\n [`map`]: Iterator::map\n\n ```\n let a = [-1i32, 4, 0, 1];\n\n let mut iter = a.into_iter()\n                 .map(|x| 16i32.checked_div(x))\n                 .take_while(|x| x.is_some())\n                 .map(|x| x.unwrap());\n\n assert_eq!(iter.next(), Some(-16));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), None);\n ```\n\n Stopping after an initial [`None`]:\n\n ```\n let a = [0, 1, 2, -3, 4, 5, -6];\n\n let iter = a.into_iter().map_while(|x| u32::try_from(x).ok());\n let vec: Vec<_> = iter.collect();\n\n // We have more elements that could fit in u32 (such as 4, 5), but `map_while` returned `None` for `-3`\n // (as the `predicate` returned `None`) and `collect` stops at the first `None` encountered.\n assert_eq!(vec, [0, 1, 2]);\n ```\n\n Because `map_while()` needs to look at the value in order to see if it\n should be included or not, consuming iterators will see that it is\n removed:\n\n ```\n let a = [1, 2, -3, 4];\n let mut iter = a.into_iter();\n\n let result: Vec<u32> = iter.by_ref()\n                            .map_while(|n| u32::try_from(n).ok())\n                            .collect();\n\n assert_eq!(result, [1, 2]);\n\n let result: Vec<i32> = iter.collect();\n\n assert_eq!(result, [4]);\n ```\n\n The `-3` is no longer there, because it was consumed in order to see if\n the iteration should stop, but wasn't placed back into the iterator.\n\n Note that unlike [`take_while`] this iterator is **not** fused.\n It is also not specified what this iterator returns after the first [`None`] is returned.\n If you need a fused iterator, use [`fuse`].\n\n [`fuse`]: Iterator::fuse\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "slice::<impl [mem::maybe_uninit::MaybeUninit<T>]>::align_to_uninit_mut",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::align_to_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Transmutes the mutable slice to a mutable slice of another type, ensuring alignment of the\n types is maintained.\n\n This method splits the slice into three distinct slices: prefix, correctly aligned middle\n slice of a new type, and the suffix slice. The middle part will be as big as possible under\n the given alignment constraint and element size.\n\n This method has no purpose when either input element `T` or output element `U` are\n zero-sized and will return the original slice without splitting anything.\n\n # Safety\n\n This method is essentially a `transmute` with respect to the elements in the returned\n middle slice, so all the usual caveats pertaining to `transmute::<T, U>` also apply here.\n\n # Examples\n\n Basic usage:\n\n ```\n unsafe {\n     let mut bytes: [u8; 7] = [1, 2, 3, 4, 5, 6, 7];\n     let (prefix, shorts, suffix) = bytes.align_to_mut::<u16>();\n     // less_efficient_algorithm_for_bytes(prefix);\n     // more_efficient_algorithm_for_aligned_shorts(shorts);\n     // less_efficient_algorithm_for_bytes(suffix);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1364,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:4951:5: 4957:6",
+  "src": "pub fn align_to_uninit_mut<U>(&mut self) -> (&mut Self, &mut [MaybeUninit<U>], &mut Self) {\n        // SAFETY: `MaybeUninit` is transparent. Correct size and alignment are guaranteed by\n        // `align_to_mut` itself. Therefore the only thing that we have to ensure for a safe\n        // `transmute` is that the values are valid for the types involved. But for `MaybeUninit`\n        // any values are valid, so this operation is safe.\n        unsafe { self.align_to_mut() }\n    }",
+  "mir": "fn slice::<impl [mem::maybe_uninit::MaybeUninit<T>]>::align_to_uninit_mut(_1: &mut [mem::maybe_uninit::MaybeUninit<T>]) -> (&mut [mem::maybe_uninit::MaybeUninit<T>], &mut [mem::maybe_uninit::MaybeUninit<U>], &mut [mem::maybe_uninit::MaybeUninit<T>]) {\n    let mut _0: (&mut [mem::maybe_uninit::MaybeUninit<T>], &mut [mem::maybe_uninit::MaybeUninit<U>], &mut [mem::maybe_uninit::MaybeUninit<T>]);\n    debug self => _1;\n    bb0: {\n        _0 = slice::<impl [mem::maybe_uninit::MaybeUninit<T>]>::align_to_mut::<mem::maybe_uninit::MaybeUninit<U>>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Transmutes the mutable uninitialized slice to a mutable uninitialized slice of\n another type, ensuring alignment of the types is maintained.\n\n This is a safe wrapper around [`slice::align_to_mut`], so inherits the same\n guarantees as that method.\n\n # Examples\n\n ```\n #![feature(align_to_uninit_mut)]\n use std::mem::MaybeUninit;\n\n pub struct BumpAllocator<'scope> {\n     memory: &'scope mut [MaybeUninit<u8>],\n }\n\n impl<'scope> BumpAllocator<'scope> {\n     pub fn new(memory: &'scope mut [MaybeUninit<u8>]) -> Self {\n         Self { memory }\n     }\n     pub fn try_alloc_uninit<T>(&mut self) -> Option<&'scope mut MaybeUninit<T>> {\n         let first_end = self.memory.as_ptr().align_offset(align_of::<T>()) + size_of::<T>();\n         let prefix = self.memory.split_off_mut(..first_end)?;\n         Some(&mut prefix.align_to_uninit_mut::<T>().1[0])\n     }\n     pub fn try_alloc_u32(&mut self, value: u32) -> Option<&'scope mut u32> {\n         let uninit = self.try_alloc_uninit()?;\n         Some(uninit.write(value))\n     }\n }\n\n let mut memory = [MaybeUninit::<u8>::uninit(); 10];\n let mut allocator = BumpAllocator::new(&mut memory);\n let v = allocator.try_alloc_u32(42);\n assert_eq!(v, Some(&mut 42));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

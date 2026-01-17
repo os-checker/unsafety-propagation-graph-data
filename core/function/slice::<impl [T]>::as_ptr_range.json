@@ -1,0 +1,41 @@
+{
+  "name": "slice::<impl [T]>::as_ptr_range",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"123\";\n let ptr: *const u8 = s.as_ptr();\n\n unsafe {\n     assert_eq!(*ptr.add(1), b'2');\n     assert_eq!(*ptr.add(2), b'3');\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ops::range::Range": [
+      "Plain"
+    ]
+  },
+  "path": 1237,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:792:5: 813:6",
+  "src": "pub const fn as_ptr_range(&self) -> Range<*const T> {\n        let start = self.as_ptr();\n        // SAFETY: The `add` here is safe, because:\n        //\n        //   - Both pointers are part of the same object, as pointing directly\n        //     past the object also counts.\n        //\n        //   - The size of the slice is never larger than `isize::MAX` bytes, as\n        //     noted here:\n        //       - https://github.com/rust-lang/unsafe-code-guidelines/issues/102#issuecomment-473340447\n        //       - https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n        //       - https://doc.rust-lang.org/core/slice/fn.from_raw_parts.html#safety\n        //     (This doesn't seem normative yet, but the very same assumption is\n        //     made in many places, including the Index implementation of slices.)\n        //\n        //   - There is no wrapping around involved, as slices do not wrap past\n        //     the end of the address space.\n        //\n        // See the documentation of [`pointer::add`].\n        let end = unsafe { start.add(self.len()) };\n        start..end\n    }",
+  "mir": "fn slice::<impl [T]>::as_ptr_range(_1: &[T]) -> ops::range::Range<*const T> {\n    let mut _0: ops::range::Range<*const T>;\n    let  _2: *const T;\n    let  _3: *const T;\n    let mut _4: usize;\n    debug self => _1;\n    debug start => _2;\n    debug end => _3;\n    bb0: {\n        _2 = slice::<impl [T]>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = PtrMetadata(_1);\n        _3 = ptr::const_ptr::<impl *const T>::add(_2, move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = Range(_2, _3);\n        return;\n    }\n}\n",
+  "doc": " Returns the two raw pointers spanning the slice.\n\n The returned range is half-open, which means that the end pointer\n points *one past* the last element of the slice. This way, an empty\n slice is represented by two equal pointers, and the difference between\n the two pointers represents the size of the slice.\n\n See [`as_ptr`] for warnings on using these pointers. The end pointer\n requires extra caution, as it does not point to a valid element in the\n slice.\n\n This function is useful for interacting with foreign interfaces which\n use two pointers to refer to a range of elements in memory, as is\n common in C++.\n\n It can also be useful to check if a pointer to an element refers to an\n element of this slice:\n\n ```\n let a = [1, 2, 3];\n let x = &a[1] as *const _;\n let y = &5 as *const _;\n\n assert!(a.as_ptr_range().contains(&x));\n assert!(!a.as_ptr_range().contains(&y));\n ```\n\n [`as_ptr`]: slice::as_ptr\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

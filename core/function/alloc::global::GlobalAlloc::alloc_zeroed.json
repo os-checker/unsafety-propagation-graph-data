@@ -1,0 +1,64 @@
+{
+  "name": "alloc::global::GlobalAlloc::alloc_zeroed",
+  "safe": false,
+  "callees": {
+    "alloc::layout::Layout::size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The minimum size in bytes for a memory block of this layout.\n",
+      "adt": {
+        "alloc::layout::Layout": "ImmutableAsArgument"
+      }
+    },
+    "alloc::global::GlobalAlloc::alloc": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory as described by the given `layout`.\n\n Returns a pointer to newly-allocated memory,\n or null to indicate allocation failure.\n\n # Safety\n\n `layout` must have non-zero size. Attempting to allocate for a zero-sized `layout` will\n result in undefined behavior.\n\n (Extension subtraits might provide more specific bounds on\n behavior, e.g., guarantee a sentinel address or a null pointer\n in response to a zero-size allocation request.)\n\n The allocated block of memory may or may not be initialized.\n\n # Errors\n\n Returning a null pointer indicates that either memory is exhausted\n or `layout` does not meet this allocator's size or alignment constraints.\n\n Implementations are encouraged to return null on memory\n exhaustion rather than aborting, but this is not\n a strict requirement. (Specifically: it is *legal* to\n implement this trait atop an underlying native allocation\n library that aborts on memory exhaustion.)\n\n Clients wishing to abort computation in response to an\n allocation error are encouraged to call the [`handle_alloc_error`] function,\n rather than directly invoking `panic!` or similar.\n\n [`handle_alloc_error`]: ../../alloc/alloc/fn.handle_alloc_error.html\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::is_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s = [1, 2, 3];\n let ptr: *mut u32 = s.as_mut_ptr();\n assert!(!ptr.is_null());\n ```\n",
+      "adt": {}
+    },
+    "ptr::write_bytes": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets `count * size_of::<T>()` bytes of memory starting at `dst` to\n `val`.\n\n `write_bytes` is similar to C's [`memset`], but sets `count *\n size_of::<T>()` bytes to `val`.\n\n [`memset`]: https://en.cppreference.com/w/c/string/byte/memset\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * `dst` must be properly aligned.\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointer must be properly aligned.\n\n Additionally, note that changing `*dst` in this way can easily lead to undefined behavior (UB)\n later if the written bytes are not a valid representation of some `T`. For instance, the\n following is an **incorrect** use of this function:\n\n ```rust,no_run\n unsafe {\n     let mut value: u8 = 0;\n     let ptr: *mut bool = &mut value as *mut u8 as *mut bool;\n     let _bool = ptr.read(); // This is fine, `ptr` points to a valid `bool`.\n     ptr.write_bytes(42u8, 1); // This function itself does not cause UB...\n     let _bool = ptr.read(); // ...but it makes this operation UB! ⚠️\n }\n ```\n\n [valid]: crate::ptr#safety\n\n # Examples\n\n Basic usage:\n\n ```\n use std::ptr;\n\n let mut vec = vec![0u32; 4];\n unsafe {\n     let vec_ptr = vec.as_mut_ptr();\n     ptr::write_bytes(vec_ptr, 0xfe, 2);\n }\n assert_eq!(vec, [0xfefefefe, 0xfefefefe, 0, 0]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc::layout::Layout": [
+      "Ref",
+      "Plain"
+    ]
+  },
+  "path": "alloc::global::GlobalAlloc::alloc_zeroed",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/alloc/global.rs:216:5: 226:6",
+  "src": "unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {\n        let size = layout.size();\n        // SAFETY: the safety contract for `alloc` must be upheld by the caller.\n        let ptr = unsafe { self.alloc(layout) };\n        if !ptr.is_null() {\n            // SAFETY: as allocation succeeded, the region from `ptr`\n            // of size `size` is guaranteed to be valid for writes.\n            unsafe { ptr::write_bytes(ptr, 0, size) };\n        }\n        ptr\n    }",
+  "mir": "fn alloc::global::GlobalAlloc::alloc_zeroed(_1: &Self, _2: alloc::layout::Layout) -> *mut u8 {\n    let mut _0: *mut u8;\n    let  _3: usize;\n    let mut _4: &alloc::layout::Layout;\n    let mut _5: bool;\n    let  _6: ();\n    debug self => _1;\n    debug layout => _2;\n    debug size => _3;\n    debug ptr => _0;\n    bb0: {\n        StorageLive(_4);\n        _4 = &_2;\n        _3 = alloc::layout::Layout::size(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _0 = <Self as alloc::global::GlobalAlloc>::alloc(_1, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_5);\n        _5 = ptr::mut_ptr::<impl *mut u8>::is_null(_0) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _5) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        goto -> bb7;\n    }\n    bb5: {\n        _6 = ptr::write_bytes::<u8>(_0, 0_u8, _3) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        goto -> bb7;\n    }\n    bb7: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": " Behaves like `alloc`, but also ensures that the contents\n are set to zero before being returned.\n\n # Safety\n\n The caller has to ensure that `layout` has non-zero size. Like `alloc`\n zero sized `layout` will result in undefined behavior.\n However the allocated block of memory is guaranteed to be initialized.\n\n # Errors\n\n Returning a null pointer indicates that either memory is exhausted\n or `layout` does not meet allocator's size or alignment constraints,\n just as in `alloc`.\n\n Clients wishing to abort computation in response to an\n allocation error are encouraged to call the [`handle_alloc_error`] function,\n rather than directly invoking `panic!` or similar.\n\n [`handle_alloc_error`]: ../../alloc/alloc/fn.handle_alloc_error.html\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

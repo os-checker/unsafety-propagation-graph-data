@@ -1,0 +1,145 @@
+{
+  "name": "string::String::from_utf16be_lossy",
+  "safe": true,
+  "callees": {
+    "core::slice::<impl [T]>::align_to": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Transmutes the slice to a slice of another type, ensuring alignment of the types is\n maintained.\n\n This method splits the slice into three distinct slices: prefix, correctly aligned middle\n slice of a new type, and the suffix slice. The middle part will be as big as possible under\n the given alignment constraint and element size.\n\n This method has no purpose when either input element `T` or output element `U` are\n zero-sized and will return the original slice without splitting anything.\n\n # Safety\n\n This method is essentially a `transmute` with respect to the elements in the returned\n middle slice, so all the usual caveats pertaining to `transmute::<T, U>` also apply here.\n\n # Examples\n\n Basic usage:\n\n ```\n unsafe {\n     let bytes: [u8; 7] = [1, 2, 3, 4, 5, 6, 7];\n     let (prefix, shorts, suffix) = bytes.align_to::<u16>();\n     // less_efficient_algorithm_for_bytes(prefix);\n     // more_efficient_algorithm_for_aligned_shorts(shorts);\n     // less_efficient_algorithm_for_bytes(suffix);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::as_chunks": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Splits the slice into a slice of `N`-element arrays,\n starting at the beginning of the slice,\n and a remainder slice with length strictly less than `N`.\n\n The remainder is meaningful in the division sense.  Given\n `let (chunks, remainder) = slice.as_chunks()`, then:\n - `chunks.len()` equals `slice.len() / N`,\n - `remainder.len()` equals `slice.len() % N`, and\n - `slice.len()` equals `chunks.len() * N + remainder.len()`.\n\n You can flatten the chunks back into a slice-of-`T` with [`as_flattened`].\n\n [`as_flattened`]: slice::as_flattened\n\n # Panics\n\n Panics if `N` is zero.\n\n Note that this check is against a const generic parameter, not a runtime\n value, and thus a particular monomorphization will either always panic\n or it will never panic.\n\n # Examples\n\n ```\n let slice = ['l', 'o', 'r', 'e', 'm'];\n let (chunks, remainder) = slice.as_chunks();\n assert_eq!(chunks, &[['l', 'o'], ['r', 'e']]);\n assert_eq!(remainder, &['m']);\n ```\n\n If you expect the slice to be an exact multiple, you can combine\n `let`-`else` with an empty slice pattern:\n ```\n let slice = ['R', 'u', 's', 't'];\n let (chunks, []) = slice.as_chunks::<2>() else {\n     panic!(\"slice didn't have even length\")\n };\n assert_eq!(chunks, &[['R', 'u'], ['s', 't']]);\n ```\n",
+      "adt": {}
+    },
+    "string::String::from_utf16_lossy": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Decode a native endian UTF-16–encoded slice `v` into a `String`,\n replacing invalid data with [the replacement character (`U+FFFD`)][U+FFFD].\n\n Unlike [`from_utf8_lossy`] which returns a [`Cow<'a, str>`],\n `from_utf16_lossy` returns a `String` since the UTF-16 to UTF-8\n conversion requires a memory allocation.\n\n [`from_utf8_lossy`]: String::from_utf8_lossy\n [`Cow<'a, str>`]: crate::borrow::Cow \"borrow::Cow\"\n [U+FFFD]: core::char::REPLACEMENT_CHARACTER\n\n # Examples\n\n ```\n // 𝄞mus<invalid>ic<invalid>\n let v = &[0xD834, 0xDD1E, 0x006d, 0x0075,\n           0x0073, 0xDD1E, 0x0069, 0x0063,\n           0xD834];\n\n assert_eq!(String::from(\"𝄞mus\\u{FFFD}ic\\u{FFFD}\"),\n            String::from_utf16_lossy(v));\n ```\n",
+      "adt": {
+        "string::String": "Constructor"
+      }
+    },
+    "core::ops::Add::add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the `+` operation.\n\n # Example\n\n ```\n assert_eq!(12 + 1, 13);\n ```\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the slice.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let mut iterator = x.iter();\n\n assert_eq!(iterator.next(), Some(&1));\n assert_eq!(iterator.next(), Some(&2));\n assert_eq!(iterator.next(), Some(&4));\n assert_eq!(iterator.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::copied": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator which copies all of its elements.\n\n This is useful when you have an iterator over `&T`, but you need an\n iterator over `T`.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let v_copied: Vec<_> = a.iter().copied().collect();\n\n // copied is the same as .map(|&x| x)\n let v_map: Vec<_> = a.iter().map(|&x| x).collect();\n\n assert_eq!(v_copied, [1, 2, 3]);\n assert_eq!(v_map, [1, 2, 3]);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes a closure and creates an iterator which calls that closure on each\n element.\n\n `map()` transforms one iterator into another, by means of its argument:\n something that implements [`FnMut`]. It produces a new iterator which\n calls this closure on each element of the original iterator.\n\n If you are good at thinking in types, you can think of `map()` like this:\n If you have an iterator that gives you elements of some type `A`, and\n you want an iterator of some other type `B`, you can use `map()`,\n passing a closure that takes an `A` and returns a `B`.\n\n `map()` is conceptually similar to a [`for`] loop. However, as `map()` is\n lazy, it is best used when you're already working with other iterators.\n If you're doing some sort of looping for a side effect, it's considered\n more idiomatic to use [`for`] than `map()`.\n\n [`for`]: ../../book/ch03-05-control-flow.html#looping-through-a-collection-with-for\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.iter().map(|x| 2 * x);\n\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), Some(6));\n assert_eq!(iter.next(), None);\n ```\n\n If you're doing some sort of side effect, prefer [`for`] to `map()`:\n\n ```\n # #![allow(unused_must_use)]\n // don't do this:\n (0..5).map(|x| println!(\"{x}\"));\n\n // it won't even execute, as it is lazy. Rust will warn you about this.\n\n // Instead, use a for-loop:\n for x in 0..5 {\n     println!(\"{x}\");\n }\n ```\n",
+      "adt": {}
+    },
+    "core::num::<impl u16>::from_be_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a native endian integer value from its representation\n as a byte array in big endian.\n\n\n # Examples\n\n ```\n ```\n\n When starting from a slice rather than an array, fallible conversion APIs can be used:\n\n ```\n     *input = rest;\n }\n ```\n",
+      "adt": {}
+    },
+    "core::char::methods::<impl char>::decode_utf16": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator over the native endian UTF-16 encoded code points in `iter`,\n returning unpaired surrogates as `Err`s.\n\n # Examples\n\n Basic usage:\n\n ```\n // 𝄞mus<invalid>ic<invalid>\n let v = [\n     0xD834, 0xDD1E, 0x006d, 0x0075, 0x0073, 0xDD1E, 0x0069, 0x0063, 0xD834,\n ];\n\n assert_eq!(\n     char::decode_utf16(v)\n         .map(|r| r.map_err(|e| e.unpaired_surrogate()))\n         .collect::<Vec<_>>(),\n     vec![\n         Ok('𝄞'),\n         Ok('m'), Ok('u'), Ok('s'),\n         Err(0xDD1E),\n         Ok('i'), Ok('c'),\n         Err(0xD834)\n     ]\n );\n ```\n\n A lossy decoder can be obtained by replacing `Err` results with the replacement character:\n\n ```\n // 𝄞mus<invalid>ic<invalid>\n let v = [\n     0xD834, 0xDD1E, 0x006d, 0x0075, 0x0073, 0xDD1E, 0x0069, 0x0063, 0xD834,\n ];\n\n assert_eq!(\n     char::decode_utf16(v)\n        .map(|r| r.unwrap_or(char::REPLACEMENT_CHARACTER))\n        .collect::<String>(),\n     \"𝄞mus�ic�\"\n );\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::collect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Transforms an iterator into a collection.\n\n `collect()` can take anything iterable, and turn it into a relevant\n collection. This is one of the more powerful methods in the standard\n library, used in a variety of contexts.\n\n The most basic pattern in which `collect()` is used is to turn one\n collection into another. You take a collection, call [`iter`] on it,\n do a bunch of transformations, and then `collect()` at the end.\n\n `collect()` can also create instances of types that are not typical\n collections. For example, a [`String`] can be built from [`char`]s,\n and an iterator of [`Result<T, E>`][`Result`] items can be collected\n into `Result<Collection<T>, E>`. See the examples below for more.\n\n Because `collect()` is so general, it can cause problems with type\n inference. As such, `collect()` is one of the few times you'll see\n the syntax affectionately known as the 'turbofish': `::<>`. This\n helps the inference algorithm understand specifically which collection\n you're trying to collect into.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let doubled: Vec<i32> = a.iter()\n                          .map(|x| x * 2)\n                          .collect();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Note that we needed the `: Vec<i32>` on the left-hand side. This is because\n we could collect into, for example, a [`VecDeque<T>`] instead:\n\n [`VecDeque<T>`]: ../../std/collections/struct.VecDeque.html\n\n ```\n use std::collections::VecDeque;\n\n let a = [1, 2, 3];\n\n let doubled: VecDeque<i32> = a.iter().map(|x| x * 2).collect();\n\n assert_eq!(2, doubled[0]);\n assert_eq!(4, doubled[1]);\n assert_eq!(6, doubled[2]);\n ```\n\n Using the 'turbofish' instead of annotating `doubled`:\n\n ```\n let a = [1, 2, 3];\n\n let doubled = a.iter().map(|x| x * 2).collect::<Vec<i32>>();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Because `collect()` only cares about what you're collecting into, you can\n still use a partial type hint, `_`, with the turbofish:\n\n ```\n let a = [1, 2, 3];\n\n let doubled = a.iter().map(|x| x * 2).collect::<Vec<_>>();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Using `collect()` to make a [`String`]:\n\n ```\n let chars = ['g', 'd', 'k', 'k', 'n'];\n\n let hello: String = chars.into_iter()\n     .map(|x| x as u8)\n     .map(|x| (x + 1) as char)\n     .collect();\n\n assert_eq!(\"hello\", hello);\n ```\n\n If you have a list of [`Result<T, E>`][`Result`]s, you can use `collect()` to\n see if any of them failed:\n\n ```\n let results = [Ok(1), Err(\"nope\"), Ok(3), Err(\"bad\")];\n\n let result: Result<Vec<_>, &str> = results.into_iter().collect();\n\n // gives us the first error\n assert_eq!(Err(\"nope\"), result);\n\n let results = [Ok(1), Ok(3)];\n\n let result: Result<Vec<_>, &str> = results.into_iter().collect();\n\n // gives us the list of answers\n assert_eq!(Ok(vec![1, 3]), result);\n ```\n\n [`iter`]: Iterator::next\n [`String`]: ../../std/string/struct.String.html\n [`char`]: type@char\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the slice has a length of 0.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n assert!(!a.is_empty());\n\n let b: &[i32] = &[];\n assert!(b.is_empty());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "string::String": [
+      "Plain"
+    ],
+    "core::slice::Iter": [
+      "Plain"
+    ],
+    "core::iter::Copied": [
+      "Plain"
+    ],
+    "core::iter::Map": [
+      "Plain"
+    ],
+    "core::char::DecodeUtf16": [
+      "Plain"
+    ]
+  },
+  "path": 1963,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:900:5: 912:6",
+  "src": "pub fn from_utf16be_lossy(v: &[u8]) -> String {\n        match (cfg!(target_endian = \"big\"), unsafe { v.align_to::<u16>() }) {\n            (true, ([], v, [])) => Self::from_utf16_lossy(v),\n            (true, ([], v, [_remainder])) => Self::from_utf16_lossy(v) + \"\\u{FFFD}\",\n            _ => {\n                let (chunks, remainder) = v.as_chunks::<2>();\n                let string = char::decode_utf16(chunks.iter().copied().map(u16::from_be_bytes))\n                    .map(|r| r.unwrap_or(char::REPLACEMENT_CHARACTER))\n                    .collect();\n                if remainder.is_empty() { string } else { string + \"\\u{FFFD}\" }\n            }\n        }\n    }",
+  "mir": "fn string::String::from_utf16be_lossy(_1: &[u8]) -> string::String {\n    let mut _0: string::String;\n    let mut _2: (bool, (&[u8], &[u16], &[u8]));\n    let mut _3: (&[u8], &[u16], &[u8]);\n    let mut _4: *const [u8];\n    let mut _5: usize;\n    let mut _6: *const [u8];\n    let mut _7: usize;\n    let mut _8: *const [u8];\n    let mut _9: usize;\n    let  _10: &[u16];\n    let  _11: &[u16];\n    let  _12: &u8;\n    let mut _13: string::String;\n    let mut _14: &str;\n    let  _15: &[[u8; 2]];\n    let  _16: &[u8];\n    let mut _17: (&[[u8; 2]], &[u8]);\n    let  _18: string::String;\n    let mut _19: core::iter::Map<core::char::DecodeUtf16<core::iter::Map<core::iter::Copied<core::slice::Iter<'_, [u8; 2]>>, fn([u8; core::::num::{impl#7}::from_be_bytes::{constant#0}]) -> u16 {core::num::<impl u16>::from_be_bytes}>>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:907:26: 907:29}>;\n    let mut _20: core::char::DecodeUtf16<core::iter::Map<core::iter::Copied<core::slice::Iter<'_, [u8; 2]>>, fn([u8; core::::num::{impl#7}::from_be_bytes::{constant#0}]) -> u16 {core::num::<impl u16>::from_be_bytes}>>;\n    let mut _21: core::iter::Map<core::iter::Copied<core::slice::Iter<'_, [u8; 2]>>, fn([u8; core::::num::{impl#7}::from_be_bytes::{constant#0}]) -> u16 {core::num::<impl u16>::from_be_bytes}>;\n    let mut _22: core::iter::Copied<core::slice::Iter<'_, [u8; 2]>>;\n    let mut _23: core::slice::Iter<'_, [u8; 2]>;\n    let mut _24: bool;\n    let mut _25: &str;\n    let mut _26: &[u8];\n    let mut _27: &[u8];\n    let mut _28: &[u8];\n    let mut _29: &[u8];\n    debug v => _1;\n    debug v => _10;\n    debug v => _11;\n    debug _remainder => _12;\n    debug chunks => _15;\n    debug remainder => _16;\n    debug string => _18;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = core::slice::<impl [u8]>::align_to::<u16>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = (false, move _3);\n        StorageDead(_3);\n        switchInt((_2.0: bool)) -> [0: bb2, otherwise: bb3];\n    }\n    bb2: {\n        StorageLive(_17);\n        _17 = core::slice::<impl [u8]>::as_chunks::<2>(_1) -> [return: bb11, unwind unreachable];\n    }\n    bb3: {\n        _26 = ((_2.1: (&[u8], &[u16], &[u8])).0: &[u8]);\n        _8 = &raw const (fake) (*_26);\n        _9 = PtrMetadata(move _8);\n        switchInt(_9) -> [0: bb4, otherwise: bb2];\n    }\n    bb4: {\n        _27 = ((_2.1: (&[u8], &[u16], &[u8])).2: &[u8]);\n        _6 = &raw const (fake) (*_27);\n        _7 = PtrMetadata(move _6);\n        switchInt(_7) -> [0: bb7, otherwise: bb5];\n    }\n    bb5: {\n        _28 = ((_2.1: (&[u8], &[u16], &[u8])).2: &[u8]);\n        _4 = &raw const (fake) (*_28);\n        _5 = PtrMetadata(move _4);\n        switchInt(_5) -> [1: bb6, otherwise: bb2];\n    }\n    bb6: {\n        _11 = ((_2.1: (&[u8], &[u16], &[u8])).1: &[u16]);\n        StorageLive(_12);\n        _29 = ((_2.1: (&[u8], &[u16], &[u8])).2: &[u8]);\n        _12 = &(*_29)[0 of 1];\n        StorageLive(_13);\n        _13 = string::String::from_utf16_lossy(_11) -> [return: bb9, unwind unreachable];\n    }\n    bb7: {\n        _10 = ((_2.1: (&[u8], &[u16], &[u8])).1: &[u16]);\n        _0 = string::String::from_utf16_lossy(_10) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        goto -> bb23;\n    }\n    bb9: {\n        StorageLive(_14);\n        _14 = \"�\";\n        _0 = <string::String as core::ops::Add<&str>>::add(move _13, move _14) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_12);\n        goto -> bb23;\n    }\n    bb11: {\n        _15 = (_17.0: &[[u8; 2]]);\n        _16 = (_17.1: &[u8]);\n        StorageDead(_17);\n        StorageLive(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = core::slice::<impl [[u8; 2]]>::iter(_15) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        _22 = <core::slice::Iter<'_, [u8; 2]> as core::iter::Iterator>::copied::<'_, [u8; 2]>(move _23) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_23);\n        _21 = <core::iter::Copied<core::slice::Iter<'_, [u8; 2]>> as core::iter::Iterator>::map::<u16, fn([u8; core::::num::{impl#7}::from_be_bytes::{constant#0}]) -> u16 {core::num::<impl u16>::from_be_bytes}>(move _22, core::num::<impl u16>::from_be_bytes) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_22);\n        _20 = core::char::methods::<impl char>::decode_utf16::<core::iter::Map<core::iter::Copied<core::slice::Iter<'_, [u8; 2]>>, fn([u8; core::::num::{impl#7}::from_be_bytes::{constant#0}]) -> u16 {core::num::<impl u16>::from_be_bytes}>>(move _21) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_21);\n        _19 = <core::char::DecodeUtf16<core::iter::Map<core::iter::Copied<core::slice::Iter<'_, [u8; 2]>>, fn([u8; core::::num::{impl#7}::from_be_bytes::{constant#0}]) -> u16 {core::num::<impl u16>::from_be_bytes}>> as core::iter::Iterator>::map::<char, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:907:26: 907:29}>(move _20, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:907:26: 907:29}) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_20);\n        _18 = <core::iter::Map<core::char::DecodeUtf16<core::iter::Map<core::iter::Copied<core::slice::Iter<'_, [u8; 2]>>, fn([u8; core::::num::{impl#7}::from_be_bytes::{constant#0}]) -> u16 {core::num::<impl u16>::from_be_bytes}>>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:907:26: 907:29}> as core::iter::Iterator>::collect::<string::String>(move _19) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_19);\n        StorageLive(_24);\n        _24 = core::slice::<impl [u8]>::is_empty(_16) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        switchInt(move _24) -> [0: bb20, otherwise: bb19];\n    }\n    bb19: {\n        _0 = _18;\n        goto -> bb22;\n    }\n    bb20: {\n        StorageLive(_25);\n        _25 = \"�\";\n        _0 = <string::String as core::ops::Add<&str>>::add(_18, move _25) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_25);\n        goto -> bb22;\n    }\n    bb22: {\n        StorageDead(_24);\n        goto -> bb23;\n    }\n    bb23: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Decode a UTF-16BE–encoded slice `v` into a `String`, replacing\n invalid data with [the replacement character (`U+FFFD`)][U+FFFD].\n\n Unlike [`from_utf8_lossy`] which returns a [`Cow<'a, str>`],\n `from_utf16le_lossy` returns a `String` since the UTF-16 to UTF-8\n conversion requires a memory allocation.\n\n [`from_utf8_lossy`]: String::from_utf8_lossy\n [`Cow<'a, str>`]: crate::borrow::Cow \"borrow::Cow\"\n [U+FFFD]: core::char::REPLACEMENT_CHARACTER\n\n # Examples\n\n Basic usage:\n\n ```\n #![feature(str_from_utf16_endian)]\n // 𝄞mus<invalid>ic<invalid>\n let v = &[0xD8, 0x34, 0xDD, 0x1E, 0x00, 0x6d, 0x00, 0x75,\n           0x00, 0x73, 0xDD, 0x1E, 0x00, 0x69, 0x00, 0x63,\n           0xD8, 0x34];\n\n assert_eq!(String::from(\"𝄞mus\\u{FFFD}ic\\u{FFFD}\"),\n            String::from_utf16be_lossy(v));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

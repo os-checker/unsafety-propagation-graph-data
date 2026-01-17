@@ -1,0 +1,63 @@
+{
+  "name": "time::SystemTime::duration_since",
+  "safe": true,
+  "callees": {
+    "sys::pal::unix::time::SystemTime::sub_time": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::pal::unix::time::SystemTime": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::map_err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps a `Result<T, E>` to `Result<T, F>` by applying a function to a\n contained [`Err`] value, leaving an [`Ok`] value untouched.\n\n This function can be used to pass through a successful result while handling\n an error.\n\n\n # Examples\n\n ```\n fn stringify(x: u32) -> String { format!(\"error code: {x}\") }\n\n let x: Result<u32, u32> = Ok(2);\n assert_eq!(x.map_err(stringify), Ok(2));\n\n let x: Result<u32, u32> = Err(13);\n assert_eq!(x.map_err(stringify), Err(\"error code: 13\".to_string()));\n ```\n",
+      "adt": {}
+    },
+    "time::SystemTimeError": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An error returned from the `duration_since` and `elapsed` methods on\n `SystemTime`, used to learn how far in the opposite direction a system time\n lies.\n\n # Examples\n\n ```no_run\n use std::thread::sleep;\n use std::time::{Duration, SystemTime};\n\n let sys_time = SystemTime::now();\n sleep(Duration::from_secs(1));\n let new_sys_time = SystemTime::now();\n match sys_time.duration_since(new_sys_time) {\n     Ok(_) => {}\n     Err(e) => println!(\"SystemTimeError difference: {:?}\", e.duration()),\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sys::pal::unix::time::SystemTime": [
+      "Ref"
+    ],
+    "time::SystemTime": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Unknown([Field(0, Ty { id: 4151, kind: RigidTy(Adt(AdtDef(DefId { id: 6224, name: \"sys::pal::unix::time::SystemTime\" }), GenericArgs([]))) })])",
+      "Ref",
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 4617,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/time.rs:554:5: 556:6",
+  "src": "pub fn duration_since(&self, earlier: SystemTime) -> Result<Duration, SystemTimeError> {\n        self.0.sub_time(&earlier.0).map_err(SystemTimeError)\n    }",
+  "mir": "fn time::SystemTime::duration_since(_1: &time::SystemTime, _2: time::SystemTime) -> core::result::Result<core::time::Duration, time::SystemTimeError> {\n    let mut _0: core::result::Result<core::time::Duration, time::SystemTimeError>;\n    let mut _3: core::result::Result<core::time::Duration, core::time::Duration>;\n    let mut _4: &sys::pal::unix::time::SystemTime;\n    let  _5: &sys::pal::unix::time::SystemTime;\n    debug self => _1;\n    debug earlier => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &((*_1).0: sys::pal::unix::time::SystemTime);\n        _5 = &(_2.0: sys::pal::unix::time::SystemTime);\n        _3 = sys::pal::unix::time::SystemTime::sub_time(move _4, _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _0 = core::result::Result::<core::time::Duration, core::time::Duration>::map_err::<time::SystemTimeError, fn(core::time::Duration) -> time::SystemTimeError {time::SystemTimeError}>(move _3, time::SystemTimeError) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Returns the amount of time elapsed from an earlier point in time.\n\n This function may fail because measurements taken earlier are not\n guaranteed to always be before later measurements (due to anomalies such\n as the system clock being adjusted either forwards or backwards).\n [`Instant`] can be used to measure elapsed time without this risk of failure.\n\n If successful, <code>[Ok]\\([Duration])</code> is returned where the duration represents\n the amount of time elapsed from the specified measurement to this one.\n\n Returns an [`Err`] if `earlier` is later than `self`, and the error\n contains how far from `self` the time is.\n\n # Examples\n\n ```no_run\n use std::time::SystemTime;\n\n let sys_time = SystemTime::now();\n let new_sys_time = SystemTime::now();\n let difference = new_sys_time.duration_since(sys_time)\n     .expect(\"Clock may have gone backwards\");\n println!(\"{difference:?}\");\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "error::Request::<'a>::would_be_satisfied_by_ref_of",
+  "safe": true,
+  "callees": {
+    "error::Request::<'a>::would_be_satisfied_by": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "error::Request": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "error::Request": [
+      "Ref"
+    ]
+  },
+  "path": 12730,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/error.rs:873:5: 878:6",
+  "src": "pub fn would_be_satisfied_by_ref_of<T>(&self) -> bool\n    where\n        T: ?Sized + 'static,\n    {\n        self.would_be_satisfied_by::<tags::Ref<tags::MaybeSizedValue<T>>>()\n    }",
+  "mir": "fn error::Request::<'a>::would_be_satisfied_by_ref_of(_1: &error::Request<'_>) -> bool {\n    let mut _0: bool;\n    debug self => _1;\n    bb0: {\n        _0 = error::Request::<'_>::would_be_satisfied_by::<error::tags::Ref<error::tags::MaybeSizedValue<T>>>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Checks if the `Request` would be satisfied if provided with a\n reference to a value of the specified type.\n\n If the type does not match or has already been provided, returns false.\n\n # Examples\n\n Checks if a `&str` still needs to be provided and then provides\n it.\n\n ```rust\n #![feature(error_generic_member_access)]\n\n use core::error::Request;\n use core::error::request_ref;\n\n #[derive(Debug)]\n struct Parent(Option<String>);\n\n impl std::fmt::Display for Parent {\n     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {\n         write!(f, \"a parent failed\")\n     }\n }\n\n impl std::error::Error for Parent {\n     fn provide<'a>(&'a self, request: &mut Request<'a>) {\n         if let Some(v) = &self.0 {\n             request.provide_ref::<str>(v);\n         }\n     }\n }\n\n #[derive(Debug)]\n struct Child {\n     parent: Parent,\n     name: String,\n }\n\n impl Child {\n     // Pretend that this takes a lot of resources to evaluate.\n     fn an_expensive_computation(&self) -> Option<&str> {\n         Some(&self.name)\n     }\n }\n\n impl std::fmt::Display for Child {\n     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {\n         write!(f, \"{} failed: \\n  {}\", self.name, self.parent)\n     }\n }\n\n impl std::error::Error for Child {\n     fn provide<'a>(&'a self, request: &mut Request<'a>) {\n         // In general, we don't know if this call will provide\n         // a `str` reference or not...\n         self.parent.provide(request);\n\n         // ...so we check to see if the `&str` is needed before\n         // we run our expensive computation.\n         if request.would_be_satisfied_by_ref_of::<str>() {\n             if let Some(v) = self.an_expensive_computation() {\n                 request.provide_ref::<str>(v);\n             }\n         }\n\n         // The request will be satisfied now, regardless of if\n         // the parent provided the reference or we did.\n         assert!(!request.would_be_satisfied_by_ref_of::<str>());\n     }\n }\n\n let parent = Parent(Some(\"parent\".into()));\n let child = Child { parent, name: \"child\".into() };\n assert_eq!(Some(\"parent\"), request_ref::<str>(&child));\n\n let parent = Parent(None);\n let child = Child { parent, name: \"child\".into() };\n assert_eq!(Some(\"child\"), request_ref::<str>(&child));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

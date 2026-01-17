@@ -1,0 +1,43 @@
+{
+  "name": "<boxed::Box<T, A> as core::alloc::Allocator>::grow",
+  "safe": false,
+  "callees": {
+    "core::alloc::Allocator::grow": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to extend the memory block.\n\n Returns a new [`NonNull<[u8]>`][NonNull] containing a pointer and the actual size of the allocated\n memory. The pointer is suitable for holding data described by `new_layout`. To accomplish\n this, the allocator may extend the allocation referenced by `ptr` to fit the new layout.\n\n If this returns `Ok`, then ownership of the memory block referenced by `ptr` has been\n transferred to this allocator. Any access to the old `ptr` is Undefined Behavior, even if the\n allocation was grown in-place. The newly returned pointer is the only valid pointer\n for accessing this memory now.\n\n If this method returns `Err`, then ownership of the memory block has not been transferred to\n this allocator, and the contents of the memory block are unaltered.\n\n # Safety\n\n * `ptr` must denote a block of memory [*currently allocated*] via this allocator.\n * `old_layout` must [*fit*] that block of memory (The `new_layout` argument need not fit it.).\n * `new_layout.size()` must be greater than or equal to `old_layout.size()`.\n\n Note that `new_layout.align()` need not be the same as `old_layout.align()`.\n\n [*currently allocated*]: #currently-allocated-memory\n [*fit*]: #memory-fitting\n\n # Errors\n\n Returns `Err` if the new layout does not meet the allocator's size and alignment\n constraints of the allocator, or if growing otherwise fails.\n\n Implementations are encouraged to return `Err` on memory exhaustion rather than panicking or\n aborting, but this is not a strict requirement. (Specifically: it is *legal* to implement\n this trait atop an underlying native allocation library that aborts on memory exhaustion.)\n\n Clients wishing to abort computation in response to an allocation error are encouraged to\n call the [`handle_alloc_error`] function, rather than directly invoking `panic!` or similar.\n\n [`handle_alloc_error`]: ../../alloc/alloc/fn.handle_alloc_error.html\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "boxed::Box": [
+      "Plain",
+      "Deref",
+      "Unknown([Field(0, Ty { id: 176, kind: RigidTy(Adt(AdtDef(DefId { id: 2645, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) }), Field(0, Ty { id: 101, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])",
+      "Ref"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 285,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed.rs:2385:5: 2393:6",
+  "src": "unsafe fn grow(\n        &self,\n        ptr: NonNull<u8>,\n        old_layout: Layout,\n        new_layout: Layout,\n    ) -> Result<NonNull<[u8]>, AllocError> {\n        // SAFETY: the safety contract must be upheld by the caller\n        unsafe { (**self).grow(ptr, old_layout, new_layout) }\n    }",
+  "mir": "fn <boxed::Box<T, A> as core::alloc::Allocator>::grow(_1: &boxed::Box<T, A>, _2: core::ptr::NonNull<u8>, _3: core::alloc::Layout, _4: core::alloc::Layout) -> core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError> {\n    let mut _0: core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError>;\n    let mut _5: &T;\n    let mut _6: boxed::Box<T, A>;\n    let mut _7: *const T;\n    debug self => _1;\n    debug ptr => _2;\n    debug old_layout => _3;\n    debug new_layout => _4;\n    bb0: {\n        StorageLive(_5);\n        _6 = (*_1);\n        _7 = ((_6.0: core::ptr::Unique<T>).0: core::ptr::NonNull<T>) as *const T;\n        _5 = &(*_7);\n        _0 = <T as core::alloc::Allocator>::grow(move _5, _2, _3, _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

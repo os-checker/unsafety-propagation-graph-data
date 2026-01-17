@@ -1,0 +1,65 @@
+{
+  "name": "<char as iter::range::Step>::backward_checked",
+  "safe": true,
+  "callees": {
+    "iter::range::Step::backward_checked": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the value that would be obtained by taking the *predecessor*\n of `self` `count` times.\n\n If this would overflow the range of values supported by `Self`, returns `None`.\n\n # Invariants\n\n For any `a`, `n`, and `m`:\n\n * `Step::backward_checked(a, n).and_then(|x| Step::backward_checked(x, m)) == n.checked_add(m).and_then(|x| Step::backward_checked(a, x))`\n * `Step::backward_checked(a, n).and_then(|x| Step::backward_checked(x, m)) == try { Step::backward_checked(a, n.checked_add(m)?) }`\n\n For any `a` and `n`:\n\n * `Step::backward_checked(a, n) == (0..n).try_fold(a, |x, _| Step::backward_checked(x, 1))`\n   * Corollary: `Step::backward_checked(a, 0) == Some(a)`\n",
+      "adt": {}
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "char::methods::<impl char>::from_u32_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a `u32` to a `char`, ignoring validity.\n\n Note that all `char`s are valid [`u32`]s, and can be cast to one with\n `as`:\n\n ```\n let c = '💯';\n let i = c as u32;\n\n assert_eq!(128175, i);\n ```\n\n However, the reverse is not true: not all valid [`u32`]s are valid\n `char`s. `from_u32_unchecked()` will ignore this, and blindly cast to\n `char`, possibly creating an invalid one.\n\n # Safety\n\n This function is unsafe, as it may construct invalid `char` values.\n\n For a safe version of this function, see the [`from_u32`] function.\n\n [`from_u32`]: #method.from_u32\n\n # Examples\n\n Basic usage:\n\n ```\n let c = unsafe { char::from_u32_unchecked(0x2764) };\n\n assert_eq!('❤', c);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 20, kind: RigidTy(Uint(U32)) })])"
+    ]
+  },
+  "path": 1453,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/range.rs:487:5: 496:6",
+  "src": "fn backward_checked(start: char, count: usize) -> Option<char> {\n        let start = start as u32;\n        let mut res = Step::backward_checked(start, count)?;\n        if start >= 0xE000 && 0xE000 > res {\n            res = Step::backward_checked(res, 0x800)?;\n        }\n        // SAFETY: res is a valid unicode scalar\n        // (below 0x110000 and not in 0xD800..0xE000)\n        Some(unsafe { char::from_u32_unchecked(res) })\n    }",
+  "mir": "fn <char as iter::range::Step>::backward_checked(_1: char, _2: usize) -> option::Option<char> {\n    let mut _0: option::Option<char>;\n    let  _3: u32;\n    let mut _4: u32;\n    let mut _5: ops::control_flow::ControlFlow<option::Option<convert::Infallible>, u32>;\n    let mut _6: option::Option<u32>;\n    let mut _7: isize;\n    let  _8: u32;\n    let mut _9: bool;\n    let mut _10: bool;\n    let mut _11: u32;\n    let mut _12: ops::control_flow::ControlFlow<option::Option<convert::Infallible>, u32>;\n    let mut _13: option::Option<u32>;\n    let mut _14: u32;\n    let mut _15: isize;\n    let  _16: u32;\n    let mut _17: char;\n    let mut _18: u32;\n    debug start => _1;\n    debug count => _2;\n    debug start => _3;\n    debug res => _4;\n    debug residual => option::Option::<convert::Infallible>::None;\n    debug val => _8;\n    debug residual => option::Option::<convert::Infallible>::None;\n    debug val => _16;\n    bb0: {\n        _3 = _1 as u32;\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = <u32 as iter::range::Step>::backward_checked(_3, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = <option::Option<u32> as ops::try_trait::Try>::branch(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _7 = discriminant(_5);\n        switchInt(move _7) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        StorageLive(_8);\n        _8 = ((_5 as variant#0).0: u32);\n        _4 = _8;\n        StorageDead(_8);\n        StorageDead(_5);\n        StorageLive(_9);\n        _9 = Ge(_3, 57344_u32);\n        switchInt(move _9) -> [0: bb8, otherwise: bb7];\n    }\n    bb5: {\n        _0 = <option::Option<char> as ops::try_trait::FromResidual<option::Option<convert::Infallible>>>::from_residual(option::Option::<convert::Infallible>::None) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_5);\n        goto -> bb18;\n    }\n    bb7: {\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = _4;\n        _10 = Gt(57344_u32, move _11);\n        switchInt(move _10) -> [0: bb15, otherwise: bb9];\n    }\n    bb8: {\n        goto -> bb16;\n    }\n    bb9: {\n        StorageDead(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = _4;\n        _13 = <u32 as iter::range::Step>::backward_checked(move _14, 2048_usize) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_14);\n        _12 = <option::Option<u32> as ops::try_trait::Try>::branch(move _13) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_13);\n        _15 = discriminant(_12);\n        switchInt(move _15) -> [0: bb12, 1: bb13, otherwise: bb3];\n    }\n    bb12: {\n        _16 = ((_12 as variant#0).0: u32);\n        _4 = _16;\n        StorageDead(_12);\n        goto -> bb16;\n    }\n    bb13: {\n        _0 = <option::Option<char> as ops::try_trait::FromResidual<option::Option<convert::Infallible>>>::from_residual(option::Option::<convert::Infallible>::None) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_12);\n        StorageDead(_10);\n        StorageDead(_9);\n        goto -> bb18;\n    }\n    bb15: {\n        StorageDead(_11);\n        goto -> bb16;\n    }\n    bb16: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = _4;\n        _17 = char::methods::<impl char>::from_u32_unchecked(move _18) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_18);\n        _0 = option::Option::Some(move _17);\n        StorageDead(_17);\n        StorageDead(_4);\n        goto -> bb19;\n    }\n    bb18: {\n        StorageDead(_4);\n        goto -> bb19;\n    }\n    bb19: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

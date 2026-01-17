@@ -1,0 +1,69 @@
+{
+  "name": "<rc::Weak<T, A> as core::clone::Clone>::clone",
+  "safe": true,
+  "callees": {
+    "rc::Weak::<T, A>::inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `None` when the pointer is dangling and there is no allocated `RcInner`,\n (i.e., when this `Weak` was created by `Weak::new`).\n",
+      "adt": {
+        "rc::Weak": "ImmutableAsArgument",
+        "core::option::Option": "Constructor",
+        "rc::WeakInner": "Constructor"
+      }
+    },
+    "rc::RcInnerPtr::inc_weak": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "rc::Weak": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 8056, kind: RigidTy(Adt(AdtDef(DefId { id: 5190, name: \"rc::WeakInner\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])"
+    ],
+    "rc::WeakInner": [
+      "Plain",
+      "Ref"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 1837,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:3677:5: 3682:6",
+  "src": "fn clone(&self) -> Weak<T, A> {\n        if let Some(inner) = self.inner() {\n            inner.inc_weak()\n        }\n        Weak { ptr: self.ptr, alloc: self.alloc.clone() }\n    }",
+  "mir": "fn <rc::Weak<T, A> as core::clone::Clone>::clone(_1: &rc::Weak<T, A>) -> rc::Weak<T, A> {\n    let mut _0: rc::Weak<T, A>;\n    let  _2: ();\n    let mut _3: core::option::Option<rc::WeakInner<'_>>;\n    let mut _4: isize;\n    let  _5: rc::WeakInner<'_>;\n    let mut _6: &rc::WeakInner<'_>;\n    let mut _7: core::ptr::NonNull<rc::RcInner<T>>;\n    let mut _8: A;\n    let mut _9: &A;\n    debug self => _1;\n    debug inner => _5;\n    bb0: {\n        StorageLive(_3);\n        _3 = rc::Weak::<T, A>::inner(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = discriminant(_3);\n        switchInt(move _4) -> [1: bb2, 0: bb4, otherwise: bb7];\n    }\n    bb2: {\n        StorageLive(_5);\n        _5 = move ((_3 as variant#1).0: rc::WeakInner<'_>);\n        StorageLive(_6);\n        _6 = &_5;\n        _2 = <rc::WeakInner<'_> as rc::RcInnerPtr>::inc_weak(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_3);\n        goto -> bb5;\n    }\n    bb4: {\n        StorageDead(_3);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageLive(_7);\n        _7 = ((*_1).0: core::ptr::NonNull<rc::RcInner<T>>);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &((*_1).1: A);\n        _8 = <A as core::clone::Clone>::clone(move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_9);\n        _0 = Weak(move _7, move _8);\n        StorageDead(_8);\n        StorageDead(_7);\n        return;\n    }\n    bb7: {\n        unreachable;\n    }\n}\n",
+  "doc": " Makes a clone of the `Weak` pointer that points to the same allocation.\n\n # Examples\n\n ```\n use std::rc::{Rc, Weak};\n\n let weak_five = Rc::downgrade(&Rc::new(5));\n\n let _ = Weak::clone(&weak_five);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

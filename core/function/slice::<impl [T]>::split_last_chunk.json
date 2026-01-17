@@ -1,0 +1,64 @@
+{
+  "name": "slice::<impl [T]>::split_last_chunk",
+  "safe": true,
+  "callees": {
+    "num::<impl usize>::checked_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checked integer subtraction. Computes `self - rhs`, returning\n `None` if overflow occurred.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "slice::<impl [T]>::split_at": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.  For a non-panicking alternative see\n [`split_at_checked`](slice::split_at_checked).\n\n # Examples\n\n ```\n let v = ['a', 'b', 'c'];\n\n {\n    let (left, right) = v.split_at(0);\n    assert_eq!(left, []);\n    assert_eq!(right, ['a', 'b', 'c']);\n }\n\n {\n     let (left, right) = v.split_at(2);\n     assert_eq!(left, ['a', 'b']);\n     assert_eq!(right, ['c']);\n }\n\n {\n     let (left, right) = v.split_at(3);\n     assert_eq!(left, ['a', 'b', 'c']);\n     assert_eq!(right, []);\n }\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::cast_array": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts from a pointer-to-`T` to a pointer-to-`[T; N]`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ]
+  },
+  "path": 1316,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:446:5: 453:6",
+  "src": "pub const fn split_last_chunk<const N: usize>(&self) -> Option<(&[T], &[T; N])> {\n        let Some(index) = self.len().checked_sub(N) else { return None };\n        let (init, last) = self.split_at(index);\n\n        // SAFETY: We explicitly check for the correct number of elements,\n        //   and do not let the references outlive the slice.\n        Some((init, unsafe { &*(last.as_ptr().cast_array()) }))\n    }",
+  "mir": "fn slice::<impl [T]>::split_last_chunk(_1: &[T]) -> option::Option<(&[T], &[T; N])> {\n    let mut _0: option::Option<(&[T], &[T; N])>;\n    let  _2: usize;\n    let mut _3: option::Option<usize>;\n    let mut _4: usize;\n    let mut _5: isize;\n    let  _6: &[T];\n    let  _7: &[T];\n    let mut _8: (&[T], &[T]);\n    let mut _9: (&[T], &[T; N]);\n    let  _10: &[T; N];\n    let  _11: *const [T; N];\n    let mut _12: *const T;\n    debug self => _1;\n    debug index => _2;\n    debug init => _6;\n    debug last => _7;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = PtrMetadata(_1);\n        _3 = num::<impl usize>::checked_sub(move _4, N) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [1: bb2, 0: bb3, otherwise: bb8];\n    }\n    bb2: {\n        _2 = ((_3 as variant#1).0: usize);\n        StorageDead(_3);\n        StorageLive(_8);\n        _8 = slice::<impl [T]>::split_at(_1, _2) -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        _0 = option::Option::None;\n        goto -> bb7;\n    }\n    bb4: {\n        _6 = (_8.0: &[T]);\n        _7 = (_8.1: &[T]);\n        StorageDead(_8);\n        StorageLive(_9);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = slice::<impl [T]>::as_ptr(_7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _11 = ptr::const_ptr::<impl *const T>::cast_array::<N>(move _12) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_12);\n        _10 = &(*_11);\n        StorageDead(_11);\n        _9 = (_6, _10);\n        _0 = option::Option::Some(move _9);\n        StorageDead(_9);\n        goto -> bb7;\n    }\n    bb7: {\n        return;\n    }\n    bb8: {\n        unreachable;\n    }\n}\n",
+  "doc": " Returns an array reference to the last `N` items in the slice and the remaining slice.\n\n If the slice is not at least `N` in length, this will return `None`.\n\n # Examples\n\n ```\n let x = &[0, 1, 2];\n\n if let Some((elements, last)) = x.split_last_chunk::<2>() {\n     assert_eq!(elements, &[0]);\n     assert_eq!(last, &[1, 2]);\n }\n\n assert_eq!(None, x.split_last_chunk::<4>());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

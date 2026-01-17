@@ -1,0 +1,72 @@
+{
+  "name": "os::unix::fs::FileExt::read_exact_at",
+  "safe": true,
+  "callees": {
+    "core::slice::<impl [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the slice has a length of 0.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n assert!(!a.is_empty());\n\n let b: &[i32] = &[];\n assert!(b.is_empty());\n ```\n",
+      "adt": {}
+    },
+    "os::unix::fs::FileExt::read_at": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads a number of bytes starting from a given offset.\n\n Returns the number of bytes read.\n\n The offset is relative to the start of the file and thus independent\n from the current cursor.\n\n The current file cursor is not affected by this function.\n\n Note that similar to [`File::read`], it is not an error to return with a\n short read.\n\n [`File::read`]: fs::File::read\n\n # Examples\n\n ```no_run\n use std::io;\n use std::fs::File;\n use std::os::unix::prelude::FileExt;\n\n fn main() -> io::Result<()> {\n     let mut buf = [0u8; 8];\n     let file = File::open(\"foo.txt\")?;\n\n     // We now read 8 bytes from the offset 10.\n     let num_bytes_read = file.read_at(&mut buf, 10)?;\n     println!(\"read {num_bytes_read} bytes: {buf:?}\");\n     Ok(())\n }\n ```\n",
+      "adt": {}
+    },
+    "io::error::Error::is_interrupted": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::error::Error": "ImmutableAsArgument"
+      }
+    },
+    "core::ops::IndexMut::index_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the mutable indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })])"
+    ],
+    "io::error::Error": [
+      "Ref",
+      "Plain"
+    ],
+    "core::ops::RangeFrom": [
+      "Plain"
+    ]
+  },
+  "path": "os::unix::fs::FileExt::read_exact_at",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/os/unix/fs.rs:118:5: 132:6",
+  "src": "fn read_exact_at(&self, mut buf: &mut [u8], mut offset: u64) -> io::Result<()> {\n        while !buf.is_empty() {\n            match self.read_at(buf, offset) {\n                Ok(0) => break,\n                Ok(n) => {\n                    let tmp = buf;\n                    buf = &mut tmp[n..];\n                    offset += n as u64;\n                }\n                Err(ref e) if e.is_interrupted() => {}\n                Err(e) => return Err(e),\n            }\n        }\n        if !buf.is_empty() { Err(io::Error::READ_EXACT_EOF) } else { Ok(()) }\n    }",
+  "mir": "fn os::unix::fs::FileExt::read_exact_at(_1: &Self, _2: &mut [u8], _3: u64) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let mut _4: bool;\n    let mut _5: &[u8];\n    let mut _6: core::result::Result<usize, io::error::Error>;\n    let mut _7: &mut [u8];\n    let mut _8: u64;\n    let mut _9: isize;\n    let  _10: usize;\n    let  _11: &mut [u8];\n    let mut _12: &mut [u8];\n    let mut _13: core::ops::RangeFrom<usize>;\n    let mut _14: u64;\n    let mut _15: (u64, bool);\n    let  _16: &io::error::Error;\n    let  _17: &&io::error::Error;\n    let mut _18: bool;\n    let  _19: io::error::Error;\n    let mut _20: bool;\n    let mut _21: &[u8];\n    let mut _22: &io::error::Error;\n    let mut _23: bool;\n    let mut _24: isize;\n    debug self => _1;\n    debug buf => _2;\n    debug offset => _3;\n    debug n => _10;\n    debug tmp => _11;\n    debug e => _16;\n    debug e => _17;\n    debug e => _19;\n    bb0: {\n        _23 = false;\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_2);\n        _4 = core::slice::<impl [u8]>::is_empty(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _4) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_5);\n        goto -> bb16;\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = _2;\n        StorageLive(_8);\n        _8 = _3;\n        _6 = <Self as os::unix::fs::FileExt>::read_at(_1, move _7, move _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _23 = true;\n        StorageDead(_8);\n        StorageDead(_7);\n        _9 = discriminant(_6);\n        switchInt(move _9) -> [0: bb7, 1: bb8, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        switchInt(((_6 as variant#0).0: usize)) -> [0: bb10, otherwise: bb9];\n    }\n    bb8: {\n        StorageLive(_17);\n        StorageLive(_16);\n        _16 = &((_6 as variant#1).0: io::error::Error);\n        _17 = &_16;\n        StorageLive(_18);\n        _22 = (*_17);\n        _18 = io::error::Error::is_interrupted(_22) -> [return: bb13, unwind unreachable];\n    }\n    bb9: {\n        _10 = ((_6 as variant#0).0: usize);\n        _11 = move _2;\n        StorageLive(_13);\n        _13 = RangeFrom(_10);\n        _12 = <[u8] as core::ops::IndexMut<core::ops::RangeFrom<usize>>>::index_mut(_11, move _13) -> [return: bb11, unwind unreachable];\n    }\n    bb10: {\n        _23 = false;\n        StorageDead(_6);\n        goto -> bb16;\n    }\n    bb11: {\n        StorageDead(_13);\n        _2 = _12;\n        StorageLive(_14);\n        _14 = _10 as u64;\n        _15 = CheckedAdd(_3, _14);\n        assert(!move (_15.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _3, move _14) -> [success: bb12, unwind unreachable];\n    }\n    bb12: {\n        _3 = move (_15.0: u64);\n        StorageDead(_14);\n        goto -> bb25;\n    }\n    bb13: {\n        switchInt(move _18) -> [0: bb15, otherwise: bb14];\n    }\n    bb14: {\n        StorageDead(_18);\n        StorageDead(_16);\n        StorageDead(_17);\n        goto -> bb25;\n    }\n    bb15: {\n        StorageDead(_18);\n        StorageDead(_16);\n        StorageDead(_17);\n        _23 = false;\n        _19 = move ((_6 as variant#1).0: io::error::Error);\n        _0 = core::result::Result::Err(_19);\n        _23 = false;\n        StorageDead(_6);\n        StorageDead(_4);\n        goto -> bb21;\n    }\n    bb16: {\n        StorageDead(_4);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = &(*_2);\n        _20 = core::slice::<impl [u8]>::is_empty(move _21) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        switchInt(move _20) -> [0: bb19, otherwise: bb18];\n    }\n    bb18: {\n        StorageDead(_21);\n        _0 = core::result::Result::Ok(());\n        goto -> bb20;\n    }\n    bb19: {\n        StorageDead(_21);\n        _0 = core::result::Result::Err(io::error::Error::READ_EXACT_EOF);\n        goto -> bb20;\n    }\n    bb20: {\n        StorageDead(_20);\n        goto -> bb21;\n    }\n    bb21: {\n        return;\n    }\n    bb22: {\n        _23 = false;\n        StorageDead(_6);\n        StorageDead(_4);\n        goto -> bb1;\n    }\n    bb23: {\n        switchInt(_23) -> [0: bb22, otherwise: bb24];\n    }\n    bb24: {\n        drop(((_6 as variant#1).0: io::error::Error)) -> [return: bb22, unwind unreachable];\n    }\n    bb25: {\n        _24 = discriminant(_6);\n        switchInt(move _24) -> [1: bb23, 0: bb22, otherwise: bb6];\n    }\n}\n",
+  "doc": " Reads the exact number of bytes required to fill `buf` from the given offset.\n\n The offset is relative to the start of the file and thus independent\n from the current cursor.\n\n The current file cursor is not affected by this function.\n\n Similar to [`io::Read::read_exact`] but uses [`read_at`] instead of `read`.\n\n [`read_at`]: FileExt::read_at\n\n # Errors\n\n If this function encounters an error of the kind\n [`io::ErrorKind::Interrupted`] then the error is ignored and the operation\n will continue.\n\n If this function encounters an \"end of file\" before completely filling\n the buffer, it returns an error of the kind [`io::ErrorKind::UnexpectedEof`].\n The contents of `buf` are unspecified in this case.\n\n If any other read error is encountered then this function immediately\n returns. The contents of `buf` are unspecified in this case.\n\n If this function returns an error, it is unspecified how many bytes it\n has read, but it will never read more than would be necessary to\n completely fill the buffer.\n\n # Examples\n\n ```no_run\n use std::io;\n use std::fs::File;\n use std::os::unix::prelude::FileExt;\n\n fn main() -> io::Result<()> {\n     let mut buf = [0u8; 8];\n     let file = File::open(\"foo.txt\")?;\n\n     // We now read exactly 8 bytes from the offset 10.\n     file.read_exact_at(&mut buf, 10)?;\n     println!(\"read {} bytes: {:?}\", buf.len(), buf);\n     Ok(())\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "sys::process::unix::common::os2c",
+  "safe": true,
+  "callees": {
+    "os::unix::ffi::os_str::OsStrExt::as_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the underlying byte view of the [`OsStr`] slice.\n\n See the module documentation for an example.\n",
+      "adt": {}
+    },
+    "alloc_crate::ffi::CString::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new C-compatible string from a container of bytes.\n\n This function will consume the provided data and use the\n underlying bytes to construct a new string, ensuring that\n there is a trailing 0 byte. This trailing 0 byte will be\n appended by this function; the provided data should *not*\n contain any 0 bytes in it.\n\n # Examples\n\n ```ignore (extern-declaration)\n use std::ffi::CString;\n use std::os::raw::c_char;\n\n extern \"C\" { fn puts(s: *const c_char); }\n\n let to_print = CString::new(\"Hello!\").expect(\"CString::new failed\");\n unsafe {\n     puts(to_print.as_ptr());\n }\n ```\n\n # Errors\n\n This function will return an error if the supplied bytes contain an\n internal 0 byte. The [`NulError`] returned will contain the bytes as well as\n the position of the nul byte.\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::unwrap_or_else": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value or computes it from a closure.\n\n\n # Examples\n\n ```\n fn count(x: &str) -> usize { x.len() }\n\n assert_eq!(Ok(2).unwrap_or_else(count), 2);\n assert_eq!(Err(\"foo\").unwrap_or_else(count), 3);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ffi::os_str::OsStr": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "alloc_crate::ffi::CString": [
+      "Plain"
+    ]
+  },
+  "path": 4116,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/process/unix/common.rs:369:1: 374:2",
+  "src": "fn os2c(s: &OsStr, saw_nul: &mut bool) -> CString {\n    CString::new(s.as_bytes()).unwrap_or_else(|_e| {\n        *saw_nul = true;\n        c\"<string-with-nul>\".to_owned()\n    })\n}",
+  "mir": "fn sys::process::unix::common::os2c(_1: &ffi::os_str::OsStr, _2: &mut bool) -> alloc_crate::ffi::CString {\n    let mut _0: alloc_crate::ffi::CString;\n    let mut _3: core::result::Result<alloc_crate::ffi::CString, alloc_crate::ffi::NulError>;\n    let mut _4: &[u8];\n    let mut _5: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/process/unix/common.rs:370:47: 370:51};\n    debug s => _1;\n    debug saw_nul => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = <ffi::os_str::OsStr as os::unix::ffi::os_str::OsStrExt>::as_bytes(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = alloc_crate::ffi::CString::new::<&[u8]>(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/process/unix/common.rs:370:47: 370:51}(_2);\n        _0 = core::result::Result::<alloc_crate::ffi::CString, alloc_crate::ffi::NulError>::unwrap_or_else::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/process/unix/common.rs:370:47: 370:51}>(move _3, move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

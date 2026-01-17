@@ -1,0 +1,159 @@
+{
+  "name": "sys::net::connection::socket::unix::cvt_gai",
+  "safe": true,
+  "callees": {
+    "sys::net::connection::socket::unix::on_resolver_failure": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "io::error::Error::last_os_error": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an error representing the last OS error which occurred.\n\n This function reads the value of `errno` for the target platform (e.g.\n `GetLastError` on Windows) and will return a corresponding instance of\n [`Error`] for the error code.\n\n This should be called immediately after a call to a platform function,\n otherwise the state of the error value is indeterminate. In particular,\n other standard library functions may call platform functions that may\n (or may not) reset the error value even if they succeed.\n\n # Examples\n\n ```\n use std::io::Error;\n\n let os_error = Error::last_os_error();\n println!(\"last OS error: {os_error:?}\");\n ```\n",
+      "adt": {
+        "io::error::Error": "Constructor"
+      }
+    },
+    "libc::gai_strerror": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::ffi::CStr::from_ptr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wraps a raw C string with a safe C string wrapper.\n\n This function will wrap the provided `ptr` with a `CStr` wrapper, which\n allows inspection and interoperation of non-owned C strings. The total\n size of the terminated buffer must be smaller than [`isize::MAX`] **bytes**\n in memory (a restriction from [`slice::from_raw_parts`]).\n\n # Safety\n\n * The memory pointed to by `ptr` must contain a valid nul terminator at the\n   end of the string.\n\n * `ptr` must be [valid] for reads of bytes up to and including the nul terminator.\n   This means in particular:\n\n     * The entire memory range of this `CStr` must be contained within a single allocation!\n     * `ptr` must be non-null even for a zero-length cstr.\n\n * The memory referenced by the returned `CStr` must not be mutated for\n   the duration of lifetime `'a`.\n\n * The nul terminator must be within `isize::MAX` from `ptr`\n\n > **Note**: This operation is intended to be a 0-cost cast but it is\n > currently implemented with an up-front calculation of the length of\n > the string. This is not guaranteed to always be the case.\n\n # Caveat\n\n The lifetime for the returned slice is inferred from its usage. To prevent accidental misuse,\n it's suggested to tie the lifetime to whichever source lifetime is safe in the context,\n such as by providing a helper function taking the lifetime of a host value for the slice,\n or by explicit annotation.\n\n # Examples\n\n ```\n use std::ffi::{c_char, CStr};\n\n fn my_string() -> *const c_char {\n     c\"hello\".as_ptr()\n }\n\n unsafe {\n     let slice = CStr::from_ptr(my_string());\n     assert_eq!(slice.to_str().unwrap(), \"hello\");\n }\n ```\n\n ```\n use std::ffi::{c_char, CStr};\n\n const HELLO_PTR: *const c_char = {\n     const BYTES: &[u8] = b\"Hello, world!\\0\";\n     BYTES.as_ptr().cast()\n };\n const HELLO: &CStr = unsafe { CStr::from_ptr(HELLO_PTR) };\n\n assert_eq!(c\"Hello, world!\", HELLO);\n ```\n\n [valid]: core::ptr#safety\n",
+      "adt": {}
+    },
+    "alloc_crate::ffi::c_str::<impl core::ffi::CStr>::to_string_lossy": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a `CStr` into a <code>[Cow]<[str]></code>.\n\n If the contents of the `CStr` are valid UTF-8 data, this\n function will return a <code>[Cow]::[Borrowed]\\(&[str])</code>\n with the corresponding <code>&[str]</code> slice. Otherwise, it will\n replace any invalid UTF-8 sequences with\n [`U+FFFD REPLACEMENT CHARACTER`][U+FFFD] and return a\n <code>[Cow]::[Owned]\\([String])</code> with the result.\n\n [str]: prim@str \"str\"\n [Borrowed]: Cow::Borrowed\n [Owned]: Cow::Owned\n [U+FFFD]: core::char::REPLACEMENT_CHARACTER \"std::char::REPLACEMENT_CHARACTER\"\n\n # Examples\n\n Calling `to_string_lossy` on a `CStr` containing valid UTF-8. The leading\n `c` on the string literal denotes a `CStr`.\n\n ```\n use std::borrow::Cow;\n\n assert_eq!(c\"Hello World\".to_string_lossy(), Cow::Borrowed(\"Hello World\"));\n ```\n\n Calling `to_string_lossy` on a `CStr` containing invalid UTF-8:\n\n ```\n use std::borrow::Cow;\n\n assert_eq!(\n     c\"Hello \\xF0\\x90\\x80World\".to_string_lossy(),\n     Cow::Owned(String::from(\"Hello �World\")) as Cow<'_, str>\n );\n ```\n",
+      "adt": {}
+    },
+    "core::fmt::rt::Argument::<'_>::new_display": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "alloc_crate::fmt::format": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes an [`Arguments`] struct and returns the resulting formatted string.\n\n The [`Arguments`] instance can be created with the [`format_args!`] macro.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::fmt;\n\n let s = fmt::format(format_args!(\"Hello, {}!\", \"world\"));\n assert_eq!(s, \"Hello, world!\");\n ```\n\n Please note that using [`format!`] might be preferable.\n Example:\n\n ```\n let s = format!(\"Hello, {}!\", \"world\");\n assert_eq!(s, \"Hello, world!\");\n ```\n\n [`format_args!`]: core::format_args\n [`format!`]: crate::format\n",
+      "adt": {}
+    },
+    "core::hint::must_use": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An identity function that causes an `unused_must_use` warning to be\n triggered if the given value is not used (returned, stored in a variable,\n etc) by the caller.\n\n This is primarily intended for use in macro-generated code, in which a\n [`#[must_use]` attribute][must_use] either on a type or a function would not\n be convenient.\n\n [must_use]: https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute\n\n # Example\n\n ```\n #![feature(hint_must_use)]\n\n use core::fmt;\n\n pub struct Error(/* ... */);\n\n #[macro_export]\n macro_rules! make_error {\n     ($($args:expr),*) => {\n         core::hint::must_use({\n             let error = $crate::make_error(core::format_args!($($args),*));\n             error\n         })\n     };\n }\n\n // Implementation detail of make_error! macro.\n #[doc(hidden)]\n pub fn make_error(args: fmt::Arguments<'_>) -> Error {\n     Error(/* ... */)\n }\n\n fn demo() -> Option<Error> {\n     if true {\n         // Oops, meant to write `return Some(make_error!(\"...\"));`\n         Some(make_error!(\"...\"));\n     }\n     None\n }\n #\n # // Make rustdoc not wrap the whole snippet in fn main, so that $crate::make_error works\n # fn main() {}\n ```\n\n In the above example, we'd like an `unused_must_use` lint to apply to the\n value created by `make_error!`. However, neither `#[must_use]` on a struct\n nor `#[must_use]` on a function is appropriate here, so the macro expands\n using `core::hint::must_use` instead.\n\n - We wouldn't want `#[must_use]` on the `struct Error` because that would\n   make the following unproblematic code trigger a warning:\n\n   ```\n   # struct Error;\n   #\n   fn f(arg: &str) -> Result<(), Error>\n   # { Ok(()) }\n\n   #[test]\n   fn t() {\n       // Assert that `f` returns error if passed an empty string.\n       // A value of type `Error` is unused here but that's not a problem.\n       f(\"\").unwrap_err();\n   }\n   ```\n\n - Using `#[must_use]` on `fn make_error` can't help because the return value\n   *is* used, as the right-hand side of a `let` statement. The `let`\n   statement looks useless but is in fact necessary for ensuring that\n   temporaries within the `format_args` expansion are not kept alive past the\n   creation of the `Error`, as keeping them alive past that point can cause\n   autotrait issues in async code:\n\n   ```\n   # #![feature(hint_must_use)]\n   #\n   # struct Error;\n   #\n   # macro_rules! make_error {\n   #     ($($args:expr),*) => {\n   #         core::hint::must_use({\n   #             // If `let` isn't used, then `f()` produces a non-Send future.\n   #             let error = make_error(core::format_args!($($args),*));\n   #             error\n   #         })\n   #     };\n   # }\n   #\n   # fn make_error(args: core::fmt::Arguments<'_>) -> Error {\n   #     Error\n   # }\n   #\n   async fn f() {\n       // Using `let` inside the make_error expansion causes temporaries like\n       // `unsync()` to drop at the semicolon of that `let` statement, which\n       // is prior to the await point. They would otherwise stay around until\n       // the semicolon on *this* statement, which is after the await point,\n       // and the enclosing Future would not implement Send.\n       log(make_error!(\"look: {:p}\", unsync())).await;\n   }\n\n   async fn log(error: Error) {/* ... */}\n\n   // Returns something without a Sync impl.\n   fn unsync() -> *const () {\n       0 as *const ()\n   }\n   #\n   # fn test() {\n   #     fn assert_send(_: impl Send) {}\n   #     assert_send(f());\n   # }\n   ```\n",
+      "adt": {}
+    },
+    "core::ops::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "io::error::Error::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new I/O error from a known kind of error as well as an\n arbitrary error payload.\n\n This function is used to generically create I/O errors which do not\n originate from the OS itself. The `error` argument is an arbitrary\n payload which will be contained in this [`Error`].\n\n Note that this function allocates memory on the heap.\n If no extra payload is required, use the `From` conversion from\n `ErrorKind`.\n\n # Examples\n\n ```\n use std::io::{Error, ErrorKind};\n\n // errors can be created from strings\n let custom_error = Error::new(ErrorKind::Other, \"oh no!\");\n\n // errors can also be created from other errors\n let custom_error2 = Error::new(ErrorKind::Interrupted, custom_error);\n\n // creating an error without payload (and without memory allocation)\n let eof_error = Error::from(ErrorKind::UnexpectedEof);\n ```\n",
+      "adt": {
+        "io::error::Error": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ],
+    "io::error::Error": [
+      "Plain"
+    ],
+    "core::ffi::CStr": [
+      "Ref"
+    ],
+    "alloc_crate::borrow::Cow": [
+      "Plain",
+      "Ref",
+      "Unknown([Field(0, Ty { id: 16409, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 3377, kind: RigidTy(Adt(AdtDef(DefId { id: 5837, name: \"alloc_crate::borrow::Cow\" }), GenericArgs([Lifetime(Region { kind: ReErased }), Type(Ty { id: 17, kind: RigidTy(Str) })]))) }, Not)) })])"
+    ],
+    "io::error::ErrorKind": [
+      "Plain"
+    ],
+    "core::fmt::rt::Argument": [
+      "Plain"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ],
+    "alloc_crate::string::String": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 3670,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/net/connection/socket/unix.rs:36:1: 63:2",
+  "src": "pub fn cvt_gai(err: c_int) -> io::Result<()> {\n    if err == 0 {\n        return Ok(());\n    }\n\n    // We may need to trigger a glibc workaround. See on_resolver_failure() for details.\n    on_resolver_failure();\n\n    #[cfg(not(any(target_os = \"espidf\", target_os = \"nuttx\")))]\n    if err == libc::EAI_SYSTEM {\n        return Err(io::Error::last_os_error());\n    }\n\n    #[cfg(not(any(target_os = \"espidf\", target_os = \"nuttx\")))]\n    let detail = unsafe {\n        // We can't always expect a UTF-8 environment. When we don't get that luxury,\n        // it's better to give a low-quality error message than none at all.\n        CStr::from_ptr(libc::gai_strerror(err)).to_string_lossy()\n    };\n\n    #[cfg(any(target_os = \"espidf\", target_os = \"nuttx\"))]\n    let detail = \"\";\n\n    Err(io::Error::new(\n        io::ErrorKind::Uncategorized,\n        &format!(\"failed to lookup address information: {detail}\")[..],\n    ))\n}",
+  "mir": "fn sys::net::connection::socket::unix::cvt_gai(_1: i32) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let  _2: ();\n    let mut _3: bool;\n    let mut _4: io::error::Error;\n    let  _5: alloc_crate::borrow::Cow<'_, str>;\n    let  _6: &core::ffi::CStr;\n    let mut _7: *const u8;\n    let mut _8: io::error::Error;\n    let mut _9: io::error::ErrorKind;\n    let  _10: &str;\n    let mut _11: &alloc_crate::string::String;\n    let  _12: alloc_crate::string::String;\n    let mut _13: alloc_crate::string::String;\n    let mut _14: core::fmt::Arguments<'_>;\n    let  _15: (&alloc_crate::borrow::Cow<'_, str>,);\n    let mut _16: &alloc_crate::borrow::Cow<'_, str>;\n    let  _17: [core::fmt::rt::Argument<'_>; 1];\n    let mut _18: core::fmt::rt::Argument<'_>;\n    let mut _19: &[u8; 41];\n    let  _20: &[core::fmt::rt::Argument<'_>; 1];\n    let mut _21: &alloc_crate::borrow::Cow<'_, str>;\n    debug err => _1;\n    debug detail => _5;\n    debug args => _15;\n    debug args => _17;\n    bb0: {\n        switchInt(_1) -> [0: bb1, otherwise: bb2];\n    }\n    bb1: {\n        _0 = core::result::Result::Ok(());\n        goto -> bb18;\n    }\n    bb2: {\n        _2 = sys::net::connection::socket::unix::on_resolver_failure() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_3);\n        _3 = Eq(_1, libc::EAI_SYSTEM);\n        switchInt(move _3) -> [0: bb6, otherwise: bb4];\n    }\n    bb4: {\n        StorageLive(_4);\n        _4 = io::error::Error::last_os_error() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = core::result::Result::Err(move _4);\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb18;\n    }\n    bb6: {\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_7);\n        _7 = libc::gai_strerror(_1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _6 = core::ffi::CStr::from_ptr::<'_>(move _7) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_7);\n        _5 = alloc_crate::ffi::c_str::<impl core::ffi::CStr>::to_string_lossy(_6) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = io::error::ErrorKind::Uncategorized;\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &_5;\n        _15 = (move _16);\n        StorageDead(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        _21 = (_15.0: &alloc_crate::borrow::Cow<'_, str>);\n        _18 = core::fmt::rt::Argument::<'_>::new_display::<alloc_crate::borrow::Cow<'_, str>>(_21) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _17 = [move _18];\n        StorageDead(_18);\n        StorageLive(_19);\n        _19 = b\"&failed to lookup address information: \\xc0\\x00\";\n        _20 = &_17;\n        _14 = core::fmt::Arguments::<'_>::new::<41, 1>(move _19, _20) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_19);\n        _13 = alloc_crate::fmt::format(move _14) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_17);\n        StorageDead(_15);\n        StorageDead(_14);\n        _12 = core::hint::must_use::<alloc_crate::string::String>(move _13) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        _11 = &_12;\n        StorageDead(_13);\n        _10 = <alloc_crate::string::String as core::ops::Index<core::ops::RangeFull>>::index(move _11, core::ops::RangeFull) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_11);\n        _8 = io::error::Error::new::<&str>(move _9, _10) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_9);\n        _0 = core::result::Result::Err(move _8);\n        drop(_12) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_12);\n        StorageDead(_8);\n        drop(_5) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_5);\n        goto -> bb18;\n    }\n    bb18: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

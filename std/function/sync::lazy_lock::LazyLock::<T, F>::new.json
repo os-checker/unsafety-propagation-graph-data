@@ -1,0 +1,65 @@
+{
+  "name": "sync::lazy_lock::LazyLock::<T, F>::new",
+  "safe": true,
+  "callees": {
+    "sync::once::Once::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `Once` value.\n",
+      "adt": {
+        "sync::once::Once": "Constructor"
+      }
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::cell::UnsafeCell::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new instance of `UnsafeCell` which will wrap the specified\n value.\n\n All access to the inner value through `&UnsafeCell<T>` requires `unsafe` code.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::once::Once": [
+      "Plain"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain"
+    ],
+    "sync::lazy_lock::Data": [
+      "Plain"
+    ],
+    "core::cell::UnsafeCell": [
+      "Plain"
+    ],
+    "sync::lazy_lock::LazyLock": [
+      "Plain"
+    ]
+  },
+  "path": 2774,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/lazy_lock.rs:104:5: 106:6",
+  "src": "pub const fn new(f: F) -> LazyLock<T, F> {\n        LazyLock { once: Once::new(), data: UnsafeCell::new(Data { f: ManuallyDrop::new(f) }) }\n    }",
+  "mir": "fn sync::lazy_lock::LazyLock::<T, F>::new(_1: F) -> sync::lazy_lock::LazyLock<T, F> {\n    let mut _0: sync::lazy_lock::LazyLock<T, F>;\n    let mut _2: sync::once::Once;\n    let mut _3: core::cell::UnsafeCell<sync::lazy_lock::Data<T, F>>;\n    let mut _4: sync::lazy_lock::Data<T, F>;\n    let mut _5: core::mem::ManuallyDrop<F>;\n    debug f => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = sync::once::Once::new() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = core::mem::ManuallyDrop::<F>::new(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = Data(move _5);\n        StorageDead(_5);\n        _3 = core::cell::UnsafeCell::<sync::lazy_lock::Data<T, F>>::new(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _0 = LazyLock(move _2, move _3);\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Creates a new lazy value with the given initializing function.\n\n # Examples\n\n ```\n use std::sync::LazyLock;\n\n let hello = \"Hello, World!\".to_string();\n\n let lazy = LazyLock::new(|| hello.to_uppercase());\n\n assert_eq!(&*lazy, \"HELLO, WORLD!\");\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

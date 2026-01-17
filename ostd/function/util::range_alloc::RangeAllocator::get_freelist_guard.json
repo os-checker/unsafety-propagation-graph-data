@@ -1,0 +1,133 @@
+{
+  "name": "util::range_alloc::RangeAllocator::get_freelist_guard",
+  "safe": true,
+  "callees": {
+    "sync::spin::SpinLock::<T, G>::lock": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the spin lock.\n",
+      "adt": {
+        "sync::spin::SpinLock": "ImmutableAsArgument",
+        "sync::spin::SpinLockGuard": "Constructor"
+      }
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::is_none": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the option is a [`None`] value.\n\n # Examples\n\n ```\n let x: Option<u32> = Some(2);\n assert_eq!(x.is_none(), false);\n\n let x: Option<u32> = None;\n assert_eq!(x.is_none(), true);\n ```\n",
+      "adt": {}
+    },
+    "alloc::collections::BTreeMap::<K, V>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Makes a new, empty `BTreeMap`.\n\n Does not allocate anything on its own.\n\n # Examples\n\n ```\n use std::collections::BTreeMap;\n\n let mut map = BTreeMap::new();\n\n // entries can now be inserted into the empty map\n map.insert(1, \"a\");\n ```\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "util::range_alloc::FreeRange::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "util::range_alloc::FreeRange": "Constructor"
+      }
+    },
+    "alloc::collections::BTreeMap::<K, V, A>::insert": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Inserts a key-value pair into the map.\n\n If the map did not have this key present, `None` is returned.\n\n If the map did have this key present, the value is updated, and the old\n value is returned. The key is not updated, though; this matters for\n types that can be `==` without being identical. See the [module-level\n documentation] for more.\n\n [module-level documentation]: index.html#insert-and-complex-keys\n\n # Examples\n\n ```\n use std::collections::BTreeMap;\n\n let mut map = BTreeMap::new();\n assert_eq!(map.insert(37, \"a\"), None);\n assert_eq!(map.is_empty(), false);\n\n map.insert(37, \"b\");\n assert_eq!(map.insert(37, \"c\"), Some(\"b\"));\n assert_eq!(map[&37], \"c\");\n ```\n",
+      "adt": {}
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::spin::SpinLock": [
+      "Ref"
+    ],
+    "util::range_alloc::RangeAllocator": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "sync::spin::SpinLockGuard": [
+      "Plain",
+      "Ref",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Ref",
+      "Plain",
+      "MutRef",
+      "Deref"
+    ],
+    "alloc::collections::BTreeMap": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::ops::Range": [
+      "Ref",
+      "Plain"
+    ],
+    "util::range_alloc::FreeRange": [
+      "Plain"
+    ]
+  },
+  "path": 2960,
+  "span": "ostd/src/util/range_alloc.rs:142:5: 152:6",
+  "src": "fn get_freelist_guard(\n        &self,\n    ) -> SpinLockGuard<'_, Option<BTreeMap<usize, FreeRange>>, PreemptDisabled> {\n        let mut lock_guard = self.freelist.lock();\n        if lock_guard.is_none() {\n            let mut freelist: BTreeMap<usize, FreeRange> = BTreeMap::new();\n            freelist.insert(self.fullrange.start, FreeRange::new(self.fullrange.clone()));\n            *lock_guard = Some(freelist);\n        }\n        lock_guard\n    }",
+  "mir": "fn util::range_alloc::RangeAllocator::get_freelist_guard(_1: &util::range_alloc::RangeAllocator) -> sync::spin::SpinLockGuard<'_, core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>, sync::guard::PreemptDisabled> {\n    let mut _0: sync::spin::SpinLockGuard<'_, core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>, sync::guard::PreemptDisabled>;\n    let mut _2: sync::spin::SpinLockGuard<'_, core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>, sync::guard::PreemptDisabled>;\n    let mut _3: &sync::spin::SpinLock<core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>>;\n    let mut _4: bool;\n    let  _5: &core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>;\n    let mut _6: &sync::spin::SpinLockGuard<'_, core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>, sync::guard::PreemptDisabled>;\n    let mut _7: alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>;\n    let  _8: core::option::Option<util::range_alloc::FreeRange>;\n    let mut _9: &mut alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>;\n    let mut _10: usize;\n    let mut _11: util::range_alloc::FreeRange;\n    let mut _12: core::ops::Range<usize>;\n    let mut _13: &core::ops::Range<usize>;\n    let mut _14: core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>;\n    let mut _15: alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>;\n    let mut _16: &mut core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>;\n    let mut _17: &mut sync::spin::SpinLockGuard<'_, core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>, sync::guard::PreemptDisabled>;\n    debug self => _1;\n    debug lock_guard => _2;\n    debug freelist => _7;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &((*_1).1: sync::spin::SpinLock<core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>>);\n        _2 = sync::spin::SpinLock::<core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>>::lock(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_6);\n        _6 = &_2;\n        _5 = <sync::spin::SpinLockGuard<'_, core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>, sync::guard::PreemptDisabled> as core::ops::Deref>::deref(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _4 = core::option::Option::<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>::is_none(_5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _4) -> [0: bb11, otherwise: bb4];\n    }\n    bb4: {\n        StorageLive(_7);\n        _7 = alloc::collections::BTreeMap::<usize, util::range_alloc::FreeRange>::new() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &mut _7;\n        StorageLive(_10);\n        _10 = (((*_1).0: core::ops::Range<usize>).0: usize);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &((*_1).0: core::ops::Range<usize>);\n        _12 = <core::ops::Range<usize> as core::clone::Clone>::clone(move _13) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_13);\n        _11 = util::range_alloc::FreeRange::new(move _12) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        _8 = alloc::collections::BTreeMap::<usize, util::range_alloc::FreeRange>::insert(move _9, move _10, move _11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = move _7;\n        _14 = core::option::Option::Some(move _15);\n        StorageDead(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &mut _2;\n        _16 = <sync::spin::SpinLockGuard<'_, core::option::Option<alloc::collections::BTreeMap<usize, util::range_alloc::FreeRange>>, sync::guard::PreemptDisabled> as core::ops::DerefMut>::deref_mut(move _17) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_17);\n        drop((*_16)) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        (*_16) = move _14;\n        StorageDead(_14);\n        StorageDead(_16);\n        StorageDead(_7);\n        goto -> bb12;\n    }\n    bb11: {\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_4);\n        _0 = move _2;\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

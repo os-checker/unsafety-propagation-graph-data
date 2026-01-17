@@ -1,0 +1,100 @@
+{
+  "name": "mm::io::VmReader::<'_>::atomic_load",
+  "safe": true,
+  "callees": {
+    "mm::io::VmReader::<'_, Fallibility>::remain": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of bytes for the remaining data.\n",
+      "adt": {
+        "mm::io::VmReader": "ImmutableAsArgument"
+      }
+    },
+    "core::mem::size_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of a type in bytes.\n\n More specifically, this is the offset in bytes between successive elements\n in an array with that item type including alignment padding. Thus, for any\n type `T` and length `n`, `[T; n]` has a size of `n * size_of::<T>()`.\n\n In general, the size of a type is not stable across compilations, but\n specific types such as primitives are.\n\n The following table gives the size for primitives.\n\n Type | `size_of::<Type>()`\n ---- | ---------------\n () | 0\n bool | 1\n u8 | 1\n u16 | 2\n u32 | 4\n u64 | 8\n u128 | 16\n i8 | 1\n i16 | 2\n i32 | 4\n i64 | 8\n i128 | 16\n f32 | 4\n f64 | 8\n char | 4\n\n Furthermore, `usize` and `isize` have the same size.\n\n The types [`*const T`], `&T`, [`Box<T>`], [`Option<&T>`], and `Option<Box<T>>` all have\n the same size. If `T` is `Sized`, all of those types have the same size as `usize`.\n\n The mutability of a pointer does not change its size. As such, `&T` and `&mut T`\n have the same size. Likewise for `*const T` and `*mut T`.\n\n # Size of `#[repr(C)]` items\n\n The `C` representation for items has a defined layout. With this layout,\n the size of items is also stable as long as all fields have a stable size.\n\n ## Size of Structs\n\n For `struct`s, the size is determined by the following algorithm.\n\n For each field in the struct ordered by declaration order:\n\n 1. Add the size of the field.\n 2. Round up the current size to the nearest multiple of the next field's [alignment].\n\n Finally, round the size of the struct to the nearest multiple of its [alignment].\n The alignment of the struct is usually the largest alignment of all its\n fields; this can be changed with the use of `repr(align(N))`.\n\n Unlike `C`, zero sized structs are not rounded up to one byte in size.\n\n ## Size of Enums\n\n Enums that carry no data other than the discriminant have the same size as C enums\n on the platform they are compiled for.\n\n ## Size of Unions\n\n The size of a union is the size of its largest field.\n\n Unlike `C`, zero sized unions are not rounded up to one byte in size.\n\n # Examples\n\n ```\n // Some primitives\n assert_eq!(4, size_of::<i32>());\n assert_eq!(8, size_of::<f64>());\n assert_eq!(0, size_of::<()>());\n\n // Some arrays\n assert_eq!(8, size_of::<[i32; 2]>());\n assert_eq!(12, size_of::<[i32; 3]>());\n assert_eq!(0, size_of::<[i32; 0]>());\n\n\n // Pointer size equality\n assert_eq!(size_of::<&i32>(), size_of::<*const i32>());\n assert_eq!(size_of::<&i32>(), size_of::<Box<i32>>());\n assert_eq!(size_of::<&i32>(), size_of::<Option<&i32>>());\n assert_eq!(size_of::<Box<i32>>(), size_of::<Option<Box<i32>>>());\n ```\n\n Using `#[repr(C)]`.\n\n ```\n #[repr(C)]\n struct FieldStruct {\n     first: u8,\n     second: u16,\n     third: u8\n }\n\n // The size of the first field is 1, so add 1 to the size. Size is 1.\n // The alignment of the second field is 2, so add 1 to the size for padding. Size is 2.\n // The size of the second field is 2, so add 2 to the size. Size is 4.\n // The alignment of the third field is 1, so add 0 to the size for padding. Size is 4.\n // The size of the third field is 1, so add 1 to the size. Size is 5.\n // Finally, the alignment of the struct is 2 (because the largest alignment amongst its\n // fields is 2), so add 1 to the size for padding. Size is 6.\n assert_eq!(6, size_of::<FieldStruct>());\n\n #[repr(C)]\n struct TupleStruct(u8, u16, u8);\n\n // Tuple structs follow the same rules.\n assert_eq!(6, size_of::<TupleStruct>());\n\n // Note that reordering the fields can lower the size. We can remove both padding bytes\n // by putting `third` before `second`.\n #[repr(C)]\n struct FieldStructOptimized {\n     first: u8,\n     third: u8,\n     second: u16\n }\n\n assert_eq!(4, size_of::<FieldStructOptimized>());\n\n // Union size is the size of the largest field.\n #[repr(C)]\n union ExampleUnion {\n     smaller: u8,\n     larger: u16\n }\n\n assert_eq!(2, size_of::<ExampleUnion>());\n ```\n\n [alignment]: align_of\n [`*const T`]: primitive@pointer\n [`Box<T>`]: ../../std/boxed/struct.Box.html\n [`Option<&T>`]: crate::option::Option\n\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::is_aligned": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns whether the pointer is properly aligned for `T`.\n\n # Examples\n\n ```\n // On some platforms, the alignment of i32 is less than 4.\n #[repr(align(4))]\n struct AlignedI32(i32);\n\n let data = AlignedI32(42);\n let ptr = &data as *const AlignedI32;\n\n assert!(ptr.is_aligned());\n assert!(!ptr.wrapping_byte_add(1).is_aligned());\n ```\n",
+      "adt": {}
+    },
+    "mm::io::PodAtomic::atomic_load_fallible": {
+      "safe": false,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Atomically loads a value.\n This function will return errors if encountering an unresolvable page fault.\n\n Returns the loaded value.\n\n # Safety\n\n - `ptr` must either be [valid] for writes of `size_of::<T>()` bytes or be in user\n   space for `size_of::<T>()` bytes.\n - `ptr` must be aligned on an `align_of::<T>()`-byte boundary.\n\n [valid]: crate::mm::io#safety\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::io::VmReader": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "error::Error": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 2123,
+  "span": "ostd/src/mm/io.rs:619:5: 631:6",
+  "src": "pub fn atomic_load<T: PodAtomic>(&self) -> Result<T> {\n        if self.remain() < size_of::<T>() {\n            return Err(Error::InvalidArgs);\n        }\n\n        let cursor = self.cursor.cast::<T>();\n        assert!(cursor.is_aligned());\n\n        // SAFETY:\n        // 1. The cursor is either valid for reading or in user space for `size_of::<T>()` bytes.\n        // 2. The cursor is aligned on an `align_of::<T>()`-byte boundary.\n        unsafe { T::atomic_load_fallible(cursor) }\n    }",
+  "mir": "fn mm::io::VmReader::<'_>::atomic_load(_1: &mm::io::VmReader<'_>) -> core::result::Result<T, error::Error> {\n    let mut _0: core::result::Result<T, error::Error>;\n    let mut _2: bool;\n    let mut _3: usize;\n    let mut _4: usize;\n    let mut _5: error::Error;\n    let  _6: *const T;\n    let mut _7: *const u8;\n    let mut _8: bool;\n    let mut _9: !;\n    debug self => _1;\n    debug cursor => _6;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = mm::io::VmReader::<'_>::remain(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = core::mem::size_of::<T>() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _2 = Lt(move _3, move _4);\n        switchInt(move _2) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = error::Error::InvalidArgs;\n        _0 = core::result::Result::Err(move _5);\n        StorageDead(_5);\n        StorageDead(_2);\n        goto -> bb10;\n    }\n    bb4: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageDead(_2);\n        StorageLive(_7);\n        _7 = ((*_1).0: *const u8);\n        _6 = core::ptr::const_ptr::<impl *const u8>::cast::<T>(move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageLive(_8);\n        _8 = core::ptr::const_ptr::<impl *const T>::is_aligned(_6) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        switchInt(move _8) -> [0: bb8, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_8);\n        _0 = <T as mm::io::PodAtomic>::atomic_load_fallible(_6) -> [return: bb9, unwind unreachable];\n    }\n    bb8: {\n        _9 = core::panicking::panic(\"assertion failed: cursor.is_aligned()\") -> unwind unreachable;\n    }\n    bb9: {\n        goto -> bb10;\n    }\n    bb10: {\n        return;\n    }\n}\n",
+  "doc": " Atomically loads a `PodAtomic` value.\n\n Regardless of whether it is successful, the cursor of the reader will not move.\n\n This method only guarantees the atomicity of the specific operation. There are no\n synchronization constraints on other memory accesses. This aligns with the [Relaxed\n ordering](https://en.cppreference.com/w/cpp/atomic/memory_order.html#Relaxed_ordering)\n specified in the C++11 memory model.\n\n This method will fail with errors if\n  1. the remaining space of the reader is less than `size_of::<T>()` bytes, or\n  2. the memory operation fails due to an unresolvable page fault.\n\n # Panics\n\n This method will panic if the memory location is not aligned on an `align_of::<T>()`-byte\n boundary.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

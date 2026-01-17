@@ -1,0 +1,67 @@
+{
+  "name": "char::methods::encode_utf16_raw",
+  "safe": true,
+  "callees": {
+    "char::methods::len_utf16": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "char::methods::encode_utf16_raw::do_panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unsafe mutable pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n let x_ptr = x.as_mut_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         *x_ptr.add(i) += 2;\n     }\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {}
+    },
+    "slice::raw::from_raw_parts_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the same functionality as [`from_raw_parts`], except that a\n mutable slice is returned.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for both reads and writes for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be accessed through any other pointer\n   (not derived from the return value) for the duration of lifetime `'a`.\n   Both read and write accesses are forbidden.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 4876,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/char/methods.rs:1958:1: 1981:2",
+  "src": "pub const fn encode_utf16_raw(mut code: u32, dst: &mut [u16]) -> &mut [u16] {\n    let len = len_utf16(code);\n    match (len, &mut *dst) {\n        (1, [a, ..]) => {\n            *a = code as u16;\n        }\n        (2, [a, b, ..]) => {\n            code -= 0x1_0000;\n            *a = (code >> 10) as u16 | 0xD800;\n            *b = (code & 0x3FF) as u16 | 0xDC00;\n        }\n        _ => {\n            const_panic!(\n                \"encode_utf16: buffer does not have enough bytes to encode code point\",\n                \"encode_utf16: need {len} bytes to encode U+{code:04X} but buffer has just {dst_len}\",\n                code: u32 = code,\n                len: usize = len,\n                dst_len: usize = dst.len(),\n            )\n        }\n    };\n    // SAFETY: `<&mut [u16]>::as_mut_ptr` is guaranteed to return a valid pointer and `len` has been tested to be within bounds.\n    unsafe { slice::from_raw_parts_mut(dst.as_mut_ptr(), len) }\n}",
+  "mir": "fn char::methods::encode_utf16_raw(_1: u32, _2: &mut [u16]) -> &mut [u16] {\n    let mut _0: &mut [u16];\n    let  _3: usize;\n    let mut _4: u32;\n    let mut _5: (usize, &mut [u16]);\n    let mut _6: *const [u16];\n    let mut _7: usize;\n    let mut _8: bool;\n    let mut _9: *const [u16];\n    let mut _10: usize;\n    let mut _11: bool;\n    let  _12: &mut u16;\n    let mut _13: u32;\n    let  _14: &mut u16;\n    let  _15: &mut u16;\n    let mut _16: (u32, bool);\n    let mut _17: u16;\n    let mut _18: u32;\n    let mut _19: u32;\n    let mut _20: u32;\n    let mut _21: bool;\n    let mut _22: u16;\n    let mut _23: u32;\n    let mut _24: u32;\n    let mut _25: !;\n    let mut _26: u32;\n    let mut _27: usize;\n    let mut _28: &[u16];\n    let mut _29: *mut u16;\n    let mut _30: &mut [u16];\n    let mut _31: &mut [u16];\n    let mut _32: &mut [u16];\n    let mut _33: &mut [u16];\n    let mut _34: &mut [u16];\n    debug code => _1;\n    debug dst => _2;\n    debug len => _3;\n    debug a => _12;\n    debug a => _14;\n    debug b => _15;\n    bb0: {\n        StorageLive(_4);\n        _4 = _1;\n        _3 = char::methods::len_utf16(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = (_3, _2);\n        switchInt((_5.0: usize)) -> [1: bb3, 2: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_26);\n        _26 = _1;\n        StorageLive(_27);\n        StorageLive(_28);\n        _28 = &(*_2);\n        _27 = PtrMetadata(move _28);\n        StorageDead(_28);\n        _25 = char::methods::encode_utf16_raw::do_panic(move _26, _3, move _27) -> unwind unreachable;\n    }\n    bb3: {\n        _30 = (_5.1: &mut [u16]);\n        _6 = &raw const (fake) (*_30);\n        _7 = PtrMetadata(move _6);\n        _8 = Ge(_7, 1_usize);\n        switchInt(move _8) -> [0: bb2, otherwise: bb6];\n    }\n    bb4: {\n        _31 = (_5.1: &mut [u16]);\n        _9 = &raw const (fake) (*_31);\n        _10 = PtrMetadata(move _9);\n        _11 = Ge(_10, 2_usize);\n        switchInt(move _11) -> [0: bb2, otherwise: bb5];\n    }\n    bb5: {\n        StorageLive(_14);\n        _32 = (_5.1: &mut [u16]);\n        _14 = &mut (*_32)[0 of 2];\n        StorageLive(_15);\n        _33 = (_5.1: &mut [u16]);\n        _15 = &mut (*_33)[1 of 2];\n        _16 = CheckedSub(_1, 65536_u32);\n        assert(!move (_16.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _1, 65536_u32) -> [success: bb7, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_12);\n        _34 = (_5.1: &mut [u16]);\n        _12 = &mut (*_34)[0 of 1];\n        StorageLive(_13);\n        _13 = _1;\n        (*_12) = move _13 as u16;\n        StorageDead(_13);\n        StorageDead(_12);\n        goto -> bb9;\n    }\n    bb7: {\n        _1 = move (_16.0: u32);\n        StorageLive(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = _1;\n        _20 = 10_i32 as u32;\n        _21 = Lt(move _20, 32_u32);\n        assert(move _21, \"attempt to shift right by `{}`, which would overflow\", 10_i32) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _18 = Shr(move _19, 10_i32);\n        StorageDead(_19);\n        _17 = move _18 as u16;\n        StorageDead(_18);\n        (*_14) = BitOr(move _17, 55296_u16);\n        StorageDead(_17);\n        StorageLive(_22);\n        StorageLive(_23);\n        StorageLive(_24);\n        _24 = _1;\n        _23 = BitAnd(move _24, 1023_u32);\n        StorageDead(_24);\n        _22 = move _23 as u16;\n        StorageDead(_23);\n        (*_15) = BitOr(move _22, 56320_u16);\n        StorageDead(_22);\n        StorageDead(_15);\n        StorageDead(_14);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_5);\n        StorageLive(_29);\n        _29 = slice::<impl [u16]>::as_mut_ptr(_2) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _0 = slice::raw::from_raw_parts_mut::<'_, u16>(move _29, _3) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_29);\n        return;\n    }\n}\n",
+  "doc": " Encodes a raw `u32` value as native endian UTF-16 into the provided `u16` buffer,\n and then returns the subslice of the buffer that contains the encoded character.\n\n Unlike `char::encode_utf16`, this method also handles codepoints in the surrogate range.\n (Creating a `char` in the surrogate range is UB.)\n\n # Panics\n\n Panics if the buffer is not large enough.\n A buffer of length 2 is large enough to encode any `char`.\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "hidden"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* hidden\n"
+    ]
+  }
+}

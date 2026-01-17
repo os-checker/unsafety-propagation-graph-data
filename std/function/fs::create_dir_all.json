@@ -1,0 +1,77 @@
+{
+  "name": "fs::create_dir_all",
+  "safe": true,
+  "callees": {
+    "fs::DirBuilder::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new set of options with default mode/security settings for all\n platforms and also non-recursive.\n\n # Examples\n\n ```\n use std::fs::DirBuilder;\n\n let builder = DirBuilder::new();\n ```\n",
+      "adt": {
+        "fs::DirBuilder": "Constructor"
+      }
+    },
+    "fs::DirBuilder::recursive": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Indicates that directories should be created recursively, creating all\n parent directories. Parents that do not exist are created with the same\n security and permissions settings.\n\n This option defaults to `false`.\n\n # Examples\n\n ```\n use std::fs::DirBuilder;\n\n let mut builder = DirBuilder::new();\n builder.recursive(true);\n ```\n",
+      "adt": {
+        "fs::DirBuilder": "MutableAsArgument"
+      }
+    },
+    "core::convert::AsRef::as_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this type into a shared reference of the (usually inferred) input type.\n",
+      "adt": {}
+    },
+    "fs::DirBuilder::create": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates the specified directory with the options configured in this\n builder.\n\n It is considered an error if the directory already exists unless\n recursive mode is enabled.\n\n # Examples\n\n ```no_run\n use std::fs::{self, DirBuilder};\n\n let path = \"/tmp/foo/bar/baz\";\n DirBuilder::new()\n     .recursive(true)\n     .create(path).unwrap();\n\n assert!(fs::metadata(path).unwrap().is_dir());\n ```\n",
+      "adt": {
+        "fs::DirBuilder": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "fs::DirBuilder": [
+      "Plain",
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "path::Path": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1058,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/fs.rs:3005:1: 3007:2",
+  "src": "pub fn create_dir_all<P: AsRef<Path>>(path: P) -> io::Result<()> {\n    DirBuilder::new().recursive(true).create(path.as_ref())\n}",
+  "mir": "fn fs::create_dir_all(_1: P) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let mut _2: &fs::DirBuilder;\n    let  _3: &mut fs::DirBuilder;\n    let mut _4: &mut fs::DirBuilder;\n    let mut _5: fs::DirBuilder;\n    let mut _6: &path::Path;\n    let mut _7: &P;\n    debug path => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = fs::DirBuilder::new() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = &mut _5;\n        _3 = fs::DirBuilder::recursive(move _4, true) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _2 = &(*_3);\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &_1;\n        _6 = <P as core::convert::AsRef<path::Path>>::as_ref(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        _0 = fs::DirBuilder::create::<&path::Path>(move _2, move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageDead(_2);\n        drop(_1) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": " Recursively create a directory and all of its parent components if they\n are missing.\n\n This function is not atomic. If it returns an error, any parent components it was able to create\n will remain.\n\n If the empty path is passed to this function, it always succeeds without\n creating any directories.\n\n # Platform-specific behavior\n\n This function currently corresponds to multiple calls to the `mkdir`\n function on Unix and the `CreateDirectoryW` function on Windows.\n\n Note that, this [may change in the future][changes].\n\n [changes]: io#platform-specific-behavior\n\n # Errors\n\n The function will return an error if any directory specified in path does not exist and\n could not be created. There may be other error conditions; see [`fs::create_dir`] for specifics.\n\n Notable exception is made for situations where any of the directories\n specified in the `path` could not be created as it was being created concurrently.\n Such cases are considered to be successful. That is, calling `create_dir_all`\n concurrently from multiple threads or processes is guaranteed not to fail\n due to a race condition with itself.\n\n [`fs::create_dir`]: create_dir\n\n # Examples\n\n ```no_run\n use std::fs;\n\n fn main() -> std::io::Result<()> {\n     fs::create_dir_all(\"/some/dir\")?;\n     Ok(())\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

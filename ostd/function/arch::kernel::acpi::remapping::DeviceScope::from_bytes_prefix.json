@@ -1,0 +1,79 @@
+{
+  "name": "arch::kernel::acpi::remapping::DeviceScope::from_bytes_prefix",
+  "safe": true,
+  "callees": {
+    "ostd_pod::Pod::from_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new instance from the given bytes.\n",
+      "adt": {}
+    },
+    "core::mem::size_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of a type in bytes.\n\n More specifically, this is the offset in bytes between successive elements\n in an array with that item type including alignment padding. Thus, for any\n type `T` and length `n`, `[T; n]` has a size of `n * size_of::<T>()`.\n\n In general, the size of a type is not stable across compilations, but\n specific types such as primitives are.\n\n The following table gives the size for primitives.\n\n Type | `size_of::<Type>()`\n ---- | ---------------\n () | 0\n bool | 1\n u8 | 1\n u16 | 2\n u32 | 4\n u64 | 8\n u128 | 16\n i8 | 1\n i16 | 2\n i32 | 4\n i64 | 8\n i128 | 16\n f32 | 4\n f64 | 8\n char | 4\n\n Furthermore, `usize` and `isize` have the same size.\n\n The types [`*const T`], `&T`, [`Box<T>`], [`Option<&T>`], and `Option<Box<T>>` all have\n the same size. If `T` is `Sized`, all of those types have the same size as `usize`.\n\n The mutability of a pointer does not change its size. As such, `&T` and `&mut T`\n have the same size. Likewise for `*const T` and `*mut T`.\n\n # Size of `#[repr(C)]` items\n\n The `C` representation for items has a defined layout. With this layout,\n the size of items is also stable as long as all fields have a stable size.\n\n ## Size of Structs\n\n For `struct`s, the size is determined by the following algorithm.\n\n For each field in the struct ordered by declaration order:\n\n 1. Add the size of the field.\n 2. Round up the current size to the nearest multiple of the next field's [alignment].\n\n Finally, round the size of the struct to the nearest multiple of its [alignment].\n The alignment of the struct is usually the largest alignment of all its\n fields; this can be changed with the use of `repr(align(N))`.\n\n Unlike `C`, zero sized structs are not rounded up to one byte in size.\n\n ## Size of Enums\n\n Enums that carry no data other than the discriminant have the same size as C enums\n on the platform they are compiled for.\n\n ## Size of Unions\n\n The size of a union is the size of its largest field.\n\n Unlike `C`, zero sized unions are not rounded up to one byte in size.\n\n # Examples\n\n ```\n // Some primitives\n assert_eq!(4, size_of::<i32>());\n assert_eq!(8, size_of::<f64>());\n assert_eq!(0, size_of::<()>());\n\n // Some arrays\n assert_eq!(8, size_of::<[i32; 2]>());\n assert_eq!(12, size_of::<[i32; 3]>());\n assert_eq!(0, size_of::<[i32; 0]>());\n\n\n // Pointer size equality\n assert_eq!(size_of::<&i32>(), size_of::<*const i32>());\n assert_eq!(size_of::<&i32>(), size_of::<Box<i32>>());\n assert_eq!(size_of::<&i32>(), size_of::<Option<&i32>>());\n assert_eq!(size_of::<Box<i32>>(), size_of::<Option<Box<i32>>>());\n ```\n\n Using `#[repr(C)]`.\n\n ```\n #[repr(C)]\n struct FieldStruct {\n     first: u8,\n     second: u16,\n     third: u8\n }\n\n // The size of the first field is 1, so add 1 to the size. Size is 1.\n // The alignment of the second field is 2, so add 1 to the size for padding. Size is 2.\n // The size of the second field is 2, so add 2 to the size. Size is 4.\n // The alignment of the third field is 1, so add 0 to the size for padding. Size is 4.\n // The size of the third field is 1, so add 1 to the size. Size is 5.\n // Finally, the alignment of the struct is 2 (because the largest alignment amongst its\n // fields is 2), so add 1 to the size for padding. Size is 6.\n assert_eq!(6, size_of::<FieldStruct>());\n\n #[repr(C)]\n struct TupleStruct(u8, u16, u8);\n\n // Tuple structs follow the same rules.\n assert_eq!(6, size_of::<TupleStruct>());\n\n // Note that reordering the fields can lower the size. We can remove both padding bytes\n // by putting `third` before `second`.\n #[repr(C)]\n struct FieldStructOptimized {\n     first: u8,\n     third: u8,\n     second: u16\n }\n\n assert_eq!(4, size_of::<FieldStructOptimized>());\n\n // Union size is the size of the largest field.\n #[repr(C)]\n union ExampleUnion {\n     smaller: u8,\n     larger: u16\n }\n\n assert_eq!(2, size_of::<ExampleUnion>());\n ```\n\n [alignment]: align_of\n [`*const T`]: primitive@pointer\n [`Box<T>`]: ../../std/boxed/struct.Box.html\n [`Option<&T>`]: crate::option::Option\n\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "alloc::vec::Vec::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new, empty `Vec<T>`.\n\n The vector will not allocate until elements are pushed onto it.\n\n # Examples\n\n ```\n # #![allow(unused_mut)]\n let mut vec: Vec<i32> = Vec::new();\n ```\n",
+      "adt": {}
+    },
+    "alloc::vec::Vec::<T, A>::push": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Appends an element to the back of a collection.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut vec = vec![1, 2];\n vec.push(3);\n assert_eq!(vec, [1, 2, 3]);\n ```\n\n # Time complexity\n\n Takes amortized *O*(1) time. If the vector's length would exceed its\n capacity after the push, *O*(*capacity*) time is taken to copy the\n vector's elements to a larger allocation. This expensive operation is\n offset by the *capacity* *O*(1) insertions it allows.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "arch::kernel::acpi::remapping::DeviceScopeHeader": [
+      "Plain",
+      "Unknown([Field(1, Ty { id: 1, kind: RigidTy(Uint(U8)) })])"
+    ],
+    "alloc::vec::Vec": [
+      "Plain",
+      "MutRef"
+    ],
+    "arch::kernel::acpi::remapping::DeviceScope": [
+      "Plain"
+    ]
+  },
+  "path": 1202,
+  "span": "ostd/src/arch/x86/kernel/acpi/remapping.rs:227:5: 242:6",
+  "src": "fn from_bytes_prefix(bytes: &[u8]) -> Self {\n        let header = DeviceScopeHeader::from_bytes(bytes);\n        debug_assert!((header.length as usize) <= bytes.len());\n\n        let mut index = size_of::<DeviceScopeHeader>();\n        debug_assert!((header.length as usize) >= index);\n\n        let mut path = Vec::new();\n        while index != (header.length as usize) {\n            let val = (bytes[index], bytes[index + 1]);\n            path.push(val);\n            index += 2;\n        }\n\n        Self { header, path }\n    }",
+  "mir": "fn arch::kernel::acpi::remapping::DeviceScope::from_bytes_prefix(_1: &[u8]) -> arch::kernel::acpi::remapping::DeviceScope {\n    let mut _0: arch::kernel::acpi::remapping::DeviceScope;\n    let  _2: arch::kernel::acpi::remapping::DeviceScopeHeader;\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: u8;\n    let mut _6: usize;\n    let mut _7: !;\n    let mut _8: usize;\n    let mut _9: bool;\n    let mut _10: usize;\n    let mut _11: u8;\n    let mut _12: usize;\n    let mut _13: !;\n    let mut _14: alloc::vec::Vec<(u8, u8)>;\n    let mut _15: bool;\n    let mut _16: usize;\n    let mut _17: usize;\n    let mut _18: u8;\n    let  _19: (u8, u8);\n    let mut _20: u8;\n    let  _21: usize;\n    let mut _22: usize;\n    let mut _23: bool;\n    let mut _24: u8;\n    let  _25: usize;\n    let mut _26: usize;\n    let mut _27: (usize, bool);\n    let mut _28: usize;\n    let mut _29: bool;\n    let  _30: ();\n    let mut _31: &mut alloc::vec::Vec<(u8, u8)>;\n    let mut _32: (usize, bool);\n    let mut _33: alloc::vec::Vec<(u8, u8)>;\n    debug bytes => _1;\n    debug header => _2;\n    debug index => _8;\n    debug path => _14;\n    debug val => _19;\n    bb0: {\n        _2 = <arch::kernel::acpi::remapping::DeviceScopeHeader as ostd_pod::Pod>::from_bytes(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = (_2.1: u8);\n        _4 = move _5 as usize;\n        StorageDead(_5);\n        StorageLive(_6);\n        _6 = PtrMetadata(_1);\n        _3 = Le(move _4, move _6);\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_8);\n        _8 = core::mem::size_of::<arch::kernel::acpi::remapping::DeviceScopeHeader>() -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_4);\n        _7 = core::panicking::panic(\"assertion failed: (header.length as usize) <= bytes.len()\") -> unwind unreachable;\n    }\n    bb4: {\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = (_2.1: u8);\n        _10 = move _11 as usize;\n        StorageDead(_11);\n        StorageLive(_12);\n        _12 = _8;\n        _9 = Ge(move _10, move _12);\n        switchInt(move _9) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_12);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_14);\n        _14 = alloc::vec::Vec::<(u8, u8)>::new() -> [return: bb7, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_12);\n        StorageDead(_10);\n        _13 = core::panicking::panic(\"assertion failed: (header.length as usize) >= index\") -> unwind unreachable;\n    }\n    bb7: {\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = _8;\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = (_2.1: u8);\n        _17 = move _18 as usize;\n        StorageDead(_18);\n        _15 = Ne(move _16, move _17);\n        switchInt(move _15) -> [0: bb14, otherwise: bb8];\n    }\n    bb8: {\n        StorageDead(_17);\n        StorageDead(_16);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = _8;\n        _22 = PtrMetadata(_1);\n        _23 = Lt(_21, _22);\n        assert(move _23, \"index out of bounds: the length is {} but the index is {}\", move _22, _21) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        _20 = (*_1)[_21];\n        StorageLive(_24);\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = _8;\n        _27 = CheckedAdd(_26, 1_usize);\n        assert(!move (_27.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _26, 1_usize) -> [success: bb10, unwind unreachable];\n    }\n    bb10: {\n        _25 = move (_27.0: usize);\n        StorageDead(_26);\n        _28 = PtrMetadata(_1);\n        _29 = Lt(_25, _28);\n        assert(move _29, \"index out of bounds: the length is {} but the index is {}\", move _28, _25) -> [success: bb11, unwind unreachable];\n    }\n    bb11: {\n        _24 = (*_1)[_25];\n        _19 = (move _20, move _24);\n        StorageDead(_24);\n        StorageDead(_20);\n        StorageDead(_25);\n        StorageDead(_21);\n        StorageLive(_31);\n        _31 = &mut _14;\n        _30 = alloc::vec::Vec::<(u8, u8)>::push(move _31, _19) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_31);\n        _32 = CheckedAdd(_8, 2_usize);\n        assert(!move (_32.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _8, 2_usize) -> [success: bb13, unwind unreachable];\n    }\n    bb13: {\n        _8 = move (_32.0: usize);\n        StorageDead(_15);\n        goto -> bb7;\n    }\n    bb14: {\n        StorageDead(_17);\n        StorageDead(_16);\n        StorageDead(_15);\n        StorageLive(_33);\n        _33 = move _14;\n        _0 = DeviceScope(_2, move _33);\n        StorageDead(_33);\n        StorageDead(_14);\n        StorageDead(_8);\n        return;\n    }\n}\n",
+  "doc": " Parses a [`DeviceScope`] from a prefix of the bytes.\n\n # Panics\n\n This method may panic if the byte prefix does not represent a valid [`DeviceScope`].\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

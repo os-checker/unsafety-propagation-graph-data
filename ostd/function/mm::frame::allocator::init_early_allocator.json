@@ -1,0 +1,65 @@
+{
+  "name": "mm::frame::allocator::init_early_allocator",
+  "safe": false,
+  "callees": {
+    "spin::mutex::Mutex::<T, R>::lock": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Locks the [`Mutex`] and returns a guard that permits access to the inner data.\n\n The returned value may be dereferenced for data access\n and the lock will be dropped when the guard falls out of scope.\n\n ```\n let lock = spin::Mutex::new(0);\n {\n     let mut data = lock.lock();\n     // The lock is now locked and the data can be accessed\n     *data += 1;\n     // The lock is implicitly dropped at the end of the scope\n }\n ```\n",
+      "adt": {}
+    },
+    "mm::frame::allocator::EarlyFrameAllocator::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new early frame allocator.\n\n It uses at most 2 regions, the first is the maximum usable region below\n 4 GiB. The other is the maximum usable region above 4 GiB and is only\n usable when linear mapping is constructed.\n",
+      "adt": {
+        "mm::frame::allocator::EarlyFrameAllocator": "Constructor"
+      }
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "spin::mutex::Mutex": [
+      "Ref"
+    ],
+    "spin::MutexGuard": [
+      "Plain",
+      "MutRef"
+    ],
+    "mm::frame::allocator::EarlyFrameAllocator": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "MutRef",
+      "Deref"
+    ]
+  },
+  "path": 1908,
+  "span": "ostd/src/mm/frame/allocator.rs:358:1: 361:2",
+  "src": "pub(crate) unsafe fn init_early_allocator() {\n    let mut early_allocator = EARLY_ALLOCATOR.lock();\n    *early_allocator = Some(EarlyFrameAllocator::new());\n}",
+  "mir": "fn mm::frame::allocator::init_early_allocator() -> () {\n    let mut _0: ();\n    let mut _1: spin::MutexGuard<'_, core::option::Option<mm::frame::allocator::EarlyFrameAllocator>>;\n    let mut _2: &spin::mutex::Mutex<core::option::Option<mm::frame::allocator::EarlyFrameAllocator>>;\n    let mut _3: core::option::Option<mm::frame::allocator::EarlyFrameAllocator>;\n    let mut _4: mm::frame::allocator::EarlyFrameAllocator;\n    let mut _5: &mut core::option::Option<mm::frame::allocator::EarlyFrameAllocator>;\n    let mut _6: &mut spin::MutexGuard<'_, core::option::Option<mm::frame::allocator::EarlyFrameAllocator>>;\n    debug early_allocator => _1;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        _2 = {alloc1161: &spin::mutex::Mutex<core::option::Option<mm::frame::allocator::EarlyFrameAllocator>>};\n        _1 = spin::mutex::Mutex::<core::option::Option<mm::frame::allocator::EarlyFrameAllocator>>::lock(move _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = mm::frame::allocator::EarlyFrameAllocator::new() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = core::option::Option::Some(move _4);\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut _1;\n        _5 = <spin::MutexGuard<'_, core::option::Option<mm::frame::allocator::EarlyFrameAllocator>> as core::ops::DerefMut>::deref_mut(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        (*_5) = move _3;\n        StorageDead(_3);\n        StorageDead(_5);\n        drop(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": " Initializes the early frame allocator.\n\n [`early_alloc`] should be used after this initialization. After [`init`], the\n early allocator.\n\n # Safety\n\n This function should be called only once after the memory regions are ready.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

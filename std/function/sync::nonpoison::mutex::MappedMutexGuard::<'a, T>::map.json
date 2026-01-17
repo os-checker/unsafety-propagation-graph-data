@@ -1,0 +1,85 @@
+{
+  "name": "sync::nonpoison::mutex::MappedMutexGuard::<'a, T>::map",
+  "safe": true,
+  "callees": {
+    "core::ptr::NonNull::<T>::as_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a unique reference to the value. If the value may be uninitialized, [`as_uninit_mut`]\n must be used instead.\n\n For the shared counterpart see [`as_ref`].\n\n [`as_uninit_mut`]: NonNull::as_uninit_mut\n [`as_ref`]: NonNull::as_ref\n\n # Safety\n\n When calling this method, you have to ensure that\n the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let mut ptr = NonNull::new(&mut x).expect(\"null pointer\");\n\n let x_ref = unsafe { ptr.as_mut() };\n assert_eq!(*x_ref, 0);\n *x_ref += 2;\n assert_eq!(*x_ref, 2);\n ```\n\n [the module documentation]: crate::ptr#safety\n",
+      "adt": {}
+    },
+    "core::ops::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "MutRef",
+      "Plain"
+    ],
+    "sync::nonpoison::mutex::MappedMutexGuard": [
+      "Unknown([Field(0, Ty { id: 11857, kind: RigidTy(Adt(AdtDef(DefId { id: 4690, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 396, kind: Param(ParamTy { index: 1, name: \"T\" }) })]))) })])",
+      "Plain",
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "sys::sync::mutex::futex::Mutex": [
+      "Ref"
+    ]
+  },
+  "path": 3069,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/nonpoison/mutex.rs:606:5: 618:6",
+  "src": "pub fn map<U, F>(mut orig: Self, f: F) -> MappedMutexGuard<'a, U>\n    where\n        F: FnOnce(&mut T) -> &mut U,\n        U: ?Sized,\n    {\n        // SAFETY: the conditions of `MutexGuard::new` were satisfied when the original guard\n        // was created, and have been upheld throughout `map` and/or `filter_map`.\n        // The signature of the closure guarantees that it will not \"leak\" the lifetime of the reference\n        // passed to it. If the closure panics, the guard will be dropped.\n        let data = NonNull::from(f(unsafe { orig.data.as_mut() }));\n        let orig = ManuallyDrop::new(orig);\n        MappedMutexGuard { data, inner: orig.inner, _variance: PhantomData }\n    }",
+  "mir": "fn sync::nonpoison::mutex::MappedMutexGuard::<'a, T>::map(_1: sync::nonpoison::mutex::MappedMutexGuard<'_, T>, _2: F) -> sync::nonpoison::mutex::MappedMutexGuard<'_, U> {\n    let mut _0: sync::nonpoison::mutex::MappedMutexGuard<'_, U>;\n    let  _3: core::ptr::NonNull<U>;\n    let mut _4: &mut U;\n    let mut _5: (&mut T,);\n    let mut _6: &mut T;\n    let mut _7: &mut core::ptr::NonNull<T>;\n    let  _8: core::mem::ManuallyDrop<sync::nonpoison::mutex::MappedMutexGuard<'_, T>>;\n    let mut _9: sync::nonpoison::mutex::MappedMutexGuard<'_, T>;\n    let  _10: &sync::nonpoison::mutex::MappedMutexGuard<'_, T>;\n    let mut _11: &core::mem::ManuallyDrop<sync::nonpoison::mutex::MappedMutexGuard<'_, T>>;\n    let mut _12: &sys::sync::mutex::futex::Mutex;\n    debug orig => _1;\n    debug f => _2;\n    debug data => _3;\n    debug orig => _8;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_7);\n        _7 = &mut (_1.0: core::ptr::NonNull<T>);\n        _6 = core::ptr::NonNull::<T>::as_mut::<'_>(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        _5 = (_6);\n        _4 = <F as core::ops::FnOnce<(&mut T,)>>::call_once(_2, move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = <core::ptr::NonNull<U> as core::convert::From<&mut U>>::from(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = move _1;\n        _8 = core::mem::ManuallyDrop::<sync::nonpoison::mutex::MappedMutexGuard<'_, T>>::new(move _9) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &_8;\n        _10 = <core::mem::ManuallyDrop<sync::nonpoison::mutex::MappedMutexGuard<'_, T>> as core::ops::Deref>::deref(move _11) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        _12 = ((*_10).1: &sys::sync::mutex::futex::Mutex);\n        _0 = MappedMutexGuard(_3, _12, ZeroSized: core::marker::PhantomData<&mut U>);\n        StorageDead(_10);\n        StorageDead(_8);\n        return;\n    }\n}\n",
+  "doc": " Makes a [`MappedMutexGuard`] for a component of the borrowed data, e.g.\n an enum variant.\n\n The `Mutex` is already locked, so this cannot fail.\n\n This is an associated function that needs to be used as\n `MappedMutexGuard::map(...)`. A method would interfere with methods of the\n same name on the contents of the `MutexGuard` used through `Deref`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

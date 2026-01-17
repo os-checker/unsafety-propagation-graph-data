@@ -1,0 +1,82 @@
+{
+  "name": "<vec::in_place_drop::InPlaceDstDataSrcBufDrop<Src, Dest> as core::ops::Drop>::drop",
+  "safe": true,
+  "callees": {
+    "core::ptr::NonNull::<T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"null pointer\");\n\n let casted_ptr = ptr.cast::<i8>();\n let raw_ptr: *mut i8 = casted_ptr.as_ptr();\n ```\n",
+      "adt": {}
+    },
+    "raw_vec::RawVec::<T, A>::from_nonnull_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " A convenience method for hoisting the non-null precondition out of [`RawVec::from_raw_parts_in`].\n\n # Safety\n\n See [`RawVec::from_raw_parts_in`].\n",
+      "adt": {
+        "raw_vec::RawVec": "Constructor"
+      }
+    },
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::slice_from_raw_parts_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forms a raw mutable slice from a pointer and a length.\n\n The `len` argument is the number of **elements**, not the number of bytes.\n\n Performs the same functionality as [`slice_from_raw_parts`], except that a\n raw mutable slice is returned, as opposed to a raw immutable slice.\n\n This function is safe, but actually using the return value is unsafe.\n See the documentation of [`slice::from_raw_parts_mut`] for slice safety requirements.\n\n [`slice::from_raw_parts_mut`]: crate::slice::from_raw_parts_mut\n\n # Examples\n\n ```rust\n use std::ptr;\n\n let x = &mut [5, 6, 7];\n let raw_pointer = x.as_mut_ptr();\n let slice = ptr::slice_from_raw_parts_mut(raw_pointer, 3);\n\n unsafe {\n     (*slice)[2] = 99; // assign a value at an index in the slice\n };\n\n assert_eq!(unsafe { &*slice }[2], 99);\n ```\n\n You must ensure that the pointer is valid and not null before dereferencing\n the raw slice. A slice reference must never have a null pointer, even if it's empty.\n\n ```rust,should_panic\n use std::ptr;\n let danger: *mut [u8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 0);\n unsafe {\n     danger.as_mut().expect(\"references must not be null\");\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::drop_in_place": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Executes the destructor (if any) of the pointed-to value.\n\n This is almost the same as calling [`ptr::read`] and discarding\n the result, but has the following advantages:\n\n * It is *required* to use `drop_in_place` to drop unsized types like\n   trait objects, because they can't be read out onto the stack and\n   dropped normally.\n\n * It is friendlier to the optimizer to do this over [`ptr::read`] when\n   dropping manually allocated memory (e.g., in the implementations of\n   `Box`/`Rc`/`Vec`), as the compiler doesn't need to prove that it's\n   sound to elide the copy.\n\n * It can be used to drop [pinned] data when `T` is not `repr(packed)`\n   (pinned data must not be moved before it is dropped).\n\n Unaligned values cannot be dropped in place, they must be copied to an aligned\n location first using [`ptr::read_unaligned`]. For packed structs, this move is\n done automatically by the compiler. This means the fields of packed structs\n are not dropped in-place.\n\n [`ptr::read`]: self::read\n [`ptr::read_unaligned`]: self::read_unaligned\n [pinned]: crate::pin\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `to_drop` must be [valid] for both reads and writes.\n\n * `to_drop` must be properly aligned, even if `T` has size 0.\n\n * `to_drop` must be nonnull, even if `T` has size 0.\n\n * The value `to_drop` points to must be valid for dropping, which may mean\n   it must uphold additional invariants. These invariants depend on the type\n   of the value being dropped. For instance, when dropping a Box, the box's\n   pointer to the heap must be valid.\n\n * While `drop_in_place` is executing, the only way to access parts of\n   `to_drop` is through the `&mut self` references supplied to the\n   `Drop::drop` methods that `drop_in_place` invokes.\n\n Additionally, if `T` is not [`Copy`], using the pointed-to value after\n calling `drop_in_place` can cause undefined behavior. Note that `*to_drop =\n foo` counts as a use because it will cause the value to be dropped\n again. [`write()`] can be used to overwrite data without causing it to be\n dropped.\n\n [valid]: self#safety\n\n # Examples\n\n Manually remove the last item from a vector:\n\n ```\n use std::ptr;\n use std::rc::Rc;\n\n let last = Rc::new(1);\n let weak = Rc::downgrade(&last);\n\n let mut v = vec![Rc::new(0), last];\n\n unsafe {\n     // Get a raw pointer to the last element in `v`.\n     let ptr = &mut v[1] as *mut _;\n     // Shorten `v` to prevent the last item from being dropped. We do that first,\n     // to prevent issues if the `drop_in_place` below panics.\n     v.set_len(1);\n     // Without a call `drop_in_place`, the last item would never be dropped,\n     // and the memory it manages would be leaked.\n     ptr::drop_in_place(ptr);\n }\n\n assert_eq!(v, &[0.into()]);\n\n // Ensure that the last item was dropped.\n assert!(weak.upgrade().is_none());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "vec::in_place_drop::InPlaceDstDataSrcBufDrop": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "raw_vec::RawVec": [
+      "Plain"
+    ]
+  },
+  "path": 2228,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/in_place_drop.rs:42:5: 48:6",
+  "src": "fn drop(&mut self) {\n        unsafe {\n            let _drop_allocation =\n                RawVec::<Src>::from_nonnull_in(self.ptr.cast::<Src>(), self.src_cap, Global);\n            drop_in_place(core::ptr::slice_from_raw_parts_mut::<Dest>(self.ptr.as_ptr(), self.len));\n        };\n    }",
+  "mir": "fn <vec::in_place_drop::InPlaceDstDataSrcBufDrop<Src, Dest> as core::ops::Drop>::drop(_1: &mut vec::in_place_drop::InPlaceDstDataSrcBufDrop<Src, Dest>) -> () {\n    let mut _0: ();\n    let  _2: raw_vec::RawVec<Src>;\n    let mut _3: core::ptr::NonNull<Src>;\n    let mut _4: core::ptr::NonNull<Dest>;\n    let mut _5: usize;\n    let  _6: ();\n    let mut _7: *mut [Dest];\n    let mut _8: *mut Dest;\n    let mut _9: core::ptr::NonNull<Dest>;\n    let mut _10: usize;\n    debug self => _1;\n    debug _drop_allocation => _2;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).0: core::ptr::NonNull<Dest>);\n        _3 = core::ptr::NonNull::<Dest>::cast::<Src>(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = ((*_1).2: usize);\n        _2 = raw_vec::RawVec::<Src>::from_nonnull_in(move _3, move _5, alloc::Global) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = ((*_1).0: core::ptr::NonNull<Dest>);\n        _8 = core::ptr::NonNull::<Dest>::as_ptr(move _9) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_9);\n        StorageLive(_10);\n        _10 = ((*_1).1: usize);\n        _7 = core::ptr::slice_from_raw_parts_mut::<Dest>(move _8, move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        StorageDead(_8);\n        _6 = core::ptr::drop_in_place::<[Dest]>(move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        drop(_2) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

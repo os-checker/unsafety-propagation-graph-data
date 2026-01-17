@@ -1,0 +1,92 @@
+{
+  "name": "ffi::c_str::CString::from_vec_with_nul_unchecked",
+  "safe": false,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::slice::memchr::memchr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the first index matching the byte `x` in `text`.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements in the vector, also referred to\n as its 'length'.\n\n # Examples\n\n ```\n let a = vec![1, 2, 3];\n assert_eq!(a.len(), 3);\n ```\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "ffi::c_str::CString::_from_vec_with_nul_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "ffi::c_str::CString": "Constructor"
+      }
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Ref",
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "ffi::c_str::CString": [
+      "Plain"
+    ]
+  },
+  "path": 1586,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/ffi/c_str.rs:630:5: 633:6",
+  "src": "pub unsafe fn from_vec_with_nul_unchecked(v: Vec<u8>) -> Self {\n        debug_assert!(memchr::memchr(0, &v).unwrap() + 1 == v.len());\n        unsafe { Self::_from_vec_with_nul_unchecked(v) }\n    }",
+  "mir": "fn ffi::c_str::CString::from_vec_with_nul_unchecked(_1: vec::Vec<u8>) -> ffi::c_str::CString {\n    let mut _0: ffi::c_str::CString;\n    let mut _2: bool;\n    let mut _3: usize;\n    let mut _4: usize;\n    let mut _5: core::option::Option<usize>;\n    let  _6: &[u8];\n    let  _7: &vec::Vec<u8>;\n    let mut _8: (usize, bool);\n    let mut _9: usize;\n    let mut _10: &vec::Vec<u8>;\n    let mut _11: !;\n    debug v => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _7 = &_1;\n        _6 = <vec::Vec<u8> as core::ops::Deref>::deref(_7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = core::slice::memchr::memchr(0_u8, _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = core::option::Option::<usize>::unwrap(move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        _8 = CheckedAdd(_4, 1_usize);\n        assert(!move (_8.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _4, 1_usize) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _3 = move (_8.0: usize);\n        StorageDead(_4);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_1;\n        _9 = vec::Vec::<u8>::len(move _10) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_10);\n        _2 = Eq(move _3, move _9);\n        switchInt(move _2) -> [0: bb7, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_9);\n        StorageDead(_3);\n        StorageDead(_2);\n        _0 = ffi::c_str::CString::_from_vec_with_nul_unchecked(_1) -> [return: bb8, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_9);\n        StorageDead(_3);\n        _11 = core::panicking::panic(\"assertion failed: memchr::memchr(0, &v).unwrap() + 1 == v.len()\") -> unwind unreachable;\n    }\n    bb8: {\n        return;\n    }\n}\n",
+  "doc": " Converts a <code>[Vec]<[u8]></code> to a [`CString`] without checking the\n invariants on the given [`Vec`].\n\n # Safety\n\n The given [`Vec`] **must** have one nul byte as its last element.\n This means it cannot be empty nor have any other nul byte anywhere else.\n\n # Example\n\n ```\n use std::ffi::CString;\n assert_eq!(\n     unsafe { CString::from_vec_with_nul_unchecked(b\"abc\\0\".to_vec()) },\n     unsafe { CString::from_vec_unchecked(b\"abc\".to_vec()) }\n );\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

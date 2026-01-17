@@ -1,0 +1,49 @@
+{
+  "name": "task::raw_waker",
+  "safe": true,
+  "callees": {
+    "sync::Arc::<T>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the `Arc`, returning the wrapped pointer.\n\n To avoid a memory leak the pointer must be converted back to an `Arc` using\n [`Arc::from_raw`].\n\n # Examples\n\n ```\n use std::sync::Arc;\n\n let x = Arc::new(\"hello\".to_owned());\n let x_ptr = Arc::into_raw(x);\n assert_eq!(unsafe { &*x_ptr }, \"hello\");\n # // Prevent leaks for Miri.\n # drop(unsafe { Arc::from_raw(x_ptr) });\n ```\n",
+      "adt": {
+        "sync::Arc": "ImmutableAsArgument"
+      }
+    },
+    "core::task::RawWaker::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `RawWaker` from the provided `data` pointer and `vtable`.\n\n The `data` pointer can be used to store arbitrary data as required\n by the executor. This could be e.g. a type-erased pointer to an `Arc`\n that is associated with the task.\n The value of this pointer will get passed to all functions that are part\n of the `vtable` as the first parameter.\n\n It is important to consider that the `data` pointer must point to a\n thread safe type such as an `Arc<T: Send + Sync>`\n when used to construct a [`Waker`]. This restriction is lifted when\n constructing a [`LocalWaker`], which allows using types that do not implement\n <code>[Send] + [Sync]</code> like `Rc<T>`.\n\n The `vtable` customizes the behavior of a `Waker` which gets created\n from a `RawWaker`. For each operation on the `Waker`, the associated\n function in the `vtable` of the underlying `RawWaker` will be called.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::Arc": [
+      "Plain"
+    ],
+    "core::task::RawWakerVTable": [
+      "Ref"
+    ],
+    "core::task::RawWaker": [
+      "Plain"
+    ]
+  },
+  "path": 2183,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/task.rs:137:1: 177:2",
+  "src": "fn raw_waker<W: Wake + Send + Sync + 'static>(waker: Arc<W>) -> RawWaker {\n    // Increment the reference count of the arc to clone it.\n    //\n    // The #[inline(always)] is to ensure that raw_waker and clone_waker are\n    // always generated in the same code generation unit as one another, and\n    // therefore that the structurally identical const-promoted RawWakerVTable\n    // within both functions is deduplicated at LLVM IR code generation time.\n    // This allows optimizing Waker::will_wake to a single pointer comparison of\n    // the vtable pointers, rather than comparing all four function pointers\n    // within the vtables.\n    #[inline(always)]\n    unsafe fn clone_waker<W: Wake + Send + Sync + 'static>(waker: *const ()) -> RawWaker {\n        unsafe { Arc::increment_strong_count(waker as *const W) };\n        RawWaker::new(\n            waker,\n            &RawWakerVTable::new(clone_waker::<W>, wake::<W>, wake_by_ref::<W>, drop_waker::<W>),\n        )\n    }\n\n    // Wake by value, moving the Arc into the Wake::wake function\n    unsafe fn wake<W: Wake + Send + Sync + 'static>(waker: *const ()) {\n        let waker = unsafe { Arc::from_raw(waker as *const W) };\n        <W as Wake>::wake(waker);\n    }\n\n    // Wake by reference, wrap the waker in ManuallyDrop to avoid dropping it\n    unsafe fn wake_by_ref<W: Wake + Send + Sync + 'static>(waker: *const ()) {\n        let waker = unsafe { ManuallyDrop::new(Arc::from_raw(waker as *const W)) };\n        <W as Wake>::wake_by_ref(&waker);\n    }\n\n    // Decrement the reference count of the Arc on drop\n    unsafe fn drop_waker<W: Wake + Send + Sync + 'static>(waker: *const ()) {\n        unsafe { Arc::decrement_strong_count(waker as *const W) };\n    }\n\n    RawWaker::new(\n        Arc::into_raw(waker) as *const (),\n        &RawWakerVTable::new(clone_waker::<W>, wake::<W>, wake_by_ref::<W>, drop_waker::<W>),\n    )\n}",
+  "mir": "fn task::raw_waker(_1: sync::Arc<W>) -> core::task::RawWaker {\n    let mut _0: core::task::RawWaker;\n    let mut _2: *const ();\n    let mut _3: *const W;\n    let  _4: &core::task::RawWakerVTable;\n    debug waker => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = sync::Arc::<W>::into_raw(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = move _3 as *const ();\n        StorageDead(_3);\n        _4 = task::raw_waker::<W>::promoted[0];\n        _0 = core::task::RawWaker::new(move _2, _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

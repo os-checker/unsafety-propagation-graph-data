@@ -1,0 +1,100 @@
+{
+  "name": "path::PathBuf::_set_file_name",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "path::Path::file_name": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the final component of the `Path`, if there is one.\n\n If the path is a normal file, this is the file name. If it's the path of a directory, this\n is the directory name.\n\n Returns [`None`] if the path terminates in `..`.\n\n # Examples\n\n ```\n use std::path::Path;\n use std::ffi::OsStr;\n\n assert_eq!(Some(OsStr::new(\"bin\")), Path::new(\"/usr/bin/\").file_name());\n assert_eq!(Some(OsStr::new(\"foo.txt\")), Path::new(\"tmp/foo.txt\").file_name());\n assert_eq!(Some(OsStr::new(\"foo.txt\")), Path::new(\"foo.txt/.\").file_name());\n assert_eq!(Some(OsStr::new(\"foo.txt\")), Path::new(\"foo.txt/.//\").file_name());\n assert_eq!(None, Path::new(\"foo.txt/..\").file_name());\n assert_eq!(None, Path::new(\"/\").file_name());\n ```\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::option::Option::<T>::is_some": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the option is a [`Some`] value.\n\n # Examples\n\n ```\n let x: Option<u32> = Some(2);\n assert_eq!(x.is_some(), true);\n\n let x: Option<u32> = None;\n assert_eq!(x.is_some(), false);\n ```\n",
+      "adt": {}
+    },
+    "path::PathBuf::pop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Truncates `self` to [`self.parent`].\n\n Returns `false` and does nothing if [`self.parent`] is [`None`].\n Otherwise, returns `true`.\n\n [`self.parent`]: Path::parent\n\n # Examples\n\n ```\n use std::path::{Path, PathBuf};\n\n let mut p = PathBuf::from(\"/spirited/away.rs\");\n\n p.pop();\n assert_eq!(Path::new(\"/spirited\"), p);\n p.pop();\n assert_eq!(Path::new(\"/\"), p);\n ```\n",
+      "adt": {
+        "path::PathBuf": "MutableAsArgument"
+      }
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "path::PathBuf::push": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extends `self` with `path`.\n\n If `path` is absolute, it replaces the current path.\n\n On Windows:\n\n * if `path` has a root but no prefix (e.g., `\\windows`), it\n   replaces everything except for the prefix (if any) of `self`.\n * if `path` has a prefix but no root, it replaces `self`.\n * if `self` has a verbatim prefix (e.g. `\\\\?\\C:\\windows`)\n   and `path` is not empty, the new path is normalized: all references\n   to `.` and `..` are removed.\n\n Consider using [`Path::join`] if you need a new `PathBuf` instead of\n using this function on a cloned `PathBuf`.\n\n # Examples\n\n Pushing a relative path extends the existing path:\n\n ```\n use std::path::PathBuf;\n\n let mut path = PathBuf::from(\"/tmp\");\n path.push(\"file.bk\");\n assert_eq!(path, PathBuf::from(\"/tmp/file.bk\"));\n ```\n\n Pushing an absolute path replaces the existing path:\n\n ```\n use std::path::PathBuf;\n\n let mut path = PathBuf::from(\"/tmp\");\n path.push(\"/etc\");\n assert_eq!(path, PathBuf::from(\"/etc\"));\n ```\n",
+      "adt": {
+        "path::PathBuf": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "path::PathBuf": [
+      "Ref",
+      "Deref",
+      "MutRef"
+    ],
+    "path::Path": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Ref"
+    ],
+    "ffi::os_str::OsStr": [
+      "Ref"
+    ]
+  },
+  "path": 2482,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:1564:5: 1570:6",
+  "src": "fn _set_file_name(&mut self, file_name: &OsStr) {\n        if self.file_name().is_some() {\n            let popped = self.pop();\n            debug_assert!(popped);\n        }\n        self.push(file_name);\n    }",
+  "mir": "fn path::PathBuf::_set_file_name(_1: &mut path::PathBuf, _2: &ffi::os_str::OsStr) -> () {\n    let mut _0: ();\n    let mut _3: bool;\n    let mut _4: &core::option::Option<&ffi::os_str::OsStr>;\n    let  _5: core::option::Option<&ffi::os_str::OsStr>;\n    let  _6: &path::Path;\n    let mut _7: &path::PathBuf;\n    let  _8: bool;\n    let mut _9: !;\n    let  _10: ();\n    debug self => _1;\n    debug file_name => _2;\n    debug popped => _8;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_7);\n        _7 = &(*_1);\n        _6 = <path::PathBuf as core::ops::Deref>::deref(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        _5 = path::Path::file_name(_6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = &_5;\n        _3 = core::option::Option::<&ffi::os_str::OsStr>::is_some(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _3) -> [0: bb8, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _8 = path::PathBuf::pop(_1) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        switchInt(_8) -> [0: bb6, otherwise: bb7];\n    }\n    bb6: {\n        _9 = core::panicking::panic(\"assertion failed: popped\") -> unwind unreachable;\n    }\n    bb7: {\n        goto -> bb9;\n    }\n    bb8: {\n        StorageDead(_5);\n        StorageDead(_4);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_3);\n        _10 = path::PathBuf::push::<&ffi::os_str::OsStr>(_1, _2) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

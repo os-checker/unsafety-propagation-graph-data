@@ -1,0 +1,68 @@
+{
+  "name": "sync::Arc::<T, A>::new_zeroed_in",
+  "safe": true,
+  "callees": {
+    "core::alloc::Layout::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `Layout` suitable for holding a value of type `T`.\n",
+      "adt": {}
+    },
+    "sync::Arc::<T>::allocate_for_layout": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates an `ArcInner<T>` with sufficient space for\n a possibly-unsized inner value where the value has the layout provided.\n\n The function `mem_to_arcinner` is called with the data pointer\n and must return back a (potentially fat)-pointer for the `ArcInner<T>`.\n",
+      "adt": {
+        "core::alloc::Layout": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "sync::Arc::<T, A>::from_ptr_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::Arc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::alloc::Layout": [
+      "Plain"
+    ],
+    "sync::Arc": [
+      "Plain"
+    ]
+  },
+  "path": 2092,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:837:5: 848:6",
+  "src": "pub fn new_zeroed_in(alloc: A) -> Arc<mem::MaybeUninit<T>, A> {\n        unsafe {\n            Arc::from_ptr_in(\n                Arc::allocate_for_layout(\n                    Layout::new::<T>(),\n                    |layout| alloc.allocate_zeroed(layout),\n                    <*mut u8>::cast,\n                ),\n                alloc,\n            )\n        }\n    }",
+  "mir": "fn sync::Arc::<T, A>::new_zeroed_in(_1: A) -> sync::Arc<core::mem::MaybeUninit<T>, A> {\n    let mut _0: sync::Arc<core::mem::MaybeUninit<T>, A>;\n    let mut _2: *mut sync::ArcInner<core::mem::MaybeUninit<T>>;\n    let mut _3: core::alloc::Layout;\n    let mut _4: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:842:21: 842:29};\n    let mut _5: &A;\n    let mut _6: A;\n    debug alloc => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = core::alloc::Layout::new::<T>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &_1;\n        _4 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:842:21: 842:29}(move _5);\n        StorageDead(_5);\n        _2 = sync::Arc::<core::mem::MaybeUninit<T>>::allocate_for_layout::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:842:21: 842:29}, fn(*mut u8) -> *mut sync::ArcInner<core::mem::MaybeUninit<T>> {core::ptr::mut_ptr::<impl *mut u8>::cast::<sync::ArcInner<core::mem::MaybeUninit<T>>>}>(move _3, move _4, core::ptr::mut_ptr::<impl *mut u8>::cast::<sync::ArcInner<core::mem::MaybeUninit<T>>>) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_6);\n        _6 = move _1;\n        _0 = sync::Arc::<core::mem::MaybeUninit<T>, A>::from_ptr_in(move _2, move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Constructs a new `Arc` with uninitialized contents, with the memory\n being filled with `0` bytes, in the provided allocator.\n\n See [`MaybeUninit::zeroed`][zeroed] for examples of correct and incorrect usage\n of this method.\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::sync::Arc;\n use std::alloc::System;\n\n let zero = Arc::<u32, _>::new_zeroed_in(System);\n let zero = unsafe { zero.assume_init() };\n\n assert_eq!(*zero, 0)\n ```\n\n [zeroed]: mem::MaybeUninit::zeroed\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

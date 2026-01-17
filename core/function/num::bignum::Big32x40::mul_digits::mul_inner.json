@@ -1,0 +1,84 @@
+{
+  "name": "num::bignum::Big32x40::mul_digits::mul_inner",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the slice.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let mut iterator = x.iter();\n\n assert_eq!(iterator.next(), Some(&1));\n assert_eq!(iterator.next(), Some(&2));\n assert_eq!(iterator.next(), Some(&4));\n assert_eq!(iterator.next(), None);\n ```\n",
+      "adt": {
+        "slice::iter::Iter": "Constructor"
+      }
+    },
+    "iter::traits::iterator::Iterator::enumerate": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator which gives the current iteration count as well as\n the next value.\n\n The iterator returned yields pairs `(i, val)`, where `i` is the\n current index of iteration and `val` is the value returned by the\n iterator.\n\n `enumerate()` keeps its count as a [`usize`]. If you want to count by a\n different sized integer, the [`zip`] function provides similar\n functionality.\n\n # Overflow Behavior\n\n The method does no guarding against overflows, so enumerating more than\n [`usize::MAX`] elements either produces the wrong result or panics. If\n overflow checks are enabled, a panic is guaranteed.\n\n # Panics\n\n The returned iterator might panic if the to-be-returned index would\n overflow a [`usize`].\n\n [`zip`]: Iterator::zip\n\n # Examples\n\n ```\n let a = ['a', 'b', 'c'];\n\n let mut iter = a.into_iter().enumerate();\n\n assert_eq!(iter.next(), Some((0, 'a')));\n assert_eq!(iter.next(), Some((1, 'b')));\n assert_eq!(iter.next(), Some((2, 'c')));\n assert_eq!(iter.next(), None);\n ```\n",
+      "adt": {
+        "iter::adapters::enumerate::Enumerate": "Constructor"
+      }
+    },
+    "iter::traits::collect::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "num::bignum::FullOps::full_mul_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `(carry', v')` such that `carry' * 2^W + v' = self * other + other2 + carry`,\n where `W` is the number of bits in `Self`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::Iter": [
+      "Plain"
+    ],
+    "iter::adapters::enumerate::Enumerate": [
+      "Plain",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 25832, kind: RigidTy(Tuple([Ty { id: 47, kind: RigidTy(Uint(Usize)) }, Ty { id: 885, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 20, kind: RigidTy(Uint(U32)) }, Not)) }])) }), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 25832, kind: RigidTy(Tuple([Ty { id: 47, kind: RigidTy(Uint(Usize)) }, Ty { id: 885, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 20, kind: RigidTy(Uint(U32)) }, Not)) }])) }), Field(1, Ty { id: 885, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 20, kind: RigidTy(Uint(U32)) }, Not)) })])"
+    ]
+  },
+  "path": 14721,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/bignum.rs:283:17: 307:18",
+  "src": "fn mul_inner(ret: &mut [$ty; $n], aa: &[$ty], bb: &[$ty]) -> usize {\n                    use crate::num::bignum::FullOps;\n\n                    let mut retsz = 0;\n                    for (i, &a) in aa.iter().enumerate() {\n                        if a == 0 {\n                            continue;\n                        }\n                        let mut sz = bb.len();\n                        let mut carry = 0;\n                        for (j, &b) in bb.iter().enumerate() {\n                            let (c, v) = a.full_mul_add(b, ret[i + j], carry);\n                            ret[i + j] = v;\n                            carry = c;\n                        }\n                        if carry > 0 {\n                            ret[i + sz] = carry;\n                            sz += 1;\n                        }\n                        if retsz < i + sz {\n                            retsz = i + sz;\n                        }\n                    }\n                    retsz\n                }",
+  "mir": "fn num::bignum::Big32x40::mul_digits::mul_inner(_1: &mut [u32; 40], _2: &[u32], _3: &[u32]) -> usize {\n    let mut _0: usize;\n    let mut _4: usize;\n    let mut _5: iter::adapters::enumerate::Enumerate<slice::iter::Iter<'_, u32>>;\n    let mut _6: iter::adapters::enumerate::Enumerate<slice::iter::Iter<'_, u32>>;\n    let mut _7: slice::iter::Iter<'_, u32>;\n    let mut _8: iter::adapters::enumerate::Enumerate<slice::iter::Iter<'_, u32>>;\n    let mut _9: option::Option<(usize, &u32)>;\n    let mut _10: &mut iter::adapters::enumerate::Enumerate<slice::iter::Iter<'_, u32>>;\n    let mut _11: isize;\n    let  _12: usize;\n    let  _13: u32;\n    let mut _14: usize;\n    let mut _15: u32;\n    let mut _16: iter::adapters::enumerate::Enumerate<slice::iter::Iter<'_, u32>>;\n    let mut _17: iter::adapters::enumerate::Enumerate<slice::iter::Iter<'_, u32>>;\n    let mut _18: slice::iter::Iter<'_, u32>;\n    let mut _19: iter::adapters::enumerate::Enumerate<slice::iter::Iter<'_, u32>>;\n    let mut _20: option::Option<(usize, &u32)>;\n    let mut _21: &mut iter::adapters::enumerate::Enumerate<slice::iter::Iter<'_, u32>>;\n    let mut _22: isize;\n    let  _23: usize;\n    let  _24: u32;\n    let  _25: u32;\n    let  _26: u32;\n    let mut _27: (u32, u32);\n    let mut _28: u32;\n    let  _29: usize;\n    let mut _30: (usize, bool);\n    let mut _31: bool;\n    let mut _32: u32;\n    let  _33: usize;\n    let mut _34: (usize, bool);\n    let mut _35: bool;\n    let mut _36: bool;\n    let mut _37: u32;\n    let mut _38: u32;\n    let  _39: usize;\n    let mut _40: usize;\n    let mut _41: (usize, bool);\n    let mut _42: bool;\n    let mut _43: (usize, bool);\n    let mut _44: bool;\n    let mut _45: usize;\n    let mut _46: usize;\n    let mut _47: usize;\n    let mut _48: (usize, bool);\n    let mut _49: usize;\n    let mut _50: (usize, bool);\n    let mut _51: &u32;\n    let mut _52: &u32;\n    debug ret => _1;\n    debug aa => _2;\n    debug bb => _3;\n    debug retsz => _4;\n    debug iter => _8;\n    debug i => _12;\n    debug a => _13;\n    debug sz => _14;\n    debug carry => _15;\n    debug iter => _19;\n    debug j => _23;\n    debug b => _24;\n    debug c => _25;\n    debug v => _26;\n    bb0: {\n        StorageLive(_4);\n        _4 = 0_usize;\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = slice::<impl [u32]>::iter(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _6 = <slice::iter::Iter<'_, u32> as iter::traits::iterator::Iterator>::enumerate(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = <iter::adapters::enumerate::Enumerate<slice::iter::Iter<'_, u32>> as iter::traits::collect::IntoIterator>::into_iter(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageLive(_8);\n        _8 = move _5;\n        goto -> bb4;\n    }\n    bb4: {\n        StorageLive(_9);\n        _10 = &mut _8;\n        _9 = <iter::adapters::enumerate::Enumerate<slice::iter::Iter<'_, u32>> as iter::traits::iterator::Iterator>::next(_10) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _11 = discriminant(_9);\n        switchInt(move _11) -> [0: bb8, 1: bb7, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        _12 = (((_9 as variant#1).0: (usize, &u32)).0: usize);\n        _51 = (((_9 as variant#1).0: (usize, &u32)).1: &u32);\n        _13 = (*_51);\n        switchInt(_13) -> [0: bb9, otherwise: bb10];\n    }\n    bb8: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_5);\n        _0 = _4;\n        StorageDead(_4);\n        return;\n    }\n    bb9: {\n        StorageDead(_9);\n        goto -> bb4;\n    }\n    bb10: {\n        StorageLive(_14);\n        _14 = PtrMetadata(_3);\n        StorageLive(_15);\n        _15 = 0_u32;\n        StorageLive(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = slice::<impl [u32]>::iter(_3) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _17 = <slice::iter::Iter<'_, u32> as iter::traits::iterator::Iterator>::enumerate(move _18) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_18);\n        _16 = <iter::adapters::enumerate::Enumerate<slice::iter::Iter<'_, u32>> as iter::traits::collect::IntoIterator>::into_iter(move _17) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_17);\n        StorageLive(_19);\n        _19 = move _16;\n        goto -> bb14;\n    }\n    bb14: {\n        StorageLive(_20);\n        _21 = &mut _19;\n        _20 = <iter::adapters::enumerate::Enumerate<slice::iter::Iter<'_, u32>> as iter::traits::iterator::Iterator>::next(_21) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        _22 = discriminant(_20);\n        switchInt(move _22) -> [0: bb17, 1: bb16, otherwise: bb6];\n    }\n    bb16: {\n        _23 = (((_20 as variant#1).0: (usize, &u32)).0: usize);\n        _52 = (((_20 as variant#1).0: (usize, &u32)).1: &u32);\n        _24 = (*_52);\n        StorageLive(_27);\n        StorageLive(_28);\n        StorageLive(_29);\n        _30 = CheckedAdd(_12, _23);\n        assert(!move (_30.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _12, _23) -> [success: bb18, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_20);\n        StorageDead(_19);\n        StorageDead(_16);\n        StorageLive(_36);\n        StorageLive(_37);\n        _37 = _15;\n        _36 = Gt(move _37, 0_u32);\n        switchInt(move _36) -> [0: bb24, otherwise: bb23];\n    }\n    bb18: {\n        _29 = move (_30.0: usize);\n        _31 = Lt(_29, 40_usize);\n        assert(move _31, \"index out of bounds: the length is {} but the index is {}\", 40_usize, _29) -> [success: bb19, unwind unreachable];\n    }\n    bb19: {\n        _28 = (*_1)[_29];\n        StorageLive(_32);\n        _32 = _15;\n        _27 = <u32 as num::bignum::FullOps>::full_mul_add(_13, _24, move _28, move _32) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_32);\n        StorageDead(_28);\n        _25 = (_27.0: u32);\n        _26 = (_27.1: u32);\n        StorageDead(_29);\n        StorageDead(_27);\n        StorageLive(_33);\n        _34 = CheckedAdd(_12, _23);\n        assert(!move (_34.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _12, _23) -> [success: bb21, unwind unreachable];\n    }\n    bb21: {\n        _33 = move (_34.0: usize);\n        _35 = Lt(_33, 40_usize);\n        assert(move _35, \"index out of bounds: the length is {} but the index is {}\", 40_usize, _33) -> [success: bb22, unwind unreachable];\n    }\n    bb22: {\n        (*_1)[_33] = _26;\n        StorageDead(_33);\n        _15 = _25;\n        StorageDead(_20);\n        goto -> bb14;\n    }\n    bb23: {\n        StorageDead(_37);\n        StorageLive(_38);\n        _38 = _15;\n        StorageLive(_39);\n        StorageLive(_40);\n        _40 = _14;\n        _41 = CheckedAdd(_12, _40);\n        assert(!move (_41.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _12, move _40) -> [success: bb25, unwind unreachable];\n    }\n    bb24: {\n        StorageDead(_37);\n        goto -> bb28;\n    }\n    bb25: {\n        _39 = move (_41.0: usize);\n        StorageDead(_40);\n        _42 = Lt(_39, 40_usize);\n        assert(move _42, \"index out of bounds: the length is {} but the index is {}\", 40_usize, _39) -> [success: bb26, unwind unreachable];\n    }\n    bb26: {\n        (*_1)[_39] = move _38;\n        StorageDead(_38);\n        StorageDead(_39);\n        _43 = CheckedAdd(_14, 1_usize);\n        assert(!move (_43.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _14, 1_usize) -> [success: bb27, unwind unreachable];\n    }\n    bb27: {\n        _14 = move (_43.0: usize);\n        goto -> bb28;\n    }\n    bb28: {\n        StorageDead(_36);\n        StorageLive(_44);\n        StorageLive(_45);\n        _45 = _4;\n        StorageLive(_46);\n        StorageLive(_47);\n        _47 = _14;\n        _48 = CheckedAdd(_12, _47);\n        assert(!move (_48.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _12, move _47) -> [success: bb29, unwind unreachable];\n    }\n    bb29: {\n        _46 = move (_48.0: usize);\n        StorageDead(_47);\n        _44 = Lt(move _45, move _46);\n        switchInt(move _44) -> [0: bb32, otherwise: bb30];\n    }\n    bb30: {\n        StorageDead(_46);\n        StorageDead(_45);\n        StorageLive(_49);\n        _49 = _14;\n        _50 = CheckedAdd(_12, _49);\n        assert(!move (_50.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _12, move _49) -> [success: bb31, unwind unreachable];\n    }\n    bb31: {\n        _4 = move (_50.0: usize);\n        StorageDead(_49);\n        goto -> bb33;\n    }\n    bb32: {\n        StorageDead(_46);\n        StorageDead(_45);\n        goto -> bb33;\n    }\n    bb33: {\n        StorageDead(_44);\n        StorageDead(_15);\n        StorageDead(_14);\n        StorageDead(_9);\n        goto -> bb4;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

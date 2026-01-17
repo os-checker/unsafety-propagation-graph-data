@@ -1,0 +1,43 @@
+{
+  "name": "sync::spin::SpinLock::<T, G>::acquire_lock",
+  "safe": true,
+  "callees": {
+    "sync::spin::SpinLock::<T, G>::try_acquire_lock": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::spin::SpinLock": "ImmutableAsArgument"
+      }
+    },
+    "core::hint::spin_loop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Emits a machine instruction to signal the processor that it is running in\n a busy-wait spin-loop (\"spin lock\").\n\n Upon receiving the spin-loop signal the processor can optimize its behavior by,\n for example, saving power or switching hyper-threads.\n\n This function is different from [`thread::yield_now`] which directly\n yields to the system's scheduler, whereas `spin_loop` does not interact\n with the operating system.\n\n A common use case for `spin_loop` is implementing bounded optimistic\n spinning in a CAS loop in synchronization primitives. To avoid problems\n like priority inversion, it is strongly recommended that the spin loop is\n terminated after a finite amount of iterations and an appropriate blocking\n syscall is made.\n\n **Note**: On platforms that do not support receiving spin-loop hints this\n function does not do anything at all.\n\n # Examples\n\n ```ignore-wasm\n use std::sync::atomic::{AtomicBool, Ordering};\n use std::sync::Arc;\n use std::{hint, thread};\n\n // A shared atomic value that threads will use to coordinate\n let live = Arc::new(AtomicBool::new(false));\n\n // In a background thread we'll eventually set the value\n let bg_work = {\n     let live = live.clone();\n     thread::spawn(move || {\n         // Do some work, then make the value live\n         do_some_work();\n         live.store(true, Ordering::Release);\n     })\n };\n\n // Back on our current thread, we wait for the value to be set\n while !live.load(Ordering::Acquire) {\n     // The spin loop is a hint to the CPU that we're waiting, but probably\n     // not for very long\n     hint::spin_loop();\n }\n\n // The value is now set\n # fn do_some_work() {}\n do_some_work();\n bg_work.join()?;\n # Ok::<(), Box<dyn core::any::Any + Send + 'static>>(())\n ```\n\n [`thread::yield_now`]: ../../std/thread/fn.yield_now.html\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::spin::SpinLock": [
+      "Ref"
+    ]
+  },
+  "path": 2718,
+  "span": "ostd/src/sync/spin.rs:104:5: 108:6",
+  "src": "fn acquire_lock(&self) {\n        while !self.try_acquire_lock() {\n            core::hint::spin_loop();\n        }\n    }",
+  "mir": "fn sync::spin::SpinLock::<T, G>::acquire_lock(_1: &sync::spin::SpinLock<T, G>) -> () {\n    let mut _0: ();\n    let mut _2: bool;\n    let  _3: ();\n    debug self => _1;\n    bb0: {\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_2);\n        _2 = sync::spin::SpinLock::<T, G>::try_acquire_lock(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _2) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_2);\n        return;\n    }\n    bb4: {\n        _3 = core::hint::spin_loop() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_2);\n        goto -> bb1;\n    }\n}\n",
+  "doc": " Acquires the spin lock, otherwise busy waiting\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

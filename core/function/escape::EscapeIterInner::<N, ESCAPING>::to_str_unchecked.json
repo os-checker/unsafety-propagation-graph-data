@@ -1,0 +1,66 @@
+{
+  "name": "escape::EscapeIterInner::<N, ESCAPING>::to_str_unchecked",
+  "safe": false,
+  "callees": {
+    "convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to an element or subslice, without doing bounds\n checking.\n\n For a safe alternative see [`get`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used.\n\n You can think of this like `.get(index).unwrap_unchecked()`.  It's UB\n to call `.get_unchecked(len)`, even if you immediately convert to a\n pointer.  And it's UB to call `.get_unchecked(..len + 1)`,\n `.get_unchecked(..=len)`, or similar.\n\n [`get`]: slice::get\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n\n unsafe {\n     assert_eq!(x.get_unchecked(1), &2);\n }\n ```\n",
+      "adt": {}
+    },
+    "<[ascii::ascii_char::AsciiChar]>::as_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Views this slice of ASCII characters as a UTF-8 `str`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "escape::EscapeIterInner": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "ops::range::Range": [
+      "Plain"
+    ]
+  },
+  "path": 12767,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/escape.rs:273:5: 285:6",
+  "src": "unsafe fn to_str_unchecked(&self) -> &str {\n        debug_assert!(self.alive.end <= Self::LITERAL_ESCAPE_START);\n\n        // SAFETY: The caller guarantees `self.data` contains printable ASCII\n        //         characters in its `escape_seq` variant, and `self.alive` is\n        //         a valid range for `self.data.escape_seq`.\n        unsafe {\n            self.data\n                .escape_seq\n                .get_unchecked(usize::from(self.alive.start)..usize::from(self.alive.end))\n                .as_str()\n        }\n    }",
+  "mir": "fn escape::EscapeIterInner::<N, ESCAPING>::to_str_unchecked(_1: &escape::EscapeIterInner<N, ESCAPING>) -> &str {\n    let mut _0: &str;\n    let mut _2: bool;\n    let mut _3: u8;\n    let mut _4: !;\n    let  _5: &[ascii::ascii_char::AsciiChar];\n    let mut _6: &[ascii::ascii_char::AsciiChar];\n    let mut _7: &[ascii::ascii_char::AsciiChar; N];\n    let mut _8: ops::range::Range<usize>;\n    let mut _9: usize;\n    let mut _10: u8;\n    let mut _11: usize;\n    let mut _12: u8;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = (((*_1).1: ops::range::Range<u8>).1: u8);\n        _2 = Le(move _3, escape::EscapeIterInner::<N, ESCAPING>::LITERAL_ESCAPE_START);\n        switchInt(move _2) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageDead(_2);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &(((*_1).0: escape::MaybeEscapedCharacter<N>).0: [ascii::ascii_char::AsciiChar; N]);\n        _6 = move _7 as &[ascii::ascii_char::AsciiChar];\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = (((*_1).1: ops::range::Range<u8>).0: u8);\n        _9 = <usize as convert::From<u8>>::from(move _10) -> [return: bb3, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _4 = panicking::panic(\"assertion failed: self.alive.end <= Self::LITERAL_ESCAPE_START\") -> unwind unreachable;\n    }\n    bb3: {\n        StorageDead(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = (((*_1).1: ops::range::Range<u8>).1: u8);\n        _11 = <usize as convert::From<u8>>::from(move _12) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_12);\n        _8 = Range(move _9, move _11);\n        StorageDead(_11);\n        StorageDead(_9);\n        _5 = slice::<impl [ascii::ascii_char::AsciiChar]>::get_unchecked::<ops::range::Range<usize>>(move _6, move _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_8);\n        StorageDead(_6);\n        _0 = <[ascii::ascii_char::AsciiChar]>::as_str(_5) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        return;\n    }\n}\n",
+  "doc": " Returns the printable ASCII characters in the `escape_seq` variant of `self.data`\n as a string.\n\n # Safety\n\n - `self.data` must contain printable ASCII characters in its `escape_seq` variant.\n - `self.alive` must be a valid range for `self.data.escape_seq`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

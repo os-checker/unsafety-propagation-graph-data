@@ -1,0 +1,78 @@
+{
+  "name": "slice::iter::Iter::<'a, T>::new",
+  "safe": true,
+  "callees": {
+    "ptr::non_null::NonNull::<T>::from_ref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a reference to a `NonNull` pointer.\n",
+      "adt": {
+        "ptr::non_null::NonNull": "Constructor"
+      }
+    },
+    "ptr::non_null::NonNull::<T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"null pointer\");\n\n let casted_ptr = ptr.cast::<i8>();\n let raw_ptr: *mut i8 = casted_ptr.as_ptr();\n ```\n",
+      "adt": {
+        "ptr::non_null::NonNull": "Constructor"
+      }
+    },
+    "ptr::without_provenance": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a pointer with the given address and no [provenance][crate::ptr#provenance].\n\n This is equivalent to `ptr::null().with_addr(addr)`.\n\n Without provenance, this pointer is not associated with any actual allocation. Such a\n no-provenance pointer may be used for zero-sized memory accesses (if suitably aligned), but\n non-zero-sized memory accesses with a no-provenance pointer are UB. No-provenance pointers are\n little more than a `usize` address in disguise.\n\n This is different from `addr as *const T`, which creates a pointer that picks up a previously\n exposed provenance. See [`with_exposed_provenance`] for more details on that operation.\n\n This is a [Strict Provenance][crate::ptr#strict-provenance] API.\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ],
+    "slice::iter::Iter": [
+      "Plain"
+    ]
+  },
+  "path": 16463,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:96:5: 106:6",
+  "src": "pub(super) const fn new(slice: &'a [T]) -> Self {\n        let len = slice.len();\n        let ptr: NonNull<T> = NonNull::from_ref(slice).cast();\n        // SAFETY: Similar to `IterMut::new`.\n        unsafe {\n            let end_or_len =\n                if T::IS_ZST { without_provenance(len) } else { ptr.as_ptr().add(len) };\n\n            Self { ptr, end_or_len, _marker: PhantomData }\n        }\n    }",
+  "mir": "fn slice::iter::Iter::<'a, T>::new(_1: &[T]) -> slice::iter::Iter<'_, T> {\n    let mut _0: slice::iter::Iter<'_, T>;\n    let  _2: usize;\n    let  _3: ptr::non_null::NonNull<T>;\n    let mut _4: ptr::non_null::NonNull<[T]>;\n    let  _5: *const T;\n    let mut _6: *mut T;\n    let mut _7: *mut T;\n    let mut _8: *const T;\n    debug slice => _1;\n    debug len => _2;\n    debug ptr => _3;\n    debug end_or_len => _5;\n    bb0: {\n        _2 = PtrMetadata(_1);\n        StorageLive(_4);\n        _4 = ptr::non_null::NonNull::<[T]>::from_ref(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = ptr::non_null::NonNull::<[T]>::cast::<T>(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        switchInt(<T as mem::SizedTypeProperties>::IS_ZST) -> [0: bb5, otherwise: bb3];\n    }\n    bb3: {\n        _5 = ptr::without_provenance::<T>(_2) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        goto -> bb8;\n    }\n    bb5: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = ptr::non_null::NonNull::<T>::as_ptr(_3) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _6 = ptr::mut_ptr::<impl *mut T>::add(move _7, _2) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_7);\n        _5 = move _6 as *const T;\n        StorageDead(_6);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageLive(_8);\n        _8 = _5;\n        _0 = Iter(_3, move _8, ZeroSized: marker::PhantomData<&T>);\n        StorageDead(_8);\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

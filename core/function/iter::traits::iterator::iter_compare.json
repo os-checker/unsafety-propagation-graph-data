@@ -1,0 +1,58 @@
+{
+  "name": "iter::traits::iterator::iter_compare",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::iter_compare::compare": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::try_for_each": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An iterator method that applies a fallible function to each item in the\n iterator, stopping at the first error and returning that error.\n\n This can also be thought of as the fallible form of [`for_each()`]\n or as the stateless version of [`try_fold()`].\n\n [`for_each()`]: Iterator::for_each\n [`try_fold()`]: Iterator::try_fold\n\n # Examples\n\n ```\n use std::fs::rename;\n use std::io::{stdout, Write};\n use std::path::Path;\n\n let data = [\"no_tea.txt\", \"stale_bread.json\", \"torrential_rain.png\"];\n\n let res = data.iter().try_for_each(|x| writeln!(stdout(), \"{x}\"));\n assert!(res.is_ok());\n\n let mut it = data.iter().cloned();\n let res = it.try_for_each(|x| rename(x, Path::new(x).with_extension(\"old\")));\n assert!(res.is_err());\n // It short-circuited, so the remaining items are still in the iterator:\n assert_eq!(it.next(), Some(\"stale_bread.json\"));\n ```\n\n The [`ControlFlow`] type can be used with this method for the situations\n in which you'd use `break` and `continue` in a normal loop:\n\n ```\n use std::ops::ControlFlow;\n\n let r = (2..100).try_for_each(|x| {\n     if 323 % x == 0 {\n         return ControlFlow::Break(x)\n     }\n\n     ControlFlow::Continue(())\n });\n assert_eq!(r, ControlFlow::Break(17));\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 9096, kind: RigidTy(Adt(AdtDef(DefId { id: 24551, name: \"ops::control_flow::ControlFlow\" }), GenericArgs([Type(Ty { id: 3828, kind: Param(ParamTy { index: 3, name: \"T\" }) }), Type(Ty { id: 67, kind: RigidTy(Adt(AdtDef(DefId { id: 24474, name: \"cmp::Ordering\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "option::Option": [
+      "Plain"
+    ],
+    "cmp::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 14279,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:4086:1: 4113:2",
+  "src": "fn iter_compare<A, B, F, T>(mut a: A, mut b: B, f: F) -> ControlFlow<T, Ordering>\nwhere\n    A: Iterator,\n    B: Iterator,\n    F: FnMut(A::Item, B::Item) -> ControlFlow<T>,\n{\n    #[inline]\n    fn compare<'a, B, X, T>(\n        b: &'a mut B,\n        mut f: impl FnMut(X, B::Item) -> ControlFlow<T> + 'a,\n    ) -> impl FnMut(X) -> ControlFlow<ControlFlow<T, Ordering>> + 'a\n    where\n        B: Iterator,\n    {\n        move |x| match b.next() {\n            None => ControlFlow::Break(ControlFlow::Continue(Ordering::Greater)),\n            Some(y) => f(x, y).map_break(ControlFlow::Break),\n        }\n    }\n\n    match a.try_for_each(compare(&mut b, f)) {\n        ControlFlow::Continue(()) => ControlFlow::Continue(match b.next() {\n            None => Ordering::Equal,\n            Some(_) => Ordering::Less,\n        }),\n        ControlFlow::Break(x) => x,\n    }\n}",
+  "mir": "fn iter::traits::iterator::iter_compare(_1: A, _2: B, _3: F) -> ops::control_flow::ControlFlow<T, cmp::Ordering> {\n    let mut _0: ops::control_flow::ControlFlow<T, cmp::Ordering>;\n    let mut _4: ops::control_flow::ControlFlow<ops::control_flow::ControlFlow<T, cmp::Ordering>>;\n    let mut _5: &mut A;\n    let mut _6: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:4100:9: 4100:17};\n    let mut _7: &mut B;\n    let mut _8: isize;\n    let mut _9: cmp::Ordering;\n    let mut _10: option::Option<<B as iter::traits::iterator::Iterator>::Item>;\n    let mut _11: &mut B;\n    let mut _12: isize;\n    let  _13: ops::control_flow::ControlFlow<T, cmp::Ordering>;\n    debug a => _1;\n    debug b => _2;\n    debug f => _3;\n    debug x => _13;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &mut _1;\n        StorageLive(_6);\n        _7 = &mut _2;\n        _6 = iter::traits::iterator::iter_compare::compare::<'_, B, <A as iter::traits::iterator::Iterator>::Item, T, F>(_7, _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = <A as iter::traits::iterator::Iterator>::try_for_each::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:4100:9: 4100:17}, ops::control_flow::ControlFlow<ops::control_flow::ControlFlow<T, cmp::Ordering>>>(move _5, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_5);\n        _8 = discriminant(_4);\n        switchInt(move _8) -> [0: bb5, 1: bb4, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        StorageLive(_13);\n        _13 = move ((_4 as variant#1).0: ops::control_flow::ControlFlow<T, cmp::Ordering>);\n        _0 = move _13;\n        StorageDead(_13);\n        goto -> bb11;\n    }\n    bb5: {\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &mut _2;\n        _10 = <B as iter::traits::iterator::Iterator>::next(move _11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        _12 = discriminant(_10);\n        switchInt(move _12) -> [0: bb8, 1: bb7, otherwise: bb3];\n    }\n    bb7: {\n        _9 = cmp::Ordering::Less;\n        goto -> bb9;\n    }\n    bb8: {\n        _9 = cmp::Ordering::Equal;\n        goto -> bb9;\n    }\n    bb9: {\n        _0 = ops::control_flow::ControlFlow::Continue(move _9);\n        StorageDead(_9);\n        drop(_10) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_10);\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_4);\n        drop(_2) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        drop(_1) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        return;\n    }\n}\n",
+  "doc": " Compares two iterators element-wise using the given function.\n\n If `ControlFlow::Continue(())` is returned from the function, the comparison moves on to the next\n elements of both iterators. Returning `ControlFlow::Break(x)` short-circuits the iteration and\n returns `ControlFlow::Break(x)`. If one of the iterators runs out of elements,\n `ControlFlow::Continue(ord)` is returned where `ord` is the result of comparing the lengths of\n the iterators.\n\n Isolates the logic shared by ['cmp_by'](Iterator::cmp_by),\n ['partial_cmp_by'](Iterator::partial_cmp_by), and ['eq_by'](Iterator::eq_by).\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

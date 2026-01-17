@@ -1,0 +1,93 @@
+{
+  "name": "<boxed::Box<T, A> as core::ops::Drop>::drop",
+  "safe": true,
+  "callees": {
+    "core::ptr::Unique::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n",
+      "adt": {}
+    },
+    "core::alloc::Layout::for_value_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Produces layout describing a record that could be used to\n allocate backing structure for `T` (which could be a trait\n or other unsized type like a slice).\n\n # Safety\n\n This function is only safe to call if the following conditions hold:\n\n - If `T` is `Sized`, this function is always safe to call.\n - If the unsized tail of `T` is:\n     - a [slice], then the length of the slice tail must be an initialized\n       integer, and the size of the *entire value*\n       (dynamic tail length + statically sized prefix) must fit in `isize`.\n       For the special case where the dynamic tail length is 0, this function\n       is safe to call.\n     - a [trait object], then the vtable part of the pointer must point\n       to a valid vtable for the type `T` acquired by an unsizing coercion,\n       and the size of the *entire value*\n       (dynamic tail length + statically sized prefix) must fit in `isize`.\n     - an (unstable) [extern type], then this function is always safe to\n       call, but may panic or otherwise return the wrong value, as the\n       extern type's layout is not known. This is the same behavior as\n       [`Layout::for_value`] on a reference to an extern type tail.\n     - otherwise, it is conservatively not allowed to call this function.\n\n [trait object]: ../../book/ch17-02-trait-objects.html\n [extern type]: ../../unstable-book/language-features/extern-types.html\n",
+      "adt": {}
+    },
+    "core::alloc::Layout::size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The minimum size in bytes for a memory block of this layout.\n",
+      "adt": {}
+    },
+    "core::ptr::Unique::<T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "core::alloc::Allocator::deallocate": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Deallocates the memory referenced by `ptr`.\n\n # Safety\n\n * `ptr` must denote a block of memory [*currently allocated*] via this allocator, and\n * `layout` must [*fit*] that block of memory.\n\n [*currently allocated*]: #currently-allocated-memory\n [*fit*]: #memory-fitting\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::Unique": [
+      "Plain"
+    ],
+    "boxed::Box": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "core::alloc::Layout": [
+      "Plain",
+      "Ref"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 347,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed.rs:1879:5: 1890:6",
+  "src": "fn drop(&mut self) {\n        // the T in the Box is dropped by the compiler before the destructor is run\n\n        let ptr = self.0;\n\n        unsafe {\n            let layout = Layout::for_value_raw(ptr.as_ptr());\n            if layout.size() != 0 {\n                self.1.deallocate(From::from(ptr.cast()), layout);\n            }\n        }\n    }",
+  "mir": "fn <boxed::Box<T, A> as core::ops::Drop>::drop(_1: &mut boxed::Box<T, A>) -> () {\n    let mut _0: ();\n    let  _2: core::ptr::Unique<T>;\n    let  _3: core::alloc::Layout;\n    let mut _4: *const T;\n    let mut _5: *mut T;\n    let mut _6: usize;\n    let mut _7: &core::alloc::Layout;\n    let  _8: ();\n    let mut _9: &A;\n    let mut _10: core::ptr::NonNull<u8>;\n    let mut _11: core::ptr::Unique<u8>;\n    debug self => _1;\n    debug ptr => _2;\n    debug layout => _3;\n    bb0: {\n        _2 = ((*_1).0: core::ptr::Unique<T>);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = core::ptr::Unique::<T>::as_ptr(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = move _5 as *const T;\n        StorageDead(_5);\n        _3 = core::alloc::Layout::for_value_raw::<T>(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &_3;\n        _6 = core::alloc::Layout::size(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        switchInt(move _6) -> [0: bb8, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageLive(_9);\n        _9 = &((*_1).1: A);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = core::ptr::Unique::<T>::cast::<u8>(_2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _10 = <core::ptr::NonNull<u8> as core::convert::From<core::ptr::Unique<u8>>>::from(move _11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        _8 = <A as core::alloc::Allocator>::deallocate(move _9, move _10, _3) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageDead(_9);\n        goto -> bb9;\n    }\n    bb8: {\n        StorageDead(_6);\n        goto -> bb9;\n    }\n    bb9: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

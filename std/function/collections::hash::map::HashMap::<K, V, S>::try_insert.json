@@ -1,0 +1,61 @@
+{
+  "name": "collections::hash::map::HashMap::<K, V, S>::try_insert",
+  "safe": true,
+  "callees": {
+    "collections::hash::map::HashMap::<K, V, S>::entry": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the given key's corresponding entry in the map for in-place manipulation.\n\n # Examples\n\n ```\n use std::collections::HashMap;\n\n let mut letters = HashMap::new();\n\n for ch in \"a short treatise on fungi\".chars() {\n     letters.entry(ch).and_modify(|counter| *counter += 1).or_insert(1);\n }\n\n assert_eq!(letters[&'s'], 2);\n assert_eq!(letters[&'t'], 3);\n assert_eq!(letters[&'u'], 1);\n assert_eq!(letters.get(&'y'), None);\n ```\n",
+      "adt": {
+        "collections::hash::map::HashMap": "MutableAsArgument",
+        "collections::hash::map::Entry": "Constructor"
+      }
+    },
+    "collections::hash::map::VacantEntry::<'a, K, V>::insert": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets the value of the entry with the `VacantEntry`'s key,\n and returns a mutable reference to it.\n\n # Examples\n\n ```\n use std::collections::HashMap;\n use std::collections::hash_map::Entry;\n\n let mut map: HashMap<&str, u32> = HashMap::new();\n\n if let Entry::Vacant(o) = map.entry(\"poneyland\") {\n     o.insert(37);\n }\n assert_eq!(map[\"poneyland\"], 37);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::hash::map::HashMap": [
+      "MutRef"
+    ],
+    "collections::hash::map::Entry": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 1586, kind: RigidTy(Adt(AdtDef(DefId { id: 5092, name: \"collections::hash::map::VacantEntry\" }), GenericArgs([Lifetime(Region { kind: ReErased }), Type(Ty { id: 1254, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 1365, kind: Param(ParamTy { index: 1, name: \"V\" }) })]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 1587, kind: RigidTy(Adt(AdtDef(DefId { id: 5093, name: \"collections::hash::map::OccupiedEntry\" }), GenericArgs([Lifetime(Region { kind: ReErased }), Type(Ty { id: 1254, kind: Param(ParamTy { index: 0, name: \"K\" }) }), Type(Ty { id: 1365, kind: Param(ParamTy { index: 1, name: \"V\" }) })]))) })])"
+    ],
+    "collections::hash::map::VacantEntry": [
+      "Plain"
+    ],
+    "collections::hash::map::OccupiedEntry": [
+      "Plain"
+    ],
+    "collections::hash::map::OccupiedError": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 657,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/collections/hash/map.rs:1235:5: 1240:6",
+  "src": "pub fn try_insert(&mut self, key: K, value: V) -> Result<&mut V, OccupiedError<'_, K, V>> {\n        match self.entry(key) {\n            Occupied(entry) => Err(OccupiedError { entry, value }),\n            Vacant(entry) => Ok(entry.insert(value)),\n        }\n    }",
+  "mir": "fn collections::hash::map::HashMap::<K, V, S>::try_insert(_1: &mut collections::hash::map::HashMap<K, V, S>, _2: K, _3: V) -> core::result::Result<&mut V, collections::hash::map::OccupiedError<'_, K, V>> {\n    let mut _0: core::result::Result<&mut V, collections::hash::map::OccupiedError<'_, K, V>>;\n    let mut _4: collections::hash::map::Entry<'_, K, V>;\n    let mut _5: isize;\n    let  _6: collections::hash::map::OccupiedEntry<'_, K, V>;\n    let mut _7: collections::hash::map::OccupiedError<'_, K, V>;\n    let  _8: collections::hash::map::VacantEntry<'_, K, V>;\n    let mut _9: &mut V;\n    debug self => _1;\n    debug key => _2;\n    debug value => _3;\n    debug entry => _6;\n    debug entry => _8;\n    bb0: {\n        StorageLive(_4);\n        _4 = collections::hash::map::HashMap::<K, V, S>::entry(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = discriminant(_4);\n        switchInt(move _5) -> [0: bb4, 1: bb3, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        _8 = move ((_4 as variant#1).0: collections::hash::map::VacantEntry<'_, K, V>);\n        _9 = collections::hash::map::VacantEntry::<'_, K, V>::insert(_8, _3) -> [return: bb5, unwind unreachable];\n    }\n    bb4: {\n        _6 = move ((_4 as variant#0).0: collections::hash::map::OccupiedEntry<'_, K, V>);\n        StorageLive(_7);\n        _7 = OccupiedError(_6, _3);\n        _0 = core::result::Result::Err(move _7);\n        StorageDead(_7);\n        goto -> bb6;\n    }\n    bb5: {\n        _0 = core::result::Result::Ok(_9);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Tries to insert a key-value pair into the map, and returns\n a mutable reference to the value in the entry.\n\n If the map already had this key present, nothing is updated, and\n an error containing the occupied entry and the value is returned.\n\n # Examples\n\n Basic usage:\n\n ```\n #![feature(map_try_insert)]\n\n use std::collections::HashMap;\n\n let mut map = HashMap::new();\n assert_eq!(map.try_insert(37, \"a\").unwrap(), &\"a\");\n\n let err = map.try_insert(37, \"b\").unwrap_err();\n assert_eq!(err.entry.key(), &37);\n assert_eq!(err.entry.get(), &\"a\");\n assert_eq!(err.value, \"b\");\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

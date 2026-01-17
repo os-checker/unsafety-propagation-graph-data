@@ -1,0 +1,67 @@
+{
+  "name": "str::<impl str>::split_at_mut_unchecked",
+  "safe": false,
+  "callees": {
+    "str::<impl str>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of `self`.\n\n This length is in bytes, not [`char`]s or graphemes. In other words,\n it might not be what a human considers the length of the string.\n\n [`char`]: prim@char\n\n # Examples\n\n ```\n let len = \"foo\".len();\n assert_eq!(3, len);\n\n assert_eq!(\"ƒoo\".len(), 4); // fancy f!\n assert_eq!(\"ƒoo\".chars().count(), 3);\n ```\n",
+      "adt": {}
+    },
+    "str::<impl str>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a mutable string slice to a raw pointer.\n\n As string slices are a slice of bytes, the raw pointer points to a\n [`u8`]. This pointer will be pointing to the first byte of the string\n slice.\n\n It is your responsibility to make sure that the string slice only gets\n modified in a way that it remains valid UTF-8.\n",
+      "adt": {}
+    },
+    "slice::raw::from_raw_parts_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the same functionality as [`from_raw_parts`], except that a\n mutable slice is returned.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for both reads and writes for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be accessed through any other pointer\n   (not derived from the return value) for the duration of lifetime `'a`.\n   Both read and write accesses are forbidden.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    },
+    "str::converts::from_utf8_unchecked_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a slice of bytes to a string slice without checking\n that the string contains valid UTF-8; mutable version.\n\n This is an alias to [`str::from_utf8_unchecked_mut`].\n\n See the immutable version, [`from_utf8_unchecked()`] for documentation and safety requirements.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::str;\n\n let mut heart = vec![240, 159, 146, 150];\n let heart = unsafe { str::from_utf8_unchecked_mut(&mut heart) };\n\n assert_eq!(\"💖\", heart);\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 3131,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/str/mod.rs:988:5: 998:6",
+  "src": "const unsafe fn split_at_mut_unchecked(&mut self, mid: usize) -> (&mut str, &mut str) {\n        let len = self.len();\n        let ptr = self.as_mut_ptr();\n        // SAFETY: caller guarantees `mid` is on a char boundary.\n        unsafe {\n            (\n                from_utf8_unchecked_mut(slice::from_raw_parts_mut(ptr, mid)),\n                from_utf8_unchecked_mut(slice::from_raw_parts_mut(ptr.add(mid), len - mid)),\n            )\n        }\n    }",
+  "mir": "fn str::<impl str>::split_at_mut_unchecked(_1: &mut str, _2: usize) -> (&mut str, &mut str) {\n    let mut _0: (&mut str, &mut str);\n    let  _3: usize;\n    let mut _4: &str;\n    let  _5: *mut u8;\n    let mut _6: &mut str;\n    let mut _7: &mut [u8];\n    let mut _8: &mut str;\n    let mut _9: &mut [u8];\n    let mut _10: *mut u8;\n    let mut _11: usize;\n    let mut _12: (usize, bool);\n    debug self => _1;\n    debug mid => _2;\n    debug len => _3;\n    debug ptr => _5;\n    bb0: {\n        StorageLive(_4);\n        _4 = &(*_1);\n        _3 = str::<impl str>::len(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _5 = str::<impl str>::as_mut_ptr(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _7 = slice::raw::from_raw_parts_mut::<'_, u8>(_5, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = str::converts::from_utf8_unchecked_mut(_7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageLive(_10);\n        _10 = ptr::mut_ptr::<impl *mut u8>::add(_5, _2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_11);\n        _12 = CheckedSub(_3, _2);\n        assert(!move (_12.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _3, _2) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _11 = move (_12.0: usize);\n        _9 = slice::raw::from_raw_parts_mut::<'_, u8>(move _10, move _11) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_11);\n        StorageDead(_10);\n        _8 = str::converts::from_utf8_unchecked_mut(_9) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _0 = (_6, _8);\n        return;\n    }\n}\n",
+  "doc": " Divides one string slice into two at an index.\n\n # Safety\n\n The caller must ensure that `mid` is a valid byte offset from the start\n of the string and falls on the boundary of a UTF-8 code point.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

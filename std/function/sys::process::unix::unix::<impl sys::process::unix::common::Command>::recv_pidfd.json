@@ -1,0 +1,155 @@
+{
+  "name": "sys::process::unix::unix::<impl sys::process::unix::common::Command>::recv_pidfd",
+  "safe": true,
+  "callees": {
+    "core::mem::zeroed": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the value of type `T` represented by the all-zero byte-pattern.\n\n This means that, for example, the padding byte in `(u8, u16)` is not\n necessarily zeroed.\n\n There is no guarantee that an all-zero byte-pattern represents a valid value\n of some type `T`. For example, the all-zero byte-pattern is not a valid value\n for reference types (`&T`, `&mut T`) and function pointers. Using `zeroed`\n on such types causes immediate [undefined behavior][ub] because [the Rust\n compiler assumes][inv] that there always is a valid value in a variable it\n considers initialized.\n\n This has the same effect as [`MaybeUninit::zeroed().assume_init()`][zeroed].\n It is useful for FFI sometimes, but should generally be avoided.\n\n [zeroed]: MaybeUninit::zeroed\n [ub]: ../../reference/behavior-considered-undefined.html\n [inv]: MaybeUninit#initialization-invariant\n\n # Examples\n\n Correct usage of this function: initializing an integer with zero.\n\n ```\n use std::mem;\n\n let x: i32 = unsafe { mem::zeroed() };\n assert_eq!(0, x);\n ```\n\n *Incorrect* usage of this function: initializing a reference with zero.\n\n ```rust,no_run\n # #![allow(invalid_value)]\n use std::mem;\n\n let _x: &i32 = unsafe { mem::zeroed() }; // Undefined behavior!\n let _y: fn() = unsafe { mem::zeroed() }; // And again!\n ```\n",
+      "adt": {}
+    },
+    "io::IoSliceMut::<'a>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `IoSliceMut` wrapping a byte slice.\n\n # Panics\n\n Panics on Windows if the slice is larger than 4GB.\n",
+      "adt": {
+        "io::IoSliceMut": "Constructor"
+      }
+    },
+    "core::mem::size_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of a type in bytes.\n\n More specifically, this is the offset in bytes between successive elements\n in an array with that item type including alignment padding. Thus, for any\n type `T` and length `n`, `[T; n]` has a size of `n * size_of::<T>()`.\n\n In general, the size of a type is not stable across compilations, but\n specific types such as primitives are.\n\n The following table gives the size for primitives.\n\n Type | `size_of::<Type>()`\n ---- | ---------------\n () | 0\n bool | 1\n u8 | 1\n u16 | 2\n u32 | 4\n u64 | 8\n u128 | 16\n i8 | 1\n i16 | 2\n i32 | 4\n i64 | 8\n i128 | 16\n f32 | 4\n f64 | 8\n char | 4\n\n Furthermore, `usize` and `isize` have the same size.\n\n The types [`*const T`], `&T`, [`Box<T>`], [`Option<&T>`], and `Option<Box<T>>` all have\n the same size. If `T` is `Sized`, all of those types have the same size as `usize`.\n\n The mutability of a pointer does not change its size. As such, `&T` and `&mut T`\n have the same size. Likewise for `*const T` and `*mut T`.\n\n # Size of `#[repr(C)]` items\n\n The `C` representation for items has a defined layout. With this layout,\n the size of items is also stable as long as all fields have a stable size.\n\n ## Size of Structs\n\n For `struct`s, the size is determined by the following algorithm.\n\n For each field in the struct ordered by declaration order:\n\n 1. Add the size of the field.\n 2. Round up the current size to the nearest multiple of the next field's [alignment].\n\n Finally, round the size of the struct to the nearest multiple of its [alignment].\n The alignment of the struct is usually the largest alignment of all its\n fields; this can be changed with the use of `repr(align(N))`.\n\n Unlike `C`, zero sized structs are not rounded up to one byte in size.\n\n ## Size of Enums\n\n Enums that carry no data other than the discriminant have the same size as C enums\n on the platform they are compiled for.\n\n ## Size of Unions\n\n The size of a union is the size of its largest field.\n\n Unlike `C`, zero sized unions are not rounded up to one byte in size.\n\n # Examples\n\n ```\n // Some primitives\n assert_eq!(4, size_of::<i32>());\n assert_eq!(8, size_of::<f64>());\n assert_eq!(0, size_of::<()>());\n\n // Some arrays\n assert_eq!(8, size_of::<[i32; 2]>());\n assert_eq!(12, size_of::<[i32; 3]>());\n assert_eq!(0, size_of::<[i32; 0]>());\n\n\n // Pointer size equality\n assert_eq!(size_of::<&i32>(), size_of::<*const i32>());\n assert_eq!(size_of::<&i32>(), size_of::<Box<i32>>());\n assert_eq!(size_of::<&i32>(), size_of::<Option<&i32>>());\n assert_eq!(size_of::<Box<i32>>(), size_of::<Option<Box<i32>>>());\n ```\n\n Using `#[repr(C)]`.\n\n ```\n #[repr(C)]\n struct FieldStruct {\n     first: u8,\n     second: u16,\n     third: u8\n }\n\n // The size of the first field is 1, so add 1 to the size. Size is 1.\n // The alignment of the second field is 2, so add 1 to the size for padding. Size is 2.\n // The size of the second field is 2, so add 2 to the size. Size is 4.\n // The alignment of the third field is 1, so add 0 to the size for padding. Size is 4.\n // The size of the third field is 1, so add 1 to the size. Size is 5.\n // Finally, the alignment of the struct is 2 (because the largest alignment amongst its\n // fields is 2), so add 1 to the size for padding. Size is 6.\n assert_eq!(6, size_of::<FieldStruct>());\n\n #[repr(C)]\n struct TupleStruct(u8, u16, u8);\n\n // Tuple structs follow the same rules.\n assert_eq!(6, size_of::<TupleStruct>());\n\n // Note that reordering the fields can lower the size. We can remove both padding bytes\n // by putting `third` before `second`.\n #[repr(C)]\n struct FieldStructOptimized {\n     first: u8,\n     third: u8,\n     second: u16\n }\n\n assert_eq!(4, size_of::<FieldStructOptimized>());\n\n // Union size is the size of the largest field.\n #[repr(C)]\n union ExampleUnion {\n     smaller: u8,\n     larger: u16\n }\n\n assert_eq!(2, size_of::<ExampleUnion>());\n ```\n\n [alignment]: align_of\n [`*const T`]: primitive@pointer\n [`Box<T>`]: ../../std/boxed/struct.Box.html\n [`Option<&T>`]: crate::option::Option\n\n",
+      "adt": {}
+    },
+    "sys::pal::unix::cvt_r": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " `-1` → look at `errno` → retry on `EINTR`. Otherwise `Ok()`-wrap the closure return value.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "libc::CMSG_FIRSTHDR": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::is_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s = [1, 2, 3];\n let ptr: *mut u32 = s.as_mut_ptr();\n assert!(!ptr.is_null());\n ```\n",
+      "adt": {}
+    },
+    "libc::CMSG_DATA": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unsafe mutable pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n let x_ptr = x.as_mut_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         *x_ptr.add(i) += 2;\n     }\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "core::ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "libc::CMSG_LEN": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sys::process::unix::unix::<impl sys::process::unix::common::Command>::recv_pidfd::Cmsg": [
+      "Plain"
+    ],
+    "io::IoSliceMut": [
+      "Plain"
+    ],
+    "libc::msghdr": [
+      "Plain",
+      "Unknown([Field(2, Ty { id: 8190, kind: RigidTy(RawPtr(Ty { id: 8201, kind: RigidTy(Adt(AdtDef(DefId { id: 8157, name: \"libc::iovec\" }), GenericArgs([]))) }, Mut)) })])",
+      "Unknown([Field(3, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(5, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(4, Ty { id: 1128, kind: RigidTy(RawPtr(Ty { id: 1135, kind: RigidTy(Adt(AdtDef(DefId { id: 8156, name: \"libc::c_void\" }), GenericArgs([]))) }, Mut)) })])",
+      "MutRef"
+    ],
+    "sys::net::connection::socket::unix::Socket": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "sys::process::unix::common::Command": [
+      "Ref"
+    ]
+  },
+  "path": 4154,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/process/unix/unix.rs:890:5: 940:6",
+  "src": "fn recv_pidfd(&self, sock: &crate::sys::net::Socket) -> pid_t {\n        use libc::{CMSG_DATA, CMSG_FIRSTHDR, CMSG_LEN, CMSG_SPACE, SCM_RIGHTS, SOL_SOCKET};\n\n        use crate::io::IoSliceMut;\n        use crate::sys::cvt_r;\n\n        unsafe {\n            const SCM_MSG_LEN: usize = size_of::<[c_int; 1]>();\n\n            #[repr(C)]\n            union Cmsg {\n                _buf: [u8; unsafe { CMSG_SPACE(SCM_MSG_LEN as u32) as usize }],\n                _align: libc::cmsghdr,\n            }\n            let mut cmsg: Cmsg = mem::zeroed();\n            // 0-length read to get the fd\n            let mut iov = [IoSliceMut::new(&mut [])];\n\n            let mut msg: libc::msghdr = mem::zeroed();\n\n            msg.msg_iov = (&raw mut iov) as *mut _;\n            msg.msg_iovlen = 1;\n            msg.msg_controllen = size_of::<Cmsg>() as _;\n            msg.msg_control = (&raw mut cmsg) as *mut _;\n\n            match cvt_r(|| libc::recvmsg(sock.as_raw(), &mut msg, libc::MSG_CMSG_CLOEXEC)) {\n                Err(_) => return -1,\n                Ok(_) => {}\n            }\n\n            let hdr = CMSG_FIRSTHDR((&raw mut msg) as *mut _);\n            if hdr.is_null()\n                || (*hdr).cmsg_level != SOL_SOCKET\n                || (*hdr).cmsg_type != SCM_RIGHTS\n                || (*hdr).cmsg_len != CMSG_LEN(SCM_MSG_LEN as _) as _\n            {\n                return -1;\n            }\n            let data = CMSG_DATA(hdr);\n\n            let mut fds = [-1 as c_int];\n\n            crate::ptr::copy_nonoverlapping(\n                data as *const _,\n                fds.as_mut_ptr().cast::<u8>(),\n                SCM_MSG_LEN,\n            );\n\n            fds[0]\n        }\n    }",
+  "mir": "fn sys::process::unix::unix::<impl sys::process::unix::common::Command>::recv_pidfd(_1: &sys::process::unix::common::Command, _2: &sys::net::connection::socket::unix::Socket) -> i32 {\n    let mut _0: i32;\n    let mut _3: sys::process::unix::unix::<impl sys::process::unix::common::Command>::recv_pidfd::Cmsg;\n    let mut _4: [io::IoSliceMut<'_>; 1];\n    let mut _5: io::IoSliceMut<'_>;\n    let mut _6: &mut [u8];\n    let mut _7: &mut [u8; 0];\n    let mut _8: libc::msghdr;\n    let mut _9: *mut libc::iovec;\n    let mut _10: *mut [io::IoSliceMut<'_>; 1];\n    let mut _11: usize;\n    let mut _12: *mut libc::c_void;\n    let mut _13: *mut sys::process::unix::unix::<impl sys::process::unix::common::Command>::recv_pidfd::Cmsg;\n    let mut _14: core::result::Result<isize, io::error::Error>;\n    let mut _15: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/process/unix/unix.rs:915:25: 915:27};\n    let mut _16: &mut libc::msghdr;\n    let mut _17: isize;\n    let  _18: *mut libc::cmsghdr;\n    let mut _19: *const libc::msghdr;\n    let mut _20: *mut libc::msghdr;\n    let mut _21: bool;\n    let mut _22: bool;\n    let mut _23: i32;\n    let mut _24: bool;\n    let mut _25: i32;\n    let mut _26: bool;\n    let mut _27: usize;\n    let mut _28: usize;\n    let mut _29: u32;\n    let mut _30: u32;\n    let  _31: *mut u8;\n    let mut _32: *const libc::cmsghdr;\n    let mut _33: [i32; 1];\n    let  _34: ();\n    let mut _35: *const u8;\n    let mut _36: *mut u8;\n    let mut _37: *mut i32;\n    let mut _38: &mut [i32];\n    let mut _39: &mut [i32; 1];\n    let  _40: usize;\n    let mut _41: bool;\n    let mut _42: *const ();\n    let mut _43: usize;\n    let mut _44: usize;\n    let mut _45: usize;\n    let mut _46: bool;\n    let mut _47: *const ();\n    let mut _48: usize;\n    let mut _49: usize;\n    let mut _50: usize;\n    let mut _51: bool;\n    let mut _52: *const ();\n    let mut _53: usize;\n    let mut _54: usize;\n    let mut _55: usize;\n    let mut _56: bool;\n    let mut _57: *const ();\n    let mut _58: usize;\n    let mut _59: bool;\n    let mut _60: bool;\n    let mut _61: bool;\n    let mut _62: bool;\n    let mut _63: *const ();\n    let mut _64: usize;\n    let mut _65: bool;\n    let mut _66: bool;\n    let mut _67: bool;\n    let mut _68: bool;\n    let mut _69: *const ();\n    let mut _70: usize;\n    let mut _71: bool;\n    let mut _72: bool;\n    let mut _73: bool;\n    let mut _74: bool;\n    debug self => _1;\n    debug sock => _2;\n    debug cmsg => _3;\n    debug iov => _4;\n    debug msg => _8;\n    debug hdr => _18;\n    debug data => _31;\n    debug fds => _33;\n    bb0: {\n        StorageLive(_3);\n        _3 = core::mem::zeroed::<sys::process::unix::unix::<impl sys::process::unix::common::Command>::recv_pidfd::Cmsg>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _7 = sys::process::unix::unix::<impl sys::process::unix::common::Command>::recv_pidfd::promoted[0];\n        _6 = _7 as &mut [u8];\n        _5 = io::IoSliceMut::<'_>::new(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _4 = [move _5];\n        StorageDead(_5);\n        StorageLive(_8);\n        _8 = core::mem::zeroed::<libc::msghdr>() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_10);\n        _10 = &raw mut _4;\n        _9 = move _10 as *mut libc::iovec;\n        StorageDead(_10);\n        (_8.2: *mut libc::iovec) = _9;\n        (_8.3: usize) = 1_usize;\n        _11 = core::mem::size_of::<sys::process::unix::unix::<impl sys::process::unix::common::Command>::recv_pidfd::Cmsg>() -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        (_8.5: usize) = _11;\n        StorageLive(_13);\n        _13 = &raw mut _3;\n        _12 = move _13 as *mut libc::c_void;\n        StorageDead(_13);\n        (_8.4: *mut libc::c_void) = _12;\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &mut _8;\n        _15 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/process/unix/unix.rs:915:25: 915:27}(_2, move _16);\n        StorageDead(_16);\n        _14 = sys::pal::unix::cvt_r::<isize, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/process/unix/unix.rs:915:25: 915:27}>(move _15) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_15);\n        _17 = discriminant(_14);\n        switchInt(move _17) -> [0: bb7, 1: bb8, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        drop(_14) -> [return: bb9, unwind unreachable];\n    }\n    bb8: {\n        _0 = -1_i32;\n        drop(_14) -> [return: bb27, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_14);\n        StorageLive(_19);\n        _20 = &raw mut _8;\n        _19 = _20 as *const libc::msghdr;\n        _18 = libc::CMSG_FIRSTHDR(move _19) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_19);\n        StorageLive(_21);\n        _21 = core::ptr::mut_ptr::<impl *mut libc::cmsghdr>::is_null(_18) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        switchInt(move _21) -> [0: bb13, otherwise: bb12];\n    }\n    bb12: {\n        goto -> bb20;\n    }\n    bb13: {\n        StorageLive(_22);\n        StorageLive(_23);\n        _52 = _18 as *const ();\n        _53 = _52 as usize;\n        _54 = Sub(<libc::cmsghdr as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _55 = BitAnd(_53, _54);\n        _56 = Eq(_55, 0_usize);\n        assert(_56, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<libc::cmsghdr as core::mem::SizedTypeProperties>::ALIGN, _53) -> [success: bb32, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_23);\n        goto -> bb20;\n    }\n    bb15: {\n        StorageDead(_23);\n        StorageLive(_24);\n        StorageLive(_25);\n        _47 = _18 as *const ();\n        _48 = _47 as usize;\n        _49 = Sub(<libc::cmsghdr as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _50 = BitAnd(_48, _49);\n        _51 = Eq(_50, 0_usize);\n        assert(_51, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<libc::cmsghdr as core::mem::SizedTypeProperties>::ALIGN, _48) -> [success: bb31, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_25);\n        goto -> bb20;\n    }\n    bb17: {\n        StorageDead(_25);\n        StorageLive(_26);\n        StorageLive(_27);\n        _42 = _18 as *const ();\n        _43 = _42 as usize;\n        _44 = Sub(<libc::cmsghdr as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _45 = BitAnd(_43, _44);\n        _46 = Eq(_45, 0_usize);\n        assert(_46, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<libc::cmsghdr as core::mem::SizedTypeProperties>::ALIGN, _43) -> [success: bb30, unwind unreachable];\n    }\n    bb18: {\n        _28 = move _29 as usize;\n        StorageDead(_29);\n        _26 = Ne(move _27, _28);\n        switchInt(move _26) -> [0: bb21, otherwise: bb19];\n    }\n    bb19: {\n        StorageDead(_27);\n        goto -> bb20;\n    }\n    bb20: {\n        _0 = -1_i32;\n        StorageDead(_26);\n        StorageDead(_24);\n        StorageDead(_22);\n        StorageDead(_21);\n        goto -> bb28;\n    }\n    bb21: {\n        StorageDead(_27);\n        StorageDead(_26);\n        StorageDead(_24);\n        StorageDead(_22);\n        StorageDead(_21);\n        StorageLive(_32);\n        _32 = _18 as *const libc::cmsghdr;\n        _31 = libc::CMSG_DATA(move _32) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_32);\n        StorageLive(_33);\n        _33 = [-1_i32];\n        _35 = _31 as *const u8;\n        StorageLive(_36);\n        StorageLive(_37);\n        StorageLive(_38);\n        StorageLive(_39);\n        _39 = &mut _33;\n        _38 = move _39 as &mut [i32];\n        StorageDead(_39);\n        _37 = core::slice::<impl [i32]>::as_mut_ptr(move _38) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_38);\n        _36 = core::ptr::mut_ptr::<impl *mut i32>::cast::<u8>(move _37) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        StorageDead(_37);\n        _34 = core::ptr::copy_nonoverlapping::<u8>(_35, move _36, sys::process::unix::unix::<impl sys::process::unix::common::Command>::recv_pidfd::SCM_MSG_LEN) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_36);\n        StorageLive(_40);\n        _40 = 0_usize;\n        _41 = Lt(_40, 1_usize);\n        assert(move _41, \"index out of bounds: the length is {} but the index is {}\", 1_usize, _40) -> [success: bb26, unwind unreachable];\n    }\n    bb26: {\n        _0 = _33[_40];\n        StorageDead(_40);\n        StorageDead(_33);\n        StorageDead(_8);\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb29;\n    }\n    bb27: {\n        StorageDead(_14);\n        goto -> bb28;\n    }\n    bb28: {\n        StorageDead(_8);\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb29;\n    }\n    bb29: {\n        return;\n    }\n    bb30: {\n        _69 = _18 as *const ();\n        _70 = _69 as usize;\n        _71 = Ne(<libc::cmsghdr as core::mem::SizedTypeProperties>::SIZE, 0_usize);\n        _72 = Eq(_70, 0_usize);\n        _73 = BitAnd(_72, _71);\n        _74 = Not(_73);\n        assert(_74, \"null pointer dereference occurred\") -> [success: bb35, unwind unreachable];\n    }\n    bb31: {\n        _63 = _18 as *const ();\n        _64 = _63 as usize;\n        _65 = Ne(<libc::cmsghdr as core::mem::SizedTypeProperties>::SIZE, 0_usize);\n        _66 = Eq(_64, 0_usize);\n        _67 = BitAnd(_66, _65);\n        _68 = Not(_67);\n        assert(_68, \"null pointer dereference occurred\") -> [success: bb34, unwind unreachable];\n    }\n    bb32: {\n        _57 = _18 as *const ();\n        _58 = _57 as usize;\n        _59 = Ne(<libc::cmsghdr as core::mem::SizedTypeProperties>::SIZE, 0_usize);\n        _60 = Eq(_58, 0_usize);\n        _61 = BitAnd(_60, _59);\n        _62 = Not(_61);\n        assert(_62, \"null pointer dereference occurred\") -> [success: bb33, unwind unreachable];\n    }\n    bb33: {\n        _23 = ((*_18).1: i32);\n        _22 = Ne(move _23, libc::SOL_SOCKET);\n        switchInt(move _22) -> [0: bb15, otherwise: bb14];\n    }\n    bb34: {\n        _25 = ((*_18).2: i32);\n        _24 = Ne(move _25, libc::SCM_RIGHTS);\n        switchInt(move _24) -> [0: bb17, otherwise: bb16];\n    }\n    bb35: {\n        _27 = ((*_18).0: usize);\n        StorageLive(_29);\n        _30 = sys::process::unix::unix::<impl sys::process::unix::common::Command>::recv_pidfd::SCM_MSG_LEN as u32;\n        _29 = libc::CMSG_LEN(_30) -> [return: bb18, unwind unreachable];\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

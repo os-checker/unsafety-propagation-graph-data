@@ -1,0 +1,147 @@
+{
+  "name": "slice::ascii::is_ascii::runtime",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::align_offset": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Computes the offset that needs to be applied to the pointer in order to make it aligned to\n `align`.\n\n If it is not possible to align the pointer, the implementation returns\n `usize::MAX`.\n\n The offset is expressed in number of `T` elements, and not bytes. The value returned can be\n used with the `wrapping_add` method.\n\n There are no guarantees whatsoever that offsetting the pointer will not overflow or go\n beyond the allocation that the pointer points into. It is up to the caller to ensure that\n the returned offset is correct in all terms other than alignment.\n\n # Panics\n\n The function panics if `align` is not a power-of-two.\n\n # Examples\n\n Accessing adjacent `u8` as `u16`\n\n ```\n # unsafe {\n let x = [5_u8, 6, 7, 8, 9];\n let ptr = x.as_ptr();\n let offset = ptr.align_offset(align_of::<u16>());\n\n if offset < x.len() - 1 {\n     let u16_ptr = ptr.add(offset).cast::<u16>();\n     assert!(*u16_ptr == u16::from_ne_bytes([5, 6]) || *u16_ptr == u16::from_ne_bytes([6, 7]));\n } else {\n     // while the pointer can be aligned via `offset`, it would point\n     // outside the allocation\n }\n # }\n ```\n",
+      "adt": {}
+    },
+    "mem::align_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the [ABI]-required minimum alignment of a type in bytes.\n\n Every reference to a value of the type `T` must be a multiple of this number.\n\n This is the alignment used for struct fields. It may be smaller than the preferred alignment.\n\n [ABI]: https://en.wikipedia.org/wiki/Application_binary_interface\n\n # Examples\n\n ```\n assert_eq!(4, align_of::<i32>());\n ```\n",
+      "adt": {}
+    },
+    "slice::ascii::is_ascii_simple": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " ASCII test *without* the chunk-at-a-time optimizations.\n\n This is carefully structured to produce nice small code -- it's smaller in\n `-O` than what the \"obvious\" ways produces under `-C opt-level=s`.  If you\n touch it, be sure to run (and update if needed) the assembly test.\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::read_unaligned": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `self` without moving it. This leaves the\n memory in `self` unchanged.\n\n Unlike `read`, the pointer may be unaligned.\n\n See [`ptr::read_unaligned`] for safety concerns and examples.\n\n [`ptr::read_unaligned`]: crate::ptr::read_unaligned()\n",
+      "adt": {}
+    },
+    "slice::ascii::is_ascii::runtime::contains_nonascii": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"123\";\n let ptr: *const u8 = s.as_ptr();\n\n unsafe {\n     assert_eq!(*ptr.add(1), b'2');\n     assert_eq!(*ptr.add(2), b'3');\n }\n ```\n",
+      "adt": {}
+    },
+    "panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::is_aligned_to": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns whether the pointer is aligned to `align`.\n\n For non-`Sized` pointees this operation considers only the data pointer,\n ignoring the metadata.\n\n # Panics\n\n The function panics if `align` is not a power-of-two (this includes 0).\n\n # Examples\n\n ```\n #![feature(pointer_is_aligned_to)]\n\n // On some platforms, the alignment of i32 is less than 4.\n #[repr(align(4))]\n struct AlignedI32(i32);\n\n let data = AlignedI32(42);\n let ptr = &data as *const AlignedI32;\n\n assert!(ptr.is_aligned_to(1));\n assert!(ptr.is_aligned_to(2));\n assert!(ptr.is_aligned_to(4));\n\n assert!(ptr.wrapping_byte_add(2).is_aligned_to(2));\n assert!(!ptr.wrapping_byte_add(2).is_aligned_to(4));\n\n assert_ne!(ptr.is_aligned_to(8), ptr.wrapping_add(1).is_aligned_to(8));\n ```\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::wrapping_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds an unsigned offset to a pointer using wrapping arithmetic.\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n This operation itself is always safe, but using the resulting pointer is not.\n\n The resulting pointer \"remembers\" the [allocation] that `self` points to; it must not\n be used to read or write other allocations.\n\n In other words, `let z = x.wrapping_add((y as usize) - (x as usize))` does *not* make `z`\n the same as `y` even if we assume `T` has size `1` and there is no overflow: `z` is still\n attached to the object `x` is attached to, and dereferencing it is Undefined Behavior unless\n `x` and `y` point into the same allocation.\n\n Compared to [`add`], this method basically delays the requirement of staying within the\n same allocation: [`add`] is immediate Undefined Behavior when crossing object\n boundaries; `wrapping_add` produces a pointer but still leads to Undefined Behavior if a\n pointer is dereferenced when it is out-of-bounds of the object it is attached to. [`add`]\n can be optimized better and is thus preferable in performance-sensitive code.\n\n The delayed check only considers the value of the pointer that was dereferenced, not the\n intermediate values used during the computation of the final result. For example,\n `x.wrapping_add(o).wrapping_sub(o)` is always the same as `x`. In other words, leaving the\n allocation and then re-entering it later is permitted.\n\n [`add`]: #method.add\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n # use std::fmt::Write;\n // Iterate using a raw pointer in increments of two elements\n let data = [1u8, 2, 3, 4, 5];\n let mut ptr: *const u8 = data.as_ptr();\n let step = 2;\n let end_rounded_up = ptr.wrapping_add(6);\n\n let mut out = String::new();\n while ptr != end_rounded_up {\n     unsafe {\n         write!(&mut out, \"{}, \", *ptr)?;\n     }\n     ptr = ptr.wrapping_add(step);\n }\n assert_eq!(out, \"1, 3, 5, \");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `self` without moving it. This leaves the\n memory in `self` unchanged.\n\n See [`ptr::read`] for safety concerns and examples.\n\n [`ptr::read`]: crate::ptr::read()\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 16308,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/intrinsics/mod.rs:2437:9: 2439:10",
+  "src": "fn runtime$(<$($binders)*>)?($($arg: $ty),*) $( -> $ret )? {\n            $runtime\n        }",
+  "mir": "fn slice::ascii::is_ascii::runtime(_1: &[u8]) -> bool {\n    let mut _0: bool;\n    let  _2: usize;\n    let  _3: usize;\n    let mut _4: *const u8;\n    let mut _5: bool;\n    let mut _6: bool;\n    let mut _7: bool;\n    let mut _8: usize;\n    let  _9: usize;\n    let  _10: *const u8;\n    let  _11: usize;\n    let mut _12: *const usize;\n    let mut _13: bool;\n    let mut _14: bool;\n    let mut _15: usize;\n    let mut _16: !;\n    let mut _17: *const usize;\n    let mut _18: *const u8;\n    let mut _19: usize;\n    let mut _20: usize;\n    let mut _21: bool;\n    let mut _22: *const usize;\n    let mut _23: usize;\n    let mut _24: !;\n    let mut _25: bool;\n    let mut _26: usize;\n    let mut _27: usize;\n    let mut _28: (usize, bool);\n    let mut _29: bool;\n    let mut _30: usize;\n    let mut _31: usize;\n    let mut _32: (usize, bool);\n    let mut _33: !;\n    let mut _34: bool;\n    let mut _35: *const u8;\n    let mut _36: *const usize;\n    let mut _37: *const u8;\n    let mut _38: usize;\n    let mut _39: !;\n    let  _40: usize;\n    let mut _41: *const usize;\n    let mut _42: bool;\n    let mut _43: (usize, bool);\n    let mut _44: *const usize;\n    let mut _45: *const usize;\n    let mut _46: bool;\n    let mut _47: usize;\n    let mut _48: bool;\n    let mut _49: usize;\n    let mut _50: usize;\n    let mut _51: (usize, bool);\n    let mut _52: !;\n    let  _53: usize;\n    let mut _54: *const usize;\n    let mut _55: *const u8;\n    let mut _56: usize;\n    let mut _57: (usize, bool);\n    let mut _58: bool;\n    debug s => _1;\n    debug len => _2;\n    debug align_offset => _3;\n    debug offset_to_aligned => _9;\n    debug start => _10;\n    debug first_word => _11;\n    debug word_ptr => _17;\n    debug byte_pos => _20;\n    debug word => _40;\n    debug last_word => _53;\n    bb0: {\n        _2 = PtrMetadata(_1);\n        StorageLive(_4);\n        _4 = slice::<impl [u8]>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = ptr::const_ptr::<impl *const u8>::align_offset(move _4, slice::ascii::is_ascii::runtime::USIZE_SIZE) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = Lt(_2, slice::ascii::is_ascii::runtime::USIZE_SIZE);\n        switchInt(move _5) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        goto -> bb9;\n    }\n    bb4: {\n        StorageLive(_6);\n        _6 = Lt(_2, _3);\n        switchInt(move _6) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        goto -> bb9;\n    }\n    bb6: {\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = mem::align_of::<usize>() -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _7 = Lt(slice::ascii::is_ascii::runtime::USIZE_SIZE, move _8);\n        switchInt(move _7) -> [0: bb11, otherwise: bb8];\n    }\n    bb8: {\n        StorageDead(_8);\n        goto -> bb9;\n    }\n    bb9: {\n        _0 = slice::ascii::is_ascii_simple(_1) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_5);\n        goto -> bb55;\n    }\n    bb11: {\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_9);\n        switchInt(_3) -> [0: bb12, otherwise: bb13];\n    }\n    bb12: {\n        _9 = slice::ascii::is_ascii::runtime::USIZE_SIZE;\n        goto -> bb14;\n    }\n    bb13: {\n        _9 = _3;\n        goto -> bb14;\n    }\n    bb14: {\n        _10 = slice::<impl [u8]>::as_ptr(_1) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageLive(_12);\n        _12 = _10 as *const usize;\n        _11 = ptr::const_ptr::<impl *const usize>::read_unaligned(move _12) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_12);\n        StorageLive(_13);\n        _13 = slice::ascii::is_ascii::runtime::contains_nonascii(_11) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        switchInt(move _13) -> [0: bb19, otherwise: bb18];\n    }\n    bb18: {\n        _0 = false;\n        StorageDead(_13);\n        goto -> bb54;\n    }\n    bb19: {\n        StorageDead(_13);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = _9;\n        _14 = Le(move _15, _2);\n        switchInt(move _14) -> [0: bb21, otherwise: bb20];\n    }\n    bb20: {\n        StorageDead(_15);\n        StorageDead(_14);\n        StorageLive(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = _9;\n        _18 = ptr::const_ptr::<impl *const u8>::add(_10, move _19) -> [return: bb22, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_15);\n        _16 = panicking::panic(\"assertion failed: offset_to_aligned <= len\") -> unwind unreachable;\n    }\n    bb22: {\n        StorageDead(_19);\n        _17 = move _18 as *const usize;\n        StorageDead(_18);\n        StorageLive(_20);\n        _20 = _9;\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = _17;\n        StorageLive(_23);\n        _23 = mem::align_of::<usize>() -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        _21 = ptr::const_ptr::<impl *const usize>::is_aligned_to(move _22, move _23) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        switchInt(move _21) -> [0: bb26, otherwise: bb25];\n    }\n    bb25: {\n        StorageDead(_23);\n        StorageDead(_22);\n        StorageDead(_21);\n        goto -> bb27;\n    }\n    bb26: {\n        StorageDead(_23);\n        StorageDead(_22);\n        _24 = panicking::panic(\"assertion failed: word_ptr.is_aligned_to(align_of::<usize>())\") -> unwind unreachable;\n    }\n    bb27: {\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = _20;\n        StorageLive(_27);\n        _28 = CheckedSub(_2, slice::ascii::is_ascii::runtime::USIZE_SIZE);\n        assert(!move (_28.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _2, slice::ascii::is_ascii::runtime::USIZE_SIZE) -> [success: bb28, unwind unreachable];\n    }\n    bb28: {\n        _27 = move (_28.0: usize);\n        _25 = Lt(move _26, move _27);\n        switchInt(move _25) -> [0: bb43, otherwise: bb29];\n    }\n    bb29: {\n        StorageDead(_27);\n        StorageDead(_26);\n        StorageLive(_29);\n        StorageLive(_30);\n        StorageLive(_31);\n        _31 = _20;\n        _32 = CheckedAdd(_31, slice::ascii::is_ascii::runtime::USIZE_SIZE);\n        assert(!move (_32.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _31, slice::ascii::is_ascii::runtime::USIZE_SIZE) -> [success: bb30, unwind unreachable];\n    }\n    bb30: {\n        _30 = move (_32.0: usize);\n        StorageDead(_31);\n        _29 = Le(move _30, _2);\n        switchInt(move _29) -> [0: bb32, otherwise: bb31];\n    }\n    bb31: {\n        StorageDead(_30);\n        StorageDead(_29);\n        StorageLive(_34);\n        StorageLive(_35);\n        StorageLive(_36);\n        _36 = _17;\n        _35 = ptr::const_ptr::<impl *const usize>::cast::<u8>(move _36) -> [return: bb33, unwind unreachable];\n    }\n    bb32: {\n        StorageDead(_30);\n        _33 = panicking::panic(\"assertion failed: byte_pos + USIZE_SIZE <= len\") -> unwind unreachable;\n    }\n    bb33: {\n        StorageDead(_36);\n        StorageLive(_37);\n        StorageLive(_38);\n        _38 = _20;\n        _37 = ptr::const_ptr::<impl *const u8>::wrapping_add(_10, move _38) -> [return: bb34, unwind unreachable];\n    }\n    bb34: {\n        StorageDead(_38);\n        _34 = Eq(move _35, move _37);\n        switchInt(move _34) -> [0: bb36, otherwise: bb35];\n    }\n    bb35: {\n        StorageDead(_37);\n        StorageDead(_35);\n        StorageDead(_34);\n        StorageLive(_41);\n        _41 = _17;\n        _40 = ptr::const_ptr::<impl *const usize>::read(move _41) -> [return: bb37, unwind unreachable];\n    }\n    bb36: {\n        StorageDead(_37);\n        StorageDead(_35);\n        _39 = panicking::panic(\"assertion failed: word_ptr.cast::<u8>() == start.wrapping_add(byte_pos)\") -> unwind unreachable;\n    }\n    bb37: {\n        StorageDead(_41);\n        StorageLive(_42);\n        _42 = slice::ascii::is_ascii::runtime::contains_nonascii(_40) -> [return: bb38, unwind unreachable];\n    }\n    bb38: {\n        switchInt(move _42) -> [0: bb40, otherwise: bb39];\n    }\n    bb39: {\n        _0 = false;\n        StorageDead(_42);\n        StorageDead(_25);\n        StorageDead(_20);\n        StorageDead(_17);\n        goto -> bb54;\n    }\n    bb40: {\n        StorageDead(_42);\n        _43 = CheckedAdd(_20, slice::ascii::is_ascii::runtime::USIZE_SIZE);\n        assert(!move (_43.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _20, slice::ascii::is_ascii::runtime::USIZE_SIZE) -> [success: bb41, unwind unreachable];\n    }\n    bb41: {\n        _20 = move (_43.0: usize);\n        StorageLive(_44);\n        StorageLive(_45);\n        _45 = _17;\n        _44 = ptr::const_ptr::<impl *const usize>::add(move _45, 1_usize) -> [return: bb42, unwind unreachable];\n    }\n    bb42: {\n        StorageDead(_45);\n        _17 = move _44;\n        StorageDead(_44);\n        StorageDead(_25);\n        goto -> bb27;\n    }\n    bb43: {\n        StorageDead(_27);\n        StorageDead(_26);\n        StorageDead(_25);\n        StorageLive(_46);\n        StorageLive(_47);\n        _47 = _20;\n        _46 = Le(move _47, _2);\n        switchInt(move _46) -> [0: bb48, otherwise: bb44];\n    }\n    bb44: {\n        StorageDead(_47);\n        StorageLive(_48);\n        StorageLive(_49);\n        StorageLive(_50);\n        _50 = _20;\n        _51 = CheckedSub(_2, _50);\n        assert(!move (_51.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _2, move _50) -> [success: bb45, unwind unreachable];\n    }\n    bb45: {\n        _49 = move (_51.0: usize);\n        StorageDead(_50);\n        _48 = Le(move _49, slice::ascii::is_ascii::runtime::USIZE_SIZE);\n        switchInt(move _48) -> [0: bb47, otherwise: bb46];\n    }\n    bb46: {\n        StorageDead(_49);\n        StorageDead(_48);\n        StorageDead(_46);\n        StorageLive(_54);\n        StorageLive(_55);\n        StorageLive(_56);\n        _57 = CheckedSub(_2, slice::ascii::is_ascii::runtime::USIZE_SIZE);\n        assert(!move (_57.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _2, slice::ascii::is_ascii::runtime::USIZE_SIZE) -> [success: bb50, unwind unreachable];\n    }\n    bb47: {\n        StorageDead(_49);\n        goto -> bb49;\n    }\n    bb48: {\n        StorageDead(_47);\n        goto -> bb49;\n    }\n    bb49: {\n        _52 = panicking::panic(\"assertion failed: byte_pos <= len && len - byte_pos <= USIZE_SIZE\") -> unwind unreachable;\n    }\n    bb50: {\n        _56 = move (_57.0: usize);\n        _55 = ptr::const_ptr::<impl *const u8>::add(_10, move _56) -> [return: bb51, unwind unreachable];\n    }\n    bb51: {\n        StorageDead(_56);\n        _54 = move _55 as *const usize;\n        StorageDead(_55);\n        _53 = ptr::const_ptr::<impl *const usize>::read_unaligned(move _54) -> [return: bb52, unwind unreachable];\n    }\n    bb52: {\n        StorageDead(_54);\n        StorageLive(_58);\n        _58 = slice::ascii::is_ascii::runtime::contains_nonascii(_53) -> [return: bb53, unwind unreachable];\n    }\n    bb53: {\n        _0 = Not(move _58);\n        StorageDead(_58);\n        StorageDead(_20);\n        StorageDead(_17);\n        StorageDead(_9);\n        goto -> bb56;\n    }\n    bb54: {\n        StorageDead(_9);\n        goto -> bb55;\n    }\n    bb55: {\n        goto -> bb56;\n    }\n    bb56: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "name": "<mm::dma::dma_coherent::DmaCoherent as mm::mem_obj::Split>::split",
+  "safe": true,
+  "callees": {
+    "core::num::<impl usize>::is_multiple_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if `self` is an integer multiple of `rhs`, and false otherwise.\n\n This function is equivalent to `self % rhs == 0`, except that it will not panic\n for `rhs == 0`. Instead, `0.is_multiple_of(0) == true`, and for any non-zero `n`,\n `n.is_multiple_of(0) == false`.\n\n # Examples\n\n ```\n\n ```\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "mm::mem_obj::HasSize::size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of the memory object in bytes.\n",
+      "adt": {}
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::ptr::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `src` without moving it. This leaves the\n memory in `src` unchanged.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads.\n\n * `src` must be properly aligned. Use [`read_unaligned`] if this is not the\n   case.\n\n * `src` must point to a properly initialized value of type `T`.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n # Examples\n\n Basic usage:\n\n ```\n let x = 12;\n let y = &x as *const i32;\n\n unsafe {\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n\n ## Ownership of the Returned Value\n\n `read` creates a bitwise copy of `T`, regardless of whether `T` is [`Copy`].\n If `T` is not [`Copy`], using both the returned value and the value at\n `*src` can violate memory safety. Note that assigning to `*src` counts as a\n use because it will attempt to drop the value at `*src`.\n\n [`write()`] can be used to overwrite data without causing it to be dropped.\n\n ```\n use std::ptr;\n\n let mut s = String::from(\"foo\");\n unsafe {\n     // `s2` now points to the same underlying memory as `s`.\n     let mut s2: String = ptr::read(&s);\n\n     assert_eq!(s2, \"foo\");\n\n     // Assigning to `s2` causes its original value to be dropped. Beyond\n     // this point, `s` must no longer be used, as the underlying memory has\n     // been freed.\n     s2 = String::default();\n     assert_eq!(s2, \"\");\n\n     // Assigning to `s` would cause the old value to be dropped again,\n     // resulting in undefined behavior.\n     // s = String::from(\"bar\"); // ERROR\n\n     // `ptr::write` can be used to overwrite a value without dropping it.\n     ptr::write(&mut s, String::from(\"bar\"));\n }\n\n assert_eq!(s, \"bar\");\n ```\n\n [valid]: self#safety\n",
+      "adt": {}
+    },
+    "mm::mem_obj::Split::split": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Splits the memory object into two at the given byte offset from the\n start.\n\n The resulting memory object cannot be empty. So the offset cannot be\n neither zero nor the length of the memory object.\n\n # Panics\n\n The function panics if the offset is out of bounds, at either ends, or\n not base-page-aligned.\n",
+      "adt": {}
+    },
+    "mm::dma::util::split_daddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "mm::dma::dma_coherent::DmaCoherent": [
+      "Ref",
+      "Plain",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "mm::dma::dma_coherent::Inner": [
+      "Ref",
+      "Deref",
+      "Plain",
+      "Unknown([Field(0, Ty { id: 4017, kind: RigidTy(Adt(AdtDef(DefId { id: 4915, name: \"mm::dma::dma_coherent::Inner\" }), GenericArgs([]))) })])",
+      "Unknown([Field(1, Ty { id: 1322, kind: RigidTy(Adt(AdtDef(DefId { id: 2756, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 11, kind: RigidTy(Uint(Usize)) })]))) })])",
+      "Unknown([Field(2, Ty { id: 76, kind: RigidTy(Bool) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 3653, kind: RigidTy(Adt(AdtDef(DefId { id: 4769, name: \"mm::kspace::kvirt_area::KVirtArea\" }), GenericArgs([]))) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(1, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 1626, kind: RigidTy(Adt(AdtDef(DefId { id: 3684, name: \"mm::frame::segment::Segment\" }), GenericArgs([Type(Ty { id: 107, kind: RigidTy(Tuple([])) })]))) })])",
+      "Unknown([Field(1, Ty { id: 4017, kind: RigidTy(Adt(AdtDef(DefId { id: 4915, name: \"mm::dma::dma_coherent::Inner\" }), GenericArgs([]))) })])"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 4017, kind: RigidTy(Adt(AdtDef(DefId { id: 4915, name: \"mm::dma::dma_coherent::Inner\" }), GenericArgs([]))) })])",
+      "Unknown([Field(1, Ty { id: 1322, kind: RigidTy(Adt(AdtDef(DefId { id: 2756, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 11, kind: RigidTy(Uint(Usize)) })]))) })])",
+      "Unknown([Field(2, Ty { id: 76, kind: RigidTy(Bool) })])",
+      "Unknown([Field(0, Ty { id: 1322, kind: RigidTy(Adt(AdtDef(DefId { id: 2756, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 11, kind: RigidTy(Uint(Usize)) })]))) })])"
+    ],
+    "mm::kspace::kvirt_area::KVirtArea": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 3653, kind: RigidTy(Adt(AdtDef(DefId { id: 4769, name: \"mm::kspace::kvirt_area::KVirtArea\" }), GenericArgs([]))) })])",
+      "Unknown([Field(1, Ty { id: 3653, kind: RigidTy(Adt(AdtDef(DefId { id: 4769, name: \"mm::kspace::kvirt_area::KVirtArea\" }), GenericArgs([]))) })])"
+    ],
+    "mm::frame::segment::Segment": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 1626, kind: RigidTy(Adt(AdtDef(DefId { id: 3684, name: \"mm::frame::segment::Segment\" }), GenericArgs([Type(Ty { id: 107, kind: RigidTy(Tuple([])) })]))) })])",
+      "Unknown([Field(1, Ty { id: 1626, kind: RigidTy(Adt(AdtDef(DefId { id: 3684, name: \"mm::frame::segment::Segment\" }), GenericArgs([Type(Ty { id: 107, kind: RigidTy(Tuple([])) })]))) })])"
+    ]
+  },
+  "path": 1859,
+  "span": "ostd/src/mm/dma/dma_coherent.rs:84:5: 124:6",
+  "src": "fn split(self, offset: usize) -> (Self, Self) {\n        assert!(offset.is_multiple_of(PAGE_SIZE));\n        assert!(0 < offset && offset < self.size());\n\n        let (inner, map_daddr, is_cache_coherent) = {\n            let this = ManuallyDrop::new(self);\n            (\n                // SAFETY: `this.inner` will never be used or dropped later.\n                unsafe { core::ptr::read(&this.inner as *const Inner) },\n                this.map_daddr,\n                this.is_cache_coherent,\n            )\n        };\n\n        let (inner1, inner2) = match inner {\n            Inner::Segment(segment) => {\n                let (s1, s2) = segment.split(offset);\n                (Inner::Segment(s1), Inner::Segment(s2))\n            }\n            Inner::Kva(kva, paddr) => {\n                let (kva1, kva2) = kva.split(offset);\n                let (paddr1, paddr2) = (paddr, paddr + offset);\n                (Inner::Kva(kva1, paddr1), Inner::Kva(kva2, paddr2))\n            }\n        };\n\n        let (daddr1, daddr2) = split_daddr(map_daddr, offset);\n\n        (\n            Self {\n                inner: inner1,\n                map_daddr: daddr1,\n                is_cache_coherent,\n            },\n            Self {\n                inner: inner2,\n                map_daddr: daddr2,\n                is_cache_coherent,\n            },\n        )\n    }",
+  "mir": "fn <mm::dma::dma_coherent::DmaCoherent as mm::mem_obj::Split>::split(_1: mm::dma::dma_coherent::DmaCoherent, _2: usize) -> (mm::dma::dma_coherent::DmaCoherent, mm::dma::dma_coherent::DmaCoherent) {\n    let mut _0: (mm::dma::dma_coherent::DmaCoherent, mm::dma::dma_coherent::DmaCoherent);\n    let mut _3: bool;\n    let mut _4: !;\n    let mut _5: bool;\n    let mut _6: bool;\n    let mut _7: usize;\n    let mut _8: &mm::dma::dma_coherent::DmaCoherent;\n    let mut _9: !;\n    let  _10: mm::dma::dma_coherent::Inner;\n    let  _11: core::option::Option<usize>;\n    let  _12: bool;\n    let mut _13: (mm::dma::dma_coherent::Inner, core::option::Option<usize>, bool);\n    let  _14: core::mem::ManuallyDrop<mm::dma::dma_coherent::DmaCoherent>;\n    let mut _15: mm::dma::dma_coherent::Inner;\n    let mut _16: *const mm::dma::dma_coherent::Inner;\n    let  _17: &mm::dma::dma_coherent::Inner;\n    let  _18: &mm::dma::dma_coherent::DmaCoherent;\n    let mut _19: &core::mem::ManuallyDrop<mm::dma::dma_coherent::DmaCoherent>;\n    let mut _20: core::option::Option<usize>;\n    let mut _21: &mm::dma::dma_coherent::DmaCoherent;\n    let mut _22: &core::mem::ManuallyDrop<mm::dma::dma_coherent::DmaCoherent>;\n    let mut _23: bool;\n    let mut _24: &mm::dma::dma_coherent::DmaCoherent;\n    let mut _25: &core::mem::ManuallyDrop<mm::dma::dma_coherent::DmaCoherent>;\n    let  _26: mm::dma::dma_coherent::Inner;\n    let  _27: mm::dma::dma_coherent::Inner;\n    let mut _28: (mm::dma::dma_coherent::Inner, mm::dma::dma_coherent::Inner);\n    let mut _29: isize;\n    let  _30: mm::frame::segment::Segment<()>;\n    let  _31: mm::frame::segment::Segment<()>;\n    let  _32: mm::frame::segment::Segment<()>;\n    let mut _33: (mm::frame::segment::Segment<()>, mm::frame::segment::Segment<()>);\n    let mut _34: mm::dma::dma_coherent::Inner;\n    let mut _35: mm::dma::dma_coherent::Inner;\n    let  _36: mm::kspace::kvirt_area::KVirtArea;\n    let  _37: usize;\n    let  _38: mm::kspace::kvirt_area::KVirtArea;\n    let  _39: mm::kspace::kvirt_area::KVirtArea;\n    let mut _40: (mm::kspace::kvirt_area::KVirtArea, mm::kspace::kvirt_area::KVirtArea);\n    let  _41: usize;\n    let  _42: usize;\n    let mut _43: (usize, usize);\n    let mut _44: usize;\n    let mut _45: (usize, bool);\n    let mut _46: mm::dma::dma_coherent::Inner;\n    let mut _47: mm::dma::dma_coherent::Inner;\n    let  _48: core::option::Option<usize>;\n    let  _49: core::option::Option<usize>;\n    let mut _50: (core::option::Option<usize>, core::option::Option<usize>);\n    let mut _51: mm::dma::dma_coherent::DmaCoherent;\n    let mut _52: mm::dma::dma_coherent::DmaCoherent;\n    debug self => _1;\n    debug offset => _2;\n    debug inner => _10;\n    debug map_daddr => _11;\n    debug is_cache_coherent => _12;\n    debug this => _14;\n    debug inner1 => _26;\n    debug inner2 => _27;\n    debug segment => _30;\n    debug s1 => _31;\n    debug s2 => _32;\n    debug kva => _36;\n    debug paddr => _37;\n    debug kva1 => _38;\n    debug kva2 => _39;\n    debug paddr1 => _41;\n    debug paddr2 => _42;\n    debug daddr1 => _48;\n    debug daddr2 => _49;\n    bb0: {\n        StorageLive(_3);\n        _3 = core::num::<impl usize>::is_multiple_of(_2, mm::PAGE_SIZE) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = Lt(0_usize, _2);\n        switchInt(move _5) -> [0: bb5, otherwise: bb4];\n    }\n    bb3: {\n        _4 = core::panicking::panic(\"assertion failed: offset.is_multiple_of(PAGE_SIZE)\") -> unwind unreachable;\n    }\n    bb4: {\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &_1;\n        _7 = <mm::dma::dma_coherent::DmaCoherent as mm::mem_obj::HasSize>::size(move _8) -> [return: bb6, unwind unreachable];\n    }\n    bb5: {\n        goto -> bb9;\n    }\n    bb6: {\n        StorageDead(_8);\n        _6 = Lt(_2, move _7);\n        switchInt(move _6) -> [0: bb8, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = core::mem::ManuallyDrop::<mm::dma::dma_coherent::DmaCoherent>::new(_1) -> [return: bb10, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_7);\n        goto -> bb9;\n    }\n    bb9: {\n        _9 = core::panicking::panic(\"assertion failed: 0 < offset && offset < self.size()\") -> unwind unreachable;\n    }\n    bb10: {\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = &_14;\n        _18 = <core::mem::ManuallyDrop<mm::dma::dma_coherent::DmaCoherent> as core::ops::Deref>::deref(move _19) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_19);\n        _17 = &((*_18).0: mm::dma::dma_coherent::Inner);\n        _16 = &raw const (*_17);\n        _15 = core::ptr::read::<mm::dma::dma_coherent::Inner>(move _16) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageDead(_16);\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = &_14;\n        _21 = <core::mem::ManuallyDrop<mm::dma::dma_coherent::DmaCoherent> as core::ops::Deref>::deref(move _22) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_22);\n        _20 = ((*_21).1: core::option::Option<usize>);\n        StorageLive(_23);\n        StorageLive(_24);\n        StorageLive(_25);\n        _25 = &_14;\n        _24 = <core::mem::ManuallyDrop<mm::dma::dma_coherent::DmaCoherent> as core::ops::Deref>::deref(move _25) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_25);\n        _23 = ((*_24).2: bool);\n        _13 = (move _15, move _20, move _23);\n        StorageDead(_24);\n        StorageDead(_23);\n        StorageDead(_21);\n        StorageDead(_20);\n        StorageDead(_15);\n        StorageDead(_14);\n        StorageLive(_10);\n        _10 = move (_13.0: mm::dma::dma_coherent::Inner);\n        _11 = (_13.1: core::option::Option<usize>);\n        _12 = (_13.2: bool);\n        StorageDead(_13);\n        StorageLive(_28);\n        _29 = discriminant(_10);\n        switchInt(move _29) -> [0: bb17, 1: bb16, otherwise: bb15];\n    }\n    bb15: {\n        unreachable;\n    }\n    bb16: {\n        _36 = move ((_10 as variant#1).0: mm::kspace::kvirt_area::KVirtArea);\n        _37 = ((_10 as variant#1).1: usize);\n        StorageLive(_40);\n        _40 = <mm::kspace::kvirt_area::KVirtArea as mm::mem_obj::Split>::split(_36, _2) -> [return: bb19, unwind unreachable];\n    }\n    bb17: {\n        _30 = move ((_10 as variant#0).0: mm::frame::segment::Segment<()>);\n        StorageLive(_33);\n        _33 = <mm::frame::segment::Segment<()> as mm::mem_obj::Split>::split(_30, _2) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        _31 = move (_33.0: mm::frame::segment::Segment<()>);\n        _32 = move (_33.1: mm::frame::segment::Segment<()>);\n        StorageDead(_33);\n        StorageLive(_34);\n        _34 = mm::dma::dma_coherent::Inner::Segment(_31);\n        StorageLive(_35);\n        _35 = mm::dma::dma_coherent::Inner::Segment(_32);\n        _28 = (move _34, move _35);\n        StorageDead(_35);\n        StorageDead(_34);\n        goto -> bb21;\n    }\n    bb19: {\n        _38 = move (_40.0: mm::kspace::kvirt_area::KVirtArea);\n        _39 = move (_40.1: mm::kspace::kvirt_area::KVirtArea);\n        StorageDead(_40);\n        StorageLive(_43);\n        StorageLive(_44);\n        _45 = CheckedAdd(_37, _2);\n        assert(!move (_45.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _37, _2) -> [success: bb20, unwind unreachable];\n    }\n    bb20: {\n        _44 = move (_45.0: usize);\n        _43 = (_37, move _44);\n        StorageDead(_44);\n        _41 = (_43.0: usize);\n        _42 = (_43.1: usize);\n        StorageDead(_43);\n        StorageLive(_46);\n        _46 = mm::dma::dma_coherent::Inner::Kva(_38, _41);\n        StorageLive(_47);\n        _47 = mm::dma::dma_coherent::Inner::Kva(_39, _42);\n        _28 = (move _46, move _47);\n        StorageDead(_47);\n        StorageDead(_46);\n        goto -> bb21;\n    }\n    bb21: {\n        _26 = move (_28.0: mm::dma::dma_coherent::Inner);\n        _27 = move (_28.1: mm::dma::dma_coherent::Inner);\n        StorageDead(_28);\n        StorageLive(_50);\n        _50 = mm::dma::util::split_daddr(_11, _2) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        _48 = (_50.0: core::option::Option<usize>);\n        _49 = (_50.1: core::option::Option<usize>);\n        StorageDead(_50);\n        StorageLive(_51);\n        _51 = DmaCoherent(_26, _48, _12);\n        StorageLive(_52);\n        _52 = DmaCoherent(_27, _49, _12);\n        _0 = (move _51, move _52);\n        StorageDead(_52);\n        StorageDead(_51);\n        StorageDead(_10);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

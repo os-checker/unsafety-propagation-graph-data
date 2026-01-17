@@ -1,0 +1,57 @@
+{
+  "name": "<ops::range::Range<T> as iter::range::RangeIteratorImpl>::spec_nth_back",
+  "safe": true,
+  "callees": {
+    "iter::range::Step::backward_checked": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the value that would be obtained by taking the *predecessor*\n of `self` `count` times.\n\n If this would overflow the range of values supported by `Self`, returns `None`.\n\n # Invariants\n\n For any `a`, `n`, and `m`:\n\n * `Step::backward_checked(a, n).and_then(|x| Step::backward_checked(x, m)) == n.checked_add(m).and_then(|x| Step::backward_checked(a, x))`\n * `Step::backward_checked(a, n).and_then(|x| Step::backward_checked(x, m)) == try { Step::backward_checked(a, n.checked_add(m)?) }`\n\n For any `a` and `n`:\n\n * `Step::backward_checked(a, n) == (0..n).try_fold(a, |x, _| Step::backward_checked(x, 1))`\n   * Corollary: `Step::backward_checked(a, 0) == Some(a)`\n",
+      "adt": {}
+    },
+    "cmp::PartialOrd::gt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests greater than (for `self` and `other`) and is used by the `>`\n operator.\n\n # Examples\n\n ```\n assert_eq!(1.0 > 1.0, false);\n assert_eq!(1.0 > 2.0, false);\n assert_eq!(2.0 > 1.0, true);\n ```\n",
+      "adt": {}
+    },
+    "iter::range::Step::backward_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the value that would be obtained by taking the *predecessor*\n of `self` `count` times.\n\n # Safety\n\n It is undefined behavior for this operation to overflow the\n range of values supported by `Self`. If you cannot guarantee that this\n will not overflow, use `backward` or `backward_checked` instead.\n\n # Invariants\n\n For any `a`:\n\n * if there exists `b` such that `b < a`, it is safe to call `Step::backward_unchecked(a, 1)`\n * if there exists `b`, `n` such that `steps_between(&b, &a) == (n, Some(n))`,\n   it is safe to call `Step::backward_unchecked(a, m)` for any `m <= n`.\n   * Corollary: `Step::backward_unchecked(a, 0)` is always safe.\n\n For any `a` and `n`, where no overflow occurs:\n\n * `Step::backward_unchecked(a, n)` is equivalent to `Step::backward(a, n)`\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ops::range::Range": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) })])"
+    ]
+  },
+  "path": 15493,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/range.rs:817:5: 828:6",
+  "src": "fn spec_nth_back(&mut self, n: usize) -> Option<T> {\n        if let Some(minus_n) = Step::backward_checked(self.end, n) {\n            if minus_n > self.start {\n                // SAFETY: just checked precondition\n                self.end = unsafe { Step::backward_unchecked(minus_n, 1) };\n                return Some(self.end);\n            }\n        }\n\n        self.end = self.start;\n        None\n    }",
+  "mir": "fn <ops::range::Range<T> as iter::range::RangeIteratorImpl>::spec_nth_back(_1: &mut ops::range::Range<T>, _2: usize) -> option::Option<T> {\n    let mut _0: option::Option<T>;\n    let mut _3: option::Option<T>;\n    let mut _4: T;\n    let mut _5: isize;\n    let  _6: T;\n    let mut _7: bool;\n    let mut _8: &T;\n    let mut _9: &T;\n    let mut _10: T;\n    let mut _11: T;\n    let mut _12: T;\n    let mut _13: T;\n    debug self => _1;\n    debug n => _2;\n    debug minus_n => _6;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).1: T);\n        _3 = <T as iter::range::Step>::backward_checked(move _4, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [1: bb2, 0: bb7, otherwise: bb10];\n    }\n    bb2: {\n        StorageLive(_6);\n        _6 = ((_3 as variant#1).0: T);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &_6;\n        StorageLive(_9);\n        _9 = &((*_1).0: T);\n        _7 = <T as cmp::PartialOrd>::gt(move _8, move _9) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _7) -> [0: bb6, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = _6;\n        _10 = <T as iter::range::Step>::backward_unchecked(move _11, 1_usize) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_11);\n        ((*_1).1: T) = move _10;\n        StorageDead(_10);\n        StorageLive(_12);\n        _12 = ((*_1).1: T);\n        _0 = option::Option::Some(move _12);\n        StorageDead(_12);\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_3);\n        goto -> bb9;\n    }\n    bb6: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_3);\n        goto -> bb8;\n    }\n    bb7: {\n        StorageDead(_3);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageLive(_13);\n        _13 = ((*_1).0: T);\n        ((*_1).1: T) = move _13;\n        StorageDead(_13);\n        _0 = option::Option::None;\n        goto -> bb9;\n    }\n    bb9: {\n        return;\n    }\n    bb10: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

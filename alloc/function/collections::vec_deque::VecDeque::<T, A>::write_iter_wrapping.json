@@ -1,0 +1,68 @@
+{
+  "name": "collections::vec_deque::VecDeque::<T, A>::write_iter_wrapping",
+  "safe": false,
+  "callees": {
+    "collections::vec_deque::VecDeque::<T, A>::capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the number of elements the deque can hold without\n reallocating.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let buf: VecDeque<i32> = VecDeque::with_capacity(10);\n assert!(buf.capacity() >= 10);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::write_iter": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes all values from `iter` to `dst`.\n\n # Safety\n\n Assumes no wrapping around happens.\n Assumes capacity is sufficient.\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    },
+    "core::iter::Iterator::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator that yields the first `n` elements, or fewer\n if the underlying iterator ends sooner.\n\n `take(n)` yields elements until `n` elements are yielded or the end of\n the iterator is reached (whichever happens first).\n The returned iterator is a prefix of length `n` if the original iterator\n contains at least `n` elements, otherwise it contains all of the\n (fewer than `n`) elements of the original iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter().take(2);\n\n assert_eq!(iter.next(), Some(1));\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), None);\n ```\n\n `take()` is often used with an infinite iterator, to make it finite:\n\n ```\n let mut iter = (0..).take(3);\n\n assert_eq!(iter.next(), Some(0));\n assert_eq!(iter.next(), Some(1));\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), None);\n ```\n\n If less than `n` elements are available,\n `take` will limit itself to the size of the underlying iterator:\n\n ```\n let v = [1, 2];\n let mut iter = v.into_iter().take(5);\n assert_eq!(iter.next(), Some(1));\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), None);\n ```\n\n Use [`by_ref`] to take from the iterator without consuming it, and then\n continue using the original iterator:\n\n ```\n let mut words = [\"hello\", \"world\", \"of\", \"Rust\"].into_iter();\n\n // Take the first two words.\n let hello_world: Vec<_> = words.by_ref().take(2).collect();\n assert_eq!(hello_world, vec![\"hello\", \"world\"]);\n\n // Collect the rest of the words.\n // We can only do this because we used `by_ref` earlier.\n let of_rust: Vec<_> = words.collect();\n assert_eq!(of_rust, vec![\"of\", \"Rust\"]);\n ```\n\n [`by_ref`]: Iterator::by_ref\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "Ref",
+      "Deref",
+      "MutRef"
+    ],
+    "collections::vec_deque::VecDeque<T, A>::write_iter_wrapping::Guard": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 6349, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 6351, kind: RigidTy(Adt(AdtDef(DefId { id: 4596, name: \"collections::vec_deque::VecDeque\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) }), Type(Ty { id: 21, kind: Param(ParamTy { index: 1, name: \"A\" }) })]))) }, Mut)) })])",
+      "Unknown([Field(1, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "core::iter::ByRefSized": [
+      "Plain"
+    ],
+    "core::iter::Take": [
+      "Plain"
+    ]
+  },
+  "path": 1541,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:581:5: 616:6",
+  "src": "unsafe fn write_iter_wrapping(\n        &mut self,\n        dst: usize,\n        mut iter: impl Iterator<Item = T>,\n        len: usize,\n    ) -> usize {\n        struct Guard<'a, T, A: Allocator> {\n            deque: &'a mut VecDeque<T, A>,\n            written: usize,\n        }\n\n        impl<'a, T, A: Allocator> Drop for Guard<'a, T, A> {\n            fn drop(&mut self) {\n                self.deque.len += self.written;\n            }\n        }\n\n        let head_room = self.capacity() - dst;\n\n        let mut guard = Guard { deque: self, written: 0 };\n\n        if head_room >= len {\n            unsafe { guard.deque.write_iter(dst, iter, &mut guard.written) };\n        } else {\n            unsafe {\n                guard.deque.write_iter(\n                    dst,\n                    ByRefSized(&mut iter).take(head_room),\n                    &mut guard.written,\n                );\n                guard.deque.write_iter(0, iter, &mut guard.written)\n            };\n        }\n\n        guard.written\n    }",
+  "mir": "fn collections::vec_deque::VecDeque::<T, A>::write_iter_wrapping(_1: &mut collections::vec_deque::VecDeque<T, A>, _2: usize, _3: impl Iterator<Item = T>, _4: usize) -> usize {\n    let mut _0: usize;\n    let  _5: usize;\n    let mut _6: usize;\n    let mut _7: &collections::vec_deque::VecDeque<T, A>;\n    let mut _8: (usize, bool);\n    let mut _9: collections::vec_deque::VecDeque<T, A>::write_iter_wrapping::Guard<'_, T, A>;\n    let mut _10: bool;\n    let  _11: ();\n    let mut _12: impl Iterator<Item = T>;\n    let mut _13: &mut usize;\n    let  _14: ();\n    let  _15: ();\n    let mut _16: core::iter::Take<core::iter::ByRefSized<'_, impl Iterator<Item = T>>>;\n    let mut _17: core::iter::ByRefSized<'_, impl Iterator<Item = T>>;\n    let mut _18: &mut impl Iterator<Item = T>;\n    let mut _19: &mut usize;\n    let mut _20: impl Iterator<Item = T>;\n    let mut _21: &mut usize;\n    let mut _22: &mut collections::vec_deque::VecDeque<T, A>;\n    let mut _23: &mut collections::vec_deque::VecDeque<T, A>;\n    let mut _24: &mut collections::vec_deque::VecDeque<T, A>;\n    debug self => _1;\n    debug dst => _2;\n    debug iter => _3;\n    debug len => _4;\n    debug head_room => _5;\n    debug guard => _9;\n    bb0: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &(*_1);\n        _6 = collections::vec_deque::VecDeque::<T, A>::capacity(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        _8 = CheckedSub(_6, _2);\n        assert(!move (_8.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _6, _2) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = move (_8.0: usize);\n        StorageDead(_6);\n        StorageLive(_9);\n        _9 = Guard(_1, 0_usize);\n        StorageLive(_10);\n        _10 = Ge(_5, _4);\n        switchInt(move _10) -> [0: bb5, otherwise: bb3];\n    }\n    bb3: {\n        _22 = (_9.0: &mut collections::vec_deque::VecDeque<T, A>);\n        StorageLive(_12);\n        _12 = move _3;\n        _13 = &mut (_9.1: usize);\n        _11 = collections::vec_deque::VecDeque::<T, A>::write_iter::<impl Iterator<Item = T>>(_22, _2, move _12, _13) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_12);\n        goto -> bb9;\n    }\n    bb5: {\n        _23 = (_9.0: &mut collections::vec_deque::VecDeque<T, A>);\n        StorageLive(_16);\n        StorageLive(_17);\n        _18 = &mut _3;\n        _17 = ByRefSized(_18);\n        _16 = <core::iter::ByRefSized<'_, impl Iterator<Item = T>> as core::iter::Iterator>::take(move _17, _5) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_17);\n        _19 = &mut (_9.1: usize);\n        _15 = collections::vec_deque::VecDeque::<T, A>::write_iter::<core::iter::Take<core::iter::ByRefSized<'_, impl Iterator<Item = T>>>>(_23, _2, move _16, _19) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_16);\n        _24 = (_9.0: &mut collections::vec_deque::VecDeque<T, A>);\n        StorageLive(_20);\n        _20 = move _3;\n        _21 = &mut (_9.1: usize);\n        _14 = collections::vec_deque::VecDeque::<T, A>::write_iter::<impl Iterator<Item = T>>(_24, 0_usize, move _20, _21) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_20);\n        goto -> bb9;\n    }\n    bb9: {\n        StorageDead(_10);\n        _0 = (_9.1: usize);\n        drop(_9) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_9);\n        return;\n    }\n}\n",
+  "doc": " Writes all values from `iter` to `dst`, wrapping\n at the end of the buffer and returns the number\n of written values.\n\n # Safety\n\n Assumes that `iter` yields at most `len` items.\n Assumes capacity is sufficient.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "name": "vec::Vec::<T, A>::truncate",
+  "safe": true,
+  "callees": {
+    "vec::Vec::<T, A>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw mutable pointer to the vector's buffer, or a dangling\n raw pointer valid for zero sized reads if the vector didn't allocate.\n\n The caller must ensure that the vector outlives the pointer this\n function returns, or else it will end up dangling.\n Modifying the vector may cause its buffer to be reallocated,\n which would also make any pointers to it invalid.\n\n This method guarantees that for the purpose of the aliasing model, this method\n does not materialize a reference to the underlying slice, and thus the returned pointer\n will remain valid when mixed with other calls to [`as_ptr`], [`as_mut_ptr`],\n and [`as_non_null`].\n Note that calling other methods that materialize references to the slice,\n or references to specific elements you are planning on accessing through this pointer,\n may still invalidate this pointer.\n See the second example below for how this guarantee can be used.\n\n The method also guarantees that, as long as `T` is not zero-sized and the capacity is\n nonzero, the pointer may be passed into [`dealloc`] with a layout of\n `Layout::array::<T>(capacity)` in order to deallocate the backing memory. If this is done,\n be careful not to run the destructor of the `Vec`, as dropping it will result in\n double-frees. Wrapping the `Vec` in a [`ManuallyDrop`] is the typical way to achieve this.\n\n # Examples\n\n ```\n // Allocate vector big enough for 4 elements.\n let size = 4;\n let mut x: Vec<i32> = Vec::with_capacity(size);\n let x_ptr = x.as_mut_ptr();\n\n // Initialize elements via raw pointer writes, then set length.\n unsafe {\n     for i in 0..size {\n         *x_ptr.add(i) = i as i32;\n     }\n     x.set_len(size);\n }\n assert_eq!(&*x, &[0, 1, 2, 3]);\n ```\n\n Due to the aliasing guarantee, the following code is legal:\n\n ```rust\n unsafe {\n     let mut v = vec![0];\n     let ptr1 = v.as_mut_ptr();\n     ptr1.write(1);\n     let ptr2 = v.as_mut_ptr();\n     ptr2.write(2);\n     // Notably, the write to `ptr2` did *not* invalidate `ptr1`:\n     ptr1.write(3);\n }\n ```\n\n Deallocating a vector using [`Box`] (which uses [`dealloc`] internally):\n\n ```\n use std::mem::{ManuallyDrop, MaybeUninit};\n\n let mut v = ManuallyDrop::new(vec![0, 1, 2]);\n let ptr = v.as_mut_ptr();\n let capacity = v.capacity();\n let slice_ptr: *mut [MaybeUninit<i32>] =\n     std::ptr::slice_from_raw_parts_mut(ptr.cast(), capacity);\n drop(unsafe { Box::from_raw(slice_ptr) });\n ```\n\n [`as_mut_ptr`]: Vec::as_mut_ptr\n [`as_ptr`]: Vec::as_ptr\n [`as_non_null`]: Vec::as_non_null\n [`dealloc`]: crate::alloc::GlobalAlloc::dealloc\n [`ManuallyDrop`]: core::mem::ManuallyDrop\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::slice_from_raw_parts_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forms a raw mutable slice from a pointer and a length.\n\n The `len` argument is the number of **elements**, not the number of bytes.\n\n Performs the same functionality as [`slice_from_raw_parts`], except that a\n raw mutable slice is returned, as opposed to a raw immutable slice.\n\n This function is safe, but actually using the return value is unsafe.\n See the documentation of [`slice::from_raw_parts_mut`] for slice safety requirements.\n\n [`slice::from_raw_parts_mut`]: crate::slice::from_raw_parts_mut\n\n # Examples\n\n ```rust\n use std::ptr;\n\n let x = &mut [5, 6, 7];\n let raw_pointer = x.as_mut_ptr();\n let slice = ptr::slice_from_raw_parts_mut(raw_pointer, 3);\n\n unsafe {\n     (*slice)[2] = 99; // assign a value at an index in the slice\n };\n\n assert_eq!(unsafe { &*slice }[2], 99);\n ```\n\n You must ensure that the pointer is valid and not null before dereferencing\n the raw slice. A slice reference must never have a null pointer, even if it's empty.\n\n ```rust,should_panic\n use std::ptr;\n let danger: *mut [u8] = ptr::slice_from_raw_parts_mut(ptr::null_mut(), 0);\n unsafe {\n     danger.as_mut().expect(\"references must not be null\");\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::drop_in_place": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Executes the destructor (if any) of the pointed-to value.\n\n This is almost the same as calling [`ptr::read`] and discarding\n the result, but has the following advantages:\n\n * It is *required* to use `drop_in_place` to drop unsized types like\n   trait objects, because they can't be read out onto the stack and\n   dropped normally.\n\n * It is friendlier to the optimizer to do this over [`ptr::read`] when\n   dropping manually allocated memory (e.g., in the implementations of\n   `Box`/`Rc`/`Vec`), as the compiler doesn't need to prove that it's\n   sound to elide the copy.\n\n * It can be used to drop [pinned] data when `T` is not `repr(packed)`\n   (pinned data must not be moved before it is dropped).\n\n Unaligned values cannot be dropped in place, they must be copied to an aligned\n location first using [`ptr::read_unaligned`]. For packed structs, this move is\n done automatically by the compiler. This means the fields of packed structs\n are not dropped in-place.\n\n [`ptr::read`]: self::read\n [`ptr::read_unaligned`]: self::read_unaligned\n [pinned]: crate::pin\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `to_drop` must be [valid] for both reads and writes.\n\n * `to_drop` must be properly aligned, even if `T` has size 0.\n\n * `to_drop` must be nonnull, even if `T` has size 0.\n\n * The value `to_drop` points to must be valid for dropping, which may mean\n   it must uphold additional invariants. These invariants depend on the type\n   of the value being dropped. For instance, when dropping a Box, the box's\n   pointer to the heap must be valid.\n\n * While `drop_in_place` is executing, the only way to access parts of\n   `to_drop` is through the `&mut self` references supplied to the\n   `Drop::drop` methods that `drop_in_place` invokes.\n\n Additionally, if `T` is not [`Copy`], using the pointed-to value after\n calling `drop_in_place` can cause undefined behavior. Note that `*to_drop =\n foo` counts as a use because it will cause the value to be dropped\n again. [`write()`] can be used to overwrite data without causing it to be\n dropped.\n\n [valid]: self#safety\n\n # Examples\n\n Manually remove the last item from a vector:\n\n ```\n use std::ptr;\n use std::rc::Rc;\n\n let last = Rc::new(1);\n let weak = Rc::downgrade(&last);\n\n let mut v = vec![Rc::new(0), last];\n\n unsafe {\n     // Get a raw pointer to the last element in `v`.\n     let ptr = &mut v[1] as *mut _;\n     // Shorten `v` to prevent the last item from being dropped. We do that first,\n     // to prevent issues if the `drop_in_place` below panics.\n     v.set_len(1);\n     // Without a call `drop_in_place`, the last item would never be dropped,\n     // and the memory it manages would be leaked.\n     ptr::drop_in_place(ptr);\n }\n\n assert_eq!(v, &[0.into()]);\n\n // Ensure that the last item was dropped.\n assert!(weak.upgrade().is_none());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ]
+  },
+  "path": 2400,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:1548:5: 1568:6",
+  "src": "pub fn truncate(&mut self, len: usize) {\n        // This is safe because:\n        //\n        // * the slice passed to `drop_in_place` is valid; the `len > self.len`\n        //   case avoids creating an invalid slice, and\n        // * the `len` of the vector is shrunk before calling `drop_in_place`,\n        //   such that no value will be dropped twice in case `drop_in_place`\n        //   were to panic once (if it panics twice, the program aborts).\n        unsafe {\n            // Note: It's intentional that this is `>` and not `>=`.\n            //       Changing it to `>=` has negative performance\n            //       implications in some cases. See #78884 for more.\n            if len > self.len {\n                return;\n            }\n            let remaining_len = self.len - len;\n            let s = ptr::slice_from_raw_parts_mut(self.as_mut_ptr().add(len), remaining_len);\n            self.len = len;\n            ptr::drop_in_place(s);\n        }\n    }",
+  "mir": "fn vec::Vec::<T, A>::truncate(_1: &mut vec::Vec<T, A>, _2: usize) -> () {\n    let mut _0: ();\n    let mut _3: bool;\n    let mut _4: usize;\n    let  _5: usize;\n    let mut _6: usize;\n    let mut _7: (usize, bool);\n    let  _8: *mut [T];\n    let mut _9: *mut T;\n    let mut _10: *mut T;\n    let  _11: ();\n    debug self => _1;\n    debug len => _2;\n    debug remaining_len => _5;\n    debug s => _8;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).1: usize);\n        _3 = Gt(_2, move _4);\n        switchInt(move _3) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb8;\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_6);\n        _6 = ((*_1).1: usize);\n        _7 = CheckedSub(_6, _2);\n        assert(!move (_7.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _6, _2) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _5 = move (_7.0: usize);\n        StorageDead(_6);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = vec::Vec::<T, A>::as_mut_ptr(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _9 = core::ptr::mut_ptr::<impl *mut T>::add(move _10, _2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_10);\n        _8 = core::ptr::slice_from_raw_parts_mut::<T>(move _9, _5) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_9);\n        ((*_1).1: usize) = _2;\n        _11 = core::ptr::drop_in_place::<[T]>(_8) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        goto -> bb8;\n    }\n    bb8: {\n        return;\n    }\n}\n",
+  "doc": " Shortens the vector, keeping the first `len` elements and dropping\n the rest.\n\n If `len` is greater or equal to the vector's current length, this has\n no effect.\n\n The [`drain`] method can emulate `truncate`, but causes the excess\n elements to be returned instead of dropped.\n\n Note that this method has no effect on the allocated capacity\n of the vector.\n\n # Examples\n\n Truncating a five element vector to two elements:\n\n ```\n let mut vec = vec![1, 2, 3, 4, 5];\n vec.truncate(2);\n assert_eq!(vec, [1, 2]);\n ```\n\n No truncation occurs when `len` is greater than the vector's current\n length:\n\n ```\n let mut vec = vec![1, 2, 3];\n vec.truncate(8);\n assert_eq!(vec, [1, 2, 3]);\n ```\n\n Truncating when `len == 0` is equivalent to calling the [`clear`]\n method.\n\n ```\n let mut vec = vec![1, 2, 3];\n vec.truncate(0);\n assert_eq!(vec, []);\n ```\n\n [`clear`]: Vec::clear\n [`drain`]: Vec::drain\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

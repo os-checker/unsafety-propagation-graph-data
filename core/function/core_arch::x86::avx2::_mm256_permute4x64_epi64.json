@@ -1,0 +1,46 @@
+{
+  "name": "core_arch::x86::avx2::_mm256_permute4x64_epi64",
+  "safe": false,
+  "callees": {
+    "core_arch::x86::__m256i::as_i64x4": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core_arch::simd::i64x4": "Constructor"
+      }
+    },
+    "intrinsics::simd::simd_shuffle": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Shuffles two vectors by const indices.\n\n `T` must be a vector.\n\n `U` must be a **const** vector of `u32`s. This means it must either refer to a named\n const or be given as an inline const expression (`const { ... }`).\n\n `V` must be a vector with the same element type as `T` and the same length as `U`.\n\n Returns a new vector such that element `i` is selected from `xy[idx[i]]`, where `xy`\n is the concatenation of `x` and `y`. It is a compile-time error if `idx[i]` is out-of-bounds\n of `xy`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_arch::x86::__m256i": [
+      "Plain"
+    ],
+    "core_arch::simd::i64x4": [
+      "Plain"
+    ]
+  },
+  "path": 6141,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../stdarch/crates/core_arch/src/x86/avx2.rs:2313:1: 2329:2",
+  "src": "pub fn _mm256_permute4x64_epi64<const IMM8: i32>(a: __m256i) -> __m256i {\n    static_assert_uimm_bits!(IMM8, 8);\n    unsafe {\n        let zero = i64x4::ZERO;\n        let r: i64x4 = simd_shuffle!(\n            a.as_i64x4(),\n            zero,\n            [\n                IMM8 as u32 & 0b11,\n                (IMM8 as u32 >> 2) & 0b11,\n                (IMM8 as u32 >> 4) & 0b11,\n                (IMM8 as u32 >> 6) & 0b11,\n            ],\n        );\n        transmute(r)\n    }\n}",
+  "mir": "fn core_arch::x86::avx2::_mm256_permute4x64_epi64(_1: core_arch::x86::__m256i) -> core_arch::x86::__m256i {\n    let mut _0: core_arch::x86::__m256i;\n    let  _2: core_arch::simd::i64x4;\n    let mut _3: core_arch::simd::i64x4;\n    let mut _4: core_arch::simd::i64x4;\n    debug a => _1;\n    debug zero => core_arch::simd::i64x4::ZERO;\n    debug r => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = core_arch::x86::__m256i::as_i64x4(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = core_arch::simd::i64x4::ZERO;\n        _2 = intrinsics::simd::simd_shuffle::<core_arch::simd::i64x4, core_arch::macros::SimdShuffleIdx<4>, core_arch::simd::i64x4>(move _3, move _4, core_arch::x86::avx2::_mm256_permute4x64_epi64::<IMM8>::{constant#1}) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        _0 = _2 as core_arch::x86::__m256i;\n        return;\n    }\n}\n",
+  "doc": " Permutes 64-bit integers from `a` using control mask `imm8`.\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm256_permute4x64_epi64)\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

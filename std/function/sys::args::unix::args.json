@@ -1,0 +1,171 @@
+{
+  "name": "sys::args::unix::args",
+  "safe": true,
+  "callees": {
+    "sys::args::unix::imp::argc_argv": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "alloc_crate::vec::Vec::<T>::with_capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new, empty `Vec<T>` with at least the specified capacity.\n\n The vector will be able to hold at least `capacity` elements without\n reallocating. This method is allowed to allocate for more elements than\n `capacity`. If `capacity` is zero, the vector will not allocate.\n\n It is important to note that although the returned vector has the\n minimum *capacity* specified, the vector will have a zero *length*. For\n an explanation of the difference between length and capacity, see\n *[Capacity and reallocation]*.\n\n If it is important to know the exact allocated capacity of a `Vec`,\n always use the [`capacity`] method after construction.\n\n For `Vec<T>` where `T` is a zero-sized type, there will be no allocation\n and the capacity will always be `usize::MAX`.\n\n [Capacity and reallocation]: #capacity-and-reallocation\n [`capacity`]: Vec::capacity\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut vec = Vec::with_capacity(10);\n\n // The vector contains no items, even though it has capacity for more\n assert_eq!(vec.len(), 0);\n assert!(vec.capacity() >= 10);\n\n // These are all done without reallocating...\n for i in 0..10 {\n     vec.push(i);\n }\n assert_eq!(vec.len(), 10);\n assert!(vec.capacity() >= 10);\n\n // ...but this may make the vector reallocate\n vec.push(11);\n assert_eq!(vec.len(), 11);\n assert!(vec.capacity() >= 11);\n\n // A vector of a zero-sized type will always over-allocate, since no\n // allocation is necessary\n let vec_units = Vec::<()>::with_capacity(10);\n assert_eq!(vec_units.capacity(), usize::MAX);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::offset": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"123\";\n let ptr: *const u8 = s.as_ptr();\n\n unsafe {\n     assert_eq!(*ptr.offset(1) as char, '2');\n     assert_eq!(*ptr.offset(2) as char, '3');\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `self` without moving it. This leaves the\n memory in `self` unchanged.\n\n See [`ptr::read`] for safety concerns and examples.\n\n [`ptr::read`]: crate::ptr::read()\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::is_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"Follow the rabbit\";\n let ptr: *const u8 = s.as_ptr();\n assert!(!ptr.is_null());\n ```\n",
+      "adt": {}
+    },
+    "core::ffi::CStr::from_ptr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wraps a raw C string with a safe C string wrapper.\n\n This function will wrap the provided `ptr` with a `CStr` wrapper, which\n allows inspection and interoperation of non-owned C strings. The total\n size of the terminated buffer must be smaller than [`isize::MAX`] **bytes**\n in memory (a restriction from [`slice::from_raw_parts`]).\n\n # Safety\n\n * The memory pointed to by `ptr` must contain a valid nul terminator at the\n   end of the string.\n\n * `ptr` must be [valid] for reads of bytes up to and including the nul terminator.\n   This means in particular:\n\n     * The entire memory range of this `CStr` must be contained within a single allocation!\n     * `ptr` must be non-null even for a zero-length cstr.\n\n * The memory referenced by the returned `CStr` must not be mutated for\n   the duration of lifetime `'a`.\n\n * The nul terminator must be within `isize::MAX` from `ptr`\n\n > **Note**: This operation is intended to be a 0-cost cast but it is\n > currently implemented with an up-front calculation of the length of\n > the string. This is not guaranteed to always be the case.\n\n # Caveat\n\n The lifetime for the returned slice is inferred from its usage. To prevent accidental misuse,\n it's suggested to tie the lifetime to whichever source lifetime is safe in the context,\n such as by providing a helper function taking the lifetime of a host value for the slice,\n or by explicit annotation.\n\n # Examples\n\n ```\n use std::ffi::{c_char, CStr};\n\n fn my_string() -> *const c_char {\n     c\"hello\".as_ptr()\n }\n\n unsafe {\n     let slice = CStr::from_ptr(my_string());\n     assert_eq!(slice.to_str().unwrap(), \"hello\");\n }\n ```\n\n ```\n use std::ffi::{c_char, CStr};\n\n const HELLO_PTR: *const c_char = {\n     const BYTES: &[u8] = b\"Hello, world!\\0\";\n     BYTES.as_ptr().cast()\n };\n const HELLO: &CStr = unsafe { CStr::from_ptr(HELLO_PTR) };\n\n assert_eq!(c\"Hello, world!\", HELLO);\n ```\n\n [valid]: core::ptr#safety\n",
+      "adt": {}
+    },
+    "core::ffi::CStr::to_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this C string to a byte slice.\n\n The returned slice will **not** contain the trailing nul terminator that this C\n string has.\n\n > **Note**: This method is currently implemented as a constant-time\n > cast, but it is planned to alter its definition in the future to\n > perform the length calculation whenever this method is called.\n\n # Examples\n\n ```\n assert_eq!(c\"foo\".to_bytes(), b\"foo\");\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::slice::<impl [T]>::to_vec": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `self` into a new `Vec`.\n\n # Examples\n\n ```\n let s = [10, 40, 30];\n let x = s.to_vec();\n // Here, `s` and `x` can be modified independently.\n ```\n",
+      "adt": {}
+    },
+    "os::unix::ffi::os_str::OsStringExt::from_vec": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an [`OsString`] from a byte vector.\n\n See the module documentation for an example.\n",
+      "adt": {}
+    },
+    "alloc_crate::vec::Vec::<T, A>::push": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Appends an element to the back of a collection.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut vec = vec![1, 2];\n vec.push(3);\n assert_eq!(vec, [1, 2, 3]);\n ```\n\n # Time complexity\n\n Takes amortized *O*(1) time. If the vector's length would exceed its\n capacity after the push, *O*(*capacity*) time is taken to copy the\n vector's elements to a larger allocation. This expensive operation is\n offset by the *capacity* *O*(1) insertions it allows.\n",
+      "adt": {}
+    },
+    "sys::args::common::Args::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::args::common::Args": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "alloc_crate::vec::Vec": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::ops::Range": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 12, kind: RigidTy(Int(Isize)) })])"
+    ],
+    "core::ffi::CStr": [
+      "Ref"
+    ],
+    "ffi::os_str::OsString": [
+      "Plain"
+    ],
+    "sys::args::common::Args": [
+      "Plain"
+    ]
+  },
+  "path": 3366,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/args/unix.rs:21:1: 62:2",
+  "src": "pub fn args() -> Args {\n    let (argc, argv) = imp::argc_argv();\n\n    let mut vec = Vec::with_capacity(argc as usize);\n\n    for i in 0..argc {\n        // SAFETY: `argv` is non-null if `argc` is positive, and it is\n        // guaranteed to be at least as long as `argc`, so reading from it\n        // should be safe.\n        let ptr = unsafe { argv.offset(i).read() };\n\n        // Some C commandline parsers (e.g. GLib and Qt) are replacing already\n        // handled arguments in `argv` with `NULL` and move them to the end.\n        //\n        // Since they can't directly ensure updates to `argc` as well, this\n        // means that `argc` might be bigger than the actual number of\n        // non-`NULL` pointers in `argv` at this point.\n        //\n        // To handle this we simply stop iterating at the first `NULL`\n        // argument. `argv` is also guaranteed to be `NULL`-terminated so any\n        // non-`NULL` arguments after the first `NULL` can safely be ignored.\n        if ptr.is_null() {\n            // NOTE: On Apple platforms, `-[NSProcessInfo arguments]` does not\n            // stop iterating here, but instead `continue`, always iterating\n            // up until it reached `argc`.\n            //\n            // This difference will only matter in very specific circumstances\n            // where `argc`/`argv` have been modified, but in unexpected ways,\n            // so it likely doesn't really matter which option we choose.\n            // See the following PR for further discussion:\n            // <https://github.com/rust-lang/rust/pull/125225>\n            break;\n        }\n\n        // SAFETY: Just checked that the pointer is not NULL, and arguments\n        // are otherwise guaranteed to be valid C strings.\n        let cstr = unsafe { CStr::from_ptr(ptr) };\n        vec.push(OsStringExt::from_vec(cstr.to_bytes().to_vec()));\n    }\n\n    Args::new(vec)\n}",
+  "mir": "fn sys::args::unix::args() -> sys::args::common::Args {\n    let mut _0: sys::args::common::Args;\n    let  _1: isize;\n    let  _2: *const *const u8;\n    let mut _3: (isize, *const *const u8);\n    let mut _4: alloc_crate::vec::Vec<ffi::os_str::OsString>;\n    let mut _5: usize;\n    let mut _6: core::ops::Range<isize>;\n    let mut _7: core::ops::Range<isize>;\n    let mut _8: core::ops::Range<isize>;\n    let mut _9: core::option::Option<isize>;\n    let mut _10: &mut core::ops::Range<isize>;\n    let mut _11: isize;\n    let  _12: isize;\n    let  _13: *const u8;\n    let mut _14: *const *const u8;\n    let mut _15: bool;\n    let  _16: &core::ffi::CStr;\n    let  _17: ();\n    let mut _18: &mut alloc_crate::vec::Vec<ffi::os_str::OsString>;\n    let mut _19: ffi::os_str::OsString;\n    let mut _20: alloc_crate::vec::Vec<u8>;\n    let  _21: &[u8];\n    let mut _22: alloc_crate::vec::Vec<ffi::os_str::OsString>;\n    debug argc => _1;\n    debug argv => _2;\n    debug vec => _4;\n    debug iter => _8;\n    debug i => _12;\n    debug ptr => _13;\n    debug cstr => _16;\n    bb0: {\n        StorageLive(_3);\n        _3 = sys::args::unix::imp::argc_argv() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _1 = (_3.0: isize);\n        _2 = (_3.1: *const *const u8);\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = _1 as usize;\n        _4 = alloc_crate::vec::Vec::<ffi::os_str::OsString>::with_capacity(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = Range(0_isize, _1);\n        _6 = <core::ops::Range<isize> as core::iter::IntoIterator>::into_iter(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageLive(_8);\n        _8 = move _6;\n        goto -> bb4;\n    }\n    bb4: {\n        StorageLive(_9);\n        _10 = &mut _8;\n        _9 = <core::ops::Range<isize> as core::iter::Iterator>::next(_10) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _11 = discriminant(_9);\n        switchInt(move _11) -> [0: bb18, 1: bb7, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        _12 = ((_9 as variant#1).0: isize);\n        StorageLive(_14);\n        _14 = core::ptr::const_ptr::<impl *const *const u8>::offset(_2, _12) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _13 = core::ptr::const_ptr::<impl *const *const u8>::read(move _14) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_14);\n        StorageLive(_15);\n        _15 = core::ptr::const_ptr::<impl *const u8>::is_null(_13) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        switchInt(move _15) -> [0: bb12, otherwise: bb11];\n    }\n    bb11: {\n        StorageDead(_15);\n        goto -> bb18;\n    }\n    bb12: {\n        StorageDead(_15);\n        _16 = core::ffi::CStr::from_ptr::<'_>(_13) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageLive(_18);\n        _18 = &mut _4;\n        StorageLive(_19);\n        StorageLive(_20);\n        _21 = core::ffi::CStr::to_bytes(_16) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        _20 = alloc_crate::slice::<impl [u8]>::to_vec(_21) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        _19 = <ffi::os_str::OsString as os::unix::ffi::os_str::OsStringExt>::from_vec(move _20) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_20);\n        _17 = alloc_crate::vec::Vec::<ffi::os_str::OsString>::push(move _18, move _19) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_19);\n        StorageDead(_18);\n        StorageDead(_9);\n        goto -> bb4;\n    }\n    bb18: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_6);\n        StorageLive(_22);\n        _22 = move _4;\n        _0 = sys::args::common::Args::new(move _22) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_22);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Returns the command line arguments\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

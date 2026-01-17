@@ -1,0 +1,64 @@
+{
+  "name": "<u128 as iter::range::Step>::backward",
+  "safe": true,
+  "callees": {
+    "iter::range::Step::backward_checked": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the value that would be obtained by taking the *predecessor*\n of `self` `count` times.\n\n If this would overflow the range of values supported by `Self`, returns `None`.\n\n # Invariants\n\n For any `a`, `n`, and `m`:\n\n * `Step::backward_checked(a, n).and_then(|x| Step::backward_checked(x, m)) == n.checked_add(m).and_then(|x| Step::backward_checked(a, x))`\n * `Step::backward_checked(a, n).and_then(|x| Step::backward_checked(x, m)) == try { Step::backward_checked(a, n.checked_add(m)?) }`\n\n For any `a` and `n`:\n\n * `Step::backward_checked(a, n) == (0..n).try_fold(a, |x, _| Step::backward_checked(x, 1))`\n   * Corollary: `Step::backward_checked(a, 0) == Some(a)`\n",
+      "adt": {}
+    },
+    "option::Option::<T>::is_none": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the option is a [`None`] value.\n\n # Examples\n\n ```\n let x: Option<u32> = Some(2);\n assert_eq!(x.is_none(), false);\n\n let x: Option<u32> = None;\n assert_eq!(x.is_none(), true);\n ```\n",
+      "adt": {
+        "option::Option": "ImmutableAsArgument"
+      }
+    },
+    "num::<impl u128>::wrapping_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrapping (modular) subtraction. Computes `self - rhs`,\n wrapping around at the boundary of the type.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 3188,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/range.rs:236:9: 244:10",
+  "src": "fn backward(start: Self, n: usize) -> Self {\n            // In debug builds, trigger a panic on overflow.\n            // This should optimize completely out in release builds.\n            if Self::backward_checked(start, n).is_none() {\n                let _ = Self::MIN - 1;\n            }\n            // Do wrapping math to allow e.g. `Step::backward(127i8, 255)`.\n            start.wrapping_sub(n as Self)\n        }",
+  "mir": "fn <u128 as iter::range::Step>::backward(_1: u128, _2: usize) -> u128 {\n    let mut _0: u128;\n    let mut _3: bool;\n    let mut _4: &option::Option<u128>;\n    let  _5: option::Option<u128>;\n    let mut _6: (u128, bool);\n    let mut _7: u128;\n    debug start => _1;\n    debug n => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = <u128 as iter::range::Step>::backward_checked(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = &_5;\n        _3 = option::Option::<u128>::is_none(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _3) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _6 = CheckedSub(num::<impl u128>::MIN, 1_u128);\n        assert(!move (_6.1: bool), \"attempt to compute `{} - {}`, which would overflow\", num::<impl u128>::MIN, 1_u128) -> [success: bb5, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_4);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_3);\n        StorageLive(_7);\n        _7 = _2 as u128;\n        _0 = num::<impl u128>::wrapping_sub(_1, move _7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_7);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "arithmetic_overflow"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* arithmetic_overflow\n"
+    ]
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "name": "<collections::vec_deque::extract_if::ExtractIf<'_, T, F, A> as core::fmt::Debug>::fmt",
+  "safe": true,
+  "callees": {
+    "collections::vec_deque::VecDeque::<T, A>::to_physical_idx": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Marginally more convenient\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::fmt::Formatter::<'a>::debug_struct": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a [`DebugStruct`] builder designed to assist with creation of\n [`fmt::Debug`] implementations for structs.\n\n [`fmt::Debug`]: self::Debug\n\n # Examples\n\n ```rust\n use std::fmt;\n use std::net::Ipv4Addr;\n\n struct Foo {\n     bar: i32,\n     baz: String,\n     addr: Ipv4Addr,\n }\n\n impl fmt::Debug for Foo {\n     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {\n         fmt.debug_struct(\"Foo\")\n             .field(\"bar\", &self.bar)\n             .field(\"baz\", &self.baz)\n             .field(\"addr\", &format_args!(\"{}\", self.addr))\n             .finish()\n     }\n }\n\n assert_eq!(\n     \"Foo { bar: 10, baz: \\\"Hello World\\\", addr: 127.0.0.1 }\",\n     format!(\"{:?}\", Foo {\n         bar: 10,\n         baz: \"Hello World\".to_string(),\n         addr: Ipv4Addr::new(127, 0, 0, 1),\n     })\n );\n ```\n",
+      "adt": {}
+    },
+    "core::fmt::DebugStruct::<'a, 'b>::field": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds a new field to the generated struct output.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Bar {\n     bar: i32,\n     another: String,\n }\n\n impl fmt::Debug for Bar {\n     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {\n         fmt.debug_struct(\"Bar\")\n            .field(\"bar\", &self.bar) // We add `bar` field.\n            .field(\"another\", &self.another) // We add `another` field.\n            // We even add a field which doesn't exist (because why not?).\n            .field(\"nonexistent_field\", &1)\n            .finish() // We're good to go!\n     }\n }\n\n assert_eq!(\n     format!(\"{:?}\", Bar { bar: 10, another: \"Hello World\".to_string() }),\n     r#\"Bar { bar: 10, another: \"Hello World\", nonexistent_field: 1 }\"#,\n );\n ```\n",
+      "adt": {}
+    },
+    "core::fmt::DebugStruct::<'a, 'b>::finish_non_exhaustive": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Marks the struct as non-exhaustive, indicating to the reader that there are some other\n fields that are not shown in the debug representation.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Bar {\n     bar: i32,\n     hidden: f32,\n }\n\n impl fmt::Debug for Bar {\n     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {\n         fmt.debug_struct(\"Bar\")\n            .field(\"bar\", &self.bar)\n            .finish_non_exhaustive() // Show that some other field(s) exist.\n     }\n }\n\n assert_eq!(\n     format!(\"{:?}\", Bar { bar: 10, hidden: 1.0 }),\n     \"Bar { bar: 10, .. }\",\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::vec_deque::extract_if::ExtractIf": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "collections::vec_deque::VecDeque": [
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Ref"
+    ],
+    "core::fmt::Formatter": [
+      "MutRef"
+    ],
+    "core::fmt::DebugStruct": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1331,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/extract_if.rs:132:5: 149:6",
+  "src": "fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n        let peek = if self.idx < self.end {\n            let idx = self.vec.to_physical_idx(self.idx);\n            // This has to use pointer arithmetic as `self.vec[self.idx]` or\n            // `self.vec.get_unchecked(self.idx)` wouldn't work since we\n            // temporarily set the length of `self.vec` to zero.\n            //\n            // SAFETY:\n            // Since `self.idx` is smaller than `self.end` and `self.end` is\n            // smaller than `self.old_len`, `idx` is valid for indexing the\n            // buffer. Also, per the invariant of `self.idx`, this element\n            // has not been inspected/moved out yet.\n            Some(unsafe { &*self.vec.ptr().add(idx) })\n        } else {\n            None\n        };\n        f.debug_struct(\"ExtractIf\").field(\"peek\", &peek).finish_non_exhaustive()\n    }",
+  "mir": "fn <collections::vec_deque::extract_if::ExtractIf<'_, T, F, A> as core::fmt::Debug>::fmt(_1: &collections::vec_deque::extract_if::ExtractIf<'_, T, F, A>, _2: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error> {\n    let mut _0: core::result::Result<(), core::fmt::Error>;\n    let  _3: core::option::Option<&T>;\n    let mut _4: bool;\n    let mut _5: usize;\n    let mut _6: usize;\n    let  _7: usize;\n    let mut _8: &collections::vec_deque::VecDeque<T, A>;\n    let mut _9: usize;\n    let mut _10: &T;\n    let  _11: *mut T;\n    let mut _12: *mut T;\n    let mut _13: &collections::vec_deque::VecDeque<T, A>;\n    let mut _14: &mut core::fmt::DebugStruct<'_, '_>;\n    let mut _15: &mut core::fmt::DebugStruct<'_, '_>;\n    let mut _16: core::fmt::DebugStruct<'_, '_>;\n    let mut _17: &str;\n    let mut _18: &str;\n    let mut _19: &dyn core::fmt::Debug;\n    let  _20: &core::option::Option<&T>;\n    let mut _21: &mut collections::vec_deque::VecDeque<T, A>;\n    let mut _22: &mut collections::vec_deque::VecDeque<T, A>;\n    debug self => _1;\n    debug f => _2;\n    debug peek => _3;\n    debug idx => _7;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = ((*_1).1: usize);\n        StorageLive(_6);\n        _6 = ((*_1).2: usize);\n        _4 = Lt(move _5, move _6);\n        switchInt(move _4) -> [0: bb5, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_8);\n        _21 = ((*_1).0: &mut collections::vec_deque::VecDeque<T, A>);\n        _8 = &(*_21);\n        StorageLive(_9);\n        _9 = ((*_1).1: usize);\n        _7 = collections::vec_deque::VecDeque::<T, A>::to_physical_idx(move _8, move _9) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _22 = ((*_1).0: &mut collections::vec_deque::VecDeque<T, A>);\n        _13 = &(*_22);\n        _12 = collections::vec_deque::VecDeque::<T, A>::ptr(move _13) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_13);\n        _11 = core::ptr::mut_ptr::<impl *mut T>::add(move _12, _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_12);\n        _10 = &(*_11);\n        _3 = core::option::Option::Some(move _10);\n        StorageDead(_10);\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_6);\n        StorageDead(_5);\n        _3 = core::option::Option::None;\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_4);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = \"ExtractIf\";\n        _16 = core::fmt::Formatter::<'_>::debug_struct(_2, move _17) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _15 = &mut _16;\n        StorageDead(_17);\n        StorageLive(_18);\n        _18 = \"peek\";\n        StorageLive(_19);\n        _20 = &_3;\n        _19 = _20 as &dyn core::fmt::Debug;\n        _14 = core::fmt::DebugStruct::<'_, '_>::field(move _15, move _18, move _19) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_19);\n        StorageDead(_18);\n        StorageDead(_15);\n        _0 = core::fmt::DebugStruct::<'_, '_>::finish_non_exhaustive(_14) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_16);\n        StorageDead(_11);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

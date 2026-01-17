@@ -1,0 +1,27 @@
+{
+  "name": "num::<impl u16>::scatter_bits",
+  "safe": true,
+  "callees": {
+    "num::<impl u16>::isolate_lowest_one": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `self` with only the least significant bit set, or `0` if\n the input is `0`.\n\n # Examples\n\n ```\n #![feature(isolate_most_least_significant_one)]\n\n\n assert_eq!(n.isolate_lowest_one(), 0b_00000100);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 3520,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/uint_macros.rs:531:9: 550:10",
+  "src": "pub const fn scatter_bits(mut self, mut mask: Self) -> Self {\n            let mut result = 0;\n\n            // Iterate through the mask bits, unsetting the lowest bit after\n            // each iteration and right-shifting `self` by one to get the next\n            // bit into the least significant bit position.\n            while mask != 0 {\n                // Find the next bit position to potentially set\n                let next_mask_bit = mask.isolate_lowest_one();\n\n                // If bit is set, deposit it at the masked bit position\n                result |= if (self & 1) != 0 { next_mask_bit } else { 0 };\n\n                // Unset lowest set bit in the mask, shift in next `self` bit\n                mask ^= next_mask_bit;\n                self >>= 1;\n            }\n\n            result\n        }",
+  "mir": "fn num::<impl u16>::scatter_bits(_1: u16, _2: u16) -> u16 {\n    let mut _0: u16;\n    let mut _3: u16;\n    let mut _4: u16;\n    let  _5: u16;\n    let mut _6: u16;\n    let mut _7: u16;\n    let mut _8: u16;\n    let mut _9: u16;\n    let mut _10: u32;\n    let mut _11: bool;\n    debug self => _1;\n    debug mask => _2;\n    debug result => _3;\n    debug next_mask_bit => _5;\n    bb0: {\n        StorageLive(_3);\n        _3 = 0_u16;\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = _2;\n        switchInt(move _4) -> [0: bb8, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = _2;\n        _5 = num::<impl u16>::isolate_lowest_one(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = _1;\n        _8 = BitAnd(move _9, 1_u16);\n        StorageDead(_9);\n        switchInt(move _8) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_8);\n        _7 = _5;\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_8);\n        _7 = 0_u16;\n        goto -> bb6;\n    }\n    bb6: {\n        _3 = BitOr(_3, move _7);\n        StorageDead(_7);\n        _2 = BitXor(_2, _5);\n        _10 = 1_i32 as u32;\n        _11 = Lt(move _10, 16_u32);\n        assert(move _11, \"attempt to shift right by `{}`, which would overflow\", 1_i32) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _1 = Shr(_1, 1_i32);\n        goto -> bb1;\n    }\n    bb8: {\n        StorageDead(_4);\n        _0 = _3;\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Returns an integer with the least significant bits of `self`\n distributed to the bit locations specified by `mask`.\n ```\n #![feature(uint_gather_scatter_bits)]\n\n assert_eq!(n.scatter_bits(0b0101_0101), 0b0101_0001);\n assert_eq!(n.scatter_bits(0xF0), 0b1101_0000);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

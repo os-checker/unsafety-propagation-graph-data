@@ -1,0 +1,56 @@
+{
+  "name": "ptr::non_null::NonNull::<T>::expose_provenance",
+  "safe": true,
+  "callees": {
+    "ptr::non_null::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::expose_provenance": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Exposes the [\"provenance\"][crate::ptr#provenance] part of the pointer for future use in\n [`with_exposed_provenance_mut`] and returns the \"address\" portion.\n\n This is equivalent to `self as usize`, which semantically discards provenance information.\n Furthermore, this (like the `as` cast) has the implicit side-effect of marking the\n provenance as 'exposed', so on platforms that support it you can later call\n [`with_exposed_provenance_mut`] to reconstitute the original pointer including its provenance.\n\n Due to its inherent ambiguity, [`with_exposed_provenance_mut`] may not be supported by tools\n that help you to stay conformant with the Rust memory model. It is recommended to use\n [Strict Provenance][crate::ptr#strict-provenance] APIs such as [`with_addr`][pointer::with_addr]\n wherever possible, in which case [`addr`][pointer::addr] should be used instead of `expose_provenance`.\n\n On most platforms this will produce a value with the same bytes as the original pointer,\n because all the bytes are dedicated to describing the address. Platforms which need to store\n additional information in the pointer may not support this operation, since the 'expose'\n side-effect which is required for [`with_exposed_provenance_mut`] to work is typically not\n available.\n\n This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.\n\n [`with_exposed_provenance_mut`]: with_exposed_provenance_mut\n",
+      "adt": {}
+    },
+    "num::nonzero::NonZero::<T>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a non-zero without checking whether the value is non-zero.\n This results in undefined behavior if the value is zero.\n\n # Safety\n\n The value must not be zero.\n",
+      "adt": {
+        "num::nonzero::NonZero": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ],
+    "num::nonzero::NonZero": [
+      "Plain"
+    ]
+  },
+  "path": 16016,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/non_null.rs:347:5: 351:6",
+  "src": "pub fn expose_provenance(self) -> NonZero<usize> {\n        // SAFETY: The pointer is guaranteed by the type to be non-null,\n        // meaning that the address will be non-zero.\n        unsafe { NonZero::new_unchecked(self.as_ptr().expose_provenance()) }\n    }",
+  "mir": "fn ptr::non_null::NonNull::<T>::expose_provenance(_1: ptr::non_null::NonNull<T>) -> num::nonzero::NonZero<usize> {\n    let mut _0: num::nonzero::NonZero<usize>;\n    let mut _2: usize;\n    let mut _3: *mut T;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = ptr::non_null::NonNull::<T>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = ptr::mut_ptr::<impl *mut T>::expose_provenance(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = num::nonzero::NonZero::<usize>::new_unchecked(move _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Exposes the [\"provenance\"][crate::ptr#provenance] part of the pointer for future use in\n [`with_exposed_provenance`][NonNull::with_exposed_provenance] and returns the \"address\" portion.\n\n For more details, see the equivalent method on a raw pointer, [`pointer::expose_provenance`].\n\n This is an [Exposed Provenance][crate::ptr#exposed-provenance] API.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

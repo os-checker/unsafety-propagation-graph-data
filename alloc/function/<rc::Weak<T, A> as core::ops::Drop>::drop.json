@@ -1,0 +1,113 @@
+{
+  "name": "<rc::Weak<T, A> as core::ops::Drop>::drop",
+  "safe": true,
+  "callees": {
+    "rc::Weak::<T, A>::inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `None` when the pointer is dangling and there is no allocated `RcInner`,\n (i.e., when this `Weak` was created by `Weak::new`).\n",
+      "adt": {
+        "rc::Weak": "ImmutableAsArgument",
+        "core::option::Option": "Constructor",
+        "rc::WeakInner": "Constructor"
+      }
+    },
+    "rc::RcInnerPtr::dec_weak": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "rc::RcInnerPtr::weak": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"null pointer\");\n\n let casted_ptr = ptr.cast::<i8>();\n let raw_ptr: *mut i8 = casted_ptr.as_ptr();\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "core::alloc::Layout::for_value_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Produces layout describing a record that could be used to\n allocate backing structure for `T` (which could be a trait\n or other unsized type like a slice).\n\n # Safety\n\n This function is only safe to call if the following conditions hold:\n\n - If `T` is `Sized`, this function is always safe to call.\n - If the unsized tail of `T` is:\n     - a [slice], then the length of the slice tail must be an initialized\n       integer, and the size of the *entire value*\n       (dynamic tail length + statically sized prefix) must fit in `isize`.\n       For the special case where the dynamic tail length is 0, this function\n       is safe to call.\n     - a [trait object], then the vtable part of the pointer must point\n       to a valid vtable for the type `T` acquired by an unsizing coercion,\n       and the size of the *entire value*\n       (dynamic tail length + statically sized prefix) must fit in `isize`.\n     - an (unstable) [extern type], then this function is always safe to\n       call, but may panic or otherwise return the wrong value, as the\n       extern type's layout is not known. This is the same behavior as\n       [`Layout::for_value`] on a reference to an extern type tail.\n     - otherwise, it is conservatively not allowed to call this function.\n\n [trait object]: ../../book/ch17-02-trait-objects.html\n [extern type]: ../../unstable-book/language-features/extern-types.html\n",
+      "adt": {}
+    },
+    "core::alloc::Allocator::deallocate": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Deallocates the memory referenced by `ptr`.\n\n # Safety\n\n * `ptr` must denote a block of memory [*currently allocated*] via this allocator, and\n * `layout` must [*fit*] that block of memory.\n\n [*currently allocated*]: #currently-allocated-memory\n [*fit*]: #memory-fitting\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "rc::Weak": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 8056, kind: RigidTy(Adt(AdtDef(DefId { id: 5190, name: \"rc::WeakInner\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])"
+    ],
+    "rc::WeakInner": [
+      "Plain",
+      "Ref"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ]
+  },
+  "path": 1840,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:3649:5: 3660:6",
+  "src": "fn drop(&mut self) {\n        let inner = if let Some(inner) = self.inner() { inner } else { return };\n\n        inner.dec_weak();\n        // the weak count starts at 1, and will only go to zero if all\n        // the strong pointers have disappeared.\n        if inner.weak() == 0 {\n            unsafe {\n                self.alloc.deallocate(self.ptr.cast(), Layout::for_value_raw(self.ptr.as_ptr()));\n            }\n        }\n    }",
+  "mir": "fn <rc::Weak<T, A> as core::ops::Drop>::drop(_1: &mut rc::Weak<T, A>) -> () {\n    let mut _0: ();\n    let  _2: rc::WeakInner<'_>;\n    let mut _3: core::option::Option<rc::WeakInner<'_>>;\n    let mut _4: &rc::Weak<T, A>;\n    let mut _5: isize;\n    let  _6: rc::WeakInner<'_>;\n    let  _7: ();\n    let mut _8: &rc::WeakInner<'_>;\n    let mut _9: usize;\n    let mut _10: &rc::WeakInner<'_>;\n    let  _11: ();\n    let mut _12: &A;\n    let mut _13: core::ptr::NonNull<u8>;\n    let mut _14: core::ptr::NonNull<rc::RcInner<T>>;\n    let mut _15: core::alloc::Layout;\n    let mut _16: *const rc::RcInner<T>;\n    let mut _17: *mut rc::RcInner<T>;\n    let mut _18: core::ptr::NonNull<rc::RcInner<T>>;\n    debug self => _1;\n    debug inner => _2;\n    debug inner => _6;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &(*_1);\n        _3 = rc::Weak::<T, A>::inner(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [1: bb2, 0: bb3, otherwise: bb14];\n    }\n    bb2: {\n        StorageLive(_6);\n        _6 = move ((_3 as variant#1).0: rc::WeakInner<'_>);\n        _2 = move _6;\n        StorageDead(_6);\n        StorageDead(_3);\n        StorageLive(_8);\n        _8 = &_2;\n        _7 = <rc::WeakInner<'_> as rc::RcInnerPtr>::dec_weak(move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        StorageDead(_2);\n        goto -> bb13;\n    }\n    bb4: {\n        StorageDead(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_2;\n        _9 = <rc::WeakInner<'_> as rc::RcInnerPtr>::weak(move _10) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_10);\n        switchInt(move _9) -> [0: bb6, otherwise: bb11];\n    }\n    bb6: {\n        StorageDead(_9);\n        StorageLive(_12);\n        _12 = &((*_1).1: A);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = ((*_1).0: core::ptr::NonNull<rc::RcInner<T>>);\n        _13 = core::ptr::NonNull::<rc::RcInner<T>>::cast::<u8>(move _14) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = ((*_1).0: core::ptr::NonNull<rc::RcInner<T>>);\n        _17 = core::ptr::NonNull::<rc::RcInner<T>>::as_ptr(move _18) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _16 = move _17 as *const rc::RcInner<T>;\n        StorageDead(_18);\n        StorageDead(_17);\n        _15 = core::alloc::Layout::for_value_raw::<rc::RcInner<T>>(move _16) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_16);\n        _11 = <A as core::alloc::Allocator>::deallocate(move _12, move _13, move _15) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_15);\n        StorageDead(_13);\n        StorageDead(_12);\n        goto -> bb12;\n    }\n    bb11: {\n        StorageDead(_9);\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_2);\n        goto -> bb13;\n    }\n    bb13: {\n        return;\n    }\n    bb14: {\n        unreachable;\n    }\n}\n",
+  "doc": " Drops the `Weak` pointer.\n\n # Examples\n\n ```\n use std::rc::{Rc, Weak};\n\n struct Foo;\n\n impl Drop for Foo {\n     fn drop(&mut self) {\n         println!(\"dropped!\");\n     }\n }\n\n let foo = Rc::new(Foo);\n let weak_foo = Rc::downgrade(&foo);\n let other_weak_foo = Weak::clone(&weak_foo);\n\n drop(weak_foo);   // Doesn't print anything\n drop(foo);        // Prints \"dropped!\"\n\n assert!(other_weak_foo.upgrade().is_none());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

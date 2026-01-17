@@ -1,0 +1,64 @@
+{
+  "name": "cell::Ref::<'b, T>::try_map",
+  "safe": true,
+  "callees": {
+    "ops::deref::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "ops::function::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "cell::Ref": [
+      "Ref",
+      "Plain",
+      "Unknown([Field(1, Ty { id: 5168, kind: RigidTy(Adt(AdtDef(DefId { id: 26097, name: \"cell::BorrowRef\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])"
+    ],
+    "result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 5259, kind: Param(ParamTy { index: 3, name: \"E\" }) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 2678, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 2679, kind: Param(ParamTy { index: 2, name: \"U\" }) }, Not)) })])"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ],
+    "cell::BorrowRef": [
+      "Plain"
+    ]
+  },
+  "path": 4774,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell.rs:1722:5: 1730:6",
+  "src": "pub fn try_map<U: ?Sized, E>(\n        orig: Ref<'b, T>,\n        f: impl FnOnce(&T) -> Result<&U, E>,\n    ) -> Result<Ref<'b, U>, (Self, E)> {\n        match f(&*orig) {\n            Ok(value) => Ok(Ref { value: NonNull::from(value), borrow: orig.borrow }),\n            Err(e) => Err((orig, e)),\n        }\n    }",
+  "mir": "fn cell::Ref::<'b, T>::try_map(_1: cell::Ref<'_, T>, _2: impl FnOnce(&T) -> Result<&U, E>) -> result::Result<cell::Ref<'_, U>, (cell::Ref<'_, T>, E)> {\n    let mut _0: result::Result<cell::Ref<'_, U>, (cell::Ref<'_, T>, E)>;\n    let mut _3: result::Result<&U, E>;\n    let mut _4: (&T,);\n    let  _5: &T;\n    let mut _6: &cell::Ref<'_, T>;\n    let mut _7: isize;\n    let  _8: &U;\n    let mut _9: cell::Ref<'_, U>;\n    let mut _10: ptr::non_null::NonNull<U>;\n    let mut _11: cell::BorrowRef<'_>;\n    let  _12: E;\n    let mut _13: (cell::Ref<'_, T>, E);\n    debug orig => _1;\n    debug f => _2;\n    debug value => _8;\n    debug e => _12;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_6);\n        _6 = &_1;\n        _5 = <cell::Ref<'_, T> as ops::deref::Deref>::deref(move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        _4 = (_5);\n        _3 = <impl FnOnce(&T) -> Result<&U, E> as ops::function::FnOnce<(&T,)>>::call_once(_2, move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _7 = discriminant(_3);\n        switchInt(move _7) -> [0: bb5, 1: bb4, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _12 = move ((_3 as variant#1).0: E);\n        StorageLive(_13);\n        _13 = (_1, _12);\n        _0 = result::Result::Err(move _13);\n        StorageDead(_13);\n        goto -> bb7;\n    }\n    bb5: {\n        _8 = ((_3 as variant#0).0: &U);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = <ptr::non_null::NonNull<U> as convert::From<&U>>::from(_8) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_11);\n        _11 = (_1.1: cell::BorrowRef<'_>);\n        _9 = Ref(move _10, move _11);\n        StorageDead(_11);\n        StorageDead(_10);\n        _0 = result::Result::Ok(move _9);\n        StorageDead(_9);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Tries to makes a new `Ref` for a component of the borrowed data.\n On failure, the original guard is returned alongside with the error\n returned by the closure.\n\n The `RefCell` is already immutably borrowed, so this cannot fail.\n\n This is an associated function that needs to be used as\n `Ref::try_map(...)`. A method would interfere with methods of the same\n name on the contents of a `RefCell` used through `Deref`.\n\n # Examples\n\n ```\n #![feature(refcell_try_map)]\n use std::cell::{RefCell, Ref};\n use std::str::{from_utf8, Utf8Error};\n\n let c = RefCell::new(vec![0xF0, 0x9F, 0xA6 ,0x80]);\n let b1: Ref<'_, Vec<u8>> = c.borrow();\n let b2: Result<Ref<'_, str>, _> = Ref::try_map(b1, |v| from_utf8(v));\n assert_eq!(&*b2.unwrap(), \"🦀\");\n\n let c = RefCell::new(vec![0xF0, 0x9F, 0xA6]);\n let b1: Ref<'_, Vec<u8>> = c.borrow();\n let b2: Result<_, (Ref<'_, Vec<u8>>, Utf8Error)> = Ref::try_map(b1, |v| from_utf8(v));\n let (b3, e) = b2.unwrap_err();\n assert_eq!(*b3, vec![0xF0, 0x9F, 0xA6]);\n assert_eq!(e.valid_up_to(), 0);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

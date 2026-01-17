@@ -1,0 +1,47 @@
+{
+  "name": "rc::Rc::<T, A>::unwrap_or_clone",
+  "safe": true,
+  "callees": {
+    "rc::Rc::<T, A>::try_unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the inner value, if the `Rc` has exactly one strong reference.\n\n Otherwise, an [`Err`] is returned with the same `Rc` that was\n passed in.\n\n This will succeed even if there are outstanding weak references.\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let x = Rc::new(3);\n assert_eq!(Rc::try_unwrap(x), Ok(3));\n\n let x = Rc::new(4);\n let _y = Rc::clone(&x);\n assert_eq!(*Rc::try_unwrap(x).unwrap_err(), 4);\n ```\n",
+      "adt": {
+        "rc::Rc": "Constructor",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::unwrap_or_else": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value or computes it from a closure.\n\n\n # Examples\n\n ```\n fn count(x: &str) -> usize { x.len() }\n\n assert_eq!(Ok(2).unwrap_or_else(count), 2);\n assert_eq!(Err(\"foo\").unwrap_or_else(count), 3);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "rc::Rc": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1790,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2136:5: 2138:6",
+  "src": "pub fn unwrap_or_clone(this: Self) -> T {\n        Rc::try_unwrap(this).unwrap_or_else(|rc| (*rc).clone())\n    }",
+  "mir": "fn rc::Rc::<T, A>::unwrap_or_clone(_1: rc::Rc<T, A>) -> T {\n    let mut _0: T;\n    let mut _2: core::result::Result<T, rc::Rc<T, A>>;\n    debug this => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = rc::Rc::<T, A>::try_unwrap(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = core::result::Result::<T, rc::Rc<T, A>>::unwrap_or_else::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2137:45: 2137:49}>(move _2, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2137:45: 2137:49}) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " If we have the only reference to `T` then unwrap it. Otherwise, clone `T` and return the\n clone.\n\n Assuming `rc_t` is of type `Rc<T>`, this function is functionally equivalent to\n `(*rc_t).clone()`, but will avoid cloning the inner value where possible.\n\n # Examples\n\n ```\n # use std::{ptr, rc::Rc};\n let inner = String::from(\"test\");\n let ptr = inner.as_ptr();\n\n let rc = Rc::new(inner);\n let inner = Rc::unwrap_or_clone(rc);\n // The inner value was not cloned\n assert!(ptr::eq(ptr, inner.as_ptr()));\n\n let rc = Rc::new(inner);\n let rc2 = rc.clone();\n let inner = Rc::unwrap_or_clone(rc);\n // Because there were 2 references, we had to clone the inner value.\n assert!(!ptr::eq(ptr, inner.as_ptr()));\n // `rc2` is the last reference, so when we unwrap it we get back\n // the original `String`.\n let inner = Rc::unwrap_or_clone(rc2);\n assert!(ptr::eq(ptr, inner.as_ptr()));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

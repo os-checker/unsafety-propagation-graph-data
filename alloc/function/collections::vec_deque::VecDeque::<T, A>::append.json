@@ -1,0 +1,96 @@
+{
+  "name": "collections::vec_deque::VecDeque::<T, A>::append",
+  "safe": true,
+  "callees": {
+    "core::num::<impl usize>::checked_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checked integer addition. Computes `self + rhs`, returning `None`\n if overflow occurred.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::expect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n # Panics\n\n Panics if the value is a [`None`] with a custom panic message provided by\n `msg`.\n\n # Examples\n\n ```\n let x = Some(\"value\");\n assert_eq!(x.expect(\"fruits are healthy\"), \"value\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n x.expect(\"fruits are healthy\"); // panics with `fruits are healthy`\n ```\n\n # Recommended Message Style\n\n We recommend that `expect` messages are used to describe the reason you\n _expect_ the `Option` should be `Some`.\n\n ```should_panic\n # let slice: &[u8] = &[];\n let item = slice.get(0)\n     .expect(\"slice should not be empty\");\n ```\n\n **Hint**: If you're having trouble remembering how to phrase expect\n error messages remember to focus on the word \"should\" as in \"env\n variable should be set by blah\" or \"the given binary should be available\n and executable by the current user\".\n\n For more detail on expect message styles and the reasoning behind our\n recommendation please refer to the section on [\"Common Message\n Styles\"](../../std/error/index.html#common-message-styles) in the [`std::error`](../../std/error/index.html) module docs.\n",
+      "adt": {}
+    },
+    "collections::vec_deque::VecDeque::<T, A>::reserve": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reserves capacity for at least `additional` more elements to be inserted in the given\n deque. The collection may reserve more space to speculatively avoid frequent reallocations.\n\n # Panics\n\n Panics if the new capacity overflows `usize`.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut buf: VecDeque<i32> = [1].into();\n buf.reserve(10);\n assert!(buf.capacity() >= 11);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::as_slices": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a pair of slices which contain, in order, the contents of the\n deque.\n\n If [`make_contiguous`] was previously called, all elements of the\n deque will be in the first slice and the second slice will be empty.\n Otherwise, the exact split point depends on implementation details\n and is not guaranteed.\n\n [`make_contiguous`]: VecDeque::make_contiguous\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut deque = VecDeque::new();\n\n deque.push_back(0);\n deque.push_back(1);\n deque.push_back(2);\n\n let expected = [0, 1, 2];\n let (front, back) = deque.as_slices();\n assert_eq!(&expected[..front.len()], front);\n assert_eq!(&expected[front.len()..], back);\n\n deque.push_front(10);\n deque.push_front(9);\n\n let expected = [9, 10, 0, 1, 2];\n let (front, back) = deque.as_slices();\n assert_eq!(&expected[..front.len()], front);\n assert_eq!(&expected[front.len()..], back);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::to_physical_idx": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "collections::vec_deque::VecDeque::<T, A>::copy_slice": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies all values from `src` to `dst`, wrapping around if needed.\n Assumes capacity is sufficient.\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 1454,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/mod.rs:2538:5: 2559:6",
+  "src": "pub fn append(&mut self, other: &mut Self) {\n        if T::IS_ZST {\n            self.len = self.len.checked_add(other.len).expect(\"capacity overflow\");\n            other.len = 0;\n            other.head = 0;\n            return;\n        }\n\n        self.reserve(other.len);\n        unsafe {\n            let (left, right) = other.as_slices();\n            self.copy_slice(self.to_physical_idx(self.len), left);\n            // no overflow, because self.capacity() >= old_cap + left.len() >= self.len + left.len()\n            self.copy_slice(self.to_physical_idx(self.len + left.len()), right);\n        }\n        // SAFETY: Update pointers after copying to avoid leaving doppelganger\n        // in case of panics.\n        self.len += other.len;\n        // Now that we own its values, forget everything in `other`.\n        other.len = 0;\n        other.head = 0;\n    }",
+  "mir": "fn collections::vec_deque::VecDeque::<T, A>::append(_1: &mut collections::vec_deque::VecDeque<T, A>, _2: &mut collections::vec_deque::VecDeque<T, A>) -> () {\n    let mut _0: ();\n    let mut _3: usize;\n    let mut _4: core::option::Option<usize>;\n    let mut _5: usize;\n    let mut _6: usize;\n    let mut _7: &str;\n    let  _8: ();\n    let mut _9: usize;\n    let  _10: &[T];\n    let  _11: &[T];\n    let mut _12: (&[T], &[T]);\n    let mut _13: &collections::vec_deque::VecDeque<T, A>;\n    let  _14: ();\n    let mut _15: usize;\n    let mut _16: &collections::vec_deque::VecDeque<T, A>;\n    let mut _17: usize;\n    let  _18: ();\n    let mut _19: usize;\n    let mut _20: &collections::vec_deque::VecDeque<T, A>;\n    let mut _21: usize;\n    let mut _22: usize;\n    let mut _23: usize;\n    let mut _24: (usize, bool);\n    let mut _25: usize;\n    let mut _26: (usize, bool);\n    debug self => _1;\n    debug other => _2;\n    debug left => _10;\n    debug right => _11;\n    bb0: {\n        switchInt(<T as core::mem::SizedTypeProperties>::IS_ZST) -> [0: bb4, otherwise: bb1];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = ((*_1).1: usize);\n        StorageLive(_6);\n        _6 = ((*_2).1: usize);\n        _4 = core::num::<impl usize>::checked_add(move _5, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_7);\n        _7 = \"capacity overflow\";\n        _3 = core::option::Option::<usize>::expect(move _4, move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageDead(_4);\n        ((*_1).1: usize) = move _3;\n        StorageDead(_3);\n        ((*_2).1: usize) = 0_usize;\n        ((*_2).0: usize) = 0_usize;\n        goto -> bb13;\n    }\n    bb4: {\n        StorageLive(_9);\n        _9 = ((*_2).1: usize);\n        _8 = collections::vec_deque::VecDeque::<T, A>::reserve(_1, move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = &(*_2);\n        _12 = collections::vec_deque::VecDeque::<T, A>::as_slices(move _13) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_13);\n        _10 = (_12.0: &[T]);\n        _11 = (_12.1: &[T]);\n        StorageDead(_12);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &(*_1);\n        StorageLive(_17);\n        _17 = ((*_1).1: usize);\n        _15 = collections::vec_deque::VecDeque::<T, A>::to_physical_idx(move _16, move _17) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_17);\n        StorageDead(_16);\n        _14 = collections::vec_deque::VecDeque::<T, A>::copy_slice(_1, move _15, _10) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_15);\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = &(*_1);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = ((*_1).1: usize);\n        StorageLive(_23);\n        _23 = PtrMetadata(_10);\n        _24 = CheckedAdd(_22, _23);\n        assert(!move (_24.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _22, move _23) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        _21 = move (_24.0: usize);\n        StorageDead(_23);\n        StorageDead(_22);\n        _19 = collections::vec_deque::VecDeque::<T, A>::to_physical_idx(move _20, move _21) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_21);\n        StorageDead(_20);\n        _18 = collections::vec_deque::VecDeque::<T, A>::copy_slice(_1, move _19, _11) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_19);\n        StorageLive(_25);\n        _25 = ((*_2).1: usize);\n        _26 = CheckedAdd(((*_1).1: usize), _25);\n        assert(!move (_26.1: bool), \"attempt to compute `{} + {}`, which would overflow\", ((*_1).1: usize), move _25) -> [success: bb12, unwind unreachable];\n    }\n    bb12: {\n        ((*_1).1: usize) = move (_26.0: usize);\n        StorageDead(_25);\n        ((*_2).1: usize) = 0_usize;\n        ((*_2).0: usize) = 0_usize;\n        goto -> bb13;\n    }\n    bb13: {\n        return;\n    }\n}\n",
+  "doc": " Moves all the elements of `other` into `self`, leaving `other` empty.\n\n # Panics\n\n Panics if the new number of elements in self overflows a `usize`.\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut buf: VecDeque<_> = [1, 2].into();\n let mut buf2: VecDeque<_> = [3, 4].into();\n buf.append(&mut buf2);\n assert_eq!(buf, [1, 2, 3, 4]);\n assert_eq!(buf2, []);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

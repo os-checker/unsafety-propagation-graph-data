@@ -1,0 +1,101 @@
+{
+  "name": "slice::sort::stable::drift::logical_merge",
+  "safe": true,
+  "callees": {
+    "slice::sort::stable::drift::DriftsortRun::sorted": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "slice::sort::stable::drift::DriftsortRun::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "ops::index::IndexMut::index_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the mutable indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "slice::sort::stable::drift::stable_quicksort": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "slice::sort::stable::merge::merge": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Merges non-decreasing runs `v[..mid]` and `v[mid..]` using `scratch` as\n temporary storage, and stores the result into `v[..]`.\n",
+      "adt": {}
+    },
+    "slice::sort::stable::drift::DriftsortRun::new_sorted": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "slice::sort::stable::drift::DriftsortRun": "Constructor"
+      }
+    },
+    "slice::sort::stable::drift::DriftsortRun::new_unsorted": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "slice::sort::stable::drift::DriftsortRun": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "slice::sort::stable::drift::DriftsortRun": [
+      "Plain"
+    ],
+    "ops::range::RangeTo": [
+      "Plain"
+    ],
+    "ops::range::RangeFrom": [
+      "Plain"
+    ]
+  },
+  "path": 16695,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/stable/drift.rs:191:1: 217:2",
+  "src": "fn logical_merge<T, F: FnMut(&T, &T) -> bool>(\n    v: &mut [T],\n    scratch: &mut [MaybeUninit<T>],\n    left: DriftsortRun,\n    right: DriftsortRun,\n    is_less: &mut F,\n) -> DriftsortRun {\n    // If one or both of the runs are sorted do a physical merge, using\n    // quicksort to sort the unsorted run if present. We also *need* to\n    // physically merge if the combined runs would not fit in the scratch space\n    // anymore (as this would mean we are no longer able to quicksort them).\n    let len = v.len();\n    let can_fit_in_scratch = len <= scratch.len();\n    if !can_fit_in_scratch || left.sorted() || right.sorted() {\n        if !left.sorted() {\n            stable_quicksort(&mut v[..left.len()], scratch, is_less);\n        }\n        if !right.sorted() {\n            stable_quicksort(&mut v[left.len()..], scratch, is_less);\n        }\n        merge(v, scratch, left.len(), is_less);\n\n        DriftsortRun::new_sorted(len)\n    } else {\n        DriftsortRun::new_unsorted(len)\n    }\n}",
+  "mir": "fn slice::sort::stable::drift::logical_merge(_1: &mut [T], _2: &mut [mem::maybe_uninit::MaybeUninit<T>], _3: slice::sort::stable::drift::DriftsortRun, _4: slice::sort::stable::drift::DriftsortRun, _5: &mut F) -> slice::sort::stable::drift::DriftsortRun {\n    let mut _0: slice::sort::stable::drift::DriftsortRun;\n    let  _6: usize;\n    let mut _7: &[T];\n    let  _8: bool;\n    let mut _9: usize;\n    let mut _10: &[mem::maybe_uninit::MaybeUninit<T>];\n    let mut _11: bool;\n    let mut _12: bool;\n    let mut _13: bool;\n    let  _14: ();\n    let mut _15: &mut [T];\n    let mut _16: ops::range::RangeTo<usize>;\n    let mut _17: usize;\n    let mut _18: bool;\n    let  _19: ();\n    let mut _20: &mut [T];\n    let mut _21: ops::range::RangeFrom<usize>;\n    let mut _22: usize;\n    let  _23: ();\n    let mut _24: usize;\n    debug v => _1;\n    debug scratch => _2;\n    debug left => _3;\n    debug right => _4;\n    debug is_less => _5;\n    debug len => _6;\n    debug can_fit_in_scratch => _8;\n    bb0: {\n        StorageLive(_7);\n        _7 = &(*_1);\n        _6 = PtrMetadata(move _7);\n        StorageDead(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &(*_2);\n        _9 = PtrMetadata(move _10);\n        StorageDead(_10);\n        _8 = Le(_6, move _9);\n        StorageDead(_9);\n        switchInt(_8) -> [0: bb7, otherwise: bb1];\n    }\n    bb1: {\n        StorageLive(_11);\n        _11 = slice::sort::stable::drift::DriftsortRun::sorted(_3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _11) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        goto -> bb7;\n    }\n    bb4: {\n        StorageLive(_12);\n        _12 = slice::sort::stable::drift::DriftsortRun::sorted(_4) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        switchInt(move _12) -> [0: bb25, otherwise: bb6];\n    }\n    bb6: {\n        goto -> bb7;\n    }\n    bb7: {\n        StorageLive(_13);\n        _13 = slice::sort::stable::drift::DriftsortRun::sorted(_3) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        switchInt(move _13) -> [0: bb10, otherwise: bb9];\n    }\n    bb9: {\n        goto -> bb14;\n    }\n    bb10: {\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = slice::sort::stable::drift::DriftsortRun::len(_3) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _16 = RangeTo(move _17);\n        StorageDead(_17);\n        _15 = <[T] as ops::index::IndexMut<ops::range::RangeTo<usize>>>::index_mut(_1, move _16) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_16);\n        _14 = slice::sort::stable::drift::stable_quicksort::<T, F>(_15, _2, _5) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        goto -> bb14;\n    }\n    bb14: {\n        StorageDead(_13);\n        StorageLive(_18);\n        _18 = slice::sort::stable::drift::DriftsortRun::sorted(_4) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        switchInt(move _18) -> [0: bb17, otherwise: bb16];\n    }\n    bb16: {\n        goto -> bb21;\n    }\n    bb17: {\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = slice::sort::stable::drift::DriftsortRun::len(_3) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        _21 = RangeFrom(move _22);\n        StorageDead(_22);\n        _20 = <[T] as ops::index::IndexMut<ops::range::RangeFrom<usize>>>::index_mut(_1, move _21) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_21);\n        _19 = slice::sort::stable::drift::stable_quicksort::<T, F>(_20, _2, _5) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        goto -> bb21;\n    }\n    bb21: {\n        StorageDead(_18);\n        StorageLive(_24);\n        _24 = slice::sort::stable::drift::DriftsortRun::len(_3) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        _23 = slice::sort::stable::merge::merge::<T, F>(_1, _2, move _24, _5) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_24);\n        _0 = slice::sort::stable::drift::DriftsortRun::new_sorted(_6) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        goto -> bb27;\n    }\n    bb25: {\n        _0 = slice::sort::stable::drift::DriftsortRun::new_unsorted(_6) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        goto -> bb27;\n    }\n    bb27: {\n        StorageDead(_12);\n        StorageDead(_11);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "name": "sync::wait::Waker::wake_up",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicBool::swap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the bool, returning the previous value.\n\n `swap` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note:** This method is only available on platforms that support atomic\n operations on `u8`.\n\n # Examples\n\n ```\n use std::sync::atomic::{AtomicBool, Ordering};\n\n let some_bool = AtomicBool::new(true);\n\n assert_eq!(some_bool.swap(false, Ordering::Relaxed), true);\n assert_eq!(some_bool.load(Ordering::Relaxed), false);\n ```\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "task::scheduler::unpark_target": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Unblocks a target task.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicBool": [
+      "Ref"
+    ],
+    "sync::wait::Waker": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "alloc::sync::Arc": [
+      "Ref",
+      "Plain"
+    ]
+  },
+  "path": 2752,
+  "span": "ostd/src/sync/wait.rs:262:5: 269:6",
+  "src": "pub fn wake_up(&self) -> bool {\n        if self.has_woken.swap(true, Ordering::Release) {\n            return false;\n        }\n        scheduler::unpark_target(self.task.clone());\n\n        true\n    }",
+  "mir": "fn sync::wait::Waker::wake_up(_1: &sync::wait::Waker) -> bool {\n    let mut _0: bool;\n    let mut _2: bool;\n    let mut _3: &core::sync::atomic::AtomicBool;\n    let mut _4: core::sync::atomic::Ordering;\n    let  _5: ();\n    let mut _6: alloc::sync::Arc<task::Task>;\n    let mut _7: &alloc::sync::Arc<task::Task>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &((*_1).0: core::sync::atomic::AtomicBool);\n        StorageLive(_4);\n        _4 = core::sync::atomic::Ordering::Release;\n        _2 = core::sync::atomic::AtomicBool::swap(move _3, true, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        _0 = false;\n        StorageDead(_2);\n        goto -> bb6;\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageDead(_2);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).1: alloc::sync::Arc<task::Task>);\n        _6 = <alloc::sync::Arc<task::Task> as core::clone::Clone>::clone(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        _5 = task::scheduler::unpark_target(move _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        _0 = true;\n        goto -> bb6;\n    }\n    bb6: {\n        return;\n    }\n}\n",
+  "doc": " Wakes up the associated [`Waiter`].\n\n This method returns `true` if the waiter is woken by this call. It returns `false` if the\n waiter has already been woken by a previous call to the method, or if the waiter has been\n dropped.\n\n Note that if this method returns `true`, it implies that the wake event will be properly\n delivered, _or_ that the waiter will be dropped after being woken. It's up to the caller to\n handle the latter case properly to avoid missing the wake event.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

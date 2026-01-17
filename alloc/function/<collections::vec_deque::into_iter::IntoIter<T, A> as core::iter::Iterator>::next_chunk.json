@@ -1,0 +1,141 @@
+{
+  "name": "<collections::vec_deque::into_iter::IntoIter<T, A> as core::iter::Iterator>::next_chunk",
+  "safe": true,
+  "callees": {
+    "core::slice::<impl [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unsafe mutable pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n let x_ptr = x.as_mut_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         *x_ptr.add(i) += 2;\n     }\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "collections::vec_deque::VecDeque::<T, A>::as_slices": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a pair of slices which contain, in order, the contents of the\n deque.\n\n If [`make_contiguous`] was previously called, all elements of the\n deque will be in the first slice and the second slice will be empty.\n Otherwise, the exact split point depends on implementation details\n and is not guaranteed.\n\n [`make_contiguous`]: VecDeque::make_contiguous\n\n # Examples\n\n ```\n use std::collections::VecDeque;\n\n let mut deque = VecDeque::new();\n\n deque.push_back(0);\n deque.push_back(1);\n deque.push_back(2);\n\n let expected = [0, 1, 2];\n let (front, back) = deque.as_slices();\n assert_eq!(&expected[..front.len()], front);\n assert_eq!(&expected[front.len()..], back);\n\n deque.push_front(10);\n deque.push_front(9);\n\n let expected = [9, 10, 0, 1, 2];\n let (front, back) = deque.as_slices();\n assert_eq!(&expected[..front.len()], front);\n assert_eq!(&expected[front.len()..], back);\n ```\n",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "core::slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "core::ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "collections::vec_deque::VecDeque::<T, A>::to_physical_idx": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::vec_deque::VecDeque": "ImmutableAsArgument"
+      }
+    },
+    "<[core::mem::MaybeUninit<T>; N]>::transpose": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Transposes a `[MaybeUninit<T>; N]` into a `MaybeUninit<[T; N]>`.\n\n # Examples\n\n ```\n #![feature(maybe_uninit_uninit_array_transpose)]\n # use std::mem::MaybeUninit;\n\n let data = [MaybeUninit::<u8>::uninit(); 1000];\n let data: MaybeUninit<[u8; 1000]> = data.transpose();\n ```\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::assume_init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the value from the `MaybeUninit<T>` container. This is a great way\n to ensure that the data will get dropped, because the resulting `T` is\n subject to the usual drop handling.\n\n # Safety\n\n It is up to the caller to guarantee that the `MaybeUninit<T>` really is in an initialized\n state. Calling this when the content is not yet fully initialized causes immediate undefined\n behavior. The [type-level documentation][inv] contains more information about\n this initialization invariant.\n\n [inv]: #initialization-invariant\n\n On top of that, remember that most types have additional invariants beyond merely\n being considered initialized at the type level. For example, a `1`-initialized [`Vec<T>`]\n is considered initialized (under the current implementation; this does not constitute\n a stable guarantee) because the only requirement the compiler knows about it\n is that the data pointer must be non-null. Creating such a `Vec<T>` does not cause\n *immediate* undefined behavior, but will cause undefined behavior with most\n safe operations (including dropping it).\n\n [`Vec<T>`]: ../../std/vec/struct.Vec.html\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<bool>::uninit();\n x.write(true);\n let x_init = unsafe { x.assume_init() };\n assert_eq!(x_init, true);\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let x = MaybeUninit::<Vec<u32>>::uninit();\n let x_init = unsafe { x.assume_init() };\n // `x` had not been initialized yet, so this last line caused undefined behavior. ⚠️\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::array::IntoIter::<T, N>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator over the elements in a partially-initialized buffer.\n\n If you have a fully-initialized array, then use [`IntoIterator`].\n But this is useful for returning partial results from unsafe code.\n\n # Safety\n\n - The `buffer[initialized]` elements must all be initialized.\n - The range must be canonical, with `initialized.start <= initialized.end`.\n - The range must be in-bounds for the buffer, with `initialized.end <= N`.\n   (Like how indexing `[0][100..100]` fails despite the range being empty.)\n\n It's sound to have more elements initialized than mentioned, though that\n will most likely result in them being leaked.\n\n # Examples\n\n ```\n #![feature(array_into_iter_constructors)]\n #![feature(maybe_uninit_uninit_array_transpose)]\n use std::array::IntoIter;\n use std::mem::MaybeUninit;\n\n # // Hi!  Thanks for reading the code. This is restricted to `Copy` because\n # // otherwise it could leak. A fully-general version this would need a drop\n # // guard to handle panics from the iterator, but this works for an example.\n fn next_chunk<T: Copy, const N: usize>(\n     it: &mut impl Iterator<Item = T>,\n ) -> Result<[T; N], IntoIter<T, N>> {\n     let mut buffer = [const { MaybeUninit::uninit() }; N];\n     let mut i = 0;\n     while i < N {\n         match it.next() {\n             Some(x) => {\n                 buffer[i].write(x);\n                 i += 1;\n             }\n             None => {\n                 // SAFETY: We've initialized the first `i` items\n                 unsafe {\n                     return Err(IntoIter::new_unchecked(buffer, 0..i));\n                 }\n             }\n         }\n     }\n\n     // SAFETY: We've initialized all N items\n     unsafe { Ok(buffer.transpose().assume_init()) }\n }\n\n let r: [_; 4] = next_chunk(&mut (10..16)).unwrap();\n assert_eq!(r, [10, 11, 12, 13]);\n let r: IntoIter<_, 40> = next_chunk(&mut (10..16)).unwrap_err();\n assert_eq!(r.collect::<Vec<_>>(), vec![10, 11, 12, 13, 14, 15]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "collections::vec_deque::VecDeque": [
+      "Ref"
+    ],
+    "collections::vec_deque::into_iter::IntoIter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "core::mem::MaybeUninit": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::Range": [
+      "Plain"
+    ],
+    "core::array::IntoIter": [
+      "Plain"
+    ]
+  },
+  "path": 1358,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/vec_deque/into_iter.rs:132:5: 175:6",
+  "src": "fn next_chunk<const N: usize>(\n        &mut self,\n    ) -> Result<[Self::Item; N], array::IntoIter<Self::Item, N>> {\n        let mut raw_arr = [const { MaybeUninit::uninit() }; N];\n        let raw_arr_ptr = raw_arr.as_mut_ptr().cast();\n        let (head, tail) = self.inner.as_slices();\n\n        if head.len() >= N {\n            // SAFETY: By manually adjusting the head and length of the deque, we effectively\n            // make it forget the first `N` elements, so taking ownership of them is safe.\n            unsafe { ptr::copy_nonoverlapping(head.as_ptr(), raw_arr_ptr, N) };\n            self.inner.head = self.inner.to_physical_idx(N);\n            self.inner.len -= N;\n            // SAFETY: We initialized the entire array with items from `head`\n            return Ok(unsafe { raw_arr.transpose().assume_init() });\n        }\n\n        // SAFETY: Same argument as above.\n        unsafe { ptr::copy_nonoverlapping(head.as_ptr(), raw_arr_ptr, head.len()) };\n        let remaining = N - head.len();\n\n        if tail.len() >= remaining {\n            // SAFETY: Same argument as above.\n            unsafe {\n                ptr::copy_nonoverlapping(tail.as_ptr(), raw_arr_ptr.add(head.len()), remaining)\n            };\n            self.inner.head = self.inner.to_physical_idx(N);\n            self.inner.len -= N;\n            // SAFETY: We initialized the entire array with items from `head` and `tail`\n            Ok(unsafe { raw_arr.transpose().assume_init() })\n        } else {\n            // SAFETY: Same argument as above.\n            unsafe {\n                ptr::copy_nonoverlapping(tail.as_ptr(), raw_arr_ptr.add(head.len()), tail.len())\n            };\n            let init = head.len() + tail.len();\n            // We completely drained all the deques elements.\n            self.inner.head = 0;\n            self.inner.len = 0;\n            // SAFETY: We copied all elements from both slices to the beginning of the array, so\n            // the given range is initialized.\n            Err(unsafe { array::IntoIter::new_unchecked(raw_arr, 0..init) })\n        }\n    }",
+  "mir": "fn <collections::vec_deque::into_iter::IntoIter<T, A> as core::iter::Iterator>::next_chunk(_1: &mut collections::vec_deque::into_iter::IntoIter<T, A>) -> core::result::Result<[T; N], core::array::IntoIter<T, N>> {\n    let mut _0: core::result::Result<[T; N], core::array::IntoIter<T, N>>;\n    let mut _2: [core::mem::MaybeUninit<T>; N];\n    let  _3: *mut T;\n    let mut _4: *mut core::mem::MaybeUninit<T>;\n    let mut _5: &mut [core::mem::MaybeUninit<T>];\n    let mut _6: &mut [core::mem::MaybeUninit<T>; N];\n    let  _7: &[T];\n    let  _8: &[T];\n    let mut _9: (&[T], &[T]);\n    let mut _10: &collections::vec_deque::VecDeque<T, A>;\n    let mut _11: bool;\n    let mut _12: usize;\n    let  _13: ();\n    let mut _14: *const T;\n    let mut _15: usize;\n    let mut _16: &collections::vec_deque::VecDeque<T, A>;\n    let mut _17: (usize, bool);\n    let mut _18: [T; N];\n    let mut _19: core::mem::MaybeUninit<[T; N]>;\n    let mut _20: [core::mem::MaybeUninit<T>; N];\n    let  _21: ();\n    let mut _22: *const T;\n    let mut _23: usize;\n    let  _24: usize;\n    let mut _25: usize;\n    let mut _26: (usize, bool);\n    let mut _27: bool;\n    let mut _28: usize;\n    let  _29: ();\n    let mut _30: *const T;\n    let mut _31: *mut T;\n    let mut _32: usize;\n    let mut _33: usize;\n    let mut _34: &collections::vec_deque::VecDeque<T, A>;\n    let mut _35: (usize, bool);\n    let mut _36: [T; N];\n    let mut _37: core::mem::MaybeUninit<[T; N]>;\n    let mut _38: [core::mem::MaybeUninit<T>; N];\n    let  _39: ();\n    let mut _40: *const T;\n    let mut _41: *mut T;\n    let mut _42: usize;\n    let mut _43: usize;\n    let  _44: usize;\n    let mut _45: usize;\n    let mut _46: usize;\n    let mut _47: (usize, bool);\n    let mut _48: core::array::IntoIter<T, N>;\n    let mut _49: [core::mem::MaybeUninit<T>; N];\n    let mut _50: core::ops::Range<usize>;\n    debug self => _1;\n    debug raw_arr => _2;\n    debug raw_arr_ptr => _3;\n    debug head => _7;\n    debug tail => _8;\n    debug remaining => _24;\n    debug init => _44;\n    bb0: {\n        StorageLive(_2);\n        _2 = [<collections::vec_deque::into_iter::IntoIter<T, A> as core::iter::Iterator>::next_chunk::<N>::{constant#1}; N];\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut _2;\n        _5 = move _6 as &mut [core::mem::MaybeUninit<T>];\n        StorageDead(_6);\n        _4 = core::slice::<impl [core::mem::MaybeUninit<T>]>::as_mut_ptr(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = core::ptr::mut_ptr::<impl *mut core::mem::MaybeUninit<T>>::cast::<T>(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &((*_1).0: collections::vec_deque::VecDeque<T, A>);\n        _9 = collections::vec_deque::VecDeque::<T, A>::as_slices(move _10) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        _7 = (_9.0: &[T]);\n        _8 = (_9.1: &[T]);\n        StorageDead(_9);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = PtrMetadata(_7);\n        _11 = Ge(move _12, N);\n        switchInt(move _11) -> [0: bb11, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_12);\n        StorageLive(_14);\n        _14 = core::slice::<impl [T]>::as_ptr(_7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _13 = core::ptr::copy_nonoverlapping::<T>(move _14, _3, N) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &((*_1).0: collections::vec_deque::VecDeque<T, A>);\n        _15 = collections::vec_deque::VecDeque::<T, A>::to_physical_idx(move _16, N) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_16);\n        (((*_1).0: collections::vec_deque::VecDeque<T, A>).0: usize) = move _15;\n        StorageDead(_15);\n        _17 = CheckedSub((((*_1).0: collections::vec_deque::VecDeque<T, A>).1: usize), N);\n        assert(!move (_17.1: bool), \"attempt to compute `{} - {}`, which would overflow\", (((*_1).0: collections::vec_deque::VecDeque<T, A>).1: usize), N) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        (((*_1).0: collections::vec_deque::VecDeque<T, A>).1: usize) = move (_17.0: usize);\n        StorageLive(_18);\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = move _2;\n        _19 = <[core::mem::MaybeUninit<T>; N]>::transpose(move _20) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_20);\n        _18 = core::mem::MaybeUninit::<[T; N]>::assume_init(move _19) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_19);\n        _0 = core::result::Result::Ok(move _18);\n        StorageDead(_18);\n        StorageDead(_11);\n        StorageDead(_2);\n        goto -> bb30;\n    }\n    bb11: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageLive(_22);\n        _22 = core::slice::<impl [T]>::as_ptr(_7) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageLive(_23);\n        _23 = PtrMetadata(_7);\n        _21 = core::ptr::copy_nonoverlapping::<T>(move _22, _3, move _23) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_23);\n        StorageDead(_22);\n        StorageLive(_25);\n        _25 = PtrMetadata(_7);\n        _26 = CheckedSub(N, _25);\n        assert(!move (_26.1: bool), \"attempt to compute `{} - {}`, which would overflow\", N, move _25) -> [success: bb14, unwind unreachable];\n    }\n    bb14: {\n        _24 = move (_26.0: usize);\n        StorageDead(_25);\n        StorageLive(_27);\n        StorageLive(_28);\n        _28 = PtrMetadata(_8);\n        _27 = Ge(move _28, _24);\n        switchInt(move _27) -> [0: bb23, otherwise: bb15];\n    }\n    bb15: {\n        StorageDead(_28);\n        StorageLive(_30);\n        _30 = core::slice::<impl [T]>::as_ptr(_8) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageLive(_31);\n        StorageLive(_32);\n        _32 = PtrMetadata(_7);\n        _31 = core::ptr::mut_ptr::<impl *mut T>::add(_3, move _32) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_32);\n        _29 = core::ptr::copy_nonoverlapping::<T>(move _30, move _31, _24) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_31);\n        StorageDead(_30);\n        StorageLive(_33);\n        StorageLive(_34);\n        _34 = &((*_1).0: collections::vec_deque::VecDeque<T, A>);\n        _33 = collections::vec_deque::VecDeque::<T, A>::to_physical_idx(move _34, N) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_34);\n        (((*_1).0: collections::vec_deque::VecDeque<T, A>).0: usize) = move _33;\n        StorageDead(_33);\n        _35 = CheckedSub((((*_1).0: collections::vec_deque::VecDeque<T, A>).1: usize), N);\n        assert(!move (_35.1: bool), \"attempt to compute `{} - {}`, which would overflow\", (((*_1).0: collections::vec_deque::VecDeque<T, A>).1: usize), N) -> [success: bb20, unwind unreachable];\n    }\n    bb20: {\n        (((*_1).0: collections::vec_deque::VecDeque<T, A>).1: usize) = move (_35.0: usize);\n        StorageLive(_36);\n        StorageLive(_37);\n        StorageLive(_38);\n        _38 = move _2;\n        _37 = <[core::mem::MaybeUninit<T>; N]>::transpose(move _38) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_38);\n        _36 = core::mem::MaybeUninit::<[T; N]>::assume_init(move _37) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_37);\n        _0 = core::result::Result::Ok(move _36);\n        StorageDead(_36);\n        goto -> bb29;\n    }\n    bb23: {\n        StorageDead(_28);\n        StorageLive(_40);\n        _40 = core::slice::<impl [T]>::as_ptr(_8) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        StorageLive(_41);\n        StorageLive(_42);\n        _42 = PtrMetadata(_7);\n        _41 = core::ptr::mut_ptr::<impl *mut T>::add(_3, move _42) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_42);\n        StorageLive(_43);\n        _43 = PtrMetadata(_8);\n        _39 = core::ptr::copy_nonoverlapping::<T>(move _40, move _41, move _43) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_43);\n        StorageDead(_41);\n        StorageDead(_40);\n        StorageLive(_45);\n        _45 = PtrMetadata(_7);\n        StorageLive(_46);\n        _46 = PtrMetadata(_8);\n        _47 = CheckedAdd(_45, _46);\n        assert(!move (_47.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _45, move _46) -> [success: bb27, unwind unreachable];\n    }\n    bb27: {\n        _44 = move (_47.0: usize);\n        StorageDead(_46);\n        StorageDead(_45);\n        (((*_1).0: collections::vec_deque::VecDeque<T, A>).0: usize) = 0_usize;\n        (((*_1).0: collections::vec_deque::VecDeque<T, A>).1: usize) = 0_usize;\n        StorageLive(_48);\n        StorageLive(_49);\n        _49 = move _2;\n        StorageLive(_50);\n        _50 = Range(0_usize, _44);\n        _48 = core::array::IntoIter::<T, N>::new_unchecked(move _49, move _50) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        StorageDead(_50);\n        StorageDead(_49);\n        _0 = core::result::Result::Err(move _48);\n        StorageDead(_48);\n        goto -> bb29;\n    }\n    bb29: {\n        StorageDead(_27);\n        StorageDead(_2);\n        goto -> bb30;\n    }\n    bb30: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

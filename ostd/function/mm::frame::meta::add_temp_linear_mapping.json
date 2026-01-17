@@ -1,0 +1,63 @@
+{
+  "name": "mm::frame::meta::add_temp_linear_mapping",
+  "safe": true,
+  "callees": {
+    "align_ext::AlignExt::align_up": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns to the smallest number that is greater than or equal to\n `self` and is a multiple of the given power of two.\n\n The method panics if `power_of_two` is not a\n power of two or is smaller than 2 or the calculation overflows\n because `self` is too large.\n\n # Examples\n\n ```\n use crate::align_ext::AlignExt;\n assert_eq!(12usize.align_up(2), 12);\n assert_eq!(12usize.align_up(4), 12);\n assert_eq!(12usize.align_up(8), 16);\n assert_eq!(12usize.align_up(16), 16);\n ```\n",
+      "adt": {}
+    },
+    "mm::page_table::boot_pt::with_borrow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The accessor to the boot page table singleton [`BootPageTable`].\n\n The user should provide a closure to access the boot page table. The\n function will acquire the lock and call the closure with a mutable\n reference to the boot page table as the argument.\n\n The boot page table will be dropped when all CPUs have dismissed it.\n This function will return an [`Err`] if the boot page table is dropped.\n",
+      "adt": {
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ops::Range": [
+      "Plain"
+    ],
+    "mm::page_prop::CachePolicy": [
+      "Plain"
+    ],
+    "mm::page_prop::PageProperty": [
+      "Plain",
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1966,
+  "span": "ostd/src/mm/frame/meta.rs:611:1: 643:2",
+  "src": "fn add_temp_linear_mapping(max_paddr: Paddr) {\n    use align_ext::AlignExt;\n\n    use crate::mm::kspace::LINEAR_MAPPING_BASE_VADDR;\n\n    const PADDR4G: Paddr = 0x1_0000_0000;\n\n    if max_paddr <= PADDR4G {\n        return;\n    }\n\n    // TODO: We don't know if the allocator would allocate from low to high or\n    // not. So we prepare all linear mappings in the boot page table. Hope it\n    // won't drag the boot performance much.\n    let end_paddr = max_paddr.align_up(PAGE_SIZE);\n    let prange = PADDR4G..end_paddr;\n    let prop = PageProperty {\n        flags: PageFlags::RW,\n        cache: CachePolicy::Writeback,\n        priv_flags: PrivilegedPageFlags::GLOBAL,\n    };\n\n    // SAFETY: we are doing the linear mapping for the kernel.\n    unsafe {\n        boot_pt::with_borrow(|boot_pt| {\n            for paddr in prange.step_by(PAGE_SIZE) {\n                let vaddr = LINEAR_MAPPING_BASE_VADDR + paddr;\n                boot_pt.map_base_page(vaddr, paddr / PAGE_SIZE, prop);\n            }\n        })\n        .unwrap();\n    }\n}",
+  "mir": "fn mm::frame::meta::add_temp_linear_mapping(_1: usize) -> () {\n    let mut _0: ();\n    let mut _2: bool;\n    let  _3: usize;\n    let  _4: core::ops::Range<usize>;\n    let  _5: mm::page_prop::PageProperty;\n    let mut _6: mm::page_prop::CachePolicy;\n    let  _7: ();\n    let mut _8: core::result::Result<(), ()>;\n    let mut _9: {closure@ostd/src/mm/frame/meta.rs:635:30: 635:39};\n    let mut _10: &mm::page_prop::PageProperty;\n    debug max_paddr => _1;\n    debug end_paddr => _3;\n    debug prange => _4;\n    debug prop => _5;\n    bb0: {\n        StorageLive(_2);\n        _2 = Le(_1, mm::frame::meta::add_temp_linear_mapping::PADDR4G);\n        switchInt(move _2) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_2);\n        goto -> bb6;\n    }\n    bb2: {\n        StorageDead(_2);\n        _3 = <usize as align_ext::AlignExt>::align_up(_1, mm::PAGE_SIZE) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_4);\n        _4 = Range(mm::frame::meta::add_temp_linear_mapping::PADDR4G, _3);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = mm::page_prop::CachePolicy::Writeback;\n        _5 = PageProperty(mm::page_prop::PageFlags::RW, move _6, mm::page_prop::PrivilegedPageFlags::GLOBAL);\n        StorageDead(_6);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_5;\n        _9 = {closure@ostd/src/mm/frame/meta.rs:635:30: 635:39}(move _4, move _10);\n        StorageDead(_10);\n        _8 = mm::page_table::boot_pt::with_borrow::<{closure@ostd/src/mm/frame/meta.rs:635:30: 635:39}, ()>(move _9) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_9);\n        _7 = core::result::Result::<(), ()>::unwrap(move _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_8);\n        StorageDead(_5);\n        StorageDead(_4);\n        goto -> bb6;\n    }\n    bb6: {\n        return;\n    }\n}\n",
+  "doc": " Adds a temporary linear mapping for the metadata frames.\n\n We only assume boot page table to contain 4G linear mapping. Thus if the\n physical memory is huge we end up depleted of linear virtual memory for\n initializing metadata.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

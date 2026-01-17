@@ -1,0 +1,36 @@
+{
+  "name": "spin::mutex::Mutex",
+  "constructors": [],
+  "access_self_as_arg": {
+    "read": [],
+    "write": [],
+    "other": []
+  },
+  "access_self_as_locals": {
+    "read": [
+      "mm::frame::allocator::init",
+      "mm::frame::allocator::early_alloc",
+      "mm::frame::allocator::init_early_allocator",
+      "mm::frame::meta::init"
+    ],
+    "write": [],
+    "other": []
+  },
+  "access_field": [
+    {
+      "read": [],
+      "write": [],
+      "other": []
+    }
+  ],
+  "span": "/home/gh-zjp-CN/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spin-0.9.8/src/mutex.rs:113:1: 113:38",
+  "src": "pub struct Mutex<T: ?Sized, R = Spin>",
+  "kind": "Struct",
+  "doc_adt": " A spin-based lock providing mutually exclusive access to data.\n\n The implementation uses either a ticket mutex or a regular spin mutex depending on whether the `spin_mutex` or\n `ticket_mutex` feature flag is enabled.\n\n # Example\n\n ```\n use spin;\n\n let lock = spin::Mutex::new(0);\n\n // Modify the data\n *lock.lock() = 2;\n\n // Read the data\n let answer = *lock.lock();\n assert_eq!(answer, 2);\n ```\n\n # Thread safety example\n\n ```\n use spin;\n use std::sync::{Arc, Barrier};\n\n let thread_count = 1000;\n let spin_mutex = Arc::new(spin::Mutex::new(0));\n\n // We use a barrier to ensure the readout happens after all writing\n let barrier = Arc::new(Barrier::new(thread_count + 1));\n\n # let mut ts = Vec::new();\n for _ in (0..thread_count) {\n     let my_barrier = barrier.clone();\n     let my_lock = spin_mutex.clone();\n # let t =\n     std::thread::spawn(move || {\n         let mut guard = my_lock.lock();\n         *guard += 1;\n\n         // Release the lock to prevent a deadlock\n         drop(guard);\n         my_barrier.wait();\n     });\n # ts.push(t);\n }\n\n barrier.wait();\n\n let answer = { *spin_mutex.lock() };\n assert_eq!(answer, thread_count);\n\n # for t in ts {\n #     t.join().unwrap();\n # }\n ```\n",
+  "variant_fields": {
+    "VariantIdx(None)-FieldIdx(Some(0))": {
+      "name": "inner",
+      "doc": ""
+    }
+  }
+}

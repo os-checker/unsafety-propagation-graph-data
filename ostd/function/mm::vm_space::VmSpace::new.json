@@ -1,0 +1,121 @@
+{
+  "name": "mm::vm_space::VmSpace::new",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the inner value if the [`Once`] has been initialized.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "mm::page_table::PageTable::<mm::kspace::KernelPtConfig>::create_user_page_table": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a new user page table.\n\n This should be the only way to create the user page table, that is to\n duplicate the kernel page table with all the kernel mappings shared.\n",
+      "adt": {
+        "mm::page_table::PageTable": "Constructor"
+      }
+    },
+    "util::id_set::IdSet::<I>::new_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `IdSet` with no IDs in the system.\n",
+      "adt": {
+        "util::id_set::IdSet": "Constructor"
+      }
+    },
+    "util::id_set::AtomicIdSet::<I>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `AtomicIdSet` from an `IdSet`.\n",
+      "adt": {
+        "util::id_set::AtomicIdSet": "Constructor"
+      }
+    },
+    "alloc::vec::Vec::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new, empty `Vec<T>`.\n\n The vector will not allocate until elements are pushed onto it.\n\n # Examples\n\n ```\n # #![allow(unused_mut)]\n let mut vec: Vec<i32> = Vec::new();\n ```\n",
+      "adt": {}
+    },
+    "sync::spin::SpinLock::<T, G>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new spin lock.\n",
+      "adt": {
+        "sync::spin::SpinLock": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "mm::page_table::PageTable": [
+      "Ref",
+      "Plain"
+    ],
+    "util::id_set::IdSet": [
+      "Plain"
+    ],
+    "util::id_set::AtomicIdSet": [
+      "Plain"
+    ],
+    "alloc::vec::Vec": [
+      "Plain"
+    ],
+    "sync::spin::SpinLock": [
+      "Plain"
+    ],
+    "mm::vm_space::VmSpace": [
+      "Plain"
+    ]
+  },
+  "path": 2500,
+  "span": "ostd/src/mm/vm_space.rs:78:5: 84:6",
+  "src": "pub fn new() -> Self {\n        Self {\n            pt: KERNEL_PAGE_TABLE.get().unwrap().create_user_page_table(),\n            cpus: AtomicCpuSet::new(CpuSet::new_empty()),\n            iomems: SpinLock::new(Vec::new()),\n        }\n    }",
+  "mir": "fn mm::vm_space::VmSpace::new() -> mm::vm_space::VmSpace {\n    let mut _0: mm::vm_space::VmSpace;\n    let mut _1: mm::page_table::PageTable<mm::vm_space::UserPtConfig>;\n    let  _2: &mm::page_table::PageTable<mm::kspace::KernelPtConfig>;\n    let mut _3: core::option::Option<&mm::page_table::PageTable<mm::kspace::KernelPtConfig>>;\n    let mut _4: &spin::once::Once<mm::page_table::PageTable<mm::kspace::KernelPtConfig>>;\n    let mut _5: util::id_set::AtomicIdSet<cpu::id::CpuId>;\n    let mut _6: util::id_set::IdSet<cpu::id::CpuId>;\n    let mut _7: sync::spin::SpinLock<alloc::vec::Vec<io::io_mem::IoMem>>;\n    let mut _8: alloc::vec::Vec<io::io_mem::IoMem>;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = {alloc1275: &spin::once::Once<mm::page_table::PageTable<mm::kspace::KernelPtConfig>>};\n        _3 = spin::once::Once::<mm::page_table::PageTable<mm::kspace::KernelPtConfig>>::get(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = core::option::Option::<&mm::page_table::PageTable<mm::kspace::KernelPtConfig>>::unwrap(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _1 = mm::page_table::PageTable::<mm::kspace::KernelPtConfig>::create_user_page_table(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = util::id_set::IdSet::<cpu::id::CpuId>::new_empty() -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _5 = util::id_set::AtomicIdSet::<cpu::id::CpuId>::new(move _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = alloc::vec::Vec::<io::io_mem::IoMem>::new() -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _7 = sync::spin::SpinLock::<alloc::vec::Vec<io::io_mem::IoMem>>::new(move _8) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_8);\n        _0 = VmSpace(move _1, move _5, move _7);\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": " Creates a new VM address space.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

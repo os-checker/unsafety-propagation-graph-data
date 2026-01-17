@@ -1,0 +1,16 @@
+{
+  "name": "cell::UnsafeCell::<T>::raw_get",
+  "safe": true,
+  "callees": {},
+  "adts": {},
+  "path": 4832,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cell.rs:2481:5: 2486:6",
+  "src": "pub const fn raw_get(this: *const Self) -> *mut T {\n        // We can just cast the pointer from `UnsafeCell<T>` to `T` because of\n        // #[repr(transparent)]. This exploits std's special status, there is\n        // no guarantee for user code that this will work in future versions of the compiler!\n        this as *const T as *mut T\n    }",
+  "mir": "fn cell::UnsafeCell::<T>::raw_get(_1: *const cell::UnsafeCell<T>) -> *mut T {\n    let mut _0: *mut T;\n    let mut _2: *const T;\n    debug this => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = _1 as *const T;\n        _0 = move _2 as *mut T;\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Gets a mutable pointer to the wrapped value.\n The difference from [`get`] is that this function accepts a raw pointer,\n which is useful to avoid the creation of temporary references.\n\n This can be cast to a pointer of any kind. When creating references, you must uphold the\n aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and\n caveats.\n\n [`get`]: UnsafeCell::get()\n\n # Examples\n\n Gradual initialization of an `UnsafeCell` requires `raw_get`, as\n calling `get` would require creating a reference to uninitialized data:\n\n ```\n use std::cell::UnsafeCell;\n use std::mem::MaybeUninit;\n\n let m = MaybeUninit::<UnsafeCell<i32>>::uninit();\n unsafe { UnsafeCell::raw_get(m.as_ptr()).write(5); }\n // avoid below which references to uninitialized data\n // unsafe { UnsafeCell::get(&*m.as_ptr()).write(5); }\n let uc = unsafe { m.assume_init() };\n\n assert_eq!(uc.into_inner(), 5);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

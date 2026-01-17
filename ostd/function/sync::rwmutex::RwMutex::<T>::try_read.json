@@ -1,0 +1,54 @@
+{
+  "name": "sync::rwmutex::RwMutex::<T>::try_read",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicUsize::fetch_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Adds to the current value, returning the previous value.\n\n This operation wraps around on overflow.\n\n `fetch_add` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n assert_eq!(foo.fetch_add(10, Ordering::SeqCst), 0);\n assert_eq!(foo.load(Ordering::SeqCst), 10);\n ```\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicUsize::fetch_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts from the current value, returning the previous value.\n\n This operation wraps around on overflow.\n\n `fetch_sub` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n assert_eq!(foo.fetch_sub(10, Ordering::SeqCst), 20);\n assert_eq!(foo.load(Ordering::SeqCst), 10);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "sync::rwmutex::RwMutex": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "sync::rwmutex::RwMutexReadGuard": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 2696,
+  "span": "ostd/src/sync/rwmutex.rs:157:5: 165:6",
+  "src": "pub fn try_read(&self) -> Option<RwMutexReadGuard<'_, T>> {\n        let lock = self.lock.fetch_add(READER, Acquire);\n        if lock & (WRITER | BEING_UPGRADED | MAX_READER) == 0 {\n            Some(RwMutexReadGuard { inner: self })\n        } else {\n            self.lock.fetch_sub(READER, Release);\n            None\n        }\n    }",
+  "mir": "fn sync::rwmutex::RwMutex::<T>::try_read(_1: &sync::rwmutex::RwMutex<T>) -> core::option::Option<sync::rwmutex::RwMutexReadGuard<'_, T>> {\n    let mut _0: core::option::Option<sync::rwmutex::RwMutexReadGuard<'_, T>>;\n    let  _2: usize;\n    let mut _3: &core::sync::atomic::AtomicUsize;\n    let mut _4: core::sync::atomic::Ordering;\n    let mut _5: usize;\n    let mut _6: usize;\n    let mut _7: usize;\n    let mut _8: sync::rwmutex::RwMutexReadGuard<'_, T>;\n    let  _9: usize;\n    let mut _10: &core::sync::atomic::AtomicUsize;\n    let mut _11: core::sync::atomic::Ordering;\n    debug self => _1;\n    debug lock => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = &((*_1).0: core::sync::atomic::AtomicUsize);\n        StorageLive(_4);\n        _4 = core::sync::atomic::Ordering::Acquire;\n        _2 = core::sync::atomic::AtomicUsize::fetch_add(move _3, sync::rwmutex::READER, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = BitOr(sync::rwmutex::WRITER, sync::rwmutex::BEING_UPGRADED);\n        _6 = BitOr(move _7, sync::rwmutex::MAX_READER);\n        StorageDead(_7);\n        _5 = BitAnd(_2, move _6);\n        StorageDead(_6);\n        switchInt(move _5) -> [0: bb2, otherwise: bb3];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageLive(_8);\n        _8 = RwMutexReadGuard(_1);\n        _0 = core::option::Option::Some(move _8);\n        StorageDead(_8);\n        goto -> bb5;\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &((*_1).0: core::sync::atomic::AtomicUsize);\n        StorageLive(_11);\n        _11 = core::sync::atomic::Ordering::Release;\n        _9 = core::sync::atomic::AtomicUsize::fetch_sub(move _10, sync::rwmutex::READER, move _11) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_9);\n        _0 = core::option::Option::None;\n        goto -> bb5;\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": " Attempts to acquire a read mutex.\n\n This function will never sleep and will return immediately.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

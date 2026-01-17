@@ -1,0 +1,58 @@
+{
+  "name": "path::iter_after",
+  "safe": true,
+  "callees": {
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::cmp::PartialEq::eq": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests for `self` and `other` values to be equal, and is used by `==`.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 9331, kind: RigidTy(Adt(AdtDef(DefId { id: 4387, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 9333, kind: RigidTy(Adt(AdtDef(DefId { id: 8722, name: \"path::Component\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })]))) })])",
+      "Unknown([Field(1, Ty { id: 9331, kind: RigidTy(Adt(AdtDef(DefId { id: 4387, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 9333, kind: RigidTy(Adt(AdtDef(DefId { id: 8722, name: \"path::Component\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })]))) })])",
+      "Unknown([Field(0, Ty { id: 9331, kind: RigidTy(Adt(AdtDef(DefId { id: 4387, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 9333, kind: RigidTy(Adt(AdtDef(DefId { id: 8722, name: \"path::Component\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })]))) }), Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 9333, kind: RigidTy(Adt(AdtDef(DefId { id: 8722, name: \"path::Component\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])",
+      "Unknown([Field(1, Ty { id: 9331, kind: RigidTy(Adt(AdtDef(DefId { id: 4387, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 9333, kind: RigidTy(Adt(AdtDef(DefId { id: 8722, name: \"path::Component\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })]))) }), Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 9333, kind: RigidTy(Adt(AdtDef(DefId { id: 8722, name: \"path::Component\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])"
+    ],
+    "path::Component": [
+      "Ref"
+    ]
+  },
+  "path": 2353,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:279:1: 295:2",
+  "src": "fn iter_after<'a, 'b, I, J>(mut iter: I, mut prefix: J) -> Option<I>\nwhere\n    I: Iterator<Item = Component<'a>> + Clone,\n    J: Iterator<Item = Component<'b>>,\n{\n    loop {\n        let mut iter_next = iter.clone();\n        match (iter_next.next(), prefix.next()) {\n            (Some(ref x), Some(ref y)) if x == y => (),\n            (Some(_), Some(_)) => return None,\n            (Some(_), None) => return Some(iter),\n            (None, None) => return Some(iter),\n            (None, Some(_)) => return None,\n        }\n        iter = iter_next;\n    }\n}",
+  "mir": "fn path::iter_after(_1: I, _2: J) -> core::option::Option<I> {\n    let mut _0: core::option::Option<I>;\n    let mut _3: I;\n    let mut _4: &I;\n    let mut _5: (core::option::Option<path::Component<'_>>, core::option::Option<path::Component<'_>>);\n    let mut _6: core::option::Option<path::Component<'_>>;\n    let mut _7: &mut I;\n    let mut _8: core::option::Option<path::Component<'_>>;\n    let mut _9: &mut J;\n    let mut _10: isize;\n    let mut _11: isize;\n    let mut _12: isize;\n    let  _13: &path::Component<'_>;\n    let  _14: &&path::Component<'_>;\n    let  _15: &path::Component<'_>;\n    let  _16: &&path::Component<'_>;\n    let mut _17: bool;\n    let mut _18: I;\n    let mut _19: I;\n    let mut _20: I;\n    let mut _21: bool;\n    debug iter => _1;\n    debug prefix => _2;\n    debug iter_next => _3;\n    debug x => _13;\n    debug x => _14;\n    debug y => _15;\n    debug y => _16;\n    bb0: {\n        _21 = false;\n        _21 = true;\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &_1;\n        _3 = <I as core::clone::Clone>::clone(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &mut _3;\n        _6 = <I as core::iter::Iterator>::next(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &mut _2;\n        _8 = <J as core::iter::Iterator>::next(move _9) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_9);\n        _5 = (move _6, move _8);\n        StorageDead(_8);\n        StorageDead(_6);\n        _12 = discriminant((_5.0: core::option::Option<path::Component<'_>>));\n        switchInt(move _12) -> [0: bb7, 1: bb6, otherwise: bb5];\n    }\n    bb5: {\n        unreachable;\n    }\n    bb6: {\n        _10 = discriminant((_5.1: core::option::Option<path::Component<'_>>));\n        switchInt(move _10) -> [0: bb10, 1: bb11, otherwise: bb5];\n    }\n    bb7: {\n        _11 = discriminant((_5.1: core::option::Option<path::Component<'_>>));\n        switchInt(move _11) -> [0: bb9, 1: bb8, otherwise: bb5];\n    }\n    bb8: {\n        _0 = core::option::Option::None;\n        goto -> bb16;\n    }\n    bb9: {\n        StorageLive(_19);\n        _21 = false;\n        _19 = move _1;\n        _0 = core::option::Option::Some(move _19);\n        StorageDead(_19);\n        goto -> bb16;\n    }\n    bb10: {\n        StorageLive(_18);\n        _21 = false;\n        _18 = move _1;\n        _0 = core::option::Option::Some(move _18);\n        StorageDead(_18);\n        goto -> bb16;\n    }\n    bb11: {\n        StorageLive(_13);\n        _13 = &(((_5.0: core::option::Option<path::Component<'_>>) as variant#1).0: path::Component<'_>);\n        _14 = &_13;\n        StorageLive(_15);\n        _15 = &(((_5.1: core::option::Option<path::Component<'_>>) as variant#1).0: path::Component<'_>);\n        _16 = &_15;\n        StorageLive(_17);\n        _17 = <&path::Component<'_> as core::cmp::PartialEq>::eq(_14, _16) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        switchInt(move _17) -> [0: bb14, otherwise: bb13];\n    }\n    bb13: {\n        StorageDead(_17);\n        StorageDead(_15);\n        StorageDead(_13);\n        StorageDead(_5);\n        StorageLive(_20);\n        _20 = move _3;\n        drop(_1) -> [return: bb15, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_17);\n        StorageDead(_15);\n        StorageDead(_13);\n        _0 = core::option::Option::None;\n        goto -> bb16;\n    }\n    bb15: {\n        _21 = true;\n        _1 = move _20;\n        StorageDead(_20);\n        StorageDead(_3);\n        goto -> bb1;\n    }\n    bb16: {\n        StorageDead(_5);\n        drop(_3) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_3);\n        drop(_2) -> [return: bb20, unwind unreachable];\n    }\n    bb18: {\n        return;\n    }\n    bb19: {\n        drop(_1) -> [return: bb18, unwind unreachable];\n    }\n    bb20: {\n        switchInt(_21) -> [0: bb18, otherwise: bb19];\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

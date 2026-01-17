@@ -1,0 +1,87 @@
+{
+  "name": "<sync::once_lock::OnceLock<T> as core::clone::Clone>::clone",
+  "safe": true,
+  "callees": {
+    "sync::once_lock::OnceLock::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new uninitialized cell.\n",
+      "adt": {
+        "sync::once_lock::OnceLock": "Constructor"
+      }
+    },
+    "sync::once_lock::OnceLock::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the reference to the underlying value.\n\n Returns `None` if the cell is uninitialized, or being initialized.\n This method never blocks.\n",
+      "adt": {
+        "sync::once_lock::OnceLock": "ImmutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "sync::once_lock::OnceLock::<T>::set": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Initializes the contents of the cell to `value`.\n\n May block if another thread is currently attempting to initialize the cell. The cell is\n guaranteed to contain a value when `set` returns, though not necessarily the one provided.\n\n Returns `Ok(())` if the cell was uninitialized and\n `Err(value)` if the cell was already initialized.\n\n # Examples\n\n ```\n use std::sync::OnceLock;\n\n static CELL: OnceLock<i32> = OnceLock::new();\n\n fn main() {\n     assert!(CELL.get().is_none());\n\n     std::thread::spawn(|| {\n         assert_eq!(CELL.set(92), Ok(()));\n     }).join().unwrap();\n\n     assert_eq!(CELL.set(62), Err(62));\n     assert_eq!(CELL.get(), Some(&92));\n }\n ```\n",
+      "adt": {
+        "sync::once_lock::OnceLock": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::once_lock::OnceLock": [
+      "Plain",
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 419, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 9, kind: Param(ParamTy { index: 0, name: \"T\" }) }, Not)) })])"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 3165,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/once_lock.rs:618:5: 627:6",
+  "src": "fn clone(&self) -> OnceLock<T> {\n        let cell = Self::new();\n        if let Some(value) = self.get() {\n            match cell.set(value.clone()) {\n                Ok(()) => (),\n                Err(_) => unreachable!(),\n            }\n        }\n        cell\n    }",
+  "mir": "fn <sync::once_lock::OnceLock<T> as core::clone::Clone>::clone(_1: &sync::once_lock::OnceLock<T>) -> sync::once_lock::OnceLock<T> {\n    let mut _0: sync::once_lock::OnceLock<T>;\n    let  _2: sync::once_lock::OnceLock<T>;\n    let mut _3: core::option::Option<&T>;\n    let mut _4: isize;\n    let  _5: &T;\n    let mut _6: core::result::Result<(), T>;\n    let mut _7: &sync::once_lock::OnceLock<T>;\n    let mut _8: T;\n    let mut _9: isize;\n    let mut _10: !;\n    debug self => _1;\n    debug cell => _2;\n    debug value => _5;\n    bb0: {\n        StorageLive(_2);\n        _2 = sync::once_lock::OnceLock::<T>::new() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        _3 = sync::once_lock::OnceLock::<T>::get(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = discriminant(_3);\n        switchInt(move _4) -> [1: bb3, 0: bb10, otherwise: bb6];\n    }\n    bb3: {\n        _5 = ((_3 as variant#1).0: &T);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &_2;\n        StorageLive(_8);\n        _8 = <T as core::clone::Clone>::clone(_5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _6 = sync::once_lock::OnceLock::<T>::set(move _7, move _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_8);\n        StorageDead(_7);\n        _9 = discriminant(_6);\n        switchInt(move _9) -> [0: bb8, 1: bb7, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        _10 = core::panicking::panic(\"internal error: entered unreachable code\") -> unwind unreachable;\n    }\n    bb8: {\n        drop(_6) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_6);\n        StorageDead(_3);\n        goto -> bb11;\n    }\n    bb10: {\n        StorageDead(_3);\n        goto -> bb11;\n    }\n    bb11: {\n        _0 = move _2;\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

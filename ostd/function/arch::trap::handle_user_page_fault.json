@@ -1,0 +1,114 @@
+{
+  "name": "arch::trap::handle_user_page_fault",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the inner value if the [`Once`] has been initialized.\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::expect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n # Panics\n\n Panics if the value is a [`None`] with a custom panic message provided by\n `msg`.\n\n # Examples\n\n ```\n let x = Some(\"value\");\n assert_eq!(x.expect(\"fruits are healthy\"), \"value\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n x.expect(\"fruits are healthy\"); // panics with `fruits are healthy`\n ```\n\n # Recommended Message Style\n\n We recommend that `expect` messages are used to describe the reason you\n _expect_ the `Option` should be `Some`.\n\n ```should_panic\n # let slice: &[u8] = &[];\n let item = slice.get(0)\n     .expect(\"slice should not be empty\");\n ```\n\n **Hint**: If you're having trouble remembering how to phrase expect\n error messages remember to focus on the word \"should\" as in \"env\n variable should be set by blah\" or \"the given binary should be available\n and executable by the current user\".\n\n For more detail on expect message styles and the reasoning behind our\n recommendation please refer to the section on [\"Common Message\n Styles\"](../../std/error/index.html#common-message-styles) in the [`std::error`](../../std/error/index.html) module docs.\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::is_ok": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the result is [`Ok`].\n\n # Examples\n\n ```\n let x: Result<i32, &str> = Ok(-3);\n assert_eq!(x.is_ok(), true);\n\n let x: Result<i32, &str> = Err(\"Some error message\");\n assert_eq!(x.is_ok(), false);\n ```\n",
+      "adt": {}
+    },
+    "ex_table::ExTable::find_recovery_inst_addr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Finds the recovery instruction address for a given instruction address.\n\n This function is generally used when an exception (such as a page fault) occurs.\n if the exception handling fails and there is a predefined recovery action,\n then the found recovery action will be taken.\n",
+      "adt": {
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::fmt::rt::Argument::<'_>::new_debug": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "arch::cpu::context::CpuException": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Ref"
+    ],
+    "arch::trap::TrapFrame": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(19)))",
+      "MutRef"
+    ],
+    "core::fmt::rt::Argument": [
+      "Plain"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 1540,
+  "span": "ostd/src/arch/x86/trap/mod.rs:211:1: 229:2",
+  "src": "fn handle_user_page_fault(f: &mut TrapFrame, exception: &CpuException) {\n    let handler = USER_PAGE_FAULT_HANDLER\n        .get()\n        .expect(\"a page fault handler is missing\");\n\n    let res = handler(exception);\n    // Copying bytes by bytes can recover directly\n    // if handling the page fault successfully.\n    if res.is_ok() {\n        return;\n    }\n\n    // Use the exception table to recover to normal execution.\n    if let Some(addr) = ExTable::find_recovery_inst_addr(f.rip) {\n        f.rip = addr;\n    } else {\n        panic!(\"Cannot handle user page fault; trapframe: {:#x?}\", f);\n    }\n}",
+  "mir": "fn arch::trap::handle_user_page_fault(_1: &mut arch::trap::TrapFrame, _2: &arch::cpu::context::CpuException) -> () {\n    let mut _0: ();\n    let  _3: &for<'a> fn(&'a arch::cpu::context::CpuException) -> core::result::Result<(), ()>;\n    let mut _4: core::option::Option<&for<'a> fn(&'a arch::cpu::context::CpuException) -> core::result::Result<(), ()>>;\n    let mut _5: &spin::once::Once<for<'a> fn(&'a arch::cpu::context::CpuException) -> core::result::Result<(), ()>>;\n    let mut _6: &str;\n    let  _7: core::result::Result<(), ()>;\n    let mut _8: for<'a> fn(&'a arch::cpu::context::CpuException) -> core::result::Result<(), ()>;\n    let mut _9: bool;\n    let mut _10: &core::result::Result<(), ()>;\n    let mut _11: core::option::Option<usize>;\n    let mut _12: usize;\n    let mut _13: isize;\n    let  _14: usize;\n    let  _15: !;\n    let mut _16: core::fmt::Arguments<'_>;\n    let  _17: (&&mut arch::trap::TrapFrame,);\n    let mut _18: &&mut arch::trap::TrapFrame;\n    let  _19: [core::fmt::rt::Argument<'_>; 1];\n    let mut _20: core::fmt::rt::Argument<'_>;\n    let mut _21: &[u8; 49];\n    let  _22: &[core::fmt::rt::Argument<'_>; 1];\n    let mut _23: &&mut arch::trap::TrapFrame;\n    debug f => _1;\n    debug exception => _2;\n    debug handler => _3;\n    debug res => _7;\n    debug addr => _14;\n    debug args => _17;\n    debug args => _19;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = {alloc645: &spin::once::Once<for<'a> fn(&'a arch::cpu::context::CpuException) -> core::result::Result<(), ()>>};\n        _4 = spin::once::Once::<for<'a> fn(&'a arch::cpu::context::CpuException) -> core::result::Result<(), ()>>::get(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageLive(_6);\n        _6 = \"a page fault handler is missing\";\n        _3 = core::option::Option::<&for<'a> fn(&'a arch::cpu::context::CpuException) -> core::result::Result<(), ()>>::expect(move _4, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_4);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = (*_3);\n        _7 = move _8(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_7;\n        _9 = core::result::Result::<(), ()>::is_ok(move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        switchInt(move _9) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageDead(_7);\n        StorageDead(_3);\n        goto -> bb12;\n    }\n    bb6: {\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = ((*_1).19: usize);\n        _11 = ex_table::ExTable::find_recovery_inst_addr(move _12) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        _13 = discriminant(_11);\n        switchInt(move _13) -> [1: bb8, 0: bb9, otherwise: bb13];\n    }\n    bb8: {\n        _14 = ((_11 as variant#1).0: usize);\n        ((*_1).19: usize) = _14;\n        StorageDead(_11);\n        StorageDead(_7);\n        StorageDead(_3);\n        goto -> bb12;\n    }\n    bb9: {\n        StorageDead(_11);\n        StorageLive(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = &_1;\n        _17 = (move _18);\n        StorageDead(_18);\n        StorageLive(_19);\n        StorageLive(_20);\n        _23 = (_17.0: &&mut arch::trap::TrapFrame);\n        _20 = core::fmt::rt::Argument::<'_>::new_debug::<&mut arch::trap::TrapFrame>(_23) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _19 = [move _20];\n        StorageDead(_20);\n        StorageLive(_21);\n        _21 = b\"*Cannot handle user page fault; trapframe: \\xc1 \\x00\\x80b\\x00\";\n        _22 = &_19;\n        _16 = core::fmt::Arguments::<'_>::new::<49, 1>(move _21, _22) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_21);\n        _15 = core::panicking::panic_fmt(move _16) -> unwind unreachable;\n    }\n    bb12: {\n        return;\n    }\n    bb13: {\n        unreachable;\n    }\n}\n",
+  "doc": " Handles page fault from user space.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

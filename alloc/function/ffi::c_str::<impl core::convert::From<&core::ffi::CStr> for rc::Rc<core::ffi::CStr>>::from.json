@@ -1,0 +1,68 @@
+{
+  "name": "ffi::c_str::<impl core::convert::From<&core::ffi::CStr> for rc::Rc<core::ffi::CStr>>::from",
+  "safe": true,
+  "callees": {
+    "core::ffi::CStr::to_bytes_with_nul": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this C string to a byte slice containing the trailing 0 byte.\n\n This function is the equivalent of [`CStr::to_bytes`] except that it\n will retain the trailing nul terminator instead of chopping it off.\n\n > **Note**: This method is currently implemented as a 0-cost cast, but\n > it is planned to alter its definition in the future to perform the\n > length calculation whenever this method is called.\n\n # Examples\n\n ```\n assert_eq!(c\"foo\".to_bytes_with_nul(), b\"foo\\0\");\n ```\n",
+      "adt": {}
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "rc::Rc::<T>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the `Rc`, returning the wrapped pointer.\n\n To avoid a memory leak the pointer must be converted back to an `Rc` using\n [`Rc::from_raw`].\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let x = Rc::new(\"hello\".to_owned());\n let x_ptr = Rc::into_raw(x);\n assert_eq!(unsafe { &*x_ptr }, \"hello\");\n # // Prevent leaks for Miri.\n # drop(unsafe { Rc::from_raw(x_ptr) });\n ```\n",
+      "adt": {
+        "rc::Rc": "ImmutableAsArgument"
+      }
+    },
+    "rc::Rc::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs an `Rc<T>` from a raw pointer.\n\n The raw pointer must have been previously returned by a call to\n [`Rc<U>::into_raw`][into_raw] with the following requirements:\n\n * If `U` is sized, it must have the same size and alignment as `T`. This\n   is trivially true if `U` is `T`.\n * If `U` is unsized, its data pointer must have the same size and\n   alignment as `T`. This is trivially true if `Rc<U>` was constructed\n   through `Rc<T>` and then converted to `Rc<U>` through an [unsized\n   coercion].\n\n Note that if `U` or `U`'s data pointer is not `T` but has the same size\n and alignment, this is basically like transmuting references of\n different types. See [`mem::transmute`][transmute] for more information\n on what restrictions apply in this case.\n\n The raw pointer must point to a block of memory allocated by the global allocator\n\n The user of `from_raw` has to make sure a specific value of `T` is only\n dropped once.\n\n This function is unsafe because improper use may lead to memory unsafety,\n even if the returned `Rc<T>` is never accessed.\n\n [into_raw]: Rc::into_raw\n [transmute]: core::mem::transmute\n [unsized coercion]: https://doc.rust-lang.org/reference/type-coercions.html#unsized-coercions\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let x = Rc::new(\"hello\".to_owned());\n let x_ptr = Rc::into_raw(x);\n\n unsafe {\n     // Convert back to an `Rc` to prevent leak.\n     let x = Rc::from_raw(x_ptr);\n     assert_eq!(&*x, \"hello\");\n\n     // Further calls to `Rc::from_raw(x_ptr)` would be memory-unsafe.\n }\n\n // The memory was freed when `x` went out of scope above, so `x_ptr` is now dangling!\n ```\n\n Convert a slice back into its original array:\n\n ```\n use std::rc::Rc;\n\n let x: Rc<[u32]> = Rc::new([1, 2, 3]);\n let x_ptr: *const [u32] = Rc::into_raw(x);\n\n unsafe {\n     let x: Rc<[u32; 3]> = Rc::from_raw(x_ptr.cast::<[u32; 3]>());\n     assert_eq!(&*x, &[1, 2, 3]);\n }\n ```\n",
+      "adt": {
+        "rc::Rc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::ffi::CStr": [
+      "Ref"
+    ],
+    "rc::Rc": [
+      "Plain"
+    ]
+  },
+  "path": 1716,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/ffi/c_str.rs:948:5: 951:6",
+  "src": "fn from(s: &CStr) -> Rc<CStr> {\n        let rc: Rc<[u8]> = Rc::from(s.to_bytes_with_nul());\n        unsafe { Rc::from_raw(Rc::into_raw(rc) as *const CStr) }\n    }",
+  "mir": "fn ffi::c_str::<impl core::convert::From<&core::ffi::CStr> for rc::Rc<core::ffi::CStr>>::from(_1: &core::ffi::CStr) -> rc::Rc<core::ffi::CStr> {\n    let mut _0: rc::Rc<core::ffi::CStr>;\n    let  _2: rc::Rc<[u8]>;\n    let mut _3: &[u8];\n    let mut _4: *const core::ffi::CStr;\n    let mut _5: *const [u8];\n    debug s => _1;\n    debug rc => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = core::ffi::CStr::to_bytes_with_nul(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = <rc::Rc<[u8]> as core::convert::From<&[u8]>>::from(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = rc::Rc::<[u8]>::into_raw(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _4 = move _5 as *const core::ffi::CStr;\n        StorageDead(_5);\n        _0 = rc::Rc::<core::ffi::CStr>::from_raw(move _4) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Converts a `&CStr` into a `Rc<CStr>`,\n by copying the contents into a newly allocated [`Rc`].\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

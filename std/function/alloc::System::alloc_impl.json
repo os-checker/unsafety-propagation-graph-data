@@ -1,0 +1,128 @@
+{
+  "name": "alloc::System::alloc_impl",
+  "safe": true,
+  "callees": {
+    "core::alloc::Layout::size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The minimum size in bytes for a memory block of this layout.\n",
+      "adt": {}
+    },
+    "core::alloc::Layout::dangling": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a `NonNull` that is dangling, but well-aligned for this Layout.\n\n Note that the address of the returned pointer may potentially\n be that of a valid pointer, which means this must not be used\n as a \"not yet initialized\" sentinel value.\n Types that lazily allocate must track initialization by some other means.\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<[T]>::slice_from_raw_parts": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a non-null raw slice from a thin pointer and a length.\n\n The `len` argument is the number of **elements**, not the number of bytes.\n\n This function is safe, but dereferencing the return value is unsafe.\n See the documentation of [`slice::from_raw_parts`] for slice safety requirements.\n\n # Examples\n\n ```rust\n use std::ptr::NonNull;\n\n // create a slice pointer when starting out with a pointer to the first element\n let mut x = [5, 6, 7];\n let nonnull_pointer = NonNull::new(x.as_mut_ptr()).unwrap();\n let slice = NonNull::slice_from_raw_parts(nonnull_pointer, 3);\n assert_eq!(unsafe { slice.as_ref()[2] }, 7);\n ```\n\n (Note that this example artificially demonstrates a use of this method,\n but `let slice = NonNull::from(&x[..]);` would be a better way to write code like this.)\n",
+      "adt": {}
+    },
+    "core::alloc::GlobalAlloc::alloc_zeroed": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Behaves like `alloc`, but also ensures that the contents\n are set to zero before being returned.\n\n # Safety\n\n The caller has to ensure that `layout` has non-zero size. Like `alloc`\n zero sized `layout` will result in undefined behavior.\n However the allocated block of memory is guaranteed to be initialized.\n\n # Errors\n\n Returning a null pointer indicates that either memory is exhausted\n or `layout` does not meet allocator's size or alignment constraints,\n just as in `alloc`.\n\n Clients wishing to abort computation in response to an\n allocation error are encouraged to call the [`handle_alloc_error`] function,\n rather than directly invoking `panic!` or similar.\n\n [`handle_alloc_error`]: ../../alloc/alloc/fn.handle_alloc_error.html\n",
+      "adt": {}
+    },
+    "core::alloc::GlobalAlloc::alloc": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory as described by the given `layout`.\n\n Returns a pointer to newly-allocated memory,\n or null to indicate allocation failure.\n\n # Safety\n\n `layout` must have non-zero size. Attempting to allocate for a zero-sized `layout` will\n result in undefined behavior.\n\n (Extension subtraits might provide more specific bounds on\n behavior, e.g., guarantee a sentinel address or a null pointer\n in response to a zero-size allocation request.)\n\n The allocated block of memory may or may not be initialized.\n\n # Errors\n\n Returning a null pointer indicates that either memory is exhausted\n or `layout` does not meet this allocator's size or alignment constraints.\n\n Implementations are encouraged to return null on memory\n exhaustion rather than aborting, but this is not\n a strict requirement. (Specifically: it is *legal* to\n implement this trait atop an underlying native allocation\n library that aborts on memory exhaustion.)\n\n Clients wishing to abort computation in response to an\n allocation error are encouraged to call the [`handle_alloc_error`] function,\n rather than directly invoking `panic!` or similar.\n\n [`handle_alloc_error`]: ../../alloc/alloc/fn.handle_alloc_error.html\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `NonNull` if `ptr` is non-null.\n\n # Panics during const evaluation\n\n This method will panic during const evaluation if the pointer cannot be\n determined to be null or not. See [`is_null`] for more information.\n\n [`is_null`]: ../primitive.pointer.html#method.is_null-1\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::<u32>::new(&mut x as *mut _).expect(\"ptr is null!\");\n\n if let Some(ptr) = NonNull::<u32>::new(std::ptr::null_mut()) {\n     unreachable!();\n }\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::ok_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Transforms the `Option<T>` into a [`Result<T, E>`], mapping [`Some(v)`] to\n [`Ok(v)`] and [`None`] to [`Err(err)`].\n\n Arguments passed to `ok_or` are eagerly evaluated; if you are passing the\n result of a function call, it is recommended to use [`ok_or_else`], which is\n lazily evaluated.\n\n [`Ok(v)`]: Ok\n [`Err(err)`]: Err\n [`Some(v)`]: Some\n [`ok_or_else`]: Option::ok_or_else\n\n # Examples\n\n ```\n let x = Some(\"foo\");\n assert_eq!(x.ok_or(0), Ok(\"foo\"));\n\n let x: Option<&str> = None;\n assert_eq!(x.ok_or(0), Err(0));\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::alloc::Layout": [
+      "Ref",
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "alloc::System": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 13072, kind: RigidTy(Adt(AdtDef(DefId { id: 4690, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 35, kind: RigidTy(Uint(U8)) })]))) })])"
+    ]
+  },
+  "path": 410,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/alloc.rs:143:5: 157:6",
+  "src": "fn alloc_impl(&self, layout: Layout, zeroed: bool) -> Result<NonNull<[u8]>, AllocError> {\n        match layout.size() {\n            0 => Ok(NonNull::slice_from_raw_parts(layout.dangling(), 0)),\n            // SAFETY: `layout` is non-zero in size,\n            size => unsafe {\n                let raw_ptr = if zeroed {\n                    GlobalAlloc::alloc_zeroed(self, layout)\n                } else {\n                    GlobalAlloc::alloc(self, layout)\n                };\n                let ptr = NonNull::new(raw_ptr).ok_or(AllocError)?;\n                Ok(NonNull::slice_from_raw_parts(ptr, size))\n            },\n        }\n    }",
+  "mir": "fn alloc::System::alloc_impl(_1: &alloc::System, _2: core::alloc::Layout, _3: bool) -> core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError> {\n    let mut _0: core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError>;\n    let mut _4: usize;\n    let mut _5: &core::alloc::Layout;\n    let mut _6: core::ptr::NonNull<[u8]>;\n    let mut _7: core::ptr::NonNull<u8>;\n    let mut _8: &core::alloc::Layout;\n    let  _9: *mut u8;\n    let mut _10: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, core::alloc::AllocError>, core::ptr::NonNull<u8>>;\n    let mut _11: core::result::Result<core::ptr::NonNull<u8>, core::alloc::AllocError>;\n    let mut _12: core::option::Option<core::ptr::NonNull<u8>>;\n    let mut _13: *mut u8;\n    let mut _14: isize;\n    let  _15: core::ptr::NonNull<u8>;\n    let mut _16: core::ptr::NonNull<[u8]>;\n    debug self => _1;\n    debug layout => _2;\n    debug zeroed => _3;\n    debug size => _4;\n    debug raw_ptr => _9;\n    debug ptr => _15;\n    debug residual => core::result::Result::<core::convert::Infallible, core::alloc::AllocError>::Err(core::alloc::AllocError);\n    debug val => _15;\n    bb0: {\n        StorageLive(_5);\n        _5 = &_2;\n        _4 = core::alloc::Layout::size(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        switchInt(_4) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_9);\n        switchInt(_3) -> [0: bb8, otherwise: bb6];\n    }\n    bb3: {\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &_2;\n        _7 = core::alloc::Layout::dangling(move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        _6 = core::ptr::NonNull::<[u8]>::slice_from_raw_parts(move _7, 0_usize) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        _0 = core::result::Result::Ok(move _6);\n        StorageDead(_6);\n        goto -> bb19;\n    }\n    bb6: {\n        _9 = <alloc::System as core::alloc::GlobalAlloc>::alloc_zeroed(_1, _2) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        goto -> bb10;\n    }\n    bb8: {\n        _9 = <alloc::System as core::alloc::GlobalAlloc>::alloc(_1, _2) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        goto -> bb10;\n    }\n    bb10: {\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = _9;\n        _12 = core::ptr::NonNull::<u8>::new(move _13) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_13);\n        _11 = core::option::Option::<core::ptr::NonNull<u8>>::ok_or::<core::alloc::AllocError>(move _12, core::alloc::AllocError) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_12);\n        _10 = <core::result::Result<core::ptr::NonNull<u8>, core::alloc::AllocError> as core::ops::Try>::branch(move _11) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_11);\n        _14 = discriminant(_10);\n        switchInt(move _14) -> [0: bb15, 1: bb16, otherwise: bb14];\n    }\n    bb14: {\n        unreachable;\n    }\n    bb15: {\n        _15 = ((_10 as variant#0).0: core::ptr::NonNull<u8>);\n        StorageDead(_10);\n        StorageLive(_16);\n        _16 = core::ptr::NonNull::<[u8]>::slice_from_raw_parts(_15, _4) -> [return: bb18, unwind unreachable];\n    }\n    bb16: {\n        _0 = <core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, core::alloc::AllocError>>>::from_residual(core::result::Result::<core::convert::Infallible, core::alloc::AllocError>::Err(core::alloc::AllocError)) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_10);\n        StorageDead(_9);\n        goto -> bb20;\n    }\n    bb18: {\n        _0 = core::result::Result::Ok(move _16);\n        StorageDead(_16);\n        StorageDead(_9);\n        goto -> bb19;\n    }\n    bb19: {\n        goto -> bb20;\n    }\n    bb20: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

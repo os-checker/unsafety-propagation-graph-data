@@ -1,0 +1,67 @@
+{
+  "name": "sync::lazy_lock::LazyLock::<T, F>::get",
+  "safe": true,
+  "callees": {
+    "sync::once::Once::is_completed": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if some [`call_once()`] call has completed\n successfully. Specifically, `is_completed` will return false in\n the following situations:\n   * [`call_once()`] was not called at all,\n   * [`call_once()`] was called, but has not yet completed,\n   * the [`Once`] instance is poisoned\n\n This function returning `false` does not mean that [`Once`] has not been\n executed. For example, it may have been executed in the time between\n when `is_completed` starts executing and when it returns, in which case\n the `false` return value would be stale (but still permissible).\n\n [`call_once()`]: Once::call_once\n\n # Examples\n\n ```\n use std::sync::Once;\n\n static INIT: Once = Once::new();\n\n assert_eq!(INIT.is_completed(), false);\n INIT.call_once(|| {\n     assert_eq!(INIT.is_completed(), false);\n });\n assert_eq!(INIT.is_completed(), true);\n ```\n\n ```\n use std::sync::Once;\n use std::thread;\n\n static INIT: Once = Once::new();\n\n assert_eq!(INIT.is_completed(), false);\n let handle = thread::spawn(|| {\n     INIT.call_once(|| panic!());\n });\n assert!(handle.join().is_err());\n assert_eq!(INIT.is_completed(), false);\n ```\n",
+      "adt": {
+        "sync::once::Once": "ImmutableAsArgument"
+      }
+    },
+    "core::cell::UnsafeCell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the wrapped value.\n\n This can be cast to a pointer of any kind. When creating references, you must uphold the\n aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and\n caveats.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let five = uc.get();\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::once::Once": [
+      "Ref"
+    ],
+    "sync::lazy_lock::LazyLock": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Ref"
+    ],
+    "core::cell::UnsafeCell": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Ref"
+    ]
+  },
+  "path": 2771,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/lazy_lock.rs:325:5: 334:6",
+  "src": "pub fn get(this: &LazyLock<T, F>) -> Option<&T> {\n        if this.once.is_completed() {\n            // SAFETY:\n            // The closure has been run successfully, so `value` has been initialized\n            // and will not be modified again.\n            Some(unsafe { &(*this.data.get()).value })\n        } else {\n            None\n        }\n    }",
+  "mir": "fn sync::lazy_lock::LazyLock::<T, F>::get(_1: &sync::lazy_lock::LazyLock<T, F>) -> core::option::Option<&T> {\n    let mut _0: core::option::Option<&T>;\n    let mut _2: bool;\n    let mut _3: &sync::once::Once;\n    let  _4: &T;\n    let  _5: &core::mem::ManuallyDrop<T>;\n    let  _6: *mut sync::lazy_lock::Data<T, F>;\n    let mut _7: &core::cell::UnsafeCell<sync::lazy_lock::Data<T, F>>;\n    let mut _8: *const ();\n    let mut _9: usize;\n    let mut _10: usize;\n    let mut _11: usize;\n    let mut _12: bool;\n    let mut _13: *const ();\n    let mut _14: usize;\n    let mut _15: bool;\n    let mut _16: bool;\n    let mut _17: bool;\n    debug this => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &((*_1).0: sync::once::Once);\n        _2 = sync::once::Once::is_completed(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb5, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &((*_1).1: core::cell::UnsafeCell<sync::lazy_lock::Data<T, F>>);\n        _6 = core::cell::UnsafeCell::<sync::lazy_lock::Data<T, F>>::get(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        _8 = _6 as *const ();\n        _9 = _8 as usize;\n        _10 = Sub(<core::mem::ManuallyDrop<T> as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _11 = BitAnd(_9, _10);\n        _12 = Eq(_11, 0_usize);\n        assert(_12, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<core::mem::ManuallyDrop<T> as core::mem::SizedTypeProperties>::ALIGN, _9) -> [success: bb7, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        _0 = core::option::Option::Some(_4);\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_3);\n        _0 = core::option::Option::None;\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_2);\n        return;\n    }\n    bb7: {\n        _13 = _6 as *const ();\n        _14 = _13 as usize;\n        _15 = Eq(_14, 0_usize);\n        _16 = BitAnd(_15, true);\n        _17 = Not(_16);\n        assert(_17, \"null pointer dereference occurred\") -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _5 = &((*_6).0: core::mem::ManuallyDrop<T>);\n        _4 = <core::mem::ManuallyDrop<T> as core::ops::Deref>::deref(_5) -> [return: bb4, unwind unreachable];\n    }\n}\n",
+  "doc": " Returns a reference to the value if initialized. Otherwise (if uninitialized or poisoned),\n returns `None`.\n\n # Examples\n\n ```\n #![feature(lazy_get)]\n\n use std::sync::LazyLock;\n\n let lazy = LazyLock::new(|| 92);\n\n assert_eq!(LazyLock::get(&lazy), None);\n let _ = LazyLock::force(&lazy);\n assert_eq!(LazyLock::get(&lazy), Some(&92));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

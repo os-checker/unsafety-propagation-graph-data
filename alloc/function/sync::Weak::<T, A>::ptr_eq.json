@@ -1,0 +1,45 @@
+{
+  "name": "sync::Weak::<T, A>::ptr_eq",
+  "safe": true,
+  "callees": {
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::addr_eq": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares the *addresses* of the two pointers for equality,\n ignoring any metadata in fat pointers.\n\n If the arguments are thin pointers of the same type,\n then this is the same as [`eq`].\n\n # Examples\n\n ```\n use std::ptr;\n\n let whole: &[i32; 3] = &[1, 2, 3];\n let first: &i32 = &whole[0];\n\n assert!(ptr::addr_eq(whole, first));\n assert!(!ptr::eq::<dyn std::fmt::Debug>(whole, first));\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "sync::Weak": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ]
+  },
+  "path": 2171,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:3381:5: 3383:6",
+  "src": "pub fn ptr_eq(&self, other: &Self) -> bool {\n        ptr::addr_eq(self.ptr.as_ptr(), other.ptr.as_ptr())\n    }",
+  "mir": "fn sync::Weak::<T, A>::ptr_eq(_1: &sync::Weak<T, A>, _2: &sync::Weak<T, A>) -> bool {\n    let mut _0: bool;\n    let mut _3: *const sync::ArcInner<T>;\n    let mut _4: *mut sync::ArcInner<T>;\n    let mut _5: core::ptr::NonNull<sync::ArcInner<T>>;\n    let mut _6: *const sync::ArcInner<T>;\n    let mut _7: *mut sync::ArcInner<T>;\n    let mut _8: core::ptr::NonNull<sync::ArcInner<T>>;\n    debug self => _1;\n    debug other => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = ((*_1).0: core::ptr::NonNull<sync::ArcInner<T>>);\n        _4 = core::ptr::NonNull::<sync::ArcInner<T>>::as_ptr(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = move _4 as *const sync::ArcInner<T>;\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = ((*_2).0: core::ptr::NonNull<sync::ArcInner<T>>);\n        _7 = core::ptr::NonNull::<sync::ArcInner<T>>::as_ptr(move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _6 = move _7 as *const sync::ArcInner<T>;\n        StorageDead(_8);\n        StorageDead(_7);\n        _0 = core::ptr::addr_eq::<sync::ArcInner<T>, sync::ArcInner<T>>(move _3, move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Returns `true` if the two `Weak`s point to the same allocation similar to [`ptr::eq`], or if\n both don't point to any allocation (because they were created with `Weak::new()`). However,\n this function ignores the metadata of  `dyn Trait` pointers.\n\n # Notes\n\n Since this compares pointers it means that `Weak::new()` will equal each\n other, even though they don't point to any allocation.\n\n # Examples\n\n ```\n use std::sync::Arc;\n\n let first_rc = Arc::new(5);\n let first = Arc::downgrade(&first_rc);\n let second = Arc::downgrade(&first_rc);\n\n assert!(first.ptr_eq(&second));\n\n let third_rc = Arc::new(5);\n let third = Arc::downgrade(&third_rc);\n\n assert!(!first.ptr_eq(&third));\n ```\n\n Comparing `Weak::new`.\n\n ```\n use std::sync::{Arc, Weak};\n\n let first = Weak::new();\n let second = Weak::new();\n assert!(first.ptr_eq(&second));\n\n let third_rc = Arc::new(());\n let third = Arc::downgrade(&third_rc);\n assert!(!first.ptr_eq(&third));\n ```\n\n [`ptr::eq`]: core::ptr::eq \"ptr::eq\"\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

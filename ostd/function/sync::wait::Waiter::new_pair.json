@@ -1,0 +1,104 @@
+{
+  "name": "sync::wait::Waiter::new_pair",
+  "safe": true,
+  "callees": {
+    "core::sync::atomic::AtomicBool::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `AtomicBool`.\n\n # Examples\n\n ```\n use std::sync::atomic::AtomicBool;\n\n let atomic_true = AtomicBool::new(true);\n let atomic_false = AtomicBool::new(false);\n ```\n",
+      "adt": {}
+    },
+    "task::Task::current": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the current task.\n\n It returns `None` if the function is called in the bootstrap context.\n",
+      "adt": {
+        "core::option::Option": "Constructor",
+        "task::CurrentTask": "Constructor"
+      }
+    },
+    "core::option::Option::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use pattern matching and handle the [`None`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`]. In functions returning `Option`, you can use\n [the `?` (try) operator][try-option].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-option]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-the--operator-can-be-used\n [`unwrap_or`]: Option::unwrap_or\n [`unwrap_or_else`]: Option::unwrap_or_else\n [`unwrap_or_default`]: Option::unwrap_or_default\n\n # Panics\n\n Panics if the self value equals [`None`].\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(x.unwrap(), \"air\");\n ```\n\n ```should_panic\n let x: Option<&str> = None;\n assert_eq!(x.unwrap(), \"air\"); // fails\n ```\n",
+      "adt": {}
+    },
+    "task::CurrentTask::cloned": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a cloned `Arc<Task>`.\n",
+      "adt": {
+        "task::CurrentTask": "ImmutableAsArgument",
+        "alloc::sync::Arc": "Constructor"
+      }
+    },
+    "alloc::sync::Arc::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new `Arc<T>`.\n\n # Examples\n\n ```\n use std::sync::Arc;\n\n let five = Arc::new(5);\n ```\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::sync::atomic::AtomicBool": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "task::CurrentTask": [
+      "Plain",
+      "Ref"
+    ],
+    "alloc::sync::Arc": [
+      "Plain",
+      "Ref"
+    ],
+    "sync::wait::Waker": [
+      "Plain"
+    ],
+    "sync::wait::Waiter": [
+      "Plain"
+    ]
+  },
+  "path": 2744,
+  "span": "ostd/src/sync/wait.rs:181:5: 190:6",
+  "src": "pub fn new_pair() -> (Self, Arc<Waker>) {\n        let waker = Arc::new(Waker {\n            has_woken: AtomicBool::new(false),\n            task: Task::current().unwrap().cloned(),\n        });\n        let waiter = Self {\n            waker: waker.clone(),\n        };\n        (waiter, waker)\n    }",
+  "mir": "fn sync::wait::Waiter::new_pair() -> (sync::wait::Waiter, alloc::sync::Arc<sync::wait::Waker>) {\n    let mut _0: (sync::wait::Waiter, alloc::sync::Arc<sync::wait::Waker>);\n    let  _1: alloc::sync::Arc<sync::wait::Waker>;\n    let mut _2: sync::wait::Waker;\n    let mut _3: core::sync::atomic::AtomicBool;\n    let mut _4: alloc::sync::Arc<task::Task>;\n    let mut _5: &task::CurrentTask;\n    let  _6: task::CurrentTask;\n    let mut _7: core::option::Option<task::CurrentTask>;\n    let  _8: sync::wait::Waiter;\n    let mut _9: alloc::sync::Arc<sync::wait::Waker>;\n    let mut _10: &alloc::sync::Arc<sync::wait::Waker>;\n    debug waker => _1;\n    debug waiter => _8;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = core::sync::atomic::AtomicBool::new(false) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = task::Task::current() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _6 = core::option::Option::<task::CurrentTask>::unwrap(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _5 = &_6;\n        StorageDead(_7);\n        _4 = task::CurrentTask::cloned(move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        _2 = Waker(move _3, move _4);\n        StorageDead(_4);\n        StorageDead(_3);\n        _1 = alloc::sync::Arc::<sync::wait::Waker>::new(move _2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_2);\n        StorageDead(_6);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_1;\n        _9 = <alloc::sync::Arc<sync::wait::Waker> as core::clone::Clone>::clone(move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_10);\n        _8 = Waiter(move _9);\n        StorageDead(_9);\n        _0 = (_8, _1);\n        return;\n    }\n}\n",
+  "doc": " Creates a waiter and its associated [`Waker`].\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "num::<impl i128>::unchecked_div_exact",
+  "safe": false,
+  "callees": {
+    "ub_checks::check_language_ub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Determines whether we should check for language UB.\n\n The intention is to not do that when running in the interpreter, as that one has its own\n language UB checks which generally produce better errors.\n",
+      "adt": {}
+    },
+    "num::<impl i128>::unchecked_div_exact::precondition_check": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "intrinsics::exact_div": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an exact division, resulting in undefined behavior where\n `x % y != 0` or `y == 0` or `x == T::MIN && y == -1`\n\n This intrinsic does not have a stable counterpart.\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 2017,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/int_macros.rs:1106:9: 1117:10",
+  "src": "pub const unsafe fn unchecked_div_exact(self, rhs: Self) -> Self {\n            assert_unsafe_precondition!(\n                check_language_ub,\n                concat!(stringify!($SelfT), \"::unchecked_div_exact cannot overflow, divide by zero, or leave a remainder\"),\n                (\n                    lhs: $SelfT = self,\n                    rhs: $SelfT = rhs,\n                ) => rhs > 0 && lhs % rhs == 0 && (lhs != <$SelfT>::MIN || rhs != -1),\n            );\n            // SAFETY: Same precondition\n            unsafe { intrinsics::exact_div(self, rhs) }\n        }",
+  "mir": "fn num::<impl i128>::unchecked_div_exact(_1: i128, _2: i128) -> i128 {\n    let mut _0: i128;\n    let mut _3: bool;\n    let  _4: ();\n    debug self => _1;\n    debug rhs => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = ub_checks::check_language_ub() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        _4 = num::<impl i128>::unchecked_div_exact::precondition_check(_1, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        goto -> bb4;\n    }\n    bb4: {\n        StorageDead(_3);\n        _0 = intrinsics::exact_div::<i128>(_1, _2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": " Unchecked integer division without remainder. Computes `self / rhs`.\n\n # Safety\n\n This results in undefined behavior when `rhs == 0`, `self % rhs != 0`, or\n i.e. when [`checked_div_exact`](Self::checked_div_exact) would return `None`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

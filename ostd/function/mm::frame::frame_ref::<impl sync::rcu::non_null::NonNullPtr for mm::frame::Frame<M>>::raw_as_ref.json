@@ -1,0 +1,70 @@
+{
+  "name": "mm::frame::frame_ref::<impl sync::rcu::non_null::NonNullPtr for mm::frame::Frame<M>>::raw_as_ref",
+  "safe": false,
+  "callees": {
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast_const": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Changes constness without changing the type.\n\n This is a bit safer than `as` because it wouldn't silently change the type if the code is\n refactored.\n\n While not strictly required (`*mut T` coerces to `*const T`), this is provided for symmetry\n with [`cast_mut`] on `*const T` and may have documentation value if used instead of implicit\n coercion.\n\n [`cast_mut`]: pointer::cast_mut\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "mm::frame::Frame": [
+      "Plain"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain"
+    ],
+    "mm::frame::frame_ref::FrameRef": [
+      "Plain"
+    ]
+  },
+  "path": 2050,
+  "span": "ostd/src/mm/frame/frame_ref.rs:69:5: 77:6",
+  "src": "unsafe fn raw_as_ref<'a>(raw: NonNull<Self::Target>) -> Self::Ref<'a> {\n        Self::Ref {\n            inner: ManuallyDrop::new(Frame {\n                ptr: raw.as_ptr().cast_const().cast(),\n                _marker: PhantomData,\n            }),\n            _marker: PhantomData,\n        }\n    }",
+  "mir": "fn mm::frame::frame_ref::<impl sync::rcu::non_null::NonNullPtr for mm::frame::Frame<M>>::raw_as_ref(_1: core::ptr::NonNull<core::marker::PhantomData<mm::frame::Frame<M>>>) -> mm::frame::frame_ref::FrameRef<'_, M> {\n    let mut _0: mm::frame::frame_ref::FrameRef<'_, M>;\n    let mut _2: core::mem::ManuallyDrop<mm::frame::Frame<M>>;\n    let mut _3: mm::frame::Frame<M>;\n    let mut _4: *const mm::frame::meta::MetaSlot;\n    let mut _5: *const core::marker::PhantomData<mm::frame::Frame<M>>;\n    let mut _6: *mut core::marker::PhantomData<mm::frame::Frame<M>>;\n    debug raw => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = core::ptr::NonNull::<core::marker::PhantomData<mm::frame::Frame<M>>>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = core::ptr::mut_ptr::<impl *mut core::marker::PhantomData<mm::frame::Frame<M>>>::cast_const(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _4 = core::ptr::const_ptr::<impl *const core::marker::PhantomData<mm::frame::Frame<M>>>::cast::<mm::frame::meta::MetaSlot>(move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        _3 = Frame(move _4, ZeroSized: core::marker::PhantomData<M>);\n        StorageDead(_4);\n        _2 = core::mem::ManuallyDrop::<mm::frame::Frame<M>>::new(move _3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_3);\n        _0 = FrameRef(move _2, ZeroSized: core::marker::PhantomData<&mm::frame::Frame<M>>);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

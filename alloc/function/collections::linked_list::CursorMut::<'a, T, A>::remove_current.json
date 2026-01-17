@@ -1,0 +1,122 @@
+{
+  "name": "collections::linked_list::CursorMut::<'a, T, A>::remove_current",
+  "safe": true,
+  "callees": {
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::as_ref": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a shared reference to the value. If the value may be uninitialized, [`as_uninit_ref`]\n must be used instead.\n\n For the mutable counterpart see [`as_mut`].\n\n [`as_uninit_ref`]: NonNull::as_uninit_ref\n [`as_mut`]: NonNull::as_mut\n\n # Safety\n\n When calling this method, you have to ensure that\n the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"ptr is null!\");\n\n let ref_x = unsafe { ptr.as_ref() };\n println!(\"{ref_x}\");\n ```\n\n [the module documentation]: crate::ptr#safety\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "collections::linked_list::LinkedList::<T, A>::unlink_node": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Unlinks the specified node from the current list.\n\n Warning: this will not check that the provided node belongs to the current list.\n\n This method takes care not to create mutable references to `element`, to\n maintain validity of aliasing pointers.\n",
+      "adt": {
+        "core::ptr::NonNull": "MutableAsArgument",
+        "collections::linked_list::LinkedList": "MutableAsArgument"
+      }
+    },
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "boxed::Box::<T, A>::from_raw_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a box from a raw pointer in the given allocator.\n\n After calling this function, the raw pointer is owned by the\n resulting `Box`. Specifically, the `Box` destructor will call\n the destructor of `T` and free the allocated memory. For this\n to be safe, the memory must have been allocated in accordance\n with the [memory layout] used by `Box` .\n\n # Safety\n\n This function is unsafe because improper use may lead to\n memory problems. For example, a double-free may occur if the\n function is called twice on the same raw pointer.\n\n The raw pointer must point to a block of memory allocated by `alloc`.\n\n # Examples\n\n Recreate a `Box` which was previously converted to a raw pointer\n using [`Box::into_raw_with_allocator`]:\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let x = Box::new_in(5, System);\n let (ptr, alloc) = Box::into_raw_with_allocator(x);\n let x = unsafe { Box::from_raw_in(ptr, alloc) };\n ```\n Manually create a `Box` from scratch by using the system allocator:\n ```\n #![feature(allocator_api, slice_ptr_get)]\n\n use std::alloc::{Allocator, Layout, System};\n\n unsafe {\n     let ptr = System.allocate(Layout::new::<i32>())?.as_mut_ptr() as *mut i32;\n     // In general .write is required to avoid attempting to destruct\n     // the (uninitialized) previous contents of `ptr`, though for this\n     // simple example `*ptr = 5` would have worked as well.\n     ptr.write(5);\n     let x = Box::from_raw_in(ptr, System);\n }\n # Ok::<(), std::alloc::AllocError>(())\n ```\n\n [memory layout]: self#memory-layout\n",
+      "adt": {
+        "boxed::Box": "Constructor"
+      }
+    },
+    "core::ops::Drop::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Executes the destructor for this type.\n\n This method is called implicitly when the value goes out of scope,\n and cannot be called explicitly (this is compiler error [E0040]).\n However, the [`mem::drop`] function in the prelude can be\n used to call the argument's `Drop` implementation.\n\n When this method has been called, `self` has not yet been deallocated.\n That only happens after the method is over.\n If this wasn't the case, `self` would be a dangling reference.\n\n # Panics\n\n Implementations should generally avoid [`panic!`]ing, because `drop()` may itself be called\n during unwinding due to a panic, and if the `drop()` panics in that situation (a “double\n panic”), this will likely abort the program. It is possible to check [`panicking()`] first,\n which may be desirable for a `Drop` implementation that is reporting a bug of the kind\n “you didn't finish using this before it was dropped”; but most types should simply clean up\n their owned allocations or other resources and return normally from `drop()`, regardless of\n what state they are in.\n\n Note that even if this panics, the value is considered to be dropped;\n you must not cause `drop` to be called again. This is normally automatically\n handled by the compiler, but when using unsafe code, can sometimes occur\n unintentionally, particularly when using [`ptr::drop_in_place`].\n\n [E0040]: ../../error_codes/E0040.html\n [`panic!`]: crate::panic!\n [`panicking()`]: ../../std/thread/fn.panicking.html\n [`mem::drop`]: drop\n [`ptr::drop_in_place`]: crate::ptr::drop_in_place\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain"
+    ],
+    "collections::linked_list::CursorMut": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "MutRef"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 5741, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 6031, kind: RigidTy(Adt(AdtDef(DefId { id: 4427, name: \"collections::linked_list::Node\" }), GenericArgs([Type(Ty { id: 110, kind: Param(ParamTy { index: 1, name: \"T\" }) })]))) })]))) })])"
+    ],
+    "core::ptr::NonNull": [
+      "Plain",
+      "Ref"
+    ],
+    "collections::linked_list::Node": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "collections::linked_list::LinkedList": [
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))"
+    ],
+    "boxed::Box": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 6115, kind: RigidTy(Adt(AdtDef(DefId { id: 2645, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 6031, kind: RigidTy(Adt(AdtDef(DefId { id: 4427, name: \"collections::linked_list::Node\" }), GenericArgs([Type(Ty { id: 110, kind: Param(ParamTy { index: 1, name: \"T\" }) })]))) })]))) }), Field(0, Ty { id: 5741, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 6031, kind: RigidTy(Adt(AdtDef(DefId { id: 4427, name: \"collections::linked_list::Node\" }), GenericArgs([Type(Ty { id: 110, kind: Param(ParamTy { index: 1, name: \"T\" }) })]))) })]))) })])",
+      "MutRef"
+    ]
+  },
+  "path": 1225,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/linked_list.rs:1732:5: 1740:6",
+  "src": "pub fn remove_current(&mut self) -> Option<T> {\n        let unlinked_node = self.current?;\n        unsafe {\n            self.current = unlinked_node.as_ref().next;\n            self.list.unlink_node(unlinked_node);\n            let unlinked_node = Box::from_raw_in(unlinked_node.as_ptr(), &self.list.alloc);\n            Some(unlinked_node.element)\n        }\n    }",
+  "mir": "fn collections::linked_list::CursorMut::<'a, T, A>::remove_current(_1: &mut collections::linked_list::CursorMut<'_, T, A>) -> core::option::Option<T> {\n    let mut _0: core::option::Option<T>;\n    let  _2: core::ptr::NonNull<collections::linked_list::Node<T>>;\n    let mut _3: core::ops::ControlFlow<core::option::Option<core::convert::Infallible>, core::ptr::NonNull<collections::linked_list::Node<T>>>;\n    let mut _4: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>;\n    let mut _5: isize;\n    let  _6: core::ptr::NonNull<collections::linked_list::Node<T>>;\n    let mut _7: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>;\n    let mut _8: &collections::linked_list::Node<T>;\n    let mut _9: &core::ptr::NonNull<collections::linked_list::Node<T>>;\n    let  _10: ();\n    let  _11: boxed::Box<collections::linked_list::Node<T>, &A>;\n    let mut _12: *mut collections::linked_list::Node<T>;\n    let mut _13: &A;\n    let mut _14: T;\n    let mut _15: &mut collections::linked_list::LinkedList<T, A>;\n    let mut _16: &mut collections::linked_list::LinkedList<T, A>;\n    let mut _17: &mut boxed::Box<collections::linked_list::Node<T>, &A>;\n    let mut _18: ();\n    let mut _19: *const collections::linked_list::Node<T>;\n    debug self => _1;\n    debug unlinked_node => _2;\n    debug residual => core::option::Option::<core::convert::Infallible>::None;\n    debug val => _6;\n    debug unlinked_node => _11;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).1: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>);\n        _3 = <core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>> as core::ops::Try>::branch(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [0: bb3, 1: bb4, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        StorageLive(_6);\n        _6 = ((_3 as variant#0).0: core::ptr::NonNull<collections::linked_list::Node<T>>);\n        _2 = _6;\n        StorageDead(_6);\n        StorageDead(_3);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &_2;\n        _8 = core::ptr::NonNull::<collections::linked_list::Node<T>>::as_ref::<'_>(move _9) -> [return: bb6, unwind unreachable];\n    }\n    bb4: {\n        _0 = <core::option::Option<T> as core::ops::FromResidual<core::option::Option<core::convert::Infallible>>>::from_residual(core::option::Option::<core::convert::Infallible>::None) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_3);\n        goto -> bb10;\n    }\n    bb6: {\n        StorageDead(_9);\n        _7 = ((*_8).0: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>);\n        ((*_1).1: core::option::Option<core::ptr::NonNull<collections::linked_list::Node<T>>>) = move _7;\n        StorageDead(_7);\n        StorageDead(_8);\n        _15 = ((*_1).2: &mut collections::linked_list::LinkedList<T, A>);\n        _10 = collections::linked_list::LinkedList::<T, A>::unlink_node(_15, _2) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = core::ptr::NonNull::<collections::linked_list::Node<T>>::as_ptr(_2) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageLive(_13);\n        _16 = ((*_1).2: &mut collections::linked_list::LinkedList<T, A>);\n        _13 = &((*_16).3: A);\n        _11 = boxed::Box::<collections::linked_list::Node<T>, &A>::from_raw_in(move _12, move _13) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageLive(_14);\n        _19 = ((_11.0: core::ptr::Unique<collections::linked_list::Node<T>>).0: core::ptr::NonNull<collections::linked_list::Node<T>>) as *const collections::linked_list::Node<T>;\n        _14 = move ((*_19).2: T);\n        _0 = core::option::Option::Some(move _14);\n        StorageDead(_14);\n        _17 = &mut _11;\n        _18 = <boxed::Box<collections::linked_list::Node<T>, &A> as core::ops::Drop>::drop(move _17) -> [return: bb11, unwind unreachable];\n    }\n    bb10: {\n        return;\n    }\n    bb11: {\n        StorageDead(_11);\n        goto -> bb10;\n    }\n}\n",
+  "doc": " Removes the current element from the `LinkedList`.\n\n The element that was removed is returned, and the cursor is\n moved to point to the next element in the `LinkedList`.\n\n If the cursor is currently pointing to the \"ghost\" non-element then no element\n is removed and `None` is returned.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

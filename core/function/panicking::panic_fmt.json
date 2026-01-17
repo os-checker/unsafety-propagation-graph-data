@@ -1,0 +1,63 @@
+{
+  "name": "panicking::panic_fmt",
+  "safe": true,
+  "callees": {
+    "panic::location::Location::<'a>::caller": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the source location of the caller of this function. If that function's caller is\n annotated then its call location will be returned, and so on up the stack to the first call\n within a non-tracked function body.\n\n # Examples\n\n ```standalone_crate\n use std::panic::Location;\n\n /// ```\n ///      |1        |11       |21       |31       |41\n ///    +-|---------|---------|---------|---------|--------\n /// 15 | #[track_caller]\n /// 16 | fn new_location() -> &'static Location<'static> {\n /// 17 |     Location::caller()\n ///    |     ------------------| the value of this expression depends on the caller,\n ///    |                       | since the function is marked #[track_caller]\n /// 18 | }\n /// ```\n #[track_caller]\n fn new_location() -> &'static Location<'static> {\n     Location::caller()\n }\n\n /// ```\n ///      |1  |5    |11       |21       |31       |41       |51\n ///    +-|---|-----|---------|---------|---------|---------|---\n /// 29 | fn constant_location() -> &'static Location<'static> {\n /// 30 |     new_location()\n ///    |     ^ any invocation of constant_location() points here,\n ///    |       no matter the location it is called from\n /// 31 | }\n /// ```\n fn constant_location() -> &'static Location<'static> {\n     new_location()\n }\n\n fn main() {\n     //      |1  |5    |11       |21       |31       |41       |51\n     //    +-|---|-----|---------|---------|---------|---------|---\n     // 29 | fn constant_location() -> &'static Location<'static> {\n     // 30 |     new_location()\n     //    |     ^ `let constant` points here\n     // 31 | }\n     let constant = constant_location();\n     assert_eq!(constant.file(), file!());\n     assert_eq!((constant.line(), constant.column()), (30, 5));\n\n     let constant_2 = constant_location();\n     assert_eq!(\n         (constant.file(), constant.line(), constant.column()),\n         (constant_2.file(), constant_2.line(), constant_2.column())\n     );\n\n     //      |1        |11  |16  |21       |31\n     //    +-|---------|----|----|---------|------\n     // 55 |     let here = new_location();\n     //    |                ^ `let here` points here, as `new_location()` is the callsite\n     // 56 |     assert_eq!(here.file(), file!());\n     let here = new_location();\n     assert_eq!(here.file(), file!());\n     assert_eq!((here.line(), here.column()), (55, 16));\n\n     //      |1        |11       |21       ||32      |41       |51\n     //    +-|---------|---------|---------||--------|---------|------\n     // 64 |     let yet_another_location = new_location();\n     //    |                                ^ `let yet_another_location` points here\n     // 65 |     assert_eq!(here.file(), yet_another_location.file());\n     let yet_another_location = new_location();\n     assert_eq!(here.file(), yet_another_location.file());\n     assert_ne!(\n         (here.line(), here.column()),\n         (yet_another_location.line(), yet_another_location.column())\n     );\n }\n ```\n",
+      "adt": {}
+    },
+    "panic::panic_info::PanicInfo::<'a>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "fmt::Arguments": "ImmutableAsArgument",
+        "panic::location::Location": "ImmutableAsArgument",
+        "panic::panic_info::PanicInfo": "Constructor"
+      }
+    },
+    "panicking::panic_fmt::panic_impl": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "fmt::Arguments": [
+      "Ref",
+      "Plain"
+    ],
+    "panic::location::Location": [
+      "Ref"
+    ],
+    "panic::panic_info::PanicInfo": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 15848,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/panicking.rs:60:1: 81:2",
+  "src": "pub const fn panic_fmt(fmt: fmt::Arguments<'_>) -> ! {\n    if cfg!(panic = \"immediate-abort\") {\n        super::intrinsics::abort()\n    }\n\n    // NOTE This function never crosses the FFI boundary; it's a Rust-to-Rust call\n    // that gets resolved to the `#[panic_handler]` function.\n    unsafe extern \"Rust\" {\n        #[lang = \"panic_impl\"]\n        fn panic_impl(pi: &PanicInfo<'_>) -> !;\n    }\n\n    let pi = PanicInfo::new(\n        &fmt,\n        Location::caller(),\n        /* can_unwind */ true,\n        /* force_no_backtrace */ false,\n    );\n\n    // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.\n    unsafe { panic_impl(&pi) }\n}",
+  "mir": "fn panicking::panic_fmt(_1: fmt::Arguments<'_>) -> ! {\n    let mut _0: !;\n    let  _2: panic::panic_info::PanicInfo<'_>;\n    let  _3: &fmt::Arguments<'_>;\n    let  _4: &panic::location::Location<'_>;\n    let  _5: &panic::panic_info::PanicInfo<'_>;\n    debug fmt => _1;\n    debug pi => _2;\n    bb0: {\n        StorageLive(_2);\n        _3 = &_1;\n        _4 = panic::location::Location::<'_>::caller() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = panic::panic_info::PanicInfo::<'_>::new(_3, _4, true, false) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = &_2;\n        _0 = panicking::panic_fmt::panic_impl(_5) -> unwind unreachable;\n    }\n}\n",
+  "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

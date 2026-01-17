@@ -1,0 +1,85 @@
+{
+  "name": "fmt::num::<impl fmt::LowerHex for u32>::fmt",
+  "safe": true,
+  "callees": {
+    "mem::maybe_uninit::MaybeUninit::<T>::uninit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `MaybeUninit<T>` in an uninitialized state.\n\n Note that dropping a `MaybeUninit<T>` will never call `T`'s drop code.\n It is your responsibility to make sure `T` gets dropped if it got initialized.\n\n See the [type-level documentation][MaybeUninit] for some examples.\n\n # Example\n\n ```\n use std::mem::MaybeUninit;\n\n let v: MaybeUninit<String> = MaybeUninit::uninit();\n ```\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "Constructor"
+      }
+    },
+    "hint::assert_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Makes a *soundness* promise to the compiler that `cond` holds.\n\n This may allow the optimizer to simplify things, but it might also make the generated code\n slower. Either way, calling it will most likely make compilation take longer.\n\n You may know this from other places as\n [`llvm.assume`](https://llvm.org/docs/LangRef.html#llvm-assume-intrinsic) or, in C,\n [`__builtin_assume`](https://clang.llvm.org/docs/LanguageExtensions.html#builtin-assume).\n\n This promotes a correctness requirement to a soundness requirement. Don't do that without\n very good reason.\n\n # Usage\n\n This is a situational tool for micro-optimization, and is allowed to do nothing. Any use\n should come with a repeatable benchmark to show the value, with the expectation to drop it\n later should the optimizer get smarter and no longer need it.\n\n The more complicated the condition, the less likely this is to be useful. For example,\n `assert_unchecked(foo.is_sorted())` is a complex enough value that the compiler is unlikely\n to be able to take advantage of it.\n\n There's also no need to `assert_unchecked` basic properties of things.  For example, the\n compiler already knows the range of `count_ones`, so there is no benefit to\n `let n = u32::count_ones(x); assert_unchecked(n <= u32::BITS);`.\n\n `assert_unchecked` is logically equivalent to `if !cond { unreachable_unchecked(); }`. If\n ever you are tempted to write `assert_unchecked(false)`, you should instead use\n [`unreachable_unchecked()`] directly.\n\n # Safety\n\n `cond` must be `true`. It is immediate UB to call this with `false`.\n\n # Example\n\n ```\n use core::hint;\n\n /// # Safety\n ///\n /// `p` must be nonnull and valid\n pub unsafe fn next_value(p: *const i32) -> i32 {\n     // SAFETY: caller invariants guarantee that `p` is not null\n     unsafe { hint::assert_unchecked(!p.is_null()) }\n\n     if p.is_null() {\n         return -1;\n     } else {\n         // SAFETY: caller invariants guarantee that `p` is valid\n         unsafe { *p + 1 }\n     }\n }\n ```\n\n Without the `assert_unchecked`, the above function produces the following with optimizations\n enabled:\n\n ```asm\n next_value:\n         test    rdi, rdi\n         je      .LBB0_1\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n .LBB0_1:\n         mov     eax, -1\n         ret\n ```\n\n Adding the assertion allows the optimizer to remove the extra check:\n\n ```asm\n next_value:\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n ```\n\n This example is quite unlike anything that would be used in the real world: it is redundant\n to put an assertion right next to code that checks the same thing, and dereferencing a\n pointer already has the builtin assumption that it is nonnull. However, it illustrates the\n kind of changes the optimizer can make even when the behavior is less obviously related.\n",
+      "adt": {}
+    },
+    "mem::maybe_uninit::MaybeUninit::<T>::write": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets the value of the `MaybeUninit<T>`.\n\n This overwrites any previous value without dropping it, so be careful\n not to use this twice unless you want to skip running the destructor.\n For your convenience, this also returns a mutable reference to the\n (now safely initialized) contents of `self`.\n\n As the content is stored inside a `ManuallyDrop`, the destructor is not\n run for the inner data if the MaybeUninit leaves scope without a call to\n [`assume_init`], [`assume_init_drop`], or similar. Code that receives\n the mutable reference returned by this function needs to keep this in\n mind. The safety model of Rust regards leaks as safe, but they are\n usually still undesirable. This being said, the mutable reference\n behaves like any other mutable reference would, so assigning a new value\n to it will drop the old content.\n\n [`assume_init`]: Self::assume_init\n [`assume_init_drop`]: Self::assume_init_drop\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u8>>::uninit();\n\n {\n     let hello = x.write((&b\"Hello, world!\").to_vec());\n     // Setting hello does not leak prior allocations, but drops them\n     *hello = (&b\"Hello\").to_vec();\n     hello[0] = 'h' as u8;\n }\n // x is initialized now:\n let s = unsafe { x.assume_init() };\n assert_eq!(b\"hello\", s.as_slice());\n ```\n\n This usage of the method causes a leak:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<String>::uninit();\n\n x.write(\"Hello\".to_string());\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n // This leaks the contained string:\n x.write(\"hello\".to_string());\n // x is initialized now:\n let s = unsafe { x.assume_init() };\n ```\n\n This method can be used to avoid unsafe in some cases. The example below\n shows a part of an implementation of a fixed sized arena that lends out\n pinned references.\n With `write`, we can avoid the need to write through a raw pointer:\n\n ```rust\n use core::pin::Pin;\n use core::mem::MaybeUninit;\n\n struct PinArena<T> {\n     memory: Box<[MaybeUninit<T>]>,\n     len: usize,\n }\n\n impl <T> PinArena<T> {\n     pub fn capacity(&self) -> usize {\n         self.memory.len()\n     }\n     pub fn push(&mut self, val: T) -> Pin<&mut T> {\n         if self.len >= self.capacity() {\n             panic!(\"Attempted to push to a full pin arena!\");\n         }\n         let ref_ = self.memory[self.len].write(val);\n         self.len += 1;\n         unsafe { Pin::new_unchecked(ref_) }\n     }\n }\n ```\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "MutableAsArgument"
+      }
+    },
+    "fmt::num::slice_buffer_to_str": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " This function converts a slice of ascii characters into a `&str` starting from `offset`.\n\n # Safety\n\n `buf` content starting from `offset` index MUST BE initialized and MUST BE ascii\n characters.\n",
+      "adt": {}
+    },
+    "fmt::Formatter::<'a>::pad_integral": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the correct padding for an integer which has already been\n emitted into a str. The str should *not* contain the sign for the\n integer, that will be added by this method.\n\n # Arguments\n\n * is_nonnegative - whether the original integer was either positive or zero.\n * prefix - if the '#' character (Alternate) is provided, this\n   is the prefix to put in front of the number.\n * buf - the byte array that the number has been formatted into\n\n This function will correctly account for the flags provided as well as\n the minimum width. It will not take precision into account.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Foo { nb: i32 }\n\n impl Foo {\n     fn new(nb: i32) -> Foo {\n         Foo {\n             nb,\n         }\n     }\n }\n\n impl fmt::Display for Foo {\n     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {\n         // We need to remove \"-\" from the number output.\n         let tmp = self.nb.abs().to_string();\n\n         formatter.pad_integral(self.nb >= 0, \"Foo \", &tmp)\n     }\n }\n\n assert_eq!(format!(\"{}\", Foo::new(2)), \"2\");\n assert_eq!(format!(\"{}\", Foo::new(-1)), \"-1\");\n assert_eq!(format!(\"{}\", Foo::new(0)), \"0\");\n assert_eq!(format!(\"{:#}\", Foo::new(-1)), \"-Foo 1\");\n assert_eq!(format!(\"{:0>#8}\", Foo::new(-1)), \"00-Foo 1\");\n ```\n",
+      "adt": {
+        "fmt::Formatter": "MutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "mem::maybe_uninit::MaybeUninit": [
+      "Plain",
+      "MutRef"
+    ],
+    "fmt::Formatter": [
+      "MutRef"
+    ],
+    "result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 3591,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/num.rs:14:13: 50:14",
+  "src": "fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n                // Check macro arguments at compile time.\n                const {\n                    assert!($Unsigned::MIN == 0, \"need unsigned\");\n                    assert!($dig_tab.is_ascii(), \"need single-byte entries\");\n                }\n\n                // ASCII digits in ascending order are used as a lookup table.\n                const DIG_TAB: &[u8] = $dig_tab;\n                const BASE: $Unsigned = DIG_TAB.len() as $Unsigned;\n                const MAX_DIG_N: usize = $Unsigned::MAX.ilog(BASE) as usize + 1;\n\n                // Buffer digits of self with right alignment.\n                let mut buf = [MaybeUninit::<u8>::uninit(); MAX_DIG_N];\n                // Count the number of bytes in buf that are not initialized.\n                let mut offset = buf.len();\n\n                // Accumulate each digit of the number from the least\n                // significant to the most significant figure.\n                let mut remain = *self;\n                loop {\n                    let digit = remain % BASE;\n                    remain /= BASE;\n\n                    offset -= 1;\n                    // SAFETY: `remain` will reach 0 and we will break before `offset` wraps\n                    unsafe { core::hint::assert_unchecked(offset < buf.len()) }\n                    buf[offset].write(DIG_TAB[digit as usize]);\n                    if remain == 0 {\n                        break;\n                    }\n                }\n\n                // SAFETY: Starting from `offset`, all elements of the slice have been set.\n                let digits = unsafe { slice_buffer_to_str(&buf, offset) };\n                f.pad_integral(true, $prefix, digits)\n            }",
+  "mir": "fn fmt::num::<impl fmt::LowerHex for u32>::fmt(_1: &u32, _2: &mut fmt::Formatter<'_>) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    let mut _3: [mem::maybe_uninit::MaybeUninit<u8>; 8];\n    let mut _4: mem::maybe_uninit::MaybeUninit<u8>;\n    let mut _5: usize;\n    let mut _6: &[mem::maybe_uninit::MaybeUninit<u8>];\n    let mut _7: &[mem::maybe_uninit::MaybeUninit<u8>; 8];\n    let mut _8: u32;\n    let  _9: u32;\n    let mut _10: u32;\n    let mut _11: bool;\n    let mut _12: bool;\n    let mut _13: (usize, bool);\n    let  _14: ();\n    let mut _15: bool;\n    let mut _16: usize;\n    let mut _17: usize;\n    let mut _18: &[mem::maybe_uninit::MaybeUninit<u8>];\n    let mut _19: &[mem::maybe_uninit::MaybeUninit<u8>; 8];\n    let  _20: &mut u8;\n    let mut _21: &mut mem::maybe_uninit::MaybeUninit<u8>;\n    let  _22: usize;\n    let mut _23: bool;\n    let mut _24: u8;\n    let mut _25: &[u8];\n    let  _26: usize;\n    let mut _27: usize;\n    let mut _28: bool;\n    let mut _29: u32;\n    let  _30: &str;\n    let mut _31: &[mem::maybe_uninit::MaybeUninit<u8>];\n    let  _32: &[mem::maybe_uninit::MaybeUninit<u8>; 8];\n    let mut _33: usize;\n    let mut _34: &str;\n    debug self => _1;\n    debug f => _2;\n    debug buf => _3;\n    debug offset => _5;\n    debug remain => _8;\n    debug digit => _9;\n    debug digits => _30;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = mem::maybe_uninit::MaybeUninit::<u8>::uninit() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = [move _4; 8];\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &_3;\n        _6 = move _7 as &[mem::maybe_uninit::MaybeUninit<u8>];\n        StorageDead(_7);\n        _5 = PtrMetadata(move _6);\n        StorageDead(_6);\n        StorageLive(_8);\n        _8 = (*_1);\n        goto -> bb2;\n    }\n    bb2: {\n        StorageLive(_10);\n        _10 = _8;\n        _11 = Eq(fmt::num::<impl fmt::LowerHex for u32>::fmt::BASE, 0_u32);\n        assert(!move _11, \"attempt to calculate the remainder of `{}` with a divisor of zero\", _10) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _9 = Rem(move _10, fmt::num::<impl fmt::LowerHex for u32>::fmt::BASE);\n        StorageDead(_10);\n        _12 = Eq(fmt::num::<impl fmt::LowerHex for u32>::fmt::BASE, 0_u32);\n        assert(!move _12, \"attempt to divide `{}` by zero\", _8) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _8 = Div(_8, fmt::num::<impl fmt::LowerHex for u32>::fmt::BASE);\n        _13 = CheckedSub(_5, 1_usize);\n        assert(!move (_13.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _5, 1_usize) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _5 = move (_13.0: usize);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = _5;\n        StorageLive(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = &_3;\n        _18 = move _19 as &[mem::maybe_uninit::MaybeUninit<u8>];\n        StorageDead(_19);\n        _17 = PtrMetadata(move _18);\n        StorageDead(_18);\n        _15 = Lt(move _16, move _17);\n        StorageDead(_17);\n        StorageDead(_16);\n        _14 = hint::assert_unchecked(move _15) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_15);\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = _5;\n        _23 = Lt(_22, 8_usize);\n        assert(move _23, \"index out of bounds: the length is {} but the index is {}\", 8_usize, _22) -> [success: bb7, unwind unreachable];\n    }\n    bb7: {\n        _21 = &mut _3[_22];\n        StorageLive(_24);\n        StorageLive(_25);\n        _25 = fmt::num::<impl fmt::LowerHex for u32>::fmt::DIG_TAB;\n        StorageLive(_26);\n        _26 = _9 as usize;\n        _27 = PtrMetadata(_25);\n        _28 = Lt(_26, _27);\n        assert(move _28, \"index out of bounds: the length is {} but the index is {}\", move _27, _26) -> [success: bb8, unwind unreachable];\n    }\n    bb8: {\n        _24 = (*_25)[_26];\n        _20 = mem::maybe_uninit::MaybeUninit::<u8>::write(move _21, move _24) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_24);\n        StorageDead(_21);\n        StorageDead(_26);\n        StorageDead(_25);\n        StorageDead(_22);\n        StorageDead(_20);\n        StorageLive(_29);\n        _29 = _8;\n        switchInt(move _29) -> [0: bb10, otherwise: bb11];\n    }\n    bb10: {\n        StorageDead(_29);\n        StorageLive(_31);\n        _32 = &_3;\n        _31 = _32 as &[mem::maybe_uninit::MaybeUninit<u8>];\n        StorageLive(_33);\n        _33 = _5;\n        _30 = fmt::num::slice_buffer_to_str(move _31, move _33) -> [return: bb12, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_29);\n        goto -> bb2;\n    }\n    bb12: {\n        StorageDead(_33);\n        StorageDead(_31);\n        StorageLive(_34);\n        _34 = \"0x\";\n        _0 = fmt::Formatter::<'_>::pad_integral(_2, true, move _34, _30) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_34);\n        StorageDead(_8);\n        StorageDead(_5);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Format unsigned integers in the radix.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

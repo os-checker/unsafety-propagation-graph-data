@@ -1,0 +1,31 @@
+{
+  "name": "slice::iter::RChunksExactMut::<'a, T>::new",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::split_at_mut_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable slice into two at an index, without doing bounds checking.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n For a safe alternative see [`split_at_mut`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used. The caller has to ensure that\n `0 <= mid <= self.len()`.\n\n [`split_at_mut`]: slice::split_at_mut\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let mut v = [1, 0, 3, 0, 5, 6];\n // scoped to restrict the lifetime of the borrows\n unsafe {\n     let (left, right) = v.split_at_mut_unchecked(2);\n     assert_eq!(left, [1, 0]);\n     assert_eq!(right, [3, 0, 5, 6]);\n     left[1] = 2;\n     right[1] = 4;\n }\n assert_eq!(v, [1, 2, 3, 4, 5, 6]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::RChunksExactMut": [
+      "Plain"
+    ]
+  },
+  "path": 16539,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:2820:5: 2825:6",
+  "src": "pub(super) const fn new(slice: &'a mut [T], chunk_size: usize) -> Self {\n        let rem = slice.len() % chunk_size;\n        // SAFETY: 0 <= rem <= slice.len() by construction above\n        let (fst, snd) = unsafe { slice.split_at_mut_unchecked(rem) };\n        Self { v: snd, rem: fst, chunk_size }\n    }",
+  "mir": "fn slice::iter::RChunksExactMut::<'a, T>::new(_1: &mut [T], _2: usize) -> slice::iter::RChunksExactMut<'_, T> {\n    let mut _0: slice::iter::RChunksExactMut<'_, T>;\n    let  _3: usize;\n    let mut _4: usize;\n    let mut _5: &[T];\n    let mut _6: bool;\n    let  _7: &mut [T];\n    let  _8: &mut [T];\n    let mut _9: (&mut [T], &mut [T]);\n    let mut _10: *mut [T];\n    debug slice => _1;\n    debug chunk_size => _2;\n    debug rem => _3;\n    debug fst => _7;\n    debug snd => _8;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = PtrMetadata(move _5);\n        StorageDead(_5);\n        _6 = Eq(_2, 0_usize);\n        assert(!move _6, \"attempt to calculate the remainder of `{}` with a divisor of zero\", _4) -> [success: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = Rem(move _4, _2);\n        StorageDead(_4);\n        StorageLive(_9);\n        _9 = slice::<impl [T]>::split_at_mut_unchecked(_1, _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _7 = move (_9.0: &mut [T]);\n        StorageLive(_8);\n        _8 = move (_9.1: &mut [T]);\n        StorageDead(_9);\n        StorageLive(_10);\n        _10 = &raw mut (*_8);\n        _0 = RChunksExactMut(move _10, _7, _2);\n        StorageDead(_10);\n        StorageDead(_8);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

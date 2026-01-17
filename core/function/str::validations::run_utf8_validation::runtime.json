@@ -1,0 +1,37 @@
+{
+  "name": "str::validations::run_utf8_validation::runtime",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "ptr::const_ptr::<impl *const T>::align_offset": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Computes the offset that needs to be applied to the pointer in order to make it aligned to\n `align`.\n\n If it is not possible to align the pointer, the implementation returns\n `usize::MAX`.\n\n The offset is expressed in number of `T` elements, and not bytes. The value returned can be\n used with the `wrapping_add` method.\n\n There are no guarantees whatsoever that offsetting the pointer will not overflow or go\n beyond the allocation that the pointer points into. It is up to the caller to ensure that\n the returned offset is correct in all terms other than alignment.\n\n # Panics\n\n The function panics if `align` is not a power-of-two.\n\n # Examples\n\n Accessing adjacent `u8` as `u16`\n\n ```\n # unsafe {\n let x = [5_u8, 6, 7, 8, 9];\n let ptr = x.as_ptr();\n let offset = ptr.align_offset(align_of::<u16>());\n\n if offset < x.len() - 1 {\n     let u16_ptr = ptr.add(offset).cast::<u16>();\n     assert!(*u16_ptr == u16::from_ne_bytes([5, 6]) || *u16_ptr == u16::from_ne_bytes([6, 7]));\n } else {\n     // while the pointer can be aligned via `offset`, it would point\n     // outside the allocation\n }\n # }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 17112,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/intrinsics/mod.rs:2437:9: 2439:10",
+  "src": "fn runtime$(<$($binders)*>)?($($arg: $ty),*) $( -> $ret )? {\n            $runtime\n        }",
+  "mir": "fn str::validations::run_utf8_validation::runtime(_1: &[u8]) -> usize {\n    let mut _0: usize;\n    let mut _2: *const u8;\n    debug v => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = slice::<impl [u8]>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = ptr::const_ptr::<impl *const u8>::align_offset(move _2, str::validations::run_utf8_validation::USIZE_BYTES) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

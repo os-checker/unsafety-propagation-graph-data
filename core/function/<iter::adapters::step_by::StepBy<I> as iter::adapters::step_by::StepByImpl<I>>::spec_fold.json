@@ -1,0 +1,83 @@
+{
+  "name": "<iter::adapters::step_by::StepBy<I> as iter::adapters::step_by::StepByImpl<I>>::spec_fold",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "ops::function::FnMut::call_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "<iter::adapters::step_by::StepBy<I> as iter::adapters::step_by::StepByImpl<I>>::spec_fold::nth": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "iter::sources::from_fn::from_fn": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator with the provided closure\n `F: FnMut() -> Option<T>` as its [`next`](Iterator::next) method.\n\n The iterator will yield the `T`s returned from the closure.\n\n This allows creating a custom iterator with any behavior\n without using the more verbose syntax of creating a dedicated type\n and implementing the [`Iterator`] trait for it.\n\n Note that the `FromFn` iterator doesn’t make assumptions about the behavior of the closure,\n and therefore conservatively does not implement [`FusedIterator`],\n or override [`Iterator::size_hint()`] from its default `(0, None)`.\n\n The closure can use captures and its environment to track state across iterations. Depending on\n how the iterator is used, this may require specifying the [`move`] keyword on the closure.\n\n [`move`]: ../../std/keyword.move.html\n [`FusedIterator`]: crate::iter::FusedIterator\n\n # Examples\n\n Let’s re-implement the counter iterator from [module-level documentation]:\n\n [module-level documentation]: crate::iter\n\n ```\n let mut count = 0;\n let counter = std::iter::from_fn(move || {\n     // Increment our count. This is why we started at zero.\n     count += 1;\n\n     // Check to see if we've finished counting or not.\n     if count < 6 {\n         Some(count)\n     } else {\n         None\n     }\n });\n assert_eq!(counter.collect::<Vec<_>>(), &[1, 2, 3, 4, 5]);\n ```\n",
+      "adt": {
+        "iter::sources::from_fn::FromFn": "Constructor"
+      }
+    },
+    "iter::traits::iterator::Iterator::fold": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Folds every element into an accumulator by applying an operation,\n returning the final result.\n\n `fold()` takes two arguments: an initial value, and a closure with two\n arguments: an 'accumulator', and an element. The closure returns the value that\n the accumulator should have for the next iteration.\n\n The initial value is the value the accumulator will have on the first\n call.\n\n After applying this closure to every element of the iterator, `fold()`\n returns the accumulator.\n\n This operation is sometimes called 'reduce' or 'inject'.\n\n Folding is useful whenever you have a collection of something, and want\n to produce a single value from it.\n\n Note: `fold()`, and similar methods that traverse the entire iterator,\n might not terminate for infinite iterators, even on traits for which a\n result is determinable in finite time.\n\n Note: [`reduce()`] can be used to use the first element as the initial\n value, if the accumulator type and item type is the same.\n\n Note: `fold()` combines elements in a *left-associative* fashion. For associative\n operators like `+`, the order the elements are combined in is not important, but for non-associative\n operators like `-` the order will affect the final result.\n For a *right-associative* version of `fold()`, see [`DoubleEndedIterator::rfold()`].\n\n # Note to Implementors\n\n Several of the other (forward) methods have default implementations in\n terms of this one, so try to implement this explicitly if it can\n do something better than the default `for` loop implementation.\n\n In particular, try to have this call `fold()` on the internal parts\n from which this iterator is composed.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n // the sum of all of the elements of the array\n let sum = a.iter().fold(0, |acc, x| acc + x);\n\n assert_eq!(sum, 6);\n ```\n\n Let's walk through each step of the iteration here:\n\n | element | acc | x | result |\n |---------|-----|---|--------|\n |         | 0   |   |        |\n | 1       | 0   | 1 | 1      |\n | 2       | 1   | 2 | 3      |\n | 3       | 3   | 3 | 6      |\n\n And so, our final result, `6`.\n\n This example demonstrates the left-associative nature of `fold()`:\n it builds a string, starting with an initial value\n and continuing with each element from the front until the back:\n\n ```\n let numbers = [1, 2, 3, 4, 5];\n\n let zero = \"0\".to_string();\n\n let result = numbers.iter().fold(zero, |acc, &x| {\n     format!(\"({acc} + {x})\")\n });\n\n assert_eq!(result, \"(((((0 + 1) + 2) + 3) + 4) + 5)\");\n ```\n It's common for people who haven't used iterators a lot to\n use a `for` loop with a list of things to build up a result. Those\n can be turned into `fold()`s:\n\n [`for`]: ../../book/ch03-05-control-flow.html#looping-through-a-collection-with-for\n\n ```\n let numbers = [1, 2, 3, 4, 5];\n\n let mut result = 0;\n\n // for loop:\n for i in &numbers {\n     result = result + i;\n }\n\n // fold:\n let result2 = numbers.iter().fold(0, |acc, &x| acc + x);\n\n // they're the same\n assert_eq!(result, result2);\n ```\n\n [`reduce()`]: Iterator::reduce\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "iter::adapters::step_by::StepBy": [
+      "Unknown([Field(2, Ty { id: 3, kind: RigidTy(Bool) })])",
+      "Unknown([Field(0, Ty { id: 4656, kind: Param(ParamTy { index: 0, name: \"I\" }) })])",
+      "Unknown([Field(1, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 4671, kind: Alias(Projection, AliasTy { def_id: AliasDef(DefId { id: 25924, name: \"iter::traits::iterator::Iterator::Item\" }), args: GenericArgs([Type(Ty { id: 4656, kind: Param(ParamTy { index: 0, name: \"I\" }) })]) }) })])"
+    ],
+    "iter::sources::from_fn::FromFn": [
+      "Plain"
+    ]
+  },
+  "path": 14066,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/step_by.rs:319:5: 339:6",
+  "src": "default fn spec_fold<Acc, F>(mut self, mut acc: Acc, mut f: F) -> Acc\n    where\n        F: FnMut(Acc, Self::Item) -> Acc,\n    {\n        #[inline]\n        fn nth<I: Iterator>(\n            iter: &mut I,\n            step_minus_one: usize,\n        ) -> impl FnMut() -> Option<I::Item> + '_ {\n            move || iter.nth(step_minus_one)\n        }\n\n        if self.first_take {\n            self.first_take = false;\n            match self.iter.next() {\n                None => return acc,\n                Some(x) => acc = f(acc, x),\n            }\n        }\n        from_fn(nth(&mut self.iter, self.step_minus_one)).fold(acc, f)\n    }",
+  "mir": "fn <iter::adapters::step_by::StepBy<I> as iter::adapters::step_by::StepByImpl<I>>::spec_fold(_1: iter::adapters::step_by::StepBy<I>, _2: Acc, _3: F) -> Acc {\n    let mut _0: Acc;\n    let mut _4: bool;\n    let mut _5: option::Option<<I as iter::traits::iterator::Iterator>::Item>;\n    let mut _6: &mut I;\n    let mut _7: isize;\n    let  _8: <I as iter::traits::iterator::Iterator>::Item;\n    let mut _9: Acc;\n    let mut _10: &mut F;\n    let mut _11: (Acc, <I as iter::traits::iterator::Iterator>::Item);\n    let mut _12: Acc;\n    let mut _13: iter::sources::from_fn::FromFn<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/step_by.rs:328:13: 328:20}>;\n    let mut _14: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/step_by.rs:328:13: 328:20};\n    let mut _15: &mut I;\n    let mut _16: usize;\n    let mut _17: Acc;\n    let mut _18: F;\n    debug self => _1;\n    debug acc => _2;\n    debug f => _3;\n    debug x => _8;\n    bb0: {\n        StorageLive(_4);\n        _4 = (_1.2: bool);\n        switchInt(move _4) -> [0: bb7, otherwise: bb1];\n    }\n    bb1: {\n        (_1.2: bool) = false;\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut (_1.0: I);\n        _5 = <I as iter::traits::iterator::Iterator>::next(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _7 = discriminant(_5);\n        switchInt(move _7) -> [0: bb5, 1: bb4, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _8 = move ((_5 as variant#1).0: <I as iter::traits::iterator::Iterator>::Item);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &mut _3;\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = move _2;\n        _11 = (move _12, _8);\n        _9 = <F as ops::function::FnMut<(Acc, <I as iter::traits::iterator::Iterator>::Item)>>::call_mut(move _10, move _11) -> [return: bb6, unwind unreachable];\n    }\n    bb5: {\n        _0 = move _2;\n        StorageDead(_5);\n        StorageDead(_4);\n        drop(_3) -> [return: bb11, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        _2 = move _9;\n        StorageDead(_9);\n        StorageDead(_5);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageDead(_4);\n        StorageLive(_13);\n        StorageLive(_14);\n        _15 = &mut (_1.0: I);\n        StorageLive(_16);\n        _16 = (_1.1: usize);\n        _14 = <iter::adapters::step_by::StepBy<I> as iter::adapters::step_by::StepByImpl<I>>::spec_fold::nth::<I>(_15, move _16) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_16);\n        _13 = iter::sources::from_fn::from_fn::<<I as iter::traits::iterator::Iterator>::Item, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/step_by.rs:328:13: 328:20}>(move _14) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_14);\n        StorageLive(_17);\n        _17 = move _2;\n        StorageLive(_18);\n        _18 = move _3;\n        _0 = <iter::sources::from_fn::FromFn<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/step_by.rs:328:13: 328:20}> as iter::traits::iterator::Iterator>::fold::<Acc, F>(move _13, move _17, move _18) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageDead(_13);\n        drop(_1) -> [return: bb12, unwind unreachable];\n    }\n    bb11: {\n        drop(_1) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

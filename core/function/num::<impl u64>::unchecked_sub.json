@@ -1,0 +1,37 @@
+{
+  "name": "num::<impl u64>::unchecked_sub",
+  "safe": false,
+  "callees": {
+    "ub_checks::check_language_ub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Determines whether we should check for language UB.\n\n The intention is to not do that when running in the interpreter, as that one has its own\n language UB checks which generally produce better errors.\n",
+      "adt": {}
+    },
+    "num::<impl u64>::unchecked_sub::precondition_check": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 3970,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/uint_macros.rs:966:9: 980:10",
+  "src": "pub const unsafe fn unchecked_sub(self, rhs: Self) -> Self {\n            assert_unsafe_precondition!(\n                check_language_ub,\n                concat!(stringify!($SelfT), \"::unchecked_sub cannot overflow\"),\n                (\n                    lhs: $SelfT = self,\n                    rhs: $SelfT = rhs,\n                ) => !lhs.overflowing_sub(rhs).1,\n            );\n\n            // SAFETY: this is guaranteed to be safe by the caller.\n            unsafe {\n                intrinsics::unchecked_sub(self, rhs)\n            }\n        }",
+  "mir": "fn num::<impl u64>::unchecked_sub(_1: u64, _2: u64) -> u64 {\n    let mut _0: u64;\n    let mut _3: bool;\n    let  _4: ();\n    debug self => _1;\n    debug rhs => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = ub_checks::check_language_ub() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        _4 = num::<impl u64>::unchecked_sub::precondition_check(_1, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        goto -> bb4;\n    }\n    bb4: {\n        StorageDead(_3);\n        _0 = SubUnchecked(_1, _2);\n        return;\n    }\n}\n",
+  "doc": " Unchecked integer subtraction. Computes `self - rhs`, assuming overflow\n cannot occur.\n\n Calling `x.unchecked_sub(y)` is semantically equivalent to calling\n `x.`[`checked_sub`]`(y).`[`unwrap_unchecked`]`()`.\n\n If you're just trying to avoid the panic in debug mode, then **do not**\n use this.  Instead, you're looking for [`wrapping_sub`].\n\n If you find yourself writing code like this:\n\n ```\n # let foo = 30_u32;\n # let bar = 20;\n if foo >= bar {\n     // SAFETY: just checked it will not overflow\n     let diff = unsafe { foo.unchecked_sub(bar) };\n     // ... use diff ...\n }\n ```\n\n Consider changing it to\n\n ```\n # let foo = 30_u32;\n # let bar = 20;\n if let Some(diff) = foo.checked_sub(bar) {\n     // ... use diff ...\n }\n ```\n\n As that does exactly the same thing -- including telling the optimizer\n that the subtraction cannot overflow -- but avoids needing `unsafe`.\n\n # Safety\n\n This results in undefined behavior when\n i.e. when [`checked_sub`] would return `None`.\n\n [`unwrap_unchecked`]: option/enum.Option.html#method.unwrap_unchecked\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

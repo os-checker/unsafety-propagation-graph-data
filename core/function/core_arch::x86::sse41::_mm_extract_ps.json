@@ -1,0 +1,51 @@
+{
+  "name": "core_arch::x86::sse41::_mm_extract_ps",
+  "safe": false,
+  "callees": {
+    "intrinsics::simd::simd_extract": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts an element from a vector.\n\n `T` must be a vector with element type `U`, and `idx` must be `const`.\n\n # Safety\n\n `idx` must be const and in-bounds of the vector.\n",
+      "adt": {}
+    },
+    "f32::<impl f32>::to_bits": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "unnecessary_transmutes"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* unnecessary_transmutes\n"
+        ]
+      },
+      "doc": " Raw transmutation to `u32`.\n\n This is currently identical to `transmute::<f32, u32>(self)` on all platforms.\n\n See [`from_bits`](Self::from_bits) for some discussion of the\n portability of this operation (there are almost no issues).\n\n Note that this function is distinct from `as` casting, which attempts to\n preserve the *numeric* value, and not the bitwise value.\n\n # Examples\n\n ```\n assert_ne!((1f32).to_bits(), 1f32 as u32); // to_bits() is not casting!\n assert_eq!((12.5f32).to_bits(), 0x41480000);\n\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_arch::x86::__m128": [
+      "Plain"
+    ]
+  },
+  "path": 11921,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../stdarch/crates/core_arch/src/x86/sse41.rs:210:1: 213:2",
+  "src": "pub fn _mm_extract_ps<const IMM8: i32>(a: __m128) -> i32 {\n    static_assert_uimm_bits!(IMM8, 2);\n    unsafe { simd_extract!(a, IMM8 as u32, f32).to_bits() as i32 }\n}",
+  "mir": "fn core_arch::x86::sse41::_mm_extract_ps(_1: core_arch::x86::__m128) -> i32 {\n    let mut _0: i32;\n    let mut _2: u32;\n    let mut _3: f32;\n    debug a => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = intrinsics::simd::simd_extract::<core_arch::x86::__m128, f32>(_1, core_arch::x86::sse41::_mm_extract_ps::<IMM8>::{constant#1}) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = f32::<impl f32>::to_bits(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = move _2 as i32;\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Extracts a single-precision (32-bit) floating-point element from `a`,\n selected with `IMM8`. The returned `i32` stores the float's bit-pattern,\n and may be converted back to a floating point number via casting.\n\n # Example\n ```rust\n # #[cfg(target_arch = \"x86\")]\n # use std::arch::x86::*;\n # #[cfg(target_arch = \"x86_64\")]\n # use std::arch::x86_64::*;\n # fn main() {\n #    if is_x86_feature_detected!(\"sse4.1\") {\n #       #[target_feature(enable = \"sse4.1\")]\n #       #[allow(unused_unsafe)] // FIXME remove after stdarch bump in rustc\n #       unsafe fn worker() { unsafe {\n let mut float_store = vec![1.0, 1.0, 2.0, 3.0];\n let simd_floats = _mm_set_ps(2.5, 5.0, 7.5, 10.0);\n let x: i32 = _mm_extract_ps::<2>(simd_floats);\n float_store.push(f32::from_bits(x as u32));\n assert_eq!(float_store, vec![1.0, 1.0, 2.0, 3.0, 5.0]);\n #       }}\n #       unsafe { worker() }\n #   }\n # }\n ```\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_extract_ps)\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

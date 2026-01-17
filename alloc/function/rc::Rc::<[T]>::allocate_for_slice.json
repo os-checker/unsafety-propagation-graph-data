@@ -1,0 +1,56 @@
+{
+  "name": "rc::Rc::<[T]>::allocate_for_slice",
+  "safe": false,
+  "callees": {
+    "core::alloc::Layout::array": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a layout describing the record for a `[T; n]`.\n\n On arithmetic overflow or when the total size would exceed\n `isize::MAX`, returns `LayoutError`.\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Panics are meant for unrecoverable errors, and\n [may abort the entire program][panic-abort].\n\n Instead, prefer to use [the `?` (try) operator][try-operator], or pattern matching\n to handle the [`Err`] case explicitly, or call [`unwrap_or`],\n [`unwrap_or_else`], or [`unwrap_or_default`].\n\n [panic-abort]: https://doc.rust-lang.org/book/ch09-01-unrecoverable-errors-with-panic.html\n [try-operator]: https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message provided by the\n [`Err`]'s value.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.unwrap(), 2);\n ```\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.unwrap(); // panics with `emergency failure`\n ```\n",
+      "adt": {}
+    },
+    "rc::Rc::<T>::allocate_for_layout": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates an `RcInner<T>` with sufficient space for\n a possibly-unsized inner value where the value has the layout provided.\n\n The function `mem_to_rc_inner` is called with the data pointer\n and must return back a (potentially fat)-pointer for the `RcInner<T>`.\n",
+      "adt": {
+        "core::alloc::Layout": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ]
+  },
+  "path": 1728,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2298:5: 2306:6",
+  "src": "unsafe fn allocate_for_slice(len: usize) -> *mut RcInner<[T]> {\n        unsafe {\n            Self::allocate_for_layout(\n                Layout::array::<T>(len).unwrap(),\n                |layout| Global.allocate(layout),\n                |mem| ptr::slice_from_raw_parts_mut(mem.cast::<T>(), len) as *mut RcInner<[T]>,\n            )\n        }\n    }",
+  "mir": "fn rc::Rc::<[T]>::allocate_for_slice(_1: usize) -> *mut rc::RcInner<[T]> {\n    let mut _0: *mut rc::RcInner<[T]>;\n    let mut _2: core::alloc::Layout;\n    let mut _3: core::result::Result<core::alloc::Layout, core::alloc::LayoutError>;\n    let mut _4: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2303:17: 2303:22};\n    let mut _5: &usize;\n    debug len => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = core::alloc::Layout::array::<T>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = core::result::Result::<core::alloc::Layout, core::alloc::LayoutError>::unwrap(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &_1;\n        _4 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2303:17: 2303:22}(move _5);\n        StorageDead(_5);\n        _0 = rc::Rc::<[T]>::allocate_for_layout::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2302:17: 2302:25}, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2303:17: 2303:22}>(move _2, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:2302:17: 2302:25}, move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Allocates an `RcInner<[T]>` with the given length.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

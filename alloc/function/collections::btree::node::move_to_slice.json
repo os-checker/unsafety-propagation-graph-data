@@ -1,0 +1,57 @@
+{
+  "name": "collections::btree::node::move_to_slice",
+  "safe": true,
+  "callees": {
+    "core::slice::<impl [T]>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(x.get_unchecked(i), &*x_ptr.add(i));\n     }\n }\n ```\n\n [`as_mut_ptr`]: slice::as_mut_ptr\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unsafe mutable pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n let x_ptr = x.as_mut_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         *x_ptr.add(i) += 2;\n     }\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 845,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/btree/node.rs:1875:1: 1880:2",
+  "src": "fn move_to_slice<T>(src: &mut [MaybeUninit<T>], dst: &mut [MaybeUninit<T>]) {\n    assert!(src.len() == dst.len());\n    unsafe {\n        ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());\n    }\n}",
+  "mir": "fn collections::btree::node::move_to_slice(_1: &mut [core::mem::MaybeUninit<T>], _2: &mut [core::mem::MaybeUninit<T>]) -> () {\n    let mut _0: ();\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: &[core::mem::MaybeUninit<T>];\n    let mut _6: usize;\n    let mut _7: &[core::mem::MaybeUninit<T>];\n    let mut _8: !;\n    let  _9: ();\n    let mut _10: *const core::mem::MaybeUninit<T>;\n    let mut _11: &[core::mem::MaybeUninit<T>];\n    let mut _12: *mut core::mem::MaybeUninit<T>;\n    let mut _13: usize;\n    let mut _14: &[core::mem::MaybeUninit<T>];\n    debug src => _1;\n    debug dst => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = PtrMetadata(move _5);\n        StorageDead(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &(*_2);\n        _6 = PtrMetadata(move _7);\n        StorageDead(_7);\n        _3 = Eq(move _4, move _6);\n        switchInt(move _3) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_6);\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &(*_1);\n        _10 = core::slice::<impl [core::mem::MaybeUninit<T>]>::as_ptr(move _11) -> [return: bb3, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_4);\n        _8 = core::panicking::panic(\"assertion failed: src.len() == dst.len()\") -> unwind unreachable;\n    }\n    bb3: {\n        StorageDead(_11);\n        StorageLive(_12);\n        _12 = core::slice::<impl [core::mem::MaybeUninit<T>]>::as_mut_ptr(_2) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = &(*_1);\n        _13 = PtrMetadata(move _14);\n        StorageDead(_14);\n        _9 = core::ptr::copy_nonoverlapping::<core::mem::MaybeUninit<T>>(move _10, move _12, move _13) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageDead(_10);\n        return;\n    }\n}\n",
+  "doc": " Moves all values from a slice of initialized elements to a slice\n of uninitialized elements, leaving behind `src` as all uninitialized.\n Works like `dst.copy_from_slice(src)` but does not require `T` to be `Copy`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

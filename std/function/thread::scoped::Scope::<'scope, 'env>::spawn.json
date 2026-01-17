@@ -1,0 +1,66 @@
+{
+  "name": "thread::scoped::Scope::<'scope, 'env>::spawn",
+  "safe": true,
+  "callees": {
+    "thread::builder::Builder::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Generates the base configuration for spawning a thread, from which\n configuration methods can be chained.\n\n # Examples\n\n ```\n use std::thread;\n\n let builder = thread::Builder::new()\n                               .name(\"foo\".into())\n                               .stack_size(32 * 1024);\n\n let handler = builder.spawn(|| {\n     // thread code\n }).unwrap();\n\n handler.join().unwrap();\n ```\n",
+      "adt": {
+        "thread::builder::Builder": "Constructor"
+      }
+    },
+    "thread::scoped::<impl thread::builder::Builder>::spawn_scoped": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Spawns a new scoped thread using the settings set through this `Builder`.\n\n Unlike [`Scope::spawn`], this method yields an [`io::Result`] to\n capture any failure to create the thread at the OS level.\n\n [`io::Result`]: crate::io::Result\n\n # Panics\n\n Panics if a thread name was set and it contained null bytes.\n\n # Example\n\n ```\n use std::thread;\n\n let mut a = vec![1, 2, 3];\n let mut x = 0;\n\n thread::scope(|s| {\n     thread::Builder::new()\n         .name(\"first\".to_string())\n         .spawn_scoped(s, ||\n     {\n         println!(\"hello from the {:?} scoped thread\", thread::current().name());\n         // We can borrow `a` here.\n         dbg!(&a);\n     })\n     .unwrap();\n     thread::Builder::new()\n         .name(\"second\".to_string())\n         .spawn_scoped(s, ||\n     {\n         println!(\"hello from the {:?} scoped thread\", thread::current().name());\n         // We can even mutably borrow `x` here,\n         // because no other threads are using it.\n         x += a[0] + a[2];\n     })\n     .unwrap();\n     println!(\"hello from the main thread\");\n });\n\n // After the scope, we can modify and access our variables again:\n a.push(4);\n assert_eq!(x, a.len());\n ```\n",
+      "adt": {
+        "thread::scoped::Scope": "ImmutableAsArgument",
+        "core::result::Result": "Constructor",
+        "thread::scoped::ScopedJoinHandle": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::expect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value, consuming the `self` value.\n\n Because this function may panic, its use is generally discouraged.\n Instead, prefer to use pattern matching and handle the [`Err`]\n case explicitly, or call [`unwrap_or`], [`unwrap_or_else`], or\n [`unwrap_or_default`].\n\n [`unwrap_or`]: Result::unwrap_or\n [`unwrap_or_else`]: Result::unwrap_or_else\n [`unwrap_or_default`]: Result::unwrap_or_default\n\n # Panics\n\n Panics if the value is an [`Err`], with a panic message including the\n passed message, and the content of the [`Err`].\n\n\n # Examples\n\n ```should_panic\n let x: Result<u32, &str> = Err(\"emergency failure\");\n x.expect(\"Testing expect\"); // panics with `Testing expect: emergency failure`\n ```\n\n # Recommended Message Style\n\n We recommend that `expect` messages are used to describe the reason you\n _expect_ the `Result` should be `Ok`.\n\n ```should_panic\n let path = std::env::var(\"IMPORTANT_PATH\")\n     .expect(\"env variable `IMPORTANT_PATH` should be set by `wrapper_script.sh`\");\n ```\n\n **Hint**: If you're having trouble remembering how to phrase expect\n error messages remember to focus on the word \"should\" as in \"env\n variable should be set by blah\" or \"the given binary should be available\n and executable by the current user\".\n\n For more detail on expect message styles and the reasoning behind our recommendation please\n refer to the section on [\"Common Message\n Styles\"](../../std/error/index.html#common-message-styles) in the\n [`std::error`](../../std/error/index.html) module docs.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "thread::builder::Builder": [
+      "Plain"
+    ],
+    "thread::scoped::Scope": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "thread::scoped::ScopedJoinHandle": [
+      "Plain"
+    ]
+  },
+  "path": 4537,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/scoped.rs:198:5: 204:6",
+  "src": "pub fn spawn<F, T>(&'scope self, f: F) -> ScopedJoinHandle<'scope, T>\n    where\n        F: FnOnce() -> T + Send + 'scope,\n        T: Send + 'scope,\n    {\n        Builder::new().spawn_scoped(self, f).expect(\"failed to spawn thread\")\n    }",
+  "mir": "fn thread::scoped::Scope::<'scope, 'env>::spawn(_1: &thread::scoped::Scope<'_, '_>, _2: F) -> thread::scoped::ScopedJoinHandle<'_, T> {\n    let mut _0: thread::scoped::ScopedJoinHandle<'_, T>;\n    let mut _3: core::result::Result<thread::scoped::ScopedJoinHandle<'_, T>, io::error::Error>;\n    let mut _4: thread::builder::Builder;\n    let mut _5: &str;\n    debug self => _1;\n    debug f => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = thread::builder::Builder::new() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = thread::scoped::<impl thread::builder::Builder>::spawn_scoped::<'_, F, T>(move _4, _1, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = \"failed to spawn thread\";\n        _0 = core::result::Result::<thread::scoped::ScopedJoinHandle<'_, T>, io::error::Error>::expect(move _3, move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Spawns a new thread within a scope, returning a [`ScopedJoinHandle`] for it.\n\n Unlike non-scoped threads, threads spawned with this function may\n borrow non-`'static` data from the outside the scope. See [`scope`] for\n details.\n\n The join handle provides a [`join`] method that can be used to join the spawned\n thread. If the spawned thread panics, [`join`] will return an [`Err`] containing\n the panic payload.\n\n If the join handle is dropped, the spawned thread will be implicitly joined at the\n end of the scope. In that case, if the spawned thread panics, [`scope`] will\n panic after all threads are joined.\n\n This function creates a thread with the default parameters of [`Builder`].\n To specify the new thread's stack size or the name, use [`Builder::spawn_scoped`].\n\n # Panics\n\n Panics if the OS fails to create a thread; use [`Builder::spawn_scoped`]\n to recover from such errors.\n\n [`join`]: ScopedJoinHandle::join\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

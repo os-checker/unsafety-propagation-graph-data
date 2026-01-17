@@ -1,0 +1,134 @@
+{
+  "name": "<vec::Vec<T> as vec::spec_from_iter::SpecFromIter<T, vec::into_iter::IntoIter<T>>>::from_iter",
+  "safe": true,
+  "callees": {
+    "core::cmp::PartialEq::ne": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests for `!=`. The default implementation is almost always sufficient,\n and should not be overridden without very good reason.\n",
+      "adt": {}
+    },
+    "core::iter::ExactSizeIterator::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the exact remaining length of the iterator.\n\n The implementation ensures that the iterator will return exactly `len()`\n more times a [`Some(T)`] value, before returning [`None`].\n This method has a default implementation, so you usually should not\n implement it directly. However, if you can provide a more efficient\n implementation, you can do so. See the [trait-level] docs for an\n example.\n\n This function has the same safety guarantees as the\n [`Iterator::size_hint`] function.\n\n [trait-level]: ExactSizeIterator\n [`Some(T)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n // a finite range knows exactly how many times it will iterate\n let mut range = 0..5;\n\n assert_eq!(5, range.len());\n let _ = range.next();\n assert_eq!(4, range.len());\n ```\n",
+      "adt": {}
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::copy": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination may overlap.\n\n If the source and destination will *never* overlap,\n [`copy_nonoverlapping`] can be used instead.\n\n `copy` is semantically equivalent to C's [`memmove`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n Copying takes place as if the bytes were copied from `src`\n to a temporary array and then copied from the array to `dst`.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memmove`]: https://en.cppreference.com/w/c/string/byte/memmove\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes, and must remain valid even\n   when `src` is read for `count * size_of::<T>()` bytes. (This means if the memory ranges\n   overlap, the `dst` pointer must not be invalidated by `src` reads.)\n\n * Both `src` and `dst` must be properly aligned.\n\n Like [`read`], `copy` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using both the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Efficiently create a Rust vector from an unsafe buffer:\n\n ```\n use std::ptr;\n\n /// # Safety\n ///\n /// * `ptr` must be correctly aligned for its type and non-zero.\n /// * `ptr` must be valid for reads of `elts` contiguous elements of type `T`.\n /// * Those elements must not be used after calling this function unless `T: Copy`.\n # #[allow(dead_code)]\n unsafe fn from_buf_raw<T>(ptr: *const T, elts: usize) -> Vec<T> {\n     let mut dst = Vec::with_capacity(elts);\n\n     // SAFETY: Our precondition ensures the source is aligned and valid,\n     // and `Vec::with_capacity` ensures that we have usable space to write them.\n     unsafe { ptr::copy(ptr, dst.as_mut_ptr(), elts); }\n\n     // SAFETY: We created it with this much capacity earlier,\n     // and the previous `copy` has initialized these elements.\n     unsafe { dst.set_len(elts); }\n     dst\n }\n ```\n",
+      "adt": {}
+    },
+    "vec::Vec::<T>::from_parts": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a `Vec<T>` directly from a `NonNull` pointer, a length, and a capacity.\n\n # Safety\n\n This is highly unsafe, due to the number of invariants that aren't\n checked:\n\n * `ptr` must have been allocated using the global allocator, such as via\n   the [`alloc::alloc`] function.\n * `T` needs to have the same alignment as what `ptr` was allocated with.\n   (`T` having a less strict alignment is not sufficient, the alignment really\n   needs to be equal to satisfy the [`dealloc`] requirement that memory must be\n   allocated and deallocated with the same layout.)\n * The size of `T` times the `capacity` (ie. the allocated size in bytes) needs\n   to be the same size as the pointer was allocated with. (Because similar to\n   alignment, [`dealloc`] must be called with the same layout `size`.)\n * `length` needs to be less than or equal to `capacity`.\n * The first `length` values must be properly initialized values of type `T`.\n * `capacity` needs to be the capacity that the pointer was allocated with.\n * The allocated size in bytes must be no larger than `isize::MAX`.\n   See the safety documentation of [`pointer::offset`].\n\n These requirements are always upheld by any `ptr` that has been allocated\n via `Vec<T>`. Other allocation sources are allowed if the invariants are\n upheld.\n\n Violating these may cause problems like corrupting the allocator's\n internal data structures. For example it is normally **not** safe\n to build a `Vec<u8>` from a pointer to a C `char` array with length\n `size_t`, doing so is only safe if the array was initially allocated by\n a `Vec` or `String`.\n It's also not safe to build one from a `Vec<u16>` and its length, because\n the allocator cares about the alignment, and these two types have different\n alignments. The buffer was allocated with alignment 2 (for `u16`), but after\n turning it into a `Vec<u8>` it'll be deallocated with alignment 1. To avoid\n these issues, it is often preferable to do casting/transmuting using\n [`NonNull::slice_from_raw_parts`] instead.\n\n The ownership of `ptr` is effectively transferred to the\n `Vec<T>` which may then deallocate, reallocate or change the\n contents of memory pointed to by the pointer at will. Ensure\n that nothing else uses the pointer after calling this\n function.\n\n [`String`]: crate::string::String\n [`alloc::alloc`]: crate::alloc::alloc\n [`dealloc`]: crate::alloc::GlobalAlloc::dealloc\n\n # Examples\n\n ```\n #![feature(box_vec_non_null)]\n\n let v = vec![1, 2, 3];\n\n // Deconstruct the vector into parts.\n let (p, len, cap) = v.into_parts();\n\n unsafe {\n     // Overwrite memory with 4, 5, 6\n     for i in 0..len {\n         p.add(i).write(4 + i);\n     }\n\n     // Put everything back together into a Vec\n     let rebuilt = Vec::from_parts(p, len, cap);\n     assert_eq!(rebuilt, [4, 5, 6]);\n }\n ```\n\n Using memory that was allocated elsewhere:\n\n ```rust\n #![feature(box_vec_non_null)]\n\n use std::alloc::{alloc, Layout};\n use std::ptr::NonNull;\n\n fn main() {\n     let layout = Layout::array::<u32>(16).expect(\"overflow cannot happen\");\n\n     let vec = unsafe {\n         let Some(mem) = NonNull::new(alloc(layout).cast::<u32>()) else {\n             return;\n         };\n\n         mem.write(1_000_000);\n\n         Vec::from_parts(mem, 1, 16)\n     };\n\n     assert_eq!(vec, &[1_000_000]);\n     assert_eq!(vec.capacity(), 16);\n }\n ```\n",
+      "adt": {
+        "vec::Vec": "Constructor"
+      }
+    },
+    "vec::Vec::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new, empty `Vec<T>`.\n\n The vector will not allocate until elements are pushed onto it.\n\n # Examples\n\n ```\n # #![allow(unused_mut)]\n let mut vec: Vec<i32> = Vec::new();\n ```\n",
+      "adt": {
+        "vec::Vec": "Constructor"
+      }
+    },
+    "vec::spec_extend::SpecExtend::spec_extend": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "Ref",
+      "Plain"
+    ],
+    "vec::into_iter::IntoIter": [
+      "Unknown([Field(0, Ty { id: 101, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])",
+      "Unknown([Field(4, Ty { id: 101, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])",
+      "Ref",
+      "Plain",
+      "Unknown([Field(2, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(4)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "vec::Vec": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 2309,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/spec_from_iter.rs:38:5: 63:6",
+  "src": "fn from_iter(iterator: IntoIter<T>) -> Self {\n        // A common case is passing a vector into a function which immediately\n        // re-collects into a vector. We can short circuit this if the IntoIter\n        // has not been advanced at all.\n        // When it has been advanced We can also reuse the memory and move the data to the front.\n        // But we only do so when the resulting Vec wouldn't have more unused capacity\n        // than creating it through the generic FromIterator implementation would. That limitation\n        // is not strictly necessary as Vec's allocation behavior is intentionally unspecified.\n        // But it is a conservative choice.\n        let has_advanced = iterator.buf != iterator.ptr;\n        if !has_advanced || iterator.len() >= iterator.cap / 2 {\n            unsafe {\n                let it = ManuallyDrop::new(iterator);\n                if has_advanced {\n                    ptr::copy(it.ptr.as_ptr(), it.buf.as_ptr(), it.len());\n                }\n                return Vec::from_parts(it.buf, it.len(), it.cap);\n            }\n        }\n\n        let mut vec = Vec::new();\n        // must delegate to spec_extend() since extend() itself delegates\n        // to spec_from for empty Vecs\n        vec.spec_extend(iterator);\n        vec\n    }",
+  "mir": "fn <vec::Vec<T> as vec::spec_from_iter::SpecFromIter<T, vec::into_iter::IntoIter<T>>>::from_iter(_1: vec::into_iter::IntoIter<T>) -> vec::Vec<T> {\n    let mut _0: vec::Vec<T>;\n    let  _2: bool;\n    let mut _3: &core::ptr::NonNull<T>;\n    let mut _4: &core::ptr::NonNull<T>;\n    let mut _5: bool;\n    let mut _6: usize;\n    let mut _7: &vec::into_iter::IntoIter<T>;\n    let mut _8: usize;\n    let mut _9: usize;\n    let mut _10: bool;\n    let  _11: core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>>;\n    let  _12: ();\n    let mut _13: *const T;\n    let mut _14: *mut T;\n    let mut _15: core::ptr::NonNull<T>;\n    let mut _16: &vec::into_iter::IntoIter<T>;\n    let mut _17: &core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>>;\n    let mut _18: *mut T;\n    let mut _19: core::ptr::NonNull<T>;\n    let mut _20: &vec::into_iter::IntoIter<T>;\n    let mut _21: &core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>>;\n    let mut _22: usize;\n    let  _23: &vec::into_iter::IntoIter<T>;\n    let mut _24: &core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>>;\n    let mut _25: core::ptr::NonNull<T>;\n    let mut _26: &vec::into_iter::IntoIter<T>;\n    let mut _27: &core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>>;\n    let mut _28: usize;\n    let  _29: &vec::into_iter::IntoIter<T>;\n    let mut _30: &core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>>;\n    let mut _31: usize;\n    let mut _32: &vec::into_iter::IntoIter<T>;\n    let mut _33: &core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>>;\n    let mut _34: vec::Vec<T>;\n    let  _35: ();\n    let mut _36: &mut vec::Vec<T>;\n    debug iterator => _1;\n    debug has_advanced => _2;\n    debug it => _11;\n    debug vec => _34;\n    bb0: {\n        StorageLive(_3);\n        _3 = &(_1.0: core::ptr::NonNull<T>);\n        StorageLive(_4);\n        _4 = &(_1.4: core::ptr::NonNull<T>);\n        _2 = <core::ptr::NonNull<T> as core::cmp::PartialEq>::ne(move _3, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageDead(_3);\n        switchInt(_2) -> [0: bb6, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &_1;\n        _6 = <vec::into_iter::IntoIter<T> as core::iter::ExactSizeIterator>::len(move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = (_1.2: usize);\n        _10 = Eq(2_usize, 0_usize);\n        assert(!move _10, \"attempt to divide `{}` by zero\", _9) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _8 = Div(move _9, 2_usize);\n        StorageDead(_9);\n        _5 = Ge(move _6, move _8);\n        switchInt(move _5) -> [0: bb22, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_8);\n        StorageDead(_6);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageLive(_11);\n        _11 = core::mem::ManuallyDrop::<vec::into_iter::IntoIter<T>>::new(_1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        switchInt(_2) -> [0: bb16, otherwise: bb8];\n    }\n    bb8: {\n        StorageLive(_13);\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &_11;\n        _16 = <core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>> as core::ops::Deref>::deref(move _17) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_17);\n        _15 = ((*_16).4: core::ptr::NonNull<T>);\n        _14 = core::ptr::NonNull::<T>::as_ptr(move _15) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _13 = move _14 as *const T;\n        StorageDead(_15);\n        StorageDead(_14);\n        StorageLive(_18);\n        StorageLive(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = &_11;\n        _20 = <core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>> as core::ops::Deref>::deref(move _21) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_21);\n        _19 = ((*_20).0: core::ptr::NonNull<T>);\n        _18 = core::ptr::NonNull::<T>::as_ptr(move _19) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_19);\n        StorageLive(_22);\n        StorageLive(_24);\n        _24 = &_11;\n        _23 = <core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>> as core::ops::Deref>::deref(move _24) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_24);\n        _22 = <vec::into_iter::IntoIter<T> as core::iter::ExactSizeIterator>::len(_23) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        _12 = core::ptr::copy::<T>(move _13, move _18, move _22) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_22);\n        StorageDead(_18);\n        StorageDead(_13);\n        StorageDead(_20);\n        StorageDead(_16);\n        goto -> bb16;\n    }\n    bb16: {\n        StorageLive(_25);\n        StorageLive(_26);\n        StorageLive(_27);\n        _27 = &_11;\n        _26 = <core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>> as core::ops::Deref>::deref(move _27) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_27);\n        _25 = ((*_26).0: core::ptr::NonNull<T>);\n        StorageLive(_28);\n        StorageLive(_30);\n        _30 = &_11;\n        _29 = <core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>> as core::ops::Deref>::deref(move _30) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_30);\n        _28 = <vec::into_iter::IntoIter<T> as core::iter::ExactSizeIterator>::len(_29) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageLive(_31);\n        StorageLive(_32);\n        StorageLive(_33);\n        _33 = &_11;\n        _32 = <core::mem::ManuallyDrop<vec::into_iter::IntoIter<T>> as core::ops::Deref>::deref(move _33) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_33);\n        _31 = ((*_32).2: usize);\n        _0 = vec::Vec::<T>::from_parts(move _25, move _28, move _31) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_31);\n        StorageDead(_28);\n        StorageDead(_25);\n        StorageDead(_32);\n        StorageDead(_26);\n        StorageDead(_11);\n        StorageDead(_5);\n        goto -> bb25;\n    }\n    bb22: {\n        StorageDead(_8);\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_34);\n        _34 = vec::Vec::<T>::new() -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageLive(_36);\n        _36 = &mut _34;\n        _35 = <vec::Vec<T> as vec::spec_extend::SpecExtend<T, vec::into_iter::IntoIter<T>>>::spec_extend(move _36, _1) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        StorageDead(_36);\n        _0 = move _34;\n        StorageDead(_34);\n        goto -> bb25;\n    }\n    bb25: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

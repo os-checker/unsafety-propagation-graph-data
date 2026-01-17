@@ -1,0 +1,78 @@
+{
+  "name": "sys::personality::gcc::find_eh_action",
+  "safe": false,
+  "callees": {
+    "unwind::_Unwind_GetLanguageSpecificData": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "unwind::_Unwind_GetIPInfo": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::wrapping_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts an unsigned offset from a pointer using wrapping arithmetic.\n\n `count` is in units of T; e.g., a `count` of 3 represents a pointer\n offset of `3 * size_of::<T>()` bytes.\n\n # Safety\n\n This operation itself is always safe, but using the resulting pointer is not.\n\n The resulting pointer \"remembers\" the [allocation] that `self` points to; it must not\n be used to read or write other allocations.\n\n In other words, `let z = x.wrapping_sub((x as usize) - (y as usize))` does *not* make `z`\n the same as `y` even if we assume `T` has size `1` and there is no overflow: `z` is still\n attached to the object `x` is attached to, and dereferencing it is Undefined Behavior unless\n `x` and `y` point into the same allocation.\n\n Compared to [`sub`], this method basically delays the requirement of staying within the\n same allocation: [`sub`] is immediate Undefined Behavior when crossing object\n boundaries; `wrapping_sub` produces a pointer but still leads to Undefined Behavior if a\n pointer is dereferenced when it is out-of-bounds of the object it is attached to. [`sub`]\n can be optimized better and is thus preferable in performance-sensitive code.\n\n The delayed check only considers the value of the pointer that was dereferenced, not the\n intermediate values used during the computation of the final result. For example,\n `x.wrapping_add(o).wrapping_sub(o)` is always the same as `x`. In other words, leaving the\n allocation and then re-entering it later is permitted.\n\n [`sub`]: #method.sub\n [allocation]: crate::ptr#allocation\n\n # Examples\n\n ```\n # use std::fmt::Write;\n // Iterate using a raw pointer in increments of two elements (backwards)\n let data = [1u8, 2, 3, 4, 5];\n let mut ptr: *const u8 = data.as_ptr();\n let start_rounded_down = ptr.wrapping_sub(2);\n ptr = ptr.wrapping_add(4);\n let step = 2;\n let mut out = String::new();\n while ptr != start_rounded_down {\n     unsafe {\n         write!(&mut out, \"{}, \", *ptr)?;\n     }\n     ptr = ptr.wrapping_sub(step);\n }\n assert_eq!(out, \"5, 3, 1, \");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {}
+    },
+    "unwind::_Unwind_GetRegionStart": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "sys::personality::dwarf::eh::find_eh_action": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::personality::dwarf::eh::EHContext": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sys::personality::dwarf::eh::EHContext": [
+      "Plain",
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 4072,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/personality/gcc.rs:323:1: 340:2",
+  "src": "unsafe fn find_eh_action(context: *mut uw::_Unwind_Context) -> Result<EHAction, ()> {\n    unsafe {\n        let lsda = uw::_Unwind_GetLanguageSpecificData(context) as *const u8;\n        let mut ip_before_instr: c_int = 0;\n        let ip = uw::_Unwind_GetIPInfo(context, &mut ip_before_instr);\n        let eh_context = EHContext {\n            // The return address points 1 byte past the call instruction,\n            // which could be in the next IP range in LSDA range table.\n            //\n            // `ip = -1` has special meaning, so use wrapping sub to allow for that\n            ip: if ip_before_instr != 0 { ip } else { ip.wrapping_sub(1) },\n            func_start: uw::_Unwind_GetRegionStart(context),\n            get_text_start: &|| uw::_Unwind_GetTextRelBase(context),\n            get_data_start: &|| uw::_Unwind_GetDataRelBase(context),\n        };\n        eh::find_eh_action(lsda, &eh_context)\n    }\n}",
+  "mir": "fn sys::personality::gcc::find_eh_action(_1: *mut unwind::_Unwind_Context) -> core::result::Result<sys::personality::dwarf::eh::EHAction, ()> {\n    let mut _0: core::result::Result<sys::personality::dwarf::eh::EHAction, ()>;\n    let  _2: *const u8;\n    let mut _3: *mut libc::c_void;\n    let mut _4: i32;\n    let  _5: *const u8;\n    let mut _6: *mut i32;\n    let mut _7: &mut i32;\n    let  _8: sys::personality::dwarf::eh::EHContext<'_>;\n    let mut _9: *const u8;\n    let mut _10: i32;\n    let mut _11: *const u8;\n    let mut _12: &dyn core::ops::Fn() -> *const u8;\n    let  _13: &{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/personality/gcc.rs:335:30: 335:32};\n    let  _14: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/personality/gcc.rs:335:30: 335:32};\n    let mut _15: &*mut unwind::_Unwind_Context;\n    let mut _16: &dyn core::ops::Fn() -> *const u8;\n    let  _17: &{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/personality/gcc.rs:336:30: 336:32};\n    let  _18: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/personality/gcc.rs:336:30: 336:32};\n    let mut _19: &*mut unwind::_Unwind_Context;\n    let  _20: &sys::personality::dwarf::eh::EHContext<'_>;\n    debug context => _1;\n    debug lsda => _2;\n    debug ip_before_instr => _4;\n    debug ip => _5;\n    debug eh_context => _8;\n    bb0: {\n        StorageLive(_3);\n        _3 = unwind::_Unwind_GetLanguageSpecificData(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = move _3 as *const u8;\n        StorageDead(_3);\n        StorageLive(_4);\n        _4 = 0_i32;\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &mut _4;\n        _6 = &raw mut (*_7);\n        _5 = unwind::_Unwind_GetIPInfo(_1, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = _4;\n        switchInt(move _10) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_10);\n        _9 = _5;\n        goto -> bb6;\n    }\n    bb4: {\n        StorageDead(_10);\n        _9 = core::ptr::const_ptr::<impl *const u8>::wrapping_sub(_5, 1_usize) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        goto -> bb6;\n    }\n    bb6: {\n        StorageLive(_11);\n        _11 = unwind::_Unwind_GetRegionStart(_1) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageLive(_12);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = &_1;\n        _14 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/personality/gcc.rs:335:30: 335:32}(move _15);\n        StorageDead(_15);\n        _13 = &_14;\n        _12 = _13 as &dyn core::ops::Fn() -> *const u8;\n        StorageLive(_16);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = &_1;\n        _18 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/personality/gcc.rs:336:30: 336:32}(move _19);\n        StorageDead(_19);\n        _17 = &_18;\n        _16 = _17 as &dyn core::ops::Fn() -> *const u8;\n        _8 = EHContext(move _9, move _11, move _12, move _16);\n        StorageDead(_16);\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_9);\n        _20 = &_8;\n        _0 = sys::personality::dwarf::eh::find_eh_action(_2, _20) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_18);\n        StorageDead(_14);\n        StorageDead(_8);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

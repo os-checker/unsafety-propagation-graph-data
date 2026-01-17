@@ -1,0 +1,65 @@
+{
+  "name": "slice::<impl [T]>::as_chunks",
+  "safe": true,
+  "callees": {
+    "fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {
+        "fmt::Arguments": "ImmutableAsArgument"
+      }
+    },
+    "slice::<impl [T]>::split_at_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one slice into two at an index, without doing bounds checking.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n For a safe alternative see [`split_at`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used. The caller has to ensure that\n `0 <= mid <= self.len()`.\n\n [`split_at`]: slice::split_at\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let v = ['a', 'b', 'c'];\n\n unsafe {\n    let (left, right) = v.split_at_unchecked(0);\n    assert_eq!(left, []);\n    assert_eq!(right, ['a', 'b', 'c']);\n }\n\n unsafe {\n     let (left, right) = v.split_at_unchecked(2);\n     assert_eq!(left, ['a', 'b']);\n     assert_eq!(right, ['c']);\n }\n\n unsafe {\n     let (left, right) = v.split_at_unchecked(3);\n     assert_eq!(left, ['a', 'b', 'c']);\n     assert_eq!(right, []);\n }\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_chunks_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Splits the slice into a slice of `N`-element arrays,\n assuming that there's no remainder.\n\n This is the inverse operation to [`as_flattened`].\n\n [`as_flattened`]: slice::as_flattened\n\n As this is `unsafe`, consider whether you could use [`as_chunks`] or\n [`as_rchunks`] instead, perhaps via something like\n `if let (chunks, []) = slice.as_chunks()` or\n `let (chunks, []) = slice.as_chunks() else { unreachable!() };`.\n\n [`as_chunks`]: slice::as_chunks\n [`as_rchunks`]: slice::as_rchunks\n\n # Safety\n\n This may only be called when\n - The slice splits exactly into `N`-element chunks (aka `self.len() % N == 0`).\n - `N != 0`.\n\n # Examples\n\n ```\n let slice: &[char] = &['l', 'o', 'r', 'e', 'm', '!'];\n let chunks: &[[char; 1]] =\n     // SAFETY: 1-element chunks never have remainder\n     unsafe { slice.as_chunks_unchecked() };\n assert_eq!(chunks, &[['l'], ['o'], ['r'], ['e'], ['m'], ['!']]);\n let chunks: &[[char; 3]] =\n     // SAFETY: The slice length (6) is a multiple of 3\n     unsafe { slice.as_chunks_unchecked() };\n assert_eq!(chunks, &[['l', 'o', 'r'], ['e', 'm', '!']]);\n\n // These would be unsound:\n // let chunks: &[[_; 5]] = slice.as_chunks_unchecked() // The slice length is not a multiple of 5\n // let chunks: &[[_; 0]] = slice.as_chunks_unchecked() // Zero-length chunks are never allowed\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 1229,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:1395:5: 1405:6",
+  "src": "pub const fn as_chunks<const N: usize>(&self) -> (&[[T; N]], &[T]) {\n        assert!(N != 0, \"chunk size must be non-zero\");\n        let len_rounded_down = self.len() / N * N;\n        // SAFETY: The rounded-down value is always the same or smaller than the\n        // original length, and thus must be in-bounds of the slice.\n        let (multiple_of_n, remainder) = unsafe { self.split_at_unchecked(len_rounded_down) };\n        // SAFETY: We already panicked for zero, and ensured by construction\n        // that the length of the subslice is a multiple of N.\n        let array_slice = unsafe { multiple_of_n.as_chunks_unchecked() };\n        (array_slice, remainder)\n    }",
+  "mir": "fn slice::<impl [T]>::as_chunks(_1: &[T]) -> (&[[T; N]], &[T]) {\n    let mut _0: (&[[T; N]], &[T]);\n    let mut _2: bool;\n    let  _3: !;\n    let mut _4: fmt::Arguments<'_>;\n    let  _5: usize;\n    let mut _6: usize;\n    let mut _7: usize;\n    let mut _8: bool;\n    let mut _9: (usize, bool);\n    let  _10: &[T];\n    let  _11: &[T];\n    let mut _12: (&[T], &[T]);\n    let  _13: &[[T; N]];\n    debug self => _1;\n    debug len_rounded_down => _5;\n    debug multiple_of_n => _10;\n    debug remainder => _11;\n    debug array_slice => _13;\n    bb0: {\n        StorageLive(_2);\n        _2 = Ne(N, 0_usize);\n        switchInt(move _2) -> [0: bb1, otherwise: bb3];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = fmt::Arguments::<'_>::from_str(\"chunk size must be non-zero\") -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = panicking::panic_fmt(move _4) -> unwind unreachable;\n    }\n    bb3: {\n        StorageDead(_2);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = PtrMetadata(_1);\n        _8 = Eq(N, 0_usize);\n        assert(!move _8, \"attempt to divide `{}` by zero\", _7) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _6 = Div(move _7, N);\n        StorageDead(_7);\n        _9 = CheckedMul(_6, N);\n        assert(!move (_9.1: bool), \"attempt to compute `{} * {}`, which would overflow\", move _6, N) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _5 = move (_9.0: usize);\n        StorageDead(_6);\n        StorageLive(_12);\n        _12 = slice::<impl [T]>::split_at_unchecked(_1, _5) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _10 = (_12.0: &[T]);\n        _11 = (_12.1: &[T]);\n        StorageDead(_12);\n        _13 = slice::<impl [T]>::as_chunks_unchecked::<N>(_10) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _0 = (_13, _11);\n        return;\n    }\n}\n",
+  "doc": " Splits the slice into a slice of `N`-element arrays,\n starting at the beginning of the slice,\n and a remainder slice with length strictly less than `N`.\n\n The remainder is meaningful in the division sense.  Given\n `let (chunks, remainder) = slice.as_chunks()`, then:\n - `chunks.len()` equals `slice.len() / N`,\n - `remainder.len()` equals `slice.len() % N`, and\n - `slice.len()` equals `chunks.len() * N + remainder.len()`.\n\n You can flatten the chunks back into a slice-of-`T` with [`as_flattened`].\n\n [`as_flattened`]: slice::as_flattened\n\n # Panics\n\n Panics if `N` is zero.\n\n Note that this check is against a const generic parameter, not a runtime\n value, and thus a particular monomorphization will either always panic\n or it will never panic.\n\n # Examples\n\n ```\n let slice = ['l', 'o', 'r', 'e', 'm'];\n let (chunks, remainder) = slice.as_chunks();\n assert_eq!(chunks, &[['l', 'o'], ['r', 'e']]);\n assert_eq!(remainder, &['m']);\n ```\n\n If you expect the slice to be an exact multiple, you can combine\n `let`-`else` with an empty slice pattern:\n ```\n let slice = ['R', 'u', 's', 't'];\n let (chunks, []) = slice.as_chunks::<2>() else {\n     panic!(\"slice didn't have even length\")\n };\n assert_eq!(chunks, &[['R', 'u'], ['s', 't']]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

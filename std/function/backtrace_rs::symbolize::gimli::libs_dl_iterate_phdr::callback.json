@@ -1,0 +1,248 @@
+{
+  "name": "backtrace_rs::symbolize::gimli::libs_dl_iterate_phdr::callback",
+  "safe": false,
+  "callees": {
+    "core::ptr::const_ptr::<impl *const T>::is_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"Follow the rabbit\";\n let ptr: *const u8 = s.as_ptr();\n assert!(!ptr.is_null());\n ```\n",
+      "adt": {}
+    },
+    "env::current_exe": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the full filesystem path of the current running executable.\n\n # Platform-specific behavior\n\n If the executable was invoked through a symbolic link, some platforms will\n return the path of the symbolic link and other platforms will return the\n path of the symbolic link’s target.\n\n If the executable is renamed while it is running, platforms may return the\n path at the time it was loaded instead of the new path.\n\n # Errors\n\n Acquiring the path of the current executable is a platform-specific operation\n that can fail for a good number of reasons. Some errors can include, but not\n be limited to, filesystem operations failing or general syscall failures.\n\n # Security\n\n The output of this function should not be trusted for anything\n that might have security implications. Basically, if users can run\n the executable, they can change the output arbitrarily.\n\n As an example, you can easily introduce a race condition. It goes\n like this:\n\n 1. You get the path to the current executable using `current_exe()`, and\n    store it in a variable.\n 2. Time passes. A malicious actor removes the current executable, and\n    replaces it with a malicious one.\n 3. You then use the stored path to re-execute the current\n    executable.\n\n You expected to safely execute the current executable, but you're\n instead executing something completely different. The code you\n just executed run with your privileges.\n\n This sort of behavior has been known to [lead to privilege escalation] when\n used incorrectly.\n\n [lead to privilege escalation]: https://securityvulns.com/Wdocument183.html\n\n # Examples\n\n ```\n use std::env;\n\n match env::current_exe() {\n     Ok(exe_path) => println!(\"Path of this executable is: {}\",\n                              exe_path.display()),\n     Err(e) => println!(\"failed to get current exe path: {e}\"),\n };\n ```\n",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "path::PathBuf": "Constructor"
+      }
+    },
+    "core::result::Result::<T, E>::unwrap_or_default": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Ok`] value or a default\n\n Consumes the `self` argument then, if [`Ok`], returns the contained\n value, otherwise if [`Err`], returns the default value for that\n type.\n\n # Examples\n\n Converts a string to an integer, turning poorly-formed strings\n into 0 (the default value for integers). [`parse`] converts\n a string to any other type that implements [`FromStr`], returning an\n [`Err`] on error.\n\n ```\n let good_year_from_input = \"1909\";\n let bad_year_from_input = \"190blarg\";\n let good_year = good_year_from_input.parse().unwrap_or_default();\n let bad_year = bad_year_from_input.parse().unwrap_or_default();\n\n assert_eq!(1909, good_year);\n assert_eq!(0, bad_year);\n ```\n\n [`parse`]: str::parse\n [`FromStr`]: crate::str::FromStr\n",
+      "adt": {}
+    },
+    "path::PathBuf::into_os_string": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the `PathBuf`, yielding its internal [`OsString`] storage.\n\n # Examples\n\n ```\n use std::path::PathBuf;\n\n let p = PathBuf::from(\"/the/head\");\n let os_str = p.into_os_string();\n ```\n",
+      "adt": {
+        "ffi::os_str::OsString": "Constructor"
+      }
+    },
+    "backtrace_rs::symbolize::gimli::libs_dl_iterate_phdr::infer_current_exe": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "ffi::os_str::OsString": "Constructor",
+        "core::option::Option": "MutableAsArgument"
+      }
+    },
+    "ffi::os_str::OsString::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new empty `OsString`.\n\n # Examples\n\n ```\n use std::ffi::OsString;\n\n let os_string = OsString::new();\n ```\n",
+      "adt": {
+        "ffi::os_str::OsString": "Constructor"
+      }
+    },
+    "core::ffi::CStr::from_ptr": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wraps a raw C string with a safe C string wrapper.\n\n This function will wrap the provided `ptr` with a `CStr` wrapper, which\n allows inspection and interoperation of non-owned C strings. The total\n size of the terminated buffer must be smaller than [`isize::MAX`] **bytes**\n in memory (a restriction from [`slice::from_raw_parts`]).\n\n # Safety\n\n * The memory pointed to by `ptr` must contain a valid nul terminator at the\n   end of the string.\n\n * `ptr` must be [valid] for reads of bytes up to and including the nul terminator.\n   This means in particular:\n\n     * The entire memory range of this `CStr` must be contained within a single allocation!\n     * `ptr` must be non-null even for a zero-length cstr.\n\n * The memory referenced by the returned `CStr` must not be mutated for\n   the duration of lifetime `'a`.\n\n * The nul terminator must be within `isize::MAX` from `ptr`\n\n > **Note**: This operation is intended to be a 0-cost cast but it is\n > currently implemented with an up-front calculation of the length of\n > the string. This is not guaranteed to always be the case.\n\n # Caveat\n\n The lifetime for the returned slice is inferred from its usage. To prevent accidental misuse,\n it's suggested to tie the lifetime to whichever source lifetime is safe in the context,\n such as by providing a helper function taking the lifetime of a host value for the slice,\n or by explicit annotation.\n\n # Examples\n\n ```\n use std::ffi::{c_char, CStr};\n\n fn my_string() -> *const c_char {\n     c\"hello\".as_ptr()\n }\n\n unsafe {\n     let slice = CStr::from_ptr(my_string());\n     assert_eq!(slice.to_str().unwrap(), \"hello\");\n }\n ```\n\n ```\n use std::ffi::{c_char, CStr};\n\n const HELLO_PTR: *const c_char = {\n     const BYTES: &[u8] = b\"Hello, world!\\0\";\n     BYTES.as_ptr().cast()\n };\n const HELLO: &CStr = unsafe { CStr::from_ptr(HELLO_PTR) };\n\n assert_eq!(c\"Hello, world!\", HELLO);\n ```\n\n [valid]: core::ptr#safety\n",
+      "adt": {}
+    },
+    "core::ffi::CStr::to_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts this C string to a byte slice.\n\n The returned slice will **not** contain the trailing nul terminator that this C\n string has.\n\n > **Note**: This method is currently implemented as a constant-time\n > cast, but it is planned to alter its definition in the future to\n > perform the length calculation whenever this method is called.\n\n # Examples\n\n ```\n assert_eq!(c\"foo\".to_bytes(), b\"foo\");\n ```\n",
+      "adt": {}
+    },
+    "os::unix::ffi::os_str::OsStrExt::from_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an [`OsStr`] from a byte slice.\n\n See the module documentation for an example.\n",
+      "adt": {}
+    },
+    "alloc_crate::borrow::ToOwned::to_owned": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates owned data from borrowed data, usually by cloning.\n\n # Examples\n\n Basic usage:\n\n ```\n let s: &str = \"a\";\n let ss: String = s.to_owned();\n\n let v: &[i32] = &[1, 2];\n let vv: Vec<i32> = v.to_owned();\n ```\n",
+      "adt": {}
+    },
+    "core::slice::from_raw_parts": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forms a slice from a pointer and a length.\n\n The `len` argument is the number of **elements**, not the number of bytes.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for reads for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations. See [below](#incorrect-usage)\n       for an example incorrectly not taking this into account.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be mutated for the duration\n   of lifetime `'a`, except inside an `UnsafeCell`.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n # Caveat\n\n The lifetime for the returned slice is inferred from its usage. To\n prevent accidental misuse, it's suggested to tie the lifetime to whichever\n source lifetime is safe in the context, such as by providing a helper\n function taking the lifetime of a host value for the slice, or by explicit\n annotation.\n\n # Examples\n\n ```\n use std::slice;\n\n // manifest a slice for a single element\n let x = 42;\n let ptr = &x as *const _;\n let slice = unsafe { slice::from_raw_parts(ptr, 1) };\n assert_eq!(slice[0], 42);\n ```\n\n ### Incorrect usage\n\n The following `join_slices` function is **unsound** ⚠️\n\n ```rust,no_run\n use std::slice;\n\n fn join_slices<'a, T>(fst: &'a [T], snd: &'a [T]) -> &'a [T] {\n     let fst_end = fst.as_ptr().wrapping_add(fst.len());\n     let snd_start = snd.as_ptr();\n     assert_eq!(fst_end, snd_start, \"Slices must be contiguous!\");\n     unsafe {\n         // The assertion above ensures `fst` and `snd` are contiguous, but they might\n         // still be contained within _different allocations_, in which case\n         // creating this slice is undefined behavior.\n         slice::from_raw_parts(fst.as_ptr(), fst.len() + snd.len())\n     }\n }\n\n fn main() {\n     // `a` and `b` are different allocations...\n     let a = 42;\n     let b = 27;\n     // ... which may nevertheless be laid out contiguously in memory: | a | b |\n     let _ = join_slices(slice::from_ref(&a), slice::from_ref(&b)); // UB\n }\n ```\n\n ### FFI: Handling null pointers\n\n In languages such as C++, pointers to empty collections are not guaranteed to be non-null.\n When accepting such pointers, they have to be checked for null-ness to avoid undefined\n behavior.\n\n ```\n use std::slice;\n\n /// Sum the elements of an FFI slice.\n ///\n /// # Safety\n ///\n /// If ptr is not NULL, it must be correctly aligned and\n /// point to `len` initialized items of type `f32`.\n unsafe extern \"C\" fn sum_slice(ptr: *const f32, len: usize) -> f32 {\n     let data = if ptr.is_null() {\n         // `len` is assumed to be 0.\n         &[]\n     } else {\n         // SAFETY: see function docstring.\n         unsafe { slice::from_raw_parts(ptr, len) }\n     };\n     data.into_iter().sum()\n }\n\n // This could be the result of C++'s std::vector::data():\n let ptr = std::ptr::null();\n // And this could be std::vector::size():\n let len = 0;\n assert_eq!(unsafe { sum_slice(ptr, len) }, 0.0);\n ```\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the slice.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let mut iterator = x.iter();\n\n assert_eq!(iterator.next(), Some(&1));\n assert_eq!(iterator.next(), Some(&2));\n assert_eq!(iterator.next(), Some(&4));\n assert_eq!(iterator.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes a closure and creates an iterator which calls that closure on each\n element.\n\n `map()` transforms one iterator into another, by means of its argument:\n something that implements [`FnMut`]. It produces a new iterator which\n calls this closure on each element of the original iterator.\n\n If you are good at thinking in types, you can think of `map()` like this:\n If you have an iterator that gives you elements of some type `A`, and\n you want an iterator of some other type `B`, you can use `map()`,\n passing a closure that takes an `A` and returns a `B`.\n\n `map()` is conceptually similar to a [`for`] loop. However, as `map()` is\n lazy, it is best used when you're already working with other iterators.\n If you're doing some sort of looping for a side effect, it's considered\n more idiomatic to use [`for`] than `map()`.\n\n [`for`]: ../../book/ch03-05-control-flow.html#looping-through-a-collection-with-for\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.iter().map(|x| 2 * x);\n\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), Some(6));\n assert_eq!(iter.next(), None);\n ```\n\n If you're doing some sort of side effect, prefer [`for`] to `map()`:\n\n ```\n # #![allow(unused_must_use)]\n // don't do this:\n (0..5).map(|x| println!(\"{x}\"));\n\n // it won't even execute, as it is lazy. Rust will warn you about this.\n\n // Instead, use a for-loop:\n for x in 0..5 {\n     println!(\"{x}\");\n }\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::collect": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Transforms an iterator into a collection.\n\n `collect()` can take anything iterable, and turn it into a relevant\n collection. This is one of the more powerful methods in the standard\n library, used in a variety of contexts.\n\n The most basic pattern in which `collect()` is used is to turn one\n collection into another. You take a collection, call [`iter`] on it,\n do a bunch of transformations, and then `collect()` at the end.\n\n `collect()` can also create instances of types that are not typical\n collections. For example, a [`String`] can be built from [`char`]s,\n and an iterator of [`Result<T, E>`][`Result`] items can be collected\n into `Result<Collection<T>, E>`. See the examples below for more.\n\n Because `collect()` is so general, it can cause problems with type\n inference. As such, `collect()` is one of the few times you'll see\n the syntax affectionately known as the 'turbofish': `::<>`. This\n helps the inference algorithm understand specifically which collection\n you're trying to collect into.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let doubled: Vec<i32> = a.iter()\n                          .map(|x| x * 2)\n                          .collect();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Note that we needed the `: Vec<i32>` on the left-hand side. This is because\n we could collect into, for example, a [`VecDeque<T>`] instead:\n\n [`VecDeque<T>`]: ../../std/collections/struct.VecDeque.html\n\n ```\n use std::collections::VecDeque;\n\n let a = [1, 2, 3];\n\n let doubled: VecDeque<i32> = a.iter().map(|x| x * 2).collect();\n\n assert_eq!(2, doubled[0]);\n assert_eq!(4, doubled[1]);\n assert_eq!(6, doubled[2]);\n ```\n\n Using the 'turbofish' instead of annotating `doubled`:\n\n ```\n let a = [1, 2, 3];\n\n let doubled = a.iter().map(|x| x * 2).collect::<Vec<i32>>();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Because `collect()` only cares about what you're collecting into, you can\n still use a partial type hint, `_`, with the turbofish:\n\n ```\n let a = [1, 2, 3];\n\n let doubled = a.iter().map(|x| x * 2).collect::<Vec<_>>();\n\n assert_eq!(vec![2, 4, 6], doubled);\n ```\n\n Using `collect()` to make a [`String`]:\n\n ```\n let chars = ['g', 'd', 'k', 'k', 'n'];\n\n let hello: String = chars.into_iter()\n     .map(|x| x as u8)\n     .map(|x| (x + 1) as char)\n     .collect();\n\n assert_eq!(\"hello\", hello);\n ```\n\n If you have a list of [`Result<T, E>`][`Result`]s, you can use `collect()` to\n see if any of them failed:\n\n ```\n let results = [Ok(1), Err(\"nope\"), Ok(3), Err(\"bad\")];\n\n let result: Result<Vec<_>, &str> = results.into_iter().collect();\n\n // gives us the first error\n assert_eq!(Err(\"nope\"), result);\n\n let results = [Ok(1), Ok(3)];\n\n let result: Result<Vec<_>, &str> = results.into_iter().collect();\n\n // gives us the list of answers\n assert_eq!(Ok(vec![1, 3]), result);\n ```\n\n [`iter`]: Iterator::next\n [`String`]: ../../std/string/struct.String.html\n [`char`]: type@char\n",
+      "adt": {}
+    },
+    "alloc_crate::vec::Vec::<T, A>::push": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Appends an element to the back of a collection.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Examples\n\n ```\n let mut vec = vec![1, 2];\n vec.push(3);\n assert_eq!(vec, [1, 2, 3]);\n ```\n\n # Time complexity\n\n Takes amortized *O*(1) time. If the vector's length would exceed its\n capacity after the push, *O*(*capacity*) time is taken to copy the\n vector's elements to a larger allocation. This expensive operation is\n offset by the *capacity* *O*(1) insertions it allows.\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "alloc_crate::vec::Vec::<T, A>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the vector contains no elements.\n\n # Examples\n\n ```\n let mut v = Vec::new();\n assert!(v.is_empty());\n\n v.push(1);\n assert!(!v.is_empty());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain"
+    ],
+    "path::PathBuf": [
+      "Plain"
+    ],
+    "ffi::os_str::OsString": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "core::ffi::CStr": [
+      "Ref"
+    ],
+    "ffi::os_str::OsStr": [
+      "Ref"
+    ],
+    "core::slice::Iter": [
+      "Plain"
+    ],
+    "core::iter::Map": [
+      "Plain"
+    ],
+    "alloc_crate::vec::Vec": [
+      "Plain",
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "backtrace_rs::symbolize::gimli::Library": [
+      "Plain"
+    ],
+    "backtrace_rs::symbolize::gimli::libs_dl_iterate_phdr::CallbackData": [
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ]
+  },
+  "path": 508,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli/libs_dl_iterate_phdr.rs:55:1: 122:2",
+  "src": "unsafe extern \"C\" fn callback(\n    info: *mut libc::dl_phdr_info,\n    _size: libc::size_t,\n    data: *mut libc::c_void,\n) -> libc::c_int {\n    // SAFETY: We are guaranteed these fields:\n    let dlpi_addr = unsafe { (*info).dlpi_addr };\n    let dlpi_name = unsafe { (*info).dlpi_name };\n    let dlpi_phdr = unsafe { (*info).dlpi_phdr };\n    let dlpi_phnum = unsafe { (*info).dlpi_phnum };\n    // SAFETY: We assured this.\n    let CallbackData { libs, maps } = unsafe { &mut *data.cast::<CallbackData>() };\n    // most implementations give us the main program first\n    let is_main = libs.is_empty();\n    // we may be statically linked, which means we are main and mostly one big blob of code\n    let is_static = dlpi_addr == 0;\n    // sometimes we get a null or 0-len CStr, based on libc's whims, but these mean the same thing\n    let no_given_name = dlpi_name.is_null()\n        // SAFETY: we just checked for null\n        || unsafe { *dlpi_name == 0 };\n    let name = if is_static {\n        // don't try to look up our name from /proc/self/maps, it'll get silly\n        env::current_exe().unwrap_or_default().into_os_string()\n    } else if is_main && no_given_name {\n        infer_current_exe(&maps, dlpi_addr as usize)\n    } else {\n        // this fallback works even if we are main, because some platforms give the name anyways\n        if dlpi_name.is_null() {\n            OsString::new()\n        } else {\n            // SAFETY: we just checked for nullness\n            OsStr::from_bytes(unsafe { CStr::from_ptr(dlpi_name) }.to_bytes()).to_owned()\n        }\n    };\n    #[cfg(target_os = \"android\")]\n    let zip_offset: Option<u64> = {\n        // only check for ZIP-embedded file if we have data from /proc/self/maps\n        maps.as_ref().and_then(|maps| {\n            // check if file is embedded within a ZIP archive by searching for `!/`\n            super::extract_zip_path_android(&name).and_then(|_| {\n                // find MapsEntry matching library's base address and get its file offset\n                maps.iter()\n                    .find(|m| m.ip_matches(dlpi_addr as usize))\n                    .map(|m| m.offset())\n            })\n        })\n    };\n    let headers = if dlpi_phdr.is_null() || dlpi_phnum == 0 {\n        &[]\n    } else {\n        // SAFETY: We just checked for nullness or 0-len slices\n        unsafe { slice::from_raw_parts(dlpi_phdr, dlpi_phnum as usize) }\n    };\n    libs.push(Library {\n        name,\n        #[cfg(target_os = \"android\")]\n        zip_offset,\n        segments: headers\n            .iter()\n            .map(|header| LibrarySegment {\n                len: header.p_memsz as usize,\n                stated_virtual_memory_address: header.p_vaddr as usize,\n            })\n            .collect(),\n        bias: dlpi_addr as usize,\n    });\n    0\n}",
+  "mir": "fn backtrace_rs::symbolize::gimli::libs_dl_iterate_phdr::callback(_1: *mut libc::dl_phdr_info, _2: usize, _3: *mut libc::c_void) -> i32 {\n    let mut _0: i32;\n    let  _4: u64;\n    let  _5: *const u8;\n    let  _6: *const libc::Elf64_Phdr;\n    let  _7: u16;\n    let  _8: &mut alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::Library>;\n    let  _9: &mut core::option::Option<alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::parse_running_mmaps::MapsEntry>>;\n    let mut _10: &mut backtrace_rs::symbolize::gimli::libs_dl_iterate_phdr::CallbackData;\n    let mut _11: *mut backtrace_rs::symbolize::gimli::libs_dl_iterate_phdr::CallbackData;\n    let  _12: bool;\n    let mut _13: &alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::Library>;\n    let  _14: bool;\n    let  _15: bool;\n    let mut _16: bool;\n    let mut _17: u8;\n    let  _18: ffi::os_str::OsString;\n    let mut _19: path::PathBuf;\n    let mut _20: core::result::Result<path::PathBuf, io::error::Error>;\n    let mut _21: bool;\n    let mut _22: &core::option::Option<alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::parse_running_mmaps::MapsEntry>>;\n    let  _23: &&mut core::option::Option<alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::parse_running_mmaps::MapsEntry>>;\n    let mut _24: usize;\n    let mut _25: bool;\n    let  _26: &ffi::os_str::OsStr;\n    let  _27: &[u8];\n    let  _28: &core::ffi::CStr;\n    let  _29: &[libc::Elf64_Phdr];\n    let mut _30: bool;\n    let  _31: &[libc::Elf64_Phdr; 0];\n    let mut _32: usize;\n    let  _33: ();\n    let mut _34: backtrace_rs::symbolize::gimli::Library;\n    let mut _35: ffi::os_str::OsString;\n    let mut _36: alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::LibrarySegment>;\n    let mut _37: core::iter::Map<core::slice::Iter<'_, libc::Elf64_Phdr>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli/libs_dl_iterate_phdr.rs:114:18: 114:26}>;\n    let mut _38: core::slice::Iter<'_, libc::Elf64_Phdr>;\n    let mut _39: &[libc::Elf64_Phdr];\n    let mut _40: usize;\n    let mut _41: &mut core::option::Option<alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::parse_running_mmaps::MapsEntry>>;\n    let mut _42: *const ();\n    let mut _43: usize;\n    let mut _44: usize;\n    let mut _45: usize;\n    let mut _46: bool;\n    let mut _47: *const ();\n    let mut _48: usize;\n    let mut _49: usize;\n    let mut _50: usize;\n    let mut _51: bool;\n    let mut _52: *const ();\n    let mut _53: usize;\n    let mut _54: usize;\n    let mut _55: usize;\n    let mut _56: bool;\n    let mut _57: *const ();\n    let mut _58: usize;\n    let mut _59: usize;\n    let mut _60: usize;\n    let mut _61: bool;\n    let mut _62: *const ();\n    let mut _63: usize;\n    let mut _64: usize;\n    let mut _65: usize;\n    let mut _66: bool;\n    let mut _67: *const ();\n    let mut _68: usize;\n    let mut _69: bool;\n    let mut _70: bool;\n    let mut _71: bool;\n    let mut _72: bool;\n    let mut _73: *const ();\n    let mut _74: usize;\n    let mut _75: bool;\n    let mut _76: bool;\n    let mut _77: bool;\n    let mut _78: bool;\n    let mut _79: *const ();\n    let mut _80: usize;\n    let mut _81: bool;\n    let mut _82: bool;\n    let mut _83: bool;\n    let mut _84: bool;\n    let mut _85: *const ();\n    let mut _86: usize;\n    let mut _87: bool;\n    let mut _88: bool;\n    let mut _89: bool;\n    let mut _90: bool;\n    let mut _91: *const ();\n    let mut _92: usize;\n    let mut _93: bool;\n    let mut _94: bool;\n    let mut _95: bool;\n    let mut _96: *const ();\n    let mut _97: usize;\n    let mut _98: bool;\n    let mut _99: bool;\n    let mut _100: bool;\n    let mut _101: bool;\n    debug info => _1;\n    debug _size => _2;\n    debug data => _3;\n    debug dlpi_addr => _4;\n    debug dlpi_name => _5;\n    debug dlpi_phdr => _6;\n    debug dlpi_phnum => _7;\n    debug libs => _8;\n    debug maps => _9;\n    debug is_main => _12;\n    debug is_static => _14;\n    debug no_given_name => _15;\n    debug name => _18;\n    debug headers => _29;\n    bb0: {\n        _62 = _1 as *const ();\n        _63 = _62 as usize;\n        _64 = Sub(<libc::dl_phdr_info as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _65 = BitAnd(_63, _64);\n        _66 = Eq(_65, 0_usize);\n        assert(_66, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<libc::dl_phdr_info as core::mem::SizedTypeProperties>::ALIGN, _63) -> [success: bb42, unwind unreachable];\n    }\n    bb1: {\n        _42 = _11 as *const ();\n        _43 = _42 as usize;\n        _44 = Sub(<backtrace_rs::symbolize::gimli::libs_dl_iterate_phdr::CallbackData as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _45 = BitAnd(_43, _44);\n        _46 = Eq(_45, 0_usize);\n        assert(_46, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<backtrace_rs::symbolize::gimli::libs_dl_iterate_phdr::CallbackData as core::mem::SizedTypeProperties>::ALIGN, _43) -> [success: bb38, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_13);\n        _14 = Eq(_4, 0_u64);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = core::ptr::const_ptr::<impl *const u8>::is_null(_5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _16) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        _15 = true;\n        goto -> bb6;\n    }\n    bb5: {\n        StorageLive(_17);\n        _96 = _5 as *const ();\n        _97 = _96 as usize;\n        _98 = Ne(<u8 as core::mem::SizedTypeProperties>::SIZE, 0_usize);\n        _99 = Eq(_97, 0_usize);\n        _100 = BitAnd(_99, _98);\n        _101 = Not(_100);\n        assert(_101, \"null pointer dereference occurred\") -> [success: bb48, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_16);\n        StorageLive(_18);\n        switchInt(_14) -> [0: bb11, otherwise: bb7];\n    }\n    bb7: {\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = env::current_exe() -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _19 = core::result::Result::<path::PathBuf, io::error::Error>::unwrap_or_default(move _20) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_20);\n        _18 = path::PathBuf::into_os_string(move _19) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_19);\n        goto -> bb25;\n    }\n    bb11: {\n        switchInt(_12) -> [0: bb15, otherwise: bb12];\n    }\n    bb12: {\n        StorageLive(_21);\n        _21 = _15;\n        switchInt(move _21) -> [0: bb15, otherwise: bb13];\n    }\n    bb13: {\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = &_9;\n        _41 = (*_23);\n        _22 = &(*_41);\n        StorageLive(_24);\n        _24 = _4 as usize;\n        _18 = backtrace_rs::symbolize::gimli::libs_dl_iterate_phdr::infer_current_exe(move _22, move _24) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_24);\n        StorageDead(_23);\n        StorageDead(_22);\n        goto -> bb24;\n    }\n    bb15: {\n        StorageLive(_25);\n        _25 = core::ptr::const_ptr::<impl *const u8>::is_null(_5) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        switchInt(move _25) -> [0: bb18, otherwise: bb17];\n    }\n    bb17: {\n        _18 = ffi::os_str::OsString::new() -> [return: bb23, unwind unreachable];\n    }\n    bb18: {\n        _28 = core::ffi::CStr::from_ptr::<'_>(_5) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        _27 = core::ffi::CStr::to_bytes(_28) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        _26 = <ffi::os_str::OsStr as os::unix::ffi::os_str::OsStrExt>::from_bytes(_27) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        _18 = <ffi::os_str::OsStr as alloc_crate::borrow::ToOwned>::to_owned(_26) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        goto -> bb23;\n    }\n    bb23: {\n        StorageDead(_25);\n        goto -> bb24;\n    }\n    bb24: {\n        StorageDead(_21);\n        goto -> bb25;\n    }\n    bb25: {\n        StorageLive(_29);\n        StorageLive(_30);\n        _30 = core::ptr::const_ptr::<impl *const libc::Elf64_Phdr>::is_null(_6) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        switchInt(move _30) -> [0: bb28, otherwise: bb27];\n    }\n    bb27: {\n        goto -> bb30;\n    }\n    bb28: {\n        switchInt(_7) -> [0: bb29, otherwise: bb31];\n    }\n    bb29: {\n        goto -> bb30;\n    }\n    bb30: {\n        _31 = backtrace_rs::symbolize::gimli::libs_dl_iterate_phdr::callback::promoted[0];\n        _29 = _31 as &[libc::Elf64_Phdr];\n        goto -> bb33;\n    }\n    bb31: {\n        StorageLive(_32);\n        _32 = _7 as usize;\n        _29 = core::slice::from_raw_parts::<'_, libc::Elf64_Phdr>(_6, move _32) -> [return: bb32, unwind unreachable];\n    }\n    bb32: {\n        StorageDead(_32);\n        goto -> bb33;\n    }\n    bb33: {\n        StorageDead(_30);\n        StorageLive(_34);\n        StorageLive(_35);\n        _35 = move _18;\n        StorageLive(_36);\n        StorageLive(_37);\n        StorageLive(_38);\n        StorageLive(_39);\n        _39 = _29;\n        _38 = core::slice::<impl [libc::Elf64_Phdr]>::iter(move _39) -> [return: bb34, unwind unreachable];\n    }\n    bb34: {\n        StorageDead(_39);\n        _37 = <core::slice::Iter<'_, libc::Elf64_Phdr> as core::iter::Iterator>::map::<backtrace_rs::symbolize::gimli::LibrarySegment, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli/libs_dl_iterate_phdr.rs:114:18: 114:26}>(move _38, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli/libs_dl_iterate_phdr.rs:114:18: 114:26}) -> [return: bb35, unwind unreachable];\n    }\n    bb35: {\n        StorageDead(_38);\n        _36 = <core::iter::Map<core::slice::Iter<'_, libc::Elf64_Phdr>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli/libs_dl_iterate_phdr.rs:114:18: 114:26}> as core::iter::Iterator>::collect::<alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::LibrarySegment>>(move _37) -> [return: bb36, unwind unreachable];\n    }\n    bb36: {\n        StorageDead(_37);\n        StorageLive(_40);\n        _40 = _4 as usize;\n        _34 = Library(move _35, move _36, move _40);\n        StorageDead(_40);\n        StorageDead(_36);\n        StorageDead(_35);\n        _33 = alloc_crate::vec::Vec::<backtrace_rs::symbolize::gimli::Library>::push(_8, move _34) -> [return: bb37, unwind unreachable];\n    }\n    bb37: {\n        StorageDead(_34);\n        _0 = 0_i32;\n        StorageDead(_29);\n        StorageDead(_18);\n        StorageDead(_15);\n        StorageDead(_9);\n        StorageDead(_11);\n        return;\n    }\n    bb38: {\n        _91 = _11 as *const ();\n        _92 = _91 as usize;\n        _93 = Eq(_92, 0_usize);\n        _94 = BitAnd(_93, true);\n        _95 = Not(_94);\n        assert(_95, \"null pointer dereference occurred\") -> [success: bb47, unwind unreachable];\n    }\n    bb39: {\n        _85 = _1 as *const ();\n        _86 = _85 as usize;\n        _87 = Ne(<libc::dl_phdr_info as core::mem::SizedTypeProperties>::SIZE, 0_usize);\n        _88 = Eq(_86, 0_usize);\n        _89 = BitAnd(_88, _87);\n        _90 = Not(_89);\n        assert(_90, \"null pointer dereference occurred\") -> [success: bb46, unwind unreachable];\n    }\n    bb40: {\n        _79 = _1 as *const ();\n        _80 = _79 as usize;\n        _81 = Ne(<libc::dl_phdr_info as core::mem::SizedTypeProperties>::SIZE, 0_usize);\n        _82 = Eq(_80, 0_usize);\n        _83 = BitAnd(_82, _81);\n        _84 = Not(_83);\n        assert(_84, \"null pointer dereference occurred\") -> [success: bb45, unwind unreachable];\n    }\n    bb41: {\n        _73 = _1 as *const ();\n        _74 = _73 as usize;\n        _75 = Ne(<libc::dl_phdr_info as core::mem::SizedTypeProperties>::SIZE, 0_usize);\n        _76 = Eq(_74, 0_usize);\n        _77 = BitAnd(_76, _75);\n        _78 = Not(_77);\n        assert(_78, \"null pointer dereference occurred\") -> [success: bb44, unwind unreachable];\n    }\n    bb42: {\n        _67 = _1 as *const ();\n        _68 = _67 as usize;\n        _69 = Ne(<libc::dl_phdr_info as core::mem::SizedTypeProperties>::SIZE, 0_usize);\n        _70 = Eq(_68, 0_usize);\n        _71 = BitAnd(_70, _69);\n        _72 = Not(_71);\n        assert(_72, \"null pointer dereference occurred\") -> [success: bb43, unwind unreachable];\n    }\n    bb43: {\n        _4 = ((*_1).0: u64);\n        _57 = _1 as *const ();\n        _58 = _57 as usize;\n        _59 = Sub(<libc::dl_phdr_info as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _60 = BitAnd(_58, _59);\n        _61 = Eq(_60, 0_usize);\n        assert(_61, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<libc::dl_phdr_info as core::mem::SizedTypeProperties>::ALIGN, _58) -> [success: bb41, unwind unreachable];\n    }\n    bb44: {\n        _5 = ((*_1).1: *const u8);\n        _52 = _1 as *const ();\n        _53 = _52 as usize;\n        _54 = Sub(<libc::dl_phdr_info as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _55 = BitAnd(_53, _54);\n        _56 = Eq(_55, 0_usize);\n        assert(_56, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<libc::dl_phdr_info as core::mem::SizedTypeProperties>::ALIGN, _53) -> [success: bb40, unwind unreachable];\n    }\n    bb45: {\n        _6 = ((*_1).2: *const libc::Elf64_Phdr);\n        _47 = _1 as *const ();\n        _48 = _47 as usize;\n        _49 = Sub(<libc::dl_phdr_info as core::mem::SizedTypeProperties>::ALIGN, 1_usize);\n        _50 = BitAnd(_48, _49);\n        _51 = Eq(_50, 0_usize);\n        assert(_51, \"misaligned pointer dereference: address must be a multiple of {} but is {}\",<libc::dl_phdr_info as core::mem::SizedTypeProperties>::ALIGN, _48) -> [success: bb39, unwind unreachable];\n    }\n    bb46: {\n        _7 = ((*_1).3: u16);\n        StorageLive(_11);\n        _11 = core::ptr::mut_ptr::<impl *mut libc::c_void>::cast::<backtrace_rs::symbolize::gimli::libs_dl_iterate_phdr::CallbackData>(_3) -> [return: bb1, unwind unreachable];\n    }\n    bb47: {\n        _10 = &mut (*_11);\n        _8 = &mut ((*_10).0: alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::Library>);\n        StorageLive(_9);\n        _9 = &mut ((*_10).1: core::option::Option<alloc_crate::vec::Vec<backtrace_rs::symbolize::gimli::parse_running_mmaps::MapsEntry>>);\n        StorageLive(_13);\n        _13 = &(*_8);\n        _12 = alloc_crate::vec::Vec::<backtrace_rs::symbolize::gimli::Library>::is_empty(move _13) -> [return: bb2, unwind unreachable];\n    }\n    bb48: {\n        _17 = (*_5);\n        _15 = Eq(move _17, 0_u8);\n        StorageDead(_17);\n        goto -> bb6;\n    }\n}\n",
+  "doc": " # Safety\n `info` must be a valid pointer.\n `data` must be a valid pointer to `CallbackData`.\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "unsafe_op_in_unsafe_fn"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* unsafe_op_in_unsafe_fn\n"
+    ]
+  }
+}

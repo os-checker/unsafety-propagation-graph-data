@@ -1,0 +1,41 @@
+{
+  "name": "<[mem::maybe_uninit::MaybeUninit<T>] as array::iter::iter_inner::PartialDrop>::partial_drop",
+  "safe": false,
+  "callees": {
+    "slice::<impl [T]>::get_unchecked_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to an element or subslice, without doing\n bounds checking.\n\n For a safe alternative see [`get_mut`].\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*\n even if the resulting reference is not used.\n\n You can think of this like `.get_mut(index).unwrap_unchecked()`.  It's\n UB to call `.get_unchecked_mut(len)`, even if you immediately convert\n to a pointer.  And it's UB to call `.get_unchecked_mut(..len + 1)`,\n `.get_unchecked_mut(..=len)`, or similar.\n\n [`get_mut`]: slice::get_mut\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n\n unsafe {\n     let elem = x.get_unchecked_mut(1);\n     *elem = 13;\n }\n assert_eq!(x, &[1, 13, 4]);\n ```\n",
+      "adt": {}
+    },
+    "<[mem::maybe_uninit::MaybeUninit<T>]>::assume_init_drop": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Drops the contained values in place.\n\n # Safety\n\n It is up to the caller to guarantee that every `MaybeUninit<T>` in the slice\n really is in an initialized state. Calling this when the content is not yet\n fully initialized causes undefined behavior.\n\n On top of that, all additional invariants of the type `T` must be\n satisfied, as the `Drop` implementation of `T` (or its members) may\n rely on this. For example, setting a `Vec<T>` to an invalid but\n non-null address makes it initialized (under the current implementation;\n this does not constitute a stable guarantee), because the only\n requirement the compiler knows about it is that the data pointer must be\n non-null. Dropping such a `Vec<T>` however will cause undefined\n behaviour.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ops::index_range::IndexRange": [
+      "Plain"
+    ]
+  },
+  "path": 1362,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/array/iter/iter_inner.rs:16:5: 19:6",
+  "src": "unsafe fn partial_drop(&mut self, alive: IndexRange) {\n        // SAFETY: We know that all elements within `alive` are properly initialized.\n        unsafe { self.get_unchecked_mut(alive).assume_init_drop() }\n    }",
+  "mir": "fn <[mem::maybe_uninit::MaybeUninit<T>] as array::iter::iter_inner::PartialDrop>::partial_drop(_1: &mut [mem::maybe_uninit::MaybeUninit<T>], _2: ops::index_range::IndexRange) -> () {\n    let mut _0: ();\n    let mut _3: &mut [mem::maybe_uninit::MaybeUninit<T>];\n    debug self => _1;\n    debug alive => _2;\n    bb0: {\n        _3 = slice::<impl [mem::maybe_uninit::MaybeUninit<T>]>::get_unchecked_mut::<ops::index_range::IndexRange>(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = <[mem::maybe_uninit::MaybeUninit<T>]>::assume_init_drop(_3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

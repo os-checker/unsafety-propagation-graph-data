@@ -1,0 +1,70 @@
+{
+  "name": "fmt::Arguments::<'a>::as_statically_known_str",
+  "safe": true,
+  "callees": {
+    "fmt::Arguments::<'a>::as_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the formatted string, if it has no arguments to be formatted at runtime.\n\n This can be used to avoid allocations in some cases.\n\n # Guarantees\n\n For `format_args!(\"just a literal\")`, this function is guaranteed to\n return `Some(\"just a literal\")`.\n\n For most cases with placeholders, this function will return `None`.\n\n However, the compiler may perform optimizations that can cause this\n function to return `Some(_)` even if the format string contains\n placeholders. For example, `format_args!(\"Hello, {}!\", \"world\")` may be\n optimized to `format_args!(\"Hello, world!\")`, such that `as_str()`\n returns `Some(\"Hello, world!\")`.\n\n The behavior for anything but the trivial case (without placeholders)\n is not guaranteed, and should not be relied upon for anything other\n than optimization.\n\n # Examples\n\n ```rust\n use std::fmt::Arguments;\n\n fn write_str(_: &str) { /* ... */ }\n\n fn write_fmt(args: &Arguments<'_>) {\n     if let Some(s) = args.as_str() {\n         write_str(s)\n     } else {\n         write_str(&args.to_string());\n     }\n }\n ```\n\n ```rust\n assert_eq!(format_args!(\"hello\").as_str(), Some(\"hello\"));\n assert_eq!(format_args!(\"\").as_str(), Some(\"\"));\n assert_eq!(format_args!(\"{:?}\", std::env::current_dir()).as_str(), None);\n ```\n",
+      "adt": {
+        "fmt::Arguments": "ImmutableAsArgument",
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::is_some": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the option is a [`Some`] value.\n\n # Examples\n\n ```\n let x: Option<u32> = Some(2);\n assert_eq!(x.is_some(), true);\n\n let x: Option<u32> = None;\n assert_eq!(x.is_some(), false);\n ```\n",
+      "adt": {
+        "option::Option": "MutableAsArgument"
+      }
+    },
+    "intrinsics::is_val_statically_known": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns whether the argument's value is statically known at\n compile-time.\n\n This is useful when there is a way of writing the code that will\n be *faster* when some variables have known values, but *slower*\n in the general case: an `if is_val_statically_known(var)` can be used\n to select between these two variants. The `if` will be optimized away\n and only the desired branch remains.\n\n Formally speaking, this function non-deterministically returns `true`\n or `false`, and the caller has to ensure sound behavior for both cases.\n In other words, the following code has *Undefined Behavior*:\n\n ```no_run\n #![feature(core_intrinsics)]\n # #![allow(internal_features)]\n use std::hint::unreachable_unchecked;\n use std::intrinsics::is_val_statically_known;\n\n if !is_val_statically_known(0) { unsafe { unreachable_unchecked(); } }\n ```\n\n This also means that the following code's behavior is unspecified; it\n may panic, or it may not:\n\n ```no_run\n #![feature(core_intrinsics)]\n # #![allow(internal_features)]\n use std::intrinsics::is_val_statically_known;\n\n assert_eq!(is_val_statically_known(0), is_val_statically_known(0));\n ```\n\n Unsafe code may not rely on `is_val_statically_known` returning any\n particular value, ever. However, the compiler will generally make it\n return `true` only if the value of the argument is actually known.\n\n # Stability concerns\n\n While it is safe to call, this intrinsic may behave differently in\n a `const` context than otherwise. See the [`const_eval_select()`]\n documentation for an explanation of the issues this can cause. Unlike\n `const_eval_select`, this intrinsic isn't guaranteed to behave\n deterministically even in a `const` context.\n\n # Type Requirements\n\n `T` must be either a `bool`, a `char`, a primitive numeric type (e.g. `f32`,\n but not `NonZeroISize`), or any thin pointer (e.g. `*mut String`).\n Any other argument types *may* cause a compiler error.\n\n ## Pointers\n\n When the input is a pointer, only the pointer itself is\n ever considered. The pointee has no effect. Currently, these functions\n behave identically:\n\n ```\n #![feature(core_intrinsics)]\n # #![allow(internal_features)]\n use std::intrinsics::is_val_statically_known;\n\n fn foo(x: &i32) -> bool {\n     is_val_statically_known(x)\n }\n\n fn bar(x: &i32) -> bool {\n     is_val_statically_known(\n         (x as *const i32).addr()\n     )\n }\n # _ = foo(&5_i32);\n # _ = bar(&5_i32);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "fmt::Arguments": [
+      "Ref"
+    ],
+    "option::Option": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 12988,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:896:5: 899:6",
+  "src": "pub fn as_statically_known_str(&self) -> Option<&'static str> {\n        let s = self.as_str();\n        if core::intrinsics::is_val_statically_known(s.is_some()) { s } else { None }\n    }",
+  "mir": "fn fmt::Arguments::<'a>::as_statically_known_str(_1: &fmt::Arguments<'_>) -> option::Option<&str> {\n    let mut _0: option::Option<&str>;\n    let  _2: option::Option<&str>;\n    let mut _3: bool;\n    let mut _4: bool;\n    let mut _5: &option::Option<&str>;\n    debug self => _1;\n    debug s => _2;\n    bb0: {\n        StorageLive(_2);\n        _2 = fmt::Arguments::<'_>::as_str(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &_2;\n        _4 = option::Option::<&str>::is_some(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = intrinsics::is_val_statically_known::<bool>(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _3) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_4);\n        _0 = _2;\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_4);\n        _0 = option::Option::None;\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Same as [`Arguments::as_str`], but will only return `Some(s)` if it can be determined at compile time.\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "hidden"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* hidden\n"
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "name": "cpu::init_on_bsp",
+  "safe": false,
+  "callees": {
+    "arch::boot::smp::count_processors": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Counts the number of processors.\n\n This function needs to be called after the OS initializes the ACPI table.\n",
+      "adt": {
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::option::Option::<T>::unwrap_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value or a provided default.\n\n Arguments passed to `unwrap_or` are eagerly evaluated; if you are passing\n the result of a function call, it is recommended to use [`unwrap_or_else`],\n which is lazily evaluated.\n\n [`unwrap_or_else`]: Option::unwrap_or_else\n\n # Examples\n\n ```\n assert_eq!(Some(\"car\").unwrap_or(\"bike\"), \"car\");\n assert_eq!(None.unwrap_or(\"bike\"), \"bike\");\n ```\n",
+      "adt": {}
+    },
+    "cpu::local::copy_bsp_for_ap": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies the static CPU-local data on the bootstrap processor (BSP)\n for application processors (APs).\n\n # Safety\n\n This function must be called in the boot context of the BSP, at a time\n when the APs have not yet booted.\n\n The CPU-local data on the BSP must not be used before calling this\n function to copy it for the APs. Otherwise, the copied data will\n contain non-constant (also non-`Copy`) data, resulting in undefined\n behavior when it's loaded on the APs.\n\n The caller must ensure that the `num_cpus` matches the number of all\n CPUs that will access the CPU-local storage.\n",
+      "adt": {}
+    },
+    "cpu::id::init_on_bsp": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Initializes the CPU ID module (the BSP part).\n\n Note that this method will use the BSP's CPU-local storage.\n\n # Safety\n\n The caller must ensure that\n 1. We're in the boot context of the BSP and APs have not yet booted.\n 2. The number of CPUs is correct.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 1718,
+  "span": "ostd/src/cpu/mod.rs:28:1: 43:2",
+  "src": "pub(crate) unsafe fn init_on_bsp() {\n    let num_cpus = crate::arch::boot::smp::count_processors().unwrap_or(1);\n\n    // SAFETY:\n    // 1. We're in the boot context of the BSP and APs have not yet booted.\n    // 2. The number of CPUs is correct.\n    // 3. CPU-local storage has NOT been used.\n    unsafe { local::copy_bsp_for_ap(num_cpus as usize) };\n\n    // For this point on, CPU-local storage on all CPUs are safe to use.\n\n    // SAFETY:\n    // 1. We're in the boot context of the BSP.\n    // 2. The number of CPUs is correct.\n    unsafe { id::init_on_bsp(num_cpus) };\n}",
+  "mir": "fn cpu::init_on_bsp() -> () {\n    let mut _0: ();\n    let  _1: u32;\n    let mut _2: core::option::Option<u32>;\n    let  _3: ();\n    let mut _4: usize;\n    let  _5: ();\n    debug num_cpus => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = arch::boot::smp::count_processors() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _1 = core::option::Option::<u32>::unwrap_or(move _2, 1_u32) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_4);\n        _4 = _1 as usize;\n        _3 = cpu::local::copy_bsp_for_ap(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _5 = cpu::id::init_on_bsp(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        return;\n    }\n}\n",
+  "doc": " Initializes the CPU module (the BSP part).\n\n # Safety\n\n The caller must ensure that\n 1. We're in the boot context of the BSP and APs have not yet booted.\n 2. The number of CPUs is available.\n 3. CPU-local storage has NOT been used.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

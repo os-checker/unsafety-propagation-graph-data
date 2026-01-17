@@ -1,0 +1,53 @@
+{
+  "name": "task::wake::Waker::wake",
+  "safe": true,
+  "callees": {
+    "mem::manually_drop::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {
+        "mem::manually_drop::ManuallyDrop": "Constructor"
+      }
+    },
+    "ops::deref::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "task::wake::Waker": [
+      "Plain",
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "mem::manually_drop::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "task::wake::RawWakerVTable": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ]
+  },
+  "path": 17632,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/task/wake.rs:438:5: 449:6",
+  "src": "pub fn wake(self) {\n        // The actual wakeup call is delegated through a virtual function call\n        // to the implementation which is defined by the executor.\n\n        // Don't call `drop` -- the waker will be consumed by `wake`.\n        let this = ManuallyDrop::new(self);\n\n        // SAFETY: This is safe because `Waker::from_raw` is the only way\n        // to initialize `wake` and `data` requiring the user to acknowledge\n        // that the contract of `RawWaker` is upheld.\n        unsafe { (this.waker.vtable.wake)(this.waker.data) };\n    }",
+  "mir": "fn task::wake::Waker::wake(_1: task::wake::Waker) -> () {\n    let mut _0: ();\n    let  _2: mem::manually_drop::ManuallyDrop<task::wake::Waker>;\n    let  _3: ();\n    let mut _4: unsafe fn(*const ());\n    let mut _5: &task::wake::Waker;\n    let mut _6: &mem::manually_drop::ManuallyDrop<task::wake::Waker>;\n    let mut _7: *const ();\n    let mut _8: &task::wake::Waker;\n    let mut _9: &mem::manually_drop::ManuallyDrop<task::wake::Waker>;\n    let mut _10: &task::wake::RawWakerVTable;\n    debug self => _1;\n    debug this => _2;\n    bb0: {\n        StorageLive(_2);\n        _2 = mem::manually_drop::ManuallyDrop::<task::wake::Waker>::new(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &_2;\n        _5 = <mem::manually_drop::ManuallyDrop<task::wake::Waker> as ops::deref::Deref>::deref(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _10 = (((*_5).0: task::wake::RawWaker).1: &task::wake::RawWakerVTable);\n        _4 = ((*_10).1: unsafe fn(*const ()));\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &_2;\n        _8 = <mem::manually_drop::ManuallyDrop<task::wake::Waker> as ops::deref::Deref>::deref(move _9) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_9);\n        _7 = (((*_8).0: task::wake::RawWaker).0: *const ());\n        _3 = move _4(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Wakes up the task associated with this `Waker`.\n\n As long as the executor keeps running and the task is not finished, it is\n guaranteed that each invocation of [`wake()`](Self::wake) (or\n [`wake_by_ref()`](Self::wake_by_ref)) will be followed by at least one\n [`poll()`] of the task to which this `Waker` belongs. This makes\n it possible to temporarily yield to other tasks while running potentially\n unbounded processing loops.\n\n Note that the above implies that multiple wake-ups may be coalesced into a\n single [`poll()`] invocation by the runtime.\n\n Also note that yielding to competing tasks is not guaranteed: it is the\n executor’s choice which task to run and the executor may choose to run the\n current task again.\n\n [`poll()`]: crate::future::Future::poll\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

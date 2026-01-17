@@ -1,0 +1,53 @@
+{
+  "name": "alloc::layout::Layout::for_value_raw",
+  "safe": false,
+  "callees": {
+    "mem::size_of_val_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of the pointed-to value in bytes.\n\n This is usually the same as [`size_of::<T>()`]. However, when `T` *has* no\n statically-known size, e.g., a slice [`[T]`][slice] or a [trait object],\n then `size_of_val_raw` can be used to get the dynamically-known size.\n\n # Safety\n\n This function is only safe to call if the following conditions hold:\n\n - If `T` is `Sized`, this function is always safe to call.\n - If the unsized tail of `T` is:\n     - a [slice], then the length of the slice tail must be an initialized\n       integer, and the size of the *entire value*\n       (dynamic tail length + statically sized prefix) must fit in `isize`.\n       For the special case where the dynamic tail length is 0, this function\n       is safe to call.\n     - a [trait object], then the vtable part of the pointer must point\n       to a valid vtable acquired by an unsizing coercion, and the size\n       of the *entire value* (dynamic tail length + statically sized prefix)\n       must fit in `isize`.\n     - an (unstable) [extern type], then this function is always safe to\n       call, but may panic or otherwise return the wrong value, as the\n       extern type's layout is not known. This is the same behavior as\n       [`size_of_val`] on a reference to a type with an extern type tail.\n     - otherwise, it is conservatively not allowed to call this function.\n\n [`size_of::<T>()`]: size_of\n [trait object]: ../../book/ch17-02-trait-objects.html\n [extern type]: ../../unstable-book/language-features/extern-types.html\n\n # Examples\n\n ```\n #![feature(layout_for_ptr)]\n use std::mem;\n\n assert_eq!(4, size_of_val(&5i32));\n\n let x: [u8; 13] = [0; 13];\n let y: &[u8] = &x;\n assert_eq!(13, unsafe { mem::size_of_val_raw(y) });\n ```\n",
+      "adt": {}
+    },
+    "mem::align_of_val_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the [ABI]-required minimum alignment of the type of the value that `val` points to in\n bytes.\n\n Every reference to a value of the type `T` must be a multiple of this number.\n\n [ABI]: https://en.wikipedia.org/wiki/Application_binary_interface\n\n # Safety\n\n This function is only safe to call if the following conditions hold:\n\n - If `T` is `Sized`, this function is always safe to call.\n - If the unsized tail of `T` is:\n     - a [slice], then the length of the slice tail must be an initialized\n       integer, and the size of the *entire value*\n       (dynamic tail length + statically sized prefix) must fit in `isize`.\n       For the special case where the dynamic tail length is 0, this function\n       is safe to call.\n     - a [trait object], then the vtable part of the pointer must point\n       to a valid vtable acquired by an unsizing coercion, and the size\n       of the *entire value* (dynamic tail length + statically sized prefix)\n       must fit in `isize`.\n     - an (unstable) [extern type], then this function is always safe to\n       call, but may panic or otherwise return the wrong value, as the\n       extern type's layout is not known. This is the same behavior as\n       [`align_of_val`] on a reference to a type with an extern type tail.\n     - otherwise, it is conservatively not allowed to call this function.\n\n [trait object]: ../../book/ch17-02-trait-objects.html\n [extern type]: ../../unstable-book/language-features/extern-types.html\n\n # Examples\n\n ```\n #![feature(layout_for_ptr)]\n use std::mem;\n\n assert_eq!(4, unsafe { mem::align_of_val_raw(&5i32) });\n ```\n",
+      "adt": {}
+    },
+    "alloc::layout::Layout::from_size_align_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a layout, bypassing all checks.\n\n # Safety\n\n This function is unsafe as it does not verify the preconditions from\n [`Layout::from_size_align`].\n",
+      "adt": {
+        "alloc::layout::Layout": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "alloc::layout::Layout": [
+      "Plain"
+    ]
+  },
+  "path": 4449,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/alloc/layout.rs:206:5: 211:6",
+  "src": "pub const unsafe fn for_value_raw<T: ?Sized>(t: *const T) -> Self {\n        // SAFETY: we pass along the prerequisites of these functions to the caller\n        let (size, align) = unsafe { (mem::size_of_val_raw(t), mem::align_of_val_raw(t)) };\n        // SAFETY: see rationale in `new` for why this is using the unsafe variant\n        unsafe { Layout::from_size_align_unchecked(size, align) }\n    }",
+  "mir": "fn alloc::layout::Layout::for_value_raw(_1: *const T) -> alloc::layout::Layout {\n    let mut _0: alloc::layout::Layout;\n    let  _2: usize;\n    let  _3: usize;\n    let mut _4: (usize, usize);\n    let mut _5: usize;\n    let mut _6: usize;\n    debug t => _1;\n    debug size => _2;\n    debug align => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = mem::size_of_val_raw::<T>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        _6 = mem::align_of_val_raw::<T>(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = (move _5, move _6);\n        StorageDead(_6);\n        StorageDead(_5);\n        _2 = (_4.0: usize);\n        _3 = (_4.1: usize);\n        StorageDead(_4);\n        _0 = alloc::layout::Layout::from_size_align_unchecked(_2, _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
+  "doc": " Produces layout describing a record that could be used to\n allocate backing structure for `T` (which could be a trait\n or other unsized type like a slice).\n\n # Safety\n\n This function is only safe to call if the following conditions hold:\n\n - If `T` is `Sized`, this function is always safe to call.\n - If the unsized tail of `T` is:\n     - a [slice], then the length of the slice tail must be an initialized\n       integer, and the size of the *entire value*\n       (dynamic tail length + statically sized prefix) must fit in `isize`.\n       For the special case where the dynamic tail length is 0, this function\n       is safe to call.\n     - a [trait object], then the vtable part of the pointer must point\n       to a valid vtable for the type `T` acquired by an unsizing coercion,\n       and the size of the *entire value*\n       (dynamic tail length + statically sized prefix) must fit in `isize`.\n     - an (unstable) [extern type], then this function is always safe to\n       call, but may panic or otherwise return the wrong value, as the\n       extern type's layout is not known. This is the same behavior as\n       [`Layout::for_value`] on a reference to an extern type tail.\n     - otherwise, it is conservatively not allowed to call this function.\n\n [trait object]: ../../book/ch17-02-trait-objects.html\n [extern type]: ../../unstable-book/language-features/extern-types.html\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

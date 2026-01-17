@@ -1,0 +1,37 @@
+{
+  "name": "string::String::into_raw_parts",
+  "safe": true,
+  "callees": {
+    "vec::Vec::<T>::into_raw_parts": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Decomposes a `Vec<T>` into its raw components: `(pointer, length, capacity)`.\n\n Returns the raw pointer to the underlying data, the length of\n the vector (in elements), and the allocated capacity of the\n data (in elements). These are the same arguments in the same\n order as the arguments to [`from_raw_parts`].\n\n After calling this function, the caller is responsible for the\n memory previously managed by the `Vec`. Most often, one does\n this by converting the raw pointer, length, and capacity back\n into a `Vec` with the [`from_raw_parts`] function; more generally,\n if `T` is non-zero-sized and the capacity is nonzero, one may use\n any method that calls [`dealloc`] with a layout of\n `Layout::array::<T>(capacity)`; if `T` is zero-sized or the\n capacity is zero, nothing needs to be done.\n\n [`from_raw_parts`]: Vec::from_raw_parts\n [`dealloc`]: crate::alloc::GlobalAlloc::dealloc\n\n # Examples\n\n ```\n let v: Vec<i32> = vec![-1, 0, 1];\n\n let (ptr, len, cap) = v.into_raw_parts();\n\n let rebuilt = unsafe {\n     // We can now make changes to the components, such as\n     // transmuting the raw pointer to a compatible type.\n     let ptr = ptr as *mut u32;\n\n     Vec::from_raw_parts(ptr, len, cap)\n };\n assert_eq!(rebuilt, [4294967295, 0, 1]);\n ```\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "Plain"
+    ],
+    "string::String": [
+      "Unknown([Field(0, Ty { id: 1639, kind: RigidTy(Adt(AdtDef(DefId { id: 2824, name: \"vec::Vec\" }), GenericArgs([Type(Ty { id: 93, kind: RigidTy(Uint(U8)) }), Type(Ty { id: 17, kind: RigidTy(Adt(AdtDef(DefId { id: 2583, name: \"alloc::Global\" }), GenericArgs([]))) })]))) })])",
+      "Plain"
+    ]
+  },
+  "path": 1975,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/string.rs:941:5: 943:6",
+  "src": "pub fn into_raw_parts(self) -> (*mut u8, usize, usize) {\n        self.vec.into_raw_parts()\n    }",
+  "mir": "fn string::String::into_raw_parts(_1: string::String) -> (*mut u8, usize, usize) {\n    let mut _0: (*mut u8, usize, usize);\n    let mut _2: vec::Vec<u8>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = move (_1.0: vec::Vec<u8>);\n        _0 = vec::Vec::<u8>::into_raw_parts(move _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Decomposes a `String` into its raw components: `(pointer, length, capacity)`.\n\n Returns the raw pointer to the underlying data, the length of\n the string (in bytes), and the allocated capacity of the data\n (in bytes). These are the same arguments in the same order as\n the arguments to [`from_raw_parts`].\n\n After calling this function, the caller is responsible for the\n memory previously managed by the `String`. The only way to do\n this is to convert the raw pointer, length, and capacity back\n into a `String` with the [`from_raw_parts`] function, allowing\n the destructor to perform the cleanup.\n\n [`from_raw_parts`]: String::from_raw_parts\n\n # Examples\n\n ```\n let s = String::from(\"hello\");\n\n let (ptr, len, cap) = s.into_raw_parts();\n\n let rebuilt = unsafe { String::from_raw_parts(ptr, len, cap) };\n assert_eq!(rebuilt, \"hello\");\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

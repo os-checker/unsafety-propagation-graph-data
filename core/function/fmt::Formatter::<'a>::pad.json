@@ -1,0 +1,217 @@
+{
+  "name": "fmt::Formatter::<'a>::pad",
+  "safe": true,
+  "callees": {
+    "fmt::Write::write_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a string slice into this writer, returning whether the write\n succeeded.\n\n This method can only succeed if the entire string slice was successfully\n written, and this method will not return until all data has been\n written or an error occurs.\n\n # Errors\n\n This function will return an instance of [`std::fmt::Error`][Error] on error.\n\n The purpose of that error is to abort the formatting operation when the underlying\n destination encounters some error preventing it from accepting more text;\n in particular, it does not communicate any information about *what* error occurred.\n It should generally be propagated rather than handled, at least when implementing\n formatting traits.\n\n # Examples\n\n ```\n use std::fmt::{Error, Write};\n\n fn writer<W: Write>(f: &mut W, s: &str) -> Result<(), Error> {\n     f.write_str(s)\n }\n\n let mut buf = String::new();\n writer(&mut buf, \"hola\")?;\n assert_eq!(&buf, \"hola\");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {}
+    },
+    "fmt::FormattingOptions::get_precision": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the current precision.\n",
+      "adt": {
+        "fmt::FormattingOptions": "ImmutableAsArgument",
+        "option::Option": "Constructor"
+      }
+    },
+    "str::<impl str>::char_indices": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the [`char`]s of a string slice, and their\n positions.\n\n As a string slice consists of valid UTF-8, we can iterate through a\n string slice by [`char`]. This method returns an iterator of both\n these [`char`]s, as well as their byte positions.\n\n The iterator yields tuples. The position is first, the [`char`] is\n second.\n\n # Examples\n\n Basic usage:\n\n ```\n let word = \"goodbye\";\n\n let count = word.char_indices().count();\n assert_eq!(7, count);\n\n let mut char_indices = word.char_indices();\n\n assert_eq!(Some((0, 'g')), char_indices.next());\n assert_eq!(Some((1, 'o')), char_indices.next());\n assert_eq!(Some((2, 'o')), char_indices.next());\n assert_eq!(Some((3, 'd')), char_indices.next());\n assert_eq!(Some((4, 'b')), char_indices.next());\n assert_eq!(Some((5, 'y')), char_indices.next());\n assert_eq!(Some((6, 'e')), char_indices.next());\n\n assert_eq!(None, char_indices.next());\n ```\n\n Remember, [`char`]s might not match your intuition about characters:\n\n [`char`]: prim@char\n\n ```\n let yes = \"y̆es\";\n\n let mut char_indices = yes.char_indices();\n\n assert_eq!(Some((0, 'y')), char_indices.next()); // not (0, 'y̆')\n assert_eq!(Some((1, '\\u{0306}')), char_indices.next());\n\n // note the 3 here - the previous character took up two bytes\n assert_eq!(Some((3, 'e')), char_indices.next());\n assert_eq!(Some((4, 's')), char_indices.next());\n\n assert_eq!(None, char_indices.next());\n ```\n",
+      "adt": {
+        "str::iter::CharIndices": "Constructor"
+      }
+    },
+    "convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::advance_by": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator by `n` elements.\n\n This method will eagerly skip `n` elements by calling [`next`] up to `n`\n times until [`None`] is encountered.\n\n `advance_by(n)` will return `Ok(())` if the iterator successfully advances by\n `n` elements, or a `Err(NonZero<usize>)` with value `k` if [`None`] is encountered,\n where `k` is remaining number of steps that could not be advanced because the iterator ran out.\n If `self` is empty and `n` is non-zero, then this returns `Err(n)`.\n Otherwise, `k` is always less than `n`.\n\n Calling `advance_by(0)` can do meaningful work, for example [`Flatten`]\n can advance its outer iterator until it finds an inner iterator that is not empty, which\n then often allows it to return a more accurate `size_hint()` than in its initial state.\n\n [`Flatten`]: crate::iter::Flatten\n [`next`]: Iterator::next\n\n # Examples\n\n ```\n #![feature(iter_advance_by)]\n\n use std::num::NonZero;\n\n let a = [1, 2, 3, 4];\n let mut iter = a.into_iter();\n\n assert_eq!(iter.advance_by(2), Ok(()));\n assert_eq!(iter.next(), Some(3));\n assert_eq!(iter.advance_by(0), Ok(()));\n assert_eq!(iter.advance_by(100), Err(NonZero::new(99).unwrap())); // only `4` was skipped\n ```\n",
+      "adt": {
+        "result::Result": "Constructor",
+        "num::nonzero::NonZero": "Constructor"
+      }
+    },
+    "num::nonzero::NonZero::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained value as a primitive type.\n",
+      "adt": {}
+    },
+    "str::iter::CharIndices::<'a>::offset": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the byte position of the next character, or the length\n of the underlying string if there are no more characters.\n\n This means that, when the iterator has not been fully consumed,\n the returned value will match the index that will be returned\n by the next call to [`next()`](Self::next).\n\n # Examples\n\n ```\n let mut chars = \"a楽\".char_indices();\n\n // `next()` has not been called yet, so `offset()` returns the byte\n // index of the first character of the string, which is always 0.\n assert_eq!(chars.offset(), 0);\n // As expected, the first call to `next()` also returns 0 as index.\n assert_eq!(chars.next(), Some((0, 'a')));\n\n // `next()` has been called once, so `offset()` returns the byte index\n // of the second character ...\n assert_eq!(chars.offset(), 1);\n // ... which matches the index returned by the next call to `next()`.\n assert_eq!(chars.next(), Some((1, '楽')));\n\n // Once the iterator has been consumed, `offset()` returns the length\n // in bytes of the string.\n assert_eq!(chars.offset(), 4);\n assert_eq!(chars.next(), None);\n ```\n",
+      "adt": {
+        "str::iter::CharIndices": "ImmutableAsArgument"
+      }
+    },
+    "str::<impl str>::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unchecked subslice of `str`.\n\n This is the unchecked alternative to indexing the `str`.\n\n # Safety\n\n Callers of this function are responsible that these preconditions are\n satisfied:\n\n * The starting index must not exceed the ending index;\n * Indexes must be within bounds of the original slice;\n * Indexes must lie on UTF-8 sequence boundaries.\n\n Failing that, the returned string slice may reference invalid memory or\n violate the invariants communicated by the `str` type.\n\n # Examples\n\n ```\n let v = \"🗻∈🌏\";\n unsafe {\n     assert_eq!(\"🗻\", v.get_unchecked(0..4));\n     assert_eq!(\"∈\", v.get_unchecked(4..7));\n     assert_eq!(\"🌏\", v.get_unchecked(7..11));\n }\n ```\n",
+      "adt": {}
+    },
+    "str::<impl str>::chars": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the [`char`]s of a string slice.\n\n As a string slice consists of valid UTF-8, we can iterate through a\n string slice by [`char`]. This method returns such an iterator.\n\n It's important to remember that [`char`] represents a Unicode Scalar\n Value, and might not match your idea of what a 'character' is. Iteration\n over grapheme clusters may be what you actually want. This functionality\n is not provided by Rust's standard library, check crates.io instead.\n\n # Examples\n\n Basic usage:\n\n ```\n let word = \"goodbye\";\n\n let count = word.chars().count();\n assert_eq!(7, count);\n\n let mut chars = word.chars();\n\n assert_eq!(Some('g'), chars.next());\n assert_eq!(Some('o'), chars.next());\n assert_eq!(Some('o'), chars.next());\n assert_eq!(Some('d'), chars.next());\n assert_eq!(Some('b'), chars.next());\n assert_eq!(Some('y'), chars.next());\n assert_eq!(Some('e'), chars.next());\n\n assert_eq!(None, chars.next());\n ```\n\n Remember, [`char`]s might not match your intuition about characters:\n\n [`char`]: prim@char\n\n ```\n let y = \"y̆\";\n\n let mut chars = y.chars();\n\n assert_eq!(Some('y'), chars.next()); // not 'y̆'\n assert_eq!(Some('\\u{0306}'), chars.next());\n\n assert_eq!(None, chars.next());\n ```\n",
+      "adt": {
+        "str::iter::Chars": "Constructor"
+      }
+    },
+    "iter::traits::iterator::Iterator::count": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the iterator, counting the number of iterations and returning it.\n\n This method will call [`next`] repeatedly until [`None`] is encountered,\n returning the number of times it saw [`Some`]. Note that [`next`] has to be\n called at least once even if the iterator does not have any elements.\n\n [`next`]: Iterator::next\n\n # Overflow Behavior\n\n The method does no guarding against overflows, so counting elements of\n an iterator with more than [`usize::MAX`] elements either produces the\n wrong result or panics. If overflow checks are enabled, a panic is\n guaranteed.\n\n # Panics\n\n This function might panic if the iterator has more than [`usize::MAX`]\n elements.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n assert_eq!(a.iter().count(), 3);\n\n let a = [1, 2, 3, 4, 5];\n assert_eq!(a.iter().count(), 5);\n ```\n",
+      "adt": {}
+    },
+    "fmt::Formatter::<'a>::padding": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes the pre-padding and returns the unwritten post-padding.\n\n Callers are responsible for ensuring post-padding is written after the\n thing that is being padded.\n",
+      "adt": {
+        "fmt::Formatter": "MutableAsArgument",
+        "result::Result": "Constructor",
+        "fmt::PostPadding": "Constructor"
+      }
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "fmt::PostPadding::write": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes this post padding.\n",
+      "adt": {
+        "fmt::Formatter": "MutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "fmt::Formatter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 1742, kind: RigidTy(Adt(AdtDef(DefId { id: 24832, name: \"num::nonzero::NonZero\" }), GenericArgs([Type(Ty { id: 47, kind: RigidTy(Uint(Usize)) })]))) })])"
+    ],
+    "fmt::FormattingOptions": [
+      "Ref"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 136, kind: RigidTy(Uint(U16)) })])"
+    ],
+    "str::iter::CharIndices": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "num::nonzero::NonZero": [
+      "Plain"
+    ],
+    "ops::range::RangeTo": [
+      "Plain"
+    ],
+    "str::iter::Chars": [
+      "Plain"
+    ],
+    "fmt::Alignment": [
+      "Plain"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 11599, kind: RigidTy(Adt(AdtDef(DefId { id: 27980, name: \"fmt::PostPadding\" }), GenericArgs([]))) })])"
+    ],
+    "fmt::PostPadding": [
+      "Plain"
+    ]
+  },
+  "path": 13033,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:1909:5: 1945:6",
+  "src": "pub fn pad(&mut self, s: &str) -> Result {\n        // Make sure there's a fast path up front.\n        if self.options.flags & (flags::WIDTH_FLAG | flags::PRECISION_FLAG) == 0 {\n            return self.buf.write_str(s);\n        }\n\n        // The `precision` field can be interpreted as a maximum width for the\n        // string being formatted.\n        let (s, char_count) = if let Some(max_char_count) = self.options.get_precision() {\n            let mut iter = s.char_indices();\n            let remaining = match iter.advance_by(usize::from(max_char_count)) {\n                Ok(()) => 0,\n                Err(remaining) => remaining.get(),\n            };\n            // SAFETY: The offset of `.char_indices()` is guaranteed to be\n            // in-bounds and between character boundaries.\n            let truncated = unsafe { s.get_unchecked(..iter.offset()) };\n            (truncated, usize::from(max_char_count) - remaining)\n        } else {\n            // Use the optimized char counting algorithm for the full string.\n            (s, s.chars().count())\n        };\n\n        // The `width` field is more of a minimum width parameter at this point.\n        if char_count < usize::from(self.options.width) {\n            // If we're under the minimum width, then fill up the minimum width\n            // with the specified string + some alignment.\n            let post_padding =\n                self.padding(self.options.width - char_count as u16, Alignment::Left)?;\n            self.buf.write_str(s)?;\n            post_padding.write(self)\n        } else {\n            // If we're over the minimum width or there is no minimum width, we\n            // can just emit the string.\n            self.buf.write_str(s)\n        }\n    }",
+  "mir": "fn fmt::Formatter::<'a>::pad(_1: &mut fmt::Formatter<'_>, _2: &str) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    let mut _3: u32;\n    let mut _4: u32;\n    let mut _5: u32;\n    let  _6: &str;\n    let  _7: usize;\n    let mut _8: (&str, usize);\n    let mut _9: option::Option<u16>;\n    let mut _10: &fmt::FormattingOptions;\n    let mut _11: isize;\n    let  _12: u16;\n    let mut _13: str::iter::CharIndices<'_>;\n    let  _14: usize;\n    let mut _15: result::Result<(), num::nonzero::NonZero<usize>>;\n    let mut _16: &mut str::iter::CharIndices<'_>;\n    let mut _17: usize;\n    let mut _18: isize;\n    let  _19: num::nonzero::NonZero<usize>;\n    let  _20: &str;\n    let mut _21: ops::range::RangeTo<usize>;\n    let mut _22: usize;\n    let mut _23: &str::iter::CharIndices<'_>;\n    let mut _24: usize;\n    let mut _25: usize;\n    let mut _26: usize;\n    let mut _27: (usize, bool);\n    let mut _28: usize;\n    let mut _29: str::iter::Chars<'_>;\n    let mut _30: bool;\n    let mut _31: usize;\n    let mut _32: u16;\n    let mut _33: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>, fmt::PostPadding>;\n    let mut _34: result::Result<fmt::PostPadding, fmt::Error>;\n    let mut _35: u16;\n    let mut _36: u16;\n    let mut _37: u16;\n    let mut _38: (u16, bool);\n    let mut _39: fmt::Alignment;\n    let mut _40: isize;\n    let  _41: fmt::PostPadding;\n    let mut _42: ops::control_flow::ControlFlow<result::Result<convert::Infallible, fmt::Error>>;\n    let mut _43: result::Result<(), fmt::Error>;\n    let mut _44: isize;\n    let mut _45: &mut dyn fmt::Write;\n    let mut _46: &mut dyn fmt::Write;\n    let mut _47: &mut dyn fmt::Write;\n    debug self => _1;\n    debug s => _2;\n    debug s => _6;\n    debug char_count => _7;\n    debug max_char_count => _12;\n    debug iter => _13;\n    debug remaining => _14;\n    debug remaining => _19;\n    debug truncated => _20;\n    debug post_padding => _41;\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => _41;\n    debug residual => result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error);\n    debug val => ();\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = (((*_1).0: fmt::FormattingOptions).0: u32);\n        StorageLive(_5);\n        _5 = BitOr(fmt::flags::WIDTH_FLAG, fmt::flags::PRECISION_FLAG);\n        _3 = BitAnd(move _4, move _5);\n        StorageDead(_5);\n        StorageDead(_4);\n        switchInt(move _3) -> [0: bb1, otherwise: bb3];\n    }\n    bb1: {\n        StorageDead(_3);\n        _45 = ((*_1).1: &mut dyn fmt::Write);\n        _0 = <dyn fmt::Write as fmt::Write>::write_str(_45, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        goto -> bb40;\n    }\n    bb3: {\n        StorageDead(_3);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &((*_1).0: fmt::FormattingOptions);\n        _9 = fmt::FormattingOptions::get_precision(move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        _11 = discriminant(_9);\n        switchInt(move _11) -> [1: bb5, 0: bb18, otherwise: bb9];\n    }\n    bb5: {\n        _12 = ((_9 as variant#1).0: u16);\n        StorageLive(_13);\n        _13 = str::<impl str>::char_indices(_2) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &mut _13;\n        StorageLive(_17);\n        _17 = <usize as convert::From<u16>>::from(_12) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _15 = <str::iter::CharIndices<'_> as iter::traits::iterator::Iterator>::advance_by(move _16, move _17) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_17);\n        StorageDead(_16);\n        _18 = discriminant(_15);\n        switchInt(move _18) -> [0: bb11, 1: bb10, otherwise: bb9];\n    }\n    bb9: {\n        unreachable;\n    }\n    bb10: {\n        _19 = ((_15 as variant#1).0: num::nonzero::NonZero<usize>);\n        _14 = num::nonzero::NonZero::<usize>::get(_19) -> [return: bb12, unwind unreachable];\n    }\n    bb11: {\n        _14 = 0_usize;\n        goto -> bb13;\n    }\n    bb12: {\n        goto -> bb13;\n    }\n    bb13: {\n        StorageDead(_15);\n        StorageLive(_21);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = &_13;\n        _22 = str::iter::CharIndices::<'_>::offset(move _23) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_23);\n        _21 = RangeTo(move _22);\n        StorageDead(_22);\n        _20 = str::<impl str>::get_unchecked::<ops::range::RangeTo<usize>>(_2, move _21) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_21);\n        StorageLive(_24);\n        StorageLive(_25);\n        _25 = <usize as convert::From<u16>>::from(_12) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageLive(_26);\n        _26 = _14;\n        _27 = CheckedSub(_25, _26);\n        assert(!move (_27.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _25, move _26) -> [success: bb17, unwind unreachable];\n    }\n    bb17: {\n        _24 = move (_27.0: usize);\n        StorageDead(_26);\n        StorageDead(_25);\n        _8 = (_20, move _24);\n        StorageDead(_24);\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageDead(_9);\n        goto -> bb21;\n    }\n    bb18: {\n        StorageDead(_9);\n        StorageLive(_28);\n        StorageLive(_29);\n        _29 = str::<impl str>::chars(_2) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        _28 = <str::iter::Chars<'_> as iter::traits::iterator::Iterator>::count(move _29) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_29);\n        _8 = (_2, move _28);\n        StorageDead(_28);\n        goto -> bb21;\n    }\n    bb21: {\n        _6 = (_8.0: &str);\n        _7 = (_8.1: usize);\n        StorageDead(_8);\n        StorageLive(_30);\n        StorageLive(_31);\n        StorageLive(_32);\n        _32 = (((*_1).0: fmt::FormattingOptions).1: u16);\n        _31 = <usize as convert::From<u16>>::from(move _32) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_32);\n        _30 = Lt(_7, move _31);\n        switchInt(move _30) -> [0: bb36, otherwise: bb23];\n    }\n    bb23: {\n        StorageDead(_31);\n        StorageLive(_33);\n        StorageLive(_34);\n        StorageLive(_35);\n        StorageLive(_36);\n        _36 = (((*_1).0: fmt::FormattingOptions).1: u16);\n        StorageLive(_37);\n        _37 = _7 as u16;\n        _38 = CheckedSub(_36, _37);\n        assert(!move (_38.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _36, move _37) -> [success: bb24, unwind unreachable];\n    }\n    bb24: {\n        _35 = move (_38.0: u16);\n        StorageDead(_37);\n        StorageDead(_36);\n        StorageLive(_39);\n        _39 = fmt::Alignment::Left;\n        _34 = fmt::Formatter::<'_>::padding(_1, move _35, move _39) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_39);\n        StorageDead(_35);\n        _33 = <result::Result<fmt::PostPadding, fmt::Error> as ops::try_trait::Try>::branch(move _34) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_34);\n        _40 = discriminant(_33);\n        switchInt(move _40) -> [0: bb27, 1: bb28, otherwise: bb9];\n    }\n    bb27: {\n        _41 = move ((_33 as variant#0).0: fmt::PostPadding);\n        StorageDead(_33);\n        StorageLive(_42);\n        StorageLive(_43);\n        _46 = ((*_1).1: &mut dyn fmt::Write);\n        _43 = <dyn fmt::Write as fmt::Write>::write_str(_46, _6) -> [return: bb30, unwind unreachable];\n    }\n    bb28: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        StorageDead(_33);\n        goto -> bb39;\n    }\n    bb30: {\n        _42 = <result::Result<(), fmt::Error> as ops::try_trait::Try>::branch(move _43) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        StorageDead(_43);\n        _44 = discriminant(_42);\n        switchInt(move _44) -> [0: bb32, 1: bb33, otherwise: bb9];\n    }\n    bb32: {\n        StorageDead(_42);\n        _0 = fmt::PostPadding::write(_41, _1) -> [return: bb35, unwind unreachable];\n    }\n    bb33: {\n        _0 = <result::Result<(), fmt::Error> as ops::try_trait::FromResidual<result::Result<convert::Infallible, fmt::Error>>>::from_residual(result::Result::<convert::Infallible, fmt::Error>::Err(fmt::Error)) -> [return: bb34, unwind unreachable];\n    }\n    bb34: {\n        StorageDead(_42);\n        goto -> bb39;\n    }\n    bb35: {\n        goto -> bb38;\n    }\n    bb36: {\n        StorageDead(_31);\n        _47 = ((*_1).1: &mut dyn fmt::Write);\n        _0 = <dyn fmt::Write as fmt::Write>::write_str(_47, _6) -> [return: bb37, unwind unreachable];\n    }\n    bb37: {\n        goto -> bb38;\n    }\n    bb38: {\n        StorageDead(_30);\n        goto -> bb40;\n    }\n    bb39: {\n        StorageDead(_30);\n        goto -> bb40;\n    }\n    bb40: {\n        return;\n    }\n}\n",
+  "doc": " Takes a string slice and emits it to the internal buffer after applying\n the relevant formatting flags specified.\n\n The flags recognized for generic strings are:\n\n * width - the minimum width of what to emit\n * fill/align - what to emit and where to emit it if the string\n                provided needs to be padded\n * precision - the maximum length to emit, the string is truncated if it\n               is longer than this length\n\n Notably this function ignores the `flag` parameters.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Foo;\n\n impl fmt::Display for Foo {\n     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {\n         formatter.pad(\"Foo\")\n     }\n }\n\n assert_eq!(format!(\"{Foo:<4}\"), \"Foo \");\n assert_eq!(format!(\"{Foo:0>4}\"), \"0Foo\");\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

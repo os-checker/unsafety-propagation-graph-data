@@ -1,0 +1,102 @@
+{
+  "name": "sync::mpmc::counter::Sender::<C>::release",
+  "safe": false,
+  "callees": {
+    "sync::mpmc::counter::Sender::<C>::counter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the internal `Counter`.\n",
+      "adt": {
+        "sync::mpmc::counter::Sender": "ImmutableAsArgument"
+      }
+    },
+    "core::sync::atomic::AtomicUsize::fetch_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts from the current value, returning the previous value.\n\n This operation wraps around on overflow.\n\n `fetch_sub` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n assert_eq!(foo.fetch_sub(10, Ordering::SeqCst), 20);\n assert_eq!(foo.load(Ordering::SeqCst), 10);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicBool::swap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the bool, returning the previous value.\n\n `swap` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note:** This method is only available on platforms that support atomic\n operations on `u8`.\n\n # Examples\n\n ```\n use std::sync::atomic::{AtomicBool, Ordering};\n\n let some_bool = AtomicBool::new(true);\n\n assert_eq!(some_bool.swap(false, Ordering::Relaxed), true);\n assert_eq!(some_bool.load(Ordering::Relaxed), false);\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::boxed::Box::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a box from a raw pointer.\n\n After calling this function, the raw pointer is owned by the\n resulting `Box`. Specifically, the `Box` destructor will call\n the destructor of `T` and free the allocated memory. For this\n to be safe, the memory must have been allocated in accordance\n with the [memory layout] used by `Box` .\n\n # Safety\n\n This function is unsafe because improper use may lead to\n memory problems. For example, a double-free may occur if the\n function is called twice on the same raw pointer.\n\n The raw pointer must point to a block of memory allocated by the global allocator.\n\n The safety conditions are described in the [memory layout] section.\n\n # Examples\n\n Recreate a `Box` which was previously converted to a raw pointer\n using [`Box::into_raw`]:\n ```\n let x = Box::new(5);\n let ptr = Box::into_raw(x);\n let x = unsafe { Box::from_raw(ptr) };\n ```\n Manually create a `Box` from scratch by using the global allocator:\n ```\n use std::alloc::{alloc, Layout};\n\n unsafe {\n     let ptr = alloc(Layout::new::<i32>()) as *mut i32;\n     // In general .write is required to avoid attempting to destruct\n     // the (uninitialized) previous contents of `ptr`, though for this\n     // simple example `*ptr = 5` would have worked as well.\n     ptr.write(5);\n     let x = Box::from_raw(ptr);\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+      "adt": {}
+    },
+    "core::mem::drop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disposes of a value.\n\n This effectively does nothing for types which implement `Copy`, e.g.\n integers. Such values are copied and _then_ moved into the function, so the\n value persists after this function call.\n\n This function is not magic; it is literally defined as\n\n ```\n pub fn drop<T>(_x: T) {}\n ```\n\n Because `_x` is moved into the function, it is automatically [dropped][drop] before\n the function returns.\n\n [drop]: Drop\n\n # Examples\n\n Basic usage:\n\n ```\n let v = vec![1, 2, 3];\n\n drop(v); // explicitly drop the vector\n ```\n\n Since [`RefCell`] enforces the borrow rules at runtime, `drop` can\n release a [`RefCell`] borrow:\n\n ```\n use std::cell::RefCell;\n\n let x = RefCell::new(1);\n\n let mut mutable_borrow = x.borrow_mut();\n *mutable_borrow = 1;\n\n drop(mutable_borrow); // relinquish the mutable borrow on this slot\n\n let borrow = x.borrow();\n println!(\"{}\", *borrow);\n ```\n\n Integers and other types implementing [`Copy`] are unaffected by `drop`.\n\n ```\n # #![allow(dropping_copy_types)]\n #[derive(Copy, Clone)]\n struct Foo(u8);\n\n let x = 1;\n let y = Foo(2);\n drop(x); // a copy of `x` is moved and dropped\n drop(y); // a copy of `y` is moved and dropped\n\n println!(\"x: {}, y: {}\", x, y.0); // still available\n ```\n\n [`RefCell`]: crate::cell::RefCell\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::mpmc::counter::Sender": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "sync::mpmc::counter::Counter": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))"
+    ],
+    "core::sync::atomic::AtomicUsize": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::sync::atomic::AtomicBool": [
+      "Ref"
+    ],
+    "alloc_crate::boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 2830,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/mpmc/counter.rs:60:5: 68:6",
+  "src": "pub(crate) unsafe fn release<F: FnOnce(&C) -> bool>(&self, disconnect: F) {\n        if self.counter().senders.fetch_sub(1, Ordering::AcqRel) == 1 {\n            disconnect(&self.counter().chan);\n\n            if self.counter().destroy.swap(true, Ordering::AcqRel) {\n                drop(unsafe { Box::from_raw(self.counter) });\n            }\n        }\n    }",
+  "mir": "fn sync::mpmc::counter::Sender::<C>::release(_1: &sync::mpmc::counter::Sender<C>, _2: F) -> () {\n    let mut _0: ();\n    let mut _3: usize;\n    let mut _4: &core::sync::atomic::AtomicUsize;\n    let  _5: &sync::mpmc::counter::Counter<C>;\n    let mut _6: core::sync::atomic::Ordering;\n    let  _7: bool;\n    let mut _8: F;\n    let mut _9: (&C,);\n    let  _10: &C;\n    let  _11: &sync::mpmc::counter::Counter<C>;\n    let mut _12: bool;\n    let mut _13: &core::sync::atomic::AtomicBool;\n    let  _14: &sync::mpmc::counter::Counter<C>;\n    let mut _15: core::sync::atomic::Ordering;\n    let  _16: ();\n    let mut _17: alloc_crate::boxed::Box<sync::mpmc::counter::Counter<C>>;\n    let mut _18: *mut sync::mpmc::counter::Counter<C>;\n    let mut _19: bool;\n    debug self => _1;\n    debug disconnect => _2;\n    bb0: {\n        _19 = false;\n        _19 = true;\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = sync::mpmc::counter::Sender::<C>::counter(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = &((*_5).0: core::sync::atomic::AtomicUsize);\n        StorageLive(_6);\n        _6 = core::sync::atomic::Ordering::AcqRel;\n        _3 = core::sync::atomic::AtomicUsize::fetch_sub(move _4, 1_usize, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_4);\n        switchInt(move _3) -> [1: bb3, otherwise: bb13];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageLive(_7);\n        StorageLive(_8);\n        _19 = false;\n        _8 = move _2;\n        StorageLive(_9);\n        StorageLive(_11);\n        _11 = sync::mpmc::counter::Sender::<C>::counter(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _10 = &((*_11).3: C);\n        _9 = (_10);\n        _7 = <F as core::ops::FnOnce<(&C,)>>::call_once(move _8, move _9) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_11);\n        StorageDead(_7);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = sync::mpmc::counter::Sender::<C>::counter(_1) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _13 = &((*_14).2: core::sync::atomic::AtomicBool);\n        StorageLive(_15);\n        _15 = core::sync::atomic::Ordering::AcqRel;\n        _12 = core::sync::atomic::AtomicBool::swap(move _13, true, move _15) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        switchInt(move _12) -> [0: bb11, otherwise: bb8];\n    }\n    bb8: {\n        StorageDead(_15);\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = ((*_1).0: *mut sync::mpmc::counter::Counter<C>);\n        _17 = alloc_crate::boxed::Box::<sync::mpmc::counter::Counter<C>>::from_raw(move _18) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_18);\n        _16 = core::mem::drop::<alloc_crate::boxed::Box<sync::mpmc::counter::Counter<C>>>(move _17) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_17);\n        goto -> bb12;\n    }\n    bb11: {\n        StorageDead(_15);\n        StorageDead(_14);\n        StorageDead(_13);\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_12);\n        goto -> bb14;\n    }\n    bb13: {\n        StorageDead(_5);\n        StorageDead(_3);\n        goto -> bb14;\n    }\n    bb14: {\n        switchInt(_19) -> [0: bb15, otherwise: bb16];\n    }\n    bb15: {\n        return;\n    }\n    bb16: {\n        drop(_2) -> [return: bb15, unwind unreachable];\n    }\n}\n",
+  "doc": " Releases the sender reference.\n\n Function `disconnect` will be called if this is the last sender reference.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

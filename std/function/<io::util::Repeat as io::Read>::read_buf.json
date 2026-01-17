@@ -1,0 +1,70 @@
+{
+  "name": "<io::util::Repeat as io::Read>::read_buf",
+  "safe": true,
+  "callees": {
+    "core::io::BorrowedCursor::<'a>::as_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference to the whole cursor.\n\n # Safety\n\n The caller must not uninitialize any previously initialized bytes.\n",
+      "adt": {}
+    },
+    "<[core::mem::MaybeUninit<T>]>::write_filled": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Fills a slice with elements by cloning `value`, returning a mutable reference to the now\n initialized contents of the slice.\n Any previously initialized elements will not be dropped.\n\n This is similar to [`slice::fill`].\n\n # Panics\n\n This function will panic if any call to `Clone` panics.\n\n If such a panic occurs, any elements previously initialized during this operation will be\n dropped.\n\n # Examples\n\n ```\n #![feature(maybe_uninit_fill)]\n use std::mem::MaybeUninit;\n\n let mut buf = [const { MaybeUninit::uninit() }; 10];\n let initialized = buf.write_filled(1);\n assert_eq!(initialized, &mut [1; 10]);\n ```\n",
+      "adt": {}
+    },
+    "core::io::BorrowedCursor::<'a>::capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the available space in the cursor.\n",
+      "adt": {}
+    },
+    "core::io::BorrowedCursor::<'a>::advance": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the cursor by asserting that `n` bytes have been filled.\n\n After advancing, the `n` bytes are no longer accessible via the cursor and can only be\n accessed via the underlying buffer. I.e., the buffer's filled portion grows by `n` elements\n and its unfilled portion (and the capacity of this cursor) shrinks by `n` elements.\n\n # Safety\n\n The caller must ensure that the first `n` bytes of the cursor have been initialized. `n`\n must not exceed the remaining capacity of this cursor.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::io::BorrowedCursor": [
+      "MutRef",
+      "Plain",
+      "Ref"
+    ],
+    "io::util::Repeat": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1703,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/util.rs:282:5: 288:6",
+  "src": "fn read_buf(&mut self, mut buf: BorrowedCursor<'_>) -> io::Result<()> {\n        // SAFETY: No uninit bytes are being written.\n        unsafe { buf.as_mut() }.write_filled(self.byte);\n        // SAFETY: the entire unfilled portion of buf has been initialized.\n        unsafe { buf.advance(buf.capacity()) };\n        Ok(())\n    }",
+  "mir": "fn <io::util::Repeat as io::Read>::read_buf(_1: &mut io::util::Repeat, _2: core::io::BorrowedCursor<'_>) -> core::result::Result<(), io::error::Error> {\n    let mut _0: core::result::Result<(), io::error::Error>;\n    let  _3: &mut [u8];\n    let mut _4: &mut [core::mem::MaybeUninit<u8>];\n    let mut _5: &mut core::io::BorrowedCursor<'_>;\n    let mut _6: u8;\n    let  _7: &mut core::io::BorrowedCursor<'_>;\n    let mut _8: &mut core::io::BorrowedCursor<'_>;\n    let mut _9: usize;\n    let mut _10: &core::io::BorrowedCursor<'_>;\n    debug self => _1;\n    debug buf => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_5);\n        _5 = &mut _2;\n        _4 = core::io::BorrowedCursor::<'_>::as_mut(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageLive(_6);\n        _6 = ((*_1).0: u8);\n        _3 = <[core::mem::MaybeUninit<u8>]>::write_filled(_4, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageDead(_3);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &mut _2;\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_2;\n        _9 = core::io::BorrowedCursor::<'_>::capacity(move _10) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        _7 = core::io::BorrowedCursor::<'_>::advance(move _8, move _9) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageDead(_7);\n        _0 = core::result::Result::Ok(());\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "name": "f64::<impl f64>::clamp_magnitude",
+  "safe": true,
+  "callees": {
+    "f64::<impl f64>::abs": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Computes the absolute value of `self`.\n\n This function always returns the precise result.\n\n # Examples\n\n ```\n let x = 3.5_f64;\n let y = -3.5_f64;\n\n assert_eq!(x.abs(), x);\n assert_eq!(y.abs(), -y);\n\n assert!(f64::NAN.abs().is_nan());\n ```\n",
+      "adt": {}
+    },
+    "fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {
+        "fmt::Arguments": "ImmutableAsArgument"
+      }
+    },
+    "f64::<impl f64>::clamp": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Restrict a value to a certain interval unless it is NaN.\n\n Returns `max` if `self` is greater than `max`, and `min` if `self` is\n less than `min`. Otherwise this returns `self`.\n\n Note that this function returns NaN if the initial value was NaN as\n well. If the result is zero and among the three inputs `self`, `min`, and `max` there are\n zeros with different sign, either `0.0` or `-0.0` is returned non-deterministically.\n\n # Panics\n\n Panics if `min > max`, `min` is NaN, or `max` is NaN.\n\n # Examples\n\n ```\n assert!((-3.0f64).clamp(-2.0, 1.0) == -2.0);\n assert!((0.0f64).clamp(-2.0, 1.0) == 0.0);\n assert!((2.0f64).clamp(-2.0, 1.0) == 1.0);\n assert!((f64::NAN).clamp(-2.0, 1.0).is_nan());\n\n // These always returns zero, but the sign (which is ignored by `==`) is non-deterministic.\n assert!((0.0f64).clamp(-0.0, -0.0) == 0.0);\n assert!((1.0f64).clamp(-0.0, 0.0) == 0.0);\n // This is definitely a negative zero.\n assert!((-1.0f64).clamp(-0.0, 1.0).is_sign_negative());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 1808,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/f64.rs:1470:5: 1474:6",
+  "src": "pub fn clamp_magnitude(self, limit: f64) -> f64 {\n        assert!(limit >= 0.0, \"limit must be non-negative\");\n        let limit = limit.abs(); // Canonicalises -0.0 to 0.0\n        self.clamp(-limit, limit)\n    }",
+  "mir": "fn f64::<impl f64>::clamp_magnitude(_1: f64, _2: f64) -> f64 {\n    let mut _0: f64;\n    let mut _3: bool;\n    let  _4: !;\n    let mut _5: fmt::Arguments<'_>;\n    let  _6: f64;\n    let mut _7: f64;\n    debug self => _1;\n    debug limit => _2;\n    debug limit => _6;\n    bb0: {\n        StorageLive(_3);\n        _3 = Ge(_2, 0f64);\n        switchInt(move _3) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        StorageDead(_3);\n        _6 = f64::<impl f64>::abs(_2) -> [return: bb4, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_5);\n        _5 = fmt::Arguments::<'_>::from_str(\"limit must be non-negative\") -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _4 = panicking::panic_fmt(move _5) -> unwind unreachable;\n    }\n    bb4: {\n        StorageLive(_7);\n        _7 = Neg(_6);\n        _0 = f64::<impl f64>::clamp(_1, move _7, _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        return;\n    }\n}\n",
+  "doc": " Clamps this number to a symmetric range centered around zero.\n\n The method clamps the number's magnitude (absolute value) to be at most `limit`.\n\n This is functionally equivalent to `self.clamp(-limit, limit)`, but is more\n explicit about the intent.\n\n # Panics\n\n Panics if `limit` is negative or NaN, as this indicates a logic error.\n\n # Examples\n\n ```\n #![feature(clamp_magnitude)]\n assert_eq!(5.0f64.clamp_magnitude(3.0), 3.0);\n assert_eq!((-5.0f64).clamp_magnitude(3.0), -3.0);\n assert_eq!(2.0f64.clamp_magnitude(3.0), 2.0);\n assert_eq!((-2.0f64).clamp_magnitude(3.0), -2.0);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

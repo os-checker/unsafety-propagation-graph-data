@@ -1,0 +1,79 @@
+{
+  "name": "path::PathBuf::pop",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "path::Path::parent": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the `Path` without its final component, if there is one.\n\n This means it returns `Some(\"\")` for relative paths with one component.\n\n Returns [`None`] if the path terminates in a root or prefix, or if it's\n the empty string.\n\n # Examples\n\n ```\n use std::path::Path;\n\n let path = Path::new(\"/foo/bar\");\n let parent = path.parent().unwrap();\n assert_eq!(parent, Path::new(\"/foo\"));\n\n let grand_parent = parent.parent().unwrap();\n assert_eq!(grand_parent, Path::new(\"/\"));\n assert_eq!(grand_parent.parent(), None);\n\n let relative_path = Path::new(\"foo/bar\");\n let parent = relative_path.parent();\n assert_eq!(parent, Some(Path::new(\"foo\")));\n let grand_parent = parent.and_then(Path::parent);\n assert_eq!(grand_parent, Some(Path::new(\"\")));\n let great_grand_parent = grand_parent.and_then(Path::parent);\n assert_eq!(great_grand_parent, None);\n ```\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::option::Option::<T>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).\n\n # Examples\n\n Calculates the length of an <code>Option<[String]></code> as an\n <code>Option<[usize]></code>, consuming the original:\n\n [String]: ../../std/string/struct.String.html \"String\"\n ```\n let maybe_some_string = Some(String::from(\"Hello, World!\"));\n // `Option::map` takes self *by value*, consuming `maybe_some_string`\n let maybe_some_len = maybe_some_string.map(|s| s.len());\n assert_eq!(maybe_some_len, Some(13));\n\n let x: Option<&str> = None;\n assert_eq!(x.map(|s| s.len()), None);\n ```\n",
+      "adt": {}
+    },
+    "ffi::os_str::OsString::truncate": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Truncate the `OsString` to the specified length.\n\n # Panics\n Panics if `len` does not lie on a valid `OsStr` boundary\n (as described in [`OsStr::slice_encoded_bytes`]).\n",
+      "adt": {
+        "ffi::os_str::OsString": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "path::PathBuf": [
+      "Ref",
+      "Deref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "path::Path": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "ffi::os_str::OsString": [
+      "MutRef"
+    ]
+  },
+  "path": 2492,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:1417:5: 1425:6",
+  "src": "pub fn pop(&mut self) -> bool {\n        match self.parent().map(|p| p.as_u8_slice().len()) {\n            Some(len) => {\n                self.inner.truncate(len);\n                true\n            }\n            None => false,\n        }\n    }",
+  "mir": "fn path::PathBuf::pop(_1: &mut path::PathBuf) -> bool {\n    let mut _0: bool;\n    let mut _2: core::option::Option<usize>;\n    let mut _3: core::option::Option<&path::Path>;\n    let  _4: &path::Path;\n    let mut _5: &path::PathBuf;\n    let mut _6: isize;\n    let  _7: usize;\n    let  _8: ();\n    let mut _9: &mut ffi::os_str::OsString;\n    debug self => _1;\n    debug len => _7;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = <path::PathBuf as core::ops::Deref>::deref(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = path::Path::parent(_4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _2 = core::option::Option::<&path::Path>::map::<usize, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:1418:33: 1418:36}>(move _3, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:1418:33: 1418:36}) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        _6 = discriminant(_2);\n        switchInt(move _6) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _0 = false;\n        goto -> bb8;\n    }\n    bb6: {\n        _7 = ((_2 as variant#1).0: usize);\n        StorageLive(_9);\n        _9 = &mut ((*_1).0: ffi::os_str::OsString);\n        _8 = ffi::os_str::OsString::truncate(move _9, _7) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_9);\n        _0 = true;\n        goto -> bb8;\n    }\n    bb8: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Truncates `self` to [`self.parent`].\n\n Returns `false` and does nothing if [`self.parent`] is [`None`].\n Otherwise, returns `true`.\n\n [`self.parent`]: Path::parent\n\n # Examples\n\n ```\n use std::path::{Path, PathBuf};\n\n let mut p = PathBuf::from(\"/spirited/away.rs\");\n\n p.pop();\n assert_eq!(Path::new(\"/spirited\"), p);\n p.pop();\n assert_eq!(Path::new(\"/\"), p);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

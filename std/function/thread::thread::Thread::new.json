@@ -1,0 +1,127 @@
+{
+  "name": "thread::thread::Thread::new",
+  "safe": true,
+  "callees": {
+    "core::option::Option::<T>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).\n\n # Examples\n\n Calculates the length of an <code>Option<[String]></code> as an\n <code>Option<[usize]></code>, consuming the original:\n\n [String]: ../../std/string/struct.String.html \"String\"\n ```\n let maybe_some_string = Some(String::from(\"Hello, World!\"));\n // `Option::map` takes self *by value*, consuming `maybe_some_string`\n let maybe_some_len = maybe_some_string.map(|s| s.len());\n assert_eq!(maybe_some_len, Some(13));\n\n let x: Option<&str> = None;\n assert_eq!(x.map(|s| s.len()), None);\n ```\n",
+      "adt": {}
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "alloc_crate::sync::Arc::<T, A>::new_uninit_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new `Arc` with uninitialized contents in the provided allocator.\n\n # Examples\n\n ```\n #![feature(get_mut_unchecked)]\n #![feature(allocator_api)]\n\n use std::sync::Arc;\n use std::alloc::System;\n\n let mut five = Arc::<u32, _>::new_uninit_in(System);\n\n let five = unsafe {\n     // Deferred initialization:\n     Arc::get_mut_unchecked(&mut five).as_mut_ptr().write(5);\n\n     five.assume_init()\n };\n\n assert_eq!(*five, 5)\n ```\n",
+      "adt": {}
+    },
+    "alloc_crate::sync::Arc::<T, A>::get_mut_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a mutable reference into the given `Arc`,\n without any check.\n\n See also [`get_mut`], which is safe and does appropriate checks.\n\n [`get_mut`]: Arc::get_mut\n\n # Safety\n\n If any other `Arc` or [`Weak`] pointers to the same allocation exist, then\n they must not be dereferenced or have active borrows for the duration\n of the returned borrow, and their inner type must be exactly the same as the\n inner type of this Arc (including lifetimes). This is trivially the case if no\n such pointers exist, for example immediately after `Arc::new`.\n\n # Examples\n\n ```\n #![feature(get_mut_unchecked)]\n\n use std::sync::Arc;\n\n let mut x = Arc::new(String::new());\n unsafe {\n     Arc::get_mut_unchecked(&mut x).push_str(\"foo\")\n }\n assert_eq!(*x, \"foo\");\n ```\n Other `Arc` pointers to the same allocation must be to the same type.\n ```no_run\n #![feature(get_mut_unchecked)]\n\n use std::sync::Arc;\n\n let x: Arc<str> = Arc::from(\"Hello, world!\");\n let mut y: Arc<[u8]> = x.clone().into();\n unsafe {\n     // this is Undefined Behavior, because x's inner type is str, not [u8]\n     Arc::get_mut_unchecked(&mut y).fill(0xff); // 0xff is invalid in UTF-8\n }\n println!(\"{}\", &*x); // Invalid UTF-8 in a str\n ```\n Other `Arc` pointers to the same allocation must be to the exact same type, including lifetimes.\n ```no_run\n #![feature(get_mut_unchecked)]\n\n use std::sync::Arc;\n\n let x: Arc<&str> = Arc::new(\"Hello, world!\");\n {\n     let s = String::from(\"Oh, no!\");\n     let mut y: Arc<&str> = x.clone();\n     unsafe {\n         // this is Undefined Behavior, because x's inner type\n         // is &'long str, not &'short str\n         *Arc::get_mut_unchecked(&mut y) = &s;\n     }\n }\n println!(\"{}\", &*x); // Use-after-free\n ```\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<Vec<u32>>`.\n // This is okay because we initialized it.\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n x_vec.push(3);\n assert_eq!(x_vec.len(), 4);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::write": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Overwrites a memory location with the given value without reading or\n dropping the old value.\n\n See [`ptr::write`] for safety concerns and examples.\n\n [`ptr::write`]: crate::ptr::write()\n",
+      "adt": {}
+    },
+    "sys::sync::thread_parking::futex::Parker::new_in_place": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the futex parker. The UNIX parker implementation\n requires this to happen in-place.\n",
+      "adt": {}
+    },
+    "alloc_crate::sync::Arc::<core::mem::MaybeUninit<T>, A>::assume_init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to `Arc<T>`.\n\n # Safety\n\n As with [`MaybeUninit::assume_init`],\n it is up to the caller to guarantee that the inner value\n really is in an initialized state.\n Calling this when the content is not yet fully initialized\n causes immediate undefined behavior.\n\n [`MaybeUninit::assume_init`]: mem::MaybeUninit::assume_init\n\n # Examples\n\n ```\n use std::sync::Arc;\n\n let mut five = Arc::<u32>::new_uninit();\n\n // Deferred initialization:\n Arc::get_mut(&mut five).unwrap().write(5);\n\n let five = unsafe { five.assume_init() };\n\n assert_eq!(*five, 5)\n ```\n",
+      "adt": {}
+    },
+    "core::pin::Pin::<Ptr>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new `Pin<Ptr>` around a reference to some data of a type that\n may or may not implement [`Unpin`].\n\n If `pointer` dereferences to an [`Unpin`] type, [`Pin::new`] should be used\n instead.\n\n # Safety\n\n This constructor is unsafe because we cannot guarantee that the data\n pointed to by `pointer` is pinned. At its core, pinning a value means making the\n guarantee that the value's data will not be moved nor have its storage invalidated until\n it gets dropped. For a more thorough explanation of pinning, see the [`pin` module docs].\n\n If the caller that is constructing this `Pin<Ptr>` does not ensure that the data `Ptr`\n points to is pinned, that is a violation of the API contract and may lead to undefined\n behavior in later (even safe) operations.\n\n By using this method, you are also making a promise about the [`Deref`],\n [`DerefMut`], and [`Drop`] implementations of `Ptr`, if they exist. Most importantly, they\n must not move out of their `self` arguments: `Pin::as_mut` and `Pin::as_ref`\n will call `DerefMut::deref_mut` and `Deref::deref` *on the pointer type `Ptr`*\n and expect these methods to uphold the pinning invariants.\n Moreover, by calling this method you promise that the reference `Ptr`\n dereferences to will not be moved out of again; in particular, it\n must not be possible to obtain a `&mut Ptr::Target` and then\n move out of that reference (using, for example [`mem::swap`]).\n\n For example, calling `Pin::new_unchecked` on an `&'a mut T` is unsafe because\n while you are able to pin it for the given lifetime `'a`, you have no control\n over whether it is kept pinned once `'a` ends, and therefore cannot uphold the\n guarantee that a value, once pinned, remains pinned until it is dropped:\n\n ```\n use std::mem;\n use std::pin::Pin;\n\n fn move_pinned_ref<T>(mut a: T, mut b: T) {\n     unsafe {\n         let p: Pin<&mut T> = Pin::new_unchecked(&mut a);\n         // This should mean the pointee `a` can never move again.\n     }\n     mem::swap(&mut a, &mut b); // Potential UB down the road ⚠️\n     // The address of `a` changed to `b`'s stack slot, so `a` got moved even\n     // though we have previously pinned it! We have violated the pinning API contract.\n }\n ```\n A value, once pinned, must remain pinned until it is dropped (unless its type implements\n `Unpin`). Because `Pin<&mut T>` does not own the value, dropping the `Pin` will not drop\n the value and will not end the pinning contract. So moving the value after dropping the\n `Pin<&mut T>` is still a violation of the API contract.\n\n Similarly, calling `Pin::new_unchecked` on an `Rc<T>` is unsafe because there could be\n aliases to the same data that are not subject to the pinning restrictions:\n ```\n use std::rc::Rc;\n use std::pin::Pin;\n\n fn move_pinned_rc<T>(mut x: Rc<T>) {\n     // This should mean the pointee can never move again.\n     let pin = unsafe { Pin::new_unchecked(Rc::clone(&x)) };\n     {\n         let p: Pin<&T> = pin.as_ref();\n         // ...\n     }\n     drop(pin);\n\n     let content = Rc::get_mut(&mut x).unwrap(); // Potential UB down the road ⚠️\n     // Now, if `x` was the only reference, we have a mutable reference to\n     // data that we pinned above, which we could use to move it as we have\n     // seen in the previous example. We have violated the pinning API contract.\n }\n ```\n\n ## Pinning of closure captures\n\n Particular care is required when using `Pin::new_unchecked` in a closure:\n `Pin::new_unchecked(&mut var)` where `var` is a by-value (moved) closure capture\n implicitly makes the promise that the closure itself is pinned, and that *all* uses\n of this closure capture respect that pinning.\n ```\n use std::pin::Pin;\n use std::task::Context;\n use std::future::Future;\n\n fn move_pinned_closure(mut x: impl Future, cx: &mut Context<'_>) {\n     // Create a closure that moves `x`, and then internally uses it in a pinned way.\n     let mut closure = move || unsafe {\n         let _ignore = Pin::new_unchecked(&mut x).poll(cx);\n     };\n     // Call the closure, so the future can assume it has been pinned.\n     closure();\n     // Move the closure somewhere else. This also moves `x`!\n     let mut moved = closure;\n     // Calling it again means we polled the future from two different locations,\n     // violating the pinning API contract.\n     moved(); // Potential UB ⚠️\n }\n ```\n When passing a closure to another API, it might be moving the closure any time, so\n `Pin::new_unchecked` on closure captures may only be used if the API explicitly documents\n that the closure is pinned.\n\n The better alternative is to avoid all that trouble and do the pinning in the outer function\n instead (here using the [`pin!`][crate::pin::pin] macro):\n ```\n use std::pin::pin;\n use std::task::Context;\n use std::future::Future;\n\n fn move_pinned_closure(mut x: impl Future, cx: &mut Context<'_>) {\n     let mut x = pin!(x);\n     // Create a closure that captures `x: Pin<&mut _>`, which is safe to move.\n     let mut closure = move || {\n         let _ignore = x.as_mut().poll(cx);\n     };\n     // Call the closure, so the future can assume it has been pinned.\n     closure();\n     // Move the closure somewhere else.\n     let mut moved = closure;\n     // Calling it again here is fine (except that we might be polling a future that already\n     // returned `Poll::Ready`, but that is a separate problem).\n     moved();\n }\n ```\n\n [`mem::swap`]: crate::mem::swap\n [`pin` module docs]: self\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain"
+    ],
+    "alloc_crate::sync::Arc": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::mem::MaybeUninit": [
+      "MutRef"
+    ],
+    "thread::id::ThreadId": [
+      "Plain"
+    ],
+    "core::pin::Pin": [
+      "Plain"
+    ],
+    "thread::thread::Thread": [
+      "Plain"
+    ]
+  },
+  "path": 4574,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/thread.rs:93:5: 111:6",
+  "src": "pub(crate) fn new(id: ThreadId, name: Option<String>) -> Thread {\n        let name = name.map(ThreadNameString::from);\n\n        // We have to use `unsafe` here to construct the `Parker` in-place,\n        // which is required for the UNIX implementation.\n        //\n        // SAFETY: We pin the Arc immediately after creation, so its address never\n        // changes.\n        let inner = unsafe {\n            let mut arc = Arc::<Inner, _>::new_uninit_in(System);\n            let ptr = Arc::get_mut_unchecked(&mut arc).as_mut_ptr();\n            (&raw mut (*ptr).name).write(name);\n            (&raw mut (*ptr).id).write(id);\n            Parker::new_in_place(&raw mut (*ptr).parker);\n            Pin::new_unchecked(arc.assume_init())\n        };\n\n        Thread { inner }\n    }",
+  "mir": "fn thread::thread::Thread::new(_1: thread::id::ThreadId, _2: core::option::Option<alloc_crate::string::String>) -> thread::thread::Thread {\n    let mut _0: thread::thread::Thread;\n    let  _3: core::option::Option<thread::thread::thread_name_string::ThreadNameString>;\n    let  _4: core::pin::Pin<alloc_crate::sync::Arc<thread::thread::Inner, alloc::System>>;\n    let mut _5: alloc_crate::sync::Arc<core::mem::MaybeUninit<thread::thread::Inner>, alloc::System>;\n    let  _6: *mut thread::thread::Inner;\n    let mut _7: &mut core::mem::MaybeUninit<thread::thread::Inner>;\n    let mut _8: &mut alloc_crate::sync::Arc<core::mem::MaybeUninit<thread::thread::Inner>, alloc::System>;\n    let  _9: ();\n    let mut _10: *mut core::option::Option<thread::thread::thread_name_string::ThreadNameString>;\n    let  _11: ();\n    let mut _12: *mut thread::id::ThreadId;\n    let  _13: ();\n    let mut _14: *mut sys::sync::thread_parking::futex::Parker;\n    let mut _15: alloc_crate::sync::Arc<thread::thread::Inner, alloc::System>;\n    let mut _16: alloc_crate::sync::Arc<core::mem::MaybeUninit<thread::thread::Inner>, alloc::System>;\n    debug id => _1;\n    debug name => _2;\n    debug name => _3;\n    debug inner => _4;\n    debug arc => _5;\n    debug ptr => _6;\n    bb0: {\n        _3 = core::option::Option::<alloc_crate::string::String>::map::<thread::thread::thread_name_string::ThreadNameString, fn(alloc_crate::string::String) -> thread::thread::thread_name_string::ThreadNameString {<thread::thread::thread_name_string::ThreadNameString as core::convert::From<alloc_crate::string::String>>::from}>(_2, <thread::thread::thread_name_string::ThreadNameString as core::convert::From<alloc_crate::string::String>>::from) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = alloc_crate::sync::Arc::<thread::thread::Inner, alloc::System>::new_uninit_in(alloc::System) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_6);\n        _8 = &mut _5;\n        _7 = alloc_crate::sync::Arc::<core::mem::MaybeUninit<thread::thread::Inner>, alloc::System>::get_mut_unchecked(_8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = core::mem::MaybeUninit::<thread::thread::Inner>::as_mut_ptr(_7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageLive(_10);\n        _10 = &raw mut ((*_6).0: core::option::Option<thread::thread::thread_name_string::ThreadNameString>);\n        _9 = core::ptr::mut_ptr::<impl *mut core::option::Option<thread::thread::thread_name_string::ThreadNameString>>::write(move _10, _3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_10);\n        StorageLive(_12);\n        _12 = &raw mut ((*_6).1: thread::id::ThreadId);\n        _11 = core::ptr::mut_ptr::<impl *mut thread::id::ThreadId>::write(move _12, _1) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_12);\n        StorageLive(_14);\n        _14 = &raw mut ((*_6).2: sys::sync::thread_parking::futex::Parker);\n        _13 = sys::sync::thread_parking::futex::Parker::new_in_place(move _14) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = move _5;\n        _15 = alloc_crate::sync::Arc::<core::mem::MaybeUninit<thread::thread::Inner>, alloc::System>::assume_init(move _16) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_16);\n        _4 = core::pin::Pin::<alloc_crate::sync::Arc<thread::thread::Inner, alloc::System>>::new_unchecked(move _15) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_15);\n        StorageDead(_6);\n        StorageDead(_5);\n        _0 = Thread(_4);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "<[T] as clone::CloneToUninit>::clone_to_uninit",
+  "safe": false,
+  "callees": {
+    "ptr::mut_ptr::<impl *mut T>::with_metadata_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Uses the address value in a new pointer of another type.\n\n This operation will ignore the address part of its `meta` operand and discard existing\n metadata of `self`. For pointers to a sized types (thin pointers), this has the same effect\n as a simple cast. For pointers to an unsized type (fat pointers) this recombines the address\n with new metadata such as slice lengths or `dyn`-vtable.\n\n The resulting pointer will have provenance of `self`. This operation is semantically the\n same as creating a new pointer with the data pointer value of `self` but the metadata of\n `meta`, being fat or thin depending on the `meta` operand.\n\n # Examples\n\n This function is primarily useful for enabling pointer arithmetic on potentially fat\n pointers. The pointer is cast to a sized pointee to utilize offset operations and then\n recombined with its own original metadata.\n\n ```\n #![feature(set_ptr_value)]\n # use core::fmt::Debug;\n let mut arr: [i32; 3] = [1, 2, 3];\n let mut ptr = arr.as_mut_ptr() as *mut dyn Debug;\n let thin = ptr as *mut u8;\n unsafe {\n     ptr = thin.add(8).with_metadata_of(ptr);\n     # assert_eq!(*(ptr as *mut i32), 3);\n     println!(\"{:?}\", &*ptr); // will print \"3\"\n }\n ```\n\n # *Incorrect* usage\n\n The provenance from pointers is *not* combined. The result must only be used to refer to the\n address allowed by `self`.\n\n ```rust,no_run\n #![feature(set_ptr_value)]\n let mut x = 0u32;\n let mut y = 1u32;\n\n let x = (&mut x) as *mut u32;\n let y = (&mut y) as *mut u32;\n\n let offset = (x as usize - y as usize) / 4;\n let bad = x.wrapping_add(offset).with_metadata_of(y);\n\n // This dereference is UB. The pointer only has provenance for `x` but points to `y`.\n println!(\"{:?}\", unsafe { &*bad });\n ```\n",
+      "adt": {}
+    },
+    "clone::uninit::CopySpec::clone_slice": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1202,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/clone.rs:559:5: 563:6",
+  "src": "unsafe fn clone_to_uninit(&self, dest: *mut u8) {\n        let dest: *mut [T] = dest.with_metadata_of(self);\n        // SAFETY: we're calling a specialization with the same contract\n        unsafe { <T as self::uninit::CopySpec>::clone_slice(self, dest) }\n    }",
+  "mir": "fn <[T] as clone::CloneToUninit>::clone_to_uninit(_1: &[T], _2: *mut u8) -> () {\n    let mut _0: ();\n    let  _3: *mut [T];\n    let mut _4: *const [T];\n    debug self => _1;\n    debug dest => _2;\n    debug dest => _3;\n    bb0: {\n        StorageLive(_4);\n        _4 = &raw const (*_1);\n        _3 = ptr::mut_ptr::<impl *mut u8>::with_metadata_of::<[T]>(_2, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _0 = <T as clone::uninit::CopySpec>::clone_slice(_1, _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

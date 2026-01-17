@@ -1,0 +1,183 @@
+{
+  "name": "boxed::thin::WithHeader::<H>::try_new",
+  "safe": true,
+  "callees": {
+    "core::alloc::Layout::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `Layout` suitable for holding a value of type `T`.\n",
+      "adt": {}
+    },
+    "boxed::thin::WithHeader::<H>::alloc_layout": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::alloc::Layout": "Constructor",
+        "core::result::Result": "Constructor"
+      }
+    },
+    "core::alloc::Layout::size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The minimum size in bytes for a memory block of this layout.\n",
+      "adt": {}
+    },
+    "core::mem::size_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of a type in bytes.\n\n More specifically, this is the offset in bytes between successive elements\n in an array with that item type including alignment padding. Thus, for any\n type `T` and length `n`, `[T; n]` has a size of `n * size_of::<T>()`.\n\n In general, the size of a type is not stable across compilations, but\n specific types such as primitives are.\n\n The following table gives the size for primitives.\n\n Type | `size_of::<Type>()`\n ---- | ---------------\n () | 0\n bool | 1\n u8 | 1\n u16 | 2\n u32 | 4\n u64 | 8\n u128 | 16\n i8 | 1\n i16 | 2\n i32 | 4\n i64 | 8\n i128 | 16\n f32 | 4\n f64 | 8\n char | 4\n\n Furthermore, `usize` and `isize` have the same size.\n\n The types [`*const T`], `&T`, [`Box<T>`], [`Option<&T>`], and `Option<Box<T>>` all have\n the same size. If `T` is `Sized`, all of those types have the same size as `usize`.\n\n The mutability of a pointer does not change its size. As such, `&T` and `&mut T`\n have the same size. Likewise for `*const T` and `*mut T`.\n\n # Size of `#[repr(C)]` items\n\n The `C` representation for items has a defined layout. With this layout,\n the size of items is also stable as long as all fields have a stable size.\n\n ## Size of Structs\n\n For `struct`s, the size is determined by the following algorithm.\n\n For each field in the struct ordered by declaration order:\n\n 1. Add the size of the field.\n 2. Round up the current size to the nearest multiple of the next field's [alignment].\n\n Finally, round the size of the struct to the nearest multiple of its [alignment].\n The alignment of the struct is usually the largest alignment of all its\n fields; this can be changed with the use of `repr(align(N))`.\n\n Unlike `C`, zero sized structs are not rounded up to one byte in size.\n\n ## Size of Enums\n\n Enums that carry no data other than the discriminant have the same size as C enums\n on the platform they are compiled for.\n\n ## Size of Unions\n\n The size of a union is the size of its largest field.\n\n Unlike `C`, zero sized unions are not rounded up to one byte in size.\n\n # Examples\n\n ```\n // Some primitives\n assert_eq!(4, size_of::<i32>());\n assert_eq!(8, size_of::<f64>());\n assert_eq!(0, size_of::<()>());\n\n // Some arrays\n assert_eq!(8, size_of::<[i32; 2]>());\n assert_eq!(12, size_of::<[i32; 3]>());\n assert_eq!(0, size_of::<[i32; 0]>());\n\n\n // Pointer size equality\n assert_eq!(size_of::<&i32>(), size_of::<*const i32>());\n assert_eq!(size_of::<&i32>(), size_of::<Box<i32>>());\n assert_eq!(size_of::<&i32>(), size_of::<Option<&i32>>());\n assert_eq!(size_of::<Box<i32>>(), size_of::<Option<Box<i32>>>());\n ```\n\n Using `#[repr(C)]`.\n\n ```\n #[repr(C)]\n struct FieldStruct {\n     first: u8,\n     second: u16,\n     third: u8\n }\n\n // The size of the first field is 1, so add 1 to the size. Size is 1.\n // The alignment of the second field is 2, so add 1 to the size for padding. Size is 2.\n // The size of the second field is 2, so add 2 to the size. Size is 4.\n // The alignment of the third field is 1, so add 0 to the size for padding. Size is 4.\n // The size of the third field is 1, so add 1 to the size. Size is 5.\n // Finally, the alignment of the struct is 2 (because the largest alignment amongst its\n // fields is 2), so add 1 to the size for padding. Size is 6.\n assert_eq!(6, size_of::<FieldStruct>());\n\n #[repr(C)]\n struct TupleStruct(u8, u16, u8);\n\n // Tuple structs follow the same rules.\n assert_eq!(6, size_of::<TupleStruct>());\n\n // Note that reordering the fields can lower the size. We can remove both padding bytes\n // by putting `third` before `second`.\n #[repr(C)]\n struct FieldStructOptimized {\n     first: u8,\n     third: u8,\n     second: u16\n }\n\n assert_eq!(4, size_of::<FieldStructOptimized>());\n\n // Union size is the size of the largest field.\n #[repr(C)]\n union ExampleUnion {\n     smaller: u8,\n     larger: u16\n }\n\n assert_eq!(2, size_of::<ExampleUnion>());\n ```\n\n [alignment]: align_of\n [`*const T`]: primitive@pointer\n [`Box<T>`]: ../../std/boxed/struct.Box.html\n [`Option<&T>`]: crate::option::Option\n\n",
+      "adt": {}
+    },
+    "core::alloc::Layout::dangling": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a `NonNull` that is dangling, but well-aligned for this Layout.\n\n Note that the address of the returned pointer may potentially\n be that of a valid pointer, which means this must not be used\n as a \"not yet initialized\" sentinel value.\n Types that lazily allocate must track initialization by some other means.\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "alloc::alloc": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates memory with the global allocator.\n\n This function forwards calls to the [`GlobalAlloc::alloc`] method\n of the allocator registered with the `#[global_allocator]` attribute\n if there is one, or the `std` crate’s default.\n\n This function is expected to be deprecated in favor of the `allocate` method\n of the [`Global`] type when it and the [`Allocator`] trait become stable.\n\n # Safety\n\n See [`GlobalAlloc::alloc`].\n\n # Examples\n\n ```\n use std::alloc::{alloc, dealloc, handle_alloc_error, Layout};\n\n unsafe {\n     let layout = Layout::new::<u16>();\n     let ptr = alloc(layout);\n     if ptr.is_null() {\n         handle_alloc_error(layout);\n     }\n\n     *(ptr as *mut u16) = 42;\n     assert_eq!(*(ptr as *mut u16), 42);\n\n     dealloc(ptr, layout);\n }\n ```\n",
+      "adt": {
+        "core::alloc::Layout": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::is_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s = [1, 2, 3];\n let ptr: *mut u32 = s.as_mut_ptr();\n assert!(!ptr.is_null());\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `NonNull`.\n\n # Safety\n\n `ptr` must be non-null.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = unsafe { NonNull::new_unchecked(&mut x as *mut _) };\n ```\n\n *Incorrect* usage of this function:\n\n ```rust,no_run\n use std::ptr::NonNull;\n\n // NEVER DO THAT!!! This is undefined behavior. ⚠️\n let ptr = unsafe { NonNull::<u32>::new_unchecked(std::ptr::null_mut()) };\n ```\n",
+      "adt": {}
+    },
+    "boxed::thin::WithHeader::<H>::header": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "boxed::thin::WithHeader": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::write": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Overwrites a memory location with the given value without reading or\n dropping the old value.\n\n `write` does not drop the contents of `dst`. This is safe, but it could leak\n allocations or resources, so care should be taken not to overwrite an object\n that should be dropped.\n\n Additionally, it does not drop `src`. Semantically, `src` is moved into the\n location pointed to by `dst`.\n\n This is appropriate for initializing uninitialized memory, or overwriting\n memory that has previously been [`read`] from.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `dst` must be [valid] for writes.\n\n * `dst` must be properly aligned. Use [`write_unaligned`] if this is not the\n   case.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n [valid]: self#safety\n\n # Examples\n\n Basic usage:\n\n ```\n let mut x = 0;\n let y = &mut x as *mut i32;\n let z = 12;\n\n unsafe {\n     std::ptr::write(y, z);\n     assert_eq!(std::ptr::read(y), 12);\n }\n ```\n\n Manually implement [`mem::swap`]:\n\n ```\n use std::ptr;\n\n fn swap<T>(a: &mut T, b: &mut T) {\n     unsafe {\n         // Create a bitwise copy of the value at `a` in `tmp`.\n         let tmp = ptr::read(a);\n\n         // Exiting at this point (either by explicitly returning or by\n         // calling a function which panics) would cause the value in `tmp` to\n         // be dropped while the same value is still referenced by `a`. This\n         // could trigger undefined behavior if `T` is not `Copy`.\n\n         // Create a bitwise copy of the value at `b` in `a`.\n         // This is safe because mutable references cannot alias.\n         ptr::copy_nonoverlapping(b, a, 1);\n\n         // As above, exiting here could trigger undefined behavior because\n         // the same value is referenced by `a` and `b`.\n\n         // Move `tmp` into `b`.\n         ptr::write(b, tmp);\n\n         // `tmp` has been moved (`write` takes ownership of its second argument),\n         // so nothing is dropped implicitly here.\n     }\n }\n\n let mut foo = \"foo\".to_owned();\n let mut bar = \"bar\".to_owned();\n\n swap(&mut foo, &mut bar);\n\n assert_eq!(foo, \"bar\");\n assert_eq!(bar, \"foo\");\n ```\n",
+      "adt": {}
+    },
+    "boxed::thin::WithHeader::<H>::value": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "boxed::thin::WithHeader": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::alloc::Layout": [
+      "Plain",
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 318, kind: RigidTy(Tuple([Ty { id: 24, kind: RigidTy(Adt(AdtDef(DefId { id: 2588, name: \"core::alloc::Layout\" }), GenericArgs([]))) }, Ty { id: 14, kind: RigidTy(Uint(Usize)) }])) }), Field(0, Ty { id: 24, kind: RigidTy(Adt(AdtDef(DefId { id: 2588, name: \"core::alloc::Layout\" }), GenericArgs([]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 318, kind: RigidTy(Tuple([Ty { id: 24, kind: RigidTy(Adt(AdtDef(DefId { id: 2588, name: \"core::alloc::Layout\" }), GenericArgs([]))) }, Ty { id: 14, kind: RigidTy(Uint(Usize)) }])) }), Field(1, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "boxed::thin::WithHeader": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 270,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed/thin.rs:271:5: 305:6",
+  "src": "fn try_new<T>(header: H, value: T) -> Result<WithHeader<H>, core::alloc::AllocError> {\n        let value_layout = Layout::new::<T>();\n        let Ok((layout, value_offset)) = Self::alloc_layout(value_layout) else {\n            return Err(core::alloc::AllocError);\n        };\n\n        unsafe {\n            // Note: It's UB to pass a layout with a zero size to `alloc::alloc`, so\n            // we use `layout.dangling()` for this case, which should have a valid\n            // alignment for both `T` and `H`.\n            let ptr = if layout.size() == 0 {\n                // Some paranoia checking, mostly so that the ThinBox tests are\n                // more able to catch issues.\n                debug_assert!(value_offset == 0 && size_of::<T>() == 0 && size_of::<H>() == 0);\n                layout.dangling()\n            } else {\n                let ptr = alloc::alloc(layout);\n                if ptr.is_null() {\n                    return Err(core::alloc::AllocError);\n                }\n\n                // Safety:\n                // - The size is at least `aligned_header_size`.\n                let ptr = ptr.add(value_offset) as *mut _;\n\n                NonNull::new_unchecked(ptr)\n            };\n\n            let result = WithHeader(ptr, PhantomData);\n            ptr::write(result.header(), header);\n            ptr::write(result.value().cast(), value);\n\n            Ok(result)\n        }\n    }",
+  "mir": "fn boxed::thin::WithHeader::<H>::try_new(_1: H, _2: T) -> core::result::Result<boxed::thin::WithHeader<H>, core::alloc::AllocError> {\n    let mut _0: core::result::Result<boxed::thin::WithHeader<H>, core::alloc::AllocError>;\n    let  _3: core::alloc::Layout;\n    let  _4: core::alloc::Layout;\n    let  _5: usize;\n    let mut _6: core::result::Result<(core::alloc::Layout, usize), core::alloc::LayoutError>;\n    let mut _7: isize;\n    let  _8: core::ptr::NonNull<u8>;\n    let mut _9: usize;\n    let mut _10: &core::alloc::Layout;\n    let mut _11: usize;\n    let mut _12: usize;\n    let mut _13: !;\n    let mut _14: &core::alloc::Layout;\n    let  _15: *mut u8;\n    let mut _16: bool;\n    let mut _17: *mut u8;\n    let  _18: boxed::thin::WithHeader<H>;\n    let mut _19: core::ptr::NonNull<u8>;\n    let  _20: ();\n    let mut _21: *mut H;\n    let mut _22: &boxed::thin::WithHeader<H>;\n    let mut _23: H;\n    let  _24: ();\n    let mut _25: *mut T;\n    let mut _26: *mut u8;\n    let mut _27: &boxed::thin::WithHeader<H>;\n    let mut _28: T;\n    debug header => _1;\n    debug value => _2;\n    debug value_layout => _3;\n    debug layout => _4;\n    debug value_offset => _5;\n    debug ptr => _8;\n    debug ptr => _15;\n    debug ptr => _17;\n    debug result => _18;\n    bb0: {\n        _3 = core::alloc::Layout::new::<T>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        _6 = boxed::thin::WithHeader::<H>::alloc_layout(_3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _7 = discriminant(_6);\n        switchInt(move _7) -> [0: bb3, 1: bb4, otherwise: bb33];\n    }\n    bb3: {\n        _4 = (((_6 as variant#0).0: (core::alloc::Layout, usize)).0: core::alloc::Layout);\n        _5 = (((_6 as variant#0).0: (core::alloc::Layout, usize)).1: usize);\n        StorageDead(_6);\n        StorageLive(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_4;\n        _9 = core::alloc::Layout::size(move _10) -> [return: bb5, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        _0 = core::result::Result::Err(core::alloc::AllocError);\n        goto -> bb30;\n    }\n    bb5: {\n        StorageDead(_10);\n        switchInt(move _9) -> [0: bb6, otherwise: bb17];\n    }\n    bb6: {\n        StorageDead(_9);\n        switchInt(_5) -> [0: bb7, otherwise: bb14];\n    }\n    bb7: {\n        StorageLive(_11);\n        _11 = core::mem::size_of::<T>() -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        switchInt(move _11) -> [0: bb9, otherwise: bb13];\n    }\n    bb9: {\n        StorageDead(_11);\n        StorageLive(_12);\n        _12 = core::mem::size_of::<H>() -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        switchInt(move _12) -> [0: bb11, otherwise: bb12];\n    }\n    bb11: {\n        StorageDead(_12);\n        StorageLive(_14);\n        _14 = &_4;\n        _8 = core::alloc::Layout::dangling(move _14) -> [return: bb16, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_12);\n        goto -> bb15;\n    }\n    bb13: {\n        StorageDead(_11);\n        goto -> bb15;\n    }\n    bb14: {\n        goto -> bb15;\n    }\n    bb15: {\n        _13 = core::panicking::panic(\"assertion failed: value_offset == 0 && size_of::<T>() == 0 && size_of::<H>() == 0\") -> unwind unreachable;\n    }\n    bb16: {\n        StorageDead(_14);\n        goto -> bb24;\n    }\n    bb17: {\n        StorageDead(_9);\n        _15 = alloc::alloc(_4) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageLive(_16);\n        _16 = core::ptr::mut_ptr::<impl *mut u8>::is_null(_15) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        switchInt(move _16) -> [0: bb21, otherwise: bb20];\n    }\n    bb20: {\n        _0 = core::result::Result::Err(core::alloc::AllocError);\n        StorageDead(_16);\n        StorageDead(_8);\n        goto -> bb30;\n    }\n    bb21: {\n        StorageDead(_16);\n        _17 = core::ptr::mut_ptr::<impl *mut u8>::add(_15, _5) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        _8 = core::ptr::NonNull::<u8>::new_unchecked(_17) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        goto -> bb24;\n    }\n    bb24: {\n        StorageLive(_19);\n        _19 = _8;\n        _18 = WithHeader(move _19, ZeroSized: core::marker::PhantomData<H>);\n        StorageDead(_19);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = &_18;\n        _21 = boxed::thin::WithHeader::<H>::header(move _22) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_22);\n        StorageLive(_23);\n        _23 = move _1;\n        _20 = core::ptr::write::<H>(move _21, move _23) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_23);\n        StorageDead(_21);\n        StorageLive(_25);\n        StorageLive(_26);\n        StorageLive(_27);\n        _27 = &_18;\n        _26 = boxed::thin::WithHeader::<H>::value(move _27) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        StorageDead(_27);\n        _25 = core::ptr::mut_ptr::<impl *mut u8>::cast::<T>(move _26) -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        StorageDead(_26);\n        StorageLive(_28);\n        _28 = move _2;\n        _24 = core::ptr::write::<T>(move _25, move _28) -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        StorageDead(_28);\n        StorageDead(_25);\n        _0 = core::result::Result::Ok(_18);\n        StorageDead(_8);\n        goto -> bb32;\n    }\n    bb30: {\n        drop(_2) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        drop(_1) -> [return: bb32, unwind unreachable];\n    }\n    bb32: {\n        return;\n    }\n    bb33: {\n        unreachable;\n    }\n}\n",
+  "doc": " Non-panicking version of `new`.\n Any error is returned as `Err(core::alloc::AllocError)`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

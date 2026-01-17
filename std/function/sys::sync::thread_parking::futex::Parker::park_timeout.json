@@ -1,0 +1,81 @@
+{
+  "name": "sys::sync::thread_parking::futex::Parker::park_timeout",
+  "safe": false,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::sync::atomic::AtomicU32::fetch_sub": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Subtracts from the current value, returning the previous value.\n\n This operation wraps around on overflow.\n\n `fetch_sub` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n assert_eq!(foo.fetch_sub(10, Ordering::SeqCst), 20);\n assert_eq!(foo.load(Ordering::SeqCst), 10);\n ```\n",
+      "adt": {}
+    },
+    "sys::pal::unix::futex::futex_wait": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Waits for a `futex_wake` operation to wake us.\n\n Returns directly if the futex doesn't hold the expected value.\n\n Returns false on timeout, and true in all other cases.\n",
+      "adt": {
+        "core::sync::atomic::AtomicU32": "MutableAsArgument",
+        "core::option::Option": "ImmutableAsArgument"
+      }
+    },
+    "core::sync::atomic::AtomicU32::swap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores a value into the atomic integer, returning the previous value.\n\n `swap` takes an [`Ordering`] argument which describes the memory ordering\n of this operation. All ordering modes are possible. Note that using\n [`Acquire`] makes the store part of this operation [`Relaxed`], and\n using [`Release`] makes the load part [`Relaxed`].\n\n **Note**: This method is only available on platforms that support atomic operations on\n\n # Examples\n\n ```\n\n\n assert_eq!(some_var.swap(10, Ordering::Relaxed), 5);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::pin::Pin": [
+      "Ref",
+      "Plain"
+    ],
+    "sys::sync::thread_parking::futex::Parker": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "core::sync::atomic::AtomicU32": [
+      "Ref"
+    ],
+    "core::sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::time::Duration": [
+      "Plain"
+    ]
+  },
+  "path": 4335,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/sync/thread_parking/futex.rs:68:5: 85:6",
+  "src": "pub unsafe fn park_timeout(self: Pin<&Self>, timeout: Duration) {\n        // Change NOTIFIED=>EMPTY or EMPTY=>PARKED, and directly return in the\n        // first case.\n        if self.state.fetch_sub(1, Acquire) == NOTIFIED {\n            return;\n        }\n        // Wait for something to happen, assuming it's still set to PARKED.\n        futex_wait(&self.state, PARKED, Some(timeout));\n        // This is not just a store, because we need to establish a\n        // release-acquire ordering with unpark().\n        if self.state.swap(EMPTY, Acquire) == NOTIFIED {\n            // Woke up because of unpark().\n        } else {\n            // Timeout or spurious wake up.\n            // We return either way, because we can't easily tell if it was the\n            // timeout or not.\n        }\n    }",
+  "mir": "fn sys::sync::thread_parking::futex::Parker::park_timeout(_1: core::pin::Pin<&sys::sync::thread_parking::futex::Parker>, _2: core::time::Duration) -> () {\n    let mut _0: ();\n    let mut _3: bool;\n    let mut _4: u32;\n    let mut _5: &core::sync::atomic::AtomicU32;\n    let  _6: &sys::sync::thread_parking::futex::Parker;\n    let mut _7: &core::pin::Pin<&sys::sync::thread_parking::futex::Parker>;\n    let mut _8: core::sync::atomic::Ordering;\n    let  _9: bool;\n    let  _10: &core::sync::atomic::AtomicU32;\n    let  _11: &sys::sync::thread_parking::futex::Parker;\n    let mut _12: &core::pin::Pin<&sys::sync::thread_parking::futex::Parker>;\n    let mut _13: core::option::Option<core::time::Duration>;\n    let mut _14: u32;\n    let mut _15: &core::sync::atomic::AtomicU32;\n    let  _16: &sys::sync::thread_parking::futex::Parker;\n    let mut _17: &core::pin::Pin<&sys::sync::thread_parking::futex::Parker>;\n    let mut _18: core::sync::atomic::Ordering;\n    debug self => _1;\n    debug timeout => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &_1;\n        _6 = <core::pin::Pin<&sys::sync::thread_parking::futex::Parker> as core::ops::Deref>::deref(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        _5 = &((*_6).0: core::sync::atomic::AtomicU32);\n        StorageLive(_8);\n        _8 = core::sync::atomic::Ordering::Acquire;\n        _4 = core::sync::atomic::AtomicU32::fetch_sub(move _5, 1_u32, move _8) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_8);\n        StorageDead(_5);\n        _3 = Eq(move _4, sys::sync::thread_parking::futex::NOTIFIED);\n        switchInt(move _3) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_6);\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb9;\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_9);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &_1;\n        _11 = <core::pin::Pin<&sys::sync::thread_parking::futex::Parker> as core::ops::Deref>::deref(move _12) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        _10 = &((*_11).0: core::sync::atomic::AtomicU32);\n        StorageLive(_13);\n        _13 = core::option::Option::Some(_2);\n        _9 = sys::pal::unix::futex::futex_wait(_10, sys::sync::thread_parking::futex::PARKED, move _13) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_13);\n        StorageDead(_11);\n        StorageDead(_9);\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &_1;\n        _16 = <core::pin::Pin<&sys::sync::thread_parking::futex::Parker> as core::ops::Deref>::deref(move _17) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_17);\n        _15 = &((*_16).0: core::sync::atomic::AtomicU32);\n        StorageLive(_18);\n        _18 = core::sync::atomic::Ordering::Acquire;\n        _14 = core::sync::atomic::AtomicU32::swap(move _15, sys::sync::thread_parking::futex::EMPTY, move _18) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_18);\n        StorageDead(_15);\n        StorageDead(_16);\n        StorageDead(_14);\n        goto -> bb9;\n    }\n    bb9: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "task::inject_pre_schedule_handler",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ]
+  },
+  "path": 2842,
+  "span": "ostd/src/task/mod.rs:37:1: 39:2",
+  "src": "pub fn inject_pre_schedule_handler(handler: fn()) {\n    PRE_SCHEDULE_HANDLER.call_once(|| handler);\n}",
+  "mir": "fn task::inject_pre_schedule_handler(_1: fn()) -> () {\n    let mut _0: ();\n    let  _2: &fn();\n    let mut _3: &spin::once::Once<fn()>;\n    let mut _4: {closure@ostd/src/task/mod.rs:38:36: 38:38};\n    let mut _5: &fn();\n    debug handler => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = {alloc1543: &spin::once::Once<fn()>};\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &_1;\n        _4 = {closure@ostd/src/task/mod.rs:38:36: 38:38}(move _5);\n        StorageDead(_5);\n        _2 = spin::once::Once::<fn()>::call_once::<{closure@ostd/src/task/mod.rs:38:36: 38:38}>(move _3, move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Injects a handler to be executed before scheduling.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

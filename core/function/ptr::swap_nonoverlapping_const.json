@@ -1,0 +1,79 @@
+{
+  "name": "ptr::swap_nonoverlapping_const",
+  "safe": false,
+  "callees": {
+    "ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "mem::maybe_uninit::MaybeUninit::<T>::uninit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `MaybeUninit<T>` in an uninitialized state.\n\n Note that dropping a `MaybeUninit<T>` will never call `T`'s drop code.\n It is your responsibility to make sure `T` gets dropped if it got initialized.\n\n See the [type-level documentation][MaybeUninit] for some examples.\n\n # Example\n\n ```\n use std::mem::MaybeUninit;\n\n let v: MaybeUninit<String> = MaybeUninit::uninit();\n ```\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "Constructor"
+      }
+    },
+    "mem::maybe_uninit::MaybeUninit::<T>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<Vec<u32>>`.\n // This is okay because we initialized it.\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n x_vec.push(3);\n assert_eq!(x_vec.len(), 4);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "MutableAsArgument"
+      }
+    },
+    "ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "mem::maybe_uninit::MaybeUninit::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n Writing to memory that this pointer (non-transitively) points to is undefined behavior\n (except inside an `UnsafeCell<T>`).\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<T>`. This is okay because we initialized it.\n let x_vec = unsafe { &*x.as_ptr() };\n assert_eq!(x_vec.len(), 3);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &*x.as_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {
+        "mem::maybe_uninit::MaybeUninit": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "mem::maybe_uninit::MaybeUninit": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ]
+  },
+  "path": 16091,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:1403:1: 1425:2",
+  "src": "const unsafe fn swap_nonoverlapping_const<T>(x: *mut T, y: *mut T, count: usize) {\n    let mut i = 0;\n    while i < count {\n        // SAFETY: By precondition, `i` is in-bounds because it's below `n`\n        let x = unsafe { x.add(i) };\n        // SAFETY: By precondition, `i` is in-bounds because it's below `n`\n        // and it's distinct from `x` since the ranges are non-overlapping\n        let y = unsafe { y.add(i) };\n\n        // SAFETY: we're only ever given pointers that are valid to read/write,\n        // including being aligned, and nothing here panics so it's drop-safe.\n        unsafe {\n            // Note that it's critical that these use `copy_nonoverlapping`,\n            // rather than `read`/`write`, to avoid #134713 if T has padding.\n            let mut temp = MaybeUninit::<T>::uninit();\n            copy_nonoverlapping(x, temp.as_mut_ptr(), 1);\n            copy_nonoverlapping(y, x, 1);\n            copy_nonoverlapping(temp.as_ptr(), y, 1);\n        }\n\n        i += 1;\n    }\n}",
+  "mir": "fn ptr::swap_nonoverlapping_const(_1: *mut T, _2: *mut T, _3: usize) -> () {\n    let mut _0: ();\n    let mut _4: usize;\n    let mut _5: bool;\n    let mut _6: usize;\n    let  _7: *mut T;\n    let mut _8: usize;\n    let  _9: *mut T;\n    let mut _10: usize;\n    let mut _11: mem::maybe_uninit::MaybeUninit<T>;\n    let  _12: ();\n    let mut _13: *const T;\n    let mut _14: *mut T;\n    let mut _15: &mut mem::maybe_uninit::MaybeUninit<T>;\n    let  _16: ();\n    let mut _17: *const T;\n    let  _18: ();\n    let mut _19: *const T;\n    let mut _20: &mem::maybe_uninit::MaybeUninit<T>;\n    let mut _21: (usize, bool);\n    debug x => _1;\n    debug y => _2;\n    debug count => _3;\n    debug i => _4;\n    debug x => _7;\n    debug y => _9;\n    debug temp => _11;\n    bb0: {\n        StorageLive(_4);\n        _4 = 0_usize;\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = _4;\n        _5 = Lt(move _6, _3);\n        switchInt(move _5) -> [0: bb12, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_6);\n        StorageLive(_8);\n        _8 = _4;\n        _7 = ptr::mut_ptr::<impl *mut T>::add(_1, move _8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageLive(_10);\n        _10 = _4;\n        _9 = ptr::mut_ptr::<impl *mut T>::add(_2, move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_10);\n        StorageLive(_11);\n        _11 = mem::maybe_uninit::MaybeUninit::<T>::uninit() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_13);\n        _13 = _7 as *const T;\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = &mut _11;\n        _14 = mem::maybe_uninit::MaybeUninit::<T>::as_mut_ptr(move _15) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_15);\n        _12 = ptr::copy_nonoverlapping::<T>(move _13, move _14, 1_usize) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_14);\n        StorageDead(_13);\n        StorageLive(_17);\n        _17 = _9 as *const T;\n        _16 = ptr::copy_nonoverlapping::<T>(move _17, _7, 1_usize) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_17);\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = &_11;\n        _19 = mem::maybe_uninit::MaybeUninit::<T>::as_ptr(move _20) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_20);\n        _18 = ptr::copy_nonoverlapping::<T>(move _19, _9, 1_usize) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_19);\n        StorageDead(_11);\n        _21 = CheckedAdd(_4, 1_usize);\n        assert(!move (_21.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _4, 1_usize) -> [success: bb11, unwind unreachable];\n    }\n    bb11: {\n        _4 = move (_21.0: usize);\n        StorageDead(_5);\n        goto -> bb1;\n    }\n    bb12: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Same behavior and safety conditions as [`swap_nonoverlapping`]\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

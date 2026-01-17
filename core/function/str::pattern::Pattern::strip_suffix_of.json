@@ -1,0 +1,107 @@
+{
+  "name": "str::pattern::Pattern::strip_suffix_of",
+  "safe": true,
+  "callees": {
+    "str::pattern::Pattern::into_searcher": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the associated searcher from\n `self` and the `haystack` to search in.\n",
+      "adt": {}
+    },
+    "str::pattern::ReverseSearcher::next_back": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the next search step starting from the back.\n\n - Returns [`Match(a, b)`][SearchStep::Match] if `haystack[a..b]`\n   matches the pattern.\n - Returns [`Reject(a, b)`][SearchStep::Reject] if `haystack[a..b]`\n   can not match the pattern, even partially.\n - Returns [`Done`][SearchStep::Done] if every byte of the haystack\n   has been visited\n\n The stream of [`Match`][SearchStep::Match] and\n [`Reject`][SearchStep::Reject] values up to a [`Done`][SearchStep::Done]\n will contain index ranges that are adjacent, non-overlapping,\n covering the whole haystack, and laying on utf8 boundaries.\n\n A [`Match`][SearchStep::Match] result needs to contain the whole matched\n pattern, however [`Reject`][SearchStep::Reject] results may be split up\n into arbitrary many adjacent fragments. Both ranges may have zero length.\n\n As an example, the pattern `\"aaa\"` and the haystack `\"cbaaaaab\"`\n might produce the stream\n `[Reject(7, 8), Match(4, 7), Reject(1, 4), Reject(0, 1)]`.\n",
+      "adt": {}
+    },
+    "str::<impl str>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of `self`.\n\n This length is in bytes, not [`char`]s or graphemes. In other words,\n it might not be what a human considers the length of the string.\n\n [`char`]: prim@char\n\n # Examples\n\n ```\n let len = \"foo\".len();\n assert_eq!(3, len);\n\n assert_eq!(\"ƒoo\".len(), 4); // fancy f!\n assert_eq!(\"ƒoo\".chars().count(), 3);\n ```\n",
+      "adt": {}
+    },
+    "str::<impl str>::get_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unchecked subslice of `str`.\n\n This is the unchecked alternative to indexing the `str`.\n\n # Safety\n\n Callers of this function are responsible that these preconditions are\n satisfied:\n\n * The starting index must not exceed the ending index;\n * Indexes must be within bounds of the original slice;\n * Indexes must lie on UTF-8 sequence boundaries.\n\n Failing that, the returned string slice may reference invalid memory or\n violate the invariants communicated by the `str` type.\n\n # Examples\n\n ```\n let v = \"🗻∈🌏\";\n unsafe {\n     assert_eq!(\"🗻\", v.get_unchecked(0..4));\n     assert_eq!(\"∈\", v.get_unchecked(4..7));\n     assert_eq!(\"🌏\", v.get_unchecked(7..11));\n }\n ```\n",
+      "adt": {}
+    },
+    "fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "panicking::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Internal function for `assert_eq!` and `assert_ne!` macros\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "str::pattern::SearchStep": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(1, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "ops::range::RangeTo": [
+      "Plain"
+    ],
+    "panicking::AssertKind": [
+      "Plain"
+    ],
+    "fmt::Arguments": [
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": "str::pattern::Pattern::strip_suffix_of",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/str/pattern.rs:146:5: 162:6",
+  "src": "fn strip_suffix_of<'a>(self, haystack: &'a str) -> Option<&'a str>\n    where\n        Self::Searcher<'a>: ReverseSearcher<'a>,\n    {\n        if let SearchStep::Match(start, end) = self.into_searcher(haystack).next_back() {\n            debug_assert_eq!(\n                end,\n                haystack.len(),\n                \"The first search step from ReverseSearcher \\\n                 must include the last character\"\n            );\n            // SAFETY: `Searcher` is known to return valid indices.\n            unsafe { Some(haystack.get_unchecked(..start)) }\n        } else {\n            None\n        }\n    }",
+  "mir": "fn str::pattern::Pattern::strip_suffix_of(_1: Self, _2: &str) -> option::Option<&str> {\n    let mut _0: option::Option<&str>;\n    let mut _3: str::pattern::SearchStep;\n    let mut _4: &mut <Self as str::pattern::Pattern>::Searcher<'_>;\n    let mut _5: <Self as str::pattern::Pattern>::Searcher<'_>;\n    let mut _6: isize;\n    let  _7: usize;\n    let  _8: usize;\n    let mut _9: (&usize, &usize);\n    let mut _10: &usize;\n    let mut _11: &usize;\n    let  _12: usize;\n    let  _13: &usize;\n    let  _14: &usize;\n    let mut _15: bool;\n    let mut _16: usize;\n    let mut _17: usize;\n    let  _18: panicking::AssertKind;\n    let  _19: !;\n    let mut _20: option::Option<fmt::Arguments<'_>>;\n    let mut _21: fmt::Arguments<'_>;\n    let  _22: &str;\n    let mut _23: ops::range::RangeTo<usize>;\n    debug self => _1;\n    debug haystack => _2;\n    debug start => _7;\n    debug end => _8;\n    debug left_val => _13;\n    debug right_val => _14;\n    debug kind => _18;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = <Self as str::pattern::Pattern>::into_searcher(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = &mut _5;\n        _3 = <<Self as str::pattern::Pattern>::Searcher<'_> as str::pattern::ReverseSearcher<'_>>::next_back(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _6 = discriminant(_3);\n        switchInt(move _6) -> [0: bb3, otherwise: bb9];\n    }\n    bb3: {\n        _7 = ((_3 as variant#0).0: usize);\n        StorageLive(_8);\n        _8 = ((_3 as variant#0).1: usize);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_8;\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = str::<impl str>::len(_2) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _11 = &_12;\n        _9 = (move _10, move _11);\n        StorageDead(_11);\n        StorageDead(_10);\n        _13 = (_9.0: &usize);\n        _14 = (_9.1: &usize);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = (*_13);\n        StorageLive(_17);\n        _17 = (*_14);\n        _15 = Eq(move _16, move _17);\n        switchInt(move _15) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_17);\n        StorageDead(_16);\n        StorageDead(_15);\n        StorageDead(_12);\n        StorageDead(_9);\n        StorageLive(_23);\n        _23 = RangeTo(_7);\n        _22 = str::<impl str>::get_unchecked::<ops::range::RangeTo<usize>>(_2, move _23) -> [return: bb8, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_17);\n        StorageDead(_16);\n        _18 = panicking::AssertKind::Eq;\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = fmt::Arguments::<'_>::from_str(\"The first search step from ReverseSearcher must include the last character\") -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _20 = option::Option::Some(move _21);\n        StorageDead(_21);\n        _19 = panicking::assert_failed::<usize, usize>(_18, _13, _14, move _20) -> unwind unreachable;\n    }\n    bb8: {\n        StorageDead(_23);\n        _0 = option::Option::Some(_22);\n        StorageDead(_8);\n        drop(_5) -> [return: bb11, unwind unreachable];\n    }\n    bb9: {\n        drop(_5) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_5);\n        StorageDead(_3);\n        _0 = option::Option::None;\n        goto -> bb12;\n    }\n    bb11: {\n        StorageDead(_5);\n        StorageDead(_3);\n        goto -> bb12;\n    }\n    bb12: {\n        return;\n    }\n}\n",
+  "doc": " Removes the pattern from the back of haystack, if it matches.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

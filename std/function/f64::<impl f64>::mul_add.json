@@ -1,0 +1,27 @@
+{
+  "name": "f64::<impl f64>::mul_add",
+  "safe": true,
+  "callees": {
+    "core::f64::math::mul_add": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Experimental version of `mul_add` in `core`. See [`f64::mul_add`] for details.\n\n # Examples\n\n ```\n #![feature(core_float_math)]\n\n # // FIXME(#140515): mingw has an incorrect fma\n # // https://sourceforge.net/p/mingw-w64/bugs/848/\n # #[cfg(all(target_os = \"windows\", target_env = \"gnu\", not(target_abi = \"llvm\")))] {\n use core::f64;\n\n let m = 10.0_f64;\n let x = 4.0_f64;\n let b = 60.0_f64;\n\n assert_eq!(f64::math::mul_add(m, x, b), 100.0);\n assert_eq!(m * x + b, 100.0);\n\n let one_plus_eps = 1.0_f64 + f64::EPSILON;\n let one_minus_eps = 1.0_f64 - f64::EPSILON;\n let minus_one = -1.0_f64;\n\n // The exact result (1 + eps) * (1 - eps) = 1 - eps * eps.\n assert_eq!(\n     f64::math::mul_add(one_plus_eps, one_minus_eps, minus_one),\n     -f64::EPSILON * f64::EPSILON\n );\n // Different rounding with the non-fused multiply and add.\n assert_eq!(one_plus_eps * one_minus_eps + minus_one, 0.0);\n # }\n ```\n\n _This standalone function is for testing only.\n It will be stabilized as an inherent method._\n\n [`f64::mul_add`]: ../../../std/primitive.f64.html#method.mul_add\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 347,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/num/f64.rs:221:5: 223:6",
+  "src": "pub const fn mul_add(self, a: f64, b: f64) -> f64 {\n        core::f64::math::mul_add(self, a, b)\n    }",
+  "mir": "fn f64::<impl f64>::mul_add(_1: f64, _2: f64, _3: f64) -> f64 {\n    let mut _0: f64;\n    debug self => _1;\n    debug a => _2;\n    debug b => _3;\n    bb0: {\n        _0 = core::f64::math::mul_add(_1, _2, _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Fused multiply-add. Computes `(self * a) + b` with only one rounding\n error, yielding a more accurate result than an unfused multiply-add.\n\n Using `mul_add` *may* be more performant than an unfused multiply-add if\n the target architecture has a dedicated `fma` CPU instruction. However,\n this is not always true, and will be heavily dependant on designing\n algorithms with specific target hardware in mind.\n\n # Precision\n\n The result of this operation is guaranteed to be the rounded\n infinite-precision result. It is specified by IEEE 754 as\n `fusedMultiplyAdd` and guaranteed not to change.\n\n # Examples\n\n ```\n let m = 10.0_f64;\n let x = 4.0_f64;\n let b = 60.0_f64;\n\n assert_eq!(m.mul_add(x, b), 100.0);\n assert_eq!(m * x + b, 100.0);\n\n let one_plus_eps = 1.0_f64 + f64::EPSILON;\n let one_minus_eps = 1.0_f64 - f64::EPSILON;\n let minus_one = -1.0_f64;\n\n // The exact result (1 + eps) * (1 - eps) = 1 - eps * eps.\n assert_eq!(one_plus_eps.mul_add(one_minus_eps, minus_one), -f64::EPSILON * f64::EPSILON);\n // Different rounding with the non-fused multiply and add.\n assert_eq!(one_plus_eps * one_minus_eps + minus_one, 0.0);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

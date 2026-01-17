@@ -1,0 +1,229 @@
+{
+  "name": "alloc::Global::grow_impl",
+  "safe": false,
+  "callees": {
+    "core::alloc::Layout::size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The minimum size in bytes for a memory block of this layout.\n",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {}
+    },
+    "core::panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {}
+    },
+    "core::alloc::Layout::align": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The minimum byte alignment for a memory block of this layout.\n\n The returned alignment is guaranteed to be a power of two.\n",
+      "adt": {}
+    },
+    "alloc::Global::alloc_impl": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::alloc::Layout": "ImmutableAsArgument",
+        "alloc::Global": "ImmutableAsArgument",
+        "core::result::Result": "Constructor",
+        "core::ptr::NonNull": "Constructor"
+      }
+    },
+    "core::hint::assert_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Makes a *soundness* promise to the compiler that `cond` holds.\n\n This may allow the optimizer to simplify things, but it might also make the generated code\n slower. Either way, calling it will most likely make compilation take longer.\n\n You may know this from other places as\n [`llvm.assume`](https://llvm.org/docs/LangRef.html#llvm-assume-intrinsic) or, in C,\n [`__builtin_assume`](https://clang.llvm.org/docs/LanguageExtensions.html#builtin-assume).\n\n This promotes a correctness requirement to a soundness requirement. Don't do that without\n very good reason.\n\n # Usage\n\n This is a situational tool for micro-optimization, and is allowed to do nothing. Any use\n should come with a repeatable benchmark to show the value, with the expectation to drop it\n later should the optimizer get smarter and no longer need it.\n\n The more complicated the condition, the less likely this is to be useful. For example,\n `assert_unchecked(foo.is_sorted())` is a complex enough value that the compiler is unlikely\n to be able to take advantage of it.\n\n There's also no need to `assert_unchecked` basic properties of things.  For example, the\n compiler already knows the range of `count_ones`, so there is no benefit to\n `let n = u32::count_ones(x); assert_unchecked(n <= u32::BITS);`.\n\n `assert_unchecked` is logically equivalent to `if !cond { unreachable_unchecked(); }`. If\n ever you are tempted to write `assert_unchecked(false)`, you should instead use\n [`unreachable_unchecked()`] directly.\n\n # Safety\n\n `cond` must be `true`. It is immediate UB to call this with `false`.\n\n # Example\n\n ```\n use core::hint;\n\n /// # Safety\n ///\n /// `p` must be nonnull and valid\n pub unsafe fn next_value(p: *const i32) -> i32 {\n     // SAFETY: caller invariants guarantee that `p` is not null\n     unsafe { hint::assert_unchecked(!p.is_null()) }\n\n     if p.is_null() {\n         return -1;\n     } else {\n         // SAFETY: caller invariants guarantee that `p` is valid\n         unsafe { *p + 1 }\n     }\n }\n ```\n\n Without the `assert_unchecked`, the above function produces the following with optimizations\n enabled:\n\n ```asm\n next_value:\n         test    rdi, rdi\n         je      .LBB0_1\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n .LBB0_1:\n         mov     eax, -1\n         ret\n ```\n\n Adding the assertion allows the optimizer to remove the extra check:\n\n ```asm\n next_value:\n         mov     eax, dword ptr [rdi]\n         inc     eax\n         ret\n ```\n\n This example is quite unlike anything that would be used in the real world: it is redundant\n to put an assertion right next to code that checks the same thing, and dereferencing a\n pointer already has the builtin assumption that it is nonnull. However, it illustrates the\n kind of changes the optimizer can make even when the behavior is less obviously related.\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "alloc::realloc": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reallocates memory with the global allocator.\n\n This function forwards calls to the [`GlobalAlloc::realloc`] method\n of the allocator registered with the `#[global_allocator]` attribute\n if there is one, or the `std` crate’s default.\n\n This function is expected to be deprecated in favor of the `grow` and `shrink` methods\n of the [`Global`] type when it and the [`Allocator`] trait become stable.\n\n # Safety\n\n See [`GlobalAlloc::realloc`].\n",
+      "adt": {
+        "core::alloc::Layout": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::NonNull::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `NonNull` if `ptr` is non-null.\n\n # Panics during const evaluation\n\n This method will panic during const evaluation if the pointer cannot be\n determined to be null or not. See [`is_null`] for more information.\n\n [`is_null`]: ../primitive.pointer.html#method.is_null-1\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::<u32>::new(&mut x as *mut _).expect(\"ptr is null!\");\n\n if let Some(ptr) = NonNull::<u32>::new(std::ptr::null_mut()) {\n     unreachable!();\n }\n ```\n",
+      "adt": {}
+    },
+    "core::option::Option::<T>::ok_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Transforms the `Option<T>` into a [`Result<T, E>`], mapping [`Some(v)`] to\n [`Ok(v)`] and [`None`] to [`Err(err)`].\n\n Arguments passed to `ok_or` are eagerly evaluated; if you are passing the\n result of a function call, it is recommended to use [`ok_or_else`], which is\n lazily evaluated.\n\n [`Ok(v)`]: Ok\n [`Err(err)`]: Err\n [`Some(v)`]: Some\n [`ok_or_else`]: Option::ok_or_else\n\n # Examples\n\n ```\n let x = Some(\"foo\");\n assert_eq!(x.ok_or(0), Ok(\"foo\"));\n\n let x: Option<&str> = None;\n assert_eq!(x.ok_or(0), Err(0));\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::write_bytes": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Invokes memset on the specified pointer, setting `count * size_of::<T>()`\n bytes of memory starting at `self` to `val`.\n\n See [`ptr::write_bytes`] for safety concerns and examples.\n\n [`ptr::write_bytes`]: crate::ptr::write_bytes()\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<[T]>::slice_from_raw_parts": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a non-null raw slice from a thin pointer and a length.\n\n The `len` argument is the number of **elements**, not the number of bytes.\n\n This function is safe, but dereferencing the return value is unsafe.\n See the documentation of [`slice::from_raw_parts`] for slice safety requirements.\n\n # Examples\n\n ```rust\n use std::ptr::NonNull;\n\n // create a slice pointer when starting out with a pointer to the first element\n let mut x = [5, 6, 7];\n let nonnull_pointer = NonNull::new(x.as_mut_ptr()).unwrap();\n let slice = NonNull::slice_from_raw_parts(nonnull_pointer, 3);\n assert_eq!(unsafe { slice.as_ref()[2] }, 7);\n ```\n\n (Note that this example artificially demonstrates a use of this method,\n but `let slice = NonNull::from(&x[..]);` would be a better way to write code like this.)\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<[T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n # Examples\n\n ```rust\n #![feature(slice_ptr_get)]\n use std::ptr::NonNull;\n\n let slice: NonNull<[i8]> = NonNull::slice_from_raw_parts(NonNull::dangling(), 3);\n assert_eq!(slice.as_mut_ptr(), NonNull::<i8>::dangling().as_ptr());\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "core::alloc::Allocator::deallocate": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Deallocates the memory referenced by `ptr`.\n\n # Safety\n\n * `ptr` must denote a block of memory [*currently allocated*] via this allocator, and\n * `layout` must [*fit*] that block of memory.\n\n [*currently allocated*]: #currently-allocated-memory\n [*fit*]: #memory-fitting\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::alloc::Layout": [
+      "Ref",
+      "Plain"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ],
+    "alloc::Global": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 102, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 93, kind: RigidTy(Uint(U8)) })]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 188, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 195, kind: RigidTy(Slice(Ty { id: 93, kind: RigidTy(Uint(U8)) })) })]))) })])"
+    ]
+  },
+  "path": 204,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/alloc.rs:200:5: 243:6",
+  "src": "unsafe fn grow_impl(\n        &self,\n        ptr: NonNull<u8>,\n        old_layout: Layout,\n        new_layout: Layout,\n        zeroed: bool,\n    ) -> Result<NonNull<[u8]>, AllocError> {\n        debug_assert!(\n            new_layout.size() >= old_layout.size(),\n            \"`new_layout.size()` must be greater than or equal to `old_layout.size()`\"\n        );\n\n        match old_layout.size() {\n            0 => self.alloc_impl(new_layout, zeroed),\n\n            // SAFETY: `new_size` is non-zero as `old_size` is greater than or equal to `new_size`\n            // as required by safety conditions. Other conditions must be upheld by the caller\n            old_size if old_layout.align() == new_layout.align() => unsafe {\n                let new_size = new_layout.size();\n\n                // `realloc` probably checks for `new_size >= old_layout.size()` or something similar.\n                hint::assert_unchecked(new_size >= old_layout.size());\n\n                let raw_ptr = realloc(ptr.as_ptr(), old_layout, new_size);\n                let ptr = NonNull::new(raw_ptr).ok_or(AllocError)?;\n                if zeroed {\n                    raw_ptr.add(old_size).write_bytes(0, new_size - old_size);\n                }\n                Ok(NonNull::slice_from_raw_parts(ptr, new_size))\n            },\n\n            // SAFETY: because `new_layout.size()` must be greater than or equal to `old_size`,\n            // both the old and new memory allocation are valid for reads and writes for `old_size`\n            // bytes. Also, because the old allocation wasn't yet deallocated, it cannot overlap\n            // `new_ptr`. Thus, the call to `copy_nonoverlapping` is safe. The safety contract\n            // for `dealloc` must be upheld by the caller.\n            old_size => unsafe {\n                let new_ptr = self.alloc_impl(new_layout, zeroed)?;\n                ptr::copy_nonoverlapping(ptr.as_ptr(), new_ptr.as_mut_ptr(), old_size);\n                self.deallocate(ptr, old_layout);\n                Ok(new_ptr)\n            },\n        }\n    }",
+  "mir": "fn alloc::Global::grow_impl(_1: &alloc::Global, _2: core::ptr::NonNull<u8>, _3: core::alloc::Layout, _4: core::alloc::Layout, _5: bool) -> core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError> {\n    let mut _0: core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError>;\n    let mut _6: bool;\n    let mut _7: usize;\n    let mut _8: &core::alloc::Layout;\n    let mut _9: usize;\n    let mut _10: &core::alloc::Layout;\n    let  _11: !;\n    let mut _12: core::fmt::Arguments<'_>;\n    let mut _13: usize;\n    let mut _14: &core::alloc::Layout;\n    let  _15: &usize;\n    let mut _16: bool;\n    let mut _17: usize;\n    let mut _18: &core::alloc::Layout;\n    let mut _19: usize;\n    let mut _20: &core::alloc::Layout;\n    let  _21: usize;\n    let mut _22: &core::alloc::Layout;\n    let  _23: ();\n    let mut _24: bool;\n    let mut _25: usize;\n    let mut _26: &core::alloc::Layout;\n    let  _27: *mut u8;\n    let mut _28: *mut u8;\n    let mut _29: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, core::alloc::AllocError>, core::ptr::NonNull<u8>>;\n    let mut _30: core::result::Result<core::ptr::NonNull<u8>, core::alloc::AllocError>;\n    let mut _31: core::option::Option<core::ptr::NonNull<u8>>;\n    let mut _32: isize;\n    let  _33: core::ptr::NonNull<u8>;\n    let  _34: ();\n    let mut _35: *mut u8;\n    let mut _36: usize;\n    let mut _37: (usize, bool);\n    let mut _38: core::ptr::NonNull<[u8]>;\n    let mut _39: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, core::alloc::AllocError>, core::ptr::NonNull<[u8]>>;\n    let mut _40: core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError>;\n    let mut _41: isize;\n    let  _42: core::ptr::NonNull<[u8]>;\n    let  _43: ();\n    let mut _44: *const u8;\n    let mut _45: *mut u8;\n    let mut _46: *mut u8;\n    let  _47: ();\n    debug self => _1;\n    debug ptr => _2;\n    debug old_layout => _3;\n    debug new_layout => _4;\n    debug zeroed => _5;\n    debug old_size => _13;\n    debug old_size => _15;\n    debug new_size => _21;\n    debug raw_ptr => _27;\n    debug ptr => _33;\n    debug residual => core::result::Result::<core::convert::Infallible, core::alloc::AllocError>::Err(core::alloc::AllocError);\n    debug val => _33;\n    debug old_size => _13;\n    debug new_ptr => _42;\n    debug residual => core::result::Result::<core::convert::Infallible, core::alloc::AllocError>::Err(core::alloc::AllocError);\n    debug val => _42;\n    bb0: {\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &_4;\n        _7 = core::alloc::Layout::size(move _8) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_8);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_3;\n        _9 = core::alloc::Layout::size(move _10) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_10);\n        _6 = Ge(move _7, move _9);\n        switchInt(move _6) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_9);\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageLive(_14);\n        _14 = &_3;\n        _13 = core::alloc::Layout::size(move _14) -> [return: bb6, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_9);\n        StorageDead(_7);\n        StorageLive(_12);\n        _12 = core::fmt::Arguments::<'_>::from_str(\"`new_layout.size()` must be greater than or equal to `old_layout.size()`\") -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _11 = core::panicking::panic_fmt(move _12) -> unwind unreachable;\n    }\n    bb6: {\n        StorageDead(_14);\n        switchInt(_13) -> [0: bb8, otherwise: bb7];\n    }\n    bb7: {\n        StorageLive(_15);\n        _15 = &_13;\n        StorageLive(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = &_3;\n        _17 = core::alloc::Layout::align(move _18) -> [return: bb10, unwind unreachable];\n    }\n    bb8: {\n        _0 = alloc::Global::alloc_impl(_1, _4, _5) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        goto -> bb41;\n    }\n    bb10: {\n        StorageDead(_18);\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = &_4;\n        _19 = core::alloc::Layout::align(move _20) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_20);\n        _16 = Eq(move _17, move _19);\n        switchInt(move _16) -> [0: bb13, otherwise: bb12];\n    }\n    bb12: {\n        StorageDead(_19);\n        StorageDead(_17);\n        StorageDead(_16);\n        StorageLive(_22);\n        _22 = &_4;\n        _21 = core::alloc::Layout::size(move _22) -> [return: bb14, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_19);\n        StorageDead(_17);\n        StorageDead(_16);\n        StorageDead(_15);\n        StorageLive(_39);\n        StorageLive(_40);\n        _40 = alloc::Global::alloc_impl(_1, _4, _5) -> [return: bb32, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_22);\n        StorageLive(_24);\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = &_3;\n        _25 = core::alloc::Layout::size(move _26) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_26);\n        _24 = Ge(_21, move _25);\n        StorageDead(_25);\n        _23 = core::hint::assert_unchecked(move _24) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_24);\n        StorageLive(_28);\n        _28 = core::ptr::NonNull::<u8>::as_ptr(_2) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        _27 = alloc::realloc(move _28, _3, _21) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_28);\n        StorageLive(_29);\n        StorageLive(_30);\n        StorageLive(_31);\n        _31 = core::ptr::NonNull::<u8>::new(_27) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        _30 = core::option::Option::<core::ptr::NonNull<u8>>::ok_or::<core::alloc::AllocError>(move _31, core::alloc::AllocError) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_31);\n        _29 = <core::result::Result<core::ptr::NonNull<u8>, core::alloc::AllocError> as core::ops::Try>::branch(move _30) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_30);\n        _32 = discriminant(_29);\n        switchInt(move _32) -> [0: bb23, 1: bb24, otherwise: bb22];\n    }\n    bb22: {\n        unreachable;\n    }\n    bb23: {\n        _33 = ((_29 as variant#0).0: core::ptr::NonNull<u8>);\n        StorageDead(_29);\n        switchInt(_5) -> [0: bb30, otherwise: bb26];\n    }\n    bb24: {\n        _0 = <core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, core::alloc::AllocError>>>::from_residual(core::result::Result::<core::convert::Infallible, core::alloc::AllocError>::Err(core::alloc::AllocError)) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_29);\n        StorageDead(_15);\n        goto -> bb42;\n    }\n    bb26: {\n        StorageLive(_35);\n        _35 = core::ptr::mut_ptr::<impl *mut u8>::add(_27, _13) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        StorageLive(_36);\n        _37 = CheckedSub(_21, _13);\n        assert(!move (_37.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _21, _13) -> [success: bb28, unwind unreachable];\n    }\n    bb28: {\n        _36 = move (_37.0: usize);\n        _34 = core::ptr::mut_ptr::<impl *mut u8>::write_bytes(move _35, 0_u8, move _36) -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        StorageDead(_36);\n        StorageDead(_35);\n        goto -> bb30;\n    }\n    bb30: {\n        StorageLive(_38);\n        _38 = core::ptr::NonNull::<[u8]>::slice_from_raw_parts(_33, _21) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        _0 = core::result::Result::Ok(move _38);\n        StorageDead(_38);\n        StorageDead(_15);\n        goto -> bb41;\n    }\n    bb32: {\n        _39 = <core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError> as core::ops::Try>::branch(move _40) -> [return: bb33, unwind unreachable];\n    }\n    bb33: {\n        StorageDead(_40);\n        _41 = discriminant(_39);\n        switchInt(move _41) -> [0: bb34, 1: bb35, otherwise: bb22];\n    }\n    bb34: {\n        _42 = ((_39 as variant#0).0: core::ptr::NonNull<[u8]>);\n        StorageDead(_39);\n        StorageLive(_44);\n        StorageLive(_45);\n        _45 = core::ptr::NonNull::<u8>::as_ptr(_2) -> [return: bb37, unwind unreachable];\n    }\n    bb35: {\n        _0 = <core::result::Result<core::ptr::NonNull<[u8]>, core::alloc::AllocError> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, core::alloc::AllocError>>>::from_residual(core::result::Result::<core::convert::Infallible, core::alloc::AllocError>::Err(core::alloc::AllocError)) -> [return: bb36, unwind unreachable];\n    }\n    bb36: {\n        StorageDead(_39);\n        goto -> bb42;\n    }\n    bb37: {\n        _44 = move _45 as *const u8;\n        StorageDead(_45);\n        StorageLive(_46);\n        _46 = core::ptr::NonNull::<[u8]>::as_mut_ptr(_42) -> [return: bb38, unwind unreachable];\n    }\n    bb38: {\n        _43 = core::ptr::copy_nonoverlapping::<u8>(move _44, move _46, _13) -> [return: bb39, unwind unreachable];\n    }\n    bb39: {\n        StorageDead(_46);\n        StorageDead(_44);\n        _47 = <alloc::Global as core::alloc::Allocator>::deallocate(_1, _2, _3) -> [return: bb40, unwind unreachable];\n    }\n    bb40: {\n        _0 = core::result::Result::Ok(_42);\n        goto -> bb41;\n    }\n    bb41: {\n        goto -> bb43;\n    }\n    bb42: {\n        goto -> bb43;\n    }\n    bb43: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

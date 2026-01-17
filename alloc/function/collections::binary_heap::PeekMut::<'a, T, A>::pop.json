@@ -1,0 +1,93 @@
+{
+  "name": "collections::binary_heap::PeekMut::<'a, T, A>::pop",
+  "safe": true,
+  "callees": {
+    "core::option::Option::<T>::take": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes the value out of the option, leaving a [`None`] in its place.\n\n # Examples\n\n ```\n let mut x = Some(2);\n let y = x.take();\n assert_eq!(x, None);\n assert_eq!(y, Some(2));\n\n let mut x: Option<u32> = None;\n let y = x.take();\n assert_eq!(x, None);\n assert_eq!(y, None);\n ```\n",
+      "adt": {}
+    },
+    "core::num::NonZero::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained value as a primitive type.\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::set_len": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Forces the length of the vector to `new_len`.\n\n This is a low-level operation that maintains none of the normal\n invariants of the type. Normally changing the length of a vector\n is done using one of the safe operations instead, such as\n [`truncate`], [`resize`], [`extend`], or [`clear`].\n\n [`truncate`]: Vec::truncate\n [`resize`]: Vec::resize\n [`extend`]: Extend::extend\n [`clear`]: Vec::clear\n\n # Safety\n\n - `new_len` must be less than or equal to [`capacity()`].\n - The elements at `old_len..new_len` must be initialized.\n\n [`capacity()`]: Vec::capacity\n\n # Examples\n\n See [`spare_capacity_mut()`] for an example with safe\n initialization of capacity elements and use of this method.\n\n `set_len()` can be useful for situations in which the vector\n is serving as a buffer for other code, particularly over FFI:\n\n ```no_run\n # #![allow(dead_code)]\n # // This is just a minimal skeleton for the doc example;\n # // don't use this as a starting point for a real library.\n # pub struct StreamWrapper { strm: *mut std::ffi::c_void }\n # const Z_OK: i32 = 0;\n # unsafe extern \"C\" {\n #     fn deflateGetDictionary(\n #         strm: *mut std::ffi::c_void,\n #         dictionary: *mut u8,\n #         dictLength: *mut usize,\n #     ) -> i32;\n # }\n # impl StreamWrapper {\n pub fn get_dictionary(&self) -> Option<Vec<u8>> {\n     // Per the FFI method's docs, \"32768 bytes is always enough\".\n     let mut dict = Vec::with_capacity(32_768);\n     let mut dict_length = 0;\n     // SAFETY: When `deflateGetDictionary` returns `Z_OK`, it holds that:\n     // 1. `dict_length` elements were initialized.\n     // 2. `dict_length` <= the capacity (32_768)\n     // which makes `set_len` safe to call.\n     unsafe {\n         // Make the FFI call...\n         let r = deflateGetDictionary(self.strm, dict.as_mut_ptr(), &mut dict_length);\n         if r == Z_OK {\n             // ...and update the length to what was initialized.\n             dict.set_len(dict_length);\n             Some(dict)\n         } else {\n             None\n         }\n     }\n }\n # }\n ```\n\n While the following example is sound, there is a memory leak since\n the inner vectors were not freed prior to the `set_len` call:\n\n ```\n let mut vec = vec![vec![1, 0, 0],\n                    vec![0, 1, 0],\n                    vec![0, 0, 1]];\n // SAFETY:\n // 1. `old_len..0` is empty so no elements need to be initialized.\n // 2. `0 <= capacity` always holds whatever `capacity` is.\n unsafe {\n     vec.set_len(0);\n #   // FIXME(https://github.com/rust-lang/miri/issues/3670):\n #   // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n #   vec.set_len(3);\n }\n ```\n\n Normally, here, one would use [`clear`] instead to correctly drop\n the contents and thus not leak memory.\n\n [`spare_capacity_mut()`]: Vec::spare_capacity_mut\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "collections::binary_heap::BinaryHeap::<T, A>::pop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Removes the greatest item from the binary heap and returns it, or `None` if it\n is empty.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::collections::BinaryHeap;\n let mut heap = BinaryHeap::from([1, 3]);\n\n assert_eq!(heap.pop(), Some(3));\n assert_eq!(heap.pop(), Some(1));\n assert_eq!(heap.pop(), None);\n ```\n\n # Time complexity\n\n The worst case cost of `pop` on a heap containing *n* elements is *O*(log(*n*)).\n",
+      "adt": {
+        "core::option::Option": "Constructor",
+        "collections::binary_heap::BinaryHeap": "MutableAsArgument"
+      }
+    },
+    "core::option::Option::<T>::unwrap_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value, consuming the `self` value,\n without checking that the value is not [`None`].\n\n # Safety\n\n Calling this method on [`None`] is *[undefined behavior]*.\n\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n let x = Some(\"air\");\n assert_eq!(unsafe { x.unwrap_unchecked() }, \"air\");\n ```\n\n ```no_run\n let x: Option<&str> = None;\n assert_eq!(unsafe { x.unwrap_unchecked() }, \"air\"); // Undefined behavior!\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "MutRef",
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 173, kind: RigidTy(Adt(AdtDef(DefId { id: 2646, name: \"core::num::NonZero\" }), GenericArgs([Type(Ty { id: 14, kind: RigidTy(Uint(Usize)) })]))) })])"
+    ],
+    "collections::binary_heap::PeekMut": [
+      "Unknown([Field(1, Ty { id: 1928, kind: RigidTy(Adt(AdtDef(DefId { id: 2671, name: \"core::option::Option\" }), GenericArgs([Type(Ty { id: 173, kind: RigidTy(Adt(AdtDef(DefId { id: 2646, name: \"core::num::NonZero\" }), GenericArgs([Type(Ty { id: 14, kind: RigidTy(Uint(Usize)) })]))) })]))) })])",
+      "Unknown([Field(0, Ty { id: 1904, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 1913, kind: RigidTy(Adt(AdtDef(DefId { id: 3295, name: \"collections::binary_heap::BinaryHeap\" }), GenericArgs([Type(Ty { id: 110, kind: Param(ParamTy { index: 1, name: \"T\" }) }), Type(Ty { id: 881, kind: Param(ParamTy { index: 2, name: \"A\" }) })]))) }, Mut)) })])",
+      "Plain"
+    ],
+    "core::num::NonZero": [
+      "Plain"
+    ],
+    "collections::binary_heap::BinaryHeap": [
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "vec::Vec": [
+      "MutRef"
+    ]
+  },
+  "path": 529,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/binary_heap/mod.rs:434:5: 448:6",
+  "src": "pub fn pop(mut this: PeekMut<'a, T, A>) -> T {\n        if let Some(original_len) = this.original_len.take() {\n            // SAFETY: This is how many elements were in the Vec at the time of\n            // the BinaryHeap::peek_mut call.\n            unsafe { this.heap.data.set_len(original_len.get()) };\n\n            // Unlike in Drop, here we don't also need to do a sift_down even if\n            // the caller could've mutated the element. It is removed from the\n            // heap on the next line and pop() is not sensitive to its value.\n        }\n\n        // SAFETY: Have a `PeekMut` element proves that the associated binary heap being non-empty,\n        // so the `pop` operation will not fail.\n        unsafe { this.heap.pop().unwrap_unchecked() }\n    }",
+  "mir": "fn collections::binary_heap::PeekMut::<'a, T, A>::pop(_1: collections::binary_heap::PeekMut<'_, T, A>) -> T {\n    let mut _0: T;\n    let mut _2: core::option::Option<core::num::NonZero<usize>>;\n    let mut _3: &mut core::option::Option<core::num::NonZero<usize>>;\n    let mut _4: isize;\n    let  _5: core::num::NonZero<usize>;\n    let  _6: ();\n    let mut _7: &mut vec::Vec<T, A>;\n    let mut _8: usize;\n    let mut _9: core::option::Option<T>;\n    let mut _10: &mut collections::binary_heap::BinaryHeap<T, A>;\n    let mut _11: &mut collections::binary_heap::BinaryHeap<T, A>;\n    debug this => _1;\n    debug original_len => _5;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &mut (_1.1: core::option::Option<core::num::NonZero<usize>>);\n        _2 = core::option::Option::<core::num::NonZero<usize>>::take(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _4 = discriminant(_2);\n        switchInt(move _4) -> [1: bb2, 0: bb5, otherwise: bb10];\n    }\n    bb2: {\n        _5 = ((_2 as variant#1).0: core::num::NonZero<usize>);\n        StorageLive(_7);\n        _10 = (_1.0: &mut collections::binary_heap::BinaryHeap<T, A>);\n        _7 = &mut ((*_10).0: vec::Vec<T, A>);\n        StorageLive(_8);\n        _8 = core::num::NonZero::<usize>::get(_5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = vec::Vec::<T, A>::set_len(move _7, move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageDead(_2);\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_2);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageLive(_9);\n        _11 = (_1.0: &mut collections::binary_heap::BinaryHeap<T, A>);\n        _9 = collections::binary_heap::BinaryHeap::<T, A>::pop(_11) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _0 = core::option::Option::<T>::unwrap_unchecked(move _9) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_9);\n        drop(_1) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        return;\n    }\n    bb10: {\n        unreachable;\n    }\n}\n",
+  "doc": " Removes the peeked value from the heap and returns it.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

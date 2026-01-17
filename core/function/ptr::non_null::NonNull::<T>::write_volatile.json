@@ -1,0 +1,41 @@
+{
+  "name": "ptr::non_null::NonNull::<T>::write_volatile",
+  "safe": false,
+  "callees": {
+    "ptr::non_null::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "ptr::write_volatile": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs a volatile write of a memory location with the given value without reading or dropping\n the old value.\n\n Volatile operations are intended to act on I/O memory. As such, they are considered externally\n observable events (just like syscalls), and are guaranteed to not be elided or reordered by the\n compiler across other externally observable events. With this in mind, there are two cases of\n usage that need to be distinguished:\n\n - When a volatile operation is used for memory inside an [allocation], it behaves exactly like\n   [`write`][write()], except for the additional guarantee that it won't be elided or reordered\n   (see above). This implies that the operation will actually access memory and not e.g. be\n   lowered to a register access. Other than that, all the usual rules for memory accesses apply\n   (including provenance). In particular, just like in C, whether an operation is volatile has no\n   bearing whatsoever on questions involving concurrent access from multiple threads. Volatile\n   accesses behave exactly like non-atomic accesses in that regard.\n\n - Volatile operations, however, may also be used to access memory that is _outside_ of any Rust\n   allocation. In this use-case, the pointer does *not* have to be [valid] for writes. This is\n   typically used for CPU and peripheral registers that must be accessed via an I/O memory\n   mapping, most commonly at fixed addresses reserved by the hardware. These often have special\n   semantics associated to their manipulation, and cannot be used as general purpose memory.\n   Here, any address value is possible, including 0 and [`usize::MAX`], so long as the semantics\n   of such a write are well-defined by the target hardware. The provenance of the pointer is\n   irrelevant, and it can be created with [`without_provenance`]. The access must not trap. It\n   can cause side-effects, but those must not affect Rust-allocated memory in any way. This\n   access is still not considered [atomic], and as such it cannot be used for inter-thread\n   synchronization.\n\n Note that volatile memory operations on zero-sized types (e.g., if a zero-sized type is passed\n to `write_volatile`) are noops and may be ignored.\n\n `write_volatile` does not drop the contents of `dst`. This is safe, but it could leak\n allocations or resources, so care should be taken not to overwrite an object that should be\n dropped when operating on Rust memory. Additionally, it does not drop `src`. Semantically, `src`\n is moved into the location pointed to by `dst`.\n\n [allocation]: crate::ptr#allocated-object\n [atomic]: crate::sync::atomic#memory-model-for-atomic-accesses\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `dst` must be either [valid] for writes, or it must point to memory outside of all Rust\n   allocations and writing to that memory must:\n   - not trap, and\n   - not cause any memory inside a Rust allocation to be modified.\n\n * `dst` must be properly aligned.\n\n Note that even if `T` has size `0`, the pointer must be properly aligned.\n\n [valid]: self#safety\n\n # Examples\n\n Basic usage:\n\n ```\n let mut x = 0;\n let y = &mut x as *mut i32;\n let z = 12;\n\n unsafe {\n     std::ptr::write_volatile(y, z);\n     assert_eq!(std::ptr::read_volatile(y), 12);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": 16046,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/non_null.rs:1181:5: 1187:6",
+  "src": "pub unsafe fn write_volatile(self, val: T)\n    where\n        T: Sized,\n    {\n        // SAFETY: the caller must uphold the safety contract for `write_volatile`.\n        unsafe { ptr::write_volatile(self.as_ptr(), val) }\n    }",
+  "mir": "fn ptr::non_null::NonNull::<T>::write_volatile(_1: ptr::non_null::NonNull<T>, _2: T) -> () {\n    let mut _0: ();\n    let mut _3: *mut T;\n    debug self => _1;\n    debug val => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = ptr::non_null::NonNull::<T>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = ptr::write_volatile::<T>(move _3, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Performs a volatile write of a memory location with the given value without\n reading or dropping the old value.\n\n Volatile operations are intended to act on I/O memory, and are guaranteed\n to not be elided or reordered by the compiler across other volatile\n operations.\n\n See [`ptr::write_volatile`] for safety concerns and examples.\n\n [`ptr::write_volatile`]: crate::ptr::write_volatile()\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

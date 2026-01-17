@@ -1,0 +1,75 @@
+{
+  "name": "ptr::const_ptr::<impl *const T>::align_offset",
+  "safe": true,
+  "callees": {
+    "num::<impl usize>::is_power_of_two": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if and only if `self == 2^k` for some unsigned integer `k`.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {}
+    },
+    "ptr::align_offset": {
+      "safe": false,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "ptr_to_integer_transmute_in_consts"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* ptr_to_integer_transmute_in_consts\n"
+        ]
+      },
+      "doc": " Calculate an element-offset that increases a pointer's alignment.\n\n Calculate an element-offset (not byte-offset) that when added to a given pointer `p`, increases `p`'s alignment to at least the given alignment `a`.\n\n # Safety\n `a` must be a power of two.\n\n # Notes\n This implementation has been carefully tailored to not panic. It is UB for this to panic.\n The only real change that can be made here is change of `INV_TABLE_MOD_16` and associated\n constants.\n\n If we ever decide to make it possible to call the intrinsic with `a` that is not a\n power-of-two, it will probably be more prudent to just change to a naive implementation rather\n than trying to adapt this to accommodate that change.\n\n Any questions go to @nagisa.\n",
+      "adt": {}
+    },
+    "fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {
+        "fmt::Arguments": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 975,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/const_ptr.rs:1294:5: 1312:6",
+  "src": "pub fn align_offset(self, align: usize) -> usize\n    where\n        T: Sized,\n    {\n        if !align.is_power_of_two() {\n            panic!(\"align_offset: align is not a power-of-two\");\n        }\n\n        // SAFETY: `align` has been checked to be a power of 2 above\n        let ret = unsafe { align_offset(self, align) };\n\n        // Inform Miri that we want to consider the resulting pointer to be suitably aligned.\n        #[cfg(miri)]\n        if ret != usize::MAX {\n            intrinsics::miri_promise_symbolic_alignment(self.wrapping_add(ret).cast(), align);\n        }\n\n        ret\n    }",
+  "mir": "fn ptr::const_ptr::<impl *const T>::align_offset(_1: *const T, _2: usize) -> usize {\n    let mut _0: usize;\n    let mut _3: bool;\n    let  _4: !;\n    let mut _5: fmt::Arguments<'_>;\n    debug self => _1;\n    debug align => _2;\n    debug ret => _0;\n    bb0: {\n        StorageLive(_3);\n        _3 = num::<impl usize>::is_power_of_two(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = ptr::align_offset::<T>(_1, _2) -> [return: bb5, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_5);\n        _5 = fmt::Arguments::<'_>::from_str(\"align_offset: align is not a power-of-two\") -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _4 = panicking::panic_fmt(move _5) -> unwind unreachable;\n    }\n    bb5: {\n        return;\n    }\n}\n",
+  "doc": " Computes the offset that needs to be applied to the pointer in order to make it aligned to\n `align`.\n\n If it is not possible to align the pointer, the implementation returns\n `usize::MAX`.\n\n The offset is expressed in number of `T` elements, and not bytes. The value returned can be\n used with the `wrapping_add` method.\n\n There are no guarantees whatsoever that offsetting the pointer will not overflow or go\n beyond the allocation that the pointer points into. It is up to the caller to ensure that\n the returned offset is correct in all terms other than alignment.\n\n # Panics\n\n The function panics if `align` is not a power-of-two.\n\n # Examples\n\n Accessing adjacent `u8` as `u16`\n\n ```\n # unsafe {\n let x = [5_u8, 6, 7, 8, 9];\n let ptr = x.as_ptr();\n let offset = ptr.align_offset(align_of::<u16>());\n\n if offset < x.len() - 1 {\n     let u16_ptr = ptr.add(offset).cast::<u16>();\n     assert!(*u16_ptr == u16::from_ne_bytes([5, 6]) || *u16_ptr == u16::from_ne_bytes([6, 7]));\n } else {\n     // while the pointer can be aligned via `offset`, it would point\n     // outside the allocation\n }\n # }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

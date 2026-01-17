@@ -1,0 +1,58 @@
+{
+  "name": "sync::nonpoison::rwlock::RwLock::<T>::with",
+  "safe": true,
+  "callees": {
+    "sync::nonpoison::rwlock::RwLock::<T>::read": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Locks this `RwLock` with shared read access, blocking the current thread\n until it can be acquired.\n\n The calling thread will be blocked until there are no more writers which\n hold the lock. There may be other readers currently inside the lock when\n this method returns. This method does not provide any guarantees with\n respect to the ordering of whether contentious readers or writers will\n acquire the lock first.\n\n Returns an RAII guard which will release this thread's shared access\n once it is dropped.\n\n # Panics\n\n This function might panic when called if the lock is already held by the current thread.\n\n # Examples\n\n ```\n #![feature(nonpoison_rwlock)]\n\n use std::sync::Arc;\n use std::sync::nonpoison::RwLock;\n use std::thread;\n\n let lock = Arc::new(RwLock::new(1));\n let c_lock = Arc::clone(&lock);\n\n let n = lock.read();\n assert_eq!(*n, 1);\n\n thread::spawn(move || {\n     let r = c_lock.read();\n }).join().unwrap();\n ```\n",
+      "adt": {
+        "sync::nonpoison::rwlock::RwLock": "ImmutableAsArgument",
+        "sync::nonpoison::rwlock::RwLockReadGuard": "Constructor"
+      }
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::ops::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::nonpoison::rwlock::RwLock": [
+      "Ref"
+    ],
+    "sync::nonpoison::rwlock::RwLockReadGuard": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 3123,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/nonpoison/rwlock.rs:523:5: 528:6",
+  "src": "pub fn with<F, R>(&self, f: F) -> R\n    where\n        F: FnOnce(&T) -> R,\n    {\n        f(&self.read())\n    }",
+  "mir": "fn sync::nonpoison::rwlock::RwLock::<T>::with(_1: &sync::nonpoison::rwlock::RwLock<T>, _2: F) -> R {\n    let mut _0: R;\n    let mut _3: (&T,);\n    let  _4: &T;\n    let  _5: &sync::nonpoison::rwlock::RwLockReadGuard<'_, T>;\n    let  _6: sync::nonpoison::rwlock::RwLockReadGuard<'_, T>;\n    debug self => _1;\n    debug f => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_6);\n        _6 = sync::nonpoison::rwlock::RwLock::<T>::read(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = &_6;\n        _4 = <sync::nonpoison::rwlock::RwLockReadGuard<'_, T> as core::ops::Deref>::deref(_5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = (_4);\n        _0 = <F as core::ops::FnOnce<(&T,)>>::call_once(_2, move _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        drop(_6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Locks this `RwLock` with shared read access to the underlying data by passing\n a reference to the given closure.\n\n This method acquires the lock, calls the provided closure with a reference\n to the data, and returns the result of the closure. The lock is released after\n the closure completes, even if it panics.\n\n # Examples\n\n ```\n #![feature(lock_value_accessors, nonpoison_rwlock)]\n\n use std::sync::nonpoison::RwLock;\n\n let rwlock = RwLock::new(2);\n let result = rwlock.with(|data| *data + 3);\n\n assert_eq!(result, 5);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

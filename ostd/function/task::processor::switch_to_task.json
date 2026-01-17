@@ -1,0 +1,240 @@
+{
+  "name": "task::processor::switch_to_task",
+  "safe": true,
+  "callees": {
+    "task::atomic_mode::might_sleep": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Marks a function as one that might sleep.\n\n This function will panic if it is executed in atomic mode.\n",
+      "adt": {}
+    },
+    "sync::rcu::finish_grace_period": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Finishes the current grace period.\n\n This function is called when the current grace period on current CPU is\n finished. If this CPU is the last CPU to finish the current grace period,\n it takes all the current callbacks and invokes them.\n\n # Safety\n\n The caller must ensure that this CPU is not executing in a RCU read-side\n critical section.\n",
+      "adt": {}
+    },
+    "irq::guard::disable_local": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Disables all IRQs on the current CPU (i.e., locally).\n\n This function returns a guard object, which will automatically enable local IRQs again when\n it is dropped. This function works correctly even when it is called in a _nested_ way.\n The local IRQs shall only be re-enabled when the most outer guard is dropped.\n\n This function can play nicely with [`SpinLock`] as the type uses this function internally.\n One can invoke this function even after acquiring a spin lock. And the reversed order is also ok.\n\n [`SpinLock`]: crate::sync::SpinLock\n\n # Example\n\n ```rust\n use ostd::irq;\n\n {\n     let _ = irq::disable_local();\n     todo!(\"do something when irqs are disabled\");\n }\n ```\n",
+      "adt": {
+        "irq::guard::DisabledLocalIrqGuard": "Constructor"
+      }
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "task::processor::before_switching_to": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "irq::guard::DisabledLocalIrqGuard": "ImmutableAsArgument",
+        "task::Task": "ImmutableAsArgument"
+      }
+    },
+    "task::Task::ctx": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "task::Task": "ImmutableAsArgument"
+      }
+    },
+    "core::cell::SyncUnsafeCell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the wrapped value.\n\n This can be cast to a pointer of any kind.\n Ensure that the access is unique (no active references, mutable or not)\n when casting to `&mut T`, and ensure that there are no mutations\n or mutable aliases going on when casting to `&T`\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast_const": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Changes constness without changing the type.\n\n This is a bit safer than `as` because it wouldn't silently change the type if the code is\n refactored.\n\n While not strictly required (`*mut T` coerces to `*const T`), this is provided for symmetry\n with [`cast_mut`] on `*const T` and may have documentation value if used instead of implicit\n coercion.\n\n [`cast_mut`]: pointer::cast_mut\n",
+      "adt": {}
+    },
+    "cpu::local::cell::CpuLocalCell::<T>::load": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets the value of the per-CPU object in a single instruction.\n\n Note that this memory operation will not be elided or reordered by the\n compiler since it is a black-box.\n",
+      "adt": {
+        "cpu::local::cell::CpuLocalCell": "MutableAsArgument"
+      }
+    },
+    "alloc::sync::Arc::<T>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the `Arc`, returning the wrapped pointer.\n\n To avoid a memory leak the pointer must be converted back to an `Arc` using\n [`Arc::from_raw`].\n\n # Examples\n\n ```\n use std::sync::Arc;\n\n let x = Arc::new(\"hello\".to_owned());\n let x_ptr = Arc::into_raw(x);\n assert_eq!(unsafe { &*x_ptr }, \"hello\");\n # // Prevent leaks for Miri.\n # drop(unsafe { Arc::from_raw(x_ptr) });\n ```\n",
+      "adt": {}
+    },
+    "cpu::local::cell::CpuLocalCell::<T>::store": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a value to the per-CPU object in a single instruction.\n\n Note that this memory operation will not be elided or reordered by the\n compiler since it is a black-box.\n",
+      "adt": {
+        "cpu::local::cell::CpuLocalCell": "MutableAsArgument"
+      }
+    },
+    "core::ptr::const_ptr::<impl *const T>::is_null": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"Follow the rabbit\";\n let ptr: *const u8 = s.as_ptr();\n assert!(!ptr.is_null());\n ```\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "core::mem::forget": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes ownership and \"forgets\" about the value **without running its destructor**.\n\n Any resources the value manages, such as heap memory or a file handle, will linger\n forever in an unreachable state. However, it does not guarantee that pointers\n to this memory will remain valid.\n\n * If you want to leak memory, see [`Box::leak`].\n * If you want to obtain a raw pointer to the memory, see [`Box::into_raw`].\n * If you want to dispose of a value properly, running its destructor, see\n   [`mem::drop`].\n\n # Safety\n\n `forget` is not marked as `unsafe`, because Rust's safety guarantees\n do not include a guarantee that destructors will always run. For example,\n a program can create a reference cycle using [`Rc`][rc], or call\n [`process::exit`][exit] to exit without running destructors. Thus, allowing\n `mem::forget` from safe code does not fundamentally change Rust's safety\n guarantees.\n\n That said, leaking resources such as memory or I/O objects is usually undesirable.\n The need comes up in some specialized use cases for FFI or unsafe code, but even\n then, [`ManuallyDrop`] is typically preferred.\n\n Because forgetting a value is allowed, any `unsafe` code you write must\n allow for this possibility. You cannot return a value and expect that the\n caller will necessarily run the value's destructor.\n\n [rc]: ../../std/rc/struct.Rc.html\n [exit]: ../../std/process/fn.exit.html\n\n # Examples\n\n The canonical safe use of `mem::forget` is to circumvent a value's destructor\n implemented by the `Drop` trait. For example, this will leak a `File`, i.e. reclaim\n the space taken by the variable but never close the underlying system resource:\n\n ```no_run\n use std::mem;\n use std::fs::File;\n\n let file = File::open(\"foo.txt\").unwrap();\n mem::forget(file);\n ```\n\n This is useful when the ownership of the underlying resource was previously\n transferred to code outside of Rust, for example by transmitting the raw\n file descriptor to C code.\n\n # Relationship with `ManuallyDrop`\n\n While `mem::forget` can also be used to transfer *memory* ownership, doing so is error-prone.\n [`ManuallyDrop`] should be used instead. Consider, for example, this code:\n\n ```\n use std::mem;\n\n let mut v = vec![65, 122];\n // Build a `String` using the contents of `v`\n let s = unsafe { String::from_raw_parts(v.as_mut_ptr(), v.len(), v.capacity()) };\n // leak `v` because its memory is now managed by `s`\n mem::forget(v);  // ERROR - v is invalid and must not be passed to a function\n assert_eq!(s, \"Az\");\n // `s` is implicitly dropped and its memory deallocated.\n ```\n\n There are two issues with the above example:\n\n * If more code were added between the construction of `String` and the invocation of\n   `mem::forget()`, a panic within it would cause a double free because the same memory\n   is handled by both `v` and `s`.\n * After calling `v.as_mut_ptr()` and transmitting the ownership of the data to `s`,\n   the `v` value is invalid. Even when a value is just moved to `mem::forget` (which won't\n   inspect it), some types have strict requirements on their values that\n   make them invalid when dangling or no longer owned. Using invalid values in any\n   way, including passing them to or returning them from functions, constitutes\n   undefined behavior and may break the assumptions made by the compiler.\n\n Switching to `ManuallyDrop` avoids both issues:\n\n ```\n use std::mem::ManuallyDrop;\n\n let v = vec![65, 122];\n // Before we disassemble `v` into its raw parts, make sure it\n // does not get dropped!\n let mut v = ManuallyDrop::new(v);\n // Now disassemble `v`. These operations cannot panic, so there cannot be a leak.\n let (ptr, len, cap) = (v.as_mut_ptr(), v.len(), v.capacity());\n // Finally, build a `String`.\n let s = unsafe { String::from_raw_parts(ptr, len, cap) };\n assert_eq!(s, \"Az\");\n // `s` is implicitly dropped and its memory deallocated.\n ```\n\n `ManuallyDrop` robustly prevents double-free because we disable `v`'s destructor\n before doing anything else. `mem::forget()` doesn't allow this because it consumes its\n argument, forcing us to call it only after extracting anything we need from `v`. Even\n if a panic were introduced between construction of `ManuallyDrop` and building the\n string (which cannot happen in the code as shown), it would result in a leak and not a\n double free. In other words, `ManuallyDrop` errs on the side of leaking instead of\n erring on the side of (double-)dropping.\n\n Also, `ManuallyDrop` prevents us from having to \"touch\" `v` after transferring the\n ownership to `s` — the final step of interacting with `v` to dispose of it without\n running its destructor is entirely avoided.\n\n [`Box`]: ../../std/boxed/struct.Box.html\n [`Box::leak`]: ../../std/boxed/struct.Box.html#method.leak\n [`Box::into_raw`]: ../../std/boxed/struct.Box.html#method.into_raw\n [`mem::drop`]: drop\n [ub]: ../../reference/behavior-considered-undefined.html\n",
+      "adt": {}
+    },
+    "arch::task::first_context_switch": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "arch::task::context_switch": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::from_str_nonconst": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {}
+    },
+    "task::processor::after_switching_to": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Does cleanups after switching to a task.\n\n # Safety\n\n This function must be called only once after switching to a task.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "irq::guard::DisabledLocalIrqGuard": [
+      "Plain",
+      "Ref"
+    ],
+    "alloc::sync::Arc": [
+      "Ref",
+      "Plain"
+    ],
+    "task::Task": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))"
+    ],
+    "core::cell::SyncUnsafeCell": [
+      "Ref"
+    ],
+    "cpu::local::cell::CpuLocalCell": [
+      "Ref"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 2789,
+  "span": "ostd/src/task/processor.rs:39:1: 93:2",
+  "src": "pub(super) fn switch_to_task(next_task: Arc<Task>) {\n    super::atomic_mode::might_sleep();\n\n    // SAFETY: RCU read-side critical sections disables preemption. By the time\n    // we reach this point, we have already checked that preemption is enabled.\n    unsafe {\n        crate::sync::finish_grace_period();\n    }\n\n    let irq_guard = crate::irq::disable_local();\n\n    before_switching_to(&next_task, &irq_guard);\n\n    // `before_switching_to` guarantees that from now on, and while the next task is running on the\n    // CPU, its context can be used exclusively.\n    let next_task_ctx_ptr = next_task.ctx().get().cast_const();\n\n    let current_task_ptr = CURRENT_TASK_PTR.load();\n    CURRENT_TASK_PTR.store(Arc::into_raw(next_task));\n    debug_assert!(PREVIOUS_TASK_PTR.load().is_null());\n    PREVIOUS_TASK_PTR.store(current_task_ptr);\n\n    // We must disable IRQs when switching, see `after_switching_to`.\n    core::mem::forget(irq_guard);\n\n    let current_task_ctx_ptr = if !current_task_ptr.is_null() {\n        // SAFETY: The pointer is set by `switch_to_task` and is guaranteed to be\n        // built with `Arc::into_raw`. It will only be dropped as a previous task,\n        // so its reference will be valid until `after_switching_to`.\n        let current_task = unsafe { &*current_task_ptr };\n        // Until `after_switching_to`, the task's context is alive and can be exclusively used.\n        current_task.ctx.get()\n    } else {\n        // SAFETY:\n        // 1. We have exclusive access to the next context (see above).\n        // 2. The next context is valid (because it is either correctly initialized or written by a\n        //    previous `context_switch`).\n        unsafe { first_context_switch(next_task_ctx_ptr) };\n        // We've switched to the first task on the current CPU.\n        unreachable!(\"`first_context_switch` should never return\");\n    };\n\n    // SAFETY:\n    // 1. We have exclusive access to both the current context and the next context (see above).\n    // 2. The next context is valid (because it is either correctly initialized or written by a\n    //    previous `context_switch`).\n    unsafe {\n        // This function may not return, for example, when the current task exits. So make sure\n        // that all variables on the stack can be forgotten without causing resource leakage.\n        context_switch(next_task_ctx_ptr, current_task_ctx_ptr);\n    }\n\n    // SAFETY: The task is just switched back, `after_switching_to` hasn't been called yet.\n    unsafe { after_switching_to() };\n}",
+  "mir": "fn task::processor::switch_to_task(_1: alloc::sync::Arc<task::Task>) -> () {\n    let mut _0: ();\n    let  _2: ();\n    let  _3: ();\n    let  _4: irq::guard::DisabledLocalIrqGuard;\n    let  _5: ();\n    let  _6: &task::Task;\n    let  _7: &alloc::sync::Arc<task::Task>;\n    let  _8: &irq::guard::DisabledLocalIrqGuard;\n    let  _9: *const arch::task::TaskContext;\n    let mut _10: *mut arch::task::TaskContext;\n    let  _11: &core::cell::SyncUnsafeCell<arch::task::TaskContext>;\n    let  _12: &task::Task;\n    let mut _13: &alloc::sync::Arc<task::Task>;\n    let  _14: *const task::Task;\n    let mut _15: &cpu::local::cell::CpuLocalCell<*const task::Task>;\n    let  _16: ();\n    let mut _17: &cpu::local::cell::CpuLocalCell<*const task::Task>;\n    let mut _18: *const task::Task;\n    let mut _19: bool;\n    let mut _20: *const task::Task;\n    let mut _21: &cpu::local::cell::CpuLocalCell<*const task::Task>;\n    let mut _22: !;\n    let  _23: ();\n    let mut _24: &cpu::local::cell::CpuLocalCell<*const task::Task>;\n    let  _25: ();\n    let  _26: *mut arch::task::TaskContext;\n    let mut _27: bool;\n    let  _28: &task::Task;\n    let mut _29: &core::cell::SyncUnsafeCell<arch::task::TaskContext>;\n    let  _30: ();\n    let  _31: !;\n    let mut _32: core::fmt::Arguments<'_>;\n    let  _33: ();\n    let  _34: ();\n    debug next_task => _1;\n    debug irq_guard => _4;\n    debug next_task_ctx_ptr => _9;\n    debug current_task_ptr => _14;\n    debug current_task_ctx_ptr => _26;\n    debug current_task => _28;\n    bb0: {\n        _2 = task::atomic_mode::might_sleep() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = sync::rcu::finish_grace_period() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = irq::guard::disable_local() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _7 = &_1;\n        _6 = <alloc::sync::Arc<task::Task> as core::ops::Deref>::deref(_7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _8 = &_4;\n        _5 = task::processor::before_switching_to(_6, _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_10);\n        StorageLive(_13);\n        _13 = &_1;\n        _12 = <alloc::sync::Arc<task::Task> as core::ops::Deref>::deref(move _13) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_13);\n        _11 = task::Task::ctx(_12) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _10 = core::cell::SyncUnsafeCell::<arch::task::TaskContext>::get(_11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _9 = core::ptr::mut_ptr::<impl *mut arch::task::TaskContext>::cast_const(move _10) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_10);\n        StorageLive(_15);\n        _15 = {alloc1518: &cpu::local::cell::CpuLocalCell<*const task::Task>};\n        _14 = cpu::local::cell::CpuLocalCell::<*const task::Task>::load(move _15) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_15);\n        StorageLive(_17);\n        _17 = {alloc1518: &cpu::local::cell::CpuLocalCell<*const task::Task>};\n        StorageLive(_18);\n        _18 = alloc::sync::Arc::<task::Task>::into_raw(_1) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _16 = cpu::local::cell::CpuLocalCell::<*const task::Task>::store(move _17, move _18) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageLive(_19);\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = {alloc1522: &cpu::local::cell::CpuLocalCell<*const task::Task>};\n        _20 = cpu::local::cell::CpuLocalCell::<*const task::Task>::load(move _21) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_21);\n        _19 = core::ptr::const_ptr::<impl *const task::Task>::is_null(move _20) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        switchInt(move _19) -> [0: bb16, otherwise: bb15];\n    }\n    bb15: {\n        StorageDead(_20);\n        StorageDead(_19);\n        StorageLive(_24);\n        _24 = {alloc1522: &cpu::local::cell::CpuLocalCell<*const task::Task>};\n        _23 = cpu::local::cell::CpuLocalCell::<*const task::Task>::store(move _24, _14) -> [return: bb17, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_20);\n        _22 = core::panicking::panic(\"assertion failed: PREVIOUS_TASK_PTR.load().is_null()\") -> unwind unreachable;\n    }\n    bb17: {\n        StorageDead(_24);\n        _25 = core::mem::forget::<irq::guard::DisabledLocalIrqGuard>(_4) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageLive(_27);\n        _27 = core::ptr::const_ptr::<impl *const task::Task>::is_null(_14) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        switchInt(move _27) -> [0: bb21, otherwise: bb20];\n    }\n    bb20: {\n        _30 = arch::task::first_context_switch(_9) -> [return: bb23, unwind unreachable];\n    }\n    bb21: {\n        StorageLive(_28);\n        _28 = &(*_14);\n        StorageLive(_29);\n        _29 = &((*_28).3: core::cell::SyncUnsafeCell<arch::task::TaskContext>);\n        _26 = core::cell::SyncUnsafeCell::<arch::task::TaskContext>::get(move _29) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_29);\n        StorageDead(_28);\n        StorageDead(_27);\n        _33 = arch::task::context_switch(_9, _26) -> [return: bb25, unwind unreachable];\n    }\n    bb23: {\n        StorageLive(_32);\n        _32 = core::fmt::Arguments::<'_>::from_str_nonconst(\"internal error: entered unreachable code: `first_context_switch` should never return\") -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        _31 = core::panicking::panic_fmt(move _32) -> unwind unreachable;\n    }\n    bb25: {\n        _34 = task::processor::after_switching_to() -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        return;\n    }\n}\n",
+  "doc": " Calls this function to switch to other task\n\n If current task is none, then it will use the default task context and it\n will not return to this function again.\n\n # Panics\n\n This function will panic if called while holding preemption locks or with\n local IRQ disabled.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

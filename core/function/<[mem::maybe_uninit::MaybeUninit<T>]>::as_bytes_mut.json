@@ -1,0 +1,47 @@
+{
+  "name": "<[mem::maybe_uninit::MaybeUninit<T>]>::as_bytes_mut",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unsafe mutable pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n let x_ptr = x.as_mut_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         *x_ptr.add(i) += 2;\n     }\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {}
+    },
+    "mem::size_of_val": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of the pointed-to value in bytes.\n\n This is usually the same as [`size_of::<T>()`]. However, when `T` *has* no\n statically-known size, e.g., a slice [`[T]`][slice] or a [trait object],\n then `size_of_val` can be used to get the dynamically-known size.\n\n [trait object]: ../../book/ch17-02-trait-objects.html\n\n # Examples\n\n ```\n assert_eq!(4, size_of_val(&5i32));\n\n let x: [u8; 13] = [0; 13];\n let y: &[u8] = &x;\n assert_eq!(13, size_of_val(y));\n ```\n\n [`size_of::<T>()`]: size_of\n",
+      "adt": {}
+    },
+    "slice::raw::from_raw_parts_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the same functionality as [`from_raw_parts`], except that a\n mutable slice is returned.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `data` must be non-null, [valid] for both reads and writes for `len * size_of::<T>()` many bytes,\n   and it must be properly aligned. This means in particular:\n\n     * The entire memory range of this slice must be contained within a single allocation!\n       Slices can never span across multiple allocations.\n     * `data` must be non-null and aligned even for zero-length slices or slices of ZSTs. One\n       reason for this is that enum layout optimizations may rely on references\n       (including slices of any length) being aligned and non-null to distinguish\n       them from other data. You can obtain a pointer that is usable as `data`\n       for zero-length slices using [`NonNull::dangling()`].\n\n * `data` must point to `len` consecutive properly initialized values of type `T`.\n\n * The memory referenced by the returned slice must not be accessed through any other pointer\n   (not derived from the return value) for the duration of lifetime `'a`.\n   Both read and write accesses are forbidden.\n\n * The total size `len * size_of::<T>()` of the slice must be no larger than `isize::MAX`,\n   and adding that size to `data` must not \"wrap around\" the address space.\n   See the safety documentation of [`pointer::offset`].\n\n [valid]: ptr#safety\n [`NonNull::dangling()`]: ptr::NonNull::dangling\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1366,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/mem/maybe_uninit.rs:1440:5: 1448:6",
+  "src": "pub const fn as_bytes_mut(&mut self) -> &mut [MaybeUninit<u8>] {\n        // SAFETY: MaybeUninit<u8> is always valid, even for padding bytes\n        unsafe {\n            slice::from_raw_parts_mut(\n                self.as_mut_ptr() as *mut MaybeUninit<u8>,\n                super::size_of_val(self),\n            )\n        }\n    }",
+  "mir": "fn <[mem::maybe_uninit::MaybeUninit<T>]>::as_bytes_mut(_1: &mut [mem::maybe_uninit::MaybeUninit<T>]) -> &mut [mem::maybe_uninit::MaybeUninit<u8>] {\n    let mut _0: &mut [mem::maybe_uninit::MaybeUninit<u8>];\n    let mut _2: *mut mem::maybe_uninit::MaybeUninit<u8>;\n    let mut _3: *mut mem::maybe_uninit::MaybeUninit<T>;\n    let mut _4: usize;\n    let mut _5: &[mem::maybe_uninit::MaybeUninit<T>];\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = slice::<impl [mem::maybe_uninit::MaybeUninit<T>]>::as_mut_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = move _3 as *mut mem::maybe_uninit::MaybeUninit<u8>;\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = mem::size_of_val::<[mem::maybe_uninit::MaybeUninit<T>]>(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _0 = slice::raw::from_raw_parts_mut::<'_, mem::maybe_uninit::MaybeUninit<u8>>(move _2, move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns the contents of this `MaybeUninit` slice as a mutable slice of potentially\n uninitialized bytes.\n\n Note that even if the contents of a `MaybeUninit` have been initialized, the value may still\n contain padding bytes which are left uninitialized.\n\n # Examples\n\n ```\n #![feature(maybe_uninit_as_bytes)]\n use std::mem::MaybeUninit;\n\n let mut uninit = [MaybeUninit::<u16>::uninit(), MaybeUninit::<u16>::uninit()];\n let uninit_bytes = uninit.as_bytes_mut();\n uninit_bytes.write_copy_of_slice(&[0x12, 0x34, 0x56, 0x78]);\n let vals = unsafe { uninit.assume_init_ref() };\n if cfg!(target_endian = \"little\") {\n     assert_eq!(vals, &[0x3412u16, 0x7856u16]);\n } else {\n     assert_eq!(vals, &[0x1234u16, 0x5678u16]);\n }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

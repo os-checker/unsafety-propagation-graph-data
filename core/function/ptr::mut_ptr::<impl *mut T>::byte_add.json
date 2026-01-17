@@ -1,0 +1,47 @@
+{
+  "name": "ptr::mut_ptr::<impl *mut T>::byte_add",
+  "safe": false,
+  "callees": {
+    "ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::with_metadata_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Uses the address value in a new pointer of another type.\n\n This operation will ignore the address part of its `meta` operand and discard existing\n metadata of `self`. For pointers to a sized types (thin pointers), this has the same effect\n as a simple cast. For pointers to an unsized type (fat pointers) this recombines the address\n with new metadata such as slice lengths or `dyn`-vtable.\n\n The resulting pointer will have provenance of `self`. This operation is semantically the\n same as creating a new pointer with the data pointer value of `self` but the metadata of\n `meta`, being fat or thin depending on the `meta` operand.\n\n # Examples\n\n This function is primarily useful for enabling pointer arithmetic on potentially fat\n pointers. The pointer is cast to a sized pointee to utilize offset operations and then\n recombined with its own original metadata.\n\n ```\n #![feature(set_ptr_value)]\n # use core::fmt::Debug;\n let mut arr: [i32; 3] = [1, 2, 3];\n let mut ptr = arr.as_mut_ptr() as *mut dyn Debug;\n let thin = ptr as *mut u8;\n unsafe {\n     ptr = thin.add(8).with_metadata_of(ptr);\n     # assert_eq!(*(ptr as *mut i32), 3);\n     println!(\"{:?}\", &*ptr); // will print \"3\"\n }\n ```\n\n # *Incorrect* usage\n\n The provenance from pointers is *not* combined. The result must only be used to refer to the\n address allowed by `self`.\n\n ```rust,no_run\n #![feature(set_ptr_value)]\n let mut x = 0u32;\n let mut y = 1u32;\n\n let x = (&mut x) as *mut u32;\n let y = (&mut y) as *mut u32;\n\n let offset = (x as usize - y as usize) / 4;\n let bad = x.wrapping_add(offset).with_metadata_of(y);\n\n // This dereference is UB. The pointer only has provenance for `x` but points to `y`.\n println!(\"{:?}\", unsafe { &*bad });\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1045,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mut_ptr.rs:979:5: 982:6",
+  "src": "pub const unsafe fn byte_add(self, count: usize) -> Self {\n        // SAFETY: the caller must uphold the safety contract for `add`.\n        unsafe { self.cast::<u8>().add(count).with_metadata_of(self) }\n    }",
+  "mir": "fn ptr::mut_ptr::<impl *mut T>::byte_add(_1: *mut T, _2: usize) -> *mut T {\n    let mut _0: *mut T;\n    let mut _3: *mut u8;\n    let mut _4: *mut u8;\n    let mut _5: *const T;\n    debug self => _1;\n    debug count => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ptr::mut_ptr::<impl *mut T>::cast::<u8>(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = ptr::mut_ptr::<impl *mut u8>::add(move _4, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = _1 as *const T;\n        _0 = ptr::mut_ptr::<impl *mut u8>::with_metadata_of::<T>(move _3, move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Adds an unsigned offset in bytes to a pointer.\n\n `count` is in units of bytes.\n\n This is purely a convenience for casting to a `u8` pointer and\n using [add][pointer::add] on it. See that method for documentation\n and safety requirements.\n\n For non-`Sized` pointees this operation changes only the data pointer,\n leaving the metadata untouched.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

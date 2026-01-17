@@ -1,0 +1,88 @@
+{
+  "name": "<mm::dma::dma_stream::DmaStream<D> as mm::io_util::HasVmReaderWriter>::reader",
+  "safe": true,
+  "callees": {
+    "mm::kspace::kvirt_area::KVirtArea::start": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "mm::kspace::kvirt_area::KVirtArea": "ImmutableAsArgument"
+      }
+    },
+    "mm::io_util::HasVmReaderWriter::reader": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reader to read data from it.\n",
+      "adt": {}
+    },
+    "mm::mem_obj::HasSize::size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of the memory object in bytes.\n",
+      "adt": {}
+    },
+    "mm::io::VmReader::<'a, mm::io::Infallible>::from_kernel_space": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `VmReader` from a pointer and a length, which represents\n a memory range in kernel space.\n\n # Safety\n\n `ptr` must be [valid] for reads of `len` bytes during the entire lifetime `a`.\n\n [valid]: crate::mm::io#safety\n",
+      "adt": {
+        "mm::io::VmReader": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "error::Error": [
+      "Plain"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "mm::dma::dma_stream::Inner": [
+      "Ref",
+      "Deref",
+      "Unknown([Deref, Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 3653, kind: RigidTy(Adt(AdtDef(DefId { id: 4769, name: \"mm::kspace::kvirt_area::KVirtArea\" }), GenericArgs([]))) })])",
+      "Unknown([Deref, Downcast(VariantIdx(2, ThreadLocalIndex)), Field(2, Ty { id: 4093, kind: RigidTy(Adt(AdtDef(DefId { id: 3684, name: \"mm::frame::segment::Segment\" }), GenericArgs([Type(Ty { id: 4095, kind: RigidTy(Dynamic([Binder { value: Trait(ExistentialTraitRef { def_id: TraitDef(DefId { id: 4951, name: \"mm::frame::untyped::AnyUFrameMeta\" }), generic_args: GenericArgs([]) }), bound_vars: [] }], Region { kind: ReErased })) })]))) })])",
+      "Unknown([Deref, Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 4093, kind: RigidTy(Adt(AdtDef(DefId { id: 3684, name: \"mm::frame::segment::Segment\" }), GenericArgs([Type(Ty { id: 4095, kind: RigidTy(Dynamic([Binder { value: Trait(ExistentialTraitRef { def_id: TraitDef(DefId { id: 4951, name: \"mm::frame::untyped::AnyUFrameMeta\" }), generic_args: GenericArgs([]) }), bound_vars: [] }], Region { kind: ReErased })) })]))) })])"
+    ],
+    "mm::dma::dma_stream::DmaStream": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "mm::kspace::kvirt_area::KVirtArea": [
+      "Ref"
+    ],
+    "mm::frame::segment::Segment": [
+      "Ref"
+    ],
+    "mm::io::VmReader": [
+      "Plain"
+    ]
+  },
+  "path": 1870,
+  "span": "ostd/src/mm/dma/dma_stream.rs:376:5: 396:6",
+  "src": "fn reader(&self) -> Result<VmReader<'_, Infallible>, Error> {\n        if !D::CAN_READ_FROM_DEVICE {\n            return Err(Error::AccessDenied);\n        }\n        match &self.inner {\n            Inner::Segment(seg) | Inner::Both(_, _, seg) => Ok(seg.reader()),\n            Inner::Kva(kva, _) => {\n                // SAFETY:\n                //  - Although the memory range points to typed memory, the range is for DMA\n                //    and the access is not by linear mapping.\n                //  - The KVA is alive during the lifetime `'_`.\n                //  - Using `VmReader` and `VmWriter` is the only way to access the KVA.\n                unsafe {\n                    Ok(VmReader::from_kernel_space(\n                        kva.start() as *const u8,\n                        kva.size(),\n                    ))\n                }\n            }\n        }\n    }",
+  "mir": "fn <mm::dma::dma_stream::DmaStream<D> as mm::io_util::HasVmReaderWriter>::reader(_1: &mm::dma::dma_stream::DmaStream<D>) -> core::result::Result<mm::io::VmReader<'_, mm::io::Infallible>, error::Error> {\n    let mut _0: core::result::Result<mm::io::VmReader<'_, mm::io::Infallible>, error::Error>;\n    let mut _2: error::Error;\n    let mut _3: &mm::dma::dma_stream::Inner;\n    let mut _4: isize;\n    let  _5: &mm::frame::segment::Segment<dyn mm::frame::untyped::AnyUFrameMeta>;\n    let mut _6: mm::io::VmReader<'_, mm::io::Infallible>;\n    let mut _7: &mm::frame::segment::Segment<dyn mm::frame::untyped::AnyUFrameMeta>;\n    let  _8: &mm::kspace::kvirt_area::KVirtArea;\n    let mut _9: mm::io::VmReader<'_, mm::io::Infallible>;\n    let mut _10: *const u8;\n    let mut _11: usize;\n    let mut _12: usize;\n    debug self => _1;\n    debug seg => _5;\n    debug kva => _8;\n    bb0: {\n        switchInt(<D as mm::dma::dma_stream::DmaDirection>::CAN_READ_FROM_DEVICE) -> [0: bb1, otherwise: bb2];\n    }\n    bb1: {\n        StorageLive(_2);\n        _2 = error::Error::AccessDenied;\n        _0 = core::result::Result::Err(move _2);\n        StorageDead(_2);\n        goto -> bb13;\n    }\n    bb2: {\n        StorageLive(_3);\n        _3 = &((*_1).0: mm::dma::dma_stream::Inner);\n        _4 = discriminant((*_3));\n        switchInt(move _4) -> [0: bb6, 1: bb4, 2: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _8 = &(((*_3) as variant#1).0: mm::kspace::kvirt_area::KVirtArea);\n        StorageLive(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = mm::kspace::kvirt_area::KVirtArea::start(_8) -> [return: bb9, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_5);\n        _5 = &(((*_3) as variant#2).2: mm::frame::segment::Segment<dyn mm::frame::untyped::AnyUFrameMeta>);\n        goto -> bb7;\n    }\n    bb6: {\n        StorageLive(_5);\n        _5 = &(((*_3) as variant#0).0: mm::frame::segment::Segment<dyn mm::frame::untyped::AnyUFrameMeta>);\n        goto -> bb7;\n    }\n    bb7: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = _5;\n        _6 = <mm::frame::segment::Segment<dyn mm::frame::untyped::AnyUFrameMeta> as mm::io_util::HasVmReaderWriter>::reader(move _7) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_7);\n        _0 = core::result::Result::Ok(move _6);\n        StorageDead(_6);\n        StorageDead(_5);\n        goto -> bb12;\n    }\n    bb9: {\n        _10 = move _11 as *const u8;\n        StorageDead(_11);\n        StorageLive(_12);\n        _12 = <mm::kspace::kvirt_area::KVirtArea as mm::mem_obj::HasSize>::size(_8) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        _9 = mm::io::VmReader::<'_, mm::io::Infallible>::from_kernel_space(move _10, move _12) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_12);\n        StorageDead(_10);\n        _0 = core::result::Result::Ok(move _9);\n        StorageDead(_9);\n        goto -> bb12;\n    }\n    bb12: {\n        StorageDead(_3);\n        goto -> bb13;\n    }\n    bb13: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

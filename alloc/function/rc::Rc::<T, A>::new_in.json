@@ -1,0 +1,61 @@
+{
+  "name": "rc::Rc::<T, A>::new_in",
+  "safe": true,
+  "callees": {
+    "rc::Rc::<T, A>::try_new_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new `Rc<T>` in the provided allocator, returning an error if the allocation\n fails\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n use std::rc::Rc;\n use std::alloc::System;\n\n let five = Rc::try_new_in(5, System);\n # Ok::<(), std::alloc::AllocError>(())\n ```\n",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "rc::Rc": "Constructor"
+      }
+    },
+    "core::alloc::Layout::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a `Layout` suitable for holding a value of type `T`.\n",
+      "adt": {}
+    },
+    "alloc::handle_alloc_error": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Signals a memory allocation error.\n\n Callers of memory allocation APIs wishing to cease execution\n in response to an allocation error are encouraged to call this function,\n rather than directly invoking [`panic!`] or similar.\n\n This function is guaranteed to diverge (not return normally with a value), but depending on\n global configuration, it may either panic (resulting in unwinding or aborting as per\n configuration for all panics), or abort the process (with no unwinding).\n\n The default behavior is:\n\n  * If the binary links against `std` (typically the case), then\n   print a message to standard error and abort the process.\n   This behavior can be replaced with [`set_alloc_error_hook`] and [`take_alloc_error_hook`].\n   Future versions of Rust may panic by default instead.\n\n * If the binary does not link against `std` (all of its crates are marked\n   [`#![no_std]`][no_std]), then call [`panic!`] with a message.\n   [The panic handler] applies as to any panic.\n\n [`set_alloc_error_hook`]: ../../std/alloc/fn.set_alloc_error_hook.html\n [`take_alloc_error_hook`]: ../../std/alloc/fn.take_alloc_error_hook.html\n [The panic handler]: https://doc.rust-lang.org/reference/runtime.html#the-panic_handler-attribute\n [no_std]: https://doc.rust-lang.org/reference/names/preludes.html#the-no_std-attribute\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 7498, kind: RigidTy(Adt(AdtDef(DefId { id: 3279, name: \"rc::Rc\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) }), Type(Ty { id: 21, kind: Param(ParamTy { index: 1, name: \"A\" }) })]))) })])"
+    ],
+    "core::alloc::Layout": [
+      "Plain"
+    ],
+    "rc::Rc": [
+      "Plain"
+    ]
+  },
+  "path": 1766,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:748:5: 755:6",
+  "src": "pub fn new_in(value: T, alloc: A) -> Rc<T, A> {\n        // NOTE: Prefer match over unwrap_or_else since closure sometimes not inlineable.\n        // That would make code size bigger.\n        match Self::try_new_in(value, alloc) {\n            Ok(m) => m,\n            Err(_) => handle_alloc_error(Layout::new::<RcInner<T>>()),\n        }\n    }",
+  "mir": "fn rc::Rc::<T, A>::new_in(_1: T, _2: A) -> rc::Rc<T, A> {\n    let mut _0: rc::Rc<T, A>;\n    let mut _3: core::result::Result<rc::Rc<T, A>, core::alloc::AllocError>;\n    let mut _4: isize;\n    let mut _5: !;\n    let mut _6: core::alloc::Layout;\n    debug value => _1;\n    debug alloc => _2;\n    debug m => _0;\n    bb0: {\n        StorageLive(_3);\n        _3 = rc::Rc::<T, A>::try_new_in(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _4 = discriminant(_3);\n        switchInt(move _4) -> [0: bb4, 1: bb3, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        StorageLive(_6);\n        _6 = core::alloc::Layout::new::<rc::RcInner<T>>() -> [return: bb5, unwind unreachable];\n    }\n    bb4: {\n        _0 = move ((_3 as variant#0).0: rc::Rc<T, A>);\n        StorageDead(_3);\n        return;\n    }\n    bb5: {\n        _5 = alloc::handle_alloc_error(move _6) -> unwind unreachable;\n    }\n}\n",
+  "doc": " Constructs a new `Rc` in the provided allocator.\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n use std::rc::Rc;\n use std::alloc::System;\n\n let five = Rc::new_in(5, System);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

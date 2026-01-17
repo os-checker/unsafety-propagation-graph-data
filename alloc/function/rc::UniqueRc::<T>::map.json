@@ -1,0 +1,168 @@
+{
+  "name": "rc::UniqueRc::<T>::map",
+  "safe": true,
+  "callees": {
+    "core::mem::size_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of a type in bytes.\n\n More specifically, this is the offset in bytes between successive elements\n in an array with that item type including alignment padding. Thus, for any\n type `T` and length `n`, `[T; n]` has a size of `n * size_of::<T>()`.\n\n In general, the size of a type is not stable across compilations, but\n specific types such as primitives are.\n\n The following table gives the size for primitives.\n\n Type | `size_of::<Type>()`\n ---- | ---------------\n () | 0\n bool | 1\n u8 | 1\n u16 | 2\n u32 | 4\n u64 | 8\n u128 | 16\n i8 | 1\n i16 | 2\n i32 | 4\n i64 | 8\n i128 | 16\n f32 | 4\n f64 | 8\n char | 4\n\n Furthermore, `usize` and `isize` have the same size.\n\n The types [`*const T`], `&T`, [`Box<T>`], [`Option<&T>`], and `Option<Box<T>>` all have\n the same size. If `T` is `Sized`, all of those types have the same size as `usize`.\n\n The mutability of a pointer does not change its size. As such, `&T` and `&mut T`\n have the same size. Likewise for `*const T` and `*mut T`.\n\n # Size of `#[repr(C)]` items\n\n The `C` representation for items has a defined layout. With this layout,\n the size of items is also stable as long as all fields have a stable size.\n\n ## Size of Structs\n\n For `struct`s, the size is determined by the following algorithm.\n\n For each field in the struct ordered by declaration order:\n\n 1. Add the size of the field.\n 2. Round up the current size to the nearest multiple of the next field's [alignment].\n\n Finally, round the size of the struct to the nearest multiple of its [alignment].\n The alignment of the struct is usually the largest alignment of all its\n fields; this can be changed with the use of `repr(align(N))`.\n\n Unlike `C`, zero sized structs are not rounded up to one byte in size.\n\n ## Size of Enums\n\n Enums that carry no data other than the discriminant have the same size as C enums\n on the platform they are compiled for.\n\n ## Size of Unions\n\n The size of a union is the size of its largest field.\n\n Unlike `C`, zero sized unions are not rounded up to one byte in size.\n\n # Examples\n\n ```\n // Some primitives\n assert_eq!(4, size_of::<i32>());\n assert_eq!(8, size_of::<f64>());\n assert_eq!(0, size_of::<()>());\n\n // Some arrays\n assert_eq!(8, size_of::<[i32; 2]>());\n assert_eq!(12, size_of::<[i32; 3]>());\n assert_eq!(0, size_of::<[i32; 0]>());\n\n\n // Pointer size equality\n assert_eq!(size_of::<&i32>(), size_of::<*const i32>());\n assert_eq!(size_of::<&i32>(), size_of::<Box<i32>>());\n assert_eq!(size_of::<&i32>(), size_of::<Option<&i32>>());\n assert_eq!(size_of::<Box<i32>>(), size_of::<Option<Box<i32>>>());\n ```\n\n Using `#[repr(C)]`.\n\n ```\n #[repr(C)]\n struct FieldStruct {\n     first: u8,\n     second: u16,\n     third: u8\n }\n\n // The size of the first field is 1, so add 1 to the size. Size is 1.\n // The alignment of the second field is 2, so add 1 to the size for padding. Size is 2.\n // The size of the second field is 2, so add 2 to the size. Size is 4.\n // The alignment of the third field is 1, so add 0 to the size for padding. Size is 4.\n // The size of the third field is 1, so add 1 to the size. Size is 5.\n // Finally, the alignment of the struct is 2 (because the largest alignment amongst its\n // fields is 2), so add 1 to the size for padding. Size is 6.\n assert_eq!(6, size_of::<FieldStruct>());\n\n #[repr(C)]\n struct TupleStruct(u8, u16, u8);\n\n // Tuple structs follow the same rules.\n assert_eq!(6, size_of::<TupleStruct>());\n\n // Note that reordering the fields can lower the size. We can remove both padding bytes\n // by putting `third` before `second`.\n #[repr(C)]\n struct FieldStructOptimized {\n     first: u8,\n     third: u8,\n     second: u16\n }\n\n assert_eq!(4, size_of::<FieldStructOptimized>());\n\n // Union size is the size of the largest field.\n #[repr(C)]\n union ExampleUnion {\n     smaller: u8,\n     larger: u16\n }\n\n assert_eq!(2, size_of::<ExampleUnion>());\n ```\n\n [alignment]: align_of\n [`*const T`]: primitive@pointer\n [`Box<T>`]: ../../std/boxed/struct.Box.html\n [`Option<&T>`]: crate::option::Option\n\n",
+      "adt": {}
+    },
+    "core::mem::align_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the [ABI]-required minimum alignment of a type in bytes.\n\n Every reference to a value of the type `T` must be a multiple of this number.\n\n This is the alignment used for struct fields. It may be smaller than the preferred alignment.\n\n [ABI]: https://en.wikipedia.org/wiki/Application_binary_interface\n\n # Examples\n\n ```\n assert_eq!(4, align_of::<i32>());\n ```\n",
+      "adt": {}
+    },
+    "rc::UniqueRc::<T, A>::weak_count": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "rc::UniqueRc": "ImmutableAsArgument"
+      }
+    },
+    "rc::UniqueRc::<T>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "rc::UniqueRc": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::const_ptr::<impl *const T>::read": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the value from `self` without moving it. This leaves the\n memory in `self` unchanged.\n\n See [`ptr::read`] for safety concerns and examples.\n\n [`ptr::read`]: crate::ptr::read()\n",
+      "adt": {}
+    },
+    "core::ptr::const_ptr::<impl *const T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "rc::UniqueRc::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "rc::UniqueRc": "Constructor"
+      }
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    },
+    "core::ops::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "core::mem::MaybeUninit::<T>::write": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sets the value of the `MaybeUninit<T>`.\n\n This overwrites any previous value without dropping it, so be careful\n not to use this twice unless you want to skip running the destructor.\n For your convenience, this also returns a mutable reference to the\n (now safely initialized) contents of `self`.\n\n As the content is stored inside a `ManuallyDrop`, the destructor is not\n run for the inner data if the MaybeUninit leaves scope without a call to\n [`assume_init`], [`assume_init_drop`], or similar. Code that receives\n the mutable reference returned by this function needs to keep this in\n mind. The safety model of Rust regards leaks as safe, but they are\n usually still undesirable. This being said, the mutable reference\n behaves like any other mutable reference would, so assigning a new value\n to it will drop the old content.\n\n [`assume_init`]: Self::assume_init\n [`assume_init_drop`]: Self::assume_init_drop\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u8>>::uninit();\n\n {\n     let hello = x.write((&b\"Hello, world!\").to_vec());\n     // Setting hello does not leak prior allocations, but drops them\n     *hello = (&b\"Hello\").to_vec();\n     hello[0] = 'h' as u8;\n }\n // x is initialized now:\n let s = unsafe { x.assume_init() };\n assert_eq!(b\"hello\", s.as_slice());\n ```\n\n This usage of the method causes a leak:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<String>::uninit();\n\n x.write(\"Hello\".to_string());\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n // This leaks the contained string:\n x.write(\"hello\".to_string());\n // x is initialized now:\n let s = unsafe { x.assume_init() };\n ```\n\n This method can be used to avoid unsafe in some cases. The example below\n shows a part of an implementation of a fixed sized arena that lends out\n pinned references.\n With `write`, we can avoid the need to write through a raw pointer:\n\n ```rust\n use core::pin::Pin;\n use core::mem::MaybeUninit;\n\n struct PinArena<T> {\n     memory: Box<[MaybeUninit<T>]>,\n     len: usize,\n }\n\n impl <T> PinArena<T> {\n     pub fn capacity(&self) -> usize {\n         self.memory.len()\n     }\n     pub fn push(&mut self, val: T) -> Pin<&mut T> {\n         if self.len >= self.capacity() {\n             panic!(\"Attempted to push to a full pin arena!\");\n         }\n         let ref_ = self.memory[self.len].write(val);\n         self.len += 1;\n         unsafe { Pin::new_unchecked(ref_) }\n     }\n }\n ```\n",
+      "adt": {}
+    },
+    "rc::UniqueRc::<core::mem::MaybeUninit<T>, A>::assume_init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "rc::UniqueRc": "Constructor"
+      }
+    },
+    "rc::UniqueRc::<T>::unwrap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "rc::UniqueRc": "ImmutableAsArgument"
+      }
+    },
+    "rc::UniqueRc::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `UniqueRc`.\n\n Weak references to this `UniqueRc` can be created with [`UniqueRc::downgrade`]. Upgrading\n these weak references will fail before the `UniqueRc` has been converted into an [`Rc`].\n After converting the `UniqueRc` into an [`Rc`], any weak references created beforehand will\n point to the new [`Rc`].\n",
+      "adt": {
+        "rc::UniqueRc": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "rc::UniqueRc": [
+      "Ref",
+      "Plain",
+      "MutRef"
+    ],
+    "core::mem::MaybeUninit": [
+      "MutRef"
+    ]
+  },
+  "path": 1824,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:4193:5: 4209:6",
+  "src": "pub fn map<U>(this: Self, f: impl FnOnce(T) -> U) -> UniqueRc<U> {\n        if size_of::<T>() == size_of::<U>()\n            && align_of::<T>() == align_of::<U>()\n            && UniqueRc::weak_count(&this) == 0\n        {\n            unsafe {\n                let ptr = UniqueRc::into_raw(this);\n                let value = ptr.read();\n                let mut allocation = UniqueRc::from_raw(ptr.cast::<mem::MaybeUninit<U>>());\n\n                allocation.write(f(value));\n                allocation.assume_init()\n            }\n        } else {\n            UniqueRc::new(f(UniqueRc::unwrap(this)))\n        }\n    }",
+  "mir": "fn rc::UniqueRc::<T>::map(_1: rc::UniqueRc<T>, _2: impl FnOnce(T) -> U) -> rc::UniqueRc<U> {\n    let mut _0: rc::UniqueRc<U>;\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: usize;\n    let mut _6: bool;\n    let mut _7: usize;\n    let mut _8: usize;\n    let mut _9: usize;\n    let  _10: &rc::UniqueRc<T>;\n    let  _11: *const T;\n    let  _12: T;\n    let mut _13: rc::UniqueRc<core::mem::MaybeUninit<U>>;\n    let mut _14: *const core::mem::MaybeUninit<U>;\n    let  _15: &mut U;\n    let mut _16: &mut core::mem::MaybeUninit<U>;\n    let mut _17: &mut rc::UniqueRc<core::mem::MaybeUninit<U>>;\n    let mut _18: U;\n    let mut _19: (T,);\n    let mut _20: rc::UniqueRc<core::mem::MaybeUninit<U>>;\n    let mut _21: U;\n    let mut _22: (T,);\n    let mut _23: T;\n    debug this => _1;\n    debug f => _2;\n    debug ptr => _11;\n    debug value => _12;\n    debug allocation => _13;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = core::mem::size_of::<T>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        _5 = core::mem::size_of::<U>() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = Eq(move _4, move _5);\n        switchInt(move _3) -> [0: bb19, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = core::mem::align_of::<T>() -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageLive(_8);\n        _8 = core::mem::align_of::<U>() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _6 = Eq(move _7, move _8);\n        switchInt(move _6) -> [0: bb18, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_8);\n        StorageDead(_7);\n        StorageLive(_9);\n        _10 = &_1;\n        _9 = rc::UniqueRc::<T>::weak_count(_10) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        switchInt(move _9) -> [0: bb8, otherwise: bb17];\n    }\n    bb8: {\n        StorageDead(_9);\n        _11 = rc::UniqueRc::<T>::into_raw(_1) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _12 = core::ptr::const_ptr::<impl *const T>::read(_11) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = core::ptr::const_ptr::<impl *const T>::cast::<core::mem::MaybeUninit<U>>(_11) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _13 = rc::UniqueRc::<core::mem::MaybeUninit<U>>::from_raw(move _14) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_14);\n        StorageLive(_15);\n        StorageLive(_17);\n        _17 = &mut _13;\n        _16 = <rc::UniqueRc<core::mem::MaybeUninit<U>> as core::ops::DerefMut>::deref_mut(move _17) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageDead(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = (_12);\n        _18 = <impl FnOnce(T) -> U as core::ops::FnOnce<(T,)>>::call_once(_2, move _19) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_19);\n        _15 = core::mem::MaybeUninit::<U>::write(_16, move _18) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_18);\n        StorageDead(_15);\n        StorageLive(_20);\n        _20 = move _13;\n        _0 = rc::UniqueRc::<core::mem::MaybeUninit<U>>::assume_init(move _20) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_20);\n        StorageDead(_13);\n        goto -> bb24;\n    }\n    bb17: {\n        StorageDead(_9);\n        goto -> bb20;\n    }\n    bb18: {\n        StorageDead(_8);\n        StorageDead(_7);\n        goto -> bb20;\n    }\n    bb19: {\n        StorageDead(_5);\n        StorageDead(_4);\n        goto -> bb20;\n    }\n    bb20: {\n        StorageLive(_21);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = rc::UniqueRc::<T>::unwrap(_1) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        _22 = (move _23);\n        _21 = <impl FnOnce(T) -> U as core::ops::FnOnce<(T,)>>::call_once(_2, move _22) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_23);\n        StorageDead(_22);\n        _0 = rc::UniqueRc::<U>::new(move _21) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_21);\n        goto -> bb24;\n    }\n    bb24: {\n        StorageDead(_6);\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Maps the value in a `UniqueRc`, reusing the allocation if possible.\n\n `f` is called on a reference to the value in the `UniqueRc`, and the result is returned,\n also in a `UniqueRc`.\n\n Note: this is an associated function, which means that you have\n to call it as `UniqueRc::map(u, f)` instead of `u.map(f)`. This\n is so that there is no conflict with a method on the inner type.\n\n # Examples\n\n ```\n #![feature(smart_pointer_try_map)]\n #![feature(unique_rc_arc)]\n\n use std::rc::UniqueRc;\n\n let r = UniqueRc::new(7);\n let new = UniqueRc::map(r, |i| i + 7);\n assert_eq!(*new, 14);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

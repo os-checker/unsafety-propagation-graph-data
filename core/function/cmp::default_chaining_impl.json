@@ -1,0 +1,48 @@
+{
+  "name": "cmp::default_chaining_impl",
+  "safe": true,
+  "callees": {
+    "cmp::PartialOrd::partial_cmp": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " This method returns an ordering between `self` and `other` values if one exists.\n\n # Examples\n\n ```\n use std::cmp::Ordering;\n\n let result = 1.0.partial_cmp(&2.0);\n assert_eq!(result, Some(Ordering::Less));\n\n let result = 1.0.partial_cmp(&1.0);\n assert_eq!(result, Some(Ordering::Equal));\n\n let result = 2.0.partial_cmp(&1.0);\n assert_eq!(result, Some(Ordering::Greater));\n ```\n\n When comparison is impossible:\n\n ```\n let result = f64::NAN.partial_cmp(&1.0);\n assert_eq!(result, None);\n ```\n",
+      "adt": {}
+    },
+    "ops::function::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 67, kind: RigidTy(Adt(AdtDef(DefId { id: 24474, name: \"cmp::Ordering\" }), GenericArgs([]))) })])"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain"
+    ],
+    "cmp::Ordering": [
+      "Plain"
+    ]
+  },
+  "path": 4994,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:1497:1: 1514:2",
+  "src": "const fn default_chaining_impl<T, U>(\n    lhs: &T,\n    rhs: &U,\n    p: impl [const] FnOnce(Ordering) -> bool + [const] Destruct,\n) -> ControlFlow<bool>\nwhere\n    T: [const] PartialOrd<U> + PointeeSized,\n    U: PointeeSized,\n{\n    // It's important that this only call `partial_cmp` once, not call `eq` then\n    // one of the relational operators.  We don't want to `bcmp`-then-`memcp` a\n    // `String`, for example, or similarly for other data structures (#108157).\n    match <T as PartialOrd<U>>::partial_cmp(lhs, rhs) {\n        Some(Equal) => ControlFlow::Continue(()),\n        Some(c) => ControlFlow::Break(p(c)),\n        None => ControlFlow::Break(false),\n    }\n}",
+  "mir": "fn cmp::default_chaining_impl(_1: &T, _2: &U, _3: impl [const] FnOnce(Ordering) -> bool + [const] Destruct) -> ops::control_flow::ControlFlow<bool> {\n    let mut _0: ops::control_flow::ControlFlow<bool>;\n    let mut _4: option::Option<cmp::Ordering>;\n    let mut _5: i8;\n    let mut _6: isize;\n    let  _7: cmp::Ordering;\n    let mut _8: bool;\n    let mut _9: impl [const] FnOnce(Ordering) -> bool + [const] Destruct;\n    let mut _10: (cmp::Ordering,);\n    let mut _11: bool;\n    debug lhs => _1;\n    debug rhs => _2;\n    debug p => _3;\n    debug c => _7;\n    bb0: {\n        _11 = false;\n        _11 = true;\n        StorageLive(_4);\n        _4 = <T as cmp::PartialOrd<U>>::partial_cmp(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _6 = discriminant(_4);\n        switchInt(move _6) -> [0: bb4, 1: bb3, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        _5 = discriminant(((_4 as variant#1).0: cmp::Ordering));\n        switchInt(move _5) -> [0: bb6, otherwise: bb5];\n    }\n    bb4: {\n        _0 = ops::control_flow::ControlFlow::Break(false);\n        goto -> bb8;\n    }\n    bb5: {\n        _7 = ((_4 as variant#1).0: cmp::Ordering);\n        StorageLive(_8);\n        StorageLive(_9);\n        _11 = false;\n        _9 = move _3;\n        StorageLive(_10);\n        _10 = (_7);\n        _8 = <impl [const] FnOnce(Ordering) -> bool + [const] Destruct as ops::function::FnOnce<(cmp::Ordering,)>>::call_once(move _9, move _10) -> [return: bb7, unwind unreachable];\n    }\n    bb6: {\n        _0 = ops::control_flow::ControlFlow::Continue(());\n        goto -> bb8;\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageDead(_9);\n        _0 = ops::control_flow::ControlFlow::Break(move _8);\n        StorageDead(_8);\n        goto -> bb8;\n    }\n    bb8: {\n        StorageDead(_4);\n        switchInt(_11) -> [0: bb9, otherwise: bb10];\n    }\n    bb9: {\n        return;\n    }\n    bb10: {\n        drop(_3) -> [return: bb9, unwind unreachable];\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

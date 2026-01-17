@@ -1,0 +1,46 @@
+{
+  "name": "<iter::adapters::cycle::Cycle<I> as iter::traits::iterator::Iterator>::next",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "iter::adapters::cycle::Cycle": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 13714,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/cycle.rs:34:5: 42:6",
+  "src": "fn next(&mut self) -> Option<<I as Iterator>::Item> {\n        match self.iter.next() {\n            None => {\n                self.iter = self.orig.clone();\n                self.iter.next()\n            }\n            y => y,\n        }\n    }",
+  "mir": "fn <iter::adapters::cycle::Cycle<I> as iter::traits::iterator::Iterator>::next(_1: &mut iter::adapters::cycle::Cycle<I>) -> option::Option<<I as iter::traits::iterator::Iterator>::Item> {\n    let mut _0: option::Option<<I as iter::traits::iterator::Iterator>::Item>;\n    let mut _2: option::Option<<I as iter::traits::iterator::Iterator>::Item>;\n    let mut _3: &mut I;\n    let mut _4: isize;\n    let mut _5: I;\n    let mut _6: &I;\n    let mut _7: &mut I;\n    let  _8: option::Option<<I as iter::traits::iterator::Iterator>::Item>;\n    let mut _9: bool;\n    debug self => _1;\n    debug y => _8;\n    bb0: {\n        _9 = false;\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = &mut ((*_1).1: I);\n        _2 = <I as iter::traits::iterator::Iterator>::next(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _9 = true;\n        StorageDead(_3);\n        _4 = discriminant(_2);\n        switchInt(move _4) -> [0: bb3, 1: bb2, otherwise: bb10];\n    }\n    bb2: {\n        StorageLive(_8);\n        _9 = false;\n        _8 = move _2;\n        _0 = move _8;\n        StorageDead(_8);\n        goto -> bb9;\n    }\n    bb3: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &((*_1).0: I);\n        _5 = <I as clone::Clone>::clone(move _6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_6);\n        drop(((*_1).1: I)) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        ((*_1).1: I) = move _5;\n        StorageDead(_5);\n        StorageLive(_7);\n        _7 = &mut ((*_1).1: I);\n        _0 = <I as iter::traits::iterator::Iterator>::next(move _7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_7);\n        goto -> bb9;\n    }\n    bb7: {\n        _9 = false;\n        StorageDead(_2);\n        return;\n    }\n    bb8: {\n        drop(_2) -> [return: bb7, unwind unreachable];\n    }\n    bb9: {\n        switchInt(_9) -> [0: bb7, otherwise: bb8];\n    }\n    bb10: {\n        unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

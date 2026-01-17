@@ -1,0 +1,102 @@
+{
+  "name": "<iter::adapters::cycle::Cycle<I> as iter::traits::iterator::Iterator>::advance_by",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::advance_by": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator by `n` elements.\n\n This method will eagerly skip `n` elements by calling [`next`] up to `n`\n times until [`None`] is encountered.\n\n `advance_by(n)` will return `Ok(())` if the iterator successfully advances by\n `n` elements, or a `Err(NonZero<usize>)` with value `k` if [`None`] is encountered,\n where `k` is remaining number of steps that could not be advanced because the iterator ran out.\n If `self` is empty and `n` is non-zero, then this returns `Err(n)`.\n Otherwise, `k` is always less than `n`.\n\n Calling `advance_by(0)` can do meaningful work, for example [`Flatten`]\n can advance its outer iterator until it finds an inner iterator that is not empty, which\n then often allows it to return a more accurate `size_hint()` than in its initial state.\n\n [`Flatten`]: crate::iter::Flatten\n [`next`]: Iterator::next\n\n # Examples\n\n ```\n #![feature(iter_advance_by)]\n\n use std::num::NonZero;\n\n let a = [1, 2, 3, 4];\n let mut iter = a.into_iter();\n\n assert_eq!(iter.advance_by(2), Ok(()));\n assert_eq!(iter.next(), Some(3));\n assert_eq!(iter.advance_by(0), Ok(()));\n assert_eq!(iter.advance_by(100), Err(NonZero::new(99).unwrap())); // only `4` was skipped\n ```\n",
+      "adt": {
+        "result::Result": "Constructor",
+        "num::nonzero::NonZero": "Constructor"
+      }
+    },
+    "num::nonzero::NonZero::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained value as a primitive type.\n",
+      "adt": {}
+    },
+    "clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "num::nonzero::NonZero::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a non-zero if the given value is not zero.\n",
+      "adt": {
+        "num::nonzero::NonZero": "Constructor",
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::map_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the provided default result (if none),\n or applies a function to the contained value (if any).\n\n Arguments passed to `map_or` are eagerly evaluated; if you are passing\n the result of a function call, it is recommended to use [`map_or_else`],\n which is lazily evaluated.\n\n [`map_or_else`]: Option::map_or_else\n\n # Examples\n\n ```\n let x = Some(\"foo\");\n assert_eq!(x.map_or(42, |v| v.len()), 3);\n\n let x: Option<&str> = None;\n assert_eq!(x.map_or(42, |v| v.len()), 42);\n ```\n",
+      "adt": {}
+    },
+    "result::Result::Err": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Contains the error value\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "iter::adapters::cycle::Cycle": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 1742, kind: RigidTy(Adt(AdtDef(DefId { id: 24832, name: \"num::nonzero::NonZero\" }), GenericArgs([Type(Ty { id: 47, kind: RigidTy(Uint(Usize)) })]))) })])",
+      "Ref"
+    ],
+    "num::nonzero::NonZero": [
+      "Plain",
+      "Ref",
+      "Deref"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 13713,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/cycle.rs:86:5: 102:6",
+  "src": "fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {\n        let mut n = match self.iter.advance_by(n) {\n            Ok(()) => return Ok(()),\n            Err(rem) => rem.get(),\n        };\n\n        while n > 0 {\n            self.iter = self.orig.clone();\n            n = match self.iter.advance_by(n) {\n                Ok(()) => return Ok(()),\n                e @ Err(rem) if rem.get() == n => return e,\n                Err(rem) => rem.get(),\n            };\n        }\n\n        NonZero::new(n).map_or(Ok(()), Err)\n    }",
+  "mir": "fn <iter::adapters::cycle::Cycle<I> as iter::traits::iterator::Iterator>::advance_by(_1: &mut iter::adapters::cycle::Cycle<I>, _2: usize) -> result::Result<(), num::nonzero::NonZero<usize>> {\n    let mut _0: result::Result<(), num::nonzero::NonZero<usize>>;\n    let mut _3: usize;\n    let mut _4: result::Result<(), num::nonzero::NonZero<usize>>;\n    let mut _5: &mut I;\n    let mut _6: isize;\n    let  _7: num::nonzero::NonZero<usize>;\n    let mut _8: bool;\n    let mut _9: usize;\n    let mut _10: I;\n    let mut _11: &I;\n    let mut _12: usize;\n    let mut _13: result::Result<(), num::nonzero::NonZero<usize>>;\n    let mut _14: &mut I;\n    let mut _15: usize;\n    let mut _16: isize;\n    let  _17: &result::Result<(), num::nonzero::NonZero<usize>>;\n    let  _18: num::nonzero::NonZero<usize>;\n    let  _19: &num::nonzero::NonZero<usize>;\n    let mut _20: bool;\n    let mut _21: usize;\n    let mut _22: num::nonzero::NonZero<usize>;\n    let mut _23: usize;\n    let  _24: num::nonzero::NonZero<usize>;\n    let mut _25: option::Option<num::nonzero::NonZero<usize>>;\n    let mut _26: usize;\n    let mut _27: result::Result<(), num::nonzero::NonZero<usize>>;\n    debug self => _1;\n    debug n => _2;\n    debug n => _3;\n    debug rem => _7;\n    debug e => _13;\n    debug e => _17;\n    debug rem => _18;\n    debug rem => _19;\n    debug rem => _24;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &mut ((*_1).1: I);\n        _4 = <I as iter::traits::iterator::Iterator>::advance_by(move _5, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _6 = discriminant(_4);\n        switchInt(move _6) -> [0: bb4, 1: bb3, otherwise: bb2];\n    }\n    bb2: {\n        unreachable;\n    }\n    bb3: {\n        _7 = ((_4 as variant#1).0: num::nonzero::NonZero<usize>);\n        _3 = num::nonzero::NonZero::<usize>::get(_7) -> [return: bb5, unwind unreachable];\n    }\n    bb4: {\n        _0 = result::Result::Ok(());\n        StorageDead(_4);\n        goto -> bb21;\n    }\n    bb5: {\n        StorageDead(_4);\n        goto -> bb6;\n    }\n    bb6: {\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = _3;\n        _8 = Gt(move _9, 0_usize);\n        switchInt(move _8) -> [0: bb17, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_9);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &((*_1).0: I);\n        _10 = <I as clone::Clone>::clone(move _11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_11);\n        drop(((*_1).1: I)) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        ((*_1).1: I) = move _10;\n        StorageDead(_10);\n        StorageLive(_12);\n        StorageLive(_14);\n        _14 = &mut ((*_1).1: I);\n        StorageLive(_15);\n        _15 = _3;\n        _13 = <I as iter::traits::iterator::Iterator>::advance_by(move _14, move _15) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_15);\n        StorageDead(_14);\n        _16 = discriminant(_13);\n        switchInt(move _16) -> [0: bb12, 1: bb11, otherwise: bb2];\n    }\n    bb11: {\n        StorageLive(_19);\n        _19 = &((_13 as variant#1).0: num::nonzero::NonZero<usize>);\n        StorageLive(_17);\n        _17 = &_13;\n        StorageLive(_20);\n        StorageLive(_21);\n        StorageLive(_22);\n        _22 = (*_19);\n        _21 = num::nonzero::NonZero::<usize>::get(move _22) -> [return: bb13, unwind unreachable];\n    }\n    bb12: {\n        _0 = result::Result::Ok(());\n        goto -> bb20;\n    }\n    bb13: {\n        StorageDead(_22);\n        StorageLive(_23);\n        _23 = _3;\n        _20 = Eq(move _21, move _23);\n        switchInt(move _20) -> [0: bb15, otherwise: bb14];\n    }\n    bb14: {\n        StorageDead(_23);\n        StorageDead(_21);\n        StorageDead(_20);\n        StorageLive(_18);\n        _18 = ((_13 as variant#1).0: num::nonzero::NonZero<usize>);\n        _0 = _13;\n        StorageDead(_18);\n        StorageDead(_17);\n        StorageDead(_19);\n        goto -> bb20;\n    }\n    bb15: {\n        StorageDead(_23);\n        StorageDead(_21);\n        StorageDead(_20);\n        StorageDead(_17);\n        StorageDead(_19);\n        _24 = ((_13 as variant#1).0: num::nonzero::NonZero<usize>);\n        _12 = num::nonzero::NonZero::<usize>::get(_24) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        _3 = move _12;\n        StorageDead(_12);\n        StorageDead(_8);\n        goto -> bb6;\n    }\n    bb17: {\n        StorageDead(_9);\n        StorageDead(_8);\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = _3;\n        _25 = num::nonzero::NonZero::<usize>::new(move _26) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_26);\n        StorageLive(_27);\n        _27 = result::Result::Ok(());\n        _0 = option::Option::<num::nonzero::NonZero<usize>>::map_or::<result::Result<(), num::nonzero::NonZero<usize>>, fn(num::nonzero::NonZero<usize>) -> result::Result<(), num::nonzero::NonZero<usize>> {result::Result::<(), num::nonzero::NonZero<usize>>::Err}>(move _25, move _27, result::Result::<(), num::nonzero::NonZero<usize>>::Err) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        StorageDead(_27);\n        StorageDead(_25);\n        StorageDead(_3);\n        goto -> bb22;\n    }\n    bb20: {\n        StorageDead(_12);\n        StorageDead(_8);\n        goto -> bb21;\n    }\n    bb21: {\n        StorageDead(_3);\n        goto -> bb22;\n    }\n    bb22: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

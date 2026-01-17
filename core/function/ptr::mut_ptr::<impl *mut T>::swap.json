@@ -1,0 +1,27 @@
+{
+  "name": "ptr::mut_ptr::<impl *mut T>::swap",
+  "safe": false,
+  "callees": {
+    "ptr::swap": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Swaps the values at two mutable locations of the same type, without\n deinitializing either.\n\n But for the following exceptions, this function is semantically\n equivalent to [`mem::swap`]:\n\n * It operates on raw pointers instead of references. When references are\n   available, [`mem::swap`] should be preferred.\n\n * The two pointed-to values may overlap. If the values do overlap, then the\n   overlapping region of memory from `x` will be used. This is demonstrated\n   in the second example below.\n\n * The operation is \"untyped\" in the sense that data may be uninitialized or otherwise violate\n   the requirements of `T`. The initialization state is preserved exactly.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * Both `x` and `y` must be [valid] for both reads and writes. They must remain valid even when the\n   other pointer is written. (This means if the memory ranges overlap, the two pointers must not\n   be subject to aliasing restrictions relative to each other.)\n\n * Both `x` and `y` must be properly aligned.\n\n Note that even if `T` has size `0`, the pointers must be properly aligned.\n\n [valid]: self#safety\n\n # Examples\n\n Swapping two non-overlapping regions:\n\n ```\n use std::ptr;\n\n let mut array = [0, 1, 2, 3];\n\n let (x, y) = array.split_at_mut(2);\n let x = x.as_mut_ptr().cast::<[u32; 2]>(); // this is `array[0..2]`\n let y = y.as_mut_ptr().cast::<[u32; 2]>(); // this is `array[2..4]`\n\n unsafe {\n     ptr::swap(x, y);\n     assert_eq!([2, 3, 0, 1], array);\n }\n ```\n\n Swapping two overlapping regions:\n\n ```\n use std::ptr;\n\n let mut array: [i32; 4] = [0, 1, 2, 3];\n\n let array_ptr: *mut i32 = array.as_mut_ptr();\n\n let x = array_ptr as *mut [i32; 3]; // this is `array[0..3]`\n let y = unsafe { array_ptr.add(1) } as *mut [i32; 3]; // this is `array[1..4]`\n\n unsafe {\n     ptr::swap(x, y);\n     // The indices `1..3` of the slice overlap between `x` and `y`.\n     // Reasonable results would be for to them be `[2, 3]`, so that indices `0..3` are\n     // `[1, 2, 3]` (matching `y` before the `swap`); or for them to be `[0, 1]`\n     // so that indices `1..4` are `[0, 1, 2]` (matching `x` before the `swap`).\n     // This implementation is defined to make the latter choice.\n     assert_eq!([1, 0, 1, 2], array);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1075,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mut_ptr.rs:1508:5: 1514:6",
+  "src": "pub const unsafe fn swap(self, with: *mut T)\n    where\n        T: Sized,\n    {\n        // SAFETY: the caller must uphold the safety contract for `swap`.\n        unsafe { swap(self, with) }\n    }",
+  "mir": "fn ptr::mut_ptr::<impl *mut T>::swap(_1: *mut T, _2: *mut T) -> () {\n    let mut _0: ();\n    debug self => _1;\n    debug with => _2;\n    bb0: {\n        _0 = ptr::swap::<T>(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",
+  "doc": " Swaps the values at two mutable locations of the same type, without\n deinitializing either. They may overlap, unlike `mem::swap` which is\n otherwise equivalent.\n\n See [`ptr::swap`] for safety concerns and examples.\n\n [`ptr::swap`]: crate::ptr::swap()\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

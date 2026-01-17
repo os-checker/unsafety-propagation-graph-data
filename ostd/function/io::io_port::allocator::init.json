@@ -1,0 +1,221 @@
+{
+  "name": "io::io_port::allocator::init",
+  "safe": false,
+  "callees": {
+    "id_alloc::IdAlloc::with_capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new id allocator with a maximum capacity.\n",
+      "adt": {}
+    },
+    "io::io_port::allocator::init::__sensitive_io_ports_start": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "io::io_port::allocator::init::__sensitive_io_ports_end": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::mem::size_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of a type in bytes.\n\n More specifically, this is the offset in bytes between successive elements\n in an array with that item type including alignment padding. Thus, for any\n type `T` and length `n`, `[T; n]` has a size of `n * size_of::<T>()`.\n\n In general, the size of a type is not stable across compilations, but\n specific types such as primitives are.\n\n The following table gives the size for primitives.\n\n Type | `size_of::<Type>()`\n ---- | ---------------\n () | 0\n bool | 1\n u8 | 1\n u16 | 2\n u32 | 4\n u64 | 8\n u128 | 16\n i8 | 1\n i16 | 2\n i32 | 4\n i64 | 8\n i128 | 16\n f32 | 4\n f64 | 8\n char | 4\n\n Furthermore, `usize` and `isize` have the same size.\n\n The types [`*const T`], `&T`, [`Box<T>`], [`Option<&T>`], and `Option<Box<T>>` all have\n the same size. If `T` is `Sized`, all of those types have the same size as `usize`.\n\n The mutability of a pointer does not change its size. As such, `&T` and `&mut T`\n have the same size. Likewise for `*const T` and `*mut T`.\n\n # Size of `#[repr(C)]` items\n\n The `C` representation for items has a defined layout. With this layout,\n the size of items is also stable as long as all fields have a stable size.\n\n ## Size of Structs\n\n For `struct`s, the size is determined by the following algorithm.\n\n For each field in the struct ordered by declaration order:\n\n 1. Add the size of the field.\n 2. Round up the current size to the nearest multiple of the next field's [alignment].\n\n Finally, round the size of the struct to the nearest multiple of its [alignment].\n The alignment of the struct is usually the largest alignment of all its\n fields; this can be changed with the use of `repr(align(N))`.\n\n Unlike `C`, zero sized structs are not rounded up to one byte in size.\n\n ## Size of Enums\n\n Enums that carry no data other than the discriminant have the same size as C enums\n on the platform they are compiled for.\n\n ## Size of Unions\n\n The size of a union is the size of its largest field.\n\n Unlike `C`, zero sized unions are not rounded up to one byte in size.\n\n # Examples\n\n ```\n // Some primitives\n assert_eq!(4, size_of::<i32>());\n assert_eq!(8, size_of::<f64>());\n assert_eq!(0, size_of::<()>());\n\n // Some arrays\n assert_eq!(8, size_of::<[i32; 2]>());\n assert_eq!(12, size_of::<[i32; 3]>());\n assert_eq!(0, size_of::<[i32; 0]>());\n\n\n // Pointer size equality\n assert_eq!(size_of::<&i32>(), size_of::<*const i32>());\n assert_eq!(size_of::<&i32>(), size_of::<Box<i32>>());\n assert_eq!(size_of::<&i32>(), size_of::<Option<&i32>>());\n assert_eq!(size_of::<Box<i32>>(), size_of::<Option<Box<i32>>>());\n ```\n\n Using `#[repr(C)]`.\n\n ```\n #[repr(C)]\n struct FieldStruct {\n     first: u8,\n     second: u16,\n     third: u8\n }\n\n // The size of the first field is 1, so add 1 to the size. Size is 1.\n // The alignment of the second field is 2, so add 1 to the size for padding. Size is 2.\n // The size of the second field is 2, so add 2 to the size. Size is 4.\n // The alignment of the third field is 1, so add 0 to the size for padding. Size is 4.\n // The size of the third field is 1, so add 1 to the size. Size is 5.\n // Finally, the alignment of the struct is 2 (because the largest alignment amongst its\n // fields is 2), so add 1 to the size for padding. Size is 6.\n assert_eq!(6, size_of::<FieldStruct>());\n\n #[repr(C)]\n struct TupleStruct(u8, u16, u8);\n\n // Tuple structs follow the same rules.\n assert_eq!(6, size_of::<TupleStruct>());\n\n // Note that reordering the fields can lower the size. We can remove both padding bytes\n // by putting `third` before `second`.\n #[repr(C)]\n struct FieldStructOptimized {\n     first: u8,\n     third: u8,\n     second: u16\n }\n\n assert_eq!(4, size_of::<FieldStructOptimized>());\n\n // Union size is the size of the largest field.\n #[repr(C)]\n union ExampleUnion {\n     smaller: u8,\n     larger: u16\n }\n\n assert_eq!(2, size_of::<ExampleUnion>());\n ```\n\n [alignment]: align_of\n [`*const T`]: primitive@pointer\n [`Box<T>`]: ../../std/boxed/struct.Box.html\n [`Option<&T>`]: crate::option::Option\n\n",
+      "adt": {}
+    },
+    "core::num::<impl usize>::is_multiple_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if `self` is an integer multiple of `rhs`, and false otherwise.\n\n This function is equivalent to `self % rhs == 0`, except that it will not panic\n for `rhs == 0`. Instead, `0.is_multiple_of(0) == true`, and for any non-zero `n`,\n `n.is_multiple_of(0) == false`.\n\n # Examples\n\n ```\n\n ```\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    },
+    "core::cmp::PartialOrd::le": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Tests less than or equal to (for `self` and `other`) and is used by the\n `<=` operator.\n\n # Examples\n\n ```\n assert_eq!(1.0 <= 1.0, true);\n assert_eq!(1.0 <= 2.0, true);\n assert_eq!(2.0 <= 1.0, false);\n ```\n",
+      "adt": {}
+    },
+    "log::max_level": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the current maximum log level.\n\n The [`log!`], [`error!`], [`warn!`], [`info!`], [`debug!`], and [`trace!`] macros check\n this value and discard any message logged at a higher level. The maximum\n log level is set by the [`set_max_level`] function.\n\n [`log!`]: macro.log.html\n [`error!`]: macro.error.html\n [`warn!`]: macro.warn.html\n [`info!`]: macro.info.html\n [`debug!`]: macro.debug.html\n [`trace!`]: macro.trace.html\n [`set_max_level`]: fn.set_max_level.html\n",
+      "adt": {}
+    },
+    "core::fmt::rt::Argument::<'_>::new_debug": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "log::__private_api::loc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "log::__private_api::log": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "id_alloc::IdAlloc::alloc_specific": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocate a specific ID.\n\n If the ID is already allocated, it returns `None`, otherwise it\n returns the allocated ID.\n\n # Panics\n\n If the `id` is out of bounds, this method will panic.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "id_alloc::IdAlloc": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::ops::Range": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 74, kind: RigidTy(Uint(U16)) })])"
+    ],
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "io::io_port::allocator::IoPortAllocator": [
+      "Ref"
+    ],
+    "io::io_port::RawIoPortRange": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 74, kind: RigidTy(Uint(U16)) })])",
+      "Unknown([Field(1, Ty { id: 74, kind: RigidTy(Uint(U16)) })])",
+      "Ref",
+      "RefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "log::Level": [
+      "Plain",
+      "Ref"
+    ],
+    "log::LevelFilter": [
+      "Ref",
+      "Plain"
+    ],
+    "core::fmt::rt::Argument": [
+      "Plain"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ],
+    "core::panic::Location": [
+      "Ref"
+    ]
+  },
+  "path": 1773,
+  "span": "ostd/src/io/io_port/allocator.rs:79:1: 110:2",
+  "src": "pub(in crate::io) unsafe fn init() {\n    // SAFETY: `MAX_IO_PORT` is guaranteed not to exceed the maximum value specified by architecture.\n    let mut allocator = IdAlloc::with_capacity(crate::arch::io::MAX_IO_PORT as usize);\n\n    unsafe extern \"C\" {\n        fn __sensitive_io_ports_start();\n        fn __sensitive_io_ports_end();\n    }\n    let start = __sensitive_io_ports_start as *const () as usize;\n    let end = __sensitive_io_ports_end as *const () as usize;\n    assert!((end - start).is_multiple_of(size_of::<RawIoPortRange>()));\n\n    // Iterate through the sensitive I/O port ranges and remove them from the allocator.\n    let io_port_range_count = (end - start) / size_of::<RawIoPortRange>();\n    for i in 0..io_port_range_count {\n        let range_base_addr =\n            __sensitive_io_ports_start as *const () as usize + i * size_of::<RawIoPortRange>();\n        // SAFETY: The range is guaranteed to be valid as it is defined in the `.sensitive_io_ports` section.\n        let port_range = unsafe { *(range_base_addr as *const RawIoPortRange) };\n\n        assert!(port_range.begin < port_range.end);\n        debug!(\"Removing sensitive I/O port range: {:#x?}\", port_range);\n\n        for i in port_range.begin..port_range.end {\n            allocator.alloc_specific(i as usize);\n        }\n    }\n\n    IO_PORT_ALLOCATOR.call_once(|| IoPortAllocator {\n        allocator: SpinLock::new(allocator),\n    });\n}",
+  "mir": "fn io::io_port::allocator::init() -> () {\n    let mut _0: ();\n    let mut _1: id_alloc::IdAlloc;\n    let mut _2: usize;\n    let  _3: usize;\n    let mut _4: *const ();\n    let mut _5: unsafe extern \"C\" fn();\n    let  _6: usize;\n    let mut _7: *const ();\n    let mut _8: unsafe extern \"C\" fn();\n    let mut _9: bool;\n    let mut _10: usize;\n    let mut _11: (usize, bool);\n    let mut _12: usize;\n    let mut _13: !;\n    let  _14: usize;\n    let mut _15: usize;\n    let mut _16: (usize, bool);\n    let mut _17: usize;\n    let mut _18: bool;\n    let mut _19: core::ops::Range<usize>;\n    let mut _20: core::ops::Range<usize>;\n    let mut _21: core::ops::Range<usize>;\n    let mut _22: core::option::Option<usize>;\n    let mut _23: &mut core::ops::Range<usize>;\n    let mut _24: isize;\n    let  _25: usize;\n    let  _26: usize;\n    let mut _27: usize;\n    let mut _28: *const ();\n    let mut _29: unsafe extern \"C\" fn();\n    let mut _30: usize;\n    let mut _31: usize;\n    let mut _32: (usize, bool);\n    let mut _33: (usize, bool);\n    let  _34: io::io_port::RawIoPortRange;\n    let mut _35: *const io::io_port::RawIoPortRange;\n    let mut _36: bool;\n    let mut _37: u16;\n    let mut _38: u16;\n    let mut _39: !;\n    let  _40: log::Level;\n    let mut _41: bool;\n    let mut _42: &log::Level;\n    let mut _43: &log::LevelFilter;\n    let mut _44: bool;\n    let mut _45: &log::Level;\n    let mut _46: &log::LevelFilter;\n    let  _47: log::LevelFilter;\n    let  _48: ();\n    let mut _49: core::fmt::Arguments<'_>;\n    let  _50: (&io::io_port::RawIoPortRange,);\n    let mut _51: &io::io_port::RawIoPortRange;\n    let  _52: [core::fmt::rt::Argument<'_>; 1];\n    let mut _53: core::fmt::rt::Argument<'_>;\n    let mut _54: &[u8; 42];\n    let  _55: &[core::fmt::rt::Argument<'_>; 1];\n    let  _56: &(&str, &str, &core::panic::Location<'_>);\n    let  _57: (&str, &str, &core::panic::Location<'_>);\n    let mut _58: &str;\n    let  _59: &core::panic::Location<'_>;\n    let mut _60: core::ops::Range<u16>;\n    let mut _61: core::ops::Range<u16>;\n    let mut _62: u16;\n    let mut _63: u16;\n    let mut _64: core::ops::Range<u16>;\n    let mut _65: core::option::Option<u16>;\n    let mut _66: &mut core::ops::Range<u16>;\n    let mut _67: isize;\n    let  _68: u16;\n    let  _69: core::option::Option<usize>;\n    let mut _70: &mut id_alloc::IdAlloc;\n    let mut _71: usize;\n    let  _72: &io::io_port::allocator::IoPortAllocator;\n    let mut _73: &spin::once::Once<io::io_port::allocator::IoPortAllocator>;\n    let mut _74: {closure@ostd/src/io/io_port/allocator.rs:107:33: 107:35};\n    let mut _75: &io::io_port::RawIoPortRange;\n    debug allocator => _1;\n    debug start => _3;\n    debug end => _6;\n    debug io_port_range_count => _14;\n    debug iter => _21;\n    debug i => _25;\n    debug range_base_addr => _26;\n    debug port_range => _34;\n    debug lvl => _40;\n    debug args => _50;\n    debug args => _52;\n    debug iter => _64;\n    debug i => _68;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        _2 = arch::io::MAX_IO_PORT as usize;\n        _1 = id_alloc::IdAlloc::with_capacity(move _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_2);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = io::io_port::allocator::init::__sensitive_io_ports_start as unsafe extern \"C\" fn();\n        _4 = move _5 as *const ();\n        StorageDead(_5);\n        _3 = move _4 as usize;\n        StorageDead(_4);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = io::io_port::allocator::init::__sensitive_io_ports_end as unsafe extern \"C\" fn();\n        _7 = move _8 as *const ();\n        StorageDead(_8);\n        _6 = move _7 as usize;\n        StorageDead(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        _11 = CheckedSub(_6, _3);\n        assert(!move (_11.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _6, _3) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _10 = move (_11.0: usize);\n        StorageLive(_12);\n        _12 = core::mem::size_of::<io::io_port::RawIoPortRange>() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _9 = core::num::<impl usize>::is_multiple_of(move _10, move _12) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        switchInt(move _9) -> [0: bb6, otherwise: bb5];\n    }\n    bb5: {\n        StorageDead(_12);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_15);\n        _16 = CheckedSub(_6, _3);\n        assert(!move (_16.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _6, _3) -> [success: bb7, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_12);\n        StorageDead(_10);\n        _13 = core::panicking::panic(\"assertion failed: (end - start).is_multiple_of(size_of::<RawIoPortRange>())\") -> unwind unreachable;\n    }\n    bb7: {\n        _15 = move (_16.0: usize);\n        StorageLive(_17);\n        _17 = core::mem::size_of::<io::io_port::RawIoPortRange>() -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _18 = Eq(_17, 0_usize);\n        assert(!move _18, \"attempt to divide `{}` by zero\", _15) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        _14 = Div(move _15, move _17);\n        StorageDead(_17);\n        StorageDead(_15);\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = Range(0_usize, _14);\n        _19 = <core::ops::Range<usize> as core::iter::IntoIterator>::into_iter(move _20) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_20);\n        StorageLive(_21);\n        _21 = move _19;\n        goto -> bb11;\n    }\n    bb11: {\n        StorageLive(_22);\n        _23 = &mut _21;\n        _22 = <core::ops::Range<usize> as core::iter::Iterator>::next(_23) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        _24 = discriminant(_22);\n        switchInt(move _24) -> [0: bb15, 1: bb14, otherwise: bb13];\n    }\n    bb13: {\n        unreachable;\n    }\n    bb14: {\n        _25 = ((_22 as variant#1).0: usize);\n        StorageLive(_27);\n        StorageLive(_28);\n        StorageLive(_29);\n        _29 = io::io_port::allocator::init::__sensitive_io_ports_start as unsafe extern \"C\" fn();\n        _28 = move _29 as *const ();\n        StorageDead(_29);\n        _27 = move _28 as usize;\n        StorageDead(_28);\n        StorageLive(_30);\n        StorageLive(_31);\n        _31 = core::mem::size_of::<io::io_port::RawIoPortRange>() -> [return: bb16, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_22);\n        StorageDead(_21);\n        StorageDead(_19);\n        StorageLive(_72);\n        StorageLive(_73);\n        _73 = {alloc811: &spin::once::Once<io::io_port::allocator::IoPortAllocator>};\n        StorageLive(_74);\n        _74 = {closure@ostd/src/io/io_port/allocator.rs:107:33: 107:35}(move _1);\n        _72 = spin::once::Once::<io::io_port::allocator::IoPortAllocator>::call_once::<{closure@ostd/src/io/io_port/allocator.rs:107:33: 107:35}>(move _73, move _74) -> [return: bb39, unwind unreachable];\n    }\n    bb16: {\n        _32 = CheckedMul(_25, _31);\n        assert(!move (_32.1: bool), \"attempt to compute `{} * {}`, which would overflow\", _25, move _31) -> [success: bb17, unwind unreachable];\n    }\n    bb17: {\n        _30 = move (_32.0: usize);\n        StorageDead(_31);\n        _33 = CheckedAdd(_27, _30);\n        assert(!move (_33.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _27, move _30) -> [success: bb18, unwind unreachable];\n    }\n    bb18: {\n        _26 = move (_33.0: usize);\n        StorageDead(_30);\n        StorageDead(_27);\n        StorageLive(_34);\n        StorageLive(_35);\n        _35 = _26 as *const io::io_port::RawIoPortRange;\n        _34 = (*_35);\n        StorageDead(_35);\n        StorageLive(_36);\n        StorageLive(_37);\n        _37 = (_34.0: u16);\n        StorageLive(_38);\n        _38 = (_34.1: u16);\n        _36 = Lt(move _37, move _38);\n        switchInt(move _36) -> [0: bb20, otherwise: bb19];\n    }\n    bb19: {\n        StorageDead(_38);\n        StorageDead(_37);\n        StorageDead(_36);\n        _40 = log::Level::Debug;\n        StorageLive(_41);\n        StorageLive(_42);\n        _42 = &_40;\n        StorageLive(_43);\n        _43 = io::io_port::allocator::init::promoted[0];\n        _41 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _42, move _43) -> [return: bb21, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_38);\n        StorageDead(_37);\n        _39 = core::panicking::panic(\"assertion failed: port_range.begin < port_range.end\") -> unwind unreachable;\n    }\n    bb21: {\n        switchInt(move _41) -> [0: bb31, otherwise: bb22];\n    }\n    bb22: {\n        StorageDead(_43);\n        StorageDead(_42);\n        StorageLive(_44);\n        StorageLive(_45);\n        _45 = &_40;\n        StorageLive(_46);\n        StorageLive(_47);\n        _47 = log::max_level() -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        _46 = &_47;\n        _44 = <log::Level as core::cmp::PartialOrd<log::LevelFilter>>::le(move _45, move _46) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        switchInt(move _44) -> [0: bb30, otherwise: bb25];\n    }\n    bb25: {\n        StorageDead(_47);\n        StorageDead(_46);\n        StorageDead(_45);\n        StorageLive(_49);\n        StorageLive(_50);\n        StorageLive(_51);\n        _51 = &_34;\n        _50 = (move _51);\n        StorageDead(_51);\n        StorageLive(_52);\n        StorageLive(_53);\n        _75 = (_50.0: &io::io_port::RawIoPortRange);\n        _53 = core::fmt::rt::Argument::<'_>::new_debug::<io::io_port::RawIoPortRange>(_75) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        _52 = [move _53];\n        StorageDead(_53);\n        StorageLive(_54);\n        _54 = b\"#Removing sensitive I/O port range: \\xc1 \\x00\\x80b\\x00\";\n        _55 = &_52;\n        _49 = core::fmt::Arguments::<'_>::new::<42, 1>(move _54, _55) -> [return: bb27, unwind unreachable];\n    }\n    bb27: {\n        StorageDead(_54);\n        StorageLive(_57);\n        StorageLive(_58);\n        _58 = \"ostd::io::io_port::allocator\";\n        _59 = log::__private_api::loc() -> [return: bb28, unwind unreachable];\n    }\n    bb28: {\n        _57 = (move _58, \"ostd::io::io_port::allocator\", _59);\n        StorageDead(_58);\n        _56 = &_57;\n        _48 = log::__private_api::log::<'_, (), log::__private_api::GlobalLogger>(log::__private_api::GlobalLogger, move _49, _40, _56, ()) -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        StorageDead(_49);\n        StorageDead(_57);\n        StorageDead(_52);\n        StorageDead(_50);\n        goto -> bb32;\n    }\n    bb30: {\n        StorageDead(_47);\n        StorageDead(_46);\n        StorageDead(_45);\n        goto -> bb32;\n    }\n    bb31: {\n        StorageDead(_43);\n        StorageDead(_42);\n        goto -> bb32;\n    }\n    bb32: {\n        StorageDead(_44);\n        StorageDead(_41);\n        StorageLive(_60);\n        StorageLive(_61);\n        StorageLive(_62);\n        _62 = (_34.0: u16);\n        StorageLive(_63);\n        _63 = (_34.1: u16);\n        _61 = Range(move _62, move _63);\n        StorageDead(_63);\n        StorageDead(_62);\n        _60 = <core::ops::Range<u16> as core::iter::IntoIterator>::into_iter(move _61) -> [return: bb33, unwind unreachable];\n    }\n    bb33: {\n        StorageDead(_61);\n        StorageLive(_64);\n        _64 = move _60;\n        goto -> bb34;\n    }\n    bb34: {\n        StorageLive(_65);\n        _66 = &mut _64;\n        _65 = <core::ops::Range<u16> as core::iter::Iterator>::next(_66) -> [return: bb35, unwind unreachable];\n    }\n    bb35: {\n        _67 = discriminant(_65);\n        switchInt(move _67) -> [0: bb37, 1: bb36, otherwise: bb13];\n    }\n    bb36: {\n        _68 = ((_65 as variant#1).0: u16);\n        StorageLive(_69);\n        StorageLive(_70);\n        _70 = &mut _1;\n        StorageLive(_71);\n        _71 = _68 as usize;\n        _69 = id_alloc::IdAlloc::alloc_specific(move _70, move _71) -> [return: bb38, unwind unreachable];\n    }\n    bb37: {\n        StorageDead(_65);\n        StorageDead(_64);\n        StorageDead(_60);\n        StorageDead(_34);\n        StorageDead(_22);\n        goto -> bb11;\n    }\n    bb38: {\n        StorageDead(_71);\n        StorageDead(_70);\n        StorageDead(_69);\n        StorageDead(_65);\n        goto -> bb34;\n    }\n    bb39: {\n        StorageDead(_74);\n        StorageDead(_73);\n        StorageDead(_72);\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": " Initializes the static `IO_PORT_ALLOCATOR` and removes the system device I/O port regions.\n\n # Safety\n\n User must ensure that:\n\n 1. All the port I/O regions belonging to the system device are defined using the macros\n    `sensitive_io_port` and `reserve_io_port_range`.\n\n 2. `MAX_IO_PORT` defined in `crate::arch::io` is guaranteed not to exceed the maximum\n    value specified by architecture.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

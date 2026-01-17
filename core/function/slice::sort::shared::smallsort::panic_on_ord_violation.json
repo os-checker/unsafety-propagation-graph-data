@@ -1,0 +1,45 @@
+{
+  "name": "slice::sort::shared::smallsort::panic_on_ord_violation",
+  "safe": true,
+  "callees": {
+    "fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {
+        "fmt::Arguments": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 16674,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/shared/smallsort.rs:845:1: 861:2",
+  "src": "fn panic_on_ord_violation() -> ! {\n    // This is indicative of a logic bug in the user-provided comparison function or Ord\n    // implementation. They are expected to implement a total order as explained in the Ord\n    // documentation.\n    //\n    // By panicking we inform the user, that they have a logic bug in their program. If a strict\n    // weak ordering is not given, the concept of comparison based sorting cannot yield a sorted\n    // result. E.g.: a < b < c < a\n    //\n    // The Ord documentation requires users to implement a total order. Arguably that's\n    // unnecessarily strict in the context of sorting. Issues only arise if the weaker requirement\n    // of a strict weak ordering is violated.\n    //\n    // The panic message talks about a total order because that's what the Ord documentation talks\n    // about and requires, so as to not confuse users.\n    panic!(\"user-provided comparison function does not correctly implement a total order\");\n}",
+  "mir": "fn slice::sort::shared::smallsort::panic_on_ord_violation() -> ! {\n    let mut _0: !;\n    let  _1: !;\n    let mut _2: fmt::Arguments<'_>;\n    bb0: {\n        StorageLive(_2);\n        _2 = fmt::Arguments::<'_>::from_str(\"user-provided comparison function does not correctly implement a total order\") -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _1 = panicking::panic_fmt(move _2) -> unwind unreachable;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

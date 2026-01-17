@@ -1,0 +1,46 @@
+{
+  "name": "boxed::Box::<T>::from_non_null",
+  "safe": false,
+  "callees": {
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "boxed::Box::<T>::from_raw": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a box from a raw pointer.\n\n After calling this function, the raw pointer is owned by the\n resulting `Box`. Specifically, the `Box` destructor will call\n the destructor of `T` and free the allocated memory. For this\n to be safe, the memory must have been allocated in accordance\n with the [memory layout] used by `Box` .\n\n # Safety\n\n This function is unsafe because improper use may lead to\n memory problems. For example, a double-free may occur if the\n function is called twice on the same raw pointer.\n\n The raw pointer must point to a block of memory allocated by the global allocator.\n\n The safety conditions are described in the [memory layout] section.\n\n # Examples\n\n Recreate a `Box` which was previously converted to a raw pointer\n using [`Box::into_raw`]:\n ```\n let x = Box::new(5);\n let ptr = Box::into_raw(x);\n let x = unsafe { Box::from_raw(ptr) };\n ```\n Manually create a `Box` from scratch by using the global allocator:\n ```\n use std::alloc::{alloc, Layout};\n\n unsafe {\n     let ptr = alloc(Layout::new::<i32>()) as *mut i32;\n     // In general .write is required to avoid attempting to destruct\n     // the (uninitialized) previous contents of `ptr`, though for this\n     // simple example `*ptr = 5` would have worked as well.\n     ptr.write(5);\n     let x = Box::from_raw(ptr);\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+      "adt": {
+        "boxed::Box": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "boxed::Box": [
+      "Plain"
+    ]
+  },
+  "path": 359,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed.rs:1319:5: 1321:6",
+  "src": "pub unsafe fn from_non_null(ptr: NonNull<T>) -> Self {\n        unsafe { Self::from_raw(ptr.as_ptr()) }\n    }",
+  "mir": "fn boxed::Box::<T>::from_non_null(_1: core::ptr::NonNull<T>) -> boxed::Box<T> {\n    let mut _0: boxed::Box<T>;\n    let mut _2: *mut T;\n    debug ptr => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = core::ptr::NonNull::<T>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = boxed::Box::<T>::from_raw(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Constructs a box from a `NonNull` pointer.\n\n After calling this function, the `NonNull` pointer is owned by\n the resulting `Box`. Specifically, the `Box` destructor will call\n the destructor of `T` and free the allocated memory. For this\n to be safe, the memory must have been allocated in accordance\n with the [memory layout] used by `Box` .\n\n # Safety\n\n This function is unsafe because improper use may lead to\n memory problems. For example, a double-free may occur if the\n function is called twice on the same `NonNull` pointer.\n\n The non-null pointer must point to a block of memory allocated by the global allocator.\n\n The safety conditions are described in the [memory layout] section.\n\n # Examples\n\n Recreate a `Box` which was previously converted to a `NonNull`\n pointer using [`Box::into_non_null`]:\n ```\n #![feature(box_vec_non_null)]\n\n let x = Box::new(5);\n let non_null = Box::into_non_null(x);\n let x = unsafe { Box::from_non_null(non_null) };\n ```\n Manually create a `Box` from scratch by using the global allocator:\n ```\n #![feature(box_vec_non_null)]\n\n use std::alloc::{alloc, Layout};\n use std::ptr::NonNull;\n\n unsafe {\n     let non_null = NonNull::new(alloc(Layout::new::<i32>()).cast::<i32>())\n         .expect(\"allocation failed\");\n     // In general .write is required to avoid attempting to destruct\n     // the (uninitialized) previous contents of `non_null`.\n     non_null.write(5);\n     let x = Box::from_non_null(non_null);\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

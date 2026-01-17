@@ -1,0 +1,44 @@
+{
+  "name": "fmt::Arguments::<'a>::from_str",
+  "safe": true,
+  "callees": {
+    "str::<impl str>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts a string slice to a raw pointer.\n\n As string slices are a slice of bytes, the raw pointer points to a\n [`u8`]. This pointer will be pointing to the first byte of the string\n slice.\n\n The caller must ensure that the returned pointer is never written to.\n If you need to mutate the contents of the string slice, use [`as_mut_ptr`].\n\n [`as_mut_ptr`]: str::as_mut_ptr\n\n # Examples\n\n ```\n let s = \"Hello\";\n let ptr = s.as_ptr();\n ```\n",
+      "adt": {}
+    },
+    "str::<impl str>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of `self`.\n\n This length is in bytes, not [`char`]s or graphemes. In other words,\n it might not be what a human considers the length of the string.\n\n [`char`]: prim@char\n\n # Examples\n\n ```\n let len = \"foo\".len();\n assert_eq!(3, len);\n\n assert_eq!(\"ƒoo\".len(), 4); // fancy f!\n assert_eq!(\"ƒoo\".chars().count(), 3);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ],
+    "fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 12991,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:815:5: 823:6",
+  "src": "pub const fn from_str(s: &'static str) -> Arguments<'a> {\n        // SAFETY: This is the \"static str\" representation of fmt::Arguments; see above.\n        unsafe {\n            Arguments {\n                template: mem::transmute(s.as_ptr()),\n                args: mem::transmute(s.len() << 1 | 1),\n            }\n        }\n    }",
+  "mir": "fn fmt::Arguments::<'a>::from_str(_1: &str) -> fmt::Arguments<'_> {\n    let mut _0: fmt::Arguments<'_>;\n    let mut _2: ptr::non_null::NonNull<u8>;\n    let mut _3: *const u8;\n    let mut _4: ptr::non_null::NonNull<fmt::rt::Argument<'_>>;\n    let mut _5: usize;\n    let mut _6: usize;\n    let mut _7: usize;\n    let mut _8: u32;\n    let mut _9: bool;\n    debug s => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = str::<impl str>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = move _3 as ptr::non_null::NonNull<u8>;\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = str::<impl str>::len(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _8 = 1_i32 as u32;\n        _9 = Lt(move _8, 64_u32);\n        assert(move _9, \"attempt to shift left by `{}`, which would overflow\", 1_i32) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _6 = Shl(move _7, 1_i32);\n        StorageDead(_7);\n        _5 = BitOr(move _6, 1_usize);\n        StorageDead(_6);\n        _4 = move _5 as ptr::non_null::NonNull<fmt::rt::Argument<'_>>;\n        StorageDead(_5);\n        _0 = Arguments(move _2, move _4);\n        StorageDead(_4);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

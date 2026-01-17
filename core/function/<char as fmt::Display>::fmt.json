@@ -1,0 +1,60 @@
+{
+  "name": "<char as fmt::Display>::fmt",
+  "safe": true,
+  "callees": {
+    "fmt::Write::write_char": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Writes a [`char`] into this writer, returning whether the write succeeded.\n\n A single [`char`] may be encoded as more than one byte.\n This method can only succeed if the entire byte sequence was successfully\n written, and this method will not return until all data has been\n written or an error occurs.\n\n # Errors\n\n This function will return an instance of [`Error`] on error.\n\n # Examples\n\n ```\n use std::fmt::{Error, Write};\n\n fn writer<W: Write>(f: &mut W, c: char) -> Result<(), Error> {\n     f.write_char(c)\n }\n\n let mut buf = String::new();\n writer(&mut buf, 'a')?;\n writer(&mut buf, 'b')?;\n assert_eq!(&buf, \"ab\");\n # std::fmt::Result::Ok(())\n ```\n",
+      "adt": {
+        "result::Result": "Constructor"
+      }
+    },
+    "char::methods::<impl char>::encode_utf8": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Encodes this character as UTF-8 into the provided byte buffer,\n and then returns the subslice of the buffer that contains the encoded character.\n\n # Panics\n\n Panics if the buffer is not large enough.\n A buffer of length four is large enough to encode any `char`.\n\n # Examples\n\n In both of these examples, 'ß' takes two bytes to encode.\n\n ```\n let mut b = [0; 2];\n\n let result = 'ß'.encode_utf8(&mut b);\n\n assert_eq!(result, \"ß\");\n\n assert_eq!(result.len(), 2);\n ```\n\n A buffer that's too small:\n\n ```should_panic\n let mut b = [0; 1];\n\n // this panics\n 'ß'.encode_utf8(&mut b);\n ```\n",
+      "adt": {}
+    },
+    "fmt::Formatter::<'a>::pad": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes a string slice and emits it to the internal buffer after applying\n the relevant formatting flags specified.\n\n The flags recognized for generic strings are:\n\n * width - the minimum width of what to emit\n * fill/align - what to emit and where to emit it if the string\n                provided needs to be padded\n * precision - the maximum length to emit, the string is truncated if it\n               is longer than this length\n\n Notably this function ignores the `flag` parameters.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Foo;\n\n impl fmt::Display for Foo {\n     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {\n         formatter.pad(\"Foo\")\n     }\n }\n\n assert_eq!(format!(\"{Foo:<4}\"), \"Foo \");\n assert_eq!(format!(\"{Foo:0>4}\"), \"0Foo\");\n ```\n",
+      "adt": {
+        "fmt::Formatter": "MutableAsArgument",
+        "result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "fmt::Formatter": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 1451,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:2980:5: 2986:6",
+  "src": "fn fmt(&self, f: &mut Formatter<'_>) -> Result {\n        if f.options.flags & (flags::WIDTH_FLAG | flags::PRECISION_FLAG) == 0 {\n            f.write_char(*self)\n        } else {\n            f.pad(self.encode_utf8(&mut [0; char::MAX_LEN_UTF8]))\n        }\n    }",
+  "mir": "fn <char as fmt::Display>::fmt(_1: &char, _2: &mut fmt::Formatter<'_>) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    let mut _3: u32;\n    let mut _4: u32;\n    let mut _5: u32;\n    let mut _6: char;\n    let mut _7: &str;\n    let  _8: &mut str;\n    let mut _9: char;\n    let mut _10: &mut [u8];\n    let mut _11: &mut [u8; 4];\n    let mut _12: [u8; 4];\n    debug self => _1;\n    debug f => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = (((*_2).0: fmt::FormattingOptions).0: u32);\n        StorageLive(_5);\n        _5 = BitOr(fmt::flags::WIDTH_FLAG, fmt::flags::PRECISION_FLAG);\n        _3 = BitAnd(move _4, move _5);\n        StorageDead(_5);\n        StorageDead(_4);\n        switchInt(move _3) -> [0: bb1, otherwise: bb3];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_6);\n        _6 = (*_1);\n        _0 = <fmt::Formatter<'_> as fmt::Write>::write_char(_2, move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        goto -> bb6;\n    }\n    bb3: {\n        StorageDead(_3);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = (*_1);\n        StorageLive(_10);\n        StorageLive(_12);\n        _12 = [0_u8; 4];\n        _11 = &mut _12;\n        _10 = _11 as &mut [u8];\n        _8 = char::methods::<impl char>::encode_utf8(move _9, move _10) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _7 = &(*_8);\n        StorageDead(_10);\n        StorageDead(_9);\n        _0 = fmt::Formatter::<'_>::pad(_2, move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        StorageDead(_8);\n        StorageDead(_7);\n        goto -> bb6;\n    }\n    bb6: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

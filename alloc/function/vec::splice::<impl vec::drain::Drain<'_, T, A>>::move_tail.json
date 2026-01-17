@@ -1,0 +1,112 @@
+{
+  "name": "vec::splice::<impl vec::drain::Drain<'_, T, A>>::move_tail",
+  "safe": false,
+  "callees": {
+    "core::ptr::NonNull::<T>::as_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a unique reference to the value. If the value may be uninitialized, [`as_uninit_mut`]\n must be used instead.\n\n For the shared counterpart see [`as_ref`].\n\n [`as_uninit_mut`]: NonNull::as_uninit_mut\n [`as_ref`]: NonNull::as_ref\n\n # Safety\n\n When calling this method, you have to ensure that\n the pointer is [convertible to a reference](crate::ptr#pointer-to-reference-conversion).\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let mut ptr = NonNull::new(&mut x).expect(\"null pointer\");\n\n let x_ref = unsafe { ptr.as_mut() };\n assert_eq!(*x_ref, 0);\n *x_ref += 2;\n assert_eq!(*x_ref, 2);\n ```\n\n [the module documentation]: crate::ptr#safety\n",
+      "adt": {}
+    },
+    "raw_vec::RawVec::<T, A>::reserve": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Ensures that the buffer contains at least enough space to hold `len +\n additional` elements. If it doesn't already have enough capacity, will\n reallocate enough space plus comfortable slack space to get amortized\n *O*(1) behavior. Will limit this behavior if it would needlessly cause\n itself to panic.\n\n If `len` exceeds `self.capacity()`, this may fail to actually allocate\n the requested space. This is not really unsafe, but the unsafe\n code *you* write that relies on the behavior of this function may break.\n\n This is ideal for implementing a bulk-push operation like `extend`.\n\n # Panics\n\n Panics if the new capacity exceeds `isize::MAX` _bytes_.\n\n # Aborts\n\n Aborts on OOM.\n",
+      "adt": {
+        "raw_vec::RawVec": "MutableAsArgument"
+      }
+    },
+    "vec::Vec::<T, A>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the vector's buffer, or a dangling raw pointer\n valid for zero sized reads if the vector didn't allocate.\n\n The caller must ensure that the vector outlives the pointer this\n function returns, or else it will end up dangling.\n Modifying the vector may cause its buffer to be reallocated,\n which would also make any pointers to it invalid.\n\n The caller must also ensure that the memory the pointer (non-transitively) points to\n is never written to (except inside an `UnsafeCell`) using this pointer or any pointer\n derived from it. If you need to mutate the contents of the slice, use [`as_mut_ptr`].\n\n This method guarantees that for the purpose of the aliasing model, this method\n does not materialize a reference to the underlying slice, and thus the returned pointer\n will remain valid when mixed with other calls to [`as_ptr`], [`as_mut_ptr`],\n and [`as_non_null`].\n Note that calling other methods that materialize mutable references to the slice,\n or mutable references to specific elements you are planning on accessing through this pointer,\n as well as writing to those elements, may still invalidate this pointer.\n See the second example below for how this guarantee can be used.\n\n\n # Examples\n\n ```\n let x = vec![1, 2, 4];\n let x_ptr = x.as_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         assert_eq!(*x_ptr.add(i), 1 << i);\n     }\n }\n ```\n\n Due to the aliasing guarantee, the following code is legal:\n\n ```rust\n unsafe {\n     let mut v = vec![0, 1, 2];\n     let ptr1 = v.as_ptr();\n     let _ = ptr1.read();\n     let ptr2 = v.as_mut_ptr().offset(2);\n     ptr2.write(2);\n     // Notably, the write to `ptr2` did *not* invalidate `ptr1`\n     // because it mutated a different element:\n     let _ = ptr1.read();\n }\n ```\n\n [`as_mut_ptr`]: Vec::as_mut_ptr\n [`as_ptr`]: Vec::as_ptr\n [`as_non_null`]: Vec::as_non_null\n",
+      "adt": {
+        "vec::Vec": "ImmutableAsArgument"
+      }
+    },
+    "core::ptr::const_ptr::<impl *const T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let s: &str = \"123\";\n let ptr: *const u8 = s.as_ptr();\n\n unsafe {\n     assert_eq!(*ptr.add(1), b'2');\n     assert_eq!(*ptr.add(2), b'3');\n }\n ```\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw mutable pointer to the vector's buffer, or a dangling\n raw pointer valid for zero sized reads if the vector didn't allocate.\n\n The caller must ensure that the vector outlives the pointer this\n function returns, or else it will end up dangling.\n Modifying the vector may cause its buffer to be reallocated,\n which would also make any pointers to it invalid.\n\n This method guarantees that for the purpose of the aliasing model, this method\n does not materialize a reference to the underlying slice, and thus the returned pointer\n will remain valid when mixed with other calls to [`as_ptr`], [`as_mut_ptr`],\n and [`as_non_null`].\n Note that calling other methods that materialize references to the slice,\n or references to specific elements you are planning on accessing through this pointer,\n may still invalidate this pointer.\n See the second example below for how this guarantee can be used.\n\n The method also guarantees that, as long as `T` is not zero-sized and the capacity is\n nonzero, the pointer may be passed into [`dealloc`] with a layout of\n `Layout::array::<T>(capacity)` in order to deallocate the backing memory. If this is done,\n be careful not to run the destructor of the `Vec`, as dropping it will result in\n double-frees. Wrapping the `Vec` in a [`ManuallyDrop`] is the typical way to achieve this.\n\n # Examples\n\n ```\n // Allocate vector big enough for 4 elements.\n let size = 4;\n let mut x: Vec<i32> = Vec::with_capacity(size);\n let x_ptr = x.as_mut_ptr();\n\n // Initialize elements via raw pointer writes, then set length.\n unsafe {\n     for i in 0..size {\n         *x_ptr.add(i) = i as i32;\n     }\n     x.set_len(size);\n }\n assert_eq!(&*x, &[0, 1, 2, 3]);\n ```\n\n Due to the aliasing guarantee, the following code is legal:\n\n ```rust\n unsafe {\n     let mut v = vec![0];\n     let ptr1 = v.as_mut_ptr();\n     ptr1.write(1);\n     let ptr2 = v.as_mut_ptr();\n     ptr2.write(2);\n     // Notably, the write to `ptr2` did *not* invalidate `ptr1`:\n     ptr1.write(3);\n }\n ```\n\n Deallocating a vector using [`Box`] (which uses [`dealloc`] internally):\n\n ```\n use std::mem::{ManuallyDrop, MaybeUninit};\n\n let mut v = ManuallyDrop::new(vec![0, 1, 2]);\n let ptr = v.as_mut_ptr();\n let capacity = v.capacity();\n let slice_ptr: *mut [MaybeUninit<i32>] =\n     std::ptr::slice_from_raw_parts_mut(ptr.cast(), capacity);\n drop(unsafe { Box::from_raw(slice_ptr) });\n ```\n\n [`as_mut_ptr`]: Vec::as_mut_ptr\n [`as_ptr`]: Vec::as_ptr\n [`as_non_null`]: Vec::as_non_null\n [`dealloc`]: crate::alloc::GlobalAlloc::dealloc\n [`ManuallyDrop`]: core::mem::ManuallyDrop\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ptr::copy": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination may overlap.\n\n If the source and destination will *never* overlap,\n [`copy_nonoverlapping`] can be used instead.\n\n `copy` is semantically equivalent to C's [`memmove`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n Copying takes place as if the bytes were copied from `src`\n to a temporary array and then copied from the array to `dst`.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memmove`]: https://en.cppreference.com/w/c/string/byte/memmove\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes, and must remain valid even\n   when `src` is read for `count * size_of::<T>()` bytes. (This means if the memory ranges\n   overlap, the `dst` pointer must not be invalidated by `src` reads.)\n\n * Both `src` and `dst` must be properly aligned.\n\n Like [`read`], `copy` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using both the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Efficiently create a Rust vector from an unsafe buffer:\n\n ```\n use std::ptr;\n\n /// # Safety\n ///\n /// * `ptr` must be correctly aligned for its type and non-zero.\n /// * `ptr` must be valid for reads of `elts` contiguous elements of type `T`.\n /// * Those elements must not be used after calling this function unless `T: Copy`.\n # #[allow(dead_code)]\n unsafe fn from_buf_raw<T>(ptr: *const T, elts: usize) -> Vec<T> {\n     let mut dst = Vec::with_capacity(elts);\n\n     // SAFETY: Our precondition ensures the source is aligned and valid,\n     // and `Vec::with_capacity` ensures that we have usable space to write them.\n     unsafe { ptr::copy(ptr, dst.as_mut_ptr(), elts); }\n\n     // SAFETY: We created it with this much capacity earlier,\n     // and the previous `copy` has initialized these elements.\n     unsafe { dst.set_len(elts); }\n     dst\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "MutRef"
+    ],
+    "vec::drain::Drain": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(3)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "vec::Vec": [
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref",
+      "Deref"
+    ],
+    "raw_vec::RawVec": [
+      "MutRef"
+    ]
+  },
+  "path": 2205,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/splice.rs:126:5: 138:6",
+  "src": "unsafe fn move_tail(&mut self, additional: usize) {\n        let vec = unsafe { self.vec.as_mut() };\n        let len = self.tail_start + self.tail_len;\n        vec.buf.reserve(len, additional);\n\n        let new_tail_start = self.tail_start + additional;\n        unsafe {\n            let src = vec.as_ptr().add(self.tail_start);\n            let dst = vec.as_mut_ptr().add(new_tail_start);\n            ptr::copy(src, dst, self.tail_len);\n        }\n        self.tail_start = new_tail_start;\n    }",
+  "mir": "fn vec::splice::<impl vec::drain::Drain<'_, T, A>>::move_tail(_1: &mut vec::drain::Drain<'_, T, A>, _2: usize) -> () {\n    let mut _0: ();\n    let mut _3: &mut vec::Vec<T, A>;\n    let mut _4: &mut core::ptr::NonNull<vec::Vec<T, A>>;\n    let  _5: usize;\n    let mut _6: usize;\n    let mut _7: usize;\n    let mut _8: (usize, bool);\n    let  _9: ();\n    let mut _10: &mut raw_vec::RawVec<T, A>;\n    let  _11: usize;\n    let mut _12: usize;\n    let mut _13: (usize, bool);\n    let  _14: *const T;\n    let mut _15: *const T;\n    let mut _16: &vec::Vec<T, A>;\n    let mut _17: usize;\n    let  _18: *mut T;\n    let mut _19: *mut T;\n    let  _20: ();\n    let mut _21: usize;\n    debug self => _1;\n    debug additional => _2;\n    debug vec => _3;\n    debug len => _5;\n    debug new_tail_start => _11;\n    debug src => _14;\n    debug dst => _18;\n    bb0: {\n        StorageLive(_4);\n        _4 = &mut ((*_1).3: core::ptr::NonNull<vec::Vec<T, A>>);\n        _3 = core::ptr::NonNull::<vec::Vec<T, A>>::as_mut::<'_>(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = ((*_1).0: usize);\n        StorageLive(_7);\n        _7 = ((*_1).1: usize);\n        _8 = CheckedAdd(_6, _7);\n        assert(!move (_8.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _6, move _7) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _5 = move (_8.0: usize);\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageLive(_10);\n        _10 = &mut ((*_3).0: raw_vec::RawVec<T, A>);\n        _9 = raw_vec::RawVec::<T, A>::reserve(move _10, _5, _2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_10);\n        StorageLive(_12);\n        _12 = ((*_1).0: usize);\n        _13 = CheckedAdd(_12, _2);\n        assert(!move (_13.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _12, _2) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _11 = move (_13.0: usize);\n        StorageDead(_12);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = &(*_3);\n        _15 = vec::Vec::<T, A>::as_ptr(move _16) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_16);\n        StorageLive(_17);\n        _17 = ((*_1).0: usize);\n        _14 = core::ptr::const_ptr::<impl *const T>::add(move _15, move _17) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_17);\n        StorageDead(_15);\n        StorageLive(_19);\n        _19 = vec::Vec::<T, A>::as_mut_ptr(_3) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _18 = core::ptr::mut_ptr::<impl *mut T>::add(move _19, _11) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_19);\n        StorageLive(_21);\n        _21 = ((*_1).1: usize);\n        _20 = core::ptr::copy::<T>(_14, _18, move _21) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_21);\n        ((*_1).0: usize) = _11;\n        return;\n    }\n}\n",
+  "doc": " Makes room for inserting more elements before the tail.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

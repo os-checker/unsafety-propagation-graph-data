@@ -1,0 +1,39 @@
+{
+  "name": "iter::adapters::flatten::FlattenCompat::<I, U>::new",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::fuse": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator which ends after the first [`None`].\n\n After an iterator returns [`None`], future calls may or may not yield\n [`Some(T)`] again. `fuse()` adapts an iterator, ensuring that after a\n [`None`] is given, it will always return [`None`] forever.\n\n Note that the [`Fuse`] wrapper is a no-op on iterators that implement\n the [`FusedIterator`] trait. `fuse()` may therefore behave incorrectly\n if the [`FusedIterator`] trait is improperly implemented.\n\n [`Some(T)`]: Some\n [`FusedIterator`]: crate::iter::FusedIterator\n\n # Examples\n\n ```\n // an iterator which alternates between Some and None\n struct Alternate {\n     state: i32,\n }\n\n impl Iterator for Alternate {\n     type Item = i32;\n\n     fn next(&mut self) -> Option<i32> {\n         let val = self.state;\n         self.state = self.state + 1;\n\n         // if it's even, Some(i32), else None\n         (val % 2 == 0).then_some(val)\n     }\n }\n\n let mut iter = Alternate { state: 0 };\n\n // we can see our iterator going back and forth\n assert_eq!(iter.next(), Some(0));\n assert_eq!(iter.next(), None);\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), None);\n\n // however, once we fuse it...\n let mut iter = iter.fuse();\n\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), None);\n\n // it will always return `None` after the first time.\n assert_eq!(iter.next(), None);\n assert_eq!(iter.next(), None);\n assert_eq!(iter.next(), None);\n ```\n",
+      "adt": {
+        "iter::adapters::fuse::Fuse": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "iter::adapters::fuse::Fuse": [
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain"
+    ],
+    "iter::adapters::flatten::FlattenCompat": [
+      "Plain"
+    ]
+  },
+  "path": 13844,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/flatten.rs:366:5: 368:6",
+  "src": "fn new(iter: I) -> FlattenCompat<I, U> {\n        FlattenCompat { iter: iter.fuse(), frontiter: None, backiter: None }\n    }",
+  "mir": "fn iter::adapters::flatten::FlattenCompat::<I, U>::new(_1: I) -> iter::adapters::flatten::FlattenCompat<I, U> {\n    let mut _0: iter::adapters::flatten::FlattenCompat<I, U>;\n    let mut _2: iter::adapters::fuse::Fuse<I>;\n    let mut _3: option::Option<U>;\n    let mut _4: option::Option<U>;\n    debug iter => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = <I as iter::traits::iterator::Iterator>::fuse(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        _3 = option::Option::None;\n        StorageLive(_4);\n        _4 = option::Option::None;\n        _0 = FlattenCompat(move _2, move _3, move _4);\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Adapts an iterator by flattening it, for use in `flatten()` and `flat_map()`.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

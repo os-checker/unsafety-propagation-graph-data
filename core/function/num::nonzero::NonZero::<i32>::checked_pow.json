@@ -1,0 +1,59 @@
+{
+  "name": "num::nonzero::NonZero::<i32>::checked_pow",
+  "safe": true,
+  "callees": {
+    "num::nonzero::NonZero::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained value as a primitive type.\n",
+      "adt": {}
+    },
+    "num::<impl i32>::checked_pow": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Checked exponentiation. Computes `self.pow(exp)`, returning `None` if\n overflow occurred.\n\n # Examples\n\n ```\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "num::nonzero::NonZero::<T>::new_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a non-zero without checking whether the value is non-zero.\n This results in undefined behavior if the value is zero.\n\n # Safety\n\n The value must not be zero.\n",
+      "adt": {
+        "num::nonzero::NonZero": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "num::nonzero::NonZero": [
+      "Plain"
+    ],
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 19, kind: RigidTy(Int(I32)) })])"
+    ]
+  },
+  "path": 15195,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/nonzero.rs:1184:13: 1197:14",
+  "src": "pub const fn checked_pow(self, other: u32) -> Option<Self> {\n                if let Some(result) = self.get().checked_pow(other) {\n                    // SAFETY:\n                    // - `checked_pow` returns `None` on overflow/underflow\n                    // - `self` is non-zero\n                    // - the only way to get zero from an exponentiation without overflow is\n                    //   for base to be zero\n                    //\n                    // So the result cannot be zero.\n                    Some(unsafe { Self::new_unchecked(result) })\n                } else {\n                    None\n                }\n            }",
+  "mir": "fn num::nonzero::NonZero::<i32>::checked_pow(_1: num::nonzero::NonZero<i32>, _2: u32) -> option::Option<num::nonzero::NonZero<i32>> {\n    let mut _0: option::Option<num::nonzero::NonZero<i32>>;\n    let mut _3: option::Option<i32>;\n    let mut _4: i32;\n    let mut _5: isize;\n    let  _6: i32;\n    let mut _7: num::nonzero::NonZero<i32>;\n    debug self => _1;\n    debug other => _2;\n    debug result => _6;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = num::nonzero::NonZero::<i32>::get(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = num::<impl i32>::checked_pow(move _4, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _5 = discriminant(_3);\n        switchInt(move _5) -> [1: bb3, 0: bb5, otherwise: bb7];\n    }\n    bb3: {\n        _6 = ((_3 as variant#1).0: i32);\n        StorageLive(_7);\n        _7 = num::nonzero::NonZero::<i32>::new_unchecked(_6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _0 = option::Option::Some(move _7);\n        StorageDead(_7);\n        StorageDead(_3);\n        goto -> bb6;\n    }\n    bb5: {\n        StorageDead(_3);\n        _0 = option::Option::None;\n        goto -> bb6;\n    }\n    bb6: {\n        return;\n    }\n    bb7: {\n        unreachable;\n    }\n}\n",
+  "doc": " Raises non-zero value to an integer power.\n Checks for overflow and returns [`None`] on overflow.\n As a consequence, the result cannot wrap to zero.\n\n # Examples\n\n ```\n # use std::num::NonZero;\n #\n # fn main() { test().unwrap(); }\n # fn test() -> Option<()> {\n\n assert_eq!(Some(twenty_seven), three.checked_pow(3));\n assert_eq!(None, half_max.checked_pow(3));\n # Some(())\n # }\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

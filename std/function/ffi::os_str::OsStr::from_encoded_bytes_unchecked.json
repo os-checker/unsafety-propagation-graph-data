@@ -1,0 +1,46 @@
+{
+  "name": "ffi::os_str::OsStr::from_encoded_bytes_unchecked",
+  "safe": false,
+  "callees": {
+    "sys::os_str::bytes::Slice::from_encoded_bytes_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "ffi::os_str::OsStr::from_inner": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::os_str::bytes::Slice": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "sys::os_str::bytes::Slice": [
+      "Ref"
+    ],
+    "ffi::os_str::OsStr": [
+      "Ref"
+    ]
+  },
+  "path": 988,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/ffi/os_str.rs:875:5: 877:6",
+  "src": "pub unsafe fn from_encoded_bytes_unchecked(bytes: &[u8]) -> &Self {\n        Self::from_inner(unsafe { Slice::from_encoded_bytes_unchecked(bytes) })\n    }",
+  "mir": "fn ffi::os_str::OsStr::from_encoded_bytes_unchecked(_1: &[u8]) -> &ffi::os_str::OsStr {\n    let mut _0: &ffi::os_str::OsStr;\n    let  _2: &sys::os_str::bytes::Slice;\n    debug bytes => _1;\n    bb0: {\n        _2 = sys::os_str::bytes::Slice::from_encoded_bytes_unchecked(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = ffi::os_str::OsStr::from_inner(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Converts a slice of bytes to an OS string slice without checking that the string contains\n valid `OsStr`-encoded data.\n\n The byte encoding is an unspecified, platform-specific, self-synchronizing superset of UTF-8.\n By being a self-synchronizing superset of UTF-8, this encoding is also a superset of 7-bit\n ASCII.\n\n See the [module's toplevel documentation about conversions][conversions] for safe,\n cross-platform [conversions] from/to native representations.\n\n # Safety\n\n As the encoding is unspecified, callers must pass in bytes that originated as a mixture of\n validated UTF-8 and bytes from [`OsStr::as_encoded_bytes`] from within the same Rust version\n built for the same target platform.  For example, reconstructing an `OsStr` from bytes sent\n over the network or stored in a file will likely violate these safety rules.\n\n Due to the encoding being self-synchronizing, the bytes from [`OsStr::as_encoded_bytes`] can be\n split either immediately before or immediately after any valid non-empty UTF-8 substring.\n\n # Example\n\n ```\n use std::ffi::OsStr;\n\n let os_str = OsStr::new(\"Mary had a little lamb\");\n let bytes = os_str.as_encoded_bytes();\n let words = bytes.split(|b| *b == b' ');\n let words: Vec<&OsStr> = words.map(|word| {\n     // SAFETY:\n     // - Each `word` only contains content that originated from `OsStr::as_encoded_bytes`\n     // - Only split with ASCII whitespace which is a non-empty UTF-8 substring\n     unsafe { OsStr::from_encoded_bytes_unchecked(word) }\n }).collect();\n ```\n\n [conversions]: super#conversions\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

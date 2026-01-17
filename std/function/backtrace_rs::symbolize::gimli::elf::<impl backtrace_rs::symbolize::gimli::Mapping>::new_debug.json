@@ -1,0 +1,92 @@
+{
+  "name": "backtrace_rs::symbolize::gimli::elf::<impl backtrace_rs::symbolize::gimli::Mapping>::new_debug",
+  "safe": true,
+  "callees": {
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "backtrace_rs::symbolize::gimli::mmap": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "path::Path": "ImmutableAsArgument",
+        "core::option::Option": "Constructor",
+        "backtrace_rs::symbolize::gimli::mmap::Mmap": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "backtrace_rs::symbolize::gimli::Mapping::mk": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a `Mapping` by ensuring that the `data` specified is used to\n create a `Context` and it can only borrow from that or the `Stash` of\n decompressed sections or auxiliary data.\n",
+      "adt": {
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "path::PathBuf": [
+      "Ref",
+      "Plain"
+    ],
+    "path::Path": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Ref"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 17791, kind: RigidTy(Adt(AdtDef(DefId { id: 12560, name: \"backtrace_rs::symbolize::gimli::mmap::Mmap\" }), GenericArgs([]))) })])"
+    ],
+    "backtrace_rs::symbolize::gimli::mmap::Mmap": [
+      "Plain"
+    ]
+  },
+  "path": 558,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli/elf.rs:94:5: 120:6",
+  "src": "fn new_debug(original_path: &Path, path: PathBuf, crc: Option<u32>) -> Option<Mapping> {\n        let map = super::mmap(&path)?;\n        Mapping::mk(map, |map, stash| {\n            let object = Object::parse(map)?;\n\n            if let Some(_crc) = crc {\n                // TODO: check crc\n            }\n\n            // Try to locate a supplementary object file.\n            let mut sup = None;\n            if let Some((path_sup, build_id_sup)) = object.gnu_debugaltlink_path(&path) {\n                if let Some(map_sup) = super::mmap(&path_sup) {\n                    let map_sup = stash.cache_mmap(map_sup);\n                    if let Some(sup_) = Object::parse(map_sup) {\n                        if sup_.build_id() == Some(build_id_sup) {\n                            sup = Some(sup_);\n                        }\n                    }\n                }\n            }\n\n            let dwp = Mapping::load_dwarf_package(original_path, stash);\n\n            Context::new(stash, object, sup, dwp)\n        })\n    }",
+  "mir": "fn backtrace_rs::symbolize::gimli::elf::<impl backtrace_rs::symbolize::gimli::Mapping>::new_debug(_1: &path::Path, _2: path::PathBuf, _3: core::option::Option<u32>) -> core::option::Option<backtrace_rs::symbolize::gimli::Mapping> {\n    let mut _0: core::option::Option<backtrace_rs::symbolize::gimli::Mapping>;\n    let mut _4: core::ops::ControlFlow<core::option::Option<core::convert::Infallible>, backtrace_rs::symbolize::gimli::mmap::Mmap>;\n    let mut _5: core::option::Option<backtrace_rs::symbolize::gimli::mmap::Mmap>;\n    let  _6: &path::Path;\n    let  _7: &path::PathBuf;\n    let mut _8: isize;\n    let  _9: backtrace_rs::symbolize::gimli::mmap::Mmap;\n    let mut _10: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli/elf.rs:96:26: 96:38};\n    let mut _11: &core::option::Option<u32>;\n    let mut _12: &path::PathBuf;\n    debug original_path => _1;\n    debug path => _2;\n    debug crc => _3;\n    debug map => _9;\n    debug residual => core::option::Option::<core::convert::Infallible>::None;\n    debug val => _9;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _7 = &_2;\n        _6 = <path::PathBuf as core::ops::Deref>::deref(_7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = backtrace_rs::symbolize::gimli::mmap(_6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _4 = <core::option::Option<backtrace_rs::symbolize::gimli::mmap::Mmap> as core::ops::Try>::branch(move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        _8 = discriminant(_4);\n        switchInt(move _8) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _9 = move ((_4 as variant#0).0: backtrace_rs::symbolize::gimli::mmap::Mmap);\n        StorageDead(_4);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &_3;\n        StorageLive(_12);\n        _12 = &_2;\n        _10 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli/elf.rs:96:26: 96:38}(move _11, move _12, _1);\n        StorageDead(_12);\n        StorageDead(_11);\n        _0 = backtrace_rs::symbolize::gimli::Mapping::mk::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/../../backtrace/src/symbolize/gimli/elf.rs:96:26: 96:38}>(_9, move _10) -> [return: bb8, unwind unreachable];\n    }\n    bb6: {\n        _0 = <core::option::Option<backtrace_rs::symbolize::gimli::Mapping> as core::ops::FromResidual<core::option::Option<core::convert::Infallible>>>::from_residual(core::option::Option::<core::convert::Infallible>::None) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_4);\n        drop(_2) -> [return: bb9, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_10);\n        drop(_2) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        return;\n    }\n}\n",
+  "doc": " Load debuginfo from an external debug file.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

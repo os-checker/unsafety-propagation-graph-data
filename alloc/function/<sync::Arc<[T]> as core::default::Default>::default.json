@@ -1,0 +1,104 @@
+{
+  "name": "<sync::Arc<[T]> as core::default::Default>::default",
+  "safe": true,
+  "callees": {
+    "core::mem::align_of": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the [ABI]-required minimum alignment of a type in bytes.\n\n Every reference to a value of the type `T` must be a multiple of this number.\n\n This is the alignment used for struct fields. It may be smaller than the preferred alignment.\n\n [ABI]: https://en.wikipedia.org/wiki/Application_binary_interface\n\n # Examples\n\n ```\n assert_eq!(4, align_of::<i32>());\n ```\n",
+      "adt": {}
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "core::ptr::NonNull::<T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"null pointer\");\n\n let casted_ptr = ptr.cast::<i8>();\n let raw_ptr: *mut i8 = casted_ptr.as_ptr();\n ```\n",
+      "adt": {}
+    },
+    "sync::Arc::<T>::from_inner": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sync::Arc": "Constructor"
+      }
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::SliceArcInnerForStatic": [
+      "Ref"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "sync::Arc": [
+      "Plain",
+      "Ref"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 2034,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:3806:5: 3823:6",
+  "src": "fn default() -> Self {\n        if align_of::<T>() <= MAX_STATIC_INNER_SLICE_ALIGNMENT {\n            // We take a reference to the whole struct instead of the ArcInner<[u8; 1]> inside it so\n            // we don't shrink the range of bytes the ptr is allowed to access under Stacked Borrows.\n            // (Miri complains on 32-bit targets with Arc<[Align16]> otherwise.)\n            // (Note that NonNull::from(&STATIC_INNER_SLICE.inner) is fine under Tree Borrows.)\n            let inner: NonNull<SliceArcInnerForStatic> = NonNull::from(&STATIC_INNER_SLICE);\n            let inner: NonNull<ArcInner<[T; 0]>> = inner.cast();\n            // `this` semantically is the Arc \"owned\" by the static, so make sure not to drop it.\n            let this: mem::ManuallyDrop<Arc<[T; 0]>> =\n                unsafe { mem::ManuallyDrop::new(Arc::from_inner(inner)) };\n            return (*this).clone();\n        }\n\n        // If T's alignment is too large for the static, make a new unique allocation.\n        let arr: [T; 0] = [];\n        Arc::from(arr)\n    }",
+  "mir": "fn <sync::Arc<[T]> as core::default::Default>::default() -> sync::Arc<[T]> {\n    let mut _0: sync::Arc<[T]>;\n    let mut _1: bool;\n    let mut _2: usize;\n    let  _3: core::ptr::NonNull<sync::SliceArcInnerForStatic>;\n    let mut _4: &sync::SliceArcInnerForStatic;\n    let  _5: core::ptr::NonNull<sync::ArcInner<[T; 0]>>;\n    let  _6: core::mem::ManuallyDrop<sync::Arc<[T; 0]>>;\n    let mut _7: sync::Arc<[T; 0]>;\n    let mut _8: sync::Arc<[T; 0]>;\n    let  _9: &sync::Arc<[T; 0]>;\n    let mut _10: &core::mem::ManuallyDrop<sync::Arc<[T; 0]>>;\n    debug inner => _3;\n    debug inner => _5;\n    debug this => _6;\n    debug arr => ZeroSized: [T; 0];\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        _2 = core::mem::align_of::<T>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _1 = Le(move _2, sync::MAX_STATIC_INNER_SLICE_ALIGNMENT);\n        switchInt(move _1) -> [0: bb9, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_4);\n        _4 = {alloc107: &sync::SliceArcInnerForStatic};\n        _3 = <core::ptr::NonNull<sync::SliceArcInnerForStatic> as core::convert::From<&sync::SliceArcInnerForStatic>>::from(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _5 = core::ptr::NonNull::<sync::SliceArcInnerForStatic>::cast::<sync::ArcInner<[T; 0]>>(_3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = sync::Arc::<[T; 0]>::from_inner(_5) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _6 = core::mem::ManuallyDrop::<sync::Arc<[T; 0]>>::new(move _7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_10);\n        _10 = &_6;\n        _9 = <core::mem::ManuallyDrop<sync::Arc<[T; 0]>> as core::ops::Deref>::deref(move _10) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_10);\n        _8 = <sync::Arc<[T; 0]> as core::clone::Clone>::clone(_9) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _0 = move _8 as sync::Arc<[T]>;\n        StorageDead(_8);\n        StorageDead(_6);\n        StorageDead(_1);\n        goto -> bb10;\n    }\n    bb9: {\n        StorageDead(_2);\n        StorageDead(_1);\n        _0 = <sync::Arc<[T]> as core::convert::From<[T; 0]>>::from(ZeroSized: [T; 0]) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        return;\n    }\n}\n",
+  "doc": " Creates an empty `[T]` inside an Arc\n\n This may or may not share an allocation with other Arcs.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

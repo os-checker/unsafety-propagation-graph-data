@@ -1,0 +1,103 @@
+{
+  "name": "<slice::iter::SplitInclusive<'a, T, P> as iter::traits::double_ended::DoubleEndedIterator>::next_back",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the slice has a length of 0.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n assert!(!a.is_empty());\n\n let b: &[i32] = &[];\n assert!(b.is_empty());\n ```\n",
+      "adt": {}
+    },
+    "ops::index::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the slice.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let mut iterator = x.iter();\n\n assert_eq!(iterator.next(), Some(&1));\n assert_eq!(iterator.next(), Some(&2));\n assert_eq!(iterator.next(), Some(&4));\n assert_eq!(iterator.next(), None);\n ```\n",
+      "adt": {
+        "slice::iter::Iter": "Constructor"
+      }
+    },
+    "iter::traits::iterator::Iterator::rposition": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Searches for an element in an iterator from the right, returning its\n index.\n\n `rposition()` takes a closure that returns `true` or `false`. It applies\n this closure to each element of the iterator, starting from the end,\n and if one of them returns `true`, then `rposition()` returns\n [`Some(index)`]. If all of them return `false`, it returns [`None`].\n\n `rposition()` is short-circuiting; in other words, it will stop\n processing as soon as it finds a `true`.\n\n [`Some(index)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n assert_eq!(a.into_iter().rposition(|x| x == 3), Some(2));\n\n assert_eq!(a.into_iter().rposition(|x| x == 5), None);\n ```\n\n Stopping at the first `true`:\n\n ```\n let a = [-1, 2, 3, 4];\n\n let mut iter = a.into_iter();\n\n assert_eq!(iter.rposition(|x| x >= 2), Some(3));\n\n // we can still use `iter`, as there are more elements.\n assert_eq!(iter.next(), Some(-1));\n assert_eq!(iter.next_back(), Some(3));\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Maps an `Option<T>` to `Option<U>` by applying a function to a contained value (if `Some`) or returns `None` (if `None`).\n\n # Examples\n\n Calculates the length of an <code>Option<[String]></code> as an\n <code>Option<[usize]></code>, consuming the original:\n\n [String]: ../../std/string/struct.String.html \"String\"\n ```\n let maybe_some_string = Some(String::from(\"Hello, World!\"));\n // `Option::map` takes self *by value*, consuming `maybe_some_string`\n let maybe_some_len = maybe_some_string.map(|s| s.len());\n assert_eq!(maybe_some_len, Some(13));\n\n let x: Option<&str> = None;\n assert_eq!(x.map(|s| s.len()), None);\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "option::Option::<T>::unwrap_or": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the contained [`Some`] value or a provided default.\n\n Arguments passed to `unwrap_or` are eagerly evaluated; if you are passing\n the result of a function call, it is recommended to use [`unwrap_or_else`],\n which is lazily evaluated.\n\n [`unwrap_or_else`]: Option::unwrap_or_else\n\n # Examples\n\n ```\n assert_eq!(Some(\"car\").unwrap_or(\"bike\"), \"car\");\n assert_eq!(None.unwrap_or(\"bike\"), \"bike\");\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::SplitInclusive": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ],
+    "ops::range::RangeTo": [
+      "Plain"
+    ],
+    "slice::iter::Iter": [
+      "Plain",
+      "MutRef"
+    ],
+    "ops::range::RangeFrom": [
+      "Plain"
+    ]
+  },
+  "path": 16588,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:640:5: 656:6",
+  "src": "fn next_back(&mut self) -> Option<&'a [T]> {\n        if self.finished {\n            return None;\n        }\n\n        // The last index of self.v is already checked and found to match\n        // by the last iteration, so we start searching a new match\n        // one index to the left.\n        let remainder = if self.v.is_empty() { &[] } else { &self.v[..(self.v.len() - 1)] };\n        let idx = remainder.iter().rposition(|x| (self.pred)(x)).map(|idx| idx + 1).unwrap_or(0);\n        if idx == 0 {\n            self.finished = true;\n        }\n        let ret = Some(&self.v[idx..]);\n        self.v = &self.v[..idx];\n        ret\n    }",
+  "mir": "fn <slice::iter::SplitInclusive<'a, T, P> as iter::traits::double_ended::DoubleEndedIterator>::next_back(_1: &mut slice::iter::SplitInclusive<'_, T, P>) -> option::Option<&[T]> {\n    let mut _0: option::Option<&[T]>;\n    let mut _2: bool;\n    let  _3: &[T];\n    let mut _4: bool;\n    let  _5: &[T; 0];\n    let  _6: &[T];\n    let mut _7: ops::range::RangeTo<usize>;\n    let mut _8: usize;\n    let mut _9: usize;\n    let mut _10: (usize, bool);\n    let  _11: usize;\n    let mut _12: option::Option<usize>;\n    let mut _13: option::Option<usize>;\n    let mut _14: &mut slice::iter::Iter<'_, T>;\n    let mut _15: slice::iter::Iter<'_, T>;\n    let mut _16: &[T];\n    let mut _17: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:649:46: 649:49};\n    let mut _18: &mut P;\n    let  _19: option::Option<&[T]>;\n    let  _20: &[T];\n    let mut _21: ops::range::RangeFrom<usize>;\n    let  _22: &[T];\n    let mut _23: ops::range::RangeTo<usize>;\n    let mut _24: &[T];\n    let mut _25: &[T];\n    let mut _26: &[T];\n    let mut _27: &[T];\n    let mut _28: &[T];\n    debug self => _1;\n    debug remainder => _3;\n    debug idx => _11;\n    debug ret => _19;\n    bb0: {\n        StorageLive(_2);\n        _2 = ((*_1).2: bool);\n        switchInt(move _2) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        _0 = option::Option::None;\n        StorageDead(_2);\n        goto -> bb18;\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _24 = ((*_1).0: &[T]);\n        _4 = slice::<impl [T]>::is_empty(_24) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _4) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        _5 = <slice::iter::SplitInclusive<'_, T, P> as iter::traits::double_ended::DoubleEndedIterator>::next_back::promoted[0];\n        _3 = _5 as &[T];\n        goto -> bb8;\n    }\n    bb5: {\n        StorageLive(_6);\n        _25 = ((*_1).0: &[T]);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _26 = ((*_1).0: &[T]);\n        _9 = PtrMetadata(_26);\n        _10 = CheckedSub(_9, 1_usize);\n        assert(!move (_10.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _9, 1_usize) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _8 = move (_10.0: usize);\n        StorageDead(_9);\n        _7 = RangeTo(move _8);\n        StorageDead(_8);\n        _6 = <[T] as ops::index::Index<ops::range::RangeTo<usize>>>::index(_25, move _7) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_7);\n        _3 = _6;\n        goto -> bb8;\n    }\n    bb8: {\n        StorageDead(_4);\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = _3;\n        _15 = slice::<impl [T]>::iter(move _16) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _14 = &mut _15;\n        StorageDead(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = &mut ((*_1).1: P);\n        _17 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:649:46: 649:49}(move _18);\n        StorageDead(_18);\n        _13 = <slice::iter::Iter<'_, T> as iter::traits::iterator::Iterator>::rposition::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:649:46: 649:49}>(move _14, move _17) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_17);\n        StorageDead(_14);\n        _12 = option::Option::<usize>::map::<usize, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:649:70: 649:75}>(move _13, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:649:70: 649:75}) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_13);\n        _11 = option::Option::<usize>::unwrap_or(move _12, 0_usize) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_12);\n        StorageDead(_15);\n        switchInt(_11) -> [0: bb13, otherwise: bb14];\n    }\n    bb13: {\n        ((*_1).2: bool) = true;\n        goto -> bb15;\n    }\n    bb14: {\n        goto -> bb15;\n    }\n    bb15: {\n        StorageLive(_19);\n        _27 = ((*_1).0: &[T]);\n        StorageLive(_21);\n        _21 = RangeFrom(_11);\n        _20 = <[T] as ops::index::Index<ops::range::RangeFrom<usize>>>::index(_27, move _21) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_21);\n        _19 = option::Option::Some(_20);\n        _28 = ((*_1).0: &[T]);\n        StorageLive(_23);\n        _23 = RangeTo(_11);\n        _22 = <[T] as ops::index::Index<ops::range::RangeTo<usize>>>::index(_28, move _23) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_23);\n        ((*_1).0: &[T]) = _22;\n        _0 = _19;\n        StorageDead(_19);\n        StorageDead(_6);\n        StorageDead(_3);\n        goto -> bb18;\n    }\n    bb18: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

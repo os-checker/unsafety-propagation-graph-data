@@ -1,0 +1,107 @@
+{
+  "name": "<io::Take<T> as io::Read>::read",
+  "safe": true,
+  "callees": {
+    "core::cmp::min": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Compares and returns the minimum of two values.\n\n Returns the first argument if the comparison determines them to be equal.\n\n Internally uses an alias to [`Ord::min`].\n\n # Examples\n\n ```\n use std::cmp;\n\n assert_eq!(cmp::min(1, 2), 1);\n assert_eq!(cmp::min(2, 2), 2);\n ```\n ```\n use std::cmp::{self, Ordering};\n\n #[derive(Eq)]\n struct Equal(&'static str);\n\n impl PartialEq for Equal {\n     fn eq(&self, other: &Self) -> bool { true }\n }\n impl PartialOrd for Equal {\n     fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(Ordering::Equal) }\n }\n impl Ord for Equal {\n     fn cmp(&self, other: &Self) -> Ordering { Ordering::Equal }\n }\n\n assert_eq!(cmp::min(Equal(\"v1\"), Equal(\"v2\")).0, \"v1\");\n ```\n",
+      "adt": {}
+    },
+    "core::ops::IndexMut::index_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the mutable indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "io::Read::read": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Pull some bytes from this source into the specified buffer, returning\n how many bytes were read.\n\n This function does not provide any guarantees about whether it blocks\n waiting for data, but if an object needs to block for a read and cannot,\n it will typically signal this via an [`Err`] return value.\n\n If the return value of this method is [`Ok(n)`], then implementations must\n guarantee that `0 <= n <= buf.len()`. A nonzero `n` value indicates\n that the buffer `buf` has been filled in with `n` bytes of data from this\n source. If `n` is `0`, then it can indicate one of two scenarios:\n\n 1. This reader has reached its \"end of file\" and will likely no longer\n    be able to produce bytes. Note that this does not mean that the\n    reader will *always* no longer be able to produce bytes. As an example,\n    on Linux, this method will call the `recv` syscall for a [`TcpStream`],\n    where returning zero indicates the connection was shut down correctly. While\n    for [`File`], it is possible to reach the end of file and get zero as result,\n    but if more data is appended to the file, future calls to `read` will return\n    more data.\n 2. The buffer specified was 0 bytes in length.\n\n It is not an error if the returned value `n` is smaller than the buffer size,\n even when the reader is not at the end of the stream yet.\n This may happen for example because fewer bytes are actually available right now\n (e. g. being close to end-of-file) or because read() was interrupted by a signal.\n\n As this trait is safe to implement, callers in unsafe code cannot rely on\n `n <= buf.len()` for safety.\n Extra care needs to be taken when `unsafe` functions are used to access the read bytes.\n Callers have to ensure that no unchecked out-of-bounds accesses are possible even if\n `n > buf.len()`.\n\n *Implementations* of this method can make no assumptions about the contents of `buf` when\n this function is called. It is recommended that implementations only write data to `buf`\n instead of reading its contents.\n\n Correspondingly, however, *callers* of this method in unsafe code must not assume\n any guarantees about how the implementation uses `buf`. The trait is safe to implement,\n so it is possible that the code that's supposed to write to the buffer might also read\n from it. It is your responsibility to make sure that `buf` is initialized\n before calling `read`. Calling `read` with an uninitialized `buf` (of the kind one\n obtains via [`MaybeUninit<T>`]) is not safe, and can lead to undefined behavior.\n\n [`MaybeUninit<T>`]: crate::mem::MaybeUninit\n\n # Errors\n\n If this function encounters any form of I/O or other error, an error\n variant will be returned. If an error is returned then it must be\n guaranteed that no bytes were read.\n\n An error of the [`ErrorKind::Interrupted`] kind is non-fatal and the read\n operation should be retried if there is nothing else to do.\n\n # Examples\n\n [`File`]s implement `Read`:\n\n [`Ok(n)`]: Ok\n [`File`]: crate::fs::File\n [`TcpStream`]: crate::net::TcpStream\n\n ```no_run\n use std::io;\n use std::io::prelude::*;\n use std::fs::File;\n\n fn main() -> io::Result<()> {\n     let mut f = File::open(\"foo.txt\")?;\n     let mut buffer = [0; 10];\n\n     // read up to 10 bytes\n     let n = f.read(&mut buffer[..])?;\n\n     println!(\"The bytes: {:?}\", &buffer[..n]);\n     Ok(())\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {}
+    },
+    "core::panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "io::Take": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::RangeTo": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ],
+    "core::fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 1786,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/mod.rs:3053:5: 3064:6",
+  "src": "fn read(&mut self, buf: &mut [u8]) -> Result<usize> {\n        // Don't call into inner reader at all at EOF because it may still block\n        if self.limit == 0 {\n            return Ok(0);\n        }\n\n        let max = cmp::min(buf.len() as u64, self.limit) as usize;\n        let n = self.inner.read(&mut buf[..max])?;\n        assert!(n as u64 <= self.limit, \"number of read bytes exceeds limit\");\n        self.limit -= n as u64;\n        Ok(n)\n    }",
+  "mir": "fn <io::Take<T> as io::Read>::read(_1: &mut io::Take<T>, _2: &mut [u8]) -> core::result::Result<usize, io::error::Error> {\n    let mut _0: core::result::Result<usize, io::error::Error>;\n    let mut _3: u64;\n    let  _4: usize;\n    let mut _5: u64;\n    let mut _6: u64;\n    let mut _7: usize;\n    let mut _8: &[u8];\n    let mut _9: u64;\n    let mut _10: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, usize>;\n    let mut _11: core::result::Result<usize, io::error::Error>;\n    let mut _12: &mut T;\n    let mut _13: &mut [u8];\n    let mut _14: core::ops::RangeTo<usize>;\n    let mut _15: isize;\n    let  _16: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _17: usize;\n    let mut _18: bool;\n    let mut _19: u64;\n    let mut _20: u64;\n    let  _21: !;\n    let mut _22: core::fmt::Arguments<'_>;\n    let mut _23: u64;\n    let mut _24: (u64, bool);\n    debug self => _1;\n    debug buf => _2;\n    debug max => _4;\n    debug n => _17;\n    debug residual => _16;\n    debug val => _17;\n    bb0: {\n        StorageLive(_3);\n        _3 = ((*_1).2: u64);\n        switchInt(move _3) -> [0: bb1, otherwise: bb2];\n    }\n    bb1: {\n        StorageDead(_3);\n        _0 = core::result::Result::Ok(0_usize);\n        goto -> bb15;\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &(*_2);\n        _7 = PtrMetadata(move _8);\n        StorageDead(_8);\n        _6 = move _7 as u64;\n        StorageDead(_7);\n        StorageLive(_9);\n        _9 = ((*_1).2: u64);\n        _5 = core::cmp::min::<u64>(move _6, move _9) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_9);\n        StorageDead(_6);\n        _4 = move _5 as usize;\n        StorageDead(_5);\n        StorageLive(_10);\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &mut ((*_1).0: T);\n        StorageLive(_14);\n        _14 = RangeTo(_4);\n        _13 = <[u8] as core::ops::IndexMut<core::ops::RangeTo<usize>>>::index_mut(_2, move _14) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_14);\n        _11 = <T as io::Read>::read(move _12, _13) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        _10 = <core::result::Result<usize, io::error::Error> as core::ops::Try>::branch(move _11) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_11);\n        _15 = discriminant(_10);\n        switchInt(move _15) -> [0: bb8, 1: bb9, otherwise: bb7];\n    }\n    bb7: {\n        unreachable;\n    }\n    bb8: {\n        _17 = ((_10 as variant#0).0: usize);\n        StorageDead(_10);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = _17 as u64;\n        StorageLive(_20);\n        _20 = ((*_1).2: u64);\n        _18 = Le(move _19, move _20);\n        switchInt(move _18) -> [0: bb12, otherwise: bb11];\n    }\n    bb9: {\n        _16 = move ((_10 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<usize, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_16) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_10);\n        goto -> bb15;\n    }\n    bb11: {\n        StorageDead(_20);\n        StorageDead(_19);\n        StorageDead(_18);\n        StorageLive(_23);\n        _23 = _17 as u64;\n        _24 = CheckedSub(((*_1).2: u64), _23);\n        assert(!move (_24.1: bool), \"attempt to compute `{} - {}`, which would overflow\", ((*_1).2: u64), move _23) -> [success: bb14, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_20);\n        StorageDead(_19);\n        StorageLive(_22);\n        _22 = core::fmt::Arguments::<'_>::from_str(\"number of read bytes exceeds limit\") -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        _21 = core::panicking::panic_fmt(move _22) -> unwind unreachable;\n    }\n    bb14: {\n        ((*_1).2: u64) = move (_24.0: u64);\n        StorageDead(_23);\n        _0 = core::result::Result::Ok(_17);\n        goto -> bb15;\n    }\n    bb15: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

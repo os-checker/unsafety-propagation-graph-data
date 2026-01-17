@@ -1,0 +1,35 @@
+{
+  "name": "logger::inject_logger",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "logger::Logger": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "spin::once::Once": [
+      "Ref"
+    ]
+  },
+  "path": 1842,
+  "span": "ostd/src/logger.rs:36:1: 38:2",
+  "src": "pub fn inject_logger(new_logger: &'static dyn log::Log) {\n    LOGGER.backend.call_once(|| new_logger);\n}",
+  "mir": "fn logger::inject_logger(_1: &dyn log::Log) -> () {\n    let mut _0: ();\n    let  _2: &&dyn log::Log;\n    let mut _3: &spin::once::Once<&dyn log::Log>;\n    let  _4: &logger::Logger;\n    let mut _5: {closure@ostd/src/logger.rs:37:30: 37:32};\n    debug new_logger => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = {alloc1011: &logger::Logger};\n        _3 = &((*_4).0: spin::once::Once<&dyn log::Log>);\n        StorageLive(_5);\n        _5 = {closure@ostd/src/logger.rs:37:30: 37:32}(_1);\n        _2 = spin::once::Once::<&dyn log::Log>::call_once::<{closure@ostd/src/logger.rs:37:30: 37:32}>(move _3, move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageDead(_4);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Injects a logger.\n\n This method can be called at most once; calling it more than once has no effect.\n\n # Requirements\n\n As the logger may be invoked in stringent situations,\n such as an interrupt handler, an out-of-memory handler, or a panic handler,\n a logger should be implemented to be\n _short_ (simple and non-sleeping) and\n _heapless_ (not trigger heap allocations).\n Failing to do so may cause the kernel to panic or deadlock.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

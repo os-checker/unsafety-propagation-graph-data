@@ -1,0 +1,53 @@
+{
+  "name": "sync::poison::rwlock::RwLock::<T>::read",
+  "safe": true,
+  "callees": {
+    "sys::sync::rwlock::futex::RwLock::read": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "sys::sync::rwlock::futex::RwLock": "ImmutableAsArgument"
+      }
+    },
+    "sync::poison::rwlock::RwLockReadGuard::<'rwlock, T>::new": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new instance of `RwLockReadGuard<T>` from a `RwLock<T>`.\n\n # Safety\n\n This function is safe if and only if the same thread has successfully and safely called\n `lock.inner.read()`, `lock.inner.try_read()`, or `lock.inner.downgrade()` before\n instantiating this object.\n",
+      "adt": {
+        "sync::poison::rwlock::RwLock": "ImmutableAsArgument",
+        "core::result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "sys::sync::rwlock::futex::RwLock": [
+      "Ref"
+    ],
+    "sync::poison::rwlock::RwLock": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 3262,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/rwlock.rs:395:5: 400:6",
+  "src": "pub fn read(&self) -> LockResult<RwLockReadGuard<'_, T>> {\n        unsafe {\n            self.inner.read();\n            RwLockReadGuard::new(self)\n        }\n    }",
+  "mir": "fn sync::poison::rwlock::RwLock::<T>::read(_1: &sync::poison::rwlock::RwLock<T>) -> core::result::Result<sync::poison::rwlock::RwLockReadGuard<'_, T>, sync::poison::PoisonError<sync::poison::rwlock::RwLockReadGuard<'_, T>>> {\n    let mut _0: core::result::Result<sync::poison::rwlock::RwLockReadGuard<'_, T>, sync::poison::PoisonError<sync::poison::rwlock::RwLockReadGuard<'_, T>>>;\n    let  _2: ();\n    let mut _3: &sys::sync::rwlock::futex::RwLock;\n    debug self => _1;\n    bb0: {\n        StorageLive(_3);\n        _3 = &((*_1).0: sys::sync::rwlock::futex::RwLock);\n        _2 = sys::sync::rwlock::futex::RwLock::read(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _0 = sync::poison::rwlock::RwLockReadGuard::<'_, T>::new(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Locks this `RwLock` with shared read access, blocking the current thread\n until it can be acquired.\n\n The calling thread will be blocked until there are no more writers which\n hold the lock. There may be other readers currently inside the lock when\n this method returns. This method does not provide any guarantees with\n respect to the ordering of whether contentious readers or writers will\n acquire the lock first.\n\n Returns an RAII guard which will release this thread's shared access\n once it is dropped.\n\n # Errors\n\n This function will return an error if the `RwLock` is poisoned. An\n `RwLock` is poisoned whenever a writer panics while holding an exclusive\n lock. The failure will occur immediately after the lock has been\n acquired. The acquired lock guard will be contained in the returned\n error.\n\n # Panics\n\n This function might panic when called if the lock is already held by the current thread.\n\n # Examples\n\n ```\n use std::sync::{Arc, RwLock};\n use std::thread;\n\n let lock = Arc::new(RwLock::new(1));\n let c_lock = Arc::clone(&lock);\n\n let n = lock.read().unwrap();\n assert_eq!(*n, 1);\n\n thread::spawn(move || {\n     let r = c_lock.read();\n     assert!(r.is_ok());\n }).join().unwrap();\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

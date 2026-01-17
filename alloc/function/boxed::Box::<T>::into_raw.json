@@ -1,0 +1,48 @@
+{
+  "name": "boxed::Box::<T>::into_raw",
+  "safe": true,
+  "callees": {
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::DerefMut::deref_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Mutably dereferences the value.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "boxed::Box": [
+      "Plain",
+      "MutRef",
+      "Deref",
+      "Unknown([Field(0, Ty { id: 176, kind: RigidTy(Adt(AdtDef(DefId { id: 2645, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) }), Field(0, Ty { id: 101, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "MutRef"
+    ]
+  },
+  "path": 369,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed.rs:1373:5: 1379:6",
+  "src": "pub fn into_raw(b: Self) -> *mut T {\n        // Avoid `into_raw_with_allocator` as that interacts poorly with Miri's Stacked Borrows.\n        let mut b = mem::ManuallyDrop::new(b);\n        // We go through the built-in deref for `Box`, which is crucial for Miri to recognize this\n        // operation for it's alias tracking.\n        &raw mut **b\n    }",
+  "mir": "fn boxed::Box::<T>::into_raw(_1: boxed::Box<T>) -> *mut T {\n    let mut _0: *mut T;\n    let mut _2: core::mem::ManuallyDrop<boxed::Box<T>>;\n    let mut _3: &mut boxed::Box<T>;\n    let mut _4: &mut core::mem::ManuallyDrop<boxed::Box<T>>;\n    let mut _5: boxed::Box<T>;\n    let mut _6: *const T;\n    debug b => _1;\n    debug b => _2;\n    bb0: {\n        StorageLive(_2);\n        _2 = core::mem::ManuallyDrop::<boxed::Box<T>>::new(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &mut _2;\n        _3 = <core::mem::ManuallyDrop<boxed::Box<T>> as core::ops::DerefMut>::deref_mut(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _5 = (*_3);\n        _6 = ((_5.0: core::ptr::Unique<T>).0: core::ptr::NonNull<T>) as *const T;\n        _0 = &raw mut (*_6);\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Consumes the `Box`, returning a wrapped raw pointer.\n\n The pointer will be properly aligned and non-null.\n\n After calling this function, the caller is responsible for the\n memory previously managed by the `Box`. In particular, the\n caller should properly destroy `T` and release the memory, taking\n into account the [memory layout] used by `Box`. The easiest way to\n do this is to convert the raw pointer back into a `Box` with the\n [`Box::from_raw`] function, allowing the `Box` destructor to perform\n the cleanup.\n\n Note: this is an associated function, which means that you have\n to call it as `Box::into_raw(b)` instead of `b.into_raw()`. This\n is so that there is no conflict with a method on the inner type.\n\n # Examples\n Converting the raw pointer back into a `Box` with [`Box::from_raw`]\n for automatic cleanup:\n ```\n let x = Box::new(String::from(\"Hello\"));\n let ptr = Box::into_raw(x);\n let x = unsafe { Box::from_raw(ptr) };\n ```\n Manual cleanup by explicitly running the destructor and deallocating\n the memory:\n ```\n use std::alloc::{dealloc, Layout};\n use std::ptr;\n\n let x = Box::new(String::from(\"Hello\"));\n let ptr = Box::into_raw(x);\n unsafe {\n     ptr::drop_in_place(ptr);\n     dealloc(ptr as *mut u8, Layout::new::<String>());\n }\n ```\n Note: This is equivalent to the following:\n ```\n let x = Box::new(String::from(\"Hello\"));\n let ptr = Box::into_raw(x);\n unsafe {\n     drop(Box::from_raw(ptr));\n }\n ```\n\n [memory layout]: self#memory-layout\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

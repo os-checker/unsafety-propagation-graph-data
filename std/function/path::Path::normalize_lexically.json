@@ -1,0 +1,199 @@
+{
+  "name": "path::Path::normalize_lexically",
+  "safe": true,
+  "callees": {
+    "path::PathBuf::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Allocates an empty `PathBuf`.\n\n # Examples\n\n ```\n use std::path::PathBuf;\n\n let path = PathBuf::new();\n ```\n",
+      "adt": {
+        "path::PathBuf": "Constructor"
+      }
+    },
+    "path::Path::components": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Produces an iterator over the [`Component`]s of the path.\n\n When parsing the path, there is a small amount of normalization:\n\n * Repeated separators are ignored, so `a/b` and `a//b` both have\n   `a` and `b` as components.\n\n * Occurrences of `.` are normalized away, except if they are at the\n   beginning of the path. For example, `a/./b`, `a/b/`, `a/b/.` and\n   `a/b` all have `a` and `b` as components, but `./a/b` starts with\n   an additional [`CurDir`] component.\n\n * Trailing separators are normalized away, so `/a/b` and `/a/b/` are equivalent.\n\n Note that no other normalization takes place; in particular, `a/c`\n and `a/b/../c` are distinct, to account for the possibility that `b`\n is a symbolic link (so its parent isn't `a`).\n\n # Examples\n\n ```\n use std::path::{Path, Component};\n use std::ffi::OsStr;\n\n let mut components = Path::new(\"/tmp/foo.txt\").components();\n\n assert_eq!(components.next(), Some(Component::RootDir));\n assert_eq!(components.next(), Some(Component::Normal(OsStr::new(\"tmp\"))));\n assert_eq!(components.next(), Some(Component::Normal(OsStr::new(\"foo.txt\"))));\n assert_eq!(components.next(), None)\n ```\n\n [`CurDir`]: Component::CurDir\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument",
+        "path::Components": "Constructor"
+      }
+    },
+    "core::iter::Iterator::peekable": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator which can use the [`peek`] and [`peek_mut`] methods\n to look at the next element of the iterator without consuming it. See\n their documentation for more information.\n\n Note that the underlying iterator is still advanced when [`peek`] or\n [`peek_mut`] are called for the first time: In order to retrieve the\n next element, [`next`] is called on the underlying iterator, hence any\n side effects (i.e. anything other than fetching the next value) of\n the [`next`] method will occur.\n\n\n # Examples\n\n Basic usage:\n\n ```\n let xs = [1, 2, 3];\n\n let mut iter = xs.into_iter().peekable();\n\n // peek() lets us see into the future\n assert_eq!(iter.peek(), Some(&1));\n assert_eq!(iter.next(), Some(1));\n\n assert_eq!(iter.next(), Some(2));\n\n // we can peek() multiple times, the iterator won't advance\n assert_eq!(iter.peek(), Some(&3));\n assert_eq!(iter.peek(), Some(&3));\n\n assert_eq!(iter.next(), Some(3));\n\n // after the iterator is finished, so is peek()\n assert_eq!(iter.peek(), None);\n assert_eq!(iter.next(), None);\n ```\n\n Using [`peek_mut`] to mutate the next item without advancing the\n iterator:\n\n ```\n let xs = [1, 2, 3];\n\n let mut iter = xs.into_iter().peekable();\n\n // `peek_mut()` lets us see into the future\n assert_eq!(iter.peek_mut(), Some(&mut 1));\n assert_eq!(iter.peek_mut(), Some(&mut 1));\n assert_eq!(iter.next(), Some(1));\n\n if let Some(p) = iter.peek_mut() {\n     assert_eq!(*p, 2);\n     // put a value into the iterator\n     *p = 1000;\n }\n\n // The value reappears as the iterator continues\n assert_eq!(iter.collect::<Vec<_>>(), vec![1000, 3]);\n ```\n [`peek`]: Peekable::peek\n [`peek_mut`]: Peekable::peek_mut\n [`next`]: Iterator::next\n",
+      "adt": {}
+    },
+    "core::iter::Peekable::<I>::peek": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the next() value without advancing the iterator.\n\n Like [`next`], if there is a value, it is wrapped in a `Some(T)`.\n But if the iteration is over, `None` is returned.\n\n [`next`]: Iterator::next\n\n Because `peek()` returns a reference, and many iterators iterate over\n references, there can be a possibly confusing situation where the\n return value is a double reference. You can see this effect in the\n examples below.\n\n # Examples\n\n Basic usage:\n\n ```\n let xs = [1, 2, 3];\n\n let mut iter = xs.iter().peekable();\n\n // peek() lets us see into the future\n assert_eq!(iter.peek(), Some(&&1));\n assert_eq!(iter.next(), Some(&1));\n\n assert_eq!(iter.next(), Some(&2));\n\n // The iterator does not advance even if we `peek` multiple times\n assert_eq!(iter.peek(), Some(&&3));\n assert_eq!(iter.peek(), Some(&&3));\n\n assert_eq!(iter.next(), Some(&3));\n\n // After the iterator is finished, so is `peek()`\n assert_eq!(iter.peek(), None);\n assert_eq!(iter.next(), None);\n ```\n",
+      "adt": {}
+    },
+    "path::PrefixComponent::<'a>::as_os_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the raw [`OsStr`] slice for this prefix.\n",
+      "adt": {
+        "path::PrefixComponent": "ImmutableAsArgument"
+      }
+    },
+    "path::PathBuf::push": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extends `self` with `path`.\n\n If `path` is absolute, it replaces the current path.\n\n On Windows:\n\n * if `path` has a root but no prefix (e.g., `\\windows`), it\n   replaces everything except for the prefix (if any) of `self`.\n * if `path` has a prefix but no root, it replaces `self`.\n * if `self` has a verbatim prefix (e.g. `\\\\?\\C:\\windows`)\n   and `path` is not empty, the new path is normalized: all references\n   to `.` and `..` are removed.\n\n Consider using [`Path::join`] if you need a new `PathBuf` instead of\n using this function on a cloned `PathBuf`.\n\n # Examples\n\n Pushing a relative path extends the existing path:\n\n ```\n use std::path::PathBuf;\n\n let mut path = PathBuf::from(\"/tmp\");\n path.push(\"file.bk\");\n assert_eq!(path, PathBuf::from(\"/tmp/file.bk\"));\n ```\n\n Pushing an absolute path replaces the existing path:\n\n ```\n use std::path::PathBuf;\n\n let mut path = PathBuf::from(\"/tmp\");\n path.push(\"/etc\");\n assert_eq!(path, PathBuf::from(\"/etc\"));\n ```\n",
+      "adt": {
+        "path::PathBuf": "MutableAsArgument"
+      }
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "path::Path::as_os_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Yields the underlying [`OsStr`] slice.\n\n # Examples\n\n ```\n use std::path::Path;\n\n let os_str = Path::new(\"foo.txt\").as_os_str();\n assert_eq!(os_str, std::ffi::OsStr::new(\"foo.txt\"));\n ```\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument"
+      }
+    },
+    "ffi::os_str::OsStr::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of this `OsStr`.\n\n Note that this does **not** return the number of bytes in the string in\n OS string form.\n\n The length returned is that of the underlying storage used by `OsStr`.\n As discussed in the [`OsString`] introduction, [`OsString`] and `OsStr`\n store strings in a form best suited for cheap inter-conversion between\n native-platform and Rust string forms, which may differ significantly\n from both of them, including in storage size and encoding.\n\n This number is simply useful for passing to other methods, like\n [`OsString::with_capacity`] to avoid reallocations.\n\n See the main `OsString` documentation information about encoding and capacity units.\n\n # Examples\n\n ```\n use std::ffi::OsStr;\n\n let os_str = OsStr::new(\"\");\n assert_eq!(os_str.len(), 0);\n\n let os_str = OsStr::new(\"foo\");\n assert_eq!(os_str.len(), 3);\n ```\n",
+      "adt": {
+        "ffi::os_str::OsStr": "ImmutableAsArgument"
+      }
+    },
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::panicking::panic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The underlying implementation of core's `panic!` macro when no formatting is used.\n",
+      "adt": {}
+    },
+    "path::PathBuf::pop": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Truncates `self` to [`self.parent`].\n\n Returns `false` and does nothing if [`self.parent`] is [`None`].\n Otherwise, returns `true`.\n\n [`self.parent`]: Path::parent\n\n # Examples\n\n ```\n use std::path::{Path, PathBuf};\n\n let mut p = PathBuf::from(\"/spirited/away.rs\");\n\n p.pop();\n assert_eq!(Path::new(\"/spirited\"), p);\n p.pop();\n assert_eq!(Path::new(\"/\"), p);\n ```\n",
+      "adt": {
+        "path::PathBuf": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "path::PathBuf": [
+      "Plain",
+      "MutRef",
+      "Ref"
+    ],
+    "path::Path": [
+      "Ref"
+    ],
+    "path::Components": [
+      "Plain"
+    ],
+    "core::iter::Peekable": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 9340, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 9333, kind: RigidTy(Adt(AdtDef(DefId { id: 8722, name: \"path::Component\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 9333, kind: RigidTy(Adt(AdtDef(DefId { id: 8722, name: \"path::Component\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])"
+    ],
+    "path::Component": [
+      "Ref",
+      "Deref",
+      "Unknown([Deref, Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 9391, kind: RigidTy(Adt(AdtDef(DefId { id: 8740, name: \"path::PrefixComponent\" }), GenericArgs([Lifetime(Region { kind: ReErased })]))) })])",
+      "Plain",
+      "Unknown([Downcast(VariantIdx(4, ThreadLocalIndex)), Field(0, Ty { id: 2802, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 2803, kind: RigidTy(Adt(AdtDef(DefId { id: 5587, name: \"ffi::os_str::OsStr\" }), GenericArgs([]))) }, Not)) })])"
+    ],
+    "path::PrefixComponent": [
+      "Ref"
+    ],
+    "ffi::os_str::OsStr": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 2444,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:3292:5: 3336:6",
+  "src": "pub fn normalize_lexically(&self) -> Result<PathBuf, NormalizeError> {\n        let mut lexical = PathBuf::new();\n        let mut iter = self.components().peekable();\n\n        // Find the root, if any, and add it to the lexical path.\n        // Here we treat the Windows path \"C:\\\" as a single \"root\" even though\n        // `components` splits it into two: (Prefix, RootDir).\n        let root = match iter.peek() {\n            Some(Component::ParentDir) => return Err(NormalizeError),\n            Some(p @ Component::RootDir) | Some(p @ Component::CurDir) => {\n                lexical.push(p);\n                iter.next();\n                lexical.as_os_str().len()\n            }\n            Some(Component::Prefix(prefix)) => {\n                lexical.push(prefix.as_os_str());\n                iter.next();\n                if let Some(p @ Component::RootDir) = iter.peek() {\n                    lexical.push(p);\n                    iter.next();\n                }\n                lexical.as_os_str().len()\n            }\n            None => return Ok(PathBuf::new()),\n            Some(Component::Normal(_)) => 0,\n        };\n\n        for component in iter {\n            match component {\n                Component::RootDir => unreachable!(),\n                Component::Prefix(_) => return Err(NormalizeError),\n                Component::CurDir => continue,\n                Component::ParentDir => {\n                    // It's an error if ParentDir causes us to go above the \"root\".\n                    if lexical.as_os_str().len() == root {\n                        return Err(NormalizeError);\n                    } else {\n                        lexical.pop();\n                    }\n                }\n                Component::Normal(path) => lexical.push(path),\n            }\n        }\n        Ok(lexical)\n    }",
+  "mir": "fn path::Path::normalize_lexically(_1: &path::Path) -> core::result::Result<path::PathBuf, path::NormalizeError> {\n    let mut _0: core::result::Result<path::PathBuf, path::NormalizeError>;\n    let mut _2: path::PathBuf;\n    let mut _3: core::iter::Peekable<path::Components<'_>>;\n    let mut _4: path::Components<'_>;\n    let  _5: usize;\n    let mut _6: core::option::Option<&path::Component<'_>>;\n    let mut _7: &mut core::iter::Peekable<path::Components<'_>>;\n    let mut _8: isize;\n    let mut _9: isize;\n    let  _10: &path::Component<'_>;\n    let  _11: ();\n    let mut _12: &mut path::PathBuf;\n    let mut _13: &path::Component<'_>;\n    let  _14: core::option::Option<path::Component<'_>>;\n    let mut _15: &mut core::iter::Peekable<path::Components<'_>>;\n    let  _16: &ffi::os_str::OsStr;\n    let  _17: &path::Path;\n    let mut _18: &path::PathBuf;\n    let  _19: &path::PrefixComponent<'_>;\n    let  _20: ();\n    let mut _21: &mut path::PathBuf;\n    let mut _22: &ffi::os_str::OsStr;\n    let  _23: core::option::Option<path::Component<'_>>;\n    let mut _24: &mut core::iter::Peekable<path::Components<'_>>;\n    let mut _25: core::option::Option<&path::Component<'_>>;\n    let mut _26: &mut core::iter::Peekable<path::Components<'_>>;\n    let mut _27: isize;\n    let mut _28: isize;\n    let  _29: &path::Component<'_>;\n    let  _30: ();\n    let mut _31: &mut path::PathBuf;\n    let  _32: core::option::Option<path::Component<'_>>;\n    let mut _33: &mut core::iter::Peekable<path::Components<'_>>;\n    let  _34: &ffi::os_str::OsStr;\n    let  _35: &path::Path;\n    let mut _36: &path::PathBuf;\n    let mut _37: path::PathBuf;\n    let mut _38: core::iter::Peekable<path::Components<'_>>;\n    let mut _39: core::iter::Peekable<path::Components<'_>>;\n    let mut _40: core::iter::Peekable<path::Components<'_>>;\n    let  _41: ();\n    let mut _42: core::option::Option<path::Component<'_>>;\n    let mut _43: &mut core::iter::Peekable<path::Components<'_>>;\n    let mut _44: isize;\n    let  _45: path::Component<'_>;\n    let mut _46: isize;\n    let mut _47: !;\n    let mut _48: bool;\n    let mut _49: usize;\n    let  _50: &ffi::os_str::OsStr;\n    let  _51: &path::Path;\n    let mut _52: &path::PathBuf;\n    let mut _53: usize;\n    let  _54: bool;\n    let mut _55: &mut path::PathBuf;\n    let  _56: &ffi::os_str::OsStr;\n    let mut _57: &mut path::PathBuf;\n    let mut _58: path::PathBuf;\n    let mut _59: &path::Component<'_>;\n    let mut _60: &path::Component<'_>;\n    let mut _61: &path::Component<'_>;\n    debug self => _1;\n    debug lexical => _2;\n    debug iter => _3;\n    debug root => _5;\n    debug p => _10;\n    debug prefix => _19;\n    debug p => _29;\n    debug iter => _40;\n    debug component => _45;\n    debug path => _56;\n    bb0: {\n        StorageLive(_2);\n        _2 = path::PathBuf::new() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = path::Path::components(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _3 = <path::Components<'_> as core::iter::Iterator>::peekable(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &mut _3;\n        _6 = core::iter::Peekable::<path::Components<'_>>::peek(move _7) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_7);\n        _9 = discriminant(_6);\n        switchInt(move _9) -> [0: bb8, 1: bb6, otherwise: bb5];\n    }\n    bb5: {\n        unreachable;\n    }\n    bb6: {\n        _59 = ((_6 as variant#1).0: &path::Component<'_>);\n        _8 = discriminant((*_59));\n        switchInt(move _8) -> [0: bb9, 1: bb11, 2: bb10, 3: bb12, 4: bb7, otherwise: bb5];\n    }\n    bb7: {\n        _5 = 0_usize;\n        goto -> bb33;\n    }\n    bb8: {\n        StorageLive(_37);\n        _37 = path::PathBuf::new() -> [return: bb32, unwind unreachable];\n    }\n    bb9: {\n        _60 = ((_6 as variant#1).0: &path::Component<'_>);\n        _19 = &(((*_60) as variant#0).0: path::PrefixComponent<'_>);\n        StorageLive(_21);\n        _21 = &mut _2;\n        StorageLive(_22);\n        _22 = path::PrefixComponent::<'_>::as_os_str(_19) -> [return: bb19, unwind unreachable];\n    }\n    bb10: {\n        StorageLive(_10);\n        _10 = ((_6 as variant#1).0: &path::Component<'_>);\n        goto -> bb13;\n    }\n    bb11: {\n        StorageLive(_10);\n        _10 = ((_6 as variant#1).0: &path::Component<'_>);\n        goto -> bb13;\n    }\n    bb12: {\n        _0 = core::result::Result::Err(path::NormalizeError);\n        goto -> bb53;\n    }\n    bb13: {\n        StorageLive(_12);\n        _12 = &mut _2;\n        StorageLive(_13);\n        _13 = _10;\n        _11 = path::PathBuf::push::<&path::Component<'_>>(move _12, move _13) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_13);\n        StorageDead(_12);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = &mut _3;\n        _14 = <core::iter::Peekable<path::Components<'_>> as core::iter::Iterator>::next(move _15) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_15);\n        StorageDead(_14);\n        StorageLive(_18);\n        _18 = &_2;\n        _17 = <path::PathBuf as core::ops::Deref>::deref(move _18) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        StorageDead(_18);\n        _16 = path::Path::as_os_str(_17) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        _5 = ffi::os_str::OsStr::len(_16) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_10);\n        goto -> bb33;\n    }\n    bb19: {\n        _20 = path::PathBuf::push::<&ffi::os_str::OsStr>(move _21, move _22) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageDead(_22);\n        StorageDead(_21);\n        StorageLive(_23);\n        StorageLive(_24);\n        _24 = &mut _3;\n        _23 = <core::iter::Peekable<path::Components<'_>> as core::iter::Iterator>::next(move _24) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_24);\n        StorageDead(_23);\n        StorageLive(_25);\n        StorageLive(_26);\n        _26 = &mut _3;\n        _25 = core::iter::Peekable::<path::Components<'_>>::peek(move _26) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_26);\n        _28 = discriminant(_25);\n        switchInt(move _28) -> [1: bb23, 0: bb27, otherwise: bb5];\n    }\n    bb23: {\n        _61 = ((_25 as variant#1).0: &path::Component<'_>);\n        _27 = discriminant((*_61));\n        switchInt(move _27) -> [1: bb24, otherwise: bb27];\n    }\n    bb24: {\n        _29 = ((_25 as variant#1).0: &path::Component<'_>);\n        StorageLive(_31);\n        _31 = &mut _2;\n        _30 = path::PathBuf::push::<&path::Component<'_>>(move _31, _29) -> [return: bb25, unwind unreachable];\n    }\n    bb25: {\n        StorageDead(_31);\n        StorageLive(_32);\n        StorageLive(_33);\n        _33 = &mut _3;\n        _32 = <core::iter::Peekable<path::Components<'_>> as core::iter::Iterator>::next(move _33) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        StorageDead(_33);\n        StorageDead(_32);\n        StorageDead(_25);\n        goto -> bb28;\n    }\n    bb27: {\n        StorageDead(_25);\n        goto -> bb28;\n    }\n    bb28: {\n        StorageLive(_36);\n        _36 = &_2;\n        _35 = <path::PathBuf as core::ops::Deref>::deref(move _36) -> [return: bb29, unwind unreachable];\n    }\n    bb29: {\n        StorageDead(_36);\n        _34 = path::Path::as_os_str(_35) -> [return: bb30, unwind unreachable];\n    }\n    bb30: {\n        _5 = ffi::os_str::OsStr::len(_34) -> [return: bb31, unwind unreachable];\n    }\n    bb31: {\n        goto -> bb33;\n    }\n    bb32: {\n        _0 = core::result::Result::Ok(move _37);\n        StorageDead(_37);\n        goto -> bb53;\n    }\n    bb33: {\n        StorageDead(_6);\n        StorageLive(_38);\n        StorageLive(_39);\n        _39 = move _3;\n        _38 = <core::iter::Peekable<path::Components<'_>> as core::iter::IntoIterator>::into_iter(move _39) -> [return: bb34, unwind unreachable];\n    }\n    bb34: {\n        StorageDead(_39);\n        StorageLive(_40);\n        _40 = move _38;\n        goto -> bb35;\n    }\n    bb35: {\n        StorageLive(_42);\n        _43 = &mut _40;\n        _42 = <core::iter::Peekable<path::Components<'_>> as core::iter::Iterator>::next(_43) -> [return: bb36, unwind unreachable];\n    }\n    bb36: {\n        _44 = discriminant(_42);\n        switchInt(move _44) -> [0: bb38, 1: bb37, otherwise: bb5];\n    }\n    bb37: {\n        StorageLive(_45);\n        _45 = ((_42 as variant#1).0: path::Component<'_>);\n        _46 = discriminant(_45);\n        switchInt(move _46) -> [0: bb41, 1: bb42, 2: bb51, 3: bb40, 4: bb39, otherwise: bb5];\n    }\n    bb38: {\n        StorageDead(_42);\n        StorageDead(_40);\n        StorageDead(_38);\n        StorageLive(_58);\n        _58 = move _2;\n        _0 = core::result::Result::Ok(move _58);\n        StorageDead(_58);\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageDead(_2);\n        goto -> bb56;\n    }\n    bb39: {\n        _56 = ((_45 as variant#4).0: &ffi::os_str::OsStr);\n        StorageLive(_57);\n        _57 = &mut _2;\n        _41 = path::PathBuf::push::<&ffi::os_str::OsStr>(move _57, _56) -> [return: bb49, unwind unreachable];\n    }\n    bb40: {\n        StorageLive(_48);\n        StorageLive(_49);\n        StorageLive(_52);\n        _52 = &_2;\n        _51 = <path::PathBuf as core::ops::Deref>::deref(move _52) -> [return: bb43, unwind unreachable];\n    }\n    bb41: {\n        _0 = core::result::Result::Err(path::NormalizeError);\n        goto -> bb52;\n    }\n    bb42: {\n        _47 = core::panicking::panic(\"internal error: entered unreachable code\") -> unwind unreachable;\n    }\n    bb43: {\n        StorageDead(_52);\n        _50 = path::Path::as_os_str(_51) -> [return: bb44, unwind unreachable];\n    }\n    bb44: {\n        _49 = ffi::os_str::OsStr::len(_50) -> [return: bb45, unwind unreachable];\n    }\n    bb45: {\n        StorageLive(_53);\n        _53 = _5;\n        _48 = Eq(move _49, move _53);\n        switchInt(move _48) -> [0: bb47, otherwise: bb46];\n    }\n    bb46: {\n        StorageDead(_53);\n        StorageDead(_49);\n        _0 = core::result::Result::Err(path::NormalizeError);\n        StorageDead(_48);\n        goto -> bb52;\n    }\n    bb47: {\n        StorageDead(_53);\n        StorageDead(_49);\n        StorageLive(_54);\n        StorageLive(_55);\n        _55 = &mut _2;\n        _54 = path::PathBuf::pop(move _55) -> [return: bb48, unwind unreachable];\n    }\n    bb48: {\n        StorageDead(_55);\n        StorageDead(_54);\n        StorageDead(_48);\n        goto -> bb50;\n    }\n    bb49: {\n        StorageDead(_57);\n        goto -> bb50;\n    }\n    bb50: {\n        StorageDead(_45);\n        StorageDead(_42);\n        goto -> bb35;\n    }\n    bb51: {\n        StorageDead(_45);\n        StorageDead(_42);\n        goto -> bb35;\n    }\n    bb52: {\n        StorageDead(_45);\n        StorageDead(_42);\n        StorageDead(_40);\n        StorageDead(_38);\n        goto -> bb54;\n    }\n    bb53: {\n        StorageDead(_6);\n        goto -> bb54;\n    }\n    bb54: {\n        StorageDead(_5);\n        StorageDead(_3);\n        drop(_2) -> [return: bb55, unwind unreachable];\n    }\n    bb55: {\n        StorageDead(_2);\n        goto -> bb56;\n    }\n    bb56: {\n        return;\n    }\n}\n",
+  "doc": " Normalize a path, including `..` without traversing the filesystem.\n\n Returns an error if normalization would leave leading `..` components.\n\n <div class=\"warning\">\n\n This function always resolves `..` to the \"lexical\" parent.\n That is \"a/b/../c\" will always resolve to `a/c` which can change the meaning of the path.\n In particular, `a/c` and `a/b/../c` are distinct on many systems because `b` may be a symbolic link, so its parent isn't `a`.\n\n </div>\n\n [`path::absolute`](absolute) is an alternative that preserves `..`.\n Or [`Path::canonicalize`] can be used to resolve any `..` by querying the filesystem.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "name": "collections::binary_heap::BinaryHeap::<T, A>::rebuild_tail",
+  "safe": true,
+  "callees": {
+    "collections::binary_heap::BinaryHeap::<T, A>::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of the binary heap.\n\n # Examples\n\n Basic usage:\n\n ```\n use std::collections::BinaryHeap;\n let heap = BinaryHeap::from([1, 3]);\n\n assert_eq!(heap.len(), 2);\n ```\n",
+      "adt": {
+        "collections::binary_heap::BinaryHeap": "ImmutableAsArgument"
+      }
+    },
+    "collections::binary_heap::BinaryHeap::<T, A>::rebuild_tail::log2_fast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "collections::binary_heap::BinaryHeap::<T, A>::rebuild": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "collections::binary_heap::BinaryHeap": "MutableAsArgument"
+      }
+    },
+    "core::iter::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "core::iter::Iterator::next": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Advances the iterator and returns the next value.\n\n Returns [`None`] when iteration is finished. Individual iterator\n implementations may choose to resume iteration, and so calling `next()`\n again may or may not eventually start returning [`Some(Item)`] again at some\n point.\n\n [`Some(Item)`]: Some\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.into_iter();\n\n // A call to next() returns the next value...\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n\n // ... and then None once it's over.\n assert_eq!(None, iter.next());\n\n // More calls may or may not return `None`. Here, they always will.\n assert_eq!(None, iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "collections::binary_heap::BinaryHeap::<T, A>::sift_up": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " # Safety\n\n The caller must guarantee that `pos < self.len()`.\n\n Returns the new position of the element.\n",
+      "adt": {
+        "collections::binary_heap::BinaryHeap": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "collections::binary_heap::BinaryHeap": [
+      "Ref",
+      "Deref",
+      "MutRef"
+    ],
+    "core::ops::Range": [
+      "Plain",
+      "MutRef"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])"
+    ]
+  },
+  "path": 463,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/collections/binary_heap/mod.rs:871:5: 905:6",
+  "src": "fn rebuild_tail(&mut self, start: usize) {\n        if start == self.len() {\n            return;\n        }\n\n        let tail_len = self.len() - start;\n\n        #[inline(always)]\n        fn log2_fast(x: usize) -> usize {\n            (usize::BITS - x.leading_zeros() - 1) as usize\n        }\n\n        // `rebuild` takes O(self.len()) operations\n        // and about 2 * self.len() comparisons in the worst case\n        // while repeating `sift_up` takes O(tail_len * log(start)) operations\n        // and about 1 * tail_len * log_2(start) comparisons in the worst case,\n        // assuming start >= tail_len. For larger heaps, the crossover point\n        // no longer follows this reasoning and was determined empirically.\n        let better_to_rebuild = if start < tail_len {\n            true\n        } else if self.len() <= 2048 {\n            2 * self.len() < tail_len * log2_fast(start)\n        } else {\n            2 * self.len() < tail_len * 11\n        };\n\n        if better_to_rebuild {\n            self.rebuild();\n        } else {\n            for i in start..self.len() {\n                // SAFETY: The index `i` is always less than self.len().\n                unsafe { self.sift_up(0, i) };\n            }\n        }\n    }",
+  "mir": "fn collections::binary_heap::BinaryHeap::<T, A>::rebuild_tail(_1: &mut collections::binary_heap::BinaryHeap<T, A>, _2: usize) -> () {\n    let mut _0: ();\n    let mut _3: bool;\n    let mut _4: usize;\n    let mut _5: &collections::binary_heap::BinaryHeap<T, A>;\n    let  _6: usize;\n    let mut _7: usize;\n    let mut _8: &collections::binary_heap::BinaryHeap<T, A>;\n    let mut _9: (usize, bool);\n    let  _10: bool;\n    let mut _11: bool;\n    let mut _12: bool;\n    let mut _13: usize;\n    let mut _14: &collections::binary_heap::BinaryHeap<T, A>;\n    let mut _15: usize;\n    let mut _16: usize;\n    let mut _17: &collections::binary_heap::BinaryHeap<T, A>;\n    let mut _18: (usize, bool);\n    let mut _19: usize;\n    let mut _20: usize;\n    let mut _21: (usize, bool);\n    let mut _22: usize;\n    let mut _23: usize;\n    let mut _24: &collections::binary_heap::BinaryHeap<T, A>;\n    let mut _25: (usize, bool);\n    let mut _26: usize;\n    let mut _27: (usize, bool);\n    let mut _28: bool;\n    let  _29: ();\n    let mut _30: core::ops::Range<usize>;\n    let mut _31: core::ops::Range<usize>;\n    let mut _32: usize;\n    let mut _33: &collections::binary_heap::BinaryHeap<T, A>;\n    let mut _34: core::ops::Range<usize>;\n    let mut _35: core::option::Option<usize>;\n    let mut _36: &mut core::ops::Range<usize>;\n    let mut _37: isize;\n    let  _38: usize;\n    let  _39: usize;\n    debug self => _1;\n    debug start => _2;\n    debug tail_len => _6;\n    debug better_to_rebuild => _10;\n    debug iter => _34;\n    debug i => _38;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &(*_1);\n        _4 = collections::binary_heap::BinaryHeap::<T, A>::len(move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        _3 = Eq(_2, move _4);\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb32;\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageDead(_3);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = &(*_1);\n        _7 = collections::binary_heap::BinaryHeap::<T, A>::len(move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        _9 = CheckedSub(_7, _2);\n        assert(!move (_9.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _7, _2) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _6 = move (_9.0: usize);\n        StorageDead(_7);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = Lt(_2, _6);\n        switchInt(move _11) -> [0: bb7, otherwise: bb6];\n    }\n    bb6: {\n        _10 = true;\n        goto -> bb19;\n    }\n    bb7: {\n        StorageLive(_12);\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = &(*_1);\n        _13 = collections::binary_heap::BinaryHeap::<T, A>::len(move _14) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_14);\n        _12 = Le(move _13, 2048_usize);\n        switchInt(move _12) -> [0: bb14, otherwise: bb9];\n    }\n    bb9: {\n        StorageDead(_13);\n        StorageLive(_15);\n        StorageLive(_16);\n        StorageLive(_17);\n        _17 = &(*_1);\n        _16 = collections::binary_heap::BinaryHeap::<T, A>::len(move _17) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_17);\n        _18 = CheckedMul(2_usize, _16);\n        assert(!move (_18.1: bool), \"attempt to compute `{} * {}`, which would overflow\", 2_usize, move _16) -> [success: bb11, unwind unreachable];\n    }\n    bb11: {\n        _15 = move (_18.0: usize);\n        StorageDead(_16);\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = collections::binary_heap::BinaryHeap::<T, A>::rebuild_tail::log2_fast(_2) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        _21 = CheckedMul(_6, _20);\n        assert(!move (_21.1: bool), \"attempt to compute `{} * {}`, which would overflow\", _6, move _20) -> [success: bb13, unwind unreachable];\n    }\n    bb13: {\n        _19 = move (_21.0: usize);\n        StorageDead(_20);\n        _10 = Lt(move _15, move _19);\n        StorageDead(_19);\n        StorageDead(_15);\n        goto -> bb18;\n    }\n    bb14: {\n        StorageDead(_13);\n        StorageLive(_22);\n        StorageLive(_23);\n        StorageLive(_24);\n        _24 = &(*_1);\n        _23 = collections::binary_heap::BinaryHeap::<T, A>::len(move _24) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_24);\n        _25 = CheckedMul(2_usize, _23);\n        assert(!move (_25.1: bool), \"attempt to compute `{} * {}`, which would overflow\", 2_usize, move _23) -> [success: bb16, unwind unreachable];\n    }\n    bb16: {\n        _22 = move (_25.0: usize);\n        StorageDead(_23);\n        StorageLive(_26);\n        _27 = CheckedMul(_6, 11_usize);\n        assert(!move (_27.1: bool), \"attempt to compute `{} * {}`, which would overflow\", _6, 11_usize) -> [success: bb17, unwind unreachable];\n    }\n    bb17: {\n        _26 = move (_27.0: usize);\n        _10 = Lt(move _22, move _26);\n        StorageDead(_26);\n        StorageDead(_22);\n        goto -> bb18;\n    }\n    bb18: {\n        StorageDead(_12);\n        goto -> bb19;\n    }\n    bb19: {\n        StorageDead(_11);\n        StorageLive(_28);\n        _28 = _10;\n        switchInt(move _28) -> [0: bb22, otherwise: bb20];\n    }\n    bb20: {\n        _29 = collections::binary_heap::BinaryHeap::<T, A>::rebuild(_1) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        goto -> bb31;\n    }\n    bb22: {\n        StorageLive(_30);\n        StorageLive(_31);\n        StorageLive(_32);\n        StorageLive(_33);\n        _33 = &(*_1);\n        _32 = collections::binary_heap::BinaryHeap::<T, A>::len(move _33) -> [return: bb23, unwind unreachable];\n    }\n    bb23: {\n        StorageDead(_33);\n        _31 = Range(_2, move _32);\n        StorageDead(_32);\n        _30 = <core::ops::Range<usize> as core::iter::IntoIterator>::into_iter(move _31) -> [return: bb24, unwind unreachable];\n    }\n    bb24: {\n        StorageDead(_31);\n        StorageLive(_34);\n        _34 = move _30;\n        goto -> bb25;\n    }\n    bb25: {\n        StorageLive(_35);\n        _36 = &mut _34;\n        _35 = <core::ops::Range<usize> as core::iter::Iterator>::next(_36) -> [return: bb26, unwind unreachable];\n    }\n    bb26: {\n        _37 = discriminant(_35);\n        switchInt(move _37) -> [0: bb29, 1: bb28, otherwise: bb27];\n    }\n    bb27: {\n        unreachable;\n    }\n    bb28: {\n        _38 = ((_35 as variant#1).0: usize);\n        StorageLive(_39);\n        _39 = collections::binary_heap::BinaryHeap::<T, A>::sift_up(_1, 0_usize, _38) -> [return: bb30, unwind unreachable];\n    }\n    bb29: {\n        StorageDead(_35);\n        StorageDead(_34);\n        StorageDead(_30);\n        goto -> bb31;\n    }\n    bb30: {\n        StorageDead(_39);\n        StorageDead(_35);\n        goto -> bb25;\n    }\n    bb31: {\n        StorageDead(_28);\n        StorageDead(_10);\n        goto -> bb32;\n    }\n    bb32: {\n        return;\n    }\n}\n",
+  "doc": " Rebuild assuming data[0..start] is still a proper heap.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

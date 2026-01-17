@@ -1,0 +1,141 @@
+{
+  "name": "alloc::Allocator::grow",
+  "safe": false,
+  "callees": {
+    "alloc::layout::Layout::size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The minimum size in bytes for a memory block of this layout.\n",
+      "adt": {
+        "alloc::layout::Layout": "ImmutableAsArgument"
+      }
+    },
+    "alloc::Allocator::allocate": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to allocate a block of memory.\n\n On success, returns a [`NonNull<[u8]>`][NonNull] meeting the size and alignment guarantees of `layout`.\n\n The returned block may have a larger size than specified by `layout.size()`, and may or may\n not have its contents initialized.\n\n The returned block of memory remains valid as long as it is [*currently allocated*] and the shorter of:\n   - the borrow-checker lifetime of the allocator type itself.\n   - as long as the allocator and all its clones have not been dropped.\n\n [*currently allocated*]: #currently-allocated-memory\n\n # Errors\n\n Returning `Err` indicates that either memory is exhausted or `layout` does not meet\n allocator's size or alignment constraints.\n\n Implementations are encouraged to return `Err` on memory exhaustion rather than panicking or\n aborting, but this is not a strict requirement. (Specifically: it is *legal* to implement\n this trait atop an underlying native allocation library that aborts on memory exhaustion.)\n\n Clients wishing to abort computation in response to an allocation error are encouraged to\n call the [`handle_alloc_error`] function, rather than directly invoking `panic!` or similar.\n\n [`handle_alloc_error`]: ../../alloc/alloc/fn.handle_alloc_error.html\n",
+      "adt": {}
+    },
+    "fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {
+        "fmt::Arguments": "ImmutableAsArgument"
+      }
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "ptr::non_null::NonNull::<[T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a raw pointer to the slice's buffer.\n\n # Examples\n\n ```rust\n #![feature(slice_ptr_get)]\n use std::ptr::NonNull;\n\n let slice: NonNull<[i8]> = NonNull::slice_from_raw_parts(NonNull::dangling(), 3);\n assert_eq!(slice.as_mut_ptr(), NonNull::<i8>::dangling().as_ptr());\n ```\n",
+      "adt": {}
+    },
+    "ptr::copy_nonoverlapping": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies `count * size_of::<T>()` bytes from `src` to `dst`. The source\n and destination must *not* overlap.\n\n For regions of memory which might overlap, use [`copy`] instead.\n\n `copy_nonoverlapping` is semantically equivalent to C's [`memcpy`], but\n with the source and destination arguments swapped,\n and `count` counting the number of `T`s instead of bytes.\n\n The copy is \"untyped\" in the sense that data may be uninitialized or otherwise violate the\n requirements of `T`. The initialization state is preserved exactly.\n\n [`memcpy`]: https://en.cppreference.com/w/c/string/byte/memcpy\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `src` must be [valid] for reads of `count * size_of::<T>()` bytes.\n\n * `dst` must be [valid] for writes of `count * size_of::<T>()` bytes.\n\n * Both `src` and `dst` must be properly aligned.\n\n * The region of memory beginning at `src` with a size of `count *\n   size_of::<T>()` bytes must *not* overlap with the region of memory\n   beginning at `dst` with the same size.\n\n Like [`read`], `copy_nonoverlapping` creates a bitwise copy of `T`, regardless of\n whether `T` is [`Copy`]. If `T` is not [`Copy`], using *both* the values\n in the region beginning at `*src` and the region beginning at `*dst` can\n [violate memory safety][read-ownership].\n\n Note that even if the effectively copied size (`count * size_of::<T>()`) is\n `0`, the pointers must be properly aligned.\n\n [`read`]: crate::ptr::read\n [read-ownership]: crate::ptr::read#ownership-of-the-returned-value\n [valid]: crate::ptr#safety\n\n # Examples\n\n Manually implement [`Vec::append`]:\n\n ```\n use std::ptr;\n\n /// Moves all the elements of `src` into `dst`, leaving `src` empty.\n fn append<T>(dst: &mut Vec<T>, src: &mut Vec<T>) {\n     let src_len = src.len();\n     let dst_len = dst.len();\n\n     // Ensure that `dst` has enough capacity to hold all of `src`.\n     dst.reserve(src_len);\n\n     unsafe {\n         // The call to add is always safe because `Vec` will never\n         // allocate more than `isize::MAX` bytes.\n         let dst_ptr = dst.as_mut_ptr().add(dst_len);\n         let src_ptr = src.as_ptr();\n\n         // Truncate `src` without dropping its contents. We do this first,\n         // to avoid problems in case something further down panics.\n         src.set_len(0);\n\n         // The two regions cannot overlap because mutable references do\n         // not alias, and two different vectors cannot own the same\n         // memory.\n         ptr::copy_nonoverlapping(src_ptr, dst_ptr, src_len);\n\n         // Notify `dst` that it now holds the contents of `src`.\n         dst.set_len(dst_len + src_len);\n     }\n }\n\n let mut a = vec!['r'];\n let mut b = vec!['u', 's', 't'];\n\n append(&mut a, &mut b);\n\n assert_eq!(a, &['r', 'u', 's', 't']);\n assert!(b.is_empty());\n ```\n\n [`Vec::append`]: ../../std/vec/struct.Vec.html#method.append\n",
+      "adt": {}
+    },
+    "alloc::Allocator::deallocate": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Deallocates the memory referenced by `ptr`.\n\n # Safety\n\n * `ptr` must denote a block of memory [*currently allocated*] via this allocator, and\n * `layout` must [*fit*] that block of memory.\n\n [*currently allocated*]: #currently-allocated-memory\n [*fit*]: #memory-fitting\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "alloc::layout::Layout": [
+      "Ref",
+      "Plain"
+    ],
+    "result::Result": [
+      "Plain"
+    ],
+    "fmt::Arguments": [
+      "Plain"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 16040, kind: RigidTy(Adt(AdtDef(DefId { id: 25106, name: \"ptr::non_null::NonNull\" }), GenericArgs([Type(Ty { id: 423, kind: RigidTy(Slice(Ty { id: 46, kind: RigidTy(Uint(U8)) })) })]))) })])"
+    ],
+    "ptr::non_null::NonNull": [
+      "Plain"
+    ]
+  },
+  "path": "alloc::Allocator::grow",
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/alloc/mod.rs:205:5: 229:6",
+  "src": "unsafe fn grow(\n        &self,\n        ptr: NonNull<u8>,\n        old_layout: Layout,\n        new_layout: Layout,\n    ) -> Result<NonNull<[u8]>, AllocError> {\n        debug_assert!(\n            new_layout.size() >= old_layout.size(),\n            \"`new_layout.size()` must be greater than or equal to `old_layout.size()`\"\n        );\n\n        let new_ptr = self.allocate(new_layout)?;\n\n        // SAFETY: because `new_layout.size()` must be greater than or equal to\n        // `old_layout.size()`, both the old and new memory allocation are valid for reads and\n        // writes for `old_layout.size()` bytes. Also, because the old allocation wasn't yet\n        // deallocated, it cannot overlap `new_ptr`. Thus, the call to `copy_nonoverlapping` is\n        // safe. The safety contract for `dealloc` must be upheld by the caller.\n        unsafe {\n            ptr::copy_nonoverlapping(ptr.as_ptr(), new_ptr.as_mut_ptr(), old_layout.size());\n            self.deallocate(ptr, old_layout);\n        }\n\n        Ok(new_ptr)\n    }",
+  "mir": "fn alloc::Allocator::grow(_1: &Self, _2: ptr::non_null::NonNull<u8>, _3: alloc::layout::Layout, _4: alloc::layout::Layout) -> result::Result<ptr::non_null::NonNull<[u8]>, alloc::AllocError> {\n    let mut _0: result::Result<ptr::non_null::NonNull<[u8]>, alloc::AllocError>;\n    let mut _5: bool;\n    let mut _6: usize;\n    let mut _7: &alloc::layout::Layout;\n    let mut _8: usize;\n    let mut _9: &alloc::layout::Layout;\n    let  _10: !;\n    let mut _11: fmt::Arguments<'_>;\n    let mut _12: ops::control_flow::ControlFlow<result::Result<convert::Infallible, alloc::AllocError>, ptr::non_null::NonNull<[u8]>>;\n    let mut _13: result::Result<ptr::non_null::NonNull<[u8]>, alloc::AllocError>;\n    let mut _14: isize;\n    let  _15: ptr::non_null::NonNull<[u8]>;\n    let  _16: ();\n    let mut _17: *const u8;\n    let mut _18: *mut u8;\n    let mut _19: *mut u8;\n    let mut _20: usize;\n    let mut _21: &alloc::layout::Layout;\n    let  _22: ();\n    debug self => _1;\n    debug ptr => _2;\n    debug old_layout => _3;\n    debug new_layout => _4;\n    debug new_ptr => _15;\n    debug residual => result::Result::<convert::Infallible, alloc::AllocError>::Err(alloc::AllocError);\n    debug val => _15;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &_4;\n        _6 = alloc::layout::Layout::size(move _7) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = &_3;\n        _8 = alloc::layout::Layout::size(move _9) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_9);\n        _5 = Ge(move _6, move _8);\n        switchInt(move _5) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_8);\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_12);\n        StorageLive(_13);\n        _13 = <Self as alloc::Allocator>::allocate(_1, _4) -> [return: bb6, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        StorageDead(_6);\n        StorageLive(_11);\n        _11 = fmt::Arguments::<'_>::from_str(\"`new_layout.size()` must be greater than or equal to `old_layout.size()`\") -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _10 = panicking::panic_fmt(move _11) -> unwind unreachable;\n    }\n    bb6: {\n        _12 = <result::Result<ptr::non_null::NonNull<[u8]>, alloc::AllocError> as ops::try_trait::Try>::branch(move _13) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_13);\n        _14 = discriminant(_12);\n        switchInt(move _14) -> [0: bb9, 1: bb10, otherwise: bb8];\n    }\n    bb8: {\n        unreachable;\n    }\n    bb9: {\n        _15 = ((_12 as variant#0).0: ptr::non_null::NonNull<[u8]>);\n        StorageDead(_12);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = ptr::non_null::NonNull::<u8>::as_ptr(_2) -> [return: bb12, unwind unreachable];\n    }\n    bb10: {\n        _0 = <result::Result<ptr::non_null::NonNull<[u8]>, alloc::AllocError> as ops::try_trait::FromResidual<result::Result<convert::Infallible, alloc::AllocError>>>::from_residual(result::Result::<convert::Infallible, alloc::AllocError>::Err(alloc::AllocError)) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        StorageDead(_12);\n        goto -> bb17;\n    }\n    bb12: {\n        _17 = move _18 as *const u8;\n        StorageDead(_18);\n        StorageLive(_19);\n        _19 = ptr::non_null::NonNull::<[u8]>::as_mut_ptr(_15) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        StorageLive(_20);\n        StorageLive(_21);\n        _21 = &_3;\n        _20 = alloc::layout::Layout::size(move _21) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_21);\n        _16 = ptr::copy_nonoverlapping::<u8>(move _17, move _19, move _20) -> [return: bb15, unwind unreachable];\n    }\n    bb15: {\n        StorageDead(_20);\n        StorageDead(_19);\n        StorageDead(_17);\n        _22 = <Self as alloc::Allocator>::deallocate(_1, _2, _3) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        _0 = result::Result::Ok(_15);\n        goto -> bb17;\n    }\n    bb17: {\n        return;\n    }\n}\n",
+  "doc": " Attempts to extend the memory block.\n\n Returns a new [`NonNull<[u8]>`][NonNull] containing a pointer and the actual size of the allocated\n memory. The pointer is suitable for holding data described by `new_layout`. To accomplish\n this, the allocator may extend the allocation referenced by `ptr` to fit the new layout.\n\n If this returns `Ok`, then ownership of the memory block referenced by `ptr` has been\n transferred to this allocator. Any access to the old `ptr` is Undefined Behavior, even if the\n allocation was grown in-place. The newly returned pointer is the only valid pointer\n for accessing this memory now.\n\n If this method returns `Err`, then ownership of the memory block has not been transferred to\n this allocator, and the contents of the memory block are unaltered.\n\n # Safety\n\n * `ptr` must denote a block of memory [*currently allocated*] via this allocator.\n * `old_layout` must [*fit*] that block of memory (The `new_layout` argument need not fit it.).\n * `new_layout.size()` must be greater than or equal to `old_layout.size()`.\n\n Note that `new_layout.align()` need not be the same as `old_layout.align()`.\n\n [*currently allocated*]: #currently-allocated-memory\n [*fit*]: #memory-fitting\n\n # Errors\n\n Returns `Err` if the new layout does not meet the allocator's size and alignment\n constraints of the allocator, or if growing otherwise fails.\n\n Implementations are encouraged to return `Err` on memory exhaustion rather than panicking or\n aborting, but this is not a strict requirement. (Specifically: it is *legal* to implement\n this trait atop an underlying native allocation library that aborts on memory exhaustion.)\n\n Clients wishing to abort computation in response to an allocation error are encouraged to\n call the [`handle_alloc_error`] function, rather than directly invoking `panic!` or similar.\n\n [`handle_alloc_error`]: ../../alloc/alloc/fn.handle_alloc_error.html\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

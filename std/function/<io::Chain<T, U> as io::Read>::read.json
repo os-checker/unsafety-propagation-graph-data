@@ -1,0 +1,72 @@
+{
+  "name": "<io::Chain<T, U> as io::Read>::read",
+  "safe": true,
+  "callees": {
+    "io::Read::read": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Pull some bytes from this source into the specified buffer, returning\n how many bytes were read.\n\n This function does not provide any guarantees about whether it blocks\n waiting for data, but if an object needs to block for a read and cannot,\n it will typically signal this via an [`Err`] return value.\n\n If the return value of this method is [`Ok(n)`], then implementations must\n guarantee that `0 <= n <= buf.len()`. A nonzero `n` value indicates\n that the buffer `buf` has been filled in with `n` bytes of data from this\n source. If `n` is `0`, then it can indicate one of two scenarios:\n\n 1. This reader has reached its \"end of file\" and will likely no longer\n    be able to produce bytes. Note that this does not mean that the\n    reader will *always* no longer be able to produce bytes. As an example,\n    on Linux, this method will call the `recv` syscall for a [`TcpStream`],\n    where returning zero indicates the connection was shut down correctly. While\n    for [`File`], it is possible to reach the end of file and get zero as result,\n    but if more data is appended to the file, future calls to `read` will return\n    more data.\n 2. The buffer specified was 0 bytes in length.\n\n It is not an error if the returned value `n` is smaller than the buffer size,\n even when the reader is not at the end of the stream yet.\n This may happen for example because fewer bytes are actually available right now\n (e. g. being close to end-of-file) or because read() was interrupted by a signal.\n\n As this trait is safe to implement, callers in unsafe code cannot rely on\n `n <= buf.len()` for safety.\n Extra care needs to be taken when `unsafe` functions are used to access the read bytes.\n Callers have to ensure that no unchecked out-of-bounds accesses are possible even if\n `n > buf.len()`.\n\n *Implementations* of this method can make no assumptions about the contents of `buf` when\n this function is called. It is recommended that implementations only write data to `buf`\n instead of reading its contents.\n\n Correspondingly, however, *callers* of this method in unsafe code must not assume\n any guarantees about how the implementation uses `buf`. The trait is safe to implement,\n so it is possible that the code that's supposed to write to the buffer might also read\n from it. It is your responsibility to make sure that `buf` is initialized\n before calling `read`. Calling `read` with an uninitialized `buf` (of the kind one\n obtains via [`MaybeUninit<T>`]) is not safe, and can lead to undefined behavior.\n\n [`MaybeUninit<T>`]: crate::mem::MaybeUninit\n\n # Errors\n\n If this function encounters any form of I/O or other error, an error\n variant will be returned. If an error is returned then it must be\n guaranteed that no bytes were read.\n\n An error of the [`ErrorKind::Interrupted`] kind is non-fatal and the read\n operation should be retried if there is nothing else to do.\n\n # Examples\n\n [`File`]s implement `Read`:\n\n [`Ok(n)`]: Ok\n [`File`]: crate::fs::File\n [`TcpStream`]: crate::net::TcpStream\n\n ```no_run\n use std::io;\n use std::io::prelude::*;\n use std::fs::File;\n\n fn main() -> io::Result<()> {\n     let mut f = File::open(\"foo.txt\")?;\n     let mut buffer = [0; 10];\n\n     // read up to 10 bytes\n     let n = f.read(&mut buffer[..])?;\n\n     println!(\"The bytes: {:?}\", &buffer[..n]);\n     Ok(())\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::slice::<impl [T]>::is_empty": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the slice has a length of 0.\n\n # Examples\n\n ```\n let a = [1, 2, 3];\n assert!(!a.is_empty());\n\n let b: &[i32] = &[];\n assert!(b.is_empty());\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "io::Chain": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 393, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 1749,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/mod.rs:2780:5: 2788:6",
+  "src": "fn read(&mut self, buf: &mut [u8]) -> Result<usize> {\n        if !self.done_first {\n            match self.first.read(buf)? {\n                0 if !buf.is_empty() => self.done_first = true,\n                n => return Ok(n),\n            }\n        }\n        self.second.read(buf)\n    }",
+  "mir": "fn <io::Chain<T, U> as io::Read>::read(_1: &mut io::Chain<T, U>, _2: &mut [u8]) -> core::result::Result<usize, io::error::Error> {\n    let mut _0: core::result::Result<usize, io::error::Error>;\n    let mut _3: bool;\n    let mut _4: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>, usize>;\n    let mut _5: core::result::Result<usize, io::error::Error>;\n    let mut _6: &mut T;\n    let mut _7: isize;\n    let  _8: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let  _9: usize;\n    let mut _10: bool;\n    let mut _11: &[u8];\n    let mut _12: &mut U;\n    debug self => _1;\n    debug buf => _2;\n    debug residual => _8;\n    debug val => _9;\n    debug n => _9;\n    bb0: {\n        StorageLive(_3);\n        _3 = ((*_1).2: bool);\n        switchInt(move _3) -> [0: bb1, otherwise: bb13];\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &mut ((*_1).0: T);\n        _5 = <T as io::Read>::read(move _6, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _4 = <core::result::Result<usize, io::error::Error> as core::ops::Try>::branch(move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        _7 = discriminant(_4);\n        switchInt(move _7) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _9 = ((_4 as variant#0).0: usize);\n        switchInt(_9) -> [0: bb9, otherwise: bb8];\n    }\n    bb6: {\n        _8 = move ((_4 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<usize, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_8) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        goto -> bb16;\n    }\n    bb8: {\n        _0 = core::result::Result::Ok(_9);\n        goto -> bb16;\n    }\n    bb9: {\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &(*_2);\n        _10 = core::slice::<impl [u8]>::is_empty(move _11) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        switchInt(move _10) -> [0: bb12, otherwise: bb11];\n    }\n    bb11: {\n        StorageDead(_11);\n        StorageDead(_10);\n        goto -> bb8;\n    }\n    bb12: {\n        StorageDead(_11);\n        StorageDead(_10);\n        ((*_1).2: bool) = true;\n        StorageDead(_4);\n        goto -> bb13;\n    }\n    bb13: {\n        StorageDead(_3);\n        StorageLive(_12);\n        _12 = &mut ((*_1).1: U);\n        _0 = <U as io::Read>::read(move _12, _2) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_12);\n        goto -> bb15;\n    }\n    bb15: {\n        return;\n    }\n    bb16: {\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb15;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

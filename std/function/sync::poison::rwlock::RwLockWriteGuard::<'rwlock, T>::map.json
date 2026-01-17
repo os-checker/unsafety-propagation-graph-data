@@ -1,0 +1,114 @@
+{
+  "name": "sync::poison::rwlock::RwLockWriteGuard::<'rwlock, T>::map",
+  "safe": true,
+  "callees": {
+    "core::cell::UnsafeCell::<T>::get": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the wrapped value.\n\n This can be cast to a pointer of any kind. When creating references, you must uphold the\n aliasing rules; see [the type-level docs][UnsafeCell#aliasing-rules] for more discussion and\n caveats.\n\n # Examples\n\n ```\n use std::cell::UnsafeCell;\n\n let uc = UnsafeCell::new(5);\n\n let five = uc.get();\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FnOnce::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the call operation.\n",
+      "adt": {}
+    },
+    "core::convert::From::from": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to this type from the input type.\n",
+      "adt": {}
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "sync::poison::rwlock::RwLock": [
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ],
+    "sync::poison::rwlock::RwLockWriteGuard": [
+      "Unknown([Field(0, Ty { id: 12285, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 12336, kind: RigidTy(Adt(AdtDef(DefId { id: 9982, name: \"sync::poison::rwlock::RwLock\" }), GenericArgs([Type(Ty { id: 396, kind: Param(ParamTy { index: 1, name: \"T\" }) })]))) }, Not)) })])",
+      "Plain",
+      "Ref",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))"
+    ],
+    "core::cell::UnsafeCell": [
+      "Ref"
+    ],
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "sys::sync::rwlock::futex::RwLock": [
+      "Ref"
+    ],
+    "sync::poison::Flag": [
+      "Ref"
+    ],
+    "sync::poison::Guard": [
+      "Ref",
+      "Plain"
+    ],
+    "sync::poison::rwlock::MappedRwLockWriteGuard": [
+      "Plain"
+    ]
+  },
+  "path": 3284,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sync/poison/rwlock.rs:897:5: 915:6",
+  "src": "pub fn map<U, F>(orig: Self, f: F) -> MappedRwLockWriteGuard<'rwlock, U>\n    where\n        F: FnOnce(&mut T) -> &mut U,\n        U: ?Sized,\n    {\n        // SAFETY: the conditions of `RwLockWriteGuard::new` were satisfied when the original guard\n        // was created, and have been upheld throughout `map` and/or `filter_map`.\n        // The signature of the closure guarantees that it will not \"leak\" the lifetime of the\n        // reference passed to it. If the closure panics, the guard will be dropped.\n        let data = NonNull::from(f(unsafe { &mut *orig.lock.data.get() }));\n        let orig = ManuallyDrop::new(orig);\n        MappedRwLockWriteGuard {\n            data,\n            inner_lock: &orig.lock.inner,\n            poison_flag: &orig.lock.poison,\n            poison_guard: orig.poison.clone(),\n            _variance: PhantomData,\n        }\n    }",
+  "mir": "fn sync::poison::rwlock::RwLockWriteGuard::<'rwlock, T>::map(_1: sync::poison::rwlock::RwLockWriteGuard<'_, T>, _2: F) -> sync::poison::rwlock::MappedRwLockWriteGuard<'_, U> {\n    let mut _0: sync::poison::rwlock::MappedRwLockWriteGuard<'_, U>;\n    let  _3: core::ptr::NonNull<U>;\n    let mut _4: &mut U;\n    let mut _5: (&mut T,);\n    let mut _6: &mut T;\n    let mut _7: *mut T;\n    let mut _8: &core::cell::UnsafeCell<T>;\n    let  _9: core::mem::ManuallyDrop<sync::poison::rwlock::RwLockWriteGuard<'_, T>>;\n    let  _10: &sys::sync::rwlock::futex::RwLock;\n    let  _11: &sync::poison::rwlock::RwLockWriteGuard<'_, T>;\n    let mut _12: &core::mem::ManuallyDrop<sync::poison::rwlock::RwLockWriteGuard<'_, T>>;\n    let  _13: &sync::poison::Flag;\n    let  _14: &sync::poison::rwlock::RwLockWriteGuard<'_, T>;\n    let mut _15: &core::mem::ManuallyDrop<sync::poison::rwlock::RwLockWriteGuard<'_, T>>;\n    let mut _16: sync::poison::Guard;\n    let mut _17: &sync::poison::Guard;\n    let  _18: &sync::poison::rwlock::RwLockWriteGuard<'_, T>;\n    let mut _19: &core::mem::ManuallyDrop<sync::poison::rwlock::RwLockWriteGuard<'_, T>>;\n    let mut _20: &sync::poison::rwlock::RwLock<T>;\n    let mut _21: &sync::poison::rwlock::RwLock<T>;\n    let mut _22: &sync::poison::rwlock::RwLock<T>;\n    debug orig => _1;\n    debug f => _2;\n    debug data => _3;\n    debug orig => _9;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_7);\n        StorageLive(_8);\n        _20 = (_1.0: &sync::poison::rwlock::RwLock<T>);\n        _8 = &((*_20).2: core::cell::UnsafeCell<T>);\n        _7 = core::cell::UnsafeCell::<T>::get(move _8) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_8);\n        _6 = &mut (*_7);\n        StorageDead(_7);\n        _5 = (_6);\n        _4 = <F as core::ops::FnOnce<(&mut T,)>>::call_once(_2, move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = <core::ptr::NonNull<U> as core::convert::From<&mut U>>::from(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        StorageLive(_9);\n        _9 = core::mem::ManuallyDrop::<sync::poison::rwlock::RwLockWriteGuard<'_, T>>::new(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageLive(_11);\n        StorageLive(_12);\n        _12 = &_9;\n        _11 = <core::mem::ManuallyDrop<sync::poison::rwlock::RwLockWriteGuard<'_, T>> as core::ops::Deref>::deref(move _12) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_12);\n        _21 = ((*_11).0: &sync::poison::rwlock::RwLock<T>);\n        _10 = &((*_21).0: sys::sync::rwlock::futex::RwLock);\n        StorageLive(_14);\n        StorageLive(_15);\n        _15 = &_9;\n        _14 = <core::mem::ManuallyDrop<sync::poison::rwlock::RwLockWriteGuard<'_, T>> as core::ops::Deref>::deref(move _15) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_15);\n        _22 = ((*_14).0: &sync::poison::rwlock::RwLock<T>);\n        _13 = &((*_22).1: sync::poison::Flag);\n        StorageLive(_17);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = &_9;\n        _18 = <core::mem::ManuallyDrop<sync::poison::rwlock::RwLockWriteGuard<'_, T>> as core::ops::Deref>::deref(move _19) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_19);\n        _17 = &((*_18).1: sync::poison::Guard);\n        _16 = <sync::poison::Guard as core::clone::Clone>::clone(move _17) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_17);\n        _0 = MappedRwLockWriteGuard(_3, ZeroSized: core::marker::PhantomData<&mut U>, _10, _13, sync::poison::Guard {{  }});\n        StorageDead(_18);\n        StorageDead(_14);\n        StorageDead(_11);\n        StorageDead(_9);\n        return;\n    }\n}\n",
+  "doc": " Makes a [`MappedRwLockWriteGuard`] for a component of the borrowed data, e.g.\n an enum variant.\n\n The `RwLock` is already locked for writing, so this cannot fail.\n\n This is an associated function that needs to be used as\n `RwLockWriteGuard::map(...)`. A method would interfere with methods of\n the same name on the contents of the `RwLockWriteGuard` used through\n `Deref`.\n\n # Panics\n\n If the closure panics, the guard will be dropped (unlocked) and the RwLock will be poisoned.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

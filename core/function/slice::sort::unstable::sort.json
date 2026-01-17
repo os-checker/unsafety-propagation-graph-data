@@ -1,0 +1,47 @@
+{
+  "name": "slice::sort::unstable::sort",
+  "safe": true,
+  "callees": {
+    "intrinsics::likely": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Hints to the compiler that branch condition is likely to be true.\n Returns the value passed to it.\n\n Any use other than with `if` statements will probably not have an effect.\n\n Note that, unlike most intrinsics, this is safe to call;\n it does not require an `unsafe` block.\n Therefore, implementations must not require the user to uphold\n any safety invariants.\n\n This intrinsic does not have a stable counterpart.\n",
+      "adt": {}
+    },
+    "slice::sort::shared::smallsort::insertion_sort_shift_left": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Sort `v` assuming `v[..offset]` is already sorted.\n",
+      "adt": {}
+    },
+    "slice::sort::unstable::ipnsort": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " See [`sort`]\n\n Deliberately don't inline the main sorting routine entrypoint to ensure the\n inlined insertion sort i-cache footprint remains minimal.\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 16743,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/sort/unstable/mod.rs:20:1: 53:2",
+  "src": "pub fn sort<T, F: FnMut(&T, &T) -> bool>(v: &mut [T], is_less: &mut F) {\n    // Arrays of zero-sized types are always all-equal, and thus sorted.\n    if T::IS_ZST {\n        return;\n    }\n\n    // Instrumenting the standard library showed that 90+% of the calls to sort\n    // by rustc are either of size 0 or 1.\n    let len = v.len();\n    if intrinsics::likely(len < 2) {\n        return;\n    }\n\n    cfg_select! {\n        any(feature = \"optimize_for_size\", target_pointer_width = \"16\") => {\n            heapsort::heapsort(v, is_less);\n        }\n        _ => {\n            // More advanced sorting methods than insertion sort are faster if called in\n            // a hot loop for small inputs, but for general-purpose code the small\n            // binary size of insertion sort is more important. The instruction cache in\n            // modern processors is very valuable, and for a single sort call in general\n            // purpose code any gains from an advanced method are cancelled by i-cache\n            // misses during the sort, and thrashing the i-cache for surrounding code.\n            const MAX_LEN_ALWAYS_INSERTION_SORT: usize = 20;\n            if intrinsics::likely(len <= MAX_LEN_ALWAYS_INSERTION_SORT) {\n                insertion_sort_shift_left(v, 1, is_less);\n                return;\n            }\n\n            ipnsort(v, is_less);\n        }\n    }\n}",
+  "mir": "fn slice::sort::unstable::sort(_1: &mut [T], _2: &mut F) -> () {\n    let mut _0: ();\n    let  _3: usize;\n    let mut _4: &[T];\n    let mut _5: bool;\n    let mut _6: bool;\n    let mut _7: bool;\n    let mut _8: bool;\n    let  _9: ();\n    let  _10: ();\n    debug v => _1;\n    debug is_less => _2;\n    debug len => _3;\n    bb0: {\n        switchInt(<T as mem::SizedTypeProperties>::IS_ZST) -> [0: bb2, otherwise: bb1];\n    }\n    bb1: {\n        goto -> bb12;\n    }\n    bb2: {\n        StorageLive(_4);\n        _4 = &(*_1);\n        _3 = PtrMetadata(move _4);\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = Lt(_3, 2_usize);\n        _5 = intrinsics::likely(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _5) -> [0: bb5, otherwise: bb4];\n    }\n    bb4: {\n        StorageDead(_6);\n        StorageDead(_5);\n        goto -> bb11;\n    }\n    bb5: {\n        StorageDead(_6);\n        StorageDead(_5);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = Le(_3, slice::sort::unstable::sort::MAX_LEN_ALWAYS_INSERTION_SORT);\n        _7 = intrinsics::likely(move _8) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        switchInt(move _7) -> [0: bb9, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_8);\n        _9 = slice::sort::shared::smallsort::insertion_sort_shift_left::<T, F>(_1, 1_usize, _2) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_7);\n        goto -> bb11;\n    }\n    bb9: {\n        StorageDead(_8);\n        StorageDead(_7);\n        _10 = slice::sort::unstable::ipnsort::<T, F>(_1, _2) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        goto -> bb12;\n    }\n    bb11: {\n        goto -> bb12;\n    }\n    bb12: {\n        return;\n    }\n}\n",
+  "doc": " Unstable sort called ipnsort by Lukas Bergdoll and Orson Peters.\n Design document:\n <https://github.com/Voultapher/sort-research-rs/blob/main/writeup/ipnsort_introduction/text.md>\n\n Upholds all safety properties outlined here:\n <https://github.com/Voultapher/sort-research-rs/blob/main/writeup/sort_safety/text.md>\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "mm::page_table::boot_pt::BootPageTable::<E, C>::from_current_pt",
+  "safe": false,
+  "callees": {
+    "arch::mm::current_page_table_paddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "mm::page_table::boot_pt::dfs_walk_on_leave": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " A helper function to walk on the page table frames.\n\n Once leaving a page table frame, the closure will be called with the PTE to\n the frame.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::page_table::boot_pt::BootPageTable": [
+      "Plain"
+    ]
+  },
+  "path": 2331,
+  "span": "ostd/src/mm/page_table/boot_pt.rs:134:5: 146:6",
+  "src": "unsafe fn from_current_pt() -> Self {\n        let root_pt = crate::arch::mm::current_page_table_paddr() / C::BASE_PAGE_SIZE;\n        // Make sure the 2 available bits are not set for firmware page tables.\n        dfs_walk_on_leave::<E, C>(root_pt, C::NR_LEVELS, &mut |pte: &mut E| {\n            let mut prop = pte.prop();\n            prop.priv_flags |= PTE_POINTS_TO_FIRMWARE_PT;\n            pte.set_prop(prop);\n        });\n        Self {\n            root_pt,\n            _pretend_to_use: core::marker::PhantomData,\n        }\n    }",
+  "mir": "fn mm::page_table::boot_pt::BootPageTable::<E, C>::from_current_pt() -> mm::page_table::boot_pt::BootPageTable<E, C> {\n    let mut _0: mm::page_table::boot_pt::BootPageTable<E, C>;\n    let  _1: usize;\n    let mut _2: usize;\n    let mut _3: bool;\n    let  _4: ();\n    let mut _5: &mut {closure@ostd/src/mm/page_table/boot_pt.rs:137:63: 137:76};\n    let mut _6: {closure@ostd/src/mm/page_table/boot_pt.rs:137:63: 137:76};\n    debug root_pt => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = arch::mm::current_page_table_paddr() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = Eq(<C as mm::PagingConstsTrait>::BASE_PAGE_SIZE, 0_usize);\n        assert(!move _3, \"attempt to divide `{}` by zero\", _2) -> [success: bb2, unwind unreachable];\n    }\n    bb2: {\n        _1 = Div(move _2, <C as mm::PagingConstsTrait>::BASE_PAGE_SIZE);\n        StorageDead(_2);\n        _5 = &mut _6;\n        _4 = mm::page_table::boot_pt::dfs_walk_on_leave::<E, C, {closure@ostd/src/mm/page_table/boot_pt.rs:137:63: 137:76}>(_1, <C as mm::PagingConstsTrait>::NR_LEVELS, _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _0 = BootPageTable(_1, ZeroSized: core::marker::PhantomData<(E, C)>);\n        return;\n    }\n}\n",
+  "doc": " Creates a new boot page table from the current page table root\n physical address.\n\n # Safety\n\n This function should be called only once in the initialization phase.\n Otherwise, It would lead to double-drop of the page table frames set up\n by the firmware, loader or the setup code.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

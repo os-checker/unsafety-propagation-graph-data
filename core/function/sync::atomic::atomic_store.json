@@ -1,0 +1,58 @@
+{
+  "name": "sync::atomic::atomic_store",
+  "safe": false,
+  "callees": {
+    "fmt::Arguments::<'a>::from_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Create a `fmt::Arguments` object for a single static string.\n\n Formatting this `fmt::Arguments` will just produce the string as-is.\n",
+      "adt": {
+        "fmt::Arguments": "Constructor"
+      }
+    },
+    "intrinsics::atomic_store": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Stores the value at the specified memory location.\n `T` must be an integer or pointer type.\n\n The stabilized version of this intrinsic is available on the\n [`atomic`] types via the `store` method. For example, [`AtomicBool::store`].\n",
+      "adt": {}
+    },
+    "panicking::panic_fmt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " The entry point for panicking with a formatted message.\n\n This is designed to reduce the amount of code required at the call\n site as much as possible (so that `panic!()` has as low an impact\n on (e.g.) the inlining of other functions as possible), by moving\n the actual formatting into this shared place.\n",
+      "adt": {
+        "fmt::Arguments": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "sync::atomic::Ordering": [
+      "Plain"
+    ],
+    "fmt::Arguments": [
+      "Plain"
+    ]
+  },
+  "path": 17177,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/sync/atomic.rs:3990:1: 4001:2",
+  "src": "unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering) {\n    // SAFETY: the caller must uphold the safety contract for `atomic_store`.\n    unsafe {\n        match order {\n            Relaxed => intrinsics::atomic_store::<T, { AO::Relaxed }>(dst, val),\n            Release => intrinsics::atomic_store::<T, { AO::Release }>(dst, val),\n            SeqCst => intrinsics::atomic_store::<T, { AO::SeqCst }>(dst, val),\n            Acquire => panic!(\"there is no such thing as an acquire store\"),\n            AcqRel => panic!(\"there is no such thing as an acquire-release store\"),\n        }\n    }\n}",
+  "mir": "fn sync::atomic::atomic_store(_1: *mut T, _2: T, _3: sync::atomic::Ordering) -> () {\n    let mut _0: ();\n    let mut _4: isize;\n    let  _5: !;\n    let mut _6: fmt::Arguments<'_>;\n    let  _7: !;\n    let mut _8: fmt::Arguments<'_>;\n    debug dst => _1;\n    debug val => _2;\n    debug order => _3;\n    bb0: {\n        _4 = discriminant(_3);\n        switchInt(move _4) -> [0: bb6, 1: bb5, 2: bb3, 3: bb2, 4: bb4, otherwise: bb1];\n    }\n    bb1: {\n        unreachable;\n    }\n    bb2: {\n        StorageLive(_8);\n        _8 = fmt::Arguments::<'_>::from_str(\"there is no such thing as an acquire-release store\") -> [return: bb11, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_6);\n        _6 = fmt::Arguments::<'_>::from_str(\"there is no such thing as an acquire store\") -> [return: bb10, unwind unreachable];\n    }\n    bb4: {\n        _0 = intrinsics::atomic_store::<T, intrinsics::AtomicOrdering::SeqCst>(_1, _2) -> [return: bb9, unwind unreachable];\n    }\n    bb5: {\n        _0 = intrinsics::atomic_store::<T, intrinsics::AtomicOrdering::Release>(_1, _2) -> [return: bb8, unwind unreachable];\n    }\n    bb6: {\n        _0 = intrinsics::atomic_store::<T, intrinsics::AtomicOrdering::Relaxed>(_1, _2) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        goto -> bb12;\n    }\n    bb8: {\n        goto -> bb12;\n    }\n    bb9: {\n        goto -> bb12;\n    }\n    bb10: {\n        _5 = panicking::panic_fmt(move _6) -> unwind unreachable;\n    }\n    bb11: {\n        _7 = panicking::panic_fmt(move _8) -> unwind unreachable;\n    }\n    bb12: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

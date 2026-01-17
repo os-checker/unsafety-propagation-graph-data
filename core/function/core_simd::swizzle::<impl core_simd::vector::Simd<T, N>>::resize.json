@@ -1,0 +1,45 @@
+{
+  "name": "core_simd::swizzle::<impl core_simd::vector::Simd<T, N>>::resize",
+  "safe": true,
+  "callees": {
+    "core_simd::vector::Simd::<T, N>::splat": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new SIMD vector with all elements set to the given value.\n\n # Examples\n\n ```\n # #![feature(portable_simd)]\n # #[cfg(feature = \"as_crate\")] use core_simd::simd;\n # #[cfg(not(feature = \"as_crate\"))] use core::simd;\n # use simd::u32x4;\n let v = u32x4::splat(8);\n assert_eq!(v.as_array(), &[8, 8, 8, 8]);\n ```\n",
+      "adt": {
+        "core_simd::vector::Simd": "Constructor"
+      }
+    },
+    "core_simd::swizzle::Swizzle::concat_swizzle": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new vector from the elements of `first` and `second`.\n\n Lane `i` of the output is `concat[Self::INDEX[i]]`, where `concat` is the concatenation of\n `first` and `second`.\n",
+      "adt": {
+        "core_simd::vector::Simd": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core_simd::vector::Simd": [
+      "Plain"
+    ]
+  },
+  "path": 12683,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/swizzle.rs:465:5: 482:6",
+  "src": "pub fn resize<const M: usize>(self, value: T) -> Simd<T, M>\n    where\n        LaneCount<M>: SupportedLaneCount,\n    {\n        struct Resize<const N: usize>;\n        impl<const N: usize, const M: usize> Swizzle<M> for Resize<N> {\n            const INDEX: [usize; M] = const {\n                let mut index = [0; M];\n                let mut i = 0;\n                while i < M {\n                    index[i] = if i < N { i } else { N };\n                    i += 1;\n                }\n                index\n            };\n        }\n        Resize::<N>::concat_swizzle(self, Simd::splat(value))\n    }",
+  "mir": "fn core_simd::swizzle::<impl core_simd::vector::Simd<T, N>>::resize(_1: core_simd::vector::Simd<T, N>, _2: T) -> core_simd::vector::Simd<T, M> {\n    let mut _0: core_simd::vector::Simd<T, M>;\n    let mut _3: core_simd::vector::Simd<T, N>;\n    debug self => _1;\n    debug value => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = core_simd::vector::Simd::<T, N>::splat(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = <core_simd::swizzle::<impl core_simd::vector::Simd<T, N>>::resize::Resize<N> as core_simd::swizzle::Swizzle<M>>::concat_swizzle::<T, N>(_1, move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": " Resize a vector.\n\n If `M` > `N`, extends the length of a vector, setting the new elements to `value`.\n If `M` < `N`, truncates the vector to the first `M` elements.\n\n ```\n # #![feature(portable_simd)]\n # #[cfg(feature = \"as_crate\")] use core_simd::simd;\n # #[cfg(not(feature = \"as_crate\"))] use core::simd;\n # use simd::u32x4;\n let x = u32x4::from_array([0, 1, 2, 3]);\n assert_eq!(x.resize::<8>(9).to_array(), [0, 1, 2, 3, 9, 9, 9, 9]);\n assert_eq!(x.resize::<2>(9).to_array(), [0, 1]);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

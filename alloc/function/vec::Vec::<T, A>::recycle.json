@@ -1,0 +1,111 @@
+{
+  "name": "vec::Vec::<T, A>::recycle",
+  "safe": true,
+  "callees": {
+    "vec::Vec::<T, A>::clear": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Clears the vector, removing all values.\n\n Note that this method has no effect on the allocated capacity\n of the vector.\n\n # Examples\n\n ```\n let mut v = vec![1, 2, 3];\n\n v.clear();\n\n assert!(v.is_empty());\n ```\n",
+      "adt": {
+        "vec::Vec": "MutableAsArgument"
+      }
+    },
+    "vec::Vec::<T, A>::into_parts_with_alloc": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Decomposes a `Vec<T>` into its raw components: `(NonNull pointer, length, capacity, allocator)`.\n\n Returns the `NonNull` pointer to the underlying data, the length of the vector (in elements),\n the allocated capacity of the data (in elements), and the allocator. These are the same\n arguments in the same order as the arguments to [`from_parts_in`].\n\n After calling this function, the caller is responsible for the\n memory previously managed by the `Vec`. The only way to do\n this is to convert the `NonNull` pointer, length, and capacity back\n into a `Vec` with the [`from_parts_in`] function, allowing\n the destructor to perform the cleanup.\n\n [`from_parts_in`]: Vec::from_parts_in\n\n # Examples\n\n ```\n #![feature(allocator_api, box_vec_non_null)]\n\n use std::alloc::System;\n\n let mut v: Vec<i32, System> = Vec::new_in(System);\n v.push(-1);\n v.push(0);\n v.push(1);\n\n let (ptr, len, cap, alloc) = v.into_parts_with_alloc();\n\n let rebuilt = unsafe {\n     // We can now make changes to the components, such as\n     // transmuting the raw pointer to a compatible type.\n     let ptr = ptr.cast::<u32>();\n\n     Vec::from_parts_in(ptr, len, cap, alloc)\n };\n assert_eq!(rebuilt, [4294967295, 0, 1]);\n ```\n",
+      "adt": {
+        "core::ptr::NonNull": "Constructor"
+      }
+    },
+    "core::ptr::NonNull::<T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x as *mut _).expect(\"null pointer\");\n\n let casted_ptr = ptr.cast::<i8>();\n let raw_ptr: *mut i8 = casted_ptr.as_ptr();\n ```\n",
+      "adt": {}
+    },
+    "core::panicking::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Internal function for `assert_eq!` and `assert_ne!` macros\n",
+      "adt": {}
+    },
+    "vec::Vec::<T, A>::from_parts_in": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a `Vec<T, A>` directly from a `NonNull` pointer, a length, a capacity,\n and an allocator.\n\n # Safety\n\n This is highly unsafe, due to the number of invariants that aren't\n checked:\n\n * `ptr` must be [*currently allocated*] via the given allocator `alloc`.\n * `T` needs to have the same alignment as what `ptr` was allocated with.\n   (`T` having a less strict alignment is not sufficient, the alignment really\n   needs to be equal to satisfy the [`dealloc`] requirement that memory must be\n   allocated and deallocated with the same layout.)\n * The size of `T` times the `capacity` (ie. the allocated size in bytes) needs\n   to be the same size as the pointer was allocated with. (Because similar to\n   alignment, [`dealloc`] must be called with the same layout `size`.)\n * `length` needs to be less than or equal to `capacity`.\n * The first `length` values must be properly initialized values of type `T`.\n * `capacity` needs to [*fit*] the layout size that the pointer was allocated with.\n * The allocated size in bytes must be no larger than `isize::MAX`.\n   See the safety documentation of [`pointer::offset`].\n\n These requirements are always upheld by any `ptr` that has been allocated\n via `Vec<T, A>`. Other allocation sources are allowed if the invariants are\n upheld.\n\n Violating these may cause problems like corrupting the allocator's\n internal data structures. For example it is **not** safe\n to build a `Vec<u8>` from a pointer to a C `char` array with length `size_t`.\n It's also not safe to build one from a `Vec<u16>` and its length, because\n the allocator cares about the alignment, and these two types have different\n alignments. The buffer was allocated with alignment 2 (for `u16`), but after\n turning it into a `Vec<u8>` it'll be deallocated with alignment 1.\n\n The ownership of `ptr` is effectively transferred to the\n `Vec<T>` which may then deallocate, reallocate or change the\n contents of memory pointed to by the pointer at will. Ensure\n that nothing else uses the pointer after calling this\n function.\n\n [`String`]: crate::string::String\n [`dealloc`]: crate::alloc::GlobalAlloc::dealloc\n [*currently allocated*]: crate::alloc::Allocator#currently-allocated-memory\n [*fit*]: crate::alloc::Allocator#memory-fitting\n\n # Examples\n\n ```\n #![feature(allocator_api, box_vec_non_null)]\n\n use std::alloc::System;\n\n let mut v = Vec::with_capacity_in(3, System);\n v.push(1);\n v.push(2);\n v.push(3);\n\n // Deconstruct the vector into parts.\n let (p, len, cap, alloc) = v.into_parts_with_alloc();\n\n unsafe {\n     // Overwrite memory with 4, 5, 6\n     for i in 0..len {\n         p.add(i).write(4 + i);\n     }\n\n     // Put everything back together into a Vec\n     let rebuilt = Vec::from_parts_in(p, len, cap, alloc.clone());\n     assert_eq!(rebuilt, [4, 5, 6]);\n }\n ```\n\n Using memory that was allocated elsewhere:\n\n ```rust\n #![feature(allocator_api, box_vec_non_null)]\n\n use std::alloc::{AllocError, Allocator, Global, Layout};\n\n fn main() {\n     let layout = Layout::array::<u32>(16).expect(\"overflow cannot happen\");\n\n     let vec = unsafe {\n         let mem = match Global.allocate(layout) {\n             Ok(mem) => mem.cast::<u32>(),\n             Err(AllocError) => return,\n         };\n\n         mem.write(1_000_000);\n\n         Vec::from_parts_in(mem, 1, 16, Global)\n     };\n\n     assert_eq!(vec, &[1_000_000]);\n     assert_eq!(vec.capacity(), 16);\n }\n ```\n",
+      "adt": {
+        "vec::Vec": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "vec::Vec": [
+      "MutRef",
+      "Plain"
+    ],
+    "core::ptr::NonNull": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 101, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])",
+      "Unknown([Field(1, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(2, Ty { id: 14, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(3, Ty { id: 21, kind: Param(ParamTy { index: 1, name: \"A\" }) })])"
+    ],
+    "core::panicking::AssertKind": [
+      "Plain"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 2383,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:3258:5: 3275:6",
+  "src": "pub fn recycle<U>(mut self) -> Vec<U, A>\n    where\n        U: Recyclable<T>,\n    {\n        self.clear();\n        const {\n            // FIXME(const-hack, 146097): compare `Layout`s\n            assert!(size_of::<T>() == size_of::<U>());\n            assert!(align_of::<T>() == align_of::<U>());\n        };\n        let (ptr, length, capacity, alloc) = self.into_parts_with_alloc();\n        debug_assert_eq!(length, 0);\n        // SAFETY:\n        // - `ptr` and `alloc` were just returned from `self.into_raw_parts_with_alloc()`\n        // - `T` & `U` have the same layout, so `capacity` does not need to be changed and we can safely use `alloc.dealloc` later\n        // - the original vector was cleared, so there is no problem with \"transmuting\" the stored values\n        unsafe { Vec::from_parts_in(ptr.cast::<U>(), length, capacity, alloc) }\n    }",
+  "mir": "fn vec::Vec::<T, A>::recycle(_1: vec::Vec<T, A>) -> vec::Vec<U, A> {\n    let mut _0: vec::Vec<U, A>;\n    let  _2: ();\n    let mut _3: &mut vec::Vec<T, A>;\n    let  _4: core::ptr::NonNull<T>;\n    let  _5: usize;\n    let  _6: usize;\n    let  _7: A;\n    let mut _8: (core::ptr::NonNull<T>, usize, usize, A);\n    let mut _9: vec::Vec<T, A>;\n    let mut _10: (&usize, &usize);\n    let mut _11: &usize;\n    let mut _12: &usize;\n    let  _13: &usize;\n    let  _14: &usize;\n    let mut _15: bool;\n    let mut _16: usize;\n    let mut _17: usize;\n    let  _18: core::panicking::AssertKind;\n    let  _19: !;\n    let mut _20: core::option::Option<core::fmt::Arguments<'_>>;\n    let mut _21: core::ptr::NonNull<U>;\n    debug self => _1;\n    debug ptr => _4;\n    debug length => _5;\n    debug capacity => _6;\n    debug alloc => _7;\n    debug left_val => _13;\n    debug right_val => _14;\n    debug kind => _18;\n    bb0: {\n        StorageLive(_3);\n        _3 = &mut _1;\n        _2 = vec::Vec::<T, A>::clear(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_8);\n        StorageLive(_9);\n        _9 = move _1;\n        _8 = vec::Vec::<T, A>::into_parts_with_alloc(move _9) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_9);\n        _4 = (_8.0: core::ptr::NonNull<T>);\n        _5 = (_8.1: usize);\n        _6 = (_8.2: usize);\n        _7 = move (_8.3: A);\n        StorageDead(_8);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = &_5;\n        StorageLive(_12);\n        _12 = vec::Vec::<T, A>::recycle::<U>::promoted[0];\n        _10 = (move _11, move _12);\n        StorageDead(_12);\n        StorageDead(_11);\n        _13 = (_10.0: &usize);\n        _14 = (_10.1: &usize);\n        StorageLive(_15);\n        StorageLive(_16);\n        _16 = (*_13);\n        StorageLive(_17);\n        _17 = (*_14);\n        _15 = Eq(move _16, move _17);\n        switchInt(move _15) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_17);\n        StorageDead(_16);\n        StorageDead(_15);\n        StorageDead(_10);\n        StorageLive(_21);\n        _21 = core::ptr::NonNull::<T>::cast::<U>(_4) -> [return: bb5, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_17);\n        StorageDead(_16);\n        _18 = core::panicking::AssertKind::Eq;\n        StorageLive(_20);\n        _20 = core::option::Option::None;\n        _19 = core::panicking::assert_failed::<usize, usize>(_18, _13, _14, move _20) -> unwind unreachable;\n    }\n    bb5: {\n        _0 = vec::Vec::<U, A>::from_parts_in(move _21, _5, _6, _7) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_21);\n        return;\n    }\n}\n",
+  "doc": " This clears out this `Vec` and recycles the allocation into a new `Vec`.\n The item type of the resulting `Vec` needs to have the same size and\n alignment as the item type of the original `Vec`.\n\n # Examples\n\n  ```\n #![feature(vec_recycle, transmutability)]\n let a: Vec<u8> = vec![0; 100];\n let capacity = a.capacity();\n let addr = a.as_ptr().addr();\n let b: Vec<i8> = a.recycle();\n assert_eq!(b.len(), 0);\n assert_eq!(b.capacity(), capacity);\n assert_eq!(b.as_ptr().addr(), addr);\n ```\n\n The `Recyclable` bound prevents this method from being called when `T` and `U` have different sizes; e.g.:\n\n  ```compile_fail,E0277\n #![feature(vec_recycle, transmutability)]\n let vec: Vec<[u8; 2]> = Vec::new();\n let _: Vec<[u8; 1]> = vec.recycle();\n ```\n ...or different alignments:\n\n  ```compile_fail,E0277\n #![feature(vec_recycle, transmutability)]\n let vec: Vec<[u16; 0]> = Vec::new();\n let _: Vec<[u8; 0]> = vec.recycle();\n ```\n\n However, due to temporary implementation limitations of `Recyclable`,\n this method is not yet callable when `T` or `U` are slices, trait objects,\n or other exotic types; e.g.:\n\n ```compile_fail,E0277\n #![feature(vec_recycle, transmutability)]\n # let inputs = [\"a b c\", \"d e f\"];\n # fn process(_: &[&str]) {}\n let mut storage: Vec<&[&str]> = Vec::new();\n\n for input in inputs {\n     let mut buffer: Vec<&str> = storage.recycle();\n     buffer.extend(input.split(\" \"));\n     process(&buffer);\n     storage = buffer.recycle();\n }\n ```\n",
+  "tags": {
+    "tags": [
+      {
+        "tag": {
+          "typ": null,
+          "name": "private_bounds"
+        },
+        "args": []
+      }
+    ],
+    "spec": {},
+    "docs": [
+      "* private_bounds\n"
+    ]
+  }
+}

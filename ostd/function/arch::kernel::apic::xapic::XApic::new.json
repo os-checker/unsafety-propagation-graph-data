@@ -1,0 +1,101 @@
+{
+  "name": "arch::kernel::apic::xapic::XApic::new",
+  "safe": true,
+  "callees": {
+    "arch::kernel::apic::xapic::XApic::has_xapic": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "mm::mem_obj::HasPaddr::paddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the start physical address of the memory object.\n",
+      "adt": {}
+    },
+    "arch::kernel::apic::xapic::read_xapic_base_address": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads xAPIC base address from the MSR.\n\n # Safety\n\n The caller must ensure that xAPIC is present.\n",
+      "adt": {}
+    },
+    "mm::mem_obj::HasSize::size": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the size of the memory object in bytes.\n",
+      "adt": {}
+    },
+    "core::panicking::assert_failed": {
+      "safe": true,
+      "tags": {
+        "tags": [
+          {
+            "tag": {
+              "typ": null,
+              "name": "hidden"
+            },
+            "args": []
+          }
+        ],
+        "spec": {},
+        "docs": [
+          "* hidden\n"
+        ]
+      },
+      "doc": " Internal function for `assert_eq!` and `assert_ne!` macros\n",
+      "adt": {}
+    },
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::option::Option": [
+      "Plain"
+    ],
+    "io::io_mem::IoMem": [
+      "Ref",
+      "Plain"
+    ],
+    "core::panicking::AssertKind": [
+      "Plain"
+    ],
+    "arch::kernel::apic::xapic::XApic": [
+      "Plain"
+    ]
+  },
+  "path": 1279,
+  "span": "ostd/src/arch/x86/kernel/apic/xapic.rs:25:5: 36:6",
+  "src": "pub(super) fn new(io_mem: &IoMem<Sensitive>) -> Option<Self> {\n        if !Self::has_xapic() {\n            return None;\n        }\n\n        // SAFETY: xAPIC is present.\n        assert_eq!(io_mem.paddr(), unsafe { read_xapic_base_address() });\n        assert_eq!(io_mem.size(), XAPIC_MMIO_SIZE);\n        Some(Self {\n            io_mem: io_mem.clone(),\n        })\n    }",
+  "mir": "fn arch::kernel::apic::xapic::XApic::new(_1: &io::io_mem::IoMem<io::io_mem::Sensitive>) -> core::option::Option<arch::kernel::apic::xapic::XApic> {\n    let mut _0: core::option::Option<arch::kernel::apic::xapic::XApic>;\n    let mut _2: bool;\n    let mut _3: (&usize, &usize);\n    let mut _4: &usize;\n    let  _5: usize;\n    let mut _6: &usize;\n    let  _7: usize;\n    let  _8: &usize;\n    let  _9: &usize;\n    let mut _10: bool;\n    let mut _11: usize;\n    let mut _12: usize;\n    let  _13: core::panicking::AssertKind;\n    let  _14: !;\n    let mut _15: core::option::Option<core::fmt::Arguments<'_>>;\n    let mut _16: (&usize, &usize);\n    let mut _17: &usize;\n    let  _18: usize;\n    let mut _19: &usize;\n    let  _20: &usize;\n    let  _21: &usize;\n    let mut _22: bool;\n    let mut _23: usize;\n    let mut _24: usize;\n    let  _25: core::panicking::AssertKind;\n    let  _26: !;\n    let mut _27: core::option::Option<core::fmt::Arguments<'_>>;\n    let mut _28: arch::kernel::apic::xapic::XApic;\n    let mut _29: io::io_mem::IoMem<io::io_mem::Sensitive>;\n    debug io_mem => _1;\n    debug left_val => _8;\n    debug right_val => _9;\n    debug kind => _13;\n    debug left_val => _20;\n    debug right_val => _21;\n    debug kind => _25;\n    bb0: {\n        StorageLive(_2);\n        _2 = arch::kernel::apic::xapic::XApic::has_xapic() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _2) -> [0: bb2, otherwise: bb3];\n    }\n    bb2: {\n        _0 = core::option::Option::None;\n        StorageDead(_2);\n        goto -> bb12;\n    }\n    bb3: {\n        StorageDead(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = <io::io_mem::IoMem<io::io_mem::Sensitive> as mm::mem_obj::HasPaddr>::paddr(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _4 = &_5;\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = arch::kernel::apic::xapic::read_xapic_base_address() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _6 = &_7;\n        _3 = (move _4, move _6);\n        StorageDead(_6);\n        StorageDead(_4);\n        _8 = (_3.0: &usize);\n        _9 = (_3.1: &usize);\n        StorageLive(_10);\n        StorageLive(_11);\n        _11 = (*_8);\n        StorageLive(_12);\n        _12 = (*_9);\n        _10 = Eq(move _11, move _12);\n        switchInt(move _10) -> [0: bb7, otherwise: bb6];\n    }\n    bb6: {\n        StorageDead(_12);\n        StorageDead(_11);\n        StorageDead(_10);\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageLive(_16);\n        StorageLive(_17);\n        StorageLive(_18);\n        _18 = <io::io_mem::IoMem<io::io_mem::Sensitive> as mm::mem_obj::HasSize>::size(_1) -> [return: bb8, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_12);\n        StorageDead(_11);\n        _13 = core::panicking::AssertKind::Eq;\n        StorageLive(_15);\n        _15 = core::option::Option::None;\n        _14 = core::panicking::assert_failed::<usize, usize>(_13, _8, _9, move _15) -> unwind unreachable;\n    }\n    bb8: {\n        _17 = &_18;\n        StorageLive(_19);\n        _19 = arch::kernel::apic::xapic::XApic::new::promoted[0];\n        _16 = (move _17, move _19);\n        StorageDead(_19);\n        StorageDead(_17);\n        _20 = (_16.0: &usize);\n        _21 = (_16.1: &usize);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = (*_20);\n        StorageLive(_24);\n        _24 = (*_21);\n        _22 = Eq(move _23, move _24);\n        switchInt(move _22) -> [0: bb10, otherwise: bb9];\n    }\n    bb9: {\n        StorageDead(_24);\n        StorageDead(_23);\n        StorageDead(_22);\n        StorageDead(_18);\n        StorageDead(_16);\n        StorageLive(_28);\n        StorageLive(_29);\n        _29 = <io::io_mem::IoMem<io::io_mem::Sensitive> as core::clone::Clone>::clone(_1) -> [return: bb11, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_24);\n        StorageDead(_23);\n        _25 = core::panicking::AssertKind::Eq;\n        StorageLive(_27);\n        _27 = core::option::Option::None;\n        _26 = core::panicking::assert_failed::<usize, usize>(_25, _20, _21, move _27) -> unwind unreachable;\n    }\n    bb11: {\n        _28 = XApic(move _29);\n        StorageDead(_29);\n        _0 = core::option::Option::Some(move _28);\n        StorageDead(_28);\n        goto -> bb12;\n    }\n    bb12: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

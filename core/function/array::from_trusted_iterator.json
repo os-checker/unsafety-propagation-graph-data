@@ -1,0 +1,57 @@
+{
+  "name": "array::from_trusted_iterator",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes a closure and creates an iterator which calls that closure on each\n element.\n\n `map()` transforms one iterator into another, by means of its argument:\n something that implements [`FnMut`]. It produces a new iterator which\n calls this closure on each element of the original iterator.\n\n If you are good at thinking in types, you can think of `map()` like this:\n If you have an iterator that gives you elements of some type `A`, and\n you want an iterator of some other type `B`, you can use `map()`,\n passing a closure that takes an `A` and returns a `B`.\n\n `map()` is conceptually similar to a [`for`] loop. However, as `map()` is\n lazy, it is best used when you're already working with other iterators.\n If you're doing some sort of looping for a side effect, it's considered\n more idiomatic to use [`for`] than `map()`.\n\n [`for`]: ../../book/ch03-05-control-flow.html#looping-through-a-collection-with-for\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.iter().map(|x| 2 * x);\n\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), Some(6));\n assert_eq!(iter.next(), None);\n ```\n\n If you're doing some sort of side effect, prefer [`for`] to `map()`:\n\n ```\n # #![allow(unused_must_use)]\n // don't do this:\n (0..5).map(|x| println!(\"{x}\"));\n\n // it won't even execute, as it is lazy. Rust will warn you about this.\n\n // Instead, use a for-loop:\n for x in 0..5 {\n     println!(\"{x}\");\n }\n ```\n",
+      "adt": {
+        "iter::adapters::map::Map": "Constructor"
+      }
+    },
+    "ops::try_trait::NeverShortCircuit": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " An adapter for implementing non-try methods via the `Try` implementation.\n\n Conceptually the same as `Result<T, !>`, but requiring less work in trait\n solving and inhabited-ness checking and such, by being an obvious newtype\n and not having `From` bounds lying around.\n\n Not currently planned to be exposed publicly, so just `pub(crate)`.\n",
+      "adt": {}
+    },
+    "array::try_from_trusted_iterator": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "iter::adapters::map::Map": [
+      "Plain"
+    ],
+    "ops::try_trait::NeverShortCircuit": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 1462, kind: RigidTy(Array(Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) }, TyConst { kind: Param(ParamConst { index: 1, name: \"N\" }), id: TyConstId(37, ThreadLocalIndex) })) })])"
+    ]
+  },
+  "path": 4552,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/array/mod.rs:862:1: 864:2",
+  "src": "fn from_trusted_iterator<T, const N: usize>(iter: impl UncheckedIterator<Item = T>) -> [T; N] {\n    try_from_trusted_iterator(iter.map(NeverShortCircuit)).0\n}",
+  "mir": "fn array::from_trusted_iterator(_1: impl UncheckedIterator<Item = T>) -> [T; N] {\n    let mut _0: [T; N];\n    let mut _2: ops::try_trait::NeverShortCircuit<[T; N]>;\n    let mut _3: iter::adapters::map::Map<impl UncheckedIterator<Item = T>, fn(T) -> ops::try_trait::NeverShortCircuit<T> {ops::try_trait::NeverShortCircuit::<T>}>;\n    debug iter => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = <impl UncheckedIterator<Item = T> as iter::traits::iterator::Iterator>::map::<ops::try_trait::NeverShortCircuit<T>, fn(T) -> ops::try_trait::NeverShortCircuit<T> {ops::try_trait::NeverShortCircuit::<T>}>(_1, ops::try_trait::NeverShortCircuit::<T>) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = array::try_from_trusted_iterator::<T, ops::try_trait::NeverShortCircuit<T>, N, iter::adapters::map::Map<impl UncheckedIterator<Item = T>, fn(T) -> ops::try_trait::NeverShortCircuit<T> {ops::try_trait::NeverShortCircuit::<T>}>>(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = move (_2.0: [T; N]);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Populate an array from the first `N` elements of `iter`\n\n # Panics\n\n If the iterator doesn't actually have enough items.\n\n By depending on `TrustedLen`, however, we can do that check up-front (where\n it easily optimizes away) so it doesn't impact the loop that fills the array.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

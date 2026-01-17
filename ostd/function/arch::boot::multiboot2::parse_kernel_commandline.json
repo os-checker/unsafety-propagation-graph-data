@@ -1,0 +1,95 @@
+{
+  "name": "arch::boot::multiboot2::parse_kernel_commandline",
+  "safe": true,
+  "callees": {
+    "multiboot2::BootInformation::<'a>::command_line_tag": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Search for the [`CommandLineTag`].\n",
+      "adt": {}
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "multiboot2::CommandLineTag::cmdline": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads the command line of the kernel as Rust string slice without\n the null-byte.\n\n For example, this returns `\"console=ttyS0\"`.if the GRUB config\n contains  `\"multiboot2 /mykernel console=ttyS0\"`.\n\n If the function returns `Err` then perhaps the memory is invalid.\n\n # Examples\n\n ```rust,no_run\n # use multiboot2::{BootInformation, BootInformationHeader};\n # let ptr = 0xdeadbeef as *const BootInformationHeader;\n # let boot_info = unsafe { BootInformation::load(ptr).unwrap() };\n if let Some(tag) = boot_info.command_line_tag() {\n     let command_line = tag.cmdline();\n     assert_eq!(Ok(\"/bootarg\"), command_line);\n }\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::result::Result::<T, E>::ok": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts from `Result<T, E>` to [`Option<T>`].\n\n Converts `self` into an [`Option<T>`], consuming `self`,\n and discarding the error, if any.\n\n # Examples\n\n ```\n let x: Result<u32, &str> = Ok(2);\n assert_eq!(x.ok(), Some(2));\n\n let x: Result<u32, &str> = Err(\"Nothing here\");\n assert_eq!(x.ok(), None);\n ```\n",
+      "adt": {}
+    },
+    "arch::boot::multiboot2::make_str_vaddr_static": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "multiboot2::BootInformation": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 264, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 267, kind: RigidTy(Adt(AdtDef(DefId { id: 2936, name: \"multiboot2::CommandLineTag\" }), GenericArgs([]))) }, Not)) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 2, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 4, kind: RigidTy(Str) }, Not)) })])"
+    ],
+    "multiboot2::CommandLineTag": [
+      "Ref"
+    ],
+    "core::result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 164,
+  "span": "ostd/src/arch/x86/boot/multiboot2/mod.rs:24:1: 29:2",
+  "src": "fn parse_kernel_commandline(mb2_info: &BootInformation) -> Option<&'static str> {\n    let cmdline = mb2_info.command_line_tag()?.cmdline().ok()?;\n\n    // SAFETY: The address of `cmdline` is physical and the command line will live for `'static`.\n    Some(unsafe { make_str_vaddr_static(cmdline) })\n}",
+  "mir": "fn arch::boot::multiboot2::parse_kernel_commandline(_1: &multiboot2::BootInformation<'_>) -> core::option::Option<&str> {\n    let mut _0: core::option::Option<&str>;\n    let mut _2: core::ops::ControlFlow<core::option::Option<core::convert::Infallible>, &str>;\n    let mut _3: core::option::Option<&str>;\n    let mut _4: core::result::Result<&str, multiboot2::StringError>;\n    let mut _5: core::ops::ControlFlow<core::option::Option<core::convert::Infallible>, &multiboot2::CommandLineTag>;\n    let mut _6: core::option::Option<&multiboot2::CommandLineTag>;\n    let mut _7: isize;\n    let  _8: &multiboot2::CommandLineTag;\n    let mut _9: isize;\n    let  _10: &str;\n    let  _11: &str;\n    debug mb2_info => _1;\n    debug cmdline => _10;\n    debug residual => core::option::Option::<core::convert::Infallible>::None;\n    debug val => _8;\n    debug residual => core::option::Option::<core::convert::Infallible>::None;\n    debug val => _10;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = multiboot2::BootInformation::<'_>::command_line_tag(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = <core::option::Option<&multiboot2::CommandLineTag> as core::ops::Try>::branch(move _6) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        _7 = discriminant(_5);\n        switchInt(move _7) -> [0: bb4, 1: bb5, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _8 = ((_5 as variant#0).0: &multiboot2::CommandLineTag);\n        _4 = multiboot2::CommandLineTag::cmdline(_8) -> [return: bb7, unwind unreachable];\n    }\n    bb5: {\n        _0 = <core::option::Option<&str> as core::ops::FromResidual<core::option::Option<core::convert::Infallible>>>::from_residual(core::option::Option::<core::convert::Infallible>::None) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_4);\n        StorageDead(_3);\n        goto -> bb13;\n    }\n    bb7: {\n        _3 = core::result::Result::<&str, multiboot2::StringError>::ok(move _4) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_4);\n        _2 = <core::option::Option<&str> as core::ops::Try>::branch(move _3) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_3);\n        _9 = discriminant(_2);\n        switchInt(move _9) -> [0: bb10, 1: bb11, otherwise: bb3];\n    }\n    bb10: {\n        _10 = ((_2 as variant#0).0: &str);\n        StorageDead(_5);\n        StorageDead(_2);\n        _11 = arch::boot::multiboot2::make_str_vaddr_static(_10) -> [return: bb12, unwind unreachable];\n    }\n    bb11: {\n        _0 = <core::option::Option<&str> as core::ops::FromResidual<core::option::Option<core::convert::Infallible>>>::from_residual(core::option::Option::<core::convert::Infallible>::None) -> [return: bb13, unwind unreachable];\n    }\n    bb12: {\n        _0 = core::option::Option::Some(_11);\n        goto -> bb14;\n    }\n    bb13: {\n        StorageDead(_5);\n        StorageDead(_2);\n        goto -> bb14;\n    }\n    bb14: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

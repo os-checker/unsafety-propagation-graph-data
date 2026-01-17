@@ -1,0 +1,57 @@
+{
+  "name": "slice::<impl [T]>::swap_unchecked",
+  "safe": false,
+  "callees": {
+    "slice::<impl [T]>::swap_unchecked::precondition_check": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "slice::<impl [T]>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an unsafe mutable pointer to the slice's buffer.\n\n The caller must ensure that the slice outlives the pointer this\n function returns, or else it will end up dangling.\n\n Modifying the container referenced by this slice may cause its buffer\n to be reallocated, which would also make any pointers to it invalid.\n\n # Examples\n\n ```\n let x = &mut [1, 2, 4];\n let x_ptr = x.as_mut_ptr();\n\n unsafe {\n     for i in 0..x.len() {\n         *x_ptr.add(i) += 2;\n     }\n }\n assert_eq!(x, &[3, 4, 6]);\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut T>::add": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "\n # Examples\n\n ```\n let mut s: String = \"123\".to_string();\n let ptr: *mut u8 = s.as_mut_ptr();\n\n unsafe {\n     assert_eq!('2', *ptr.add(1) as char);\n     assert_eq!('3', *ptr.add(2) as char);\n }\n ```\n",
+      "adt": {}
+    },
+    "ptr::swap": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Swaps the values at two mutable locations of the same type, without\n deinitializing either.\n\n But for the following exceptions, this function is semantically\n equivalent to [`mem::swap`]:\n\n * It operates on raw pointers instead of references. When references are\n   available, [`mem::swap`] should be preferred.\n\n * The two pointed-to values may overlap. If the values do overlap, then the\n   overlapping region of memory from `x` will be used. This is demonstrated\n   in the second example below.\n\n * The operation is \"untyped\" in the sense that data may be uninitialized or otherwise violate\n   the requirements of `T`. The initialization state is preserved exactly.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * Both `x` and `y` must be [valid] for both reads and writes. They must remain valid even when the\n   other pointer is written. (This means if the memory ranges overlap, the two pointers must not\n   be subject to aliasing restrictions relative to each other.)\n\n * Both `x` and `y` must be properly aligned.\n\n Note that even if `T` has size `0`, the pointers must be properly aligned.\n\n [valid]: self#safety\n\n # Examples\n\n Swapping two non-overlapping regions:\n\n ```\n use std::ptr;\n\n let mut array = [0, 1, 2, 3];\n\n let (x, y) = array.split_at_mut(2);\n let x = x.as_mut_ptr().cast::<[u32; 2]>(); // this is `array[0..2]`\n let y = y.as_mut_ptr().cast::<[u32; 2]>(); // this is `array[2..4]`\n\n unsafe {\n     ptr::swap(x, y);\n     assert_eq!([2, 3, 0, 1], array);\n }\n ```\n\n Swapping two overlapping regions:\n\n ```\n use std::ptr;\n\n let mut array: [i32; 4] = [0, 1, 2, 3];\n\n let array_ptr: *mut i32 = array.as_mut_ptr();\n\n let x = array_ptr as *mut [i32; 3]; // this is `array[0..3]`\n let y = unsafe { array_ptr.add(1) } as *mut [i32; 3]; // this is `array[1..4]`\n\n unsafe {\n     ptr::swap(x, y);\n     // The indices `1..3` of the slice overlap between `x` and `y`.\n     // Reasonable results would be for to them be `[2, 3]`, so that indices `0..3` are\n     // `[1, 2, 3]` (matching `y` before the `swap`); or for them to be `[0, 1]`\n     // so that indices `1..4` are `[0, 1, 2]` (matching `x` before the `swap`).\n     // This implementation is defined to make the latter choice.\n     assert_eq!([1, 0, 1, 2], array);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1335,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:947:5: 963:6",
+  "src": "pub const unsafe fn swap_unchecked(&mut self, a: usize, b: usize) {\n        assert_unsafe_precondition!(\n            check_library_ub,\n            \"slice::swap_unchecked requires that the indices are within the slice\",\n            (\n                len: usize = self.len(),\n                a: usize = a,\n                b: usize = b,\n            ) => a < len && b < len,\n        );\n\n        let ptr = self.as_mut_ptr();\n        // SAFETY: caller has to guarantee that `a < self.len()` and `b < self.len()`\n        unsafe {\n            ptr::swap(ptr.add(a), ptr.add(b));\n        }\n    }",
+  "mir": "fn slice::<impl [T]>::swap_unchecked(_1: &mut [T], _2: usize, _3: usize) -> () {\n    let mut _0: ();\n    let mut _4: bool;\n    let  _5: ();\n    let mut _6: usize;\n    let mut _7: &[T];\n    let  _8: *mut T;\n    let  _9: ();\n    let mut _10: *mut T;\n    let mut _11: *mut T;\n    debug self => _1;\n    debug a => _2;\n    debug b => _3;\n    debug ptr => _8;\n    bb0: {\n        StorageLive(_4);\n        _4 = RuntimeChecks(UbChecks)() \" \";\n        switchInt(move _4) -> [0: bb3, otherwise: bb1];\n    }\n    bb1: {\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &(*_1);\n        _6 = PtrMetadata(move _7);\n        StorageDead(_7);\n        _5 = slice::<impl [T]>::swap_unchecked::precondition_check(move _6, _2, _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        goto -> bb3;\n    }\n    bb3: {\n        StorageDead(_4);\n        _8 = slice::<impl [T]>::as_mut_ptr(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageLive(_10);\n        _10 = ptr::mut_ptr::<impl *mut T>::add(_8, _2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageLive(_11);\n        _11 = ptr::mut_ptr::<impl *mut T>::add(_8, _3) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        _9 = ptr::swap::<T>(move _10, move _11) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_11);\n        StorageDead(_10);\n        return;\n    }\n}\n",
+  "doc": " Swaps two elements in the slice, without doing bounds checking.\n\n For a safe alternative see [`swap`].\n\n # Arguments\n\n * a - The index of the first element\n * b - The index of the second element\n\n # Safety\n\n Calling this method with an out-of-bounds index is *[undefined behavior]*.\n The caller has to ensure that `a < self.len()` and `b < self.len()`.\n\n # Examples\n\n ```\n #![feature(slice_swap_unchecked)]\n\n let mut v = [\"a\", \"b\", \"c\", \"d\"];\n // SAFETY: we know that 1 and 3 are both indices of the slice\n unsafe { v.swap_unchecked(1, 3) };\n assert!(v == [\"a\", \"d\", \"c\", \"b\"]);\n ```\n\n [`swap`]: slice::swap\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

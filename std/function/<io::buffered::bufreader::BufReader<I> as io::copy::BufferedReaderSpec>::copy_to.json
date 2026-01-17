@@ -1,0 +1,114 @@
+{
+  "name": "<io::buffered::bufreader::BufReader<I> as io::copy::BufferedReaderSpec>::copy_to",
+  "safe": true,
+  "callees": {
+    "io::Read::read": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Pull some bytes from this source into the specified buffer, returning\n how many bytes were read.\n\n This function does not provide any guarantees about whether it blocks\n waiting for data, but if an object needs to block for a read and cannot,\n it will typically signal this via an [`Err`] return value.\n\n If the return value of this method is [`Ok(n)`], then implementations must\n guarantee that `0 <= n <= buf.len()`. A nonzero `n` value indicates\n that the buffer `buf` has been filled in with `n` bytes of data from this\n source. If `n` is `0`, then it can indicate one of two scenarios:\n\n 1. This reader has reached its \"end of file\" and will likely no longer\n    be able to produce bytes. Note that this does not mean that the\n    reader will *always* no longer be able to produce bytes. As an example,\n    on Linux, this method will call the `recv` syscall for a [`TcpStream`],\n    where returning zero indicates the connection was shut down correctly. While\n    for [`File`], it is possible to reach the end of file and get zero as result,\n    but if more data is appended to the file, future calls to `read` will return\n    more data.\n 2. The buffer specified was 0 bytes in length.\n\n It is not an error if the returned value `n` is smaller than the buffer size,\n even when the reader is not at the end of the stream yet.\n This may happen for example because fewer bytes are actually available right now\n (e. g. being close to end-of-file) or because read() was interrupted by a signal.\n\n As this trait is safe to implement, callers in unsafe code cannot rely on\n `n <= buf.len()` for safety.\n Extra care needs to be taken when `unsafe` functions are used to access the read bytes.\n Callers have to ensure that no unchecked out-of-bounds accesses are possible even if\n `n > buf.len()`.\n\n *Implementations* of this method can make no assumptions about the contents of `buf` when\n this function is called. It is recommended that implementations only write data to `buf`\n instead of reading its contents.\n\n Correspondingly, however, *callers* of this method in unsafe code must not assume\n any guarantees about how the implementation uses `buf`. The trait is safe to implement,\n so it is possible that the code that's supposed to write to the buffer might also read\n from it. It is your responsibility to make sure that `buf` is initialized\n before calling `read`. Calling `read` with an uninitialized `buf` (of the kind one\n obtains via [`MaybeUninit<T>`]) is not safe, and can lead to undefined behavior.\n\n [`MaybeUninit<T>`]: crate::mem::MaybeUninit\n\n # Errors\n\n If this function encounters any form of I/O or other error, an error\n variant will be returned. If an error is returned then it must be\n guaranteed that no bytes were read.\n\n An error of the [`ErrorKind::Interrupted`] kind is non-fatal and the read\n operation should be retried if there is nothing else to do.\n\n # Examples\n\n [`File`]s implement `Read`:\n\n [`Ok(n)`]: Ok\n [`File`]: crate::fs::File\n [`TcpStream`]: crate::net::TcpStream\n\n ```no_run\n use std::io;\n use std::io::prelude::*;\n use std::fs::File;\n\n fn main() -> io::Result<()> {\n     let mut f = File::open(\"foo.txt\")?;\n     let mut buffer = [0; 10];\n\n     // read up to 10 bytes\n     let n = f.read(&mut buffer[..])?;\n\n     println!(\"The bytes: {:?}\", &buffer[..n]);\n     Ok(())\n }\n ```\n",
+      "adt": {}
+    },
+    "io::error::Error::is_interrupted": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "io::error::Error": "ImmutableAsArgument"
+      }
+    },
+    "io::buffered::bufreader::BufReader::<R>::buffer": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a reference to the internally buffered data.\n\n Unlike [`fill_buf`], this will not attempt to fill the buffer if it is empty.\n\n [`fill_buf`]: BufRead::fill_buf\n\n # Examples\n\n ```no_run\n use std::io::{BufReader, BufRead};\n use std::fs::File;\n\n fn main() -> std::io::Result<()> {\n     let f = File::open(\"log.txt\")?;\n     let mut reader = BufReader::new(f);\n     assert!(reader.buffer().is_empty());\n\n     if reader.fill_buf()?.len() > 0 {\n         assert!(!reader.buffer().is_empty());\n     }\n     Ok(())\n }\n ```\n",
+      "adt": {
+        "io::buffered::bufreader::BufReader": "ImmutableAsArgument"
+      }
+    },
+    "io::Write::write_all": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Attempts to write an entire buffer into this writer.\n\n This method will continuously call [`write`] until there is no more data\n to be written or an error of non-[`ErrorKind::Interrupted`] kind is\n returned. This method will not return until the entire buffer has been\n successfully written or such an error occurs. The first error that is\n not of [`ErrorKind::Interrupted`] kind generated from this method will be\n returned.\n\n If the buffer contains no data, this will never call [`write`].\n\n # Errors\n\n This function will return the first error of\n non-[`ErrorKind::Interrupted`] kind that [`write`] returns.\n\n [`write`]: Write::write\n\n # Examples\n\n ```no_run\n use std::io::prelude::*;\n use std::fs::File;\n\n fn main() -> std::io::Result<()> {\n     let mut buffer = File::create(\"foo.txt\")?;\n\n     buffer.write_all(b\"some bytes\")?;\n     Ok(())\n }\n ```\n",
+      "adt": {
+        "core::result::Result": "Constructor",
+        "io::error::Error": "Constructor"
+      }
+    },
+    "core::ops::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "core::ops::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    },
+    "io::buffered::bufreader::BufReader::<R>::discard_buffer": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Invalidates all data in the internal buffer.\n",
+      "adt": {
+        "io::buffered::bufreader::BufReader": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "io::buffered::bufreader::BufReader": [
+      "MutRef",
+      "Ref",
+      "Deref"
+    ],
+    "core::result::Result": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })])"
+    ],
+    "io::error::Error": [
+      "Ref",
+      "Plain"
+    ],
+    "core::ops::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 510, kind: RigidTy(Adt(AdtDef(DefId { id: 4389, name: \"core::result::Result\" }), GenericArgs([Type(Ty { id: 427, kind: RigidTy(Adt(AdtDef(DefId { id: 4570, name: \"core::convert::Infallible\" }), GenericArgs([]))) }), Type(Ty { id: 20, kind: RigidTy(Adt(AdtDef(DefId { id: 4564, name: \"io::error::Error\" }), GenericArgs([]))) })]))) })])"
+    ]
+  },
+  "path": 1287,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/io/copy.rs:157:5: 184:6",
+  "src": "fn copy_to(&mut self, to: &mut (impl Write + ?Sized)) -> Result<u64> {\n        let mut len = 0;\n\n        loop {\n            // Hack: this relies on `impl Read for BufReader` always calling fill_buf\n            // if the buffer is empty, even for empty slices.\n            // It can't be called directly here since specialization prevents us\n            // from adding I: Read\n            match self.read(&mut []) {\n                Ok(_) => {}\n                Err(e) if e.is_interrupted() => continue,\n                Err(e) => return Err(e),\n            }\n            let buf = self.buffer();\n            if self.buffer().len() == 0 {\n                return Ok(len);\n            }\n\n            // In case the writer side is a BufWriter then its write_all\n            // implements an optimization that passes through large\n            // buffers to the underlying writer. That code path is #[cold]\n            // but we're still avoiding redundant memcopies when doing\n            // a copy between buffered inputs and outputs.\n            to.write_all(buf)?;\n            len += buf.len() as u64;\n            self.discard_buffer();\n        }\n    }",
+  "mir": "fn <io::buffered::bufreader::BufReader<I> as io::copy::BufferedReaderSpec>::copy_to(_1: &mut io::buffered::bufreader::BufReader<I>, _2: &mut impl Write + ?Sized) -> core::result::Result<u64, io::error::Error> {\n    let mut _0: core::result::Result<u64, io::error::Error>;\n    let mut _3: u64;\n    let mut _4: core::result::Result<usize, io::error::Error>;\n    let mut _5: &mut [u8];\n    let mut _6: &mut [u8; 0];\n    let mut _7: isize;\n    let  _8: io::error::Error;\n    let  _9: &io::error::Error;\n    let mut _10: bool;\n    let  _11: io::error::Error;\n    let  _12: &[u8];\n    let mut _13: &io::buffered::bufreader::BufReader<I>;\n    let mut _14: usize;\n    let  _15: &[u8];\n    let mut _16: &io::buffered::bufreader::BufReader<I>;\n    let mut _17: u64;\n    let mut _18: core::ops::ControlFlow<core::result::Result<core::convert::Infallible, io::error::Error>>;\n    let mut _19: core::result::Result<(), io::error::Error>;\n    let mut _20: isize;\n    let  _21: core::result::Result<core::convert::Infallible, io::error::Error>;\n    let mut _22: u64;\n    let mut _23: usize;\n    let mut _24: (u64, bool);\n    let  _25: ();\n    debug self => _1;\n    debug to => _2;\n    debug len => _3;\n    debug e => _8;\n    debug e => _9;\n    debug e => _11;\n    debug buf => _12;\n    debug residual => _21;\n    debug val => ();\n    bb0: {\n        StorageLive(_3);\n        _3 = 0_u64;\n        goto -> bb1;\n    }\n    bb1: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _6 = <io::buffered::bufreader::BufReader<I> as io::copy::BufferedReaderSpec>::copy_to::<impl Write + ?Sized>::promoted[0];\n        _5 = _6 as &mut [u8];\n        _4 = <io::buffered::bufreader::BufReader<I> as io::Read>::read(_1, move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _7 = discriminant(_4);\n        switchInt(move _7) -> [0: bb5, 1: bb4, otherwise: bb3];\n    }\n    bb3: {\n        unreachable;\n    }\n    bb4: {\n        _9 = &((_4 as variant#1).0: io::error::Error);\n        StorageLive(_10);\n        _10 = io::error::Error::is_interrupted(_9) -> [return: bb6, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_4);\n        StorageLive(_13);\n        _13 = &(*_1);\n        _12 = io::buffered::bufreader::BufReader::<I>::buffer(move _13) -> [return: bb9, unwind unreachable];\n    }\n    bb6: {\n        switchInt(move _10) -> [0: bb8, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageLive(_8);\n        _8 = move ((_4 as variant#1).0: io::error::Error);\n        drop(_8) -> [return: bb20, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_10);\n        _11 = move ((_4 as variant#1).0: io::error::Error);\n        _0 = core::result::Result::Err(_11);\n        StorageDead(_4);\n        goto -> bb22;\n    }\n    bb9: {\n        StorageDead(_13);\n        StorageLive(_14);\n        StorageLive(_16);\n        _16 = &(*_1);\n        _15 = io::buffered::bufreader::BufReader::<I>::buffer(move _16) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_16);\n        _14 = PtrMetadata(_15);\n        switchInt(move _14) -> [0: bb11, otherwise: bb12];\n    }\n    bb11: {\n        StorageDead(_14);\n        StorageLive(_17);\n        _17 = _3;\n        _0 = core::result::Result::Ok(move _17);\n        StorageDead(_17);\n        goto -> bb21;\n    }\n    bb12: {\n        StorageDead(_14);\n        StorageLive(_18);\n        StorageLive(_19);\n        _19 = <impl Write + ?Sized as io::Write>::write_all(_2, _12) -> [return: bb13, unwind unreachable];\n    }\n    bb13: {\n        _18 = <core::result::Result<(), io::error::Error> as core::ops::Try>::branch(move _19) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        StorageDead(_19);\n        _20 = discriminant(_18);\n        switchInt(move _20) -> [0: bb15, 1: bb16, otherwise: bb3];\n    }\n    bb15: {\n        StorageDead(_18);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = PtrMetadata(_12);\n        _22 = move _23 as u64;\n        StorageDead(_23);\n        _24 = CheckedAdd(_3, _22);\n        assert(!move (_24.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _3, move _22) -> [success: bb18, unwind unreachable];\n    }\n    bb16: {\n        _21 = move ((_18 as variant#1).0: core::result::Result<core::convert::Infallible, io::error::Error>);\n        _0 = <core::result::Result<u64, io::error::Error> as core::ops::FromResidual<core::result::Result<core::convert::Infallible, io::error::Error>>>::from_residual(_21) -> [return: bb17, unwind unreachable];\n    }\n    bb17: {\n        StorageDead(_18);\n        goto -> bb21;\n    }\n    bb18: {\n        _3 = move (_24.0: u64);\n        StorageDead(_22);\n        _25 = io::buffered::bufreader::BufReader::<I>::discard_buffer(_1) -> [return: bb19, unwind unreachable];\n    }\n    bb19: {\n        goto -> bb1;\n    }\n    bb20: {\n        StorageDead(_8);\n        StorageDead(_4);\n        goto -> bb1;\n    }\n    bb21: {\n        goto -> bb22;\n    }\n    bb22: {\n        StorageDead(_3);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

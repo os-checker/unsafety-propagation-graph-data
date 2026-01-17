@@ -1,0 +1,84 @@
+{
+  "name": "sys::net::connection::socket::socket_addr_v4_to_c",
+  "safe": true,
+  "callees": {
+    "core::net::SocketAddrV4::port": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the port number associated with this socket address.\n\n # Examples\n\n ```\n use std::net::{SocketAddrV4, Ipv4Addr};\n\n let socket = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8080);\n assert_eq!(socket.port(), 8080);\n ```\n",
+      "adt": {}
+    },
+    "core::num::<impl u16>::to_be": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts `self` to big endian from the target's endianness.\n\n On big endian this is a no-op. On little endian the bytes are\n swapped.\n\n # Examples\n\n ```\n\n if cfg!(target_endian = \"big\") {\n     assert_eq!(n.to_be(), n)\n } else {\n     assert_eq!(n.to_be(), n.swap_bytes())\n }\n ```\n",
+      "adt": {}
+    },
+    "core::net::SocketAddrV4::ip": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the IP address associated with this socket address.\n\n # Examples\n\n ```\n use std::net::{SocketAddrV4, Ipv4Addr};\n\n let socket = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8080);\n assert_eq!(socket.ip(), &Ipv4Addr::new(127, 0, 0, 1));\n ```\n",
+      "adt": {}
+    },
+    "sys::net::connection::socket::ip_v4_addr_to_c": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core::net::Ipv4Addr": "ImmutableAsArgument",
+        "libc::in_addr": "Constructor"
+      }
+    },
+    "core::mem::zeroed": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the value of type `T` represented by the all-zero byte-pattern.\n\n This means that, for example, the padding byte in `(u8, u16)` is not\n necessarily zeroed.\n\n There is no guarantee that an all-zero byte-pattern represents a valid value\n of some type `T`. For example, the all-zero byte-pattern is not a valid value\n for reference types (`&T`, `&mut T`) and function pointers. Using `zeroed`\n on such types causes immediate [undefined behavior][ub] because [the Rust\n compiler assumes][inv] that there always is a valid value in a variable it\n considers initialized.\n\n This has the same effect as [`MaybeUninit::zeroed().assume_init()`][zeroed].\n It is useful for FFI sometimes, but should generally be avoided.\n\n [zeroed]: MaybeUninit::zeroed\n [ub]: ../../reference/behavior-considered-undefined.html\n [inv]: MaybeUninit#initialization-invariant\n\n # Examples\n\n Correct usage of this function: initializing an integer with zero.\n\n ```\n use std::mem;\n\n let x: i32 = unsafe { mem::zeroed() };\n assert_eq!(0, x);\n ```\n\n *Incorrect* usage of this function: initializing a reference with zero.\n\n ```rust,no_run\n # #![allow(invalid_value)]\n use std::mem;\n\n let _x: &i32 = unsafe { mem::zeroed() }; // Undefined behavior!\n let _y: fn() = unsafe { mem::zeroed() }; // And again!\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::net::SocketAddrV4": [
+      "Ref"
+    ],
+    "core::net::Ipv4Addr": [
+      "Ref"
+    ],
+    "libc::in_addr": [
+      "Plain"
+    ],
+    "libc::sockaddr_in": [
+      "Plain",
+      "Unknown([Field(3, Ty { id: 13555, kind: RigidTy(Array(Ty { id: 35, kind: RigidTy(Uint(U8)) }, TyConst { kind: Value(Ty { id: 393, kind: RigidTy(Uint(Usize)) }, Allocation { bytes: [Some(8), Some(0), Some(0), Some(0), Some(0), Some(0), Some(0), Some(0)], provenance: ProvenanceMap { ptrs: [] }, align: 8, mutability: Mut }), id: TyConstId(32, ThreadLocalIndex) })) })])"
+    ]
+  },
+  "path": 3731,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/net/connection/socket/mod.rs:119:1: 126:2",
+  "src": "fn socket_addr_v4_to_c(addr: &SocketAddrV4) -> c::sockaddr_in {\n    c::sockaddr_in {\n        sin_family: c::AF_INET as c::sa_family_t,\n        sin_port: addr.port().to_be(),\n        sin_addr: ip_v4_addr_to_c(addr.ip()),\n        ..unsafe { mem::zeroed() }\n    }\n}",
+  "mir": "fn sys::net::connection::socket::socket_addr_v4_to_c(_1: &core::net::SocketAddrV4) -> libc::sockaddr_in {\n    let mut _0: libc::sockaddr_in;\n    let mut _2: u16;\n    let mut _3: u16;\n    let mut _4: u16;\n    let mut _5: libc::in_addr;\n    let  _6: &core::net::Ipv4Addr;\n    let mut _7: libc::sockaddr_in;\n    debug addr => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = libc::AF_INET as u16;\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = core::net::SocketAddrV4::port(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = core::num::<impl u16>::to_be(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _6 = core::net::SocketAddrV4::ip(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _5 = sys::net::connection::socket::ip_v4_addr_to_c(_6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageLive(_7);\n        _7 = core::mem::zeroed::<libc::sockaddr_in>() -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _0 = sockaddr_in(move _2, move _3, move _5, (_7.3: [u8; 8]));\n        StorageDead(_7);\n        StorageDead(_5);\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

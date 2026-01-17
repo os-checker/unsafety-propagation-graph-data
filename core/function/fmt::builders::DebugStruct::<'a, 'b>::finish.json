@@ -1,0 +1,38 @@
+{
+  "name": "fmt::builders::DebugStruct::<'a, 'b>::finish",
+  "safe": true,
+  "callees": {
+    "result::Result::<T, E>::and_then": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calls `op` if the result is [`Ok`], otherwise returns the [`Err`] value of `self`.\n\n\n This function can be used for control flow based on `Result` values.\n\n # Examples\n\n ```\n fn sq_then_to_string(x: u32) -> Result<String, &'static str> {\n     x.checked_mul(x).map(|sq| sq.to_string()).ok_or(\"overflowed\")\n }\n\n assert_eq!(Ok(2).and_then(sq_then_to_string), Ok(4.to_string()));\n assert_eq!(Ok(1_000_000).and_then(sq_then_to_string), Err(\"overflowed\"));\n assert_eq!(Err(\"not a number\").and_then(sq_then_to_string), Err(\"not a number\"));\n ```\n\n Often used to chain fallible operations that may return [`Err`].\n\n ```\n use std::{io::ErrorKind, path::Path};\n\n // Note: on Windows \"/\" maps to \"C:\\\"\n let root_modified_time = Path::new(\"/\").metadata().and_then(|md| md.modified());\n assert!(root_modified_time.is_ok());\n\n let should_fail = Path::new(\"/bad/path\").metadata().and_then(|md| md.modified());\n assert!(should_fail.is_err());\n assert_eq!(should_fail.unwrap_err().kind(), ErrorKind::NotFound);\n ```\n",
+      "adt": {
+        "result::Result": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "fmt::builders::DebugStruct": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "MutRef"
+    ],
+    "result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 12921,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/builders.rs:244:5: 251:6",
+  "src": "pub fn finish(&mut self) -> fmt::Result {\n        if self.has_fields {\n            self.result = self.result.and_then(|_| {\n                if self.is_pretty() { self.fmt.write_str(\"}\") } else { self.fmt.write_str(\" }\") }\n            });\n        }\n        self.result\n    }",
+  "mir": "fn fmt::builders::DebugStruct::<'a, 'b>::finish(_1: &mut fmt::builders::DebugStruct<'_, '_>) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    let mut _2: bool;\n    let mut _3: result::Result<(), fmt::Error>;\n    let mut _4: result::Result<(), fmt::Error>;\n    let mut _5: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/builders.rs:246:48: 246:51};\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = ((*_1).2: bool);\n        switchInt(move _2) -> [0: bb3, otherwise: bb1];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = ((*_1).1: result::Result<(), fmt::Error>);\n        StorageLive(_5);\n        _5 = {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/builders.rs:246:48: 246:51}(_1);\n        _3 = result::Result::<(), fmt::Error>::and_then::<(), {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/builders.rs:246:48: 246:51}>(move _4, move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageDead(_4);\n        ((*_1).1: result::Result<(), fmt::Error>) = move _3;\n        StorageDead(_3);\n        goto -> bb3;\n    }\n    bb3: {\n        StorageDead(_2);\n        _0 = ((*_1).1: result::Result<(), fmt::Error>);\n        return;\n    }\n}\n",
+  "doc": " Finishes output and returns any error encountered.\n\n # Examples\n\n ```\n use std::fmt;\n\n struct Bar {\n     bar: i32,\n     baz: String,\n }\n\n impl fmt::Debug for Bar {\n     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {\n         fmt.debug_struct(\"Bar\")\n            .field(\"bar\", &self.bar)\n            .field(\"baz\", &self.baz)\n            .finish() // You need to call it to \"finish\" the\n                      // struct formatting.\n     }\n }\n\n assert_eq!(\n     format!(\"{:?}\", Bar { bar: 10, baz: \"Hello World\".to_string() }),\n     r#\"Bar { bar: 10, baz: \"Hello World\" }\"#,\n );\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

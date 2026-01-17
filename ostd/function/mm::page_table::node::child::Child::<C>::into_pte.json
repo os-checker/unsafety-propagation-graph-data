@@ -1,0 +1,98 @@
+{
+  "name": "mm::page_table::node::child::Child::<C>::into_pte",
+  "safe": true,
+  "callees": {
+    "mm::page_table::PageTableEntryTrait::new_absent": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a PTE that points to nothing.\n\n Note that currently the implementation requires a zeroed PTE to be an absent PTE.\n",
+      "adt": {}
+    },
+    "mm::page_table::PageTableEntryTrait::new_page": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new PTE that maps to a page.\n",
+      "adt": {}
+    },
+    "core::ops::Deref::deref": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Dereferences the value.\n",
+      "adt": {}
+    },
+    "mm::mem_obj::HasPaddr::paddr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the start physical address of the memory object.\n",
+      "adt": {}
+    },
+    "core::mem::ManuallyDrop::<T>::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Wrap a value to be manually dropped.\n\n # Examples\n\n ```rust\n use std::mem::ManuallyDrop;\n let mut x = ManuallyDrop::new(String::from(\"Hello World!\"));\n x.truncate(5); // You can still safely operate on the value\n assert_eq!(*x, \"Hello\");\n // But `Drop` will not be run here\n # // FIXME(https://github.com/rust-lang/miri/issues/3670):\n # // use -Zmiri-disable-leak-check instead of unleaking in tests meant to leak.\n # let _ = ManuallyDrop::into_inner(x);\n ```\n",
+      "adt": {}
+    },
+    "mm::page_table::PageTableEntryTrait::new_pt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new PTE that maps to a child page table.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "mm::page_table::node::child::Child": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 11, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(1, Ty { id: 1, kind: RigidTy(Uint(U8)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(2, Ty { id: 1097, kind: RigidTy(Adt(AdtDef(DefId { id: 3471, name: \"mm::page_prop::PageProperty\" }), GenericArgs([]))) })])",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 5420, kind: RigidTy(Adt(AdtDef(DefId { id: 5361, name: \"sync::rcu::RcuDrop\" }), GenericArgs([Type(Ty { id: 5428, kind: RigidTy(Adt(AdtDef(DefId { id: 3414, name: \"mm::frame::Frame\" }), GenericArgs([Type(Ty { id: 5429, kind: RigidTy(Adt(AdtDef(DefId { id: 5364, name: \"mm::page_table::node::PageTablePageMeta\" }), GenericArgs([Type(Ty { id: 1032, kind: Param(ParamTy { index: 0, name: \"C\" }) })]))) })]))) })]))) })])"
+    ],
+    "mm::page_prop::PageProperty": [
+      "Plain"
+    ],
+    "sync::rcu::RcuDrop": [
+      "Plain",
+      "Ref"
+    ],
+    "mm::frame::Frame": [
+      "Ref"
+    ],
+    "core::mem::ManuallyDrop": [
+      "Plain"
+    ]
+  },
+  "path": 2377,
+  "span": "ostd/src/mm/page_table/node/child.rs:32:5: 42:6",
+  "src": "pub(super) fn into_pte(self) -> C::E {\n        match self {\n            Child::PageTable(node) => {\n                let paddr = node.paddr();\n                let _ = ManuallyDrop::new(node);\n                C::E::new_pt(paddr)\n            }\n            Child::Frame(paddr, level, prop) => C::E::new_page(paddr, level, prop),\n            Child::None => C::E::new_absent(),\n        }\n    }",
+  "mir": "fn mm::page_table::node::child::Child::<C>::into_pte(_1: mm::page_table::node::child::Child<C>) -> <C as mm::page_table::PageTableConfig>::E {\n    let mut _0: <C as mm::page_table::PageTableConfig>::E;\n    let mut _2: isize;\n    let  _3: sync::rcu::RcuDrop<mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>;\n    let  _4: usize;\n    let  _5: &mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>;\n    let mut _6: &sync::rcu::RcuDrop<mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>;\n    let mut _7: core::mem::ManuallyDrop<sync::rcu::RcuDrop<mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>>;\n    let  _8: usize;\n    let  _9: u8;\n    let  _10: mm::page_prop::PageProperty;\n    debug self => _1;\n    debug node => _3;\n    debug paddr => _4;\n    debug paddr => _8;\n    debug level => _9;\n    debug prop => _10;\n    bb0: {\n        _2 = discriminant(_1);\n        switchInt(move _2) -> [0: bb4, 1: bb3, 2: bb2, otherwise: bb1];\n    }\n    bb1: {\n        unreachable;\n    }\n    bb2: {\n        _0 = <<C as mm::page_table::PageTableConfig>::E as mm::page_table::PageTableEntryTrait>::new_absent() -> [return: bb10, unwind unreachable];\n    }\n    bb3: {\n        _8 = ((_1 as variant#1).0: usize);\n        _9 = ((_1 as variant#1).1: u8);\n        _10 = ((_1 as variant#1).2: mm::page_prop::PageProperty);\n        _0 = <<C as mm::page_table::PageTableConfig>::E as mm::page_table::PageTableEntryTrait>::new_page(_8, _9, _10) -> [return: bb9, unwind unreachable];\n    }\n    bb4: {\n        _3 = move ((_1 as variant#0).0: sync::rcu::RcuDrop<mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>);\n        StorageLive(_6);\n        _6 = &_3;\n        _5 = <sync::rcu::RcuDrop<mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>> as core::ops::Deref>::deref(move _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        _4 = <mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>> as mm::mem_obj::HasPaddr>::paddr(_5) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageLive(_7);\n        _7 = core::mem::ManuallyDrop::<sync::rcu::RcuDrop<mm::frame::Frame<mm::page_table::node::PageTablePageMeta<C>>>>::new(_3) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_7);\n        _0 = <<C as mm::page_table::PageTableConfig>::E as mm::page_table::PageTableEntryTrait>::new_pt(_4) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        goto -> bb10;\n    }\n    bb9: {\n        goto -> bb10;\n    }\n    bb10: {\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

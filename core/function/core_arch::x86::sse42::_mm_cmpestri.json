@@ -1,0 +1,46 @@
+{
+  "name": "core_arch::x86::sse42::_mm_cmpestri",
+  "safe": false,
+  "callees": {
+    "core_arch::x86::__m128i::as_i8x16": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {
+        "core_arch::simd::i8x16": "Constructor"
+      }
+    },
+    "core_arch::x86::sse42::pcmpestri128": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core_arch::x86::__m128i": [
+      "Plain"
+    ],
+    "core_arch::simd::i8x16": [
+      "Plain"
+    ]
+  },
+  "path": 11956,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../stdarch/crates/core_arch/src/x86/sse42.rs:441:1: 444:2",
+  "src": "pub fn _mm_cmpestri<const IMM8: i32>(a: __m128i, la: i32, b: __m128i, lb: i32) -> i32 {\n    static_assert_uimm_bits!(IMM8, 8);\n    unsafe { pcmpestri128(a.as_i8x16(), la, b.as_i8x16(), lb, IMM8 as i8) }\n}",
+  "mir": "fn core_arch::x86::sse42::_mm_cmpestri(_1: core_arch::x86::__m128i, _2: i32, _3: core_arch::x86::__m128i, _4: i32) -> i32 {\n    let mut _0: i32;\n    let mut _5: core_arch::simd::i8x16;\n    let mut _6: core_arch::simd::i8x16;\n    let mut _7: i8;\n    debug a => _1;\n    debug la => _2;\n    debug b => _3;\n    debug lb => _4;\n    bb0: {\n        StorageLive(_5);\n        _5 = core_arch::x86::__m128i::as_i8x16(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        _6 = core_arch::x86::__m128i::as_i8x16(_3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_7);\n        _7 = IMM8 as i8;\n        _0 = core_arch::x86::sse42::pcmpestri128(move _5, _2, move _6, _4, move _7) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_7);\n        StorageDead(_6);\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": " Compares packed strings `a` and `b` with lengths `la` and `lb` using the\n control in `IMM8` and return the generated index. Similar to\n [`_mm_cmpistri`] with the exception that [`_mm_cmpistri`] implicitly\n determines the length of `a` and `b`.\n\n # Control modes\n\n The control specified by `IMM8` may be one or more of the following.\n\n ## Data size and signedness\n\n  - [`_SIDD_UBYTE_OPS`] - Default\n  - [`_SIDD_UWORD_OPS`]\n  - [`_SIDD_SBYTE_OPS`]\n  - [`_SIDD_SWORD_OPS`]\n\n ## Comparison options\n  - [`_SIDD_CMP_EQUAL_ANY`] - Default\n  - [`_SIDD_CMP_RANGES`]\n  - [`_SIDD_CMP_EQUAL_EACH`]\n  - [`_SIDD_CMP_EQUAL_ORDERED`]\n\n ## Result polarity\n  - [`_SIDD_POSITIVE_POLARITY`] - Default\n  - [`_SIDD_NEGATIVE_POLARITY`]\n\n ## Bit returned\n  - [`_SIDD_LEAST_SIGNIFICANT`] - Default\n  - [`_SIDD_MOST_SIGNIFICANT`]\n\n # Examples\n\n ```\n #[cfg(target_arch = \"x86\")]\n use std::arch::x86::*;\n #[cfg(target_arch = \"x86_64\")]\n use std::arch::x86_64::*;\n\n # fn main() {\n #     if is_x86_feature_detected!(\"sse4.2\") {\n #         #[target_feature(enable = \"sse4.2\")]\n #         unsafe fn worker() {\n\n // The string we want to find a substring in\n let haystack = b\"Split \\r\\n\\t line  \";\n\n // The string we want to search for with some\n // extra bytes we do not want to search for.\n let needle = b\"\\r\\n\\t ignore this \";\n\n let a = unsafe { _mm_loadu_si128(needle.as_ptr() as *const _) };\n let b = unsafe { _mm_loadu_si128(haystack.as_ptr() as *const _) };\n\n // Note: We explicitly specify we only want to search `b` for the\n // first 3 characters of a.\n let idx = _mm_cmpestri(a, 3, b, 15, _SIDD_CMP_EQUAL_ORDERED);\n\n assert_eq!(idx, 6);\n #         }\n #         unsafe { worker(); }\n #     }\n # }\n ```\n\n [`_SIDD_UBYTE_OPS`]: constant._SIDD_UBYTE_OPS.html\n [`_SIDD_UWORD_OPS`]: constant._SIDD_UWORD_OPS.html\n [`_SIDD_SBYTE_OPS`]: constant._SIDD_SBYTE_OPS.html\n [`_SIDD_SWORD_OPS`]: constant._SIDD_SWORD_OPS.html\n [`_SIDD_CMP_EQUAL_ANY`]: constant._SIDD_CMP_EQUAL_ANY.html\n [`_SIDD_CMP_RANGES`]: constant._SIDD_CMP_RANGES.html\n [`_SIDD_CMP_EQUAL_EACH`]: constant._SIDD_CMP_EQUAL_EACH.html\n [`_SIDD_CMP_EQUAL_ORDERED`]: constant._SIDD_CMP_EQUAL_ORDERED.html\n [`_SIDD_POSITIVE_POLARITY`]: constant._SIDD_POSITIVE_POLARITY.html\n [`_SIDD_NEGATIVE_POLARITY`]: constant._SIDD_NEGATIVE_POLARITY.html\n [`_SIDD_LEAST_SIGNIFICANT`]: constant._SIDD_LEAST_SIGNIFICANT.html\n [`_SIDD_MOST_SIGNIFICANT`]: constant._SIDD_MOST_SIGNIFICANT.html\n [`_mm_cmpistri`]: fn._mm_cmpistri.html\n\n [Intel's documentation](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_cmpestri)\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

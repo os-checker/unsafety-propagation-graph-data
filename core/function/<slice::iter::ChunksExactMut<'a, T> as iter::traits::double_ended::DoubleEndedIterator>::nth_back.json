@@ -1,0 +1,56 @@
+{
+  "name": "<slice::iter::ChunksExactMut<'a, T> as iter::traits::double_ended::DoubleEndedIterator>::nth_back",
+  "safe": true,
+  "callees": {
+    "iter::traits::exact_size::ExactSizeIterator::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the exact remaining length of the iterator.\n\n The implementation ensures that the iterator will return exactly `len()`\n more times a [`Some(T)`] value, before returning [`None`].\n This method has a default implementation, so you usually should not\n implement it directly. However, if you can provide a more efficient\n implementation, you can do so. See the [trait-level] docs for an\n example.\n\n This function has the same safety guarantees as the\n [`Iterator::size_hint`] function.\n\n [trait-level]: ExactSizeIterator\n [`Some(T)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n // a finite range knows exactly how many times it will iterate\n let mut range = 0..5;\n\n assert_eq!(5, range.len());\n let _ = range.next();\n assert_eq!(4, range.len());\n ```\n",
+      "adt": {}
+    },
+    "mem::replace": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Moves `src` into the referenced `dest`, returning the previous `dest` value.\n\n Neither value is dropped.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a default value, see [`take`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::replace(&mut v, vec![3, 4, 5]);\n assert_eq!(vec![1, 2], old_v);\n assert_eq!(vec![3, 4, 5], v);\n ```\n\n `replace` allows consumption of a struct field by replacing it with another value.\n Without `replace` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let t = self.buf[i];\n         self.buf[i] = v;\n         t\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so we can't even clone `self.buf[i]` to\n avoid the move. But `replace` can be used to disassociate the original value at that index from\n `self`, allowing it to be returned:\n\n ```\n # #![allow(dead_code)]\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         mem::replace(&mut self.buf[i], v)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf[0], 0);\n\n assert_eq!(buffer.replace_index(0, 2), 0);\n assert_eq!(buffer.buf[0], 2);\n ```\n",
+      "adt": {}
+    },
+    "ptr::mut_ptr::<impl *mut [T]>::split_at_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Divides one mutable raw slice into two at an index.\n\n The first will contain all indices from `[0, mid)` (excluding\n the index `mid` itself) and the second will contain all\n indices from `[mid, len)` (excluding the index `len` itself).\n\n # Panics\n\n Panics if `mid > len`.\n\n # Safety\n\n `mid` must be [in-bounds] of the underlying [allocation].\n Which means `self` must be dereferenceable and span a single allocation\n that is at least `mid * size_of::<T>()` bytes long. Not upholding these\n requirements is *[undefined behavior]* even if the resulting pointers are not used.\n\n Since `len` being in-bounds it is not a safety invariant of `*mut [T]` the\n safety requirements of this method are the same as for [`split_at_mut_unchecked`].\n The explicit bounds check is only as useful as `len` is correct.\n\n [`split_at_mut_unchecked`]: #method.split_at_mut_unchecked\n [in-bounds]: #method.add\n [allocation]: crate::ptr#allocation\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n\n # Examples\n\n ```\n #![feature(raw_slice_split)]\n #![feature(slice_ptr_get)]\n\n let mut v = [1, 0, 3, 0, 5, 6];\n let ptr = &mut v as *mut [_];\n unsafe {\n     let (left, right) = ptr.split_at_mut(2);\n     assert_eq!(&*left, [1, 0]);\n     assert_eq!(&*right, [3, 0, 5, 6]);\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::ChunksExactMut": [
+      "MutRef",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(2)))",
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))"
+    ],
+    "option::Option": [
+      "Plain"
+    ]
+  },
+  "path": 16407,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/iter.rs:2112:5: 2128:6",
+  "src": "fn nth_back(&mut self, n: usize) -> Option<Self::Item> {\n        let len = self.len();\n        if n < len {\n            let start = (len - 1 - n) * self.chunk_size;\n            let end = start + self.chunk_size;\n            // SAFETY: The self.v contract ensures that any split_at_mut is valid.\n            let (temp, _tail) = unsafe { mem::replace(&mut self.v, &mut []).split_at_mut(end) };\n            // SAFETY: The self.v contract ensures that any split_at_mut is valid.\n            let (head, nth_back) = unsafe { temp.split_at_mut(start) };\n            self.v = head;\n            // SAFETY: Nothing else points to or will point to the contents of this slice.\n            Some(unsafe { &mut *nth_back })\n        } else {\n            self.v = &mut [];\n            None\n        }\n    }",
+  "mir": "fn <slice::iter::ChunksExactMut<'a, T> as iter::traits::double_ended::DoubleEndedIterator>::nth_back(_1: &mut slice::iter::ChunksExactMut<'_, T>, _2: usize) -> option::Option<&mut [T]> {\n    let mut _0: option::Option<&mut [T]>;\n    let  _3: usize;\n    let mut _4: &&mut slice::iter::ChunksExactMut<'_, T>;\n    let mut _5: bool;\n    let  _6: usize;\n    let mut _7: usize;\n    let mut _8: usize;\n    let mut _9: (usize, bool);\n    let mut _10: (usize, bool);\n    let mut _11: usize;\n    let mut _12: (usize, bool);\n    let  _13: usize;\n    let mut _14: usize;\n    let mut _15: (usize, bool);\n    let  _16: *mut [T];\n    let  _17: *mut [T];\n    let mut _18: (*mut [T], *mut [T]);\n    let mut _19: *mut [T];\n    let mut _20: &mut *mut [T];\n    let mut _21: *mut [T];\n    let mut _22: *mut [T; 0];\n    let mut _23: &mut [T; 0];\n    let  _24: *mut [T];\n    let  _25: *mut [T];\n    let mut _26: (*mut [T], *mut [T]);\n    let mut _27: &mut [T];\n    let mut _28: *mut [T; 0];\n    let mut _29: &mut [T; 0];\n    debug self => _1;\n    debug n => _2;\n    debug len => _3;\n    debug start => _6;\n    debug end => _13;\n    debug temp => _16;\n    debug _tail => _17;\n    debug head => _24;\n    debug nth_back => _25;\n    bb0: {\n        StorageLive(_4);\n        _4 = &_1;\n        _3 = <&mut slice::iter::ChunksExactMut<'_, T> as iter::traits::exact_size::ExactSizeIterator>::len(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        StorageLive(_5);\n        _5 = Lt(_2, _3);\n        switchInt(move _5) -> [0: bb10, otherwise: bb2];\n    }\n    bb2: {\n        StorageLive(_7);\n        StorageLive(_8);\n        _9 = CheckedSub(_3, 1_usize);\n        assert(!move (_9.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _3, 1_usize) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _8 = move (_9.0: usize);\n        _10 = CheckedSub(_8, _2);\n        assert(!move (_10.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _8, _2) -> [success: bb4, unwind unreachable];\n    }\n    bb4: {\n        _7 = move (_10.0: usize);\n        StorageDead(_8);\n        StorageLive(_11);\n        _11 = ((*_1).2: usize);\n        _12 = CheckedMul(_7, _11);\n        assert(!move (_12.1: bool), \"attempt to compute `{} * {}`, which would overflow\", move _7, move _11) -> [success: bb5, unwind unreachable];\n    }\n    bb5: {\n        _6 = move (_12.0: usize);\n        StorageDead(_11);\n        StorageDead(_7);\n        StorageLive(_14);\n        _14 = ((*_1).2: usize);\n        _15 = CheckedAdd(_6, _14);\n        assert(!move (_15.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _6, move _14) -> [success: bb6, unwind unreachable];\n    }\n    bb6: {\n        _13 = move (_15.0: usize);\n        StorageDead(_14);\n        StorageLive(_18);\n        StorageLive(_19);\n        _20 = &mut ((*_1).0: *mut [T]);\n        StorageLive(_21);\n        StorageLive(_22);\n        StorageLive(_23);\n        _23 = <slice::iter::ChunksExactMut<'_, T> as iter::traits::double_ended::DoubleEndedIterator>::nth_back::promoted[0];\n        _22 = &raw mut (*_23);\n        _21 = move _22 as *mut [T];\n        StorageDead(_22);\n        _19 = mem::replace::<*mut [T]>(_20, move _21) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_21);\n        _18 = ptr::mut_ptr::<impl *mut [T]>::split_at_mut(move _19, _13) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_23);\n        StorageDead(_19);\n        _16 = (_18.0: *mut [T]);\n        StorageLive(_17);\n        _17 = (_18.1: *mut [T]);\n        StorageDead(_18);\n        StorageLive(_26);\n        _26 = ptr::mut_ptr::<impl *mut [T]>::split_at_mut(_16, _6) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _24 = (_26.0: *mut [T]);\n        StorageLive(_25);\n        _25 = (_26.1: *mut [T]);\n        StorageDead(_26);\n        ((*_1).0: *mut [T]) = _24;\n        _27 = &mut (*_25);\n        _0 = option::Option::Some(_27);\n        StorageDead(_25);\n        StorageDead(_17);\n        goto -> bb11;\n    }\n    bb10: {\n        StorageLive(_28);\n        StorageLive(_29);\n        _29 = <slice::iter::ChunksExactMut<'_, T> as iter::traits::double_ended::DoubleEndedIterator>::nth_back::promoted[1];\n        _28 = &raw mut (*_29);\n        ((*_1).0: *mut [T]) = move _28 as *mut [T];\n        StorageDead(_28);\n        StorageDead(_29);\n        _0 = option::Option::None;\n        goto -> bb11;\n    }\n    bb11: {\n        StorageDead(_5);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

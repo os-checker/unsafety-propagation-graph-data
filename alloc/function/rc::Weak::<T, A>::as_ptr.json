@@ -1,0 +1,45 @@
+{
+  "name": "rc::Weak::<T, A>::as_ptr",
+  "safe": true,
+  "callees": {
+    "core::ptr::NonNull::<T>::as_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Acquires the underlying `*mut` pointer.\n\n # Examples\n\n ```\n use std::ptr::NonNull;\n\n let mut x = 0u32;\n let ptr = NonNull::new(&mut x).expect(\"ptr is null!\");\n\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 0);\n\n unsafe { *ptr.as_ptr() += 2; }\n let x_value = unsafe { *ptr.as_ptr() };\n assert_eq!(x_value, 2);\n ```\n",
+      "adt": {}
+    },
+    "rc::is_dangling": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::ptr::NonNull": [
+      "Plain"
+    ],
+    "rc::Weak": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(0)))",
+      "Ref"
+    ]
+  },
+  "path": 1842,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:3373:5: 3386:6",
+  "src": "pub fn as_ptr(&self) -> *const T {\n        let ptr: *mut RcInner<T> = NonNull::as_ptr(self.ptr);\n\n        if is_dangling(ptr) {\n            // If the pointer is dangling, we return the sentinel directly. This cannot be\n            // a valid payload address, as the payload is at least as aligned as RcInner (usize).\n            ptr as *const T\n        } else {\n            // SAFETY: if is_dangling returns false, then the pointer is dereferenceable.\n            // The payload may be dropped at this point, and we have to maintain provenance,\n            // so use raw pointer manipulation.\n            unsafe { &raw mut (*ptr).value }\n        }\n    }",
+  "mir": "fn rc::Weak::<T, A>::as_ptr(_1: &rc::Weak<T, A>) -> *const T {\n    let mut _0: *const T;\n    let  _2: *mut rc::RcInner<T>;\n    let mut _3: core::ptr::NonNull<rc::RcInner<T>>;\n    let mut _4: bool;\n    let mut _5: *const rc::RcInner<T>;\n    let mut _6: *mut T;\n    debug self => _1;\n    debug ptr => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = ((*_1).0: core::ptr::NonNull<rc::RcInner<T>>);\n        _2 = core::ptr::NonNull::<rc::RcInner<T>>::as_ptr(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = _2 as *const rc::RcInner<T>;\n        _4 = rc::is_dangling::<rc::RcInner<T>>(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _4) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_5);\n        _0 = _2 as *const T;\n        goto -> bb5;\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageLive(_6);\n        _6 = &raw mut ((*_2).2: T);\n        _0 = move _6 as *const T;\n        StorageDead(_6);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": " Returns a raw pointer to the object `T` pointed to by this `Weak<T>`.\n\n The pointer is valid only if there are some strong references. The pointer may be dangling,\n unaligned or even [`null`] otherwise.\n\n # Examples\n\n ```\n use std::rc::Rc;\n use std::ptr;\n\n let strong = Rc::new(\"hello\".to_owned());\n let weak = Rc::downgrade(&strong);\n // Both point to the same object\n assert!(ptr::eq(&*strong, weak.as_ptr()));\n // The strong here keeps it alive, so we can still access the object.\n assert_eq!(\"hello\", unsafe { &*weak.as_ptr() });\n\n drop(strong);\n // But not any more. We can do weak.as_ptr(), but accessing the pointer would lead to\n // undefined behavior.\n // assert_eq!(\"hello\", unsafe { &*weak.as_ptr() });\n ```\n\n [`null`]: ptr::null\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

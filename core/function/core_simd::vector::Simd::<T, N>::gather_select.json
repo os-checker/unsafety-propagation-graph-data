@@ -1,0 +1,68 @@
+{
+  "name": "core_simd::vector::Simd::<T, N>::gather_select",
+  "safe": true,
+  "callees": {
+    "core_simd::vector::Simd::<T, N>::splat": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new SIMD vector with all elements set to the given value.\n\n # Examples\n\n ```\n # #![feature(portable_simd)]\n # #[cfg(feature = \"as_crate\")] use core_simd::simd;\n # #[cfg(not(feature = \"as_crate\"))] use core::simd;\n # use simd::u32x4;\n let v = u32x4::splat(8);\n assert_eq!(v.as_array(), &[8, 8, 8, 8]);\n ```\n",
+      "adt": {
+        "core_simd::vector::Simd": "Constructor"
+      }
+    },
+    "core_simd::simd::cmp::ord::SimdPartialOrd::simd_lt": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Test if each element is less than the corresponding element in `other`.\n",
+      "adt": {}
+    },
+    "ops::bit::BitAnd::bitand": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the `&` operation.\n\n # Examples\n\n ```\n assert_eq!(true & false, false);\n assert_eq!(true & true, true);\n assert_eq!(5u8 & 1u8, 1);\n assert_eq!(5u8 & 2u8, 0);\n ```\n",
+      "adt": {}
+    },
+    "core_simd::vector::Simd::<T, N>::gather_select_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reads from indices in `slice` to construct a SIMD vector.\n The mask `enable`s all `true` indices and disables all `false` indices.\n If an index is disabled, the element is selected from the `or` vector.\n\n # Safety\n\n Calling this function with an `enable`d out-of-bounds index is *[undefined behavior]*\n even if the resulting value is not used.\n\n # Examples\n ```\n # #![feature(portable_simd)]\n # #[cfg(feature = \"as_crate\")] use core_simd::simd;\n # #[cfg(not(feature = \"as_crate\"))] use core::simd;\n # use simd::{Simd, cmp::SimdPartialOrd, Mask};\n let vec: Vec<i32> = vec![10, 11, 12, 13, 14, 15, 16, 17, 18];\n let idxs = Simd::from_array([9, 3, 0, 5]); // Includes an out-of-bounds index\n let alt = Simd::from_array([-5, -4, -3, -2]);\n let enable = Mask::from_array([true, true, true, false]); // Includes a masked element\n // If this mask was used to gather, it would be unsound. Let's fix that.\n let enable = enable & idxs.simd_lt(Simd::splat(vec.len()));\n\n // The out-of-bounds index has been masked, so it's safe to gather now.\n let result = unsafe { Simd::gather_select_unchecked(&vec, enable, idxs, alt) };\n assert_eq!(result, Simd::from_array([-5, 13, 10, -2]));\n ```\n [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n",
+      "adt": {
+        "core_simd::vector::Simd": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "core_simd::vector::Simd": [
+      "Plain"
+    ],
+    "core_simd::masks::Mask": [
+      "Plain"
+    ]
+  },
+  "path": 12671,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/vector.rs:547:5: 556:6",
+  "src": "pub fn gather_select(\n        slice: &[T],\n        enable: Mask<isize, N>,\n        idxs: Simd<usize, N>,\n        or: Self,\n    ) -> Self {\n        let enable: Mask<isize, N> = enable & idxs.simd_lt(Simd::splat(slice.len()));\n        // Safety: We have masked-off out-of-bounds indices.\n        unsafe { Self::gather_select_unchecked(slice, enable, idxs, or) }\n    }",
+  "mir": "fn core_simd::vector::Simd::<T, N>::gather_select(_1: &[T], _2: core_simd::masks::Mask<isize, N>, _3: core_simd::vector::Simd<usize, N>, _4: core_simd::vector::Simd<T, N>) -> core_simd::vector::Simd<T, N> {\n    let mut _0: core_simd::vector::Simd<T, N>;\n    let  _5: core_simd::masks::Mask<isize, N>;\n    let mut _6: core_simd::masks::Mask<isize, N>;\n    let mut _7: core_simd::vector::Simd<usize, N>;\n    let mut _8: usize;\n    debug slice => _1;\n    debug enable => _2;\n    debug idxs => _3;\n    debug or => _4;\n    debug enable => _5;\n    bb0: {\n        StorageLive(_6);\n        StorageLive(_7);\n        StorageLive(_8);\n        _8 = PtrMetadata(_1);\n        _7 = core_simd::vector::Simd::<usize, N>::splat(move _8) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_8);\n        _6 = <core_simd::vector::Simd<usize, N> as core_simd::simd::cmp::ord::SimdPartialOrd>::simd_lt(_3, move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = <core_simd::masks::Mask<isize, N> as ops::bit::BitAnd>::bitand(_2, move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _0 = core_simd::vector::Simd::<T, N>::gather_select_unchecked(_1, _5, _3, _4) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        return;\n    }\n}\n",
+  "doc": " Reads from indices in `slice` to construct a SIMD vector.\n The mask `enable`s all `true` indices and disables all `false` indices.\n If an index is disabled or is out-of-bounds, the element is selected from the `or` vector.\n\n # Examples\n ```\n # #![feature(portable_simd)]\n # use core::simd::{Simd, Mask};\n let vec: Vec<i32> = vec![10, 11, 12, 13, 14, 15, 16, 17, 18];\n let idxs = Simd::from_array([9, 3, 0, 5]); // Includes an out-of-bounds index\n let alt = Simd::from_array([-5, -4, -3, -2]);\n let enable = Mask::from_array([true, true, true, false]); // Includes a masked element\n\n let result = Simd::gather_select(&vec, enable, idxs, alt);\n assert_eq!(result, Simd::from_array([-5, 13, 10, -2]));\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

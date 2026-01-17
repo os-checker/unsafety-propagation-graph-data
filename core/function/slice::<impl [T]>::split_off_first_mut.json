@@ -1,0 +1,45 @@
+{
+  "name": "slice::<impl [T]>::split_off_first_mut",
+  "safe": true,
+  "callees": {
+    "mem::replace": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Moves `src` into the referenced `dest`, returning the previous `dest` value.\n\n Neither value is dropped.\n\n * If you want to replace the values of two variables, see [`swap`].\n * If you want to replace with a default value, see [`take`].\n\n # Examples\n\n A simple example:\n\n ```\n use std::mem;\n\n let mut v: Vec<i32> = vec![1, 2];\n\n let old_v = mem::replace(&mut v, vec![3, 4, 5]);\n assert_eq!(vec![1, 2], old_v);\n assert_eq!(vec![3, 4, 5], v);\n ```\n\n `replace` allows consumption of a struct field by replacing it with another value.\n Without `replace` you can run into issues like these:\n\n ```compile_fail,E0507\n struct Buffer<T> { buf: Vec<T> }\n\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         // error: cannot move out of dereference of `&mut`-pointer\n         let t = self.buf[i];\n         self.buf[i] = v;\n         t\n     }\n }\n ```\n\n Note that `T` does not necessarily implement [`Clone`], so we can't even clone `self.buf[i]` to\n avoid the move. But `replace` can be used to disassociate the original value at that index from\n `self`, allowing it to be returned:\n\n ```\n # #![allow(dead_code)]\n use std::mem;\n\n # struct Buffer<T> { buf: Vec<T> }\n impl<T> Buffer<T> {\n     fn replace_index(&mut self, i: usize, v: T) -> T {\n         mem::replace(&mut self.buf[i], v)\n     }\n }\n\n let mut buffer = Buffer { buf: vec![0, 1] };\n assert_eq!(buffer.buf[0], 0);\n\n assert_eq!(buffer.replace_index(0, 2), 0);\n assert_eq!(buffer.buf[0], 2);\n ```\n",
+      "adt": {}
+    },
+    "slice::<impl [T]>::split_first_mut": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the first and all the rest of the elements of the slice, or `None` if it is empty.\n\n # Examples\n\n ```\n let x = &mut [0, 1, 2];\n\n if let Some((first, elements)) = x.split_first_mut() {\n     *first = 3;\n     elements[0] = 4;\n     elements[1] = 5;\n }\n assert_eq!(x, &[3, 4, 5]);\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 13617, kind: RigidTy(Tuple([Ty { id: 1178, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) }, Mut)) }, Ty { id: 1485, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 1489, kind: RigidTy(Slice(Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) })) }, Mut)) }])) }), Field(0, Ty { id: 1178, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) }, Mut)) })])",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 13617, kind: RigidTy(Tuple([Ty { id: 1178, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) }, Mut)) }, Ty { id: 1485, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 1489, kind: RigidTy(Slice(Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) })) }, Mut)) }])) }), Field(1, Ty { id: 1485, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 1489, kind: RigidTy(Slice(Ty { id: 95, kind: Param(ParamTy { index: 0, name: \"T\" }) })) }, Mut)) })])"
+    ]
+  },
+  "path": 1322,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:4607:5: 4613:6",
+  "src": "pub const fn split_off_first_mut<'a>(self: &mut &'a mut Self) -> Option<&'a mut T> {\n        // FIXME(const-hack): Use `mem::take` and `?` when available in const.\n        // Original: `mem::take(self).split_first_mut()?`\n        let Some((first, rem)) = mem::replace(self, &mut []).split_first_mut() else { return None };\n        *self = rem;\n        Some(first)\n    }",
+  "mir": "fn slice::<impl [T]>::split_off_first_mut(_1: &mut &mut [T]) -> option::Option<&mut T> {\n    let mut _0: option::Option<&mut T>;\n    let  _2: &mut T;\n    let  _3: &mut [T];\n    let mut _4: option::Option<(&mut T, &mut [T])>;\n    let mut _5: &mut [T];\n    let mut _6: &mut [T];\n    let mut _7: &mut [T; 0];\n    let mut _8: isize;\n    debug self => _1;\n    debug first => _2;\n    debug rem => _3;\n    bb0: {\n        StorageLive(_4);\n        StorageLive(_6);\n        _7 = slice::<impl [T]>::split_off_first_mut::promoted[0];\n        _6 = _7 as &mut [T];\n        _5 = mem::replace::<&mut [T]>(_1, move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        _4 = slice::<impl [T]>::split_first_mut(_5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _8 = discriminant(_4);\n        switchInt(move _8) -> [1: bb3, 0: bb4, otherwise: bb6];\n    }\n    bb3: {\n        _2 = move (((_4 as variant#1).0: (&mut T, &mut [T])).0: &mut T);\n        _3 = move (((_4 as variant#1).0: (&mut T, &mut [T])).1: &mut [T]);\n        StorageDead(_4);\n        (*_1) = _3;\n        _0 = option::Option::Some(_2);\n        goto -> bb5;\n    }\n    bb4: {\n        StorageDead(_4);\n        _0 = option::Option::None;\n        goto -> bb5;\n    }\n    bb5: {\n        return;\n    }\n    bb6: {\n        unreachable;\n    }\n}\n",
+  "doc": " Removes the first element of the slice and returns a mutable\n reference to it.\n\n Returns `None` if the slice is empty.\n\n # Examples\n\n ```\n let mut slice: &mut [_] = &mut ['a', 'b', 'c'];\n let first = slice.split_off_first_mut().unwrap();\n *first = 'd';\n\n assert_eq!(slice, &['b', 'c']);\n assert_eq!(first, &'d');\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

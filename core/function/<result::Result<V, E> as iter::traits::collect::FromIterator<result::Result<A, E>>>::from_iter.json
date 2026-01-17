@@ -1,0 +1,41 @@
+{
+  "name": "<result::Result<V, E> as iter::traits::collect::FromIterator<result::Result<A, E>>>::from_iter",
+  "safe": true,
+  "callees": {
+    "iter::traits::collect::IntoIterator::into_iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates an iterator from a value.\n\n See the [module-level documentation] for more.\n\n [module-level documentation]: crate::iter\n\n # Examples\n\n ```\n let v = [1, 2, 3];\n let mut iter = v.into_iter();\n\n assert_eq!(Some(1), iter.next());\n assert_eq!(Some(2), iter.next());\n assert_eq!(Some(3), iter.next());\n assert_eq!(None, iter.next());\n ```\n",
+      "adt": {}
+    },
+    "iter::adapters::try_process": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Process the given iterator as if it yielded the item's `Try::Output`\n type instead. Any `Try::Residual`s encountered will stop the inner iterator\n and be propagated back to the overall result.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "result::Result": [
+      "Plain"
+    ]
+  },
+  "path": 16258,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/result.rs:2155:5: 2157:6",
+  "src": "fn from_iter<I: IntoIterator<Item = Result<A, E>>>(iter: I) -> Result<V, E> {\n        iter::try_process(iter.into_iter(), |i| i.collect())\n    }",
+  "mir": "fn <result::Result<V, E> as iter::traits::collect::FromIterator<result::Result<A, E>>>::from_iter(_1: I) -> result::Result<V, E> {\n    let mut _0: result::Result<V, E>;\n    let mut _2: <I as iter::traits::collect::IntoIterator>::IntoIter;\n    debug iter => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = <I as iter::traits::collect::IntoIterator>::into_iter(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = iter::adapters::try_process::<<I as iter::traits::collect::IntoIterator>::IntoIter, A, result::Result<convert::Infallible, E>, {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/result.rs:2156:45: 2156:48}, V>(move _2, ZeroSized: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/result.rs:2156:45: 2156:48}) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Takes each element in the `Iterator`: if it is an `Err`, no further\n elements are taken, and the `Err` is returned. Should no `Err` occur, a\n container with the values of each `Result` is returned.\n\n Here is an example which increments every integer in a vector,\n checking for overflow:\n\n ```\n let v = vec![1, 2];\n let res: Result<Vec<u32>, &'static str> = v.iter().map(|x: &u32|\n     x.checked_add(1).ok_or(\"Overflow!\")\n ).collect();\n assert_eq!(res, Ok(vec![2, 3]));\n ```\n\n Here is another example that tries to subtract one from another list\n of integers, this time checking for underflow:\n\n ```\n let v = vec![1, 2, 0];\n let res: Result<Vec<u32>, &'static str> = v.iter().map(|x: &u32|\n     x.checked_sub(1).ok_or(\"Underflow!\")\n ).collect();\n assert_eq!(res, Err(\"Underflow!\"));\n ```\n\n Here is a variation on the previous example, showing that no\n further elements are taken from `iter` after the first `Err`.\n\n ```\n let v = vec![3, 2, 1, 10];\n let mut shared = 0;\n let res: Result<Vec<u32>, &'static str> = v.iter().map(|x: &u32| {\n     shared += x;\n     x.checked_sub(2).ok_or(\"Underflow!\")\n }).collect();\n assert_eq!(res, Err(\"Underflow!\"));\n assert_eq!(shared, 6);\n ```\n\n Since the third element caused an underflow, no further elements were taken,\n so the final value of `shared` is 6 (= `3 + 2 + 1`), not 16.\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

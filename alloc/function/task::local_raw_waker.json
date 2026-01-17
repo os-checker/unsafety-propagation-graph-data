@@ -1,0 +1,49 @@
+{
+  "name": "task::local_raw_waker",
+  "safe": true,
+  "callees": {
+    "rc::Rc::<T>::into_raw": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Consumes the `Rc`, returning the wrapped pointer.\n\n To avoid a memory leak the pointer must be converted back to an `Rc` using\n [`Rc::from_raw`].\n\n # Examples\n\n ```\n use std::rc::Rc;\n\n let x = Rc::new(\"hello\".to_owned());\n let x_ptr = Rc::into_raw(x);\n assert_eq!(unsafe { &*x_ptr }, \"hello\");\n # // Prevent leaks for Miri.\n # drop(unsafe { Rc::from_raw(x_ptr) });\n ```\n",
+      "adt": {
+        "rc::Rc": "ImmutableAsArgument"
+      }
+    },
+    "core::task::RawWaker::new": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `RawWaker` from the provided `data` pointer and `vtable`.\n\n The `data` pointer can be used to store arbitrary data as required\n by the executor. This could be e.g. a type-erased pointer to an `Arc`\n that is associated with the task.\n The value of this pointer will get passed to all functions that are part\n of the `vtable` as the first parameter.\n\n It is important to consider that the `data` pointer must point to a\n thread safe type such as an `Arc<T: Send + Sync>`\n when used to construct a [`Waker`]. This restriction is lifted when\n constructing a [`LocalWaker`], which allows using types that do not implement\n <code>[Send] + [Sync]</code> like `Rc<T>`.\n\n The `vtable` customizes the behavior of a `Waker` which gets created\n from a `RawWaker`. For each operation on the `Waker`, the associated\n function in the `vtable` of the underlying `RawWaker` will be called.\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "rc::Rc": [
+      "Plain"
+    ],
+    "core::task::RawWakerVTable": [
+      "Ref"
+    ],
+    "core::task::RawWaker": [
+      "Plain"
+    ]
+  },
+  "path": 2182,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/task.rs:315:1: 350:2",
+  "src": "fn local_raw_waker<W: LocalWake + 'static>(waker: Rc<W>) -> RawWaker {\n    // Increment the reference count of the Rc to clone it.\n    //\n    // Refer to the comment on raw_waker's clone_waker regarding why this is\n    // always inline.\n    #[inline(always)]\n    unsafe fn clone_waker<W: LocalWake + 'static>(waker: *const ()) -> RawWaker {\n        unsafe { Rc::increment_strong_count(waker as *const W) };\n        RawWaker::new(\n            waker,\n            &RawWakerVTable::new(clone_waker::<W>, wake::<W>, wake_by_ref::<W>, drop_waker::<W>),\n        )\n    }\n\n    // Wake by value, moving the Rc into the LocalWake::wake function\n    unsafe fn wake<W: LocalWake + 'static>(waker: *const ()) {\n        let waker = unsafe { Rc::from_raw(waker as *const W) };\n        <W as LocalWake>::wake(waker);\n    }\n\n    // Wake by reference, wrap the waker in ManuallyDrop to avoid dropping it\n    unsafe fn wake_by_ref<W: LocalWake + 'static>(waker: *const ()) {\n        let waker = unsafe { ManuallyDrop::new(Rc::from_raw(waker as *const W)) };\n        <W as LocalWake>::wake_by_ref(&waker);\n    }\n\n    // Decrement the reference count of the Rc on drop\n    unsafe fn drop_waker<W: LocalWake + 'static>(waker: *const ()) {\n        unsafe { Rc::decrement_strong_count(waker as *const W) };\n    }\n\n    RawWaker::new(\n        Rc::into_raw(waker) as *const (),\n        &RawWakerVTable::new(clone_waker::<W>, wake::<W>, wake_by_ref::<W>, drop_waker::<W>),\n    )\n}",
+  "mir": "fn task::local_raw_waker(_1: rc::Rc<W>) -> core::task::RawWaker {\n    let mut _0: core::task::RawWaker;\n    let mut _2: *const ();\n    let mut _3: *const W;\n    let  _4: &core::task::RawWakerVTable;\n    debug waker => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = rc::Rc::<W>::into_raw(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = move _3 as *const ();\n        StorageDead(_3);\n        _4 = task::local_raw_waker::<W>::promoted[0];\n        _0 = core::task::RawWaker::new(move _2, _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

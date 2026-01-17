@@ -1,0 +1,34 @@
+{
+  "name": "smp::init",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "smp::IpiSender": [
+      "Ref"
+    ]
+  },
+  "path": 2534,
+  "span": "ostd/src/smp.rs:107:1: 112:2",
+  "src": "pub(super) fn init() {\n    IPI_SENDER.call_once(|| {\n        let hw_cpu_ids = crate::boot::smp::construct_hw_cpu_id_mapping();\n        IpiSender { hw_cpu_ids }\n    });\n}",
+  "mir": "fn smp::init() -> () {\n    let mut _0: ();\n    let  _1: &smp::IpiSender;\n    let mut _2: &spin::once::Once<smp::IpiSender>;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        _2 = {alloc1417: &spin::once::Once<smp::IpiSender>};\n        _1 = spin::once::Once::<smp::IpiSender>::call_once::<{closure@ostd/src/smp.rs:108:26: 108:28}>(move _2, ZeroSized: {closure@ostd/src/smp.rs:108:26: 108:28}) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_2);\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

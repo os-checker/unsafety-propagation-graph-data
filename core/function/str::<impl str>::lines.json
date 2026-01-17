@@ -1,0 +1,51 @@
+{
+  "name": "str::<impl str>::lines",
+  "safe": true,
+  "callees": {
+    "str::<impl str>::split_inclusive": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over substrings of this string slice, separated by\n characters matched by a pattern.\n\n Differs from the iterator produced by `split` in that `split_inclusive`\n leaves the matched part as the terminator of the substring.\n\n The [pattern] can be a `&str`, [`char`], a slice of [`char`]s, or a\n function or closure that determines if a character matches.\n\n [`char`]: prim@char\n [pattern]: self::pattern\n\n # Examples\n\n ```\n let v: Vec<&str> = \"Mary had a little lamb\\nlittle lamb\\nlittle lamb.\"\n     .split_inclusive('\\n').collect();\n assert_eq!(v, [\"Mary had a little lamb\\n\", \"little lamb\\n\", \"little lamb.\"]);\n ```\n\n If the last element of the string is matched,\n that element will be considered the terminator of the preceding substring.\n That substring will be the last item returned by the iterator.\n\n ```\n let v: Vec<&str> = \"Mary had a little lamb\\nlittle lamb\\nlittle lamb.\\n\"\n     .split_inclusive('\\n').collect();\n assert_eq!(v, [\"Mary had a little lamb\\n\", \"little lamb\\n\", \"little lamb.\\n\"]);\n ```\n",
+      "adt": {
+        "str::iter::SplitInclusive": "Constructor"
+      }
+    },
+    "iter::traits::iterator::Iterator::map": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Takes a closure and creates an iterator which calls that closure on each\n element.\n\n `map()` transforms one iterator into another, by means of its argument:\n something that implements [`FnMut`]. It produces a new iterator which\n calls this closure on each element of the original iterator.\n\n If you are good at thinking in types, you can think of `map()` like this:\n If you have an iterator that gives you elements of some type `A`, and\n you want an iterator of some other type `B`, you can use `map()`,\n passing a closure that takes an `A` and returns a `B`.\n\n `map()` is conceptually similar to a [`for`] loop. However, as `map()` is\n lazy, it is best used when you're already working with other iterators.\n If you're doing some sort of looping for a side effect, it's considered\n more idiomatic to use [`for`] than `map()`.\n\n [`for`]: ../../book/ch03-05-control-flow.html#looping-through-a-collection-with-for\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n let mut iter = a.iter().map(|x| 2 * x);\n\n assert_eq!(iter.next(), Some(2));\n assert_eq!(iter.next(), Some(4));\n assert_eq!(iter.next(), Some(6));\n assert_eq!(iter.next(), None);\n ```\n\n If you're doing some sort of side effect, prefer [`for`] to `map()`:\n\n ```\n # #![allow(unused_must_use)]\n // don't do this:\n (0..5).map(|x| println!(\"{x}\"));\n\n // it won't even execute, as it is lazy. Rust will warn you about this.\n\n // Instead, use a for-loop:\n for x in 0..5 {\n     println!(\"{x}\");\n }\n ```\n",
+      "adt": {
+        "iter::adapters::map::Map": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "str::iter::SplitInclusive": [
+      "Plain"
+    ],
+    "iter::adapters::map::Map": [
+      "Plain"
+    ],
+    "str::iter::Lines": [
+      "Plain"
+    ]
+  },
+  "path": 3109,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/str/mod.rs:1297:5: 1299:6",
+  "src": "pub fn lines(&self) -> Lines<'_> {\n        Lines(self.split_inclusive('\\n').map(LinesMap))\n    }",
+  "mir": "fn str::<impl str>::lines(_1: &str) -> str::iter::Lines<'_> {\n    let mut _0: str::iter::Lines<'_>;\n    let mut _2: iter::adapters::map::Map<str::iter::SplitInclusive<'_, char>, str::LinesMap>;\n    let mut _3: str::iter::SplitInclusive<'_, char>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = str::<impl str>::split_inclusive::<char>(_1, '\\n') -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = <str::iter::SplitInclusive<'_, char> as iter::traits::iterator::Iterator>::map::<&str, str::LinesMap>(move _3, str::LinesMap) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = Lines(move _2);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns an iterator over the lines of a string, as string slices.\n\n Lines are split at line endings that are either newlines (`\\n`) or\n sequences of a carriage return followed by a line feed (`\\r\\n`).\n\n Line terminators are not included in the lines returned by the iterator.\n\n Note that any carriage return (`\\r`) not immediately followed by a\n line feed (`\\n`) does not split a line. These carriage returns are\n thereby included in the produced lines.\n\n The final line ending is optional. A string that ends with a final line\n ending will return the same lines as an otherwise identical string\n without a final line ending.\n\n An empty string returns an empty iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let text = \"foo\\r\\nbar\\n\\nbaz\\r\";\n let mut lines = text.lines();\n\n assert_eq!(Some(\"foo\"), lines.next());\n assert_eq!(Some(\"bar\"), lines.next());\n assert_eq!(Some(\"\"), lines.next());\n // Trailing carriage return is included in the last line\n assert_eq!(Some(\"baz\\r\"), lines.next());\n\n assert_eq!(None, lines.next());\n ```\n\n The final line does not require any ending:\n\n ```\n let text = \"foo\\nbar\\n\\r\\nbaz\";\n let mut lines = text.lines();\n\n assert_eq!(Some(\"foo\"), lines.next());\n assert_eq!(Some(\"bar\"), lines.next());\n assert_eq!(Some(\"\"), lines.next());\n assert_eq!(Some(\"baz\"), lines.next());\n\n assert_eq!(None, lines.next());\n ```\n\n An empty string returns an empty iterator:\n\n ```\n let text = \"\";\n let mut lines = text.lines();\n\n assert_eq!(lines.next(), None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

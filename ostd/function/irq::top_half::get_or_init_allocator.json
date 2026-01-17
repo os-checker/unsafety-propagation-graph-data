@@ -1,0 +1,34 @@
+{
+  "name": "irq::top_half::get_or_init_allocator",
+  "safe": true,
+  "callees": {
+    "spin::once::Once::<T, R>::call_once": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs an initialization routine once and only once. The given closure\n will be executed if this is the first time `call_once` has been called,\n and otherwise the routine will *not* be invoked.\n\n This method will block the calling thread if another initialization\n routine is currently running.\n\n When this function returns, it is guaranteed that some initialization\n has run and completed (it may not be the closure specified). The\n returned pointer will point to the result from the closure that was\n run.\n\n # Panics\n\n This function will panic if the [`Once`] previously panicked while attempting\n to initialize. This is similar to the poisoning behaviour of `std::sync`'s\n primitives.\n\n # Examples\n\n ```\n use spin;\n\n static INIT: spin::Once<usize> = spin::Once::new();\n\n fn get_cached_val() -> usize {\n     *INIT.call_once(expensive_computation)\n }\n\n fn expensive_computation() -> usize {\n     // ...\n # 2\n }\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "spin::once::Once": [
+      "Ref"
+    ],
+    "sync::spin::SpinLock": [
+      "Ref"
+    ]
+  },
+  "path": 1817,
+  "span": "ostd/src/irq/top_half.rs:140:1: 142:2",
+  "src": "fn get_or_init_allocator() -> &'static SpinLock<IdAlloc> {\n    ALLOCATOR.call_once(|| SpinLock::new(IdAlloc::with_capacity(NUMBER_OF_IRQS)))\n}",
+  "mir": "fn irq::top_half::get_or_init_allocator() -> &sync::spin::SpinLock<id_alloc::IdAlloc> {\n    let mut _0: &sync::spin::SpinLock<id_alloc::IdAlloc>;\n    let mut _1: &spin::once::Once<sync::spin::SpinLock<id_alloc::IdAlloc>>;\n    bb0: {\n        StorageLive(_1);\n        _1 = {alloc994: &spin::once::Once<sync::spin::SpinLock<id_alloc::IdAlloc>>};\n        _0 = spin::once::Once::<sync::spin::SpinLock<id_alloc::IdAlloc>>::call_once::<{closure@ostd/src/irq/top_half.rs:141:25: 141:27}>(move _1, ZeroSized: {closure@ostd/src/irq/top_half.rs:141:25: 141:27}) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_1);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "alloc::__default_lib_allocator::__rdl_realloc",
+  "safe": false,
+  "callees": {
+    "core::alloc::Layout::from_size_align_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a layout, bypassing all checks.\n\n # Safety\n\n This function is unsafe as it does not verify the preconditions from\n [`Layout::from_size_align`].\n",
+      "adt": {}
+    },
+    "core::alloc::GlobalAlloc::realloc": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Shrinks or grows a block of memory to the given `new_size` in bytes.\n The block is described by the given `ptr` pointer and `layout`.\n\n If this returns a non-null pointer, then ownership of the memory block\n referenced by `ptr` has been transferred to this allocator.\n Any access to the old `ptr` is Undefined Behavior, even if the\n allocation remained in-place. The newly returned pointer is the only valid pointer\n for accessing this memory now.\n\n The new memory block is allocated with `layout`,\n but with the `size` updated to `new_size` in bytes.\n This new layout must be used when deallocating the new memory block with `dealloc`.\n The range `0..min(layout.size(), new_size)` of the new memory block is\n guaranteed to have the same values as the original block.\n\n If this method returns null, then ownership of the memory\n block has not been transferred to this allocator, and the\n contents of the memory block are unaltered.\n\n # Safety\n\n The caller must ensure that:\n\n * `ptr` is allocated via this allocator,\n\n * `layout` is the same layout that was used\n   to allocate that block of memory,\n\n * `new_size` is greater than zero.\n\n * `new_size`, when rounded up to the nearest multiple of `layout.align()`,\n   does not overflow `isize` (i.e., the rounded value must be less than or\n   equal to `isize::MAX`).\n\n If these are not followed, the behavior is undefined.\n\n (Extension subtraits might provide more specific bounds on\n behavior, e.g., guarantee a sentinel address or a null pointer\n in response to a zero-size allocation request.)\n\n # Errors\n\n Returns null if the new layout does not meet the size\n and alignment constraints of the allocator, or if reallocation\n otherwise fails.\n\n Implementations are encouraged to return null on memory\n exhaustion rather than panicking or aborting, but this is not\n a strict requirement. (Specifically: it is *legal* to\n implement this trait atop an underlying native allocation\n library that aborts on memory exhaustion.)\n\n Clients wishing to abort computation in response to a\n reallocation error are encouraged to call the [`handle_alloc_error`] function,\n rather than directly invoking `panic!` or similar.\n\n [`handle_alloc_error`]: ../../alloc/alloc/fn.handle_alloc_error.html\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "core::alloc::Layout": [
+      "Plain"
+    ],
+    "alloc::System": [
+      "Ref"
+    ]
+  },
+  "path": 390,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/alloc.rs:478:5: 490:6",
+  "src": "pub unsafe extern \"C\" fn __rdl_realloc(\n        ptr: *mut u8,\n        old_size: usize,\n        align: usize,\n        new_size: usize,\n    ) -> *mut u8 {\n        // SAFETY: see the guarantees expected by `Layout::from_size_align` and\n        // `GlobalAlloc::realloc`.\n        unsafe {\n            let old_layout = Layout::from_size_align_unchecked(old_size, align);\n            System.realloc(ptr, old_layout, new_size)\n        }\n    }",
+  "mir": "fn alloc::__default_lib_allocator::__rdl_realloc(_1: *mut u8, _2: usize, _3: usize, _4: usize) -> *mut u8 {\n    let mut _0: *mut u8;\n    let  _5: core::alloc::Layout;\n    let mut _6: &alloc::System;\n    debug ptr => _1;\n    debug old_size => _2;\n    debug align => _3;\n    debug new_size => _4;\n    debug old_layout => _5;\n    bb0: {\n        _5 = core::alloc::Layout::from_size_align_unchecked(_2, _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_6);\n        _6 = alloc::__default_lib_allocator::__rdl_realloc::promoted[0];\n        _0 = <alloc::System as core::alloc::GlobalAlloc>::realloc(move _6, _1, _5, _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_6);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

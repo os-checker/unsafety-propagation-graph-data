@@ -1,0 +1,94 @@
+{
+  "name": "<boxed::Box<T, A> as core::clone::Clone>::clone",
+  "safe": true,
+  "callees": {
+    "core::clone::Clone::clone": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns a duplicate of the value.\n\n Note that what \"duplicate\" means varies by type:\n - For most types, this creates a deep, independent copy\n - For reference types like `&T`, this creates another reference to the same value\n - For smart pointers like [`Arc`] or [`Rc`], this increments the reference count\n   but still points to the same underlying data\n\n [`Arc`]: ../../std/sync/struct.Arc.html\n [`Rc`]: ../../std/rc/struct.Rc.html\n\n # Examples\n\n ```\n # #![allow(noop_method_call)]\n let hello = \"Hello\"; // &str implements Clone\n\n assert_eq!(\"Hello\", hello.clone());\n ```\n\n Example with a reference-counted type:\n\n ```\n use std::sync::{Arc, Mutex};\n\n let data = Arc::new(Mutex::new(vec![1, 2, 3]));\n let data_clone = data.clone(); // Creates another Arc pointing to the same Mutex\n\n {\n     let mut lock = data.lock().unwrap();\n     lock.push(4);\n }\n\n // Changes are visible through the clone because they share the same underlying data\n assert_eq!(*data_clone.lock().unwrap(), vec![1, 2, 3, 4]);\n ```\n",
+      "adt": {}
+    },
+    "boxed::Box::<T, A>::new_uninit_in": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs a new box with uninitialized contents in the provided allocator.\n\n # Examples\n\n ```\n #![feature(allocator_api)]\n\n use std::alloc::System;\n\n let mut five = Box::<u32, _>::new_uninit_in(System);\n // Deferred initialization:\n five.write(5);\n let five = unsafe { five.assume_init() };\n\n assert_eq!(*five, 5)\n ```\n",
+      "adt": {
+        "boxed::Box": "Constructor",
+        "core::mem::MaybeUninit": "Constructor"
+      }
+    },
+    "core::mem::MaybeUninit::<T>::as_mut_ptr": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable pointer to the contained value. Reading from this pointer or turning it\n into a reference is undefined behavior unless the `MaybeUninit<T>` is initialized.\n\n # Examples\n\n Correct usage of this method:\n\n ```rust\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n x.write(vec![0, 1, 2]);\n // Create a reference into the `MaybeUninit<Vec<u32>>`.\n // This is okay because we initialized it.\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n x_vec.push(3);\n assert_eq!(x_vec.len(), 4);\n # // Prevent leaks for Miri\n # unsafe { MaybeUninit::assume_init_drop(&mut x); }\n ```\n\n *Incorrect* usage of this method:\n\n ```rust,no_run\n use std::mem::MaybeUninit;\n\n let mut x = MaybeUninit::<Vec<u32>>::uninit();\n let x_vec = unsafe { &mut *x.as_mut_ptr() };\n // We have created a reference to an uninitialized vector! This is undefined behavior. ⚠️\n ```\n\n (Notice that the rules around references to uninitialized data are not finalized yet, but\n until they are, it is advisable to avoid them.)\n",
+      "adt": {}
+    },
+    "core::ptr::mut_ptr::<impl *mut T>::cast": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Casts to a pointer of another type.\n",
+      "adt": {}
+    },
+    "core::clone::CloneToUninit::clone_to_uninit": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs copy-assignment from `self` to `dest`.\n\n This is analogous to `std::ptr::write(dest.cast(), self.clone())`,\n except that `Self` may be a dynamically-sized type ([`!Sized`](Sized)).\n\n Before this function is called, `dest` may point to uninitialized memory.\n After this function is called, `dest` will point to initialized memory; it will be\n sound to create a `&Self` reference from the pointer with the [pointer metadata]\n from `self`.\n\n # Safety\n\n Behavior is undefined if any of the following conditions are violated:\n\n * `dest` must be [valid] for writes for `size_of_val(self)` bytes.\n * `dest` must be properly aligned to `align_of_val(self)`.\n\n [valid]: crate::ptr#safety\n [pointer metadata]: crate::ptr::metadata()\n\n # Panics\n\n This function may panic. (For example, it might panic if memory allocation for a clone\n of a value owned by `self` fails.)\n If the call panics, then `*dest` should be treated as uninitialized memory; it must not be\n read or dropped, because even if it was previously valid, it may have been partially\n overwritten.\n\n The caller may wish to take care to deallocate the allocation pointed to by `dest`,\n if applicable, to avoid a memory leak (but this is not a requirement).\n\n Implementors should avoid leaking values by, upon unwinding, dropping all component values\n that might have already been created. (For example, if a `[Foo]` of length 3 is being\n cloned, and the second of the three calls to `Foo::clone()` unwinds, then the first `Foo`\n cloned should be dropped.)\n",
+      "adt": {}
+    },
+    "boxed::Box::<core::mem::MaybeUninit<T>, A>::assume_init": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts to `Box<T, A>`.\n\n # Safety\n\n As with [`MaybeUninit::assume_init`],\n it is up to the caller to guarantee that the value\n really is in an initialized state.\n Calling this when the content is not yet fully initialized\n causes immediate undefined behavior.\n\n [`MaybeUninit::assume_init`]: mem::MaybeUninit::assume_init\n\n # Examples\n\n ```\n let mut five = Box::<u32>::new_uninit();\n // Deferred initialization:\n five.write(5);\n let five: Box<u32> = unsafe { five.assume_init() };\n\n assert_eq!(*five, 5)\n ```\n",
+      "adt": {
+        "boxed::Box": "Constructor"
+      }
+    }
+  },
+  "adts": {
+    "boxed::Box": [
+      "DerefVariantField(VariantIdx(None)-FieldIdx(Some(1)))",
+      "Plain",
+      "Deref",
+      "Unknown([Field(0, Ty { id: 176, kind: RigidTy(Adt(AdtDef(DefId { id: 2645, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) }), Field(0, Ty { id: 101, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })])",
+      "Unknown([Field(0, Ty { id: 1139, kind: RigidTy(Adt(AdtDef(DefId { id: 2645, name: \"core::ptr::Unique\" }), GenericArgs([Type(Ty { id: 73, kind: RigidTy(Adt(AdtDef(DefId { id: 2984, name: \"core::mem::MaybeUninit\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })]))) }), Field(0, Ty { id: 1140, kind: RigidTy(Adt(AdtDef(DefId { id: 2619, name: \"core::ptr::NonNull\" }), GenericArgs([Type(Ty { id: 73, kind: RigidTy(Adt(AdtDef(DefId { id: 2984, name: \"core::mem::MaybeUninit\" }), GenericArgs([Type(Ty { id: 10, kind: Param(ParamTy { index: 0, name: \"T\" }) })]))) })]))) })])",
+      "Ref"
+    ],
+    "core::mem::MaybeUninit": [
+      "MutRef"
+    ]
+  },
+  "path": 292,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/boxed.rs:1972:5: 1979:6",
+  "src": "fn clone(&self) -> Self {\n        // Pre-allocate memory to allow writing the cloned value directly.\n        let mut boxed = Self::new_uninit_in(self.1.clone());\n        unsafe {\n            (**self).clone_to_uninit(boxed.as_mut_ptr().cast());\n            boxed.assume_init()\n        }\n    }",
+  "mir": "fn <boxed::Box<T, A> as core::clone::Clone>::clone(_1: &boxed::Box<T, A>) -> boxed::Box<T, A> {\n    let mut _0: boxed::Box<T, A>;\n    let mut _2: boxed::Box<core::mem::MaybeUninit<T>, A>;\n    let mut _3: A;\n    let mut _4: &A;\n    let  _5: ();\n    let mut _6: &T;\n    let mut _7: *mut u8;\n    let mut _8: *mut T;\n    let mut _9: &mut core::mem::MaybeUninit<T>;\n    let mut _10: boxed::Box<T, A>;\n    let mut _11: *const T;\n    let mut _12: *const core::mem::MaybeUninit<T>;\n    debug self => _1;\n    debug boxed => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &((*_1).1: A);\n        _3 = <A as core::clone::Clone>::clone(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = boxed::Box::<T, A>::new_uninit_in(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_6);\n        _10 = (*_1);\n        _11 = ((_10.0: core::ptr::Unique<T>).0: core::ptr::NonNull<T>) as *const T;\n        _6 = &(*_11);\n        StorageLive(_7);\n        StorageLive(_8);\n        StorageLive(_9);\n        _12 = ((_2.0: core::ptr::Unique<core::mem::MaybeUninit<T>>).0: core::ptr::NonNull<core::mem::MaybeUninit<T>>) as *const core::mem::MaybeUninit<T>;\n        _9 = &mut (*_12);\n        _8 = core::mem::MaybeUninit::<T>::as_mut_ptr(move _9) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_9);\n        _7 = core::ptr::mut_ptr::<impl *mut T>::cast::<u8>(move _8) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_8);\n        _5 = <T as core::clone::CloneToUninit>::clone_to_uninit(move _6, move _7) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageDead(_6);\n        _0 = boxed::Box::<core::mem::MaybeUninit<T>, A>::assume_init(_2) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        return;\n    }\n}\n",
+  "doc": " Returns a new box with a `clone()` of this box's contents.\n\n # Examples\n\n ```\n let x = Box::new(5);\n let y = x.clone();\n\n // The value is the same\n assert_eq!(x, y);\n\n // But they are unique objects\n assert_ne!(&*x as *const i32, &*y as *const i32);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

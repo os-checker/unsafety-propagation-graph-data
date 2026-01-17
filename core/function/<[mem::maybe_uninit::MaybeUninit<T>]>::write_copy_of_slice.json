@@ -1,0 +1,37 @@
+{
+  "name": "<[mem::maybe_uninit::MaybeUninit<T>]>::write_copy_of_slice",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::copy_from_slice": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Copies all elements from `src` into `self`, using a memcpy.\n\n The length of `src` must be the same as `self`.\n\n If `T` does not implement `Copy`, use [`clone_from_slice`].\n\n # Panics\n\n This function will panic if the two slices have different lengths.\n\n # Examples\n\n Copying two elements from a slice into another:\n\n ```\n let src = [1, 2, 3, 4];\n let mut dst = [0, 0];\n\n // Because the slices have to be the same length,\n // we slice the source slice from four elements\n // to two. It will panic if we don't do this.\n dst.copy_from_slice(&src[2..]);\n\n assert_eq!(src, [1, 2, 3, 4]);\n assert_eq!(dst, [3, 4]);\n ```\n\n Rust enforces that there can only be one mutable reference with no\n immutable references to a particular piece of data in a particular\n scope. Because of this, attempting to use `copy_from_slice` on a\n single slice will result in a compile failure:\n\n ```compile_fail\n let mut slice = [1, 2, 3, 4, 5];\n\n slice[..2].copy_from_slice(&slice[3..]); // compile fail!\n ```\n\n To work around this, we can use [`split_at_mut`] to create two distinct\n sub-slices from a slice:\n\n ```\n let mut slice = [1, 2, 3, 4, 5];\n\n {\n     let (left, right) = slice.split_at_mut(2);\n     left.copy_from_slice(&right[1..]);\n }\n\n assert_eq!(slice, [4, 5, 3, 4, 5]);\n ```\n\n [`clone_from_slice`]: slice::clone_from_slice\n [`split_at_mut`]: slice::split_at_mut\n",
+      "adt": {}
+    },
+    "<[mem::maybe_uninit::MaybeUninit<T>]>::assume_init_mut": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Gets a mutable (unique) reference to the contained value.\n\n # Safety\n\n Calling this when the content is not yet fully initialized causes undefined\n behavior: it is up to the caller to guarantee that every `MaybeUninit<T>` in the\n slice really is in an initialized state. For instance, `.assume_init_mut()` cannot\n be used to initialize a `MaybeUninit` slice.\n",
+      "adt": {}
+    }
+  },
+  "adts": {},
+  "path": 1371,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/mem/maybe_uninit.rs:1145:5: 1156:6",
+  "src": "pub const fn write_copy_of_slice(&mut self, src: &[T]) -> &mut [T]\n    where\n        T: Copy,\n    {\n        // SAFETY: &[T] and &[MaybeUninit<T>] have the same layout\n        let uninit_src: &[MaybeUninit<T>] = unsafe { super::transmute(src) };\n\n        self.copy_from_slice(uninit_src);\n\n        // SAFETY: Valid elements have just been copied into `self` so it is initialized\n        unsafe { self.assume_init_mut() }\n    }",
+  "mir": "fn <[mem::maybe_uninit::MaybeUninit<T>]>::write_copy_of_slice(_1: &mut [mem::maybe_uninit::MaybeUninit<T>], _2: &[T]) -> &mut [T] {\n    let mut _0: &mut [T];\n    let  _3: &[mem::maybe_uninit::MaybeUninit<T>];\n    let  _4: ();\n    debug self => _1;\n    debug src => _2;\n    debug uninit_src => _3;\n    bb0: {\n        _3 = _2 as &[mem::maybe_uninit::MaybeUninit<T>];\n        _4 = slice::<impl [mem::maybe_uninit::MaybeUninit<T>]>::copy_from_slice(_1, _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = <[mem::maybe_uninit::MaybeUninit<T>]>::assume_init_mut(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",
+  "doc": " Copies the elements from `src` to `self`,\n returning a mutable reference to the now initialized contents of `self`.\n\n If `T` does not implement `Copy`, use [`write_clone_of_slice`] instead.\n\n This is similar to [`slice::copy_from_slice`].\n\n # Panics\n\n This function will panic if the two slices have different lengths.\n\n # Examples\n\n ```\n use std::mem::MaybeUninit;\n\n let mut dst = [MaybeUninit::uninit(); 32];\n let src = [0; 32];\n\n let init = dst.write_copy_of_slice(&src);\n\n assert_eq!(init, src);\n ```\n\n ```\n let mut vec = Vec::with_capacity(32);\n let src = [0; 16];\n\n vec.spare_capacity_mut()[..src.len()].write_copy_of_slice(&src);\n\n // SAFETY: we have just copied all the elements of len into the spare capacity\n // the first src.len() elements of the vec are valid now.\n unsafe {\n     vec.set_len(src.len());\n }\n\n assert_eq!(vec, src);\n ```\n\n [`write_clone_of_slice`]: slice::write_clone_of_slice\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

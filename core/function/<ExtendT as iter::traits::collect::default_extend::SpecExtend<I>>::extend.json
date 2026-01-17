@@ -1,0 +1,88 @@
+{
+  "name": "<ExtendT as iter::traits::collect::default_extend::SpecExtend<I>>::extend",
+  "safe": true,
+  "callees": {
+    "iter::traits::iterator::Iterator::size_hint": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the bounds on the remaining length of the iterator.\n\n Specifically, `size_hint()` returns a tuple where the first element\n is the lower bound, and the second element is the upper bound.\n\n The second half of the tuple that is returned is an <code>[Option]<[usize]></code>.\n A [`None`] here means that either there is no known upper bound, or the\n upper bound is larger than [`usize`].\n\n # Implementation notes\n\n It is not enforced that an iterator implementation yields the declared\n number of elements. A buggy iterator may yield less than the lower bound\n or more than the upper bound of elements.\n\n `size_hint()` is primarily intended to be used for optimizations such as\n reserving space for the elements of the iterator, but must not be\n trusted to e.g., omit bounds checks in unsafe code. An incorrect\n implementation of `size_hint()` should not lead to memory safety\n violations.\n\n That said, the implementation should provide a correct estimation,\n because otherwise it would be a violation of the trait's protocol.\n\n The default implementation returns <code>(0, [None])</code> which is correct for any\n iterator.\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n let mut iter = a.iter();\n\n assert_eq!((3, Some(3)), iter.size_hint());\n let _ = iter.next();\n assert_eq!((2, Some(2)), iter.size_hint());\n ```\n\n A more complex example:\n\n ```\n // The even numbers in the range of zero to nine.\n let iter = (0..10).filter(|x| x % 2 == 0);\n\n // We might iterate from zero to ten times. Knowing that it's five\n // exactly wouldn't be possible without executing filter().\n assert_eq!((0, Some(10)), iter.size_hint());\n\n // Let's add five more numbers with chain()\n let iter = (0..10).filter(|x| x % 2 == 0).chain(15..20);\n\n // now both bounds are increased by five\n assert_eq!((5, Some(15)), iter.size_hint());\n ```\n\n Returning `None` for an upper bound:\n\n ```\n // an infinite iterator has no upper bound\n // and the maximum possible lower bound\n let iter = 0..;\n\n assert_eq!((usize::MAX, None), iter.size_hint());\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "iter::traits::collect::Extend::extend_reserve": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Reserves capacity in a collection for the given number of additional elements.\n\n The default implementation does nothing.\n",
+      "adt": {}
+    },
+    "option::Option::<T>::is_none": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns `true` if the option is a [`None`] value.\n\n # Examples\n\n ```\n let x: Option<u32> = Some(2);\n assert_eq!(x.is_none(), false);\n\n let x: Option<u32> = None;\n assert_eq!(x.is_none(), true);\n ```\n",
+      "adt": {
+        "option::Option": "ImmutableAsArgument"
+      }
+    },
+    "iter::traits::collect::default_extend::extender": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    },
+    "iter::traits::iterator::Iterator::for_each": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Calls a closure on each element of an iterator.\n\n This is equivalent to using a [`for`] loop on the iterator, although\n `break` and `continue` are not possible from a closure. It's generally\n more idiomatic to use a `for` loop, but `for_each` may be more legible\n when processing items at the end of longer iterator chains. In some\n cases `for_each` may also be faster than a loop, because it will use\n internal iteration on adapters like `Chain`.\n\n [`for`]: ../../book/ch03-05-control-flow.html#looping-through-a-collection-with-for\n\n # Examples\n\n Basic usage:\n\n ```\n use std::sync::mpsc::channel;\n\n let (tx, rx) = channel();\n (0..5).map(|x| x * 2 + 1)\n       .for_each(move |x| tx.send(x).unwrap());\n\n let v: Vec<_> = rx.iter().collect();\n assert_eq!(v, vec![1, 3, 5, 7, 9]);\n ```\n\n For such a small example, a `for` loop may be cleaner, but `for_each`\n might be preferable to keep a functional style with longer iterators:\n\n ```\n (0..5).flat_map(|x| (x * 100)..(x * 110))\n       .enumerate()\n       .filter(|&(i, x)| (i + x) % 3 == 0)\n       .for_each(|(i, x)| println!(\"{i}:{x}\"));\n ```\n",
+      "adt": {}
+    },
+    "iter::traits::collect::default_extend::unchecked_extender": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": "",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "option::Option": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])",
+      "Unknown([Field(1, Ty { id: 518, kind: RigidTy(Adt(AdtDef(DefId { id: 24532, name: \"option::Option\" }), GenericArgs([Type(Ty { id: 47, kind: RigidTy(Uint(Usize)) })]))) })])",
+      "Ref"
+    ]
+  },
+  "path": 1109,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/collect.rs:591:9: 605:10",
+  "src": "fn extend(&mut self, iter: I) {\n            let (lower_bound, upper_bound) = iter.size_hint();\n            if lower_bound > 0 {\n                self.extend_reserve(lower_bound);\n            }\n\n            if upper_bound.is_none() {\n                // We cannot reserve more than `usize::MAX` items, and this is likely to go out of memory anyway.\n                iter.for_each(extender(self))\n            } else {\n                // SAFETY: We reserve enough space for the `size_hint`, and the iterator is\n                // `TrustedLen` so its `size_hint` is exact.\n                iter.for_each(unsafe { unchecked_extender(self) })\n            }\n        }",
+  "mir": "fn <ExtendT as iter::traits::collect::default_extend::SpecExtend<I>>::extend(_1: &mut ExtendT, _2: I) -> () {\n    let mut _0: ();\n    let  _3: usize;\n    let  _4: option::Option<usize>;\n    let mut _5: (usize, option::Option<usize>);\n    let mut _6: &I;\n    let mut _7: bool;\n    let  _8: ();\n    let mut _9: bool;\n    let mut _10: &option::Option<usize>;\n    let mut _11: I;\n    let mut _12: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/collect.rs:557:9: 557:20};\n    let mut _13: I;\n    let mut _14: {closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/collect.rs:568:9: 568:20};\n    debug self => _1;\n    debug iter => _2;\n    debug lower_bound => _3;\n    debug upper_bound => _4;\n    bb0: {\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = &_2;\n        _5 = <I as iter::traits::iterator::Iterator>::size_hint(move _6) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_6);\n        _3 = (_5.0: usize);\n        StorageLive(_4);\n        _4 = (_5.1: option::Option<usize>);\n        StorageDead(_5);\n        StorageLive(_7);\n        _7 = Gt(_3, 0_usize);\n        switchInt(move _7) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        _8 = <ExtendT as iter::traits::collect::Extend<T>>::extend_reserve(_1, _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        goto -> bb5;\n    }\n    bb4: {\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_7);\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = &_4;\n        _9 = option::Option::<usize>::is_none(move _10) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        switchInt(move _9) -> [0: bb10, otherwise: bb7];\n    }\n    bb7: {\n        StorageDead(_10);\n        StorageLive(_11);\n        _11 = move _2;\n        StorageLive(_12);\n        _12 = iter::traits::collect::default_extend::extender::<ExtendT, T>(_1) -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        _0 = <I as iter::traits::iterator::Iterator>::for_each::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/collect.rs:557:9: 557:20}>(move _11, move _12) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        StorageDead(_12);\n        StorageDead(_11);\n        goto -> bb13;\n    }\n    bb10: {\n        StorageDead(_10);\n        StorageLive(_13);\n        _13 = move _2;\n        StorageLive(_14);\n        _14 = iter::traits::collect::default_extend::unchecked_extender::<ExtendT, T>(_1) -> [return: bb11, unwind unreachable];\n    }\n    bb11: {\n        _0 = <I as iter::traits::iterator::Iterator>::for_each::<{closure@/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/collect.rs:568:9: 568:20}>(move _13, move _14) -> [return: bb12, unwind unreachable];\n    }\n    bb12: {\n        StorageDead(_14);\n        StorageDead(_13);\n        goto -> bb13;\n    }\n    bb13: {\n        StorageDead(_9);\n        StorageDead(_4);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

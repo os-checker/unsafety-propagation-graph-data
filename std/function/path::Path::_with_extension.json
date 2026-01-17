@@ -1,0 +1,134 @@
+{
+  "name": "path::Path::_with_extension",
+  "safe": true,
+  "callees": {
+    "path::Path::as_os_str": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Yields the underlying [`OsStr`] slice.\n\n # Examples\n\n ```\n use std::path::Path;\n\n let os_str = Path::new(\"foo.txt\").as_os_str();\n assert_eq!(os_str, std::ffi::OsStr::new(\"foo.txt\"));\n ```\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument"
+      }
+    },
+    "ffi::os_str::OsStr::len": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns the length of this `OsStr`.\n\n Note that this does **not** return the number of bytes in the string in\n OS string form.\n\n The length returned is that of the underlying storage used by `OsStr`.\n As discussed in the [`OsString`] introduction, [`OsString`] and `OsStr`\n store strings in a form best suited for cheap inter-conversion between\n native-platform and Rust string forms, which may differ significantly\n from both of them, including in storage size and encoding.\n\n This number is simply useful for passing to other methods, like\n [`OsString::with_capacity`] to avoid reallocations.\n\n See the main `OsString` documentation information about encoding and capacity units.\n\n # Examples\n\n ```\n use std::ffi::OsStr;\n\n let os_str = OsStr::new(\"\");\n assert_eq!(os_str.len(), 0);\n\n let os_str = OsStr::new(\"foo\");\n assert_eq!(os_str.len(), 3);\n ```\n",
+      "adt": {
+        "ffi::os_str::OsStr": "ImmutableAsArgument"
+      }
+    },
+    "ffi::os_str::OsStr::as_encoded_bytes": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Converts an OS string slice to a byte slice.  To convert the byte slice back into an OS\n string slice, use the [`OsStr::from_encoded_bytes_unchecked`] function.\n\n The byte encoding is an unspecified, platform-specific, self-synchronizing superset of UTF-8.\n By being a self-synchronizing superset of UTF-8, this encoding is also a superset of 7-bit\n ASCII.\n\n Note: As the encoding is unspecified, any sub-slice of bytes that is not valid UTF-8 should\n be treated as opaque and only comparable within the same Rust version built for the same\n target platform.  For example, sending the slice over the network or storing it in a file\n will likely result in incompatible byte slices.  See [`OsString`] for more encoding details\n and [`std::ffi`] for platform-specific, specified conversions.\n\n [`std::ffi`]: crate::ffi\n",
+      "adt": {
+        "ffi::os_str::OsStr": "ImmutableAsArgument"
+      }
+    },
+    "path::Path::extension": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Extracts the extension (without the leading dot) of [`self.file_name`], if possible.\n\n The extension is:\n\n * [`None`], if there is no file name;\n * [`None`], if there is no embedded `.`;\n * [`None`], if the file name begins with `.` and has no other `.`s within;\n * Otherwise, the portion of the file name after the final `.`\n\n [`self.file_name`]: Path::file_name\n\n # Examples\n\n ```\n use std::path::Path;\n\n assert_eq!(\"rs\", Path::new(\"foo.rs\").extension().unwrap());\n assert_eq!(\"gz\", Path::new(\"foo.tar.gz\").extension().unwrap());\n ```\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument",
+        "core::option::Option": "Constructor"
+      }
+    },
+    "core::ops::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "path::PathBuf::with_capacity": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Creates a new `PathBuf` with a given capacity used to create the\n internal [`OsString`]. See [`with_capacity`] defined on [`OsString`].\n\n # Examples\n\n ```\n use std::path::PathBuf;\n\n let mut path = PathBuf::with_capacity(10);\n let capacity = path.capacity();\n\n // This push is done without reallocating\n path.push(r\"C:\\\");\n\n assert_eq!(capacity, path.capacity());\n ```\n\n [`with_capacity`]: OsString::with_capacity\n",
+      "adt": {
+        "path::PathBuf": "Constructor"
+      }
+    },
+    "ffi::os_str::OsString::extend_from_slice_unchecked": {
+      "safe": false,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Provides plumbing to `Vec::extend_from_slice` without giving full\n mutable access to the `Vec`.\n\n # Safety\n\n The slice must be valid for the platform encoding (as described in\n [`OsStr::from_encoded_bytes_unchecked`]).\n\n This bypasses the encoding-dependent surrogate joining, so either\n `self` must not end with a leading surrogate half, or `other` must not\n start with a trailing surrogate half.\n",
+      "adt": {
+        "ffi::os_str::OsString": "MutableAsArgument"
+      }
+    },
+    "path::PathBuf::set_extension": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Updates [`self.extension`] to `Some(extension)` or to `None` if\n `extension` is empty.\n\n Returns `false` and does nothing if [`self.file_name`] is [`None`],\n returns `true` and updates the extension otherwise.\n\n If [`self.extension`] is [`None`], the extension is added; otherwise\n it is replaced.\n\n If `extension` is the empty string, [`self.extension`] will be [`None`]\n afterwards, not `Some(\"\")`.\n\n # Panics\n\n Panics if the passed extension contains a path separator (see\n [`is_separator`]).\n\n # Caveats\n\n The new `extension` may contain dots and will be used in its entirety,\n but only the part after the final dot will be reflected in\n [`self.extension`].\n\n If the file stem contains internal dots and `extension` is empty, part\n of the old file stem will be considered the new [`self.extension`].\n\n See the examples below.\n\n [`self.file_name`]: Path::file_name\n [`self.extension`]: Path::extension\n\n # Examples\n\n ```\n use std::path::{Path, PathBuf};\n\n let mut p = PathBuf::from(\"/feel/the\");\n\n p.set_extension(\"force\");\n assert_eq!(Path::new(\"/feel/the.force\"), p.as_path());\n\n p.set_extension(\"dark.side\");\n assert_eq!(Path::new(\"/feel/the.dark.side\"), p.as_path());\n\n p.set_extension(\"cookie\");\n assert_eq!(Path::new(\"/feel/the.dark.cookie\"), p.as_path());\n\n p.set_extension(\"\");\n assert_eq!(Path::new(\"/feel/the.dark\"), p.as_path());\n\n p.set_extension(\"\");\n assert_eq!(Path::new(\"/feel/the\"), p.as_path());\n\n p.set_extension(\"\");\n assert_eq!(Path::new(\"/feel/the\"), p.as_path());\n ```\n",
+      "adt": {
+        "path::PathBuf": "MutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "path::Path": [
+      "Ref"
+    ],
+    "ffi::os_str::OsStr": [
+      "Ref"
+    ],
+    "core::option::Option": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(1, ThreadLocalIndex)), Field(0, Ty { id: 2802, kind: RigidTy(Ref(Region { kind: ReErased }, Ty { id: 2803, kind: RigidTy(Adt(AdtDef(DefId { id: 5587, name: \"ffi::os_str::OsStr\" }), GenericArgs([]))) }, Not)) })])"
+    ],
+    "core::ops::RangeTo": [
+      "Plain"
+    ],
+    "path::PathBuf": [
+      "Plain",
+      "Unknown([Field(0, Ty { id: 2791, kind: RigidTy(Adt(AdtDef(DefId { id: 5580, name: \"ffi::os_str::OsString\" }), GenericArgs([]))) })])",
+      "MutRef"
+    ],
+    "ffi::os_str::OsString": [
+      "MutRef"
+    ]
+  },
+  "path": 2414,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:3062:5: 3085:6",
+  "src": "fn _with_extension(&self, extension: &OsStr) -> PathBuf {\n        let self_len = self.as_os_str().len();\n        let self_bytes = self.as_os_str().as_encoded_bytes();\n\n        let (new_capacity, slice_to_copy) = match self.extension() {\n            None => {\n                // Enough capacity for the extension and the dot\n                let capacity = self_len + extension.len() + 1;\n                let whole_path = self_bytes;\n                (capacity, whole_path)\n            }\n            Some(previous_extension) => {\n                let capacity = self_len + extension.len() - previous_extension.len();\n                let path_till_dot = &self_bytes[..self_len - previous_extension.len()];\n                (capacity, path_till_dot)\n            }\n        };\n\n        let mut new_path = PathBuf::with_capacity(new_capacity);\n        // SAFETY: The path is empty, so cannot have surrogate halves.\n        unsafe { new_path.inner.extend_from_slice_unchecked(slice_to_copy) };\n        new_path.set_extension(extension);\n        new_path\n    }",
+  "mir": "fn path::Path::_with_extension(_1: &path::Path, _2: &ffi::os_str::OsStr) -> path::PathBuf {\n    let mut _0: path::PathBuf;\n    let  _3: usize;\n    let  _4: &ffi::os_str::OsStr;\n    let  _5: &[u8];\n    let  _6: &ffi::os_str::OsStr;\n    let  _7: usize;\n    let  _8: &[u8];\n    let mut _9: (usize, &[u8]);\n    let mut _10: core::option::Option<&ffi::os_str::OsStr>;\n    let mut _11: isize;\n    let  _12: usize;\n    let mut _13: usize;\n    let mut _14: usize;\n    let mut _15: (usize, bool);\n    let mut _16: (usize, bool);\n    let  _17: &ffi::os_str::OsStr;\n    let  _18: usize;\n    let mut _19: usize;\n    let mut _20: usize;\n    let mut _21: (usize, bool);\n    let mut _22: usize;\n    let mut _23: (usize, bool);\n    let  _24: &[u8];\n    let mut _25: core::ops::RangeTo<usize>;\n    let mut _26: usize;\n    let mut _27: usize;\n    let mut _28: (usize, bool);\n    let mut _29: path::PathBuf;\n    let  _30: ();\n    let mut _31: &mut ffi::os_str::OsString;\n    let  _32: bool;\n    let mut _33: &mut path::PathBuf;\n    debug self => _1;\n    debug extension => _2;\n    debug self_len => _3;\n    debug self_bytes => _5;\n    debug new_capacity => _7;\n    debug slice_to_copy => _8;\n    debug capacity => _12;\n    debug whole_path => _5;\n    debug previous_extension => _17;\n    debug capacity => _18;\n    debug path_till_dot => _24;\n    debug new_path => _29;\n    bb0: {\n        _4 = path::Path::as_os_str(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = ffi::os_str::OsStr::len(_4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _6 = path::Path::as_os_str(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _5 = ffi::os_str::OsStr::as_encoded_bytes(_6) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageLive(_9);\n        StorageLive(_10);\n        _10 = path::Path::extension(_1) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        _11 = discriminant(_10);\n        switchInt(move _11) -> [0: bb8, 1: bb7, otherwise: bb6];\n    }\n    bb6: {\n        unreachable;\n    }\n    bb7: {\n        _17 = ((_10 as variant#1).0: &ffi::os_str::OsStr);\n        StorageLive(_19);\n        StorageLive(_20);\n        _20 = ffi::os_str::OsStr::len(_2) -> [return: bb12, unwind unreachable];\n    }\n    bb8: {\n        StorageLive(_13);\n        StorageLive(_14);\n        _14 = ffi::os_str::OsStr::len(_2) -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        _15 = CheckedAdd(_3, _14);\n        assert(!move (_15.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _3, move _14) -> [success: bb10, unwind unreachable];\n    }\n    bb10: {\n        _13 = move (_15.0: usize);\n        StorageDead(_14);\n        _16 = CheckedAdd(_13, 1_usize);\n        assert(!move (_16.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _13, 1_usize) -> [success: bb11, unwind unreachable];\n    }\n    bb11: {\n        _12 = move (_16.0: usize);\n        StorageDead(_13);\n        _9 = (_12, _5);\n        goto -> bb19;\n    }\n    bb12: {\n        _21 = CheckedAdd(_3, _20);\n        assert(!move (_21.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _3, move _20) -> [success: bb13, unwind unreachable];\n    }\n    bb13: {\n        _19 = move (_21.0: usize);\n        StorageDead(_20);\n        StorageLive(_22);\n        _22 = ffi::os_str::OsStr::len(_17) -> [return: bb14, unwind unreachable];\n    }\n    bb14: {\n        _23 = CheckedSub(_19, _22);\n        assert(!move (_23.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _19, move _22) -> [success: bb15, unwind unreachable];\n    }\n    bb15: {\n        _18 = move (_23.0: usize);\n        StorageDead(_22);\n        StorageDead(_19);\n        StorageLive(_25);\n        StorageLive(_26);\n        StorageLive(_27);\n        _27 = ffi::os_str::OsStr::len(_17) -> [return: bb16, unwind unreachable];\n    }\n    bb16: {\n        _28 = CheckedSub(_3, _27);\n        assert(!move (_28.1: bool), \"attempt to compute `{} - {}`, which would overflow\", _3, move _27) -> [success: bb17, unwind unreachable];\n    }\n    bb17: {\n        _26 = move (_28.0: usize);\n        StorageDead(_27);\n        _25 = RangeTo(move _26);\n        StorageDead(_26);\n        _24 = <[u8] as core::ops::Index<core::ops::RangeTo<usize>>>::index(_5, move _25) -> [return: bb18, unwind unreachable];\n    }\n    bb18: {\n        StorageDead(_25);\n        _9 = (_18, _24);\n        goto -> bb19;\n    }\n    bb19: {\n        _7 = (_9.0: usize);\n        _8 = (_9.1: &[u8]);\n        StorageDead(_10);\n        StorageDead(_9);\n        StorageLive(_29);\n        _29 = path::PathBuf::with_capacity(_7) -> [return: bb20, unwind unreachable];\n    }\n    bb20: {\n        StorageLive(_31);\n        _31 = &mut (_29.0: ffi::os_str::OsString);\n        _30 = ffi::os_str::OsString::extend_from_slice_unchecked(move _31, _8) -> [return: bb21, unwind unreachable];\n    }\n    bb21: {\n        StorageDead(_31);\n        StorageLive(_32);\n        StorageLive(_33);\n        _33 = &mut _29;\n        _32 = path::PathBuf::set_extension::<&ffi::os_str::OsStr>(move _33, _2) -> [return: bb22, unwind unreachable];\n    }\n    bb22: {\n        StorageDead(_33);\n        StorageDead(_32);\n        _0 = move _29;\n        StorageDead(_29);\n        return;\n    }\n}\n",
+  "doc": "",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

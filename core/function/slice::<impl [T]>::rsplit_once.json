@@ -1,0 +1,89 @@
+{
+  "name": "slice::<impl [T]>::rsplit_once",
+  "safe": true,
+  "callees": {
+    "slice::<impl [T]>::iter": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Returns an iterator over the slice.\n\n The iterator yields all items from start to end.\n\n # Examples\n\n ```\n let x = &[1, 2, 4];\n let mut iterator = x.iter();\n\n assert_eq!(iterator.next(), Some(&1));\n assert_eq!(iterator.next(), Some(&2));\n assert_eq!(iterator.next(), Some(&4));\n assert_eq!(iterator.next(), None);\n ```\n",
+      "adt": {
+        "slice::iter::Iter": "Constructor"
+      }
+    },
+    "iter::traits::iterator::Iterator::rposition": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Searches for an element in an iterator from the right, returning its\n index.\n\n `rposition()` takes a closure that returns `true` or `false`. It applies\n this closure to each element of the iterator, starting from the end,\n and if one of them returns `true`, then `rposition()` returns\n [`Some(index)`]. If all of them return `false`, it returns [`None`].\n\n `rposition()` is short-circuiting; in other words, it will stop\n processing as soon as it finds a `true`.\n\n [`Some(index)`]: Some\n\n # Examples\n\n Basic usage:\n\n ```\n let a = [1, 2, 3];\n\n assert_eq!(a.into_iter().rposition(|x| x == 3), Some(2));\n\n assert_eq!(a.into_iter().rposition(|x| x == 5), None);\n ```\n\n Stopping at the first `true`:\n\n ```\n let a = [-1, 2, 3, 4];\n\n let mut iter = a.into_iter();\n\n assert_eq!(iter.rposition(|x| x >= 2), Some(3));\n\n // we can still use `iter`, as there are more elements.\n assert_eq!(iter.next(), Some(-1));\n assert_eq!(iter.next_back(), Some(3));\n ```\n",
+      "adt": {
+        "option::Option": "Constructor"
+      }
+    },
+    "ops::try_trait::Try::branch": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Used in `?` to decide whether the operator should produce a value\n (because this returned [`ControlFlow::Continue`])\n or propagate a value back to the caller\n (because this returned [`ControlFlow::Break`]).\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, Try};\n\n assert_eq!(Ok::<_, String>(3).branch(), ControlFlow::Continue(3));\n assert_eq!(Err::<String, _>(3).branch(), ControlFlow::Break(Err(3)));\n\n assert_eq!(Some(3).branch(), ControlFlow::Continue(3));\n assert_eq!(None::<String>.branch(), ControlFlow::Break(None));\n\n assert_eq!(ControlFlow::<String, _>::Continue(3).branch(), ControlFlow::Continue(3));\n assert_eq!(\n     ControlFlow::<_, String>::Break(3).branch(),\n     ControlFlow::Break(ControlFlow::Break(3)),\n );\n ```\n",
+      "adt": {}
+    },
+    "ops::index::Index::index": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Performs the indexing (`container[index]`) operation.\n\n # Panics\n\n May panic if the index is out of bounds.\n",
+      "adt": {}
+    },
+    "ops::try_trait::FromResidual::from_residual": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Constructs the type from a compatible `Residual` type.\n\n This should be implemented consistently with the `branch` method such\n that applying the `?` operator will get back an equivalent residual:\n `FromResidual::from_residual(r).branch() --> ControlFlow::Break(r)`.\n (The residual is not mandated to be *identical* when interconversion is involved.)\n\n # Examples\n\n ```\n #![feature(try_trait_v2)]\n use std::ops::{ControlFlow, FromResidual};\n\n assert_eq!(Result::<String, i64>::from_residual(Err(3_u8)), Err(3));\n assert_eq!(Option::<String>::from_residual(None), None);\n assert_eq!(\n     ControlFlow::<_, String>::from_residual(ControlFlow::Break(5)),\n     ControlFlow::Break(5),\n );\n ```\n",
+      "adt": {}
+    }
+  },
+  "adts": {
+    "slice::iter::Iter": [
+      "Plain",
+      "MutRef"
+    ],
+    "option::Option": [
+      "Plain"
+    ],
+    "ops::control_flow::ControlFlow": [
+      "Plain",
+      "Unknown([Downcast(VariantIdx(0, ThreadLocalIndex)), Field(0, Ty { id: 47, kind: RigidTy(Uint(Usize)) })])"
+    ],
+    "ops::range::RangeTo": [
+      "Plain"
+    ],
+    "ops::range::RangeFrom": [
+      "Plain"
+    ]
+  },
+  "path": 1293,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:2550:5: 2556:6",
+  "src": "pub fn rsplit_once<F>(&self, pred: F) -> Option<(&[T], &[T])>\n    where\n        F: FnMut(&T) -> bool,\n    {\n        let index = self.iter().rposition(pred)?;\n        Some((&self[..index], &self[index + 1..]))\n    }",
+  "mir": "fn slice::<impl [T]>::rsplit_once(_1: &[T], _2: F) -> option::Option<(&[T], &[T])> {\n    let mut _0: option::Option<(&[T], &[T])>;\n    let mut _3: ops::control_flow::ControlFlow<option::Option<convert::Infallible>, usize>;\n    let mut _4: option::Option<usize>;\n    let mut _5: &mut slice::iter::Iter<'_, T>;\n    let mut _6: slice::iter::Iter<'_, T>;\n    let mut _7: isize;\n    let  _8: usize;\n    let mut _9: (&[T], &[T]);\n    let  _10: &[T];\n    let mut _11: ops::range::RangeTo<usize>;\n    let  _12: &[T];\n    let mut _13: ops::range::RangeFrom<usize>;\n    let mut _14: usize;\n    let mut _15: (usize, bool);\n    debug self => _1;\n    debug pred => _2;\n    debug index => _8;\n    debug residual => option::Option::<convert::Infallible>::None;\n    debug val => _8;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = slice::<impl [T]>::iter(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = &mut _6;\n        _4 = <slice::iter::Iter<'_, T> as iter::traits::iterator::Iterator>::rposition::<F>(move _5, _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_5);\n        _3 = <option::Option<usize> as ops::try_trait::Try>::branch(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _7 = discriminant(_3);\n        switchInt(move _7) -> [0: bb5, 1: bb6, otherwise: bb4];\n    }\n    bb4: {\n        unreachable;\n    }\n    bb5: {\n        _8 = ((_3 as variant#0).0: usize);\n        StorageDead(_6);\n        StorageDead(_3);\n        StorageLive(_9);\n        StorageLive(_11);\n        _11 = RangeTo(_8);\n        _10 = <[T] as ops::index::Index<ops::range::RangeTo<usize>>>::index(_1, move _11) -> [return: bb8, unwind unreachable];\n    }\n    bb6: {\n        _0 = <option::Option<(&[T], &[T])> as ops::try_trait::FromResidual<option::Option<convert::Infallible>>>::from_residual(option::Option::<convert::Infallible>::None) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        StorageDead(_6);\n        StorageDead(_3);\n        goto -> bb11;\n    }\n    bb8: {\n        StorageDead(_11);\n        StorageLive(_13);\n        StorageLive(_14);\n        _15 = CheckedAdd(_8, 1_usize);\n        assert(!move (_15.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _8, 1_usize) -> [success: bb9, unwind unreachable];\n    }\n    bb9: {\n        _14 = move (_15.0: usize);\n        _13 = RangeFrom(move _14);\n        StorageDead(_14);\n        _12 = <[T] as ops::index::Index<ops::range::RangeFrom<usize>>>::index(_1, move _13) -> [return: bb10, unwind unreachable];\n    }\n    bb10: {\n        StorageDead(_13);\n        _9 = (_10, _12);\n        _0 = option::Option::Some(move _9);\n        StorageDead(_9);\n        goto -> bb11;\n    }\n    bb11: {\n        return;\n    }\n}\n",
+  "doc": " Splits the slice on the last element that matches the specified\n predicate.\n\n If any matching elements are present in the slice, returns the prefix\n before the match and suffix after. The matching element itself is not\n included. If no elements match, returns `None`.\n\n # Examples\n\n ```\n #![feature(slice_split_once)]\n let s = [1, 2, 3, 2, 4];\n assert_eq!(s.rsplit_once(|&x| x == 2), Some((\n     &[1, 2, 3][..],\n     &[4][..]\n )));\n assert_eq!(s.rsplit_once(|&x| x == 0), None);\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}

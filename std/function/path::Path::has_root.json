@@ -1,0 +1,50 @@
+{
+  "name": "path::Path::has_root",
+  "safe": true,
+  "callees": {
+    "path::Path::components": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Produces an iterator over the [`Component`]s of the path.\n\n When parsing the path, there is a small amount of normalization:\n\n * Repeated separators are ignored, so `a/b` and `a//b` both have\n   `a` and `b` as components.\n\n * Occurrences of `.` are normalized away, except if they are at the\n   beginning of the path. For example, `a/./b`, `a/b/`, `a/b/.` and\n   `a/b` all have `a` and `b` as components, but `./a/b` starts with\n   an additional [`CurDir`] component.\n\n * Trailing separators are normalized away, so `/a/b` and `/a/b/` are equivalent.\n\n Note that no other normalization takes place; in particular, `a/c`\n and `a/b/../c` are distinct, to account for the possibility that `b`\n is a symbolic link (so its parent isn't `a`).\n\n # Examples\n\n ```\n use std::path::{Path, Component};\n use std::ffi::OsStr;\n\n let mut components = Path::new(\"/tmp/foo.txt\").components();\n\n assert_eq!(components.next(), Some(Component::RootDir));\n assert_eq!(components.next(), Some(Component::Normal(OsStr::new(\"tmp\"))));\n assert_eq!(components.next(), Some(Component::Normal(OsStr::new(\"foo.txt\"))));\n assert_eq!(components.next(), None)\n ```\n\n [`CurDir`]: Component::CurDir\n",
+      "adt": {
+        "path::Path": "ImmutableAsArgument",
+        "path::Components": "Constructor"
+      }
+    },
+    "path::Components::<'a>::has_root": {
+      "safe": true,
+      "tags": {
+        "tags": [],
+        "spec": {},
+        "docs": []
+      },
+      "doc": " Is the *original* path rooted?\n",
+      "adt": {
+        "path::Components": "ImmutableAsArgument"
+      }
+    }
+  },
+  "adts": {
+    "path::Path": [
+      "Ref"
+    ],
+    "path::Components": [
+      "Plain",
+      "Ref"
+    ]
+  },
+  "path": 2431,
+  "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/path.rs:2557:5: 2559:6",
+  "src": "pub fn has_root(&self) -> bool {\n        self.components().has_root()\n    }",
+  "mir": "fn path::Path::has_root(_1: &path::Path) -> bool {\n    let mut _0: bool;\n    let mut _2: &path::Components<'_>;\n    let  _3: path::Components<'_>;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = path::Path::components(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = &_3;\n        _0 = path::Components::<'_>::has_root(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageDead(_2);\n        return;\n    }\n}\n",
+  "doc": " Returns `true` if the `Path` has a root.\n\n * On Unix, a path has a root if it begins with `/`.\n\n * On Windows, a path has a root if it:\n     * has no prefix and begins with a separator, e.g., `\\windows`\n     * has a prefix followed by a separator, e.g., `c:\\windows` but not `c:windows`\n     * has any non-disk prefix, e.g., `\\\\server\\share`\n\n # Examples\n\n ```\n use std::path::Path;\n\n assert!(Path::new(\"/etc/passwd\").has_root());\n ```\n",
+  "tags": {
+    "tags": [],
+    "spec": {},
+    "docs": []
+  }
+}
