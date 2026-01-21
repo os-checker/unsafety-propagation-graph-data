@@ -22,7 +22,10 @@
       "Ref"
     ]
   },
-  "path": 4461,
+  "path": {
+    "type": "Local",
+    "path": "core::alloc::layout::Layout::size_rounded_up_to_custom_align"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/alloc/layout.rs:284:5: 307:6",
   "src": "const fn size_rounded_up_to_custom_align(&self, align: Alignment) -> usize {\n        // SAFETY:\n        // Rounded up value is:\n        //   size_rounded_up = (size + align - 1) & !(align - 1);\n        //\n        // The arithmetic we do here can never overflow:\n        //\n        // 1. align is guaranteed to be > 0, so align - 1 is always\n        //    valid.\n        //\n        // 2. size is at most `isize::MAX`, so adding `align - 1` (which is at\n        //    most `isize::MAX`) can never overflow a `usize`.\n        //\n        // 3. masking by the alignment can remove at most `align - 1`,\n        //    which is what we just added, thus the value we return is never\n        //    less than the original `size`.\n        //\n        // (Size 0 Align MAX is already aligned, so stays the same, but things like\n        // Size 1 Align MAX or Size isize::MAX Align 2 round up to `isize::MAX + 1`.)\n        unsafe {\n            let align_m1 = unchecked_sub(align.as_usize(), 1);\n            unchecked_add(self.size, align_m1) & !align_m1\n        }\n    }",
   "mir": "fn alloc::layout::Layout::size_rounded_up_to_custom_align(_1: &alloc::layout::Layout, _2: ptr::alignment::Alignment) -> usize {\n    let mut _0: usize;\n    let  _3: usize;\n    let mut _4: usize;\n    let mut _5: usize;\n    let mut _6: usize;\n    let mut _7: usize;\n    debug self => _1;\n    debug align => _2;\n    debug align_m1 => _3;\n    bb0: {\n        StorageLive(_4);\n        _4 = ptr::alignment::Alignment::as_usize(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = SubUnchecked(move _4, 1_usize);\n        StorageDead(_4);\n        StorageLive(_5);\n        StorageLive(_6);\n        _6 = ((*_1).0: usize);\n        _5 = AddUnchecked(move _6, _3);\n        StorageDead(_6);\n        StorageLive(_7);\n        _7 = Not(_3);\n        _0 = BitAnd(move _5, move _7);\n        StorageDead(_7);\n        StorageDead(_5);\n        return;\n    }\n}\n",

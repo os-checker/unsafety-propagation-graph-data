@@ -35,7 +35,10 @@
       "Plain"
     ]
   },
-  "path": 17196,
+  "path": {
+    "type": "Local",
+    "path": "core::sync::atomic::AtomicBool::fetch_nand"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/sync/atomic.rs:1114:5: 1128:6",
   "src": "pub fn fetch_nand(&self, val: bool, order: Ordering) -> bool {\n        // We can't use atomic_nand here because it can result in a bool with\n        // an invalid value. This happens because the atomic operation is done\n        // with an 8-bit integer internally, which would set the upper 7 bits.\n        // So we just use fetch_xor or swap instead.\n        if val {\n            // !(x & true) == !x\n            // We must invert the bool.\n            self.fetch_xor(true, order)\n        } else {\n            // !(x & false) == true\n            // We must set the bool to true.\n            self.swap(true, order)\n        }\n    }",
   "mir": "fn sync::atomic::AtomicBool::fetch_nand(_1: &sync::atomic::AtomicBool, _2: bool, _3: sync::atomic::Ordering) -> bool {\n    let mut _0: bool;\n    debug self => _1;\n    debug val => _2;\n    debug order => _3;\n    bb0: {\n        switchInt(_2) -> [0: bb3, otherwise: bb1];\n    }\n    bb1: {\n        _0 = sync::atomic::AtomicBool::fetch_xor(_1, true, _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        goto -> bb5;\n    }\n    bb3: {\n        _0 = sync::atomic::AtomicBool::swap(_1, true, _3) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        goto -> bb5;\n    }\n    bb5: {\n        return;\n    }\n}\n",

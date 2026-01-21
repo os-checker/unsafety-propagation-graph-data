@@ -14,7 +14,10 @@
     }
   },
   "adts": {},
-  "path": 995,
+  "path": {
+    "type": "Local",
+    "path": "core::ptr::const_ptr::<impl *const T>::is_null"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/const_ptr.rs:22:5: 41:6",
   "src": "pub const fn is_null(self) -> bool {\n        // Compare via a cast to a thin pointer, so fat pointers are only\n        // considering their \"data\" part for null-ness.\n        let ptr = self as *const u8;\n        const_eval_select!(\n            @capture { ptr: *const u8 } -> bool:\n            // This use of `const_raw_ptr_comparison` has been explicitly blessed by t-lang.\n            if const #[rustc_allow_const_fn_unstable(const_raw_ptr_comparison)] {\n                match (ptr).guaranteed_eq(null_mut()) {\n                    Some(res) => res,\n                    // To remain maximally conservative, we stop execution when we don't\n                    // know whether the pointer is null or not.\n                    // We can *not* return `false` here, that would be unsound in `NonNull::new`!\n                    None => panic!(\"null-ness of this pointer cannot be determined in const context\"),\n                }\n            } else {\n                ptr.addr() == 0\n            }\n        )\n    }",
   "mir": "fn ptr::const_ptr::<impl *const T>::is_null(_1: *const T) -> bool {\n    let mut _0: bool;\n    let  _2: *const u8;\n    let mut _3: (*const u8,);\n    debug self => _1;\n    debug ptr => _2;\n    bb0: {\n        _2 = _1 as *const u8;\n        StorageLive(_3);\n        _3 = (_2);\n        _0 = ptr::const_ptr::<impl *const T>::is_null::runtime(move (_3.0: *const u8)) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        return;\n    }\n}\n",

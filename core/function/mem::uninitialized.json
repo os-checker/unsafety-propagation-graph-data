@@ -63,7 +63,10 @@
       "MutRef"
     ]
   },
-  "path": 14474,
+  "path": {
+    "type": "Local",
+    "path": "core::mem::uninitialized"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/mem/mod.rs:710:1: 724:2",
   "src": "pub unsafe fn uninitialized<T>() -> T {\n    // SAFETY: the caller must guarantee that an uninitialized value is valid for `T`.\n    unsafe {\n        intrinsics::assert_mem_uninitialized_valid::<T>();\n        let mut val = MaybeUninit::<T>::uninit();\n\n        // Fill memory with 0x01, as an imperfect mitigation for old code that uses this function on\n        // bool, nonnull, and noundef types. But don't do this if we actively want to detect UB.\n        if !cfg!(any(miri, sanitize = \"memory\")) {\n            val.as_mut_ptr().write_bytes(0x01, 1);\n        }\n\n        val.assume_init()\n    }\n}",
   "mir": "fn mem::uninitialized() -> T {\n    let mut _0: T;\n    let  _1: ();\n    let mut _2: mem::maybe_uninit::MaybeUninit<T>;\n    let  _3: ();\n    let mut _4: *mut T;\n    let mut _5: &mut mem::maybe_uninit::MaybeUninit<T>;\n    let mut _6: mem::maybe_uninit::MaybeUninit<T>;\n    debug val => _2;\n    bb0: {\n        _1 = intrinsics::assert_mem_uninitialized_valid::<T>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_2);\n        _2 = mem::maybe_uninit::MaybeUninit::<T>::uninit() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = &mut _2;\n        _4 = mem::maybe_uninit::MaybeUninit::<T>::as_mut_ptr(move _5) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_5);\n        _3 = ptr::mut_ptr::<impl *mut T>::write_bytes(move _4, 1_u8, 1_usize) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = move _2;\n        _0 = mem::maybe_uninit::MaybeUninit::<T>::assume_init(move _6) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_6);\n        StorageDead(_2);\n        return;\n    }\n}\n",

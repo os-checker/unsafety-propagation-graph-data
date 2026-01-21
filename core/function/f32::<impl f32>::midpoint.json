@@ -3,7 +3,10 @@
   "safe": true,
   "callees": {},
   "adts": {},
-  "path": 1745,
+  "path": {
+    "type": "Local",
+    "path": "core::f32::<impl f32>::midpoint"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/f32.rs:1019:5: 1051:6",
   "src": "pub const fn midpoint(self, other: f32) -> f32 {\n        cfg_select! {\n            // Allow faster implementation that have known good 64-bit float\n            // implementations. Falling back to the branchy code on targets that don't\n            // have 64-bit hardware floats or buggy implementations.\n            // https://github.com/rust-lang/rust/pull/121062#issuecomment-2123408114\n            any(\n                target_arch = \"x86_64\",\n                target_arch = \"aarch64\",\n                all(any(target_arch = \"riscv32\", target_arch = \"riscv64\"), target_feature = \"d\"),\n                all(target_arch = \"loongarch64\", target_feature = \"d\"),\n                all(target_arch = \"arm\", target_feature = \"vfp2\"),\n                target_arch = \"wasm32\",\n                target_arch = \"wasm64\",\n            ) => {\n                ((self as f64 + other as f64) / 2.0) as f32\n            }\n            _ => {\n                const HI: f32 = f32::MAX / 2.;\n\n                let (a, b) = (self, other);\n                let abs_a = a.abs();\n                let abs_b = b.abs();\n\n                if abs_a <= HI && abs_b <= HI {\n                    // Overflow is impossible\n                    (a + b) / 2.\n                } else {\n                    (a / 2.) + (b / 2.)\n                }\n            }\n        }\n    }",
   "mir": "fn f32::<impl f32>::midpoint(_1: f32, _2: f32) -> f32 {\n    let mut _0: f32;\n    let mut _3: f64;\n    let mut _4: f64;\n    let mut _5: f64;\n    let mut _6: f64;\n    debug self => _1;\n    debug other => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = _1 as f64;\n        StorageLive(_6);\n        _6 = _2 as f64;\n        _4 = Add(move _5, move _6);\n        StorageDead(_6);\n        StorageDead(_5);\n        _3 = Div(move _4, 2f64);\n        StorageDead(_4);\n        _0 = move _3 as f32;\n        StorageDead(_3);\n        return;\n    }\n}\n",

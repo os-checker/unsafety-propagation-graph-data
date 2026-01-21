@@ -34,7 +34,10 @@
       "MutRef"
     ]
   },
-  "path": 2253,
+  "path": {
+    "type": "Local",
+    "path": "alloc::<vec::into_iter::IntoIter<T, A> as core::ops::Drop>::drop"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/into_iter.rs:493:5: 513:6",
   "src": "fn drop(&mut self) {\n        struct DropGuard<'a, T, A: Allocator>(&'a mut IntoIter<T, A>);\n\n        impl<T, A: Allocator> Drop for DropGuard<'_, T, A> {\n            fn drop(&mut self) {\n                unsafe {\n                    // `IntoIter::alloc` is not used anymore after this and will be dropped by RawVec\n                    let alloc = ManuallyDrop::take(&mut self.0.alloc);\n                    // RawVec handles deallocation\n                    let _ = RawVec::from_nonnull_in(self.0.buf, self.0.cap, alloc);\n                }\n            }\n        }\n\n        let guard = DropGuard(self);\n        // destroy the remaining elements\n        unsafe {\n            ptr::drop_in_place(guard.0.as_raw_mut_slice());\n        }\n        // now `guard` will be dropped and do the rest\n    }",
   "mir": "fn <vec::into_iter::IntoIter<T, A> as core::ops::Drop>::drop(_1: &mut vec::into_iter::IntoIter<T, A>) -> () {\n    let mut _0: ();\n    let  _2: <vec::into_iter::IntoIter<T, A> as core::ops::Drop>::drop::DropGuard<'_, T, A>;\n    let  _3: ();\n    let mut _4: *mut [T];\n    let mut _5: &mut vec::into_iter::IntoIter<T, A>;\n    debug self => _1;\n    debug guard => _2;\n    bb0: {\n        StorageLive(_2);\n        _2 = DropGuard(_1);\n        StorageLive(_4);\n        _5 = (_2.0: &mut vec::into_iter::IntoIter<T, A>);\n        _4 = vec::into_iter::IntoIter::<T, A>::as_raw_mut_slice(_5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = core::ptr::drop_in_place::<[T]>(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        drop(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_2);\n        return;\n    }\n}\n",

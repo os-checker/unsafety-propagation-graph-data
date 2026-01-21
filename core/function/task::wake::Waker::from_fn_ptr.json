@@ -39,7 +39,10 @@
       "Plain"
     ]
   },
-  "path": 17627,
+  "path": {
+    "type": "Local",
+    "path": "core::task::wake::Waker::from_fn_ptr"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/task/wake.rs:592:5: 608:6",
   "src": "pub const fn from_fn_ptr(f: fn()) -> Self {\n        // SAFETY: Unsafe is used for transmutes, pointer came from `fn()` so it\n        //         is sound to transmute it back to `fn()`.\n        static VTABLE: RawWakerVTable = unsafe {\n            RawWakerVTable::new(\n                |this| RawWaker::new(this, &VTABLE),\n                |this| transmute::<*const (), fn()>(this)(),\n                |this| transmute::<*const (), fn()>(this)(),\n                |_| {},\n            )\n        };\n        let raw = RawWaker::new(f as *const (), &VTABLE);\n\n        // SAFETY: `clone` is just a copy, `drop` is a no-op while `wake` and\n        //         `wake_by_ref` just call the function pointer.\n        unsafe { Self::from_raw(raw) }\n    }",
   "mir": "fn task::wake::Waker::from_fn_ptr(_1: fn()) -> task::wake::Waker {\n    let mut _0: task::wake::Waker;\n    let  _2: task::wake::RawWaker;\n    let mut _3: *const ();\n    let  _4: &task::wake::RawWakerVTable;\n    debug f => _1;\n    debug raw => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = _1 as *const ();\n        _4 = {alloc5679: &task::wake::RawWakerVTable};\n        _2 = task::wake::RawWaker::new(move _3, _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        _0 = task::wake::Waker::from_raw(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",

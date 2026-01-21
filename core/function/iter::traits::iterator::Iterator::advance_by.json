@@ -18,7 +18,10 @@
       "Plain"
     ]
   },
-  "path": "iter::traits::iterator::Iterator::advance_by",
+  "path": {
+    "type": "External",
+    "path": "iter::traits::iterator::Iterator::advance_by"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:297:5: 331:6",
   "src": "fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {\n        /// Helper trait to specialize `advance_by` via `try_fold` for `Sized` iterators.\n        trait SpecAdvanceBy {\n            fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>>;\n        }\n\n        impl<I: Iterator + ?Sized> SpecAdvanceBy for I {\n            default fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {\n                for i in 0..n {\n                    if self.next().is_none() {\n                        // SAFETY: `i` is always less than `n`.\n                        return Err(unsafe { NonZero::new_unchecked(n - i) });\n                    }\n                }\n                Ok(())\n            }\n        }\n\n        impl<I: Iterator> SpecAdvanceBy for I {\n            fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {\n                let Some(n) = NonZero::new(n) else {\n                    return Ok(());\n                };\n\n                let res = self.try_fold(n, |n, _| NonZero::new(n.get() - 1));\n\n                match res {\n                    None => Ok(()),\n                    Some(n) => Err(n),\n                }\n            }\n        }\n\n        self.spec_advance_by(n)\n    }",
   "mir": "fn iter::traits::iterator::Iterator::advance_by(_1: &mut Self, _2: usize) -> result::Result<(), num::nonzero::NonZero<usize>> {\n    let mut _0: result::Result<(), num::nonzero::NonZero<usize>>;\n    debug self => _1;\n    debug n => _2;\n    bb0: {\n        _0 = <Self as iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>::spec_advance_by(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",

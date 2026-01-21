@@ -60,7 +60,10 @@
       "Plain"
     ]
   },
-  "path": 14456,
+  "path": {
+    "type": "Local",
+    "path": "core::mem::conjure_zst"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/mem/mod.rs:1476:1: 1491:2",
   "src": "pub const unsafe fn conjure_zst<T>() -> T {\n    const_assert!(\n        size_of::<T>() == 0,\n        \"mem::conjure_zst invoked on a nonzero-sized type\",\n        \"mem::conjure_zst invoked on type {t}, which is not zero-sized\",\n        t: &str = stringify!(T)\n    );\n\n    // SAFETY: because the caller must guarantee that it's inhabited and zero-sized,\n    // there's nothing in the representation that needs to be set.\n    // `assume_init` calls `assert_inhabited`, so we don't need to here.\n    unsafe {\n        #[allow(clippy::uninit_assumed_init)]\n        MaybeUninit::uninit().assume_init()\n    }\n}",
   "mir": "fn mem::conjure_zst() -> T {\n    let mut _0: T;\n    let mut _1: bool;\n    let mut _2: bool;\n    let mut _3: usize;\n    let mut _4: !;\n    let mut _5: &str;\n    let mut _6: mem::maybe_uninit::MaybeUninit<T>;\n    bb0: {\n        StorageLive(_1);\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = mem::size_of::<T>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = Eq(move _3, 0_usize);\n        StorageDead(_3);\n        _1 = intrinsics::likely(move _2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _1) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_2);\n        StorageDead(_1);\n        StorageLive(_6);\n        _6 = mem::maybe_uninit::MaybeUninit::<T>::uninit() -> [return: bb5, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_2);\n        StorageLive(_5);\n        _5 = \"T\";\n        _4 = mem::conjure_zst::do_panic(move _5) -> unwind unreachable;\n    }\n    bb5: {\n        _0 = mem::maybe_uninit::MaybeUninit::<T>::assume_init(move _6) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        StorageDead(_6);\n        return;\n    }\n}\n",

@@ -50,7 +50,10 @@
       "Plain"
     ]
   },
-  "path": 1718,
+  "path": {
+    "type": "Local",
+    "path": "ostd::cpu::init_on_bsp"
+  },
   "span": "ostd/src/cpu/mod.rs:28:1: 43:2",
   "src": "pub(crate) unsafe fn init_on_bsp() {\n    let num_cpus = crate::arch::boot::smp::count_processors().unwrap_or(1);\n\n    // SAFETY:\n    // 1. We're in the boot context of the BSP and APs have not yet booted.\n    // 2. The number of CPUs is correct.\n    // 3. CPU-local storage has NOT been used.\n    unsafe { local::copy_bsp_for_ap(num_cpus as usize) };\n\n    // For this point on, CPU-local storage on all CPUs are safe to use.\n\n    // SAFETY:\n    // 1. We're in the boot context of the BSP.\n    // 2. The number of CPUs is correct.\n    unsafe { id::init_on_bsp(num_cpus) };\n}",
   "mir": "fn cpu::init_on_bsp() -> () {\n    let mut _0: ();\n    let  _1: u32;\n    let mut _2: core::option::Option<u32>;\n    let  _3: ();\n    let mut _4: usize;\n    let  _5: ();\n    debug num_cpus => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = arch::boot::smp::count_processors() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _1 = core::option::Option::<u32>::unwrap_or(move _2, 1_u32) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_2);\n        StorageLive(_4);\n        _4 = _1 as usize;\n        _3 = cpu::local::copy_bsp_for_ap(move _4) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_4);\n        _5 = cpu::id::init_on_bsp(_1) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        return;\n    }\n}\n",

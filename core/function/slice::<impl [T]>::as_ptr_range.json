@@ -28,7 +28,10 @@
       "Plain"
     ]
   },
-  "path": 1237,
+  "path": {
+    "type": "Local",
+    "path": "core::slice::<impl [T]>::as_ptr_range"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:792:5: 813:6",
   "src": "pub const fn as_ptr_range(&self) -> Range<*const T> {\n        let start = self.as_ptr();\n        // SAFETY: The `add` here is safe, because:\n        //\n        //   - Both pointers are part of the same object, as pointing directly\n        //     past the object also counts.\n        //\n        //   - The size of the slice is never larger than `isize::MAX` bytes, as\n        //     noted here:\n        //       - https://github.com/rust-lang/unsafe-code-guidelines/issues/102#issuecomment-473340447\n        //       - https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n        //       - https://doc.rust-lang.org/core/slice/fn.from_raw_parts.html#safety\n        //     (This doesn't seem normative yet, but the very same assumption is\n        //     made in many places, including the Index implementation of slices.)\n        //\n        //   - There is no wrapping around involved, as slices do not wrap past\n        //     the end of the address space.\n        //\n        // See the documentation of [`pointer::add`].\n        let end = unsafe { start.add(self.len()) };\n        start..end\n    }",
   "mir": "fn slice::<impl [T]>::as_ptr_range(_1: &[T]) -> ops::range::Range<*const T> {\n    let mut _0: ops::range::Range<*const T>;\n    let  _2: *const T;\n    let  _3: *const T;\n    let mut _4: usize;\n    debug self => _1;\n    debug start => _2;\n    debug end => _3;\n    bb0: {\n        _2 = slice::<impl [T]>::as_ptr(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = PtrMetadata(_1);\n        _3 = ptr::const_ptr::<impl *const T>::add(_2, move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = Range(_2, _3);\n        return;\n    }\n}\n",

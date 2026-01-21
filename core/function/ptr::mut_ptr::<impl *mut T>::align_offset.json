@@ -62,7 +62,10 @@
       "Plain"
     ]
   },
-  "path": 1038,
+  "path": {
+    "type": "Local",
+    "path": "core::ptr::mut_ptr::<impl *mut T>::align_offset"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mut_ptr.rs:1557:5: 1578:6",
   "src": "pub fn align_offset(self, align: usize) -> usize\n    where\n        T: Sized,\n    {\n        if !align.is_power_of_two() {\n            panic!(\"align_offset: align is not a power-of-two\");\n        }\n\n        // SAFETY: `align` has been checked to be a power of 2 above\n        let ret = unsafe { align_offset(self, align) };\n\n        // Inform Miri that we want to consider the resulting pointer to be suitably aligned.\n        #[cfg(miri)]\n        if ret != usize::MAX {\n            intrinsics::miri_promise_symbolic_alignment(\n                self.wrapping_add(ret).cast_const().cast(),\n                align,\n            );\n        }\n\n        ret\n    }",
   "mir": "fn ptr::mut_ptr::<impl *mut T>::align_offset(_1: *mut T, _2: usize) -> usize {\n    let mut _0: usize;\n    let mut _3: bool;\n    let  _4: !;\n    let mut _5: fmt::Arguments<'_>;\n    let mut _6: *const T;\n    debug self => _1;\n    debug align => _2;\n    debug ret => _0;\n    bb0: {\n        StorageLive(_3);\n        _3 = num::<impl usize>::is_power_of_two(_2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_6);\n        _6 = _1 as *const T;\n        _0 = ptr::align_offset::<T>(move _6, _2) -> [return: bb5, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_5);\n        _5 = fmt::Arguments::<'_>::from_str(\"align_offset: align is not a power-of-two\") -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        _4 = panicking::panic_fmt(move _5) -> unwind unreachable;\n    }\n    bb5: {\n        StorageDead(_6);\n        return;\n    }\n}\n",

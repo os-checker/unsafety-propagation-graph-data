@@ -21,7 +21,10 @@
       "Plain"
     ]
   },
-  "path": "fmt::Write::write_fmt",
+  "path": {
+    "type": "External",
+    "path": "fmt::Write::write_fmt"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:212:5: 242:6",
   "src": "fn write_fmt(&mut self, args: Arguments<'_>) -> Result {\n        // We use a specialization for `Sized` types to avoid an indirection\n        // through `&mut self`\n        trait SpecWriteFmt {\n            fn spec_write_fmt(self, args: Arguments<'_>) -> Result;\n        }\n\n        impl<W: Write + ?Sized> SpecWriteFmt for &mut W {\n            #[inline]\n            default fn spec_write_fmt(mut self, args: Arguments<'_>) -> Result {\n                if let Some(s) = args.as_statically_known_str() {\n                    self.write_str(s)\n                } else {\n                    write(&mut self, args)\n                }\n            }\n        }\n\n        impl<W: Write> SpecWriteFmt for &mut W {\n            #[inline]\n            fn spec_write_fmt(self, args: Arguments<'_>) -> Result {\n                if let Some(s) = args.as_statically_known_str() {\n                    self.write_str(s)\n                } else {\n                    write(self, args)\n                }\n            }\n        }\n\n        self.spec_write_fmt(args)\n    }",
   "mir": "fn fmt::Write::write_fmt(_1: &mut Self, _2: fmt::Arguments<'_>) -> result::Result<(), fmt::Error> {\n    let mut _0: result::Result<(), fmt::Error>;\n    debug self => _1;\n    debug args => _2;\n    bb0: {\n        _0 = <&mut Self as fmt::Write::write_fmt::SpecWriteFmt>::spec_write_fmt(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",

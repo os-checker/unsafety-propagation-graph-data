@@ -20,7 +20,10 @@
       "Unknown([Field(1, Ty { id: 1394, kind: Param(ParamTy { index: 1, name: \"Ret\" }) })])"
     ]
   },
-  "path": 13398,
+  "path": {
+    "type": "Local",
+    "path": "core::intrinsics::contract_check_ensures"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/intrinsics/mod.rs:2709:1: 2731:2",
   "src": "pub const fn contract_check_ensures<C: Fn(&Ret) -> bool + Copy, Ret>(\n    cond: Option<C>,\n    ret: Ret,\n) -> Ret {\n    const_eval_select!(\n        @capture[C: Fn(&Ret) -> bool + Copy, Ret] { cond: Option<C>, ret: Ret } -> Ret :\n        if const {\n            // Do nothing\n            ret\n        } else {\n            match cond {\n                crate::option::Option::Some(cond) => {\n                    if !cond(&ret) {\n                        // Emit no unwind panic in case this was a safety requirement.\n                        crate::panicking::panic_nounwind(\"failed ensures check\");\n                    }\n                },\n                crate::option::Option::None => {},\n            }\n            ret\n        }\n    )\n}",
   "mir": "fn intrinsics::contract_check_ensures(_1: option::Option<C>, _2: Ret) -> Ret {\n    let mut _0: Ret;\n    let mut _3: (option::Option<C>, Ret);\n    debug cond => _1;\n    debug ret => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = (_1, _2);\n        _0 = intrinsics::contract_check_ensures::runtime::<C, Ret>(move (_3.0: option::Option<C>), move (_3.1: Ret)) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        return;\n    }\n}\n",

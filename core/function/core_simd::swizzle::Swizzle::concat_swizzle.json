@@ -18,7 +18,10 @@
       "Plain"
     ]
   },
-  "path": "core_simd::swizzle::Swizzle::concat_swizzle",
+  "path": {
+    "type": "External",
+    "path": "core_simd::swizzle::Swizzle::concat_swizzle"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/swizzle.rs:122:5: 154:6",
   "src": "fn concat_swizzle<T, const M: usize>(first: Simd<T, M>, second: Simd<T, M>) -> Simd<T, N>\n    where\n        T: SimdElement,\n        LaneCount<N>: SupportedLaneCount,\n        LaneCount<M>: SupportedLaneCount,\n    {\n        // Safety: `first` and `second` are vectors, and the index is a const vector of u32.\n        unsafe {\n            core::intrinsics::simd::simd_shuffle(\n                first,\n                second,\n                const {\n                    let mut output = [0; N];\n                    let mut i = 0;\n                    while i < N {\n                        let index = Self::INDEX[i];\n                        assert!(index as u32 as usize == index);\n                        assert!(\n                            index < 2 * M,\n                            \"source element index exceeds input vector length\"\n                        );\n                        output[i] = index as u32;\n                        i += 1;\n                    }\n\n                    // The index list needs to be returned as a vector.\n                    #[repr(simd)]\n                    struct SimdShuffleIdx<const LEN: usize>([u32; LEN]);\n                    SimdShuffleIdx(output)\n                },\n            )\n        }\n    }",
   "mir": "fn core_simd::swizzle::Swizzle::concat_swizzle(_1: core_simd::vector::Simd<T, M>, _2: core_simd::vector::Simd<T, M>) -> core_simd::vector::Simd<T, N> {\n    let mut _0: core_simd::vector::Simd<T, N>;\n    debug first => _1;\n    debug second => _2;\n    bb0: {\n        _0 = intrinsics::simd::simd_shuffle::<core_simd::vector::Simd<T, M>, core_simd::swizzle::Swizzle::concat_swizzle::{constant#0}::SimdShuffleIdx<N>, core_simd::vector::Simd<T, N>>(_1, _2, <Self as core_simd::swizzle::Swizzle<N>>::concat_swizzle::<T, M>::{constant#0}) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        return;\n    }\n}\n",

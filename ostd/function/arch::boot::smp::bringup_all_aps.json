@@ -64,7 +64,10 @@
     }
   },
   "adts": {},
-  "path": 168,
+  "path": {
+    "type": "Local",
+    "path": "ostd::arch::boot::smp::bringup_all_aps"
+  },
   "span": "ostd/src/arch/x86/boot/smp.rs:117:1: 132:2",
   "src": "pub(crate) unsafe fn bringup_all_aps(info_ptr: *const PerApRawInfo, pt_ptr: Paddr, num_cpus: u32) {\n    // SAFETY: The code and data to boot AP is valid to write because\n    // there are no readers and we are the only writer at this point.\n    unsafe {\n        copy_ap_boot_code();\n        fill_boot_info_ptr(info_ptr);\n        fill_boot_pt_ptr(pt_ptr);\n    }\n\n    // SAFETY: We've properly prepared all the resources to boot APs.\n    if_tdx_enabled!({\n        unsafe { wake_up_aps_via_mailbox(num_cpus) };\n    } else {\n        unsafe { send_boot_ipis() };\n    });\n}",
   "mir": "fn arch::boot::smp::bringup_all_aps(_1: *const boot::smp::PerApRawInfo, _2: usize, _3: u32) -> () {\n    let mut _0: ();\n    let  _4: ();\n    let  _5: ();\n    let  _6: ();\n    let mut _7: bool;\n    let  _8: ();\n    let  _9: ();\n    debug info_ptr => _1;\n    debug pt_ptr => _2;\n    debug num_cpus => _3;\n    bb0: {\n        _4 = arch::boot::smp::copy_ap_boot_code() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _5 = arch::boot::smp::fill_boot_info_ptr(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _6 = arch::boot::smp::fill_boot_pt_ptr(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageLive(_7);\n        _7 = tdx_guest::tdx_is_enabled() -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        switchInt(move _7) -> [0: bb7, otherwise: bb5];\n    }\n    bb5: {\n        _8 = arch::boot::smp::wake_up_aps_via_mailbox(_3) -> [return: bb6, unwind unreachable];\n    }\n    bb6: {\n        goto -> bb8;\n    }\n    bb7: {\n        _9 = arch::boot::smp::send_boot_ipis() -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_7);\n        return;\n    }\n}\n",

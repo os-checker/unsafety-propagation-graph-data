@@ -18,7 +18,10 @@
       "Plain"
     ]
   },
-  "path": 4454,
+  "path": {
+    "type": "Local",
+    "path": "core::alloc::layout::Layout::max_size_for_align"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/alloc/layout.rs:77:5: 96:6",
   "src": "const fn max_size_for_align(align: Alignment) -> usize {\n        // (power-of-two implies align != 0.)\n\n        // Rounded up size is:\n        //   size_rounded_up = (size + align - 1) & !(align - 1);\n        //\n        // We know from above that align != 0. If adding (align - 1)\n        // does not overflow, then rounding up will be fine.\n        //\n        // Conversely, &-masking with !(align - 1) will subtract off\n        // only low-order-bits. Thus if overflow occurs with the sum,\n        // the &-mask cannot subtract enough to undo that overflow.\n        //\n        // Above implies that checking for summation overflow is both\n        // necessary and sufficient.\n\n        // SAFETY: the maximum possible alignment is `isize::MAX + 1`,\n        // so the subtraction cannot overflow.\n        unsafe { unchecked_sub(isize::MAX as usize + 1, align.as_usize()) }\n    }",
   "mir": "fn alloc::layout::Layout::max_size_for_align(_1: ptr::alignment::Alignment) -> usize {\n    let mut _0: usize;\n    let mut _2: usize;\n    let mut _3: usize;\n    let mut _4: (usize, bool);\n    let mut _5: usize;\n    debug align => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _3 = num::<impl isize>::MAX as usize;\n        _4 = CheckedAdd(_3, 1_usize);\n        assert(!move (_4.1: bool), \"attempt to compute `{} + {}`, which would overflow\", move _3, 1_usize) -> [success: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = move (_4.0: usize);\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = ptr::alignment::Alignment::as_usize(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        _0 = SubUnchecked(move _2, move _5);\n        StorageDead(_5);\n        StorageDead(_2);\n        return;\n    }\n}\n",

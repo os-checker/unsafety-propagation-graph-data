@@ -39,7 +39,10 @@
       "Plain"
     ]
   },
-  "path": 14429,
+  "path": {
+    "type": "Local",
+    "path": "core::mem::maybe_uninit::MaybeUninit::<T>::assume_init"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/mem/maybe_uninit.rs:704:5: 713:6",
   "src": "pub const unsafe fn assume_init(self) -> T {\n        // SAFETY: the caller must guarantee that `self` is initialized.\n        // This also means that `self` must be a `value` variant.\n        unsafe {\n            intrinsics::assert_inhabited::<T>();\n            // We do this via a raw ptr read instead of `ManuallyDrop::into_inner` so that there's\n            // no trace of `ManuallyDrop` in Miri's error messages here.\n            (&raw const self.value).cast::<T>().read()\n        }\n    }",
   "mir": "fn mem::maybe_uninit::MaybeUninit::<T>::assume_init(_1: mem::maybe_uninit::MaybeUninit<T>) -> T {\n    let mut _0: T;\n    let  _2: ();\n    let mut _3: *const T;\n    let mut _4: *const mem::manually_drop::ManuallyDrop<T>;\n    debug self => _1;\n    bb0: {\n        _2 = intrinsics::assert_inhabited::<T>() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &raw const (_1.1: mem::manually_drop::ManuallyDrop<T>);\n        _3 = ptr::const_ptr::<impl *const mem::manually_drop::ManuallyDrop<T>>::cast::<T>(move _4) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_4);\n        _0 = ptr::const_ptr::<impl *const T>::read(move _3) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_3);\n        return;\n    }\n}\n",

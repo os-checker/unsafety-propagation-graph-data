@@ -38,7 +38,10 @@
       "Plain"
     ]
   },
-  "path": 4286,
+  "path": {
+    "type": "Local",
+    "path": "std::<sys::sync::once::futex::CompletionGuard<'a> as core::ops::Drop>::drop"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/sync/once/futex.rs:58:5: 65:6",
   "src": "fn drop(&mut self) {\n        // Use release ordering to propagate changes to all threads checking\n        // up on the Once. `futex_wake_all` does its own synchronization, hence\n        // we do not need `AcqRel`.\n        if self.state_and_queued.swap(self.set_state_on_drop_to, Release) & QUEUED != 0 {\n            futex_wake_all(self.state_and_queued);\n        }\n    }",
   "mir": "fn <sys::sync::once::futex::CompletionGuard<'a> as core::ops::Drop>::drop(_1: &mut sys::sync::once::futex::CompletionGuard<'_>) -> () {\n    let mut _0: ();\n    let mut _2: u32;\n    let mut _3: u32;\n    let mut _4: u32;\n    let mut _5: core::sync::atomic::Ordering;\n    let  _6: ();\n    let mut _7: &core::sync::atomic::AtomicU32;\n    let mut _8: &core::sync::atomic::AtomicU32;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        _7 = ((*_1).0: &core::sync::atomic::AtomicU32);\n        StorageLive(_4);\n        _4 = ((*_1).1: u32);\n        StorageLive(_5);\n        _5 = core::sync::atomic::Ordering::Release;\n        _3 = core::sync::atomic::AtomicU32::swap(_7, move _4, move _5) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _2 = BitAnd(move _3, sys::sync::once::futex::QUEUED);\n        StorageDead(_3);\n        switchInt(move _2) -> [0: bb4, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_2);\n        _8 = ((*_1).0: &core::sync::atomic::AtomicU32);\n        _6 = sys::pal::unix::futex::futex_wake_all(_8) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        goto -> bb5;\n    }\n    bb4: {\n        StorageDead(_2);\n        goto -> bb5;\n    }\n    bb5: {\n        return;\n    }\n}\n",

@@ -41,7 +41,10 @@
       "Plain"
     ]
   },
-  "path": 2166,
+  "path": {
+    "type": "Local",
+    "path": "alloc::sync::Weak::<T, A>::inner"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/sync.rs:3325:5: 3335:6",
   "src": "fn inner(&self) -> Option<WeakInner<'_>> {\n        let ptr = self.ptr.as_ptr();\n        if is_dangling(ptr) {\n            None\n        } else {\n            // We are careful to *not* create a reference covering the \"data\" field, as\n            // the field may be mutated concurrently (for example, if the last `Arc`\n            // is dropped, the data field will be dropped in-place).\n            Some(unsafe { WeakInner { strong: &(*ptr).strong, weak: &(*ptr).weak } })\n        }\n    }",
   "mir": "fn sync::Weak::<T, A>::inner(_1: &sync::Weak<T, A>) -> core::option::Option<sync::WeakInner<'_>> {\n    let mut _0: core::option::Option<sync::WeakInner<'_>>;\n    let  _2: *mut sync::ArcInner<T>;\n    let mut _3: core::ptr::NonNull<sync::ArcInner<T>>;\n    let mut _4: bool;\n    let mut _5: *const sync::ArcInner<T>;\n    let mut _6: sync::WeakInner<'_>;\n    let  _7: &core::sync::atomic::AtomicUsize;\n    let  _8: &core::sync::atomic::AtomicUsize;\n    debug self => _1;\n    debug ptr => _2;\n    bb0: {\n        StorageLive(_3);\n        _3 = ((*_1).0: core::ptr::NonNull<sync::ArcInner<T>>);\n        _2 = core::ptr::NonNull::<sync::ArcInner<T>>::as_ptr(move _3) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = _2 as *const sync::ArcInner<T>;\n        _4 = rc::is_dangling::<sync::ArcInner<T>>(move _5) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        switchInt(move _4) -> [0: bb4, otherwise: bb3];\n    }\n    bb3: {\n        StorageDead(_5);\n        _0 = core::option::Option::None;\n        goto -> bb5;\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageLive(_6);\n        _7 = &((*_2).0: core::sync::atomic::AtomicUsize);\n        _8 = &((*_2).1: core::sync::atomic::AtomicUsize);\n        _6 = WeakInner(_8, _7);\n        _0 = core::option::Option::Some(move _6);\n        StorageDead(_6);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_4);\n        return;\n    }\n}\n",

@@ -80,7 +80,10 @@
       "Plain"
     ]
   },
-  "path": 2784,
+  "path": {
+    "type": "Local",
+    "path": "ostd::task::preempt::halt_cpu"
+  },
   "span": "ostd/src/task/preempt/mod.rs:23:1: 37:2",
   "src": "pub fn halt_cpu() {\n    crate::task::atomic_mode::might_sleep();\n\n    let irq_guard = crate::irq::disable_local();\n\n    if cpu_local::need_preempt() {\n        drop(irq_guard);\n    } else {\n        core::mem::forget(irq_guard);\n        // IRQs were previously enabled (checked by `might_sleep`). So we can re-enable them now.\n        crate::arch::irq::enable_local_and_halt();\n    }\n\n    super::scheduler::might_preempt();\n}",
   "mir": "fn task::preempt::halt_cpu() -> () {\n    let mut _0: ();\n    let  _1: ();\n    let  _2: irq::guard::DisabledLocalIrqGuard;\n    let mut _3: bool;\n    let  _4: ();\n    let  _5: ();\n    let  _6: ();\n    let  _7: ();\n    debug irq_guard => _2;\n    bb0: {\n        _1 = task::atomic_mode::might_sleep() -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = irq::guard::disable_local() -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_3);\n        _3 = task::preempt::cpu_local::need_preempt() -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        switchInt(move _3) -> [0: bb6, otherwise: bb4];\n    }\n    bb4: {\n        _4 = core::mem::drop::<irq::guard::DisabledLocalIrqGuard>(_2) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        goto -> bb8;\n    }\n    bb6: {\n        _5 = core::mem::forget::<irq::guard::DisabledLocalIrqGuard>(_2) -> [return: bb7, unwind unreachable];\n    }\n    bb7: {\n        _6 = arch::irq::ops::enable_local_and_halt() -> [return: bb8, unwind unreachable];\n    }\n    bb8: {\n        StorageDead(_3);\n        _7 = task::scheduler::might_preempt() -> [return: bb9, unwind unreachable];\n    }\n    bb9: {\n        return;\n    }\n}\n",

@@ -69,7 +69,10 @@
       "Plain"
     ]
   },
-  "path": 1734,
+  "path": {
+    "type": "Local",
+    "path": "alloc::rc::Rc::<T, A>::clone_from_ref_in"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/rc.rs:1345:5: 1358:6",
   "src": "pub fn clone_from_ref_in(value: &T, alloc: A) -> Rc<T, A> {\n        // `in_progress` drops the allocation if we panic before finishing initializing it.\n        let mut in_progress: UniqueRcUninit<T, A> = UniqueRcUninit::new(value, alloc);\n\n        // Initialize with clone of value.\n        let initialized_clone = unsafe {\n            // Clone. If the clone panics, `in_progress` will be dropped and clean up.\n            value.clone_to_uninit(in_progress.data_ptr().cast());\n            // Cast type of pointer, now that it is initialized.\n            in_progress.into_rc()\n        };\n\n        initialized_clone\n    }",
   "mir": "fn rc::Rc::<T, A>::clone_from_ref_in(_1: &T, _2: A) -> rc::Rc<T, A> {\n    let mut _0: rc::Rc<T, A>;\n    let mut _3: rc::UniqueRcUninit<T, A>;\n    let  _4: ();\n    let mut _5: *mut u8;\n    let mut _6: *mut T;\n    let mut _7: &mut rc::UniqueRcUninit<T, A>;\n    let mut _8: rc::UniqueRcUninit<T, A>;\n    debug value => _1;\n    debug alloc => _2;\n    debug in_progress => _3;\n    debug initialized_clone => _0;\n    bb0: {\n        StorageLive(_3);\n        _3 = rc::UniqueRcUninit::<T, A>::new(_1, _2) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = &mut _3;\n        _6 = rc::UniqueRcUninit::<T, A>::data_ptr(move _7) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_7);\n        _5 = core::ptr::mut_ptr::<impl *mut T>::cast::<u8>(move _6) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        StorageDead(_6);\n        _4 = <T as core::clone::CloneToUninit>::clone_to_uninit(_1, move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageLive(_8);\n        _8 = move _3;\n        _0 = rc::UniqueRcUninit::<T, A>::into_rc(move _8) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        StorageDead(_8);\n        StorageDead(_3);\n        return;\n    }\n}\n",

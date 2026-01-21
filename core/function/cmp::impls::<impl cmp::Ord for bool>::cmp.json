@@ -18,7 +18,10 @@
       "Plain"
     ]
   },
-  "path": 1403,
+  "path": {
+    "type": "Local",
+    "path": "core::cmp::impls::<impl cmp::Ord for bool>::cmp"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2017:9: 2028:10",
   "src": "fn cmp(&self, other: &bool) -> Ordering {\n            // Casting to i8's and converting the difference to an Ordering generates\n            // more optimal assembly.\n            // See <https://github.com/rust-lang/rust/issues/66780> for more info.\n            match (*self as i8) - (*other as i8) {\n                -1 => Less,\n                0 => Equal,\n                1 => Greater,\n                // SAFETY: bool as i8 returns 0 or 1, so the difference can't be anything else\n                _ => unsafe { unreachable_unchecked() },\n            }\n        }",
   "mir": "fn cmp::impls::<impl cmp::Ord for bool>::cmp(_1: &bool, _2: &bool) -> cmp::Ordering {\n    let mut _0: cmp::Ordering;\n    let mut _3: i8;\n    let mut _4: i8;\n    let mut _5: bool;\n    let mut _6: i8;\n    let mut _7: bool;\n    let mut _8: (i8, bool);\n    let mut _9: !;\n    debug self => _1;\n    debug other => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = (*_1);\n        _4 = move _5 as i8;\n        StorageDead(_5);\n        StorageLive(_6);\n        StorageLive(_7);\n        _7 = (*_2);\n        _6 = move _7 as i8;\n        StorageDead(_7);\n        _8 = CheckedSub(_4, _6);\n        assert(!move (_8.1: bool), \"attempt to compute `{} - {}`, which would overflow\", move _4, move _6) -> [success: bb1, unwind unreachable];\n    }\n    bb1: {\n        _3 = move (_8.0: i8);\n        StorageDead(_6);\n        StorageDead(_4);\n        switchInt(_3) -> [255: bb5, 0: bb4, 1: bb3, otherwise: bb2];\n    }\n    bb2: {\n        _9 = hint::unreachable_unchecked() -> unwind unreachable;\n    }\n    bb3: {\n        _0 = cmp::Ordering::Greater;\n        goto -> bb6;\n    }\n    bb4: {\n        _0 = cmp::Ordering::Equal;\n        goto -> bb6;\n    }\n    bb5: {\n        _0 = cmp::Ordering::Less;\n        goto -> bb6;\n    }\n    bb6: {\n        StorageDead(_3);\n        return;\n    }\n}\n",

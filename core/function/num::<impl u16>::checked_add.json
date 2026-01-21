@@ -18,7 +18,10 @@
       "Plain"
     ]
   },
-  "path": 3438,
+  "path": {
+    "type": "Local",
+    "path": "core::num::<impl u16>::checked_add"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/uint_macros.rs:716:9: 730:10",
   "src": "pub const fn checked_add(self, rhs: Self) -> Option<Self> {\n            // This used to use `overflowing_add`, but that means it ends up being\n            // a `wrapping_add`, losing some optimization opportunities. Notably,\n            // phrasing it this way helps `.checked_add(1)` optimize to a check\n            // against `MAX` and a `add nuw`.\n            // Per <https://github.com/rust-lang/rust/pull/124114#issuecomment-2066173305>,\n            // LLVM is happy to re-form the intrinsic later if useful.\n\n            if intrinsics::unlikely(intrinsics::add_with_overflow(self, rhs).1) {\n                None\n            } else {\n                // SAFETY: Just checked it doesn't overflow\n                Some(unsafe { intrinsics::unchecked_add(self, rhs) })\n            }\n        }",
   "mir": "fn num::<impl u16>::checked_add(_1: u16, _2: u16) -> option::Option<u16> {\n    let mut _0: option::Option<u16>;\n    let mut _3: bool;\n    let mut _4: bool;\n    let mut _5: (u16, bool);\n    let mut _6: u16;\n    debug self => _1;\n    debug rhs => _2;\n    bb0: {\n        StorageLive(_3);\n        StorageLive(_4);\n        StorageLive(_5);\n        _5 = CheckedAdd(_1, _2);\n        _4 = (_5.1: bool);\n        _3 = intrinsics::unlikely(move _4) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        switchInt(move _3) -> [0: bb3, otherwise: bb2];\n    }\n    bb2: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _0 = option::Option::None;\n        goto -> bb4;\n    }\n    bb3: {\n        StorageDead(_5);\n        StorageDead(_4);\n        StorageLive(_6);\n        _6 = AddUnchecked(_1, _2);\n        _0 = option::Option::Some(move _6);\n        StorageDead(_6);\n        goto -> bb4;\n    }\n    bb4: {\n        StorageDead(_3);\n        return;\n    }\n}\n",

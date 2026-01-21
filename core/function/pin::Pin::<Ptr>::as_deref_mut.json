@@ -31,7 +31,10 @@
       "MutRef"
     ]
   },
-  "path": 15901,
+  "path": {
+    "type": "Local",
+    "path": "core::pin::Pin::<Ptr>::as_deref_mut"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/pin.rs:1430:5: 1459:6",
   "src": "pub const fn as_deref_mut(self: Pin<&mut Self>) -> Pin<&mut Ptr::Target>\n    where\n        Ptr: [const] DerefMut,\n    {\n        // SAFETY: What we're asserting here is that going from\n        //\n        //     Pin<&mut Pin<Ptr>>\n        //\n        // to\n        //\n        //     Pin<&mut Ptr::Target>\n        //\n        // is safe.\n        //\n        // We need to ensure that two things hold for that to be the case:\n        //\n        // 1) Once we give out a `Pin<&mut Ptr::Target>`, a `&mut Ptr::Target` will not be given out.\n        // 2) By giving out a `Pin<&mut Ptr::Target>`, we do not risk violating\n        // `Pin<&mut Pin<Ptr>>`\n        //\n        // The existence of `Pin<Ptr>` is sufficient to guarantee #1: since we already have a\n        // `Pin<Ptr>`, it must already uphold the pinning guarantees, which must mean that\n        // `Pin<&mut Ptr::Target>` does as well, since `Pin::as_mut` is safe. We do not have to rely\n        // on the fact that `Ptr` is _also_ pinned.\n        //\n        // For #2, we need to ensure that code given a `Pin<&mut Ptr::Target>` cannot cause the\n        // `Pin<Ptr>` to move? That is not possible, since `Pin<&mut Ptr::Target>` no longer retains\n        // any access to the `Ptr` itself, much less the `Pin<Ptr>`.\n        unsafe { self.get_unchecked_mut() }.as_mut()\n    }",
   "mir": "fn pin::Pin::<Ptr>::as_deref_mut(_1: pin::Pin<&mut pin::Pin<Ptr>>) -> pin::Pin<&mut <Ptr as ops::deref::Deref>::Target> {\n    let mut _0: pin::Pin<&mut <Ptr as ops::deref::Deref>::Target>;\n    let mut _2: &mut pin::Pin<Ptr>;\n    debug self => _1;\n    bb0: {\n        _2 = pin::Pin::<&mut pin::Pin<Ptr>>::get_unchecked_mut(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _0 = pin::Pin::<Ptr>::as_mut(_2) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        return;\n    }\n}\n",

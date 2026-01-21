@@ -3,7 +3,10 @@
   "safe": true,
   "callees": {},
   "adts": {},
-  "path": 14466,
+  "path": {
+    "type": "Local",
+    "path": "core::mem::replace"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/mem/mod.rs:879:1: 897:2",
   "src": "pub const fn replace<T>(dest: &mut T, src: T) -> T {\n    // It may be tempting to use `swap` to avoid `unsafe` here. Don't!\n    // The compiler optimizes the implementation below to two `memcpy`s\n    // while `swap` would require at least three. See PR#83022 for details.\n\n    // SAFETY: We read from `dest` but directly write `src` into it afterwards,\n    // such that the old value is not duplicated. Nothing is dropped and\n    // nothing here can panic.\n    unsafe {\n        // Ideally we wouldn't use the intrinsics here, but going through the\n        // `ptr` methods introduces two unnecessary UbChecks, so until we can\n        // remove those for pointers that come from references, this uses the\n        // intrinsics instead so this stays very cheap in MIR (and debug).\n\n        let result = crate::intrinsics::read_via_copy(dest);\n        crate::intrinsics::write_via_move(dest, src);\n        result\n    }\n}",
   "mir": "fn mem::replace(_1: &mut T, _2: T) -> T {\n    let mut _0: T;\n    let mut _3: *const T;\n    let mut _4: *mut T;\n    debug dest => _1;\n    debug src => _2;\n    debug result => _0;\n    bb0: {\n        StorageLive(_3);\n        _3 = &raw const (*_1);\n        _0 = (*_3);\n        StorageDead(_3);\n        StorageLive(_4);\n        _4 = &raw mut (*_1);\n        (*_4) = _2;\n        StorageDead(_4);\n        return;\n    }\n}\n",

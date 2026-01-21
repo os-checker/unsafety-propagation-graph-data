@@ -18,7 +18,10 @@
       "Ref"
     ]
   },
-  "path": 12848,
+  "path": {
+    "type": "Local",
+    "path": "core::ffi::c_str::CStr::from_bytes_with_nul_unchecked"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ffi/c_str.rs:388:5: 418:6",
   "src": "pub const unsafe fn from_bytes_with_nul_unchecked(bytes: &[u8]) -> &CStr {\n        const_eval_select!(\n            @capture { bytes: &[u8] } -> &CStr:\n            if const {\n                // Saturating so that an empty slice panics in the assert with a good\n                // message, not here due to underflow.\n                let mut i = bytes.len().saturating_sub(1);\n                assert!(!bytes.is_empty() && bytes[i] == 0, \"input was not nul-terminated\");\n\n                // Ending nul byte exists, skip to the rest.\n                while i != 0 {\n                    i -= 1;\n                    let byte = bytes[i];\n                    assert!(byte != 0, \"input contained interior nul\");\n                }\n\n                // SAFETY: See runtime cast comment below.\n                unsafe { &*(bytes as *const [u8] as *const CStr) }\n            } else {\n                // Chance at catching some UB at runtime with debug builds.\n                debug_assert!(!bytes.is_empty() && bytes[bytes.len() - 1] == 0);\n\n                // SAFETY: Casting to CStr is safe because its internal representation\n                // is a [u8] too (safe only inside std).\n                // Dereferencing the obtained pointer is safe because it comes from a\n                // reference. Making a reference is then safe because its lifetime\n                // is bound by the lifetime of the given `bytes`.\n                unsafe { &*(bytes as *const [u8] as *const CStr) }\n            }\n        )\n    }",
   "mir": "fn ffi::c_str::CStr::from_bytes_with_nul_unchecked(_1: &[u8]) -> &ffi::c_str::CStr {\n    let mut _0: &ffi::c_str::CStr;\n    let mut _2: (&[u8],);\n    debug bytes => _1;\n    bb0: {\n        StorageLive(_2);\n        _2 = (_1);\n        _0 = ffi::c_str::CStr::from_bytes_with_nul_unchecked::runtime(move (_2.0: &[u8])) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_2);\n        return;\n    }\n}\n",

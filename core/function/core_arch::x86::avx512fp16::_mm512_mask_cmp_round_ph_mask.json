@@ -7,7 +7,10 @@
       "Plain"
     ]
   },
-  "path": 10466,
+  "path": {
+    "type": "Local",
+    "path": "core::core_arch::x86::avx512fp16::_mm512_mask_cmp_round_ph_mask"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../stdarch/crates/core_arch/src/x86/avx512fp16.rs:829:1: 853:2",
   "src": "pub fn _mm512_mask_cmp_round_ph_mask<const IMM5: i32, const SAE: i32>(\n    k1: __mmask32,\n    a: __m512h,\n    b: __m512h,\n) -> __mmask32 {\n    unsafe {\n        static_assert_uimm_bits!(IMM5, 5);\n        static_assert_sae!(SAE);\n        if SAE == _MM_FROUND_NO_EXC {\n            let dst: __mmask32;\n            asm!(\n                \"vcmpph {k} {{{k1}}}, {a}, {b}, {{sae}}, {imm8}\",\n                k = lateout(kreg) dst,\n                k1 = in(kreg) k1,\n                a = in(zmm_reg) a,\n                b = in(zmm_reg) b,\n                imm8 = const IMM5,\n                options(pure, nomem, nostack)\n            );\n            dst\n        } else {\n            cmp_asm!(__mmask32, k1, zmm_reg, a, b)\n        }\n    }\n}",
   "mir": "fn core_arch::x86::avx512fp16::_mm512_mask_cmp_round_ph_mask(_1: u32, _2: core_arch::x86::__m512h, _3: core_arch::x86::__m512h) -> u32 {\n    let mut _0: u32;\n    let mut _4: bool;\n    let  _5: u32;\n    let  _6: u32;\n    debug k1 => _1;\n    debug a => _2;\n    debug b => _3;\n    debug dst => _5;\n    debug dst => _6;\n    bb0: {\n        StorageLive(_4);\n        _4 = Eq(SAE, core_arch::x86::sse41::_MM_FROUND_NO_EXC);\n        switchInt(move _4) -> [0: bb3, otherwise: bb1];\n    }\n    bb1: {\n        StorageLive(_5);\n        InlineAsm -> [goto: bb2, unwind unreachable];\n    }\n    bb2: {\n        _0 = _5;\n        StorageDead(_5);\n        goto -> bb5;\n    }\n    bb3: {\n        StorageLive(_6);\n        InlineAsm -> [goto: bb4, unwind unreachable];\n    }\n    bb4: {\n        _0 = _6;\n        StorageDead(_6);\n        goto -> bb5;\n    }\n    bb5: {\n        StorageDead(_4);\n        return;\n    }\n}\n",

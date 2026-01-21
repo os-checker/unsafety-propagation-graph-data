@@ -48,7 +48,10 @@
       "Ref"
     ]
   },
-  "path": 12849,
+  "path": {
+    "type": "Local",
+    "path": "core::ffi::c_str::CStr::from_ptr"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ffi/c_str.rs:253:5: 265:6",
   "src": "pub const unsafe fn from_ptr<'a>(ptr: *const c_char) -> &'a CStr {\n        // SAFETY: The caller has provided a pointer that points to a valid C\n        // string with a NUL terminator less than `isize::MAX` from `ptr`.\n        let len = unsafe { strlen(ptr) };\n\n        // SAFETY: The caller has provided a valid pointer with length less than\n        // `isize::MAX`, so `from_raw_parts` is safe. The content remains valid\n        // and doesn't change for the lifetime of the returned `CStr`. This\n        // means the call to `from_bytes_with_nul_unchecked` is correct.\n        //\n        // The cast from c_char to u8 is ok because a c_char is always one byte.\n        unsafe { Self::from_bytes_with_nul_unchecked(slice::from_raw_parts(ptr.cast(), len + 1)) }\n    }",
   "mir": "fn ffi::c_str::CStr::from_ptr(_1: *const i8) -> &ffi::c_str::CStr {\n    let mut _0: &ffi::c_str::CStr;\n    let  _2: usize;\n    let  _3: &[u8];\n    let mut _4: *const u8;\n    let mut _5: usize;\n    let mut _6: (usize, bool);\n    debug ptr => _1;\n    debug len => _2;\n    bb0: {\n        _2 = ffi::c_str::strlen(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageLive(_4);\n        _4 = ptr::const_ptr::<impl *const i8>::cast::<u8>(_1) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageLive(_5);\n        _6 = CheckedAdd(_2, 1_usize);\n        assert(!move (_6.1: bool), \"attempt to compute `{} + {}`, which would overflow\", _2, 1_usize) -> [success: bb3, unwind unreachable];\n    }\n    bb3: {\n        _5 = move (_6.0: usize);\n        _3 = slice::raw::from_raw_parts::<'_, u8>(move _4, move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_4);\n        _0 = ffi::c_str::CStr::from_bytes_with_nul_unchecked(_3) -> [return: bb5, unwind unreachable];\n    }\n    bb5: {\n        return;\n    }\n}\n",

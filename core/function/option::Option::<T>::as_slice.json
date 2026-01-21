@@ -51,7 +51,10 @@
       "Ref"
     ]
   },
-  "path": 15729,
+  "path": {
+    "type": "Local",
+    "path": "core::option::Option::<T>::as_slice"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:844:5: 861:6",
   "src": "pub const fn as_slice(&self) -> &[T] {\n        // SAFETY: When the `Option` is `Some`, we're using the actual pointer\n        // to the payload, with a length of 1, so this is equivalent to\n        // `slice::from_ref`, and thus is safe.\n        // When the `Option` is `None`, the length used is 0, so to be safe it\n        // just needs to be aligned, which it is because `&self` is aligned and\n        // the offset used is a multiple of alignment.\n        //\n        // Here we assume that `offset_of!` always returns an offset to an\n        // in-bounds and correctly aligned position for a `T` (even if in the\n        // `None` case it's just padding).\n        unsafe {\n            slice::from_raw_parts(\n                (self as *const Self).byte_add(core::mem::offset_of!(Self, Some.0)).cast(),\n                self.len(),\n            )\n        }\n    }",
   "mir": "fn option::Option::<T>::as_slice(_1: &option::Option<T>) -> &[T] {\n    let mut _0: &[T];\n    let mut _2: *const T;\n    let mut _3: *const option::Option<T>;\n    let mut _4: *const option::Option<T>;\n    let mut _5: usize;\n    debug self => _1;\n    bb0: {\n        StorageLive(_2);\n        StorageLive(_3);\n        StorageLive(_4);\n        _4 = &raw const (*_1);\n        _3 = ptr::const_ptr::<impl *const option::Option<T>>::byte_add(move _4, option::Option::<T>::as_slice::{constant#0}) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        StorageDead(_4);\n        _2 = ptr::const_ptr::<impl *const option::Option<T>>::cast::<T>(move _3) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        StorageLive(_5);\n        _5 = option::Option::<T>::len(_1) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        _0 = slice::raw::from_raw_parts::<'_, T>(move _2, move _5) -> [return: bb4, unwind unreachable];\n    }\n    bb4: {\n        StorageDead(_5);\n        StorageDead(_2);\n        return;\n    }\n}\n",

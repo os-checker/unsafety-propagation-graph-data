@@ -45,7 +45,10 @@
       "Plain"
     ]
   },
-  "path": 12407,
+  "path": {
+    "type": "Local",
+    "path": "core::core_simd::masks::mask_impl::Mask::<T, N>::to_bitmask_impl"
+  },
   "span": "/home/gh-zjp-CN/.rustup/toolchains/nightly-2025-12-06-aarch64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/../../portable-simd/crates/core_simd/src/masks/full_masks.rs:143:5: 158:6",
   "src": "unsafe fn to_bitmask_impl<U: ReverseBits, const M: usize>(self) -> U\n    where\n        LaneCount<M>: SupportedLaneCount,\n    {\n        let resized = self.to_int().resize::<M>(T::FALSE);\n\n        // Safety: `resized` is an integer vector with length M, which must match T\n        let bitmask: U = unsafe { core::intrinsics::simd::simd_bitmask(resized) };\n\n        // LLVM assumes bit order should match endianness\n        if cfg!(target_endian = \"big\") {\n            bitmask.reverse_bits(M)\n        } else {\n            bitmask\n        }\n    }",
   "mir": "fn core_simd::masks::mask_impl::Mask::<T, N>::to_bitmask_impl(_1: core_simd::masks::mask_impl::Mask<T, N>) -> U {\n    let mut _0: U;\n    let  _2: core_simd::vector::Simd<T, M>;\n    let mut _3: core_simd::vector::Simd<T, N>;\n    debug self => _1;\n    debug resized => _2;\n    debug bitmask => _0;\n    bb0: {\n        StorageLive(_3);\n        _3 = core_simd::masks::mask_impl::Mask::<T, N>::to_int(_1) -> [return: bb1, unwind unreachable];\n    }\n    bb1: {\n        _2 = core_simd::swizzle::<impl core_simd::vector::Simd<T, N>>::resize::<M>(move _3, <T as core_simd::masks::sealed::Sealed>::FALSE) -> [return: bb2, unwind unreachable];\n    }\n    bb2: {\n        StorageDead(_3);\n        _0 = intrinsics::simd::simd_bitmask::<core_simd::vector::Simd<T, M>, U>(_2) -> [return: bb3, unwind unreachable];\n    }\n    bb3: {\n        return;\n    }\n}\n",
