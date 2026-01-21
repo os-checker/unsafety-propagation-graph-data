@@ -1,5 +1,5 @@
 {
   "name": "core::fmt::num::div_rem_1e16",
   "span": "$library/core/src/fmt/num.rs:849:1: 849:40",
-  "src": "fn div_rem_1e16(n: u128) -> (u128, u64)"
+  "src": "fn div_rem_1e16(n: u128) -> (u128, u64) {\n    const D: u128 = 1_0000_0000_0000_0000;\n    // The check inlines well with the caller flow.\n    if n < D {\n        return (0, n as u64);\n    }\n\n    // These constant values are computed with the CHOOSE_MULTIPLIER procedure\n    // from the Granlund & Montgomery paper, using N=128, prec=128 and d=1E16.\n    const M_HIGH: u128 = 76624777043294442917917351357515459181;\n    const SH_POST: u8 = 51;\n\n    let quot = n.widening_mul(M_HIGH).1 >> SH_POST;\n    let rem = n - quot * D;\n    (quot, rem as u64)\n}"
 }

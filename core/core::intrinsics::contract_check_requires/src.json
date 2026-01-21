@@ -1,5 +1,5 @@
 {
   "name": "core::intrinsics::contract_check_requires",
   "span": "$library/core/src/intrinsics/mod.rs:2680:1: 2680:70",
-  "src": "pub const fn contract_check_requires<C: Fn() -> bool + Copy>(cond: C)"
+  "src": "pub const fn contract_check_requires<C: Fn() -> bool + Copy>(cond: C) {\n    const_eval_select!(\n        @capture[C: Fn() -> bool + Copy] { cond: C } :\n        if const {\n                // Do nothing\n        } else {\n            if !cond() {\n                // Emit no unwind panic in case this was a safety requirement.\n                crate::panicking::panic_nounwind(\"failed requires check\");\n            }\n        }\n    )\n}"
 }

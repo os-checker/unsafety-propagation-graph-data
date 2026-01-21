@@ -1,5 +1,5 @@
 {
   "name": "core::<&mut array::drain::Drain<'_, '_, T, N, F> as ops::function::FnMut<(usize,)>>::call_mut",
   "span": "$library/core/src/array/drain.rs:72:5: 75:22",
-  "src": "extern \"rust-call\" fn call_mut(\n        &mut self,\n        (_ /* ignore argument */,): (usize,),\n    ) -> Self::Output"
+  "src": "extern \"rust-call\" fn call_mut(\n        &mut self,\n        (_ /* ignore argument */,): (usize,),\n    ) -> Self::Output {\n        if T::IS_ZST {\n            // its UB to call this more than N times, so returning more ZSTs is valid.\n            // SAFETY: its a ZST? we conjur.\n            (self.f)(unsafe { conjure_zst::<T>() })\n        } else {\n            // increment before moving; if `f` panics, we drop the rest.\n            let p = self.ptr;\n            // SAFETY: caller guarantees never called more than N times (see `Drain::new`)\n            self.ptr = unsafe { self.ptr.add(1) };\n            // SAFETY: we are allowed to move this.\n            (self.f)(unsafe { p.read() })\n        }\n    }"
 }

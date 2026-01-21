@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::dma::dma_stream::DmaStream::<D>::alloc_uninit",
   "span": "ostd/src/mm/dma/dma_stream.rs:125:5: 125:88",
-  "src": "pub fn alloc_uninit(nframes: usize, is_cache_coherent: bool) -> Result<Self, Error>"
+  "src": "pub fn alloc_uninit(nframes: usize, is_cache_coherent: bool) -> Result<Self, Error> {\n        let cvm = cvm_need_private_protection();\n\n        let (inner, paddr_range) = if (can_sync_dma() || is_cache_coherent) && !cvm {\n            let segment: USegment = FrameAllocOptions::new()\n                .zeroed(false)\n                .alloc_segment(nframes)?\n                .into();\n            let paddr_range = segment.paddr_range();\n\n            (Inner::Segment(segment), paddr_range)\n        } else {\n            let (kva, paddr) = alloc_kva(nframes, can_sync_dma() || is_cache_coherent)?;\n\n            (Inner::Kva(kva, paddr), paddr..paddr + nframes * PAGE_SIZE)\n        };\n\n        // SAFETY: The physical address range is untyped DMA memory before `drop`.\n        let map_daddr = unsafe { prepare_dma(&paddr_range) };\n\n        Ok(Self {\n            inner,\n            map_daddr,\n            is_cache_coherent,\n            _phantom: PhantomData,\n        })\n    }"
 }

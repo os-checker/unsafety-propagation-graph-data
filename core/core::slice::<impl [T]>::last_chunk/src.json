@@ -1,5 +1,5 @@
 {
   "name": "core::slice::<impl [T]>::last_chunk",
   "span": "$library/core/src/slice/mod.rs:508:5: 508:70",
-  "src": "pub const fn last_chunk<const N: usize>(&self) -> Option<&[T; N]>"
+  "src": "pub const fn last_chunk<const N: usize>(&self) -> Option<&[T; N]> {\n        // FIXME(const-hack): Without const traits, we need this instead of `get`.\n        let Some(index) = self.len().checked_sub(N) else { return None };\n        let (_, last) = self.split_at(index);\n\n        // SAFETY: We explicitly check for the correct number of elements,\n        //   and do not let the references outlive the slice.\n        Some(unsafe { &*(last.as_ptr().cast_array()) })\n    }"
 }

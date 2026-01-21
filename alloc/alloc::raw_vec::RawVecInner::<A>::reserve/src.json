@@ -1,5 +1,5 @@
 {
   "name": "alloc::raw_vec::RawVecInner::<A>::reserve",
   "span": "$library/alloc/src/raw_vec/mod.rs:544:5: 544:85",
-  "src": "unsafe fn reserve(&mut self, len: usize, additional: usize, elem_layout: Layout)"
+  "src": "unsafe fn reserve(&mut self, len: usize, additional: usize, elem_layout: Layout) {\n        // Callers expect this function to be very cheap when there is already sufficient capacity.\n        // Therefore, we move all the resizing and error-handling logic from grow_amortized and\n        // handle_reserve behind a call, while making sure that this function is likely to be\n        // inlined as just a comparison and a call if the comparison fails.\n        #[cold]\n        unsafe fn do_reserve_and_handle<A: Allocator>(\n            slf: &mut RawVecInner<A>,\n            len: usize,\n            additional: usize,\n            elem_layout: Layout,\n        ) {\n            // SAFETY: Precondition passed to caller\n            if let Err(err) = unsafe { slf.grow_amortized(len, additional, elem_layout) } {\n                handle_error(err);\n            }\n        }\n\n        if self.needs_to_grow(len, additional, elem_layout) {\n            unsafe {\n                do_reserve_and_handle(self, len, additional, elem_layout);\n            }\n        }\n    }"
 }

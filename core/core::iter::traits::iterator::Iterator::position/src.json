@@ -1,5 +1,5 @@
 {
   "name": "core::iter::traits::iterator::Iterator::position",
   "span": "$library/core/src/iter/traits/iterator.rs:3049:5: 3052:38",
-  "src": "fn position<P>(&mut self, predicate: P) -> Option<usize>\n    where\n        Self: Sized,\n        P: FnMut(Self::Item) -> bool,"
+  "src": "fn position<P>(&mut self, predicate: P) -> Option<usize>\n    where\n        Self: Sized,\n        P: FnMut(Self::Item) -> bool,\n    {\n        #[inline]\n        fn check<'a, T>(\n            mut predicate: impl FnMut(T) -> bool + 'a,\n            acc: &'a mut usize,\n        ) -> impl FnMut((), T) -> ControlFlow<usize, ()> + 'a {\n            #[rustc_inherit_overflow_checks]\n            move |_, x| {\n                if predicate(x) {\n                    ControlFlow::Break(*acc)\n                } else {\n                    *acc += 1;\n                    ControlFlow::Continue(())\n                }\n            }\n        }\n\n        let mut acc = 0;\n        self.try_fold((), check(predicate, &mut acc)).break_value()\n    }"
 }

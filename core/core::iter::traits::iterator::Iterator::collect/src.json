@@ -1,5 +1,5 @@
 {
   "name": "core::iter::traits::iterator::Iterator::collect",
   "span": "$library/core/src/iter/traits/iterator.rs:2015:5: 2017:21",
-  "src": "fn collect<B: FromIterator<Self::Item>>(self) -> B\n    where\n        Self: Sized,"
+  "src": "fn collect<B: FromIterator<Self::Item>>(self) -> B\n    where\n        Self: Sized,\n    {\n        // This is too aggressive to turn on for everything all the time, but PR#137908\n        // accidentally noticed that some rustc iterators had malformed `size_hint`s,\n        // so this will help catch such things in debug-assertions-std runners,\n        // even if users won't actually ever see it.\n        if cfg!(debug_assertions) {\n            let hint = self.size_hint();\n            assert!(hint.1.is_none_or(|high| high >= hint.0), \"Malformed size_hint {hint:?}\");\n        }\n\n        FromIterator::from_iter(self)\n    }"
 }

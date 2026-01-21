@@ -1,5 +1,5 @@
 {
   "name": "std::sys::sync::once_box::OnceBox::<T>::initialize",
   "span": "$library/std/src/sys/sync/once_box.rs:62:5: 62:69",
-  "src": "fn initialize(&self, f: impl FnOnce() -> Pin<Box<T>>) -> Pin<&T>"
+  "src": "fn initialize(&self, f: impl FnOnce() -> Pin<Box<T>>) -> Pin<&T> {\n        let new_ptr = Box::into_raw(unsafe { Pin::into_inner_unchecked(f()) });\n        match self.ptr.compare_exchange(null_mut(), new_ptr, Release, Acquire) {\n            Ok(_) => unsafe { Pin::new_unchecked(&*new_ptr) },\n            Err(ptr) => {\n                // Lost the race to another thread.\n                // Drop the value we created, and use the one from the other thread instead.\n                drop(unsafe { Box::from_raw(new_ptr) });\n                unsafe { Pin::new_unchecked(&*ptr) }\n            }\n        }\n    }"
 }

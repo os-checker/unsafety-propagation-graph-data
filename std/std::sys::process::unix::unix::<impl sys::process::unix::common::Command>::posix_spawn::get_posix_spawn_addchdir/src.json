@@ -1,5 +1,5 @@
 {
   "name": "std::sys::process::unix::unix::<impl sys::process::unix::common::Command>::posix_spawn::get_posix_spawn_addchdir",
   "span": "$library/std/src/sys/process/unix/unix.rs:602:9: 602:70",
-  "src": "fn get_posix_spawn_addchdir() -> Option<PosixSpawnAddChdirFn>"
+  "src": "fn get_posix_spawn_addchdir() -> Option<PosixSpawnAddChdirFn> {\n            use crate::sys::weak::weak;\n\n            // POSIX.1-2024 standardizes this function:\n            // https://pubs.opengroup.org/onlinepubs/9799919799/functions/posix_spawn_file_actions_addchdir.html.\n            // The _np version is more widely available, though, so try that first.\n\n            weak!(\n                fn posix_spawn_file_actions_addchdir_np(\n                    file_actions: *mut libc::posix_spawn_file_actions_t,\n                    path: *const libc::c_char,\n                ) -> libc::c_int;\n            );\n\n            weak!(\n                fn posix_spawn_file_actions_addchdir(\n                    file_actions: *mut libc::posix_spawn_file_actions_t,\n                    path: *const libc::c_char,\n                ) -> libc::c_int;\n            );\n\n            posix_spawn_file_actions_addchdir_np\n                .get()\n                .or_else(|| posix_spawn_file_actions_addchdir.get())\n        }"
 }

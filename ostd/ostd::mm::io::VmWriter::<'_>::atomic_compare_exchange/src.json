@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::io::VmWriter::<'_>::atomic_compare_exchange",
   "span": "ostd/src/mm/io.rs:892:5: 899:27",
-  "src": "pub fn atomic_compare_exchange<T>(\n        &self,\n        reader: &VmReader,\n        old_val: T,\n        new_val: T,\n    ) -> Result<(T, bool)>\n    where\n        T: PodAtomic + Eq,"
+  "src": "pub fn atomic_compare_exchange<T>(\n        &self,\n        reader: &VmReader,\n        old_val: T,\n        new_val: T,\n    ) -> Result<(T, bool)>\n    where\n        T: PodAtomic + Eq,\n    {\n        if self.avail() < size_of::<T>() || reader.remain() < size_of::<T>() {\n            return Err(Error::InvalidArgs);\n        }\n\n        assert_eq!(self.cursor.cast_const(), reader.cursor);\n\n        let cursor = self.cursor.cast::<T>();\n        assert!(cursor.is_aligned());\n\n        // SAFETY:\n        // 1. The cursor is either valid for reading and writing or in user space for\n        //    `size_of::<T>()` bytes.\n        // 2. The cursor is aligned on an `align_of::<T>()`-byte boundary.\n        let cur_val = unsafe { T::atomic_cmpxchg_fallible(cursor, old_val, new_val)? };\n\n        Ok((cur_val, old_val == cur_val))\n    }"
 }

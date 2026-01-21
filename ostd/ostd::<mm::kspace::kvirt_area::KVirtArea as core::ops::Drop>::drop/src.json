@@ -1,5 +1,5 @@
 {
   "name": "ostd::<mm::kspace::kvirt_area::KVirtArea as core::ops::Drop>::drop",
   "span": "ostd/src/mm/kspace/kvirt_area.rs:179:5: 179:23",
-  "src": "fn drop(&mut self)"
+  "src": "fn drop(&mut self) {\n        // 1. unmap all mapped pages.\n        let page_table = KERNEL_PAGE_TABLE.get().unwrap();\n        let range = self.start()..self.end();\n        let preempt_guard = disable_preempt();\n        let mut cursor = page_table.cursor_mut(&preempt_guard, &range).unwrap();\n        loop {\n            // SAFETY: The range is under `KVirtArea` so it is safe to unmap.\n            let Some(frag) = (unsafe { cursor.take_next(self.end() - cursor.virt_addr()) }) else {\n                break;\n            };\n            drop(frag);\n        }\n        // 2. free the virtual block\n        KVIRT_AREA_ALLOCATOR.free(range);\n    }"
 }

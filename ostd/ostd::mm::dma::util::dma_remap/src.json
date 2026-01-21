@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::dma::util::dma_remap",
   "span": "ostd/src/mm/dma/util.rs:233:1: 233:62",
-  "src": "unsafe fn dma_remap(pa_range: &Range<Paddr>) -> Option<Daddr>"
+  "src": "unsafe fn dma_remap(pa_range: &Range<Paddr>) -> Option<Daddr> {\n    if has_dma_remapping() {\n        #[cfg(target_arch = \"x86_64\")]\n        let daddr = DADDR_ALLOCATOR\n            .alloc(pa_range.len())\n            .expect(\"failed to allocate DMA address range\");\n        #[cfg(not(target_arch = \"x86_64\"))]\n        let daddr = pa_range.clone();\n\n        for map_paddr in pa_range.clone().step_by(PAGE_SIZE) {\n            let map_daddr = (map_paddr - pa_range.start + daddr.start) as Daddr;\n            // SAFETY: The caller guarantees that `map_paddr` corresponds to\n            // untyped frames that outlive `iommu::unmap()` in `dma_unmap()`.\n            unsafe {\n                iommu::map(map_daddr, map_paddr).unwrap();\n            }\n        }\n        Some(daddr.start)\n    } else {\n        None\n    }\n}"
 }

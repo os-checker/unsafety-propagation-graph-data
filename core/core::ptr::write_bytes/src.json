@@ -1,5 +1,5 @@
 {
   "name": "core::ptr::write_bytes",
   "span": "$library/core/src/ptr/mod.rs:697:1: 697:71",
-  "src": "pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize)"
+  "src": "pub const unsafe fn write_bytes<T>(dst: *mut T, val: u8, count: usize) {\n    // SAFETY: the safety contract for `write_bytes` must be upheld by the caller.\n    unsafe {\n        ub_checks::assert_unsafe_precondition!(\n            check_language_ub,\n            \"ptr::write_bytes requires that the destination pointer is aligned and non-null\",\n            (\n                addr: *const () = dst as *const (),\n                align: usize = align_of::<T>(),\n                zero_size: bool = T::IS_ZST || count == 0,\n            ) => ub_checks::maybe_is_aligned_and_not_null(addr, align, zero_size)\n        );\n        crate::intrinsics::write_bytes(dst, val, count)\n    }\n}"
 }

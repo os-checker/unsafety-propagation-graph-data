@@ -1,5 +1,5 @@
 {
   "name": "std::sys::fs::unix::File::open_c",
   "span": "$library/std/src/sys/fs/unix.rs:1206:5: 1206:71",
-  "src": "pub fn open_c(path: &CStr, opts: &OpenOptions) -> io::Result<File>"
+  "src": "pub fn open_c(path: &CStr, opts: &OpenOptions) -> io::Result<File> {\n        let flags = libc::O_CLOEXEC\n            | opts.get_access_mode()?\n            | opts.get_creation_mode()?\n            | (opts.custom_flags as c_int & !libc::O_ACCMODE);\n        // The third argument of `open64` is documented to have type `mode_t`. On\n        // some platforms (like macOS, where `open64` is actually `open`), `mode_t` is `u16`.\n        // However, since this is a variadic function, C integer promotion rules mean that on\n        // the ABI level, this still gets passed as `c_int` (aka `u32` on Unix platforms).\n        let fd = cvt_r(|| unsafe { open64(path.as_ptr(), flags, opts.mode as c_int) })?;\n        Ok(File(unsafe { FileDesc::from_raw_fd(fd) }))\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::panic::__ostd_panic_handler",
   "span": "ostd/src/panic.rs:17:1: 17:64",
-  "src": "pub fn __ostd_panic_handler(info: &core::panic::PanicInfo) -> !"
+  "src": "pub fn __ostd_panic_handler(info: &core::panic::PanicInfo) -> ! {\n    let _irq_guard = crate::irq::disable_local();\n\n    crate::cpu_local_cell! {\n        static IN_PANIC: bool = false;\n    }\n\n    if IN_PANIC.load() {\n        early_println!(\"The panic handler panicked {:#?}\", info);\n        abort();\n    }\n\n    IN_PANIC.store(true);\n\n    early_println!(\"Non-resettable panic! {:#?}\", info);\n\n    print_stack_trace();\n    abort();\n}"
 }

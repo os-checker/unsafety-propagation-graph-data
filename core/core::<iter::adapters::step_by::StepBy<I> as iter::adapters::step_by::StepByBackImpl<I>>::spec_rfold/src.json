@@ -1,5 +1,5 @@
 {
   "name": "core::<iter::adapters::step_by::StepBy<I> as iter::adapters::step_by::StepByBackImpl<I>>::spec_rfold",
   "span": "$library/core/src/iter/adapters/step_by.rs:383:5: 386:39",
-  "src": "default fn spec_rfold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc\n    where\n        Self: Sized,\n        F: FnMut(Acc, I::Item) -> Acc,"
+  "src": "default fn spec_rfold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc\n    where\n        Self: Sized,\n        F: FnMut(Acc, I::Item) -> Acc,\n    {\n        #[inline]\n        fn nth_back<I: DoubleEndedIterator>(\n            iter: &mut I,\n            step_minus_one: usize,\n        ) -> impl FnMut() -> Option<I::Item> + '_ {\n            move || iter.nth_back(step_minus_one)\n        }\n\n        match self.next_back() {\n            None => init,\n            Some(x) => {\n                let acc = f(init, x);\n                from_fn(nth_back(&mut self.iter, self.step_minus_one)).fold(acc, f)\n            }\n        }\n    }"
 }

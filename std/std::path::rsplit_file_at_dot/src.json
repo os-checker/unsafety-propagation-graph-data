@@ -1,5 +1,5 @@
 {
   "name": "std::path::rsplit_file_at_dot",
   "span": "$library/std/src/path.rs:308:1: 308:72",
-  "src": "fn rsplit_file_at_dot(file: &OsStr) -> (Option<&OsStr>, Option<&OsStr>)"
+  "src": "fn rsplit_file_at_dot(file: &OsStr) -> (Option<&OsStr>, Option<&OsStr>) {\n    if file.as_encoded_bytes() == b\"..\" {\n        return (Some(file), None);\n    }\n\n    // The unsafety here stems from converting between &OsStr and &[u8]\n    // and back. This is safe to do because (1) we only look at ASCII\n    // contents of the encoding and (2) new &OsStr values are produced\n    // only from ASCII-bounded slices of existing &OsStr values.\n    let mut iter = file.as_encoded_bytes().rsplitn(2, |b| *b == b'.');\n    let after = iter.next();\n    let before = iter.next();\n    if before == Some(b\"\") {\n        (Some(file), None)\n    } else {\n        unsafe {\n            (\n                before.map(|s| OsStr::from_encoded_bytes_unchecked(s)),\n                after.map(|s| OsStr::from_encoded_bytes_unchecked(s)),\n            )\n        }\n    }\n}"
 }

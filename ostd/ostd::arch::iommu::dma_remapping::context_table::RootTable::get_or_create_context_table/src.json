@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::iommu::dma_remapping::context_table::RootTable::get_or_create_context_table",
   "span": "ostd/src/arch/x86/iommu/dma_remapping/context_table.rs:138:5: 138:97",
-  "src": "fn get_or_create_context_table(&mut self, device_id: PciDeviceLocation) -> &mut ContextTable"
+  "src": "fn get_or_create_context_table(&mut self, device_id: PciDeviceLocation) -> &mut ContextTable {\n        let bus_entry = self\n            .root_frame\n            .read_val::<RootEntry>(device_id.bus as usize * size_of::<RootEntry>())\n            .unwrap();\n\n        if !bus_entry.is_present() {\n            let table = ContextTable::new();\n            let address = table.paddr();\n            self.context_tables.insert(address, table);\n            let entry = RootEntry(address as u128 | 1);\n            self.root_frame\n                .write_val::<RootEntry>(device_id.bus as usize * size_of::<RootEntry>(), &entry)\n                .unwrap();\n            self.context_tables.get_mut(&address).unwrap()\n        } else {\n            self.context_tables\n                .get_mut(&(bus_entry.addr() as usize))\n                .unwrap()\n        }\n    }"
 }

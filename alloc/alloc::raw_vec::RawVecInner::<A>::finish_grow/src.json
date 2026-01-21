@@ -1,5 +1,5 @@
 {
   "name": "alloc::raw_vec::RawVecInner::<A>::finish_grow",
   "span": "$library/alloc/src/raw_vec/mod.rs:740:5: 744:48",
-  "src": "unsafe fn finish_grow(\n        &self,\n        cap: usize,\n        elem_layout: Layout,\n    ) -> Result<NonNull<[u8]>, TryReserveError>"
+  "src": "unsafe fn finish_grow(\n        &self,\n        cap: usize,\n        elem_layout: Layout,\n    ) -> Result<NonNull<[u8]>, TryReserveError> {\n        let new_layout = layout_array(cap, elem_layout)?;\n\n        let memory = if let Some((ptr, old_layout)) = unsafe { self.current_memory(elem_layout) } {\n            debug_assert_eq!(old_layout.align(), new_layout.align());\n            unsafe {\n                // The allocator checks for alignment equality\n                hint::assert_unchecked(old_layout.align() == new_layout.align());\n                self.alloc.grow(ptr, old_layout, new_layout)\n            }\n        } else {\n            self.alloc.allocate(new_layout)\n        };\n\n        memory.map_err(|_| AllocError { layout: new_layout, non_exhaustive: () }.into())\n    }"
 }

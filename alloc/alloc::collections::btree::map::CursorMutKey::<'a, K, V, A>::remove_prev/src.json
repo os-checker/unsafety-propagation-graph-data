@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::btree::map::CursorMutKey::<'a, K, V, A>::remove_prev",
   "span": "$library/alloc/src/collections/btree/map.rs:3444:5: 3444:52",
-  "src": "pub fn remove_prev(&mut self) -> Option<(K, V)>"
+  "src": "pub fn remove_prev(&mut self) -> Option<(K, V)> {\n        let current = self.current.take()?;\n        if current.reborrow().next_back_kv().is_err() {\n            self.current = Some(current);\n            return None;\n        }\n        let mut emptied_internal_root = false;\n        let (kv, pos) = current\n            .next_back_kv()\n            // This should be unwrap(), but that doesn't work because NodeRef\n            // doesn't implement Debug. The condition is checked above.\n            .ok()?\n            .remove_kv_tracking(|| emptied_internal_root = true, self.alloc.clone());\n        self.current = Some(pos);\n        *self.length -= 1;\n        if emptied_internal_root {\n            // SAFETY: This is safe since current does not point within the now\n            // empty root node.\n            let root = unsafe { self.root.reborrow().as_mut().unwrap() };\n            root.pop_internal_level(self.alloc.clone());\n        }\n        Some(kv)\n    }"
 }

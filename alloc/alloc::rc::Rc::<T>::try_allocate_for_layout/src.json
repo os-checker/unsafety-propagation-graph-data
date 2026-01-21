@@ -1,5 +1,5 @@
 {
   "name": "alloc::rc::Rc::<T>::try_allocate_for_layout",
   "span": "$library/alloc/src/rc.rs:2235:5: 2239:45",
-  "src": "unsafe fn try_allocate_for_layout(\n        value_layout: Layout,\n        allocate: impl FnOnce(Layout) -> Result<NonNull<[u8]>, AllocError>,\n        mem_to_rc_inner: impl FnOnce(*mut u8) -> *mut RcInner<T>,\n    ) -> Result<*mut RcInner<T>, AllocError>"
+  "src": "unsafe fn try_allocate_for_layout(\n        value_layout: Layout,\n        allocate: impl FnOnce(Layout) -> Result<NonNull<[u8]>, AllocError>,\n        mem_to_rc_inner: impl FnOnce(*mut u8) -> *mut RcInner<T>,\n    ) -> Result<*mut RcInner<T>, AllocError> {\n        let layout = rc_inner_layout_for_value_layout(value_layout);\n\n        // Allocate for the layout.\n        let ptr = allocate(layout)?;\n\n        // Initialize the RcInner\n        let inner = mem_to_rc_inner(ptr.as_non_null_ptr().as_ptr());\n        unsafe {\n            debug_assert_eq!(Layout::for_value_raw(inner), layout);\n\n            (&raw mut (*inner).strong).write(Cell::new(1));\n            (&raw mut (*inner).weak).write(Cell::new(1));\n        }\n\n        Ok(inner)\n    }"
 }

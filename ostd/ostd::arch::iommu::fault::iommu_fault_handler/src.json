@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::iommu::fault::iommu_fault_handler",
   "span": "ostd/src/arch/x86/iommu/fault.rs:250:1: 250:43",
-  "src": "fn iommu_fault_handler(_frame: &TrapFrame)"
+  "src": "fn iommu_fault_handler(_frame: &TrapFrame) {\n    let mut fault_event_regs = FAULT_EVENT_REGS.get().unwrap().lock();\n\n    primary_fault_handler(&mut fault_event_regs);\n\n    let fault_status = fault_event_regs.status();\n    if fault_status.intersects(FaultStatus::IQE | FaultStatus::ICE | FaultStatus::ITE) {\n        panic!(\n            \"Catch IOMMU invalidation error. Fault status: {:x?}\",\n            fault_status\n        );\n    }\n}"
 }

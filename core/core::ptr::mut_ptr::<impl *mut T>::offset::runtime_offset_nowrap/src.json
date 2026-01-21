@@ -1,5 +1,5 @@
 {
   "name": "core::ptr::mut_ptr::<impl *mut T>::offset::runtime_offset_nowrap",
   "span": "$library/core/src/ptr/mut_ptr.rs:358:9: 358:91",
-  "src": "const fn runtime_offset_nowrap(this: *const (), count: isize, size: usize) -> bool"
+  "src": "const fn runtime_offset_nowrap(this: *const (), count: isize, size: usize) -> bool {\n            // We can use const_eval_select here because this is only for UB checks.\n            const_eval_select!(\n                @capture { this: *const (), count: isize, size: usize } -> bool:\n                if const {\n                    true\n                } else {\n                    // `size` is the size of a Rust type, so we know that\n                    // `size <= isize::MAX` and thus `as` cast here is not lossy.\n                    let Some(byte_offset) = count.checked_mul(size as isize) else {\n                        return false;\n                    };\n                    let (_, overflow) = this.addr().overflowing_add_signed(byte_offset);\n                    !overflow\n                }\n            )\n        }"
 }

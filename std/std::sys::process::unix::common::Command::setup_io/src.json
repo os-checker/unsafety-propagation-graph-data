@@ -1,5 +1,5 @@
 {
   "name": "std::sys::process::unix::common::Command::setup_io",
   "span": "$library/std/src/sys/process/unix/common.rs:350:5: 354:46",
-  "src": "pub fn setup_io(\n        &self,\n        default: Stdio,\n        needs_stdin: bool,\n    ) -> io::Result<(StdioPipes, ChildPipes)>"
+  "src": "pub fn setup_io(\n        &self,\n        default: Stdio,\n        needs_stdin: bool,\n    ) -> io::Result<(StdioPipes, ChildPipes)> {\n        let null = Stdio::Null;\n        let default_stdin = if needs_stdin { &default } else { &null };\n        let stdin = self.stdin.as_ref().unwrap_or(default_stdin);\n        let stdout = self.stdout.as_ref().unwrap_or(&default);\n        let stderr = self.stderr.as_ref().unwrap_or(&default);\n        let (their_stdin, our_stdin) = stdin.to_child_stdio(true)?;\n        let (their_stdout, our_stdout) = stdout.to_child_stdio(false)?;\n        let (their_stderr, our_stderr) = stderr.to_child_stdio(false)?;\n        let ours = StdioPipes { stdin: our_stdin, stdout: our_stdout, stderr: our_stderr };\n        let theirs = ChildPipes { stdin: their_stdin, stdout: their_stdout, stderr: their_stderr };\n        Ok((ours, theirs))\n    }"
 }

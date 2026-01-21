@@ -1,5 +1,5 @@
 {
   "name": "std::io::skip_until",
   "span": "$library/std/src/io/mod.rs:2250:1: 2250:74",
-  "src": "fn skip_until<R: BufRead + ?Sized>(r: &mut R, delim: u8) -> Result<usize>"
+  "src": "fn skip_until<R: BufRead + ?Sized>(r: &mut R, delim: u8) -> Result<usize> {\n    let mut read = 0;\n    loop {\n        let (done, used) = {\n            let available = match r.fill_buf() {\n                Ok(n) => n,\n                Err(ref e) if e.kind() == ErrorKind::Interrupted => continue,\n                Err(e) => return Err(e),\n            };\n            match memchr::memchr(delim, available) {\n                Some(i) => (true, i + 1),\n                None => (false, available.len()),\n            }\n        };\n        r.consume(used);\n        read += used;\n        if done || used == 0 {\n            return Ok(read);\n        }\n    }\n}"
 }

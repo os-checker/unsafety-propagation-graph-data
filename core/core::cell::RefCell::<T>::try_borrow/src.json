@@ -1,5 +1,5 @@
 {
   "name": "core::cell::RefCell::<T>::try_borrow",
   "span": "$library/core/src/cell.rs:1136:5: 1136:70",
-  "src": "pub const fn try_borrow(&self) -> Result<Ref<'_, T>, BorrowError>"
+  "src": "pub const fn try_borrow(&self) -> Result<Ref<'_, T>, BorrowError> {\n        match BorrowRef::new(&self.borrow) {\n            Some(b) => {\n                #[cfg(feature = \"debug_refcell\")]\n                {\n                    // `borrowed_at` is always the *first* active borrow\n                    if b.borrow.get() == 1 {\n                        self.borrowed_at.replace(Some(crate::panic::Location::caller()));\n                    }\n                }\n\n                // SAFETY: `BorrowRef` ensures that there is only immutable access\n                // to the value while borrowed.\n                let value = unsafe { NonNull::new_unchecked(self.value.get()) };\n                Ok(Ref { value, borrow: b })\n            }\n            None => Err(BorrowError {\n                // If a borrow occurred, then we must already have an outstanding borrow,\n                // so `borrowed_at` will be `Some`\n                #[cfg(feature = \"debug_refcell\")]\n                location: self.borrowed_at.get().unwrap(),\n            }),\n        }\n    }"
 }

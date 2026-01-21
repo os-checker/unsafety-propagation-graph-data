@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::io::VmIo::read_val",
   "span": "ostd/src/mm/io.rs:92:5: 92:59",
-  "src": "fn read_val<T: Pod>(&self, offset: usize) -> Result<T>"
+  "src": "fn read_val<T: Pod>(&self, offset: usize) -> Result<T> {\n        // Why not use `MaybeUninit` for a faster implementation?\n        //\n        // ```rust\n        // let mut val: MaybeUninit<T> = MaybeUninit::uninit();\n        // let writer = unsafe {\n        //     VmWriter::from_kernel_space(val.as_mut_ptr().cast(), size_of::<T>())\n        // };\n        // self.read(offset, &mut writer.to_fallible())?;\n        // Ok(unsafe { val.assume_init() })\n        // ```\n        //\n        // The above implementation avoids initializing `val` upfront,\n        // so it is more efficient than our actual implementation.\n        // Unfortunately, it is unsound.\n        // This is because the `read` method,\n        // which could be implemented outside OSTD and thus is untrusted,\n        // may not really initialize the bits of `val` at all!\n\n        let mut val = T::new_zeroed();\n        self.read_bytes(offset, val.as_bytes_mut())?;\n        Ok(val)\n    }"
 }

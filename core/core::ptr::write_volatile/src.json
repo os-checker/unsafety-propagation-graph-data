@@ -1,5 +1,5 @@
 {
   "name": "core::ptr::write_volatile",
   "span": "$library/core/src/ptr/mod.rs:2158:1: 2158:53",
-  "src": "pub unsafe fn write_volatile<T>(dst: *mut T, src: T)"
+  "src": "pub unsafe fn write_volatile<T>(dst: *mut T, src: T) {\n    // SAFETY: the caller must uphold the safety contract for `volatile_store`.\n    unsafe {\n        ub_checks::assert_unsafe_precondition!(\n            check_language_ub,\n            \"ptr::write_volatile requires that the pointer argument is aligned\",\n            (\n                addr: *mut () = dst as *mut (),\n                align: usize = align_of::<T>(),\n            ) => ub_checks::maybe_is_aligned(addr, align)\n        );\n        intrinsics::volatile_store(dst, src);\n    }\n}"
 }

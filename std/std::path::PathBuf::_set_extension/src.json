@@ -1,5 +1,5 @@
 {
   "name": "std::path::PathBuf::_set_extension",
   "span": "$library/std/src/path.rs:1633:5: 1633:60",
-  "src": "fn _set_extension(&mut self, extension: &OsStr) -> bool"
+  "src": "fn _set_extension(&mut self, extension: &OsStr) -> bool {\n        validate_extension(extension);\n\n        let file_stem = match self.file_stem() {\n            None => return false,\n            Some(f) => f.as_encoded_bytes(),\n        };\n\n        // truncate until right after the file stem\n        let end_file_stem = file_stem[file_stem.len()..].as_ptr().addr();\n        let start = self.inner.as_encoded_bytes().as_ptr().addr();\n        self.inner.truncate(end_file_stem.wrapping_sub(start));\n\n        // add the new extension, if any\n        let new = extension.as_encoded_bytes();\n        if !new.is_empty() {\n            self.inner.reserve_exact(new.len() + 1);\n            self.inner.push(\".\");\n            // SAFETY: Since a UTF-8 string was just pushed, it is not possible\n            // for the buffer to end with a surrogate half.\n            unsafe { self.inner.extend_from_slice_unchecked(new) };\n        }\n\n        true\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::time::Timespec::checked_add_duration",
   "span": "$library/std/src/sys/pal/unix/time.rs:169:5: 169:77",
-  "src": "pub fn checked_add_duration(&self, other: &Duration) -> Option<Timespec>"
+  "src": "pub fn checked_add_duration(&self, other: &Duration) -> Option<Timespec> {\n        let mut secs = self.tv_sec.checked_add_unsigned(other.as_secs())?;\n\n        // Nano calculations can't overflow because nanos are <1B which fit\n        // in a u32.\n        let mut nsec = other.subsec_nanos() + self.tv_nsec.as_inner();\n        if nsec >= NSEC_PER_SEC as u32 {\n            nsec -= NSEC_PER_SEC as u32;\n            secs = secs.checked_add(1)?;\n        }\n        Some(unsafe { Timespec::new_unchecked(secs, nsec.into()) })\n    }"
 }

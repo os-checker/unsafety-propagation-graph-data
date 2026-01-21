@@ -1,5 +1,5 @@
 {
   "name": "std::alloc::System::alloc_impl",
   "span": "$library/std/src/alloc.rs:143:5: 143:92",
-  "src": "fn alloc_impl(&self, layout: Layout, zeroed: bool) -> Result<NonNull<[u8]>, AllocError>"
+  "src": "fn alloc_impl(&self, layout: Layout, zeroed: bool) -> Result<NonNull<[u8]>, AllocError> {\n        match layout.size() {\n            0 => Ok(NonNull::slice_from_raw_parts(layout.dangling(), 0)),\n            // SAFETY: `layout` is non-zero in size,\n            size => unsafe {\n                let raw_ptr = if zeroed {\n                    GlobalAlloc::alloc_zeroed(self, layout)\n                } else {\n                    GlobalAlloc::alloc(self, layout)\n                };\n                let ptr = NonNull::new(raw_ptr).ok_or(AllocError)?;\n                Ok(NonNull::slice_from_raw_parts(ptr, size))\n            },\n        }\n    }"
 }

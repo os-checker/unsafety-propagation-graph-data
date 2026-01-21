@@ -1,5 +1,5 @@
 {
   "name": "std::sync::lazy_lock::LazyLock::<T, F>::force",
   "span": "$library/std/src/sync/lazy_lock.rs:251:5: 251:46",
-  "src": "pub fn force(this: &LazyLock<T, F>) -> &T"
+  "src": "pub fn force(this: &LazyLock<T, F>) -> &T {\n        this.once.call_once_force(|state| {\n            if state.is_poisoned() {\n                panic_poisoned();\n            }\n\n            // SAFETY: `call_once` only runs this closure once, ever.\n            let data = unsafe { &mut *this.data.get() };\n            let f = unsafe { ManuallyDrop::take(&mut data.f) };\n            let value = f();\n            data.value = ManuallyDrop::new(value);\n        });\n\n        // SAFETY:\n        // There are four possible scenarios:\n        // * the closure was called and initialized `value`.\n        // * the closure was called and panicked, so this point is never reached.\n        // * the closure was not called, but a previous call initialized `value`.\n        // * the closure was not called because the Once is poisoned, which we handled above.\n        // So `value` has definitely been initialized and will not be modified again.\n        unsafe { &*(*this.data.get()).value }\n    }"
 }

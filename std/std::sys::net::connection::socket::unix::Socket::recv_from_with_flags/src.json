@@ -1,5 +1,5 @@
 {
   "name": "std::sys::net::connection::socket::unix::Socket::recv_from_with_flags",
   "span": "$library/std/src/sys/net/connection/socket/unix.rs:326:5: 330:41",
-  "src": "fn recv_from_with_flags(\n        &self,\n        buf: &mut [u8],\n        flags: c_int,\n    ) -> io::Result<(usize, SocketAddr)>"
+  "src": "fn recv_from_with_flags(\n        &self,\n        buf: &mut [u8],\n        flags: c_int,\n    ) -> io::Result<(usize, SocketAddr)> {\n        // The `recvfrom` function will fill in the storage with the address,\n        // so we don't need to zero it here.\n        // reference: https://linux.die.net/man/2/recvfrom\n        let mut storage: mem::MaybeUninit<libc::sockaddr_storage> = mem::MaybeUninit::uninit();\n        let mut addrlen = size_of_val(&storage) as libc::socklen_t;\n\n        let n = cvt(unsafe {\n            libc::recvfrom(\n                self.as_raw_fd(),\n                buf.as_mut_ptr() as *mut c_void,\n                buf.len(),\n                flags,\n                (&raw mut storage) as *mut _,\n                &mut addrlen,\n            )\n        })?;\n        Ok((n as usize, unsafe { socket_addr_from_c(storage.as_ptr(), addrlen as usize)? }))\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::io_util::<impl mm::io::VmIo for S>::read",
   "span": "ostd/src/mm/io_util.rs:77:5: 77:71",
-  "src": "fn read(&self, offset: usize, writer: &mut VmWriter) -> Result<()>"
+  "src": "fn read(&self, offset: usize, writer: &mut VmWriter) -> Result<()> {\n        let mut reader = <Self as HasVmReaderWriter>::Types::to_reader_result(self.reader())?;\n\n        let limit = offset.checked_add(writer.avail()).ok_or(Error::Overflow)?;\n        if limit > reader.remain() {\n            return Err(Error::InvalidArgs);\n        }\n\n        reader.skip(offset);\n        let _len = reader\n            .to_fallible()\n            .read_fallible(writer)\n            .map_err(|(err, _)| err)?;\n        debug_assert!(!writer.has_avail());\n        Ok(())\n    }"
 }

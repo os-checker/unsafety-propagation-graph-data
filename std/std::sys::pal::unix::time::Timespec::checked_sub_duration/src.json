@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::time::Timespec::checked_sub_duration",
   "span": "$library/std/src/sys/pal/unix/time.rs:182:5: 182:77",
-  "src": "pub fn checked_sub_duration(&self, other: &Duration) -> Option<Timespec>"
+  "src": "pub fn checked_sub_duration(&self, other: &Duration) -> Option<Timespec> {\n        let mut secs = self.tv_sec.checked_sub_unsigned(other.as_secs())?;\n\n        // Similar to above, nanos can't overflow.\n        let mut nsec = self.tv_nsec.as_inner() as i32 - other.subsec_nanos() as i32;\n        if nsec < 0 {\n            nsec += NSEC_PER_SEC as i32;\n            secs = secs.checked_sub(1)?;\n        }\n        Some(unsafe { Timespec::new_unchecked(secs, nsec.into()) })\n    }"
 }

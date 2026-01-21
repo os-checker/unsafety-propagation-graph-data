@@ -1,5 +1,5 @@
 {
   "name": "alloc::rc::UniqueRc::<T>::map",
   "span": "$library/alloc/src/rc.rs:4193:5: 4193:69",
-  "src": "pub fn map<U>(this: Self, f: impl FnOnce(T) -> U) -> UniqueRc<U>"
+  "src": "pub fn map<U>(this: Self, f: impl FnOnce(T) -> U) -> UniqueRc<U> {\n        if size_of::<T>() == size_of::<U>()\n            && align_of::<T>() == align_of::<U>()\n            && UniqueRc::weak_count(&this) == 0\n        {\n            unsafe {\n                let ptr = UniqueRc::into_raw(this);\n                let value = ptr.read();\n                let mut allocation = UniqueRc::from_raw(ptr.cast::<mem::MaybeUninit<U>>());\n\n                allocation.write(f(value));\n                allocation.assume_init()\n            }\n        } else {\n            UniqueRc::new(f(UniqueRc::unwrap(this)))\n        }\n    }"
 }

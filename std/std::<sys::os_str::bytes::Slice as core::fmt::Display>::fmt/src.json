@@ -1,5 +1,5 @@
 {
   "name": "std::<sys::os_str::bytes::Slice as core::fmt::Display>::fmt",
   "span": "$library/std/src/sys/os_str/bytes.rs:66:5: 66:61",
-  "src": "fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result"
+  "src": "fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n        // If we're the empty string then our iterator won't actually yield\n        // anything, so perform the formatting manually\n        if self.inner.is_empty() {\n            return \"\".fmt(f);\n        }\n\n        for chunk in self.inner.utf8_chunks() {\n            let valid = chunk.valid();\n            // If we successfully decoded the whole chunk as a valid string then\n            // we can return a direct formatting of the string which will also\n            // respect various formatting flags if possible.\n            if chunk.invalid().is_empty() {\n                return valid.fmt(f);\n            }\n\n            f.write_str(valid)?;\n            f.write_char(char::REPLACEMENT_CHARACTER)?;\n        }\n        Ok(())\n    }"
 }

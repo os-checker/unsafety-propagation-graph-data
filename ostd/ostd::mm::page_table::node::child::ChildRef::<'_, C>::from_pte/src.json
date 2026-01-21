@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::node::child::ChildRef::<'_, C>::from_pte",
   "span": "ostd/src/mm/page_table/node/child.rs:93:5: 93:74",
-  "src": "pub(super) unsafe fn from_pte(pte: &C::E, level: PagingLevel) -> Self"
+  "src": "pub(super) unsafe fn from_pte(pte: &C::E, level: PagingLevel) -> Self {\n        if !pte.is_present() {\n            return ChildRef::None;\n        }\n\n        let paddr = pte.paddr();\n\n        if !pte.is_last(level) {\n            // SAFETY: The caller ensures that the lifetime of the child is\n            // contained by the residing node, and the physical address is\n            // valid since the entry is present.\n            let node = unsafe { PageTableNodeRef::borrow_paddr(paddr) };\n            debug_assert_eq!(node.level(), level - 1);\n            return ChildRef::PageTable(node);\n        }\n\n        ChildRef::Frame(paddr, level, pte.prop())\n    }"
 }

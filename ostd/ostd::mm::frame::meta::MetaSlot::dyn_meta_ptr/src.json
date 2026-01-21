@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::meta::MetaSlot::dyn_meta_ptr",
   "span": "ostd/src/mm/frame/meta.rs:336:5: 336:70",
-  "src": "pub(super) unsafe fn dyn_meta_ptr(&self) -> *mut dyn AnyFrameMeta"
+  "src": "pub(super) unsafe fn dyn_meta_ptr(&self) -> *mut dyn AnyFrameMeta {\n        // SAFETY: The page metadata is valid to be borrowed immutably, since\n        // it will never be borrowed mutably after initialization.\n        let vtable_ptr = unsafe { *self.vtable_ptr.get() };\n\n        // SAFETY: The page metadata is initialized and valid.\n        let vtable_ptr = *unsafe { vtable_ptr.assume_init_ref() };\n\n        let meta_ptr: *mut dyn AnyFrameMeta =\n            core::ptr::from_raw_parts_mut(self as *const MetaSlot as *mut MetaSlot, vtable_ptr);\n\n        meta_ptr\n    }"
 }

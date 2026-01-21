@@ -1,5 +1,5 @@
 {
   "name": "core::<array::drain::Drain<'_, '_, T, N, F> as ops::drop::Drop>::drop",
   "span": "$library/core/src/array/drain.rs:93:5: 93:23",
-  "src": "fn drop(&mut self)"
+  "src": "fn drop(&mut self) {\n        if !T::IS_ZST {\n            // SAFETY: we cant read more than N elements\n            let slice = unsafe {\n                from_raw_parts_mut::<[T]>(\n                    self.ptr.as_ptr(),\n                    // SAFETY: `start <= end`\n                    self.end.offset_from_unsigned(self.ptr.as_ptr()),\n                )\n            };\n\n            // SAFETY: By the type invariant, we're allowed to drop all these. (we own it, after all)\n            unsafe { drop_in_place(slice) }\n        }\n    }"
 }

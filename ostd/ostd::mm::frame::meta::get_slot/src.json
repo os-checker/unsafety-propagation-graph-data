@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::meta::get_slot",
   "span": "ostd/src/mm/frame/meta.rs:209:1: 209:81",
-  "src": "pub(super) fn get_slot(paddr: Paddr) -> Result<&'static MetaSlot, GetFrameError>"
+  "src": "pub(super) fn get_slot(paddr: Paddr) -> Result<&'static MetaSlot, GetFrameError> {\n    if !paddr.is_multiple_of(PAGE_SIZE) {\n        return Err(GetFrameError::NotAligned);\n    }\n    if paddr >= super::max_paddr() {\n        return Err(GetFrameError::OutOfBound);\n    }\n\n    let vaddr = mapping::frame_to_meta::<PagingConsts>(paddr);\n    let ptr = vaddr as *mut MetaSlot;\n\n    // SAFETY: `ptr` points to a valid `MetaSlot` that will never be\n    // mutably borrowed, so taking an immutable reference to it is safe.\n    Ok(unsafe { &*ptr })\n}"
 }

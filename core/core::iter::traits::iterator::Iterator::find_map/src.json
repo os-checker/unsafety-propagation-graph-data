@@ -1,5 +1,5 @@
 {
   "name": "core::iter::traits::iterator::Iterator::find_map",
   "span": "$library/core/src/iter/traits/iterator.rs:2908:5: 2911:43",
-  "src": "fn find_map<B, F>(&mut self, f: F) -> Option<B>\n    where\n        Self: Sized,\n        F: FnMut(Self::Item) -> Option<B>,"
+  "src": "fn find_map<B, F>(&mut self, f: F) -> Option<B>\n    where\n        Self: Sized,\n        F: FnMut(Self::Item) -> Option<B>,\n    {\n        #[inline]\n        fn check<T, B>(mut f: impl FnMut(T) -> Option<B>) -> impl FnMut((), T) -> ControlFlow<B> {\n            move |(), x| match f(x) {\n                Some(x) => ControlFlow::Break(x),\n                None => ControlFlow::Continue(()),\n            }\n        }\n\n        self.try_fold((), check(f)).break_value()\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::fmt::float::float_to_exponential_common_exact",
   "span": "$library/core/src/fmt/float.rs:102:1: 110:32",
-  "src": "fn float_to_exponential_common_exact<T>(\n    fmt: &mut Formatter<'_>,\n    num: &T,\n    sign: flt2dec::Sign,\n    precision: u16,\n    upper: bool,\n) -> Result\nwhere\n    T: flt2dec::DecodableFloat,"
+  "src": "fn float_to_exponential_common_exact<T>(\n    fmt: &mut Formatter<'_>,\n    num: &T,\n    sign: flt2dec::Sign,\n    precision: u16,\n    upper: bool,\n) -> Result\nwhere\n    T: flt2dec::DecodableFloat,\n{\n    let mut buf: [MaybeUninit<u8>; 1024] = [MaybeUninit::uninit(); 1024]; // enough for f32 and f64\n    let mut parts: [MaybeUninit<numfmt::Part<'_>>; 6] = [MaybeUninit::uninit(); 6];\n    let formatted = flt2dec::to_exact_exp_str(\n        flt2dec::strategy::grisu::format_exact,\n        *num,\n        sign,\n        precision.into(),\n        upper,\n        &mut buf,\n        &mut parts,\n    );\n    // SAFETY: `to_exact_exp_str` and `format_exact` produce only ASCII characters.\n    unsafe { fmt.pad_formatted_parts(&formatted) }\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::<ops::range::Range<T> as iter::range::RangeIteratorImpl>::spec_advance_by",
   "span": "$library/core/src/iter/range.rs:790:5: 790:74",
-  "src": "fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>>"
+  "src": "fn spec_advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {\n        let steps = Step::steps_between(&self.start, &self.end);\n        let available = steps.1.unwrap_or(steps.0);\n\n        let taken = available.min(n);\n\n        // SAFETY: the conditions above ensure that the count is in bounds. If start <= end\n        // then steps_between either returns a bound to which we clamp or returns None which\n        // together with the initial inequality implies more than usize::MAX steps.\n        // Otherwise 0 is returned which always safe to use.\n        self.start = unsafe { Step::forward_unchecked(self.start, taken) };\n\n        NonZero::new(n - taken).map_or(Ok(()), Err)\n    }"
 }

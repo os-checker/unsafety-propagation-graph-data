@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::waker::Waker::try_select",
   "span": "$library/std/src/sync/mpmc/waker.rs:67:5: 67:57",
-  "src": "pub(crate) fn try_select(&mut self) -> Option<Entry>"
+  "src": "pub(crate) fn try_select(&mut self) -> Option<Entry> {\n        if self.selectors.is_empty() {\n            None\n        } else {\n            let thread_id = current_thread_id();\n\n            self.selectors\n                .iter()\n                .position(|selector| {\n                    // Does the entry belong to a different thread?\n                    selector.cx.thread_id() != thread_id\n                        && selector // Try selecting this operation.\n                            .cx\n                            .try_select(Selected::Operation(selector.oper))\n                            .is_ok()\n                        && {\n                            // Provide the packet.\n                            selector.cx.store_packet(selector.packet);\n                            // Wake the thread up.\n                            selector.cx.unpark();\n                            true\n                        }\n                })\n                // Remove the entry from the queue to keep it clean and improve\n                // performance.\n                .map(|pos| self.selectors.remove(pos))\n        }\n    }"
 }

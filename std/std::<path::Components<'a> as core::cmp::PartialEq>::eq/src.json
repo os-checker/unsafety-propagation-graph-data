@@ -1,5 +1,5 @@
 {
   "name": "std::<path::Components<'a> as core::cmp::PartialEq>::eq",
   "span": "$library/std/src/path.rs:1003:5: 1003:49",
-  "src": "fn eq(&self, other: &Components<'a>) -> bool"
+  "src": "fn eq(&self, other: &Components<'a>) -> bool {\n        let Components { path: _, front: _, back: _, has_physical_root: _, prefix: _ } = self;\n\n        // Fast path for exact matches, e.g. for hashmap lookups.\n        // Don't explicitly compare the prefix or has_physical_root fields since they'll\n        // either be covered by the `path` buffer or are only relevant for `prefix_verbatim()`.\n        if self.path.len() == other.path.len()\n            && self.front == other.front\n            && self.back == State::Body\n            && other.back == State::Body\n            && self.prefix_verbatim() == other.prefix_verbatim()\n        {\n            // possible future improvement: this could bail out earlier if there were a\n            // reverse memcmp/bcmp comparing back to front\n            if self.path == other.path {\n                return true;\n            }\n        }\n\n        // compare back to front since absolute paths often share long prefixes\n        Iterator::eq(self.clone().rev(), other.clone().rev())\n    }"
 }

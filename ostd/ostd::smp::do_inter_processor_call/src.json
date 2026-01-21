@@ -1,5 +1,5 @@
 {
   "name": "ostd::smp::do_inter_processor_call",
   "span": "ostd/src/smp.rs:92:1: 92:69",
-  "src": "pub(crate) unsafe fn do_inter_processor_call(_trapframe: &TrapFrame)"
+  "src": "pub(crate) unsafe fn do_inter_processor_call(_trapframe: &TrapFrame) {\n    // No races because we are in IRQs.\n    let this_cpu_id = crate::cpu::CpuId::current_racy();\n\n    let mut queue = CALL_QUEUES.get_on_cpu(this_cpu_id).lock();\n    while let Some(f) = queue.pop_front() {\n        log::trace!(\n            \"Performing inter-processor call to {:#?} on CPU {:#?}\",\n            f,\n            this_cpu_id,\n        );\n        f();\n    }\n}"
 }

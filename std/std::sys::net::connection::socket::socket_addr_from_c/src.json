@@ -1,5 +1,5 @@
 {
   "name": "std::sys::net::connection::socket::socket_addr_from_c",
   "span": "$library/std/src/sys/net/connection/socket/mod.rs:193:1: 196:28",
-  "src": "unsafe fn socket_addr_from_c(\n    storage: *const c::sockaddr_storage,\n    len: usize,\n) -> io::Result<SocketAddr>"
+  "src": "unsafe fn socket_addr_from_c(\n    storage: *const c::sockaddr_storage,\n    len: usize,\n) -> io::Result<SocketAddr> {\n    match (*storage).ss_family as c_int {\n        c::AF_INET => {\n            assert!(len >= size_of::<c::sockaddr_in>());\n            Ok(SocketAddr::V4(socket_addr_v4_from_c(unsafe {\n                *(storage as *const _ as *const c::sockaddr_in)\n            })))\n        }\n        c::AF_INET6 => {\n            assert!(len >= size_of::<c::sockaddr_in6>());\n            Ok(SocketAddr::V6(socket_addr_v6_from_c(unsafe {\n                *(storage as *const _ as *const c::sockaddr_in6)\n            })))\n        }\n        _ => Err(io::const_error!(ErrorKind::InvalidInput, \"invalid argument\")),\n    }\n}"
 }

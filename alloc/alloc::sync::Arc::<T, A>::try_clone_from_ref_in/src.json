@@ -1,5 +1,5 @@
 {
   "name": "alloc::sync::Arc::<T, A>::try_clone_from_ref_in",
   "span": "$library/alloc/src/sync.rs:1525:5: 1525:87",
-  "src": "pub fn try_clone_from_ref_in(value: &T, alloc: A) -> Result<Arc<T, A>, AllocError>"
+  "src": "pub fn try_clone_from_ref_in(value: &T, alloc: A) -> Result<Arc<T, A>, AllocError> {\n        // `in_progress` drops the allocation if we panic before finishing initializing it.\n        let mut in_progress: UniqueArcUninit<T, A> = UniqueArcUninit::try_new(value, alloc)?;\n\n        // Initialize with clone of value.\n        let initialized_clone = unsafe {\n            // Clone. If the clone panics, `in_progress` will be dropped and clean up.\n            value.clone_to_uninit(in_progress.data_ptr().cast());\n            // Cast type of pointer, now that it is initialized.\n            in_progress.into_arc()\n        };\n\n        Ok(initialized_clone)\n    }"
 }

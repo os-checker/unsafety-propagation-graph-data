@@ -1,5 +1,5 @@
 {
   "name": "alloc::<collections::vec_deque::VecDeque<T, A> as collections::vec_deque::SpecExtendFromWithin>::spec_extend_from_within",
   "span": "$library/alloc/src/collections/vec_deque/mod.rs:3426:5: 3426:68",
-  "src": "unsafe fn spec_extend_from_within(&mut self, src: Range<usize>)"
+  "src": "unsafe fn spec_extend_from_within(&mut self, src: Range<usize>) {\n        let dst = self.len();\n        let count = src.end - src.start;\n        let src = src.start;\n\n        unsafe {\n            // SAFETY:\n            // - Ranges do not overlap: src entirely spans initialized values, dst entirely spans uninitialized values.\n            // - Ranges are in bounds: guaranteed by the caller.\n            let ranges = self.nonoverlapping_ranges(src, dst, count, self.head);\n            for (src, dst, count) in ranges {\n                ptr::copy_nonoverlapping(src, dst, count);\n            }\n        }\n\n        // SAFETY:\n        // - The elements were just initialized by `copy_nonoverlapping`\n        self.len += count;\n    }"
 }

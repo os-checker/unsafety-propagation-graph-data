@@ -1,5 +1,5 @@
 {
   "name": "core::core_simd::masks::Mask::<T, N>::from_array",
   "span": "$library/core/src/../../portable-simd/crates/core_simd/src/masks.rs:148:5: 148:48",
-  "src": "pub fn from_array(array: [bool; N]) -> Self"
+  "src": "pub fn from_array(array: [bool; N]) -> Self {\n        // SAFETY: Rust's bool has a layout of 1 byte (u8) with a value of\n        //     true:    0b_0000_0001\n        //     false:   0b_0000_0000\n        // Thus, an array of bools is also a valid array of bytes: [u8; N]\n        // This would be hypothetically valid as an \"in-place\" transmute,\n        // but these are \"dependently-sized\" types, so copy elision it is!\n        unsafe {\n            let bytes: [u8; N] = mem::transmute_copy(&array);\n            let bools: Simd<i8, N> =\n                core::intrinsics::simd::simd_ne(Simd::from_array(bytes), Simd::splat(0u8));\n            Mask::from_int_unchecked(core::intrinsics::simd::simd_cast(bools))\n        }\n    }"
 }

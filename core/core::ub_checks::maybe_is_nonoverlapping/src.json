@@ -1,5 +1,5 @@
 {
   "name": "core::ub_checks::maybe_is_nonoverlapping",
   "span": "$library/core/src/ub_checks.rs:160:1: 165:10",
-  "src": "pub(crate) const fn maybe_is_nonoverlapping(\n    src: *const (),\n    dst: *const (),\n    size: usize,\n    count: usize,\n) -> bool"
+  "src": "pub(crate) const fn maybe_is_nonoverlapping(\n    src: *const (),\n    dst: *const (),\n    size: usize,\n    count: usize,\n) -> bool {\n    // This is just for safety checks so we can const_eval_select.\n    const_eval_select!(\n        @capture { src: *const (), dst: *const (), size: usize, count: usize } -> bool:\n        if const {\n            true\n        } else {\n            let src_usize = src.addr();\n            let dst_usize = dst.addr();\n            let Some(size) = size.checked_mul(count) else {\n                crate::panicking::panic_nounwind(\n                    \"is_nonoverlapping: `size_of::<T>() * count` overflows a usize\",\n                )\n            };\n            let diff = src_usize.abs_diff(dst_usize);\n            // If the absolute distance between the ptrs is at least as big as the size of the buffer,\n            // they do not overlap.\n            diff >= size\n        }\n    )\n}"
 }

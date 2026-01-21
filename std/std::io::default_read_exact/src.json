@@ -1,5 +1,5 @@
 {
   "name": "std::io::default_read_exact",
   "span": "$library/std/src/io/mod.rs:542:1: 542:99",
-  "src": "pub(crate) fn default_read_exact<R: Read + ?Sized>(this: &mut R, mut buf: &mut [u8]) -> Result<()>"
+  "src": "pub(crate) fn default_read_exact<R: Read + ?Sized>(this: &mut R, mut buf: &mut [u8]) -> Result<()> {\n    while !buf.is_empty() {\n        match this.read(buf) {\n            Ok(0) => break,\n            Ok(n) => {\n                buf = &mut buf[n..];\n            }\n            Err(ref e) if e.is_interrupted() => {}\n            Err(e) => return Err(e),\n        }\n    }\n    if !buf.is_empty() { Err(Error::READ_EXACT_EOF) } else { Ok(()) }\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::num::dec2flt::decimal_seq::DecimalSeq::round",
   "span": "$library/core/src/num/dec2flt/decimal_seq.rs:91:5: 91:38",
-  "src": "pub(super) fn round(&self) -> u64"
+  "src": "pub(super) fn round(&self) -> u64 {\n        if self.num_digits == 0 || self.decimal_point < 0 {\n            return 0;\n        } else if self.decimal_point >= Self::MAX_DIGITS_WITHOUT_OVERFLOW as i32 {\n            return 0xFFFF_FFFF_FFFF_FFFF_u64;\n        }\n\n        let dp = self.decimal_point as usize;\n        let mut n = 0_u64;\n\n        for i in 0..dp {\n            n *= 10;\n            if i < self.num_digits {\n                n += self.digits[i] as u64;\n            }\n        }\n\n        let mut round_up = false;\n\n        if dp < self.num_digits {\n            round_up = self.digits[dp] >= 5;\n            if self.digits[dp] == 5 && dp + 1 == self.num_digits {\n                round_up = self.truncated || ((dp != 0) && (1 & self.digits[dp - 1] != 0))\n            }\n        }\n\n        if round_up {\n            n += 1;\n        }\n        n\n    }"
 }

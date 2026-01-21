@@ -1,5 +1,5 @@
 {
   "name": "alloc::<boxed::thin::WithHeader<H>::drop::DropGuard<H> as core::ops::Drop>::drop",
   "span": "$library/alloc/src/boxed/thin.rs:369:13: 369:31",
-  "src": "fn drop(&mut self)"
+  "src": "fn drop(&mut self) {\n                // All ZST are allocated statically.\n                if self.value_layout.size() == 0 {\n                    return;\n                }\n\n                unsafe {\n                    // SAFETY: Layout must have been computable if we're in drop\n                    let (layout, value_offset) =\n                        WithHeader::<H>::alloc_layout(self.value_layout).unwrap_unchecked();\n\n                    // Since we only allocate for non-ZSTs, the layout size cannot be zero.\n                    debug_assert!(layout.size() != 0);\n                    alloc::dealloc(self.ptr.as_ptr().sub(value_offset), layout);\n                }\n            }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::vec_deque::VecDeque::<T, A>::append",
   "span": "$library/alloc/src/collections/vec_deque/mod.rs:2538:5: 2538:47",
-  "src": "pub fn append(&mut self, other: &mut Self)"
+  "src": "pub fn append(&mut self, other: &mut Self) {\n        if T::IS_ZST {\n            self.len = self.len.checked_add(other.len).expect(\"capacity overflow\");\n            other.len = 0;\n            other.head = 0;\n            return;\n        }\n\n        self.reserve(other.len);\n        unsafe {\n            let (left, right) = other.as_slices();\n            self.copy_slice(self.to_physical_idx(self.len), left);\n            // no overflow, because self.capacity() >= old_cap + left.len() >= self.len + left.len()\n            self.copy_slice(self.to_physical_idx(self.len + left.len()), right);\n        }\n        // SAFETY: Update pointers after copying to avoid leaving doppelganger\n        // in case of panics.\n        self.len += other.len;\n        // Now that we own its values, forget everything in `other`.\n        other.len = 0;\n        other.head = 0;\n    }"
 }

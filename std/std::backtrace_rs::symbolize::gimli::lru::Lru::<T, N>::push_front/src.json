@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::symbolize::gimli::lru::Lru::<T, N>::push_front",
   "span": "$library/std/src/../../backtrace/src/symbolize/gimli/lru.rs:38:5: 38:61",
-  "src": "pub fn push_front(&mut self, value: T) -> Option<&mut T>"
+  "src": "pub fn push_front(&mut self, value: T) -> Option<&mut T> {\n        if N == 0 {\n            return None;\n        } else if self.len == N {\n            self.len = N - 1;\n            // SAFETY: we maintain len invariant and bail on N == 0\n            unsafe { ptr::drop_in_place(self.arr.as_mut_ptr().cast::<T>().add(N - 1)) };\n        };\n        let len_to_init = self.len + 1;\n        let mut last = MaybeUninit::new(value);\n        for elem in self.arr[0..len_to_init].iter_mut() {\n            // OPT(size): using `mem::swap` allows surprising size regressions\n            last = mem::replace(elem, last);\n        }\n        self.len = len_to_init;\n\n        self.arr\n            .first_mut()\n            // SAFETY: we just pushed it\n            .map(|elem| unsafe { elem.assume_init_mut() })\n    }"
 }

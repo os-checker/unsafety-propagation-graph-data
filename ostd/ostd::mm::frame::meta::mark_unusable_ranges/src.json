@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::meta::mark_unusable_ranges",
   "span": "ostd/src/mm/frame/meta.rs:587:1: 587:26",
-  "src": "fn mark_unusable_ranges()"
+  "src": "fn mark_unusable_ranges() {\n    let regions = &crate::boot::EARLY_INFO.get().unwrap().memory_regions;\n\n    for region in regions.iter().rev().skip_while(|r| !r.typ().is_physical()) {\n        match region.typ() {\n            MemoryRegionType::BadMemory => mark_ranges!(region, UnusableMemoryMeta),\n            MemoryRegionType::Unknown => mark_ranges!(region, ReservedMemoryMeta),\n            MemoryRegionType::NonVolatileSleep => mark_ranges!(region, UnusableMemoryMeta),\n            MemoryRegionType::Reserved => mark_ranges!(region, ReservedMemoryMeta),\n            MemoryRegionType::Kernel => mark_ranges!(region, KernelMeta),\n            MemoryRegionType::Module => mark_ranges!(region, UnusableMemoryMeta),\n            MemoryRegionType::Framebuffer => mark_ranges!(region, ReservedMemoryMeta),\n            MemoryRegionType::Reclaimable => mark_ranges!(region, UnusableMemoryMeta),\n            MemoryRegionType::Usable => {} // By default it is initialized as usable.\n        }\n    }\n}"
 }

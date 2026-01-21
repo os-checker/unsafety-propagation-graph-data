@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::weak::dlsym::DlsymWeak::<F>::initialize",
   "span": "$library/std/src/sys/pal/unix/weak/dlsym.rs:86:5: 86:38",
-  "src": "fn initialize(&self) -> Option<F>"
+  "src": "fn initialize(&self) -> Option<F> {\n        // SAFETY: `self.name` was created from a `&'static CStr` and is\n        // therefore a valid C string pointer.\n        let val = unsafe { libc::dlsym(libc::RTLD_DEFAULT, self.name) };\n        // This synchronizes with the acquire load in `get`.\n        self.func.store(val, Ordering::Release);\n\n        if val.is_null() {\n            None\n        } else {\n            // SAFETY: see the comment in `get`.\n            // FIXME: use `transmute` once it stops complaining about generics.\n            Some(unsafe { mem::transmute_copy::<*mut libc::c_void, F>(&val) })\n        }\n    }"
 }

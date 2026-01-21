@@ -1,5 +1,5 @@
 {
   "name": "core::core_simd::vector::Simd::<T, N>::to_array",
   "span": "$library/core/src/../../portable-simd/crates/core_simd/src/vector.rs:263:5: 263:42",
-  "src": "pub const fn to_array(self) -> [T; N]"
+  "src": "pub const fn to_array(self) -> [T; N] {\n        let mut tmp = core::mem::MaybeUninit::uninit();\n        // SAFETY: writing to `tmp` is safe and initializes it.\n        //\n        // FIXME: We currently use a pointer store instead of `transmute_copy` because `repr(simd)`\n        // results in padding for non-power-of-2 vectors (so vectors are larger than arrays).\n        //\n        // NOTE: This deliberately doesn't just use `self.0`, see the comment\n        // on the struct definition for details.\n        unsafe {\n            self.store(tmp.as_mut_ptr());\n            tmp.assume_init()\n        }\n    }"
 }

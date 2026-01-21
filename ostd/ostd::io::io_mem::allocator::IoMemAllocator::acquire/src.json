@@ -1,5 +1,5 @@
 {
   "name": "ostd::io::io_mem::allocator::IoMemAllocator::acquire",
   "span": "ostd/src/io/io_mem/allocator.rs:26:5: 30:36",
-  "src": "pub(super) fn acquire(\n        &self,\n        range: Range<usize>,\n        cache_policy: CachePolicy,\n    ) -> Option<IoMem<Insensitive>>"
+  "src": "pub(super) fn acquire(\n        &self,\n        range: Range<usize>,\n        cache_policy: CachePolicy,\n    ) -> Option<IoMem<Insensitive>> {\n        debug!(\n            \"Try to acquire security-insensitive MMIO range: {:#x?} with cache policy: {:?}\",\n            range, cache_policy\n        );\n\n        find_allocator(&self.allocators, &range)?\n            .alloc_specific(&range)\n            .ok()?;\n\n        // SAFETY:\n        // 1. The `IoMemAllocator` instance is built from an\n        //    `IoMemAllocatorBuilder` instance, which is constructed after the\n        //    kernel page table is activated.\n        // 2. The created `IoMem` is guaranteed not to access physical memory or\n        //    system device I/O.\n        unsafe { Some(IoMem::new(range, PageFlags::RW, cache_policy)) }\n    }"
 }

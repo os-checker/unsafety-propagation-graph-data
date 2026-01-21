@@ -1,5 +1,5 @@
 {
   "name": "core::array::iter::iter_inner::PolymorphicIter::<[mem::maybe_uninit::MaybeUninit<T>]>::next_back",
   "span": "$library/core/src/array/iter/iter_inner.rs:225:5: 225:52",
-  "src": "pub(super) fn next_back(&mut self) -> Option<T>"
+  "src": "pub(super) fn next_back(&mut self) -> Option<T> {\n        // Get the next index from the back.\n        //\n        // Decreasing `alive.end` by 1 maintains the invariant regarding\n        // `alive`. However, due to this change, for a short time, the alive\n        // zone is not `data[alive]` anymore, but `data[alive.start..=idx]`.\n        self.alive.next_back().map(|idx| {\n            // Read the element from the array.\n            // SAFETY: `idx` is an index into the former \"alive\" region of the\n            // array. Reading this element means that `data[idx]` is regarded as\n            // dead now (i.e. do not touch). As `idx` was the end of the\n            // alive-zone, the alive zone is now `data[alive]` again, restoring\n            // all invariants.\n            unsafe { self.data.get_unchecked(idx).assume_init_read() }\n        })\n    }"
 }

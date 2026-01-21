@@ -1,5 +1,5 @@
 {
   "name": "alloc::<vec::Vec<T> as vec::spec_from_iter_nested::SpecFromIterNested<T, I>>::from_iter",
   "span": "$library/alloc/src/vec/spec_from_iter_nested.rs:50:5: 50:38",
-  "src": "fn from_iter(iterator: I) -> Self"
+  "src": "fn from_iter(iterator: I) -> Self {\n        let mut vector = match iterator.size_hint() {\n            (_, Some(upper)) => Vec::with_capacity(upper),\n            // TrustedLen contract guarantees that `size_hint() == (_, None)` means that there\n            // are more than `usize::MAX` elements.\n            // Since the previous branch would eagerly panic if the capacity is too large\n            // (via `with_capacity`) we do the same here.\n            _ => panic!(\"capacity overflow\"),\n        };\n        // reuse extend specialization for TrustedLen\n        vector.spec_extend(iterator);\n        vector\n    }"
 }

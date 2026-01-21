@@ -1,5 +1,5 @@
 {
   "name": "alloc::<sync::Arc<[T]> as core::default::Default>::default",
   "span": "$library/alloc/src/sync.rs:3806:5: 3806:25",
-  "src": "fn default() -> Self"
+  "src": "fn default() -> Self {\n        if align_of::<T>() <= MAX_STATIC_INNER_SLICE_ALIGNMENT {\n            // We take a reference to the whole struct instead of the ArcInner<[u8; 1]> inside it so\n            // we don't shrink the range of bytes the ptr is allowed to access under Stacked Borrows.\n            // (Miri complains on 32-bit targets with Arc<[Align16]> otherwise.)\n            // (Note that NonNull::from(&STATIC_INNER_SLICE.inner) is fine under Tree Borrows.)\n            let inner: NonNull<SliceArcInnerForStatic> = NonNull::from(&STATIC_INNER_SLICE);\n            let inner: NonNull<ArcInner<[T; 0]>> = inner.cast();\n            // `this` semantically is the Arc \"owned\" by the static, so make sure not to drop it.\n            let this: mem::ManuallyDrop<Arc<[T; 0]>> =\n                unsafe { mem::ManuallyDrop::new(Arc::from_inner(inner)) };\n            return (*this).clone();\n        }\n\n        // If T's alignment is too large for the static, make a new unique allocation.\n        let arr: [T; 0] = [];\n        Arc::from(arr)\n    }"
 }

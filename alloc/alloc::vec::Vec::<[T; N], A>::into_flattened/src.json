@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<[T; N], A>::into_flattened",
   "span": "$library/alloc/src/vec/mod.rs:3425:5: 3425:45",
-  "src": "pub fn into_flattened(self) -> Vec<T, A>"
+  "src": "pub fn into_flattened(self) -> Vec<T, A> {\n        let (ptr, len, cap, alloc) = self.into_raw_parts_with_alloc();\n        let (new_len, new_cap) = if T::IS_ZST {\n            (len.checked_mul(N).expect(\"vec len overflow\"), usize::MAX)\n        } else {\n            // SAFETY:\n            // - `cap * N` cannot overflow because the allocation is already in\n            // the address space.\n            // - Each `[T; N]` has `N` valid elements, so there are `len * N`\n            // valid elements in the allocation.\n            unsafe { (len.unchecked_mul(N), cap.unchecked_mul(N)) }\n        };\n        // SAFETY:\n        // - `ptr` was allocated by `self`\n        // - `ptr` is well-aligned because `[T; N]` has the same alignment as `T`.\n        // - `new_cap` refers to the same sized allocation as `cap` because\n        // `new_cap * size_of::<T>()` == `cap * size_of::<[T; N]>()`\n        // - `len` <= `cap`, so `len * N` <= `cap * N`.\n        unsafe { Vec::<T, A>::from_raw_parts_in(ptr.cast(), new_len, new_cap, alloc) }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::trap::handle_user_page_fault",
   "span": "ostd/src/arch/x86/trap/mod.rs:211:1: 211:71",
-  "src": "fn handle_user_page_fault(f: &mut TrapFrame, exception: &CpuException)"
+  "src": "fn handle_user_page_fault(f: &mut TrapFrame, exception: &CpuException) {\n    let handler = USER_PAGE_FAULT_HANDLER\n        .get()\n        .expect(\"a page fault handler is missing\");\n\n    let res = handler(exception);\n    // Copying bytes by bytes can recover directly\n    // if handling the page fault successfully.\n    if res.is_ok() {\n        return;\n    }\n\n    // Use the exception table to recover to normal execution.\n    if let Some(addr) = ExTable::find_recovery_inst_addr(f.rip) {\n        f.rip = addr;\n    } else {\n        panic!(\"Cannot handle user page fault; trapframe: {:#x?}\", f);\n    }\n}"
 }

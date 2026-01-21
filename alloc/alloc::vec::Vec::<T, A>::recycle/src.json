@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<T, A>::recycle",
   "span": "$library/alloc/src/vec/mod.rs:3258:5: 3260:26",
-  "src": "pub fn recycle<U>(mut self) -> Vec<U, A>\n    where\n        U: Recyclable<T>,"
+  "src": "pub fn recycle<U>(mut self) -> Vec<U, A>\n    where\n        U: Recyclable<T>,\n    {\n        self.clear();\n        const {\n            // FIXME(const-hack, 146097): compare `Layout`s\n            assert!(size_of::<T>() == size_of::<U>());\n            assert!(align_of::<T>() == align_of::<U>());\n        };\n        let (ptr, length, capacity, alloc) = self.into_parts_with_alloc();\n        debug_assert_eq!(length, 0);\n        // SAFETY:\n        // - `ptr` and `alloc` were just returned from `self.into_raw_parts_with_alloc()`\n        // - `T` & `U` have the same layout, so `capacity` does not need to be changed and we can safely use `alloc.dealloc` later\n        // - the original vector was cleared, so there is no problem with \"transmuting\" the stored values\n        unsafe { Vec::from_parts_in(ptr.cast::<U>(), length, capacity, alloc) }\n    }"
 }

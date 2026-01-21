@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::backtrace::libunwind::trace::trace_fn",
   "span": "$library/std/src/../../backtrace/src/backtrace/libunwind.rs:120:5: 123:33",
-  "src": "extern \"C\" fn trace_fn(\n        ctx: *mut uw::_Unwind_Context,\n        arg: *mut c_void,\n    ) -> uw::_Unwind_Reason_Code"
+  "src": "extern \"C\" fn trace_fn(\n        ctx: *mut uw::_Unwind_Context,\n        arg: *mut c_void,\n    ) -> uw::_Unwind_Reason_Code {\n        let cb = unsafe { &mut *arg.cast::<&mut dyn FnMut(&super::Frame) -> bool>() };\n        let cx = super::Frame {\n            inner: Frame::Raw(ctx),\n        };\n\n        let mut bomb = Bomb { enabled: true };\n        let keep_going = cb(&cx);\n        bomb.enabled = false;\n\n        if keep_going {\n            uw::_URC_NO_REASON\n        } else {\n            uw::_URC_FAILURE\n        }\n    }"
 }

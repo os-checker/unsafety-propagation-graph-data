@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::zero::Channel::<T>::read",
   "span": "$library/std/src/sync/mpmc/zero.rs:114:5: 114:73",
-  "src": "pub(crate) unsafe fn read(&self, token: &mut Token) -> Result<T, ()>"
+  "src": "pub(crate) unsafe fn read(&self, token: &mut Token) -> Result<T, ()> {\n        // If there is no packet, the channel is disconnected.\n        if token.zero.0.is_null() {\n            return Err(());\n        }\n\n        let packet = unsafe { &*(token.zero.0 as *const Packet<T>) };\n\n        if packet.on_stack {\n            // The message has been in the packet from the beginning, so there is no need to wait\n            // for it. However, after reading the message, we need to set `ready` to `true` in\n            // order to signal that the packet can be destroyed.\n            let msg = unsafe { packet.msg.get().replace(None) }.unwrap();\n            packet.ready.store(true, Ordering::Release);\n            Ok(msg)\n        } else {\n            // Wait until the message becomes available, then read it and destroy the\n            // heap-allocated packet.\n            packet.wait_ready();\n            unsafe {\n                let msg = packet.msg.get().replace(None).unwrap();\n                drop(Box::from_raw(token.zero.0 as *mut Packet<T>));\n                Ok(msg)\n            }\n        }\n    }"
 }

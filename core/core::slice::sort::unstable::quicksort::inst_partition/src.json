@@ -1,5 +1,5 @@
 {
   "name": "core::slice::sort::unstable::quicksort::inst_partition",
   "span": "$library/core/src/slice/sort/unstable/quicksort.rs:139:1: 139:92",
-  "src": "const fn inst_partition<T, F: FnMut(&T, &T) -> bool>() -> fn(&mut [T], &T, &mut F) -> usize"
+  "src": "const fn inst_partition<T, F: FnMut(&T, &T) -> bool>() -> fn(&mut [T], &T, &mut F) -> usize {\n    const MAX_BRANCHLESS_PARTITION_SIZE: usize = 96;\n    if size_of::<T>() <= MAX_BRANCHLESS_PARTITION_SIZE {\n        // Specialize for types that are relatively cheap to copy, where branchless optimizations\n        // have large leverage e.g. `u64` and `String`.\n        cfg_select! {\n            feature = \"optimize_for_size\" => {\n                partition_lomuto_branchless_simple::<T, F>\n            }\n            _ => {\n                partition_lomuto_branchless_cyclic::<T, F>\n            }\n        }\n    } else {\n        partition_hoare_branchy_cyclic::<T, F>\n    }\n}"
 }

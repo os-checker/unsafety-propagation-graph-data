@@ -1,5 +1,5 @@
 {
   "name": "std::io::default_read_to_end::small_probe_read",
   "span": "$library/std/src/io/mod.rs:424:5: 424:89",
-  "src": "fn small_probe_read<R: Read + ?Sized>(r: &mut R, buf: &mut Vec<u8>) -> Result<usize>"
+  "src": "fn small_probe_read<R: Read + ?Sized>(r: &mut R, buf: &mut Vec<u8>) -> Result<usize> {\n        let mut probe = [0u8; PROBE_SIZE];\n\n        loop {\n            match r.read(&mut probe) {\n                Ok(n) => {\n                    // there is no way to recover from allocation failure here\n                    // because the data has already been read.\n                    buf.extend_from_slice(&probe[..n]);\n                    return Ok(n);\n                }\n                Err(ref e) if e.is_interrupted() => continue,\n                Err(e) => return Err(e),\n            }\n        }\n    }"
 }

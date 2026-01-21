@@ -1,5 +1,5 @@
 {
   "name": "core::iter::traits::iterator::Iterator::partial_cmp_by",
   "span": "$library/core/src/iter/traits/iterator.rs:3748:5: 3752:59",
-  "src": "fn partial_cmp_by<I, F>(self, other: I, partial_cmp: F) -> Option<Ordering>\n    where\n        Self: Sized,\n        I: IntoIterator,\n        F: FnMut(Self::Item, I::Item) -> Option<Ordering>,"
+  "src": "fn partial_cmp_by<I, F>(self, other: I, partial_cmp: F) -> Option<Ordering>\n    where\n        Self: Sized,\n        I: IntoIterator,\n        F: FnMut(Self::Item, I::Item) -> Option<Ordering>,\n    {\n        #[inline]\n        fn compare<X, Y, F>(mut partial_cmp: F) -> impl FnMut(X, Y) -> ControlFlow<Option<Ordering>>\n        where\n            F: FnMut(X, Y) -> Option<Ordering>,\n        {\n            move |x, y| match partial_cmp(x, y) {\n                Some(Ordering::Equal) => ControlFlow::Continue(()),\n                non_eq => ControlFlow::Break(non_eq),\n            }\n        }\n\n        match iter_compare(self, other.into_iter(), compare(partial_cmp)) {\n            ControlFlow::Continue(ord) => Some(ord),\n            ControlFlow::Break(ord) => ord,\n        }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::panicking::update_hook",
   "span": "$library/std/src/panicking.rs:222:1: 227:19",
-  "src": "pub fn update_hook<F>(hook_fn: F)\nwhere\n    F: Fn(&(dyn Fn(&PanicHookInfo<'_>) + Send + Sync + 'static), &PanicHookInfo<'_>)\n        + Sync\n        + Send\n        + 'static,"
+  "src": "pub fn update_hook<F>(hook_fn: F)\nwhere\n    F: Fn(&(dyn Fn(&PanicHookInfo<'_>) + Send + Sync + 'static), &PanicHookInfo<'_>)\n        + Sync\n        + Send\n        + 'static,\n{\n    if thread::panicking() {\n        panic!(\"cannot modify the panic hook from a panicking thread\");\n    }\n\n    let mut hook = HOOK.write();\n    let prev = mem::take(&mut *hook).into_box();\n    *hook = Hook::Custom(Box::new(move |info| hook_fn(&prev, info)));\n}"
 }

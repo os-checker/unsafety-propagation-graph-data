@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<T, A>::extend_with",
   "span": "$library/alloc/src/vec/mod.rs:3450:5: 3450:50",
-  "src": "fn extend_with(&mut self, n: usize, value: T)"
+  "src": "fn extend_with(&mut self, n: usize, value: T) {\n        self.reserve(n);\n\n        unsafe {\n            let mut ptr = self.as_mut_ptr().add(self.len());\n            // Use SetLenOnDrop to work around bug where compiler\n            // might not realize the store through `ptr` through self.set_len()\n            // don't alias.\n            let mut local_len = SetLenOnDrop::new(&mut self.len);\n\n            // Write all elements except the last one\n            for _ in 1..n {\n                ptr::write(ptr, value.clone());\n                ptr = ptr.add(1);\n                // Increment the length in every step in case clone() panics\n                local_len.increment_len(1);\n            }\n\n            if n > 0 {\n                // We can write the last element directly without cloning needlessly\n                ptr::write(ptr, value);\n                local_len.increment_len(1);\n            }\n\n            // len set by scope guard\n        }\n    }"
 }

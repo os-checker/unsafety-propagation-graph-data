@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::linux::pidfd::PidFd::try_wait",
   "span": "$library/std/src/sys/pal/unix/linux/pidfd.rs:40:5: 40:61",
-  "src": "pub fn try_wait(&self) -> io::Result<Option<ExitStatus>>"
+  "src": "pub fn try_wait(&self) -> io::Result<Option<ExitStatus>> {\n        let mut siginfo: libc::siginfo_t = unsafe { crate::mem::zeroed() };\n\n        cvt(unsafe {\n            libc::waitid(\n                libc::P_PIDFD,\n                self.0.as_raw_fd() as u32,\n                &mut siginfo,\n                libc::WEXITED | libc::WNOHANG,\n            )\n        })?;\n        if unsafe { siginfo.si_pid() } == 0 {\n            Ok(None)\n        } else {\n            Ok(Some(ExitStatus::from_waitid_siginfo(siginfo)))\n        }\n    }"
 }

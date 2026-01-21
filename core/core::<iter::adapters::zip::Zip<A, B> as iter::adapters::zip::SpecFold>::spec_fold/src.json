@@ -1,5 +1,5 @@
 {
   "name": "core::<iter::adapters::zip::Zip<A, B> as iter::adapters::zip::SpecFold>::spec_fold",
   "span": "$library/core/src/iter/adapters/zip.rs:660:5: 662:42",
-  "src": "fn spec_fold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc\n    where\n        F: FnMut(Acc, Self::Item) -> Acc,"
+  "src": "fn spec_fold<Acc, F>(mut self, init: Acc, mut f: F) -> Acc\n    where\n        F: FnMut(Acc, Self::Item) -> Acc,\n    {\n        let mut accum = init;\n        loop {\n            let (upper, more) = if let Some(upper) = ZipImpl::size_hint(&self).1 {\n                (upper, false)\n            } else {\n                // Per TrustedLen contract a None upper bound means more than usize::MAX items\n                (usize::MAX, true)\n            };\n\n            for _ in 0..upper {\n                let pair =\n                    // SAFETY: TrustedLen guarantees that at least `upper` many items are available\n                    // therefore we know they can't be None\n                    unsafe { (self.a.next().unwrap_unchecked(), self.b.next().unwrap_unchecked()) };\n                accum = f(accum, pair);\n            }\n\n            if !more {\n                break;\n            }\n        }\n        accum\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::slice::<impl [T]>::split_at_mut_unchecked",
   "span": "$library/core/src/slice/mod.rs:2089:5: 2089:94",
-  "src": "pub const unsafe fn split_at_mut_unchecked(&mut self, mid: usize) -> (&mut [T], &mut [T])"
+  "src": "pub const unsafe fn split_at_mut_unchecked(&mut self, mid: usize) -> (&mut [T], &mut [T]) {\n        let len = self.len();\n        let ptr = self.as_mut_ptr();\n\n        assert_unsafe_precondition!(\n            check_library_ub,\n            \"slice::split_at_mut_unchecked requires the index to be within the slice\",\n            (mid: usize = mid, len: usize = len) => mid <= len,\n        );\n\n        // SAFETY: Caller has to check that `0 <= mid <= self.len()`.\n        //\n        // `[ptr; mid]` and `[mid; len]` are not overlapping, so returning a mutable reference\n        // is fine.\n        unsafe {\n            (\n                from_raw_parts_mut(ptr, mid),\n                from_raw_parts_mut(ptr.add(mid), unchecked_sub(len, mid)),\n            )\n        }\n    }"
 }

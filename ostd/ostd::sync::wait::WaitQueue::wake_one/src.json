@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::wait::WaitQueue::wake_one",
   "span": "ostd/src/sync/wait.rs:89:5: 89:35",
-  "src": "pub fn wake_one(&self) -> bool"
+  "src": "pub fn wake_one(&self) -> bool {\n        // Fast path\n        if self.is_empty() {\n            return false;\n        }\n\n        loop {\n            let mut wakers = self.wakers.lock();\n            let Some(waker) = wakers.pop_front() else {\n                return false;\n            };\n            self.num_wakers.fetch_sub(1, Ordering::Release);\n            // Avoid holding lock when calling `wake_up`\n            drop(wakers);\n\n            if waker.wake_up() {\n                return true;\n            }\n        }\n    }"
 }

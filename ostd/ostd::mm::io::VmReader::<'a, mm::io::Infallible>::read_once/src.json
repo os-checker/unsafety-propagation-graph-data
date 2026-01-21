@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::io::VmReader::<'a, mm::io::Infallible>::read_once",
   "span": "ostd/src/mm/io.rs:511:5: 511:57",
-  "src": "pub fn read_once<T: PodOnce>(&mut self) -> Result<T>"
+  "src": "pub fn read_once<T: PodOnce>(&mut self) -> Result<T> {\n        if self.remain() < size_of::<T>() {\n            return Err(Error::InvalidArgs);\n        }\n\n        let cursor = self.cursor.cast::<T>();\n        assert!(cursor.is_aligned());\n\n        const { assert!(pod_once_impls::is_non_tearing::<T>()) };\n\n        // SAFETY: We have checked that the number of bytes remaining is at least the size of `T`\n        // and that the cursor is properly aligned with respect to the type `T`. All other safety\n        // requirements are the same as for `Self::read`.\n        let val = unsafe { cursor.read_volatile() };\n        self.cursor = self.cursor.wrapping_add(size_of::<T>());\n\n        Ok(val)\n    }"
 }

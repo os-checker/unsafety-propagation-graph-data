@@ -1,5 +1,5 @@
 {
   "name": "std::sys::sync::rwlock::futex::is_read_lockable",
   "span": "$library/std/src/sys/sync/rwlock/futex.rs:47:1: 47:46",
-  "src": "fn is_read_lockable(state: Primitive) -> bool"
+  "src": "fn is_read_lockable(state: Primitive) -> bool {\n    // This also returns false if the counter could overflow if we tried to read lock it.\n    //\n    // We don't allow read-locking if there's readers waiting, even if the lock is unlocked\n    // and there's no writers waiting. The only situation when this happens is after unlocking,\n    // at which point the unlocking thread might be waking up writers, which have priority over readers.\n    // The unlocking thread will clear the readers waiting bit and wake up readers, if necessary.\n    state & MASK < MAX_READERS && !has_readers_waiting(state) && !has_writers_waiting(state)\n}"
 }

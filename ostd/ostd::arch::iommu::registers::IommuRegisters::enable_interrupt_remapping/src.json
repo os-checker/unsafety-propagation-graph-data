@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::iommu::registers::IommuRegisters::enable_interrupt_remapping",
   "span": "ostd/src/arch/x86/iommu/registers/mod.rs:127:5: 127:91",
-  "src": "pub(super) fn enable_interrupt_remapping(&mut self, table: &'static IntRemappingTable)"
+  "src": "pub(super) fn enable_interrupt_remapping(&mut self, table: &'static IntRemappingTable) {\n        assert!(\n            self.read_extended_capability()\n                .flags()\n                .contains(ExtendedCapabilityFlags::IR)\n        );\n        // Set interrupt remapping table address\n        self.interrupt_remapping_table_addr\n            .as_mut_ptr()\n            .write(table.encode());\n        self.write_global_command(GlobalCommand::SIRTP, true);\n        while !self.read_global_status().contains(GlobalStatus::IRTPS) {}\n\n        // Enable Interrupt Remapping\n        self.write_global_command(GlobalCommand::IRE, true);\n        while !self.read_global_status().contains(GlobalStatus::IRES) {}\n\n        // Disable Compatibility format interrupts\n        if self.read_global_status().contains(GlobalStatus::CFIS) {\n            self.write_global_command(GlobalCommand::CFI, false);\n            while self.read_global_status().contains(GlobalStatus::CFIS) {}\n        }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::path::Path::_with_extension",
   "span": "$library/std/src/path.rs:3062:5: 3062:60",
-  "src": "fn _with_extension(&self, extension: &OsStr) -> PathBuf"
+  "src": "fn _with_extension(&self, extension: &OsStr) -> PathBuf {\n        let self_len = self.as_os_str().len();\n        let self_bytes = self.as_os_str().as_encoded_bytes();\n\n        let (new_capacity, slice_to_copy) = match self.extension() {\n            None => {\n                // Enough capacity for the extension and the dot\n                let capacity = self_len + extension.len() + 1;\n                let whole_path = self_bytes;\n                (capacity, whole_path)\n            }\n            Some(previous_extension) => {\n                let capacity = self_len + extension.len() - previous_extension.len();\n                let path_till_dot = &self_bytes[..self_len - previous_extension.len()];\n                (capacity, path_till_dot)\n            }\n        };\n\n        let mut new_path = PathBuf::with_capacity(new_capacity);\n        // SAFETY: The path is empty, so cannot have surrogate halves.\n        unsafe { new_path.inner.extend_from_slice_unchecked(slice_to_copy) };\n        new_path.set_extension(extension);\n        new_path\n    }"
 }

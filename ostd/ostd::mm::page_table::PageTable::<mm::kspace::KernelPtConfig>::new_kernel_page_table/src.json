@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::PageTable::<mm::kspace::KernelPtConfig>::new_kernel_page_table",
   "span": "ostd/src/mm/page_table/mod.rs:297:5: 297:50",
-  "src": "pub(crate) fn new_kernel_page_table() -> Self"
+  "src": "pub(crate) fn new_kernel_page_table() -> Self {\n        let kpt = Self::empty();\n\n        // Make shared the page tables mapped by the root table in the kernel space.\n        {\n            let preempt_guard = disable_preempt();\n            let mut root_node = kpt.root.borrow().lock(&preempt_guard);\n\n            for i in KernelPtConfig::TOP_LEVEL_INDEX_RANGE {\n                let mut root_entry = root_node.entry(i);\n                let _ = root_entry.alloc_if_none(&preempt_guard).unwrap();\n            }\n        }\n\n        kpt\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::tlb::TlbFlusher::<'a, G>::sync_tlb_flush",
   "span": "ostd/src/mm/tlb.rs:141:5: 141:37",
-  "src": "pub fn sync_tlb_flush(&mut self)"
+  "src": "pub fn sync_tlb_flush(&mut self) {\n        if self.ipi_sender.is_none() {\n            // We performed some TLB flushes in the boot context. The AP's boot\n            // process should take care of them.\n            return;\n        }\n\n        assert!(\n            irq::is_local_enabled(),\n            \"Waiting for remote flush with IRQs disabled\"\n        );\n\n        for cpu in self.have_unsynced_flush.iter() {\n            while !ACK_REMOTE_FLUSH.get_on_cpu(cpu).load(Ordering::Relaxed) {\n                core::hint::spin_loop();\n            }\n        }\n\n        self.have_unsynced_flush = CpuSet::new_empty();\n    }"
 }

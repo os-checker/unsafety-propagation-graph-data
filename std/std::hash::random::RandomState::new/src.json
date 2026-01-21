@@ -1,5 +1,5 @@
 {
   "name": "std::hash::random::RandomState::new",
   "span": "$library/std/src/hash/random.rs:56:5: 56:32",
-  "src": "pub fn new() -> RandomState"
+  "src": "pub fn new() -> RandomState {\n        // Historically this function did not cache keys from the OS and instead\n        // simply always called `rand::thread_rng().gen()` twice. In #31356 it\n        // was discovered, however, that because we re-seed the thread-local RNG\n        // from the OS periodically that this can cause excessive slowdown when\n        // many hash maps are created on a thread. To solve this performance\n        // trap we cache the first set of randomly generated keys per-thread.\n        //\n        // Later in #36481 it was discovered that exposing a deterministic\n        // iteration order allows a form of DOS attack. To counter that we\n        // increment one of the seeds on every RandomState creation, giving\n        // every corresponding HashMap a different iteration order.\n        thread_local!(static KEYS: Cell<(u64, u64)> = {\n            Cell::new(hashmap_random_keys())\n        });\n\n        KEYS.with(|keys| {\n            let (k0, k1) = keys.get();\n            keys.set((k0.wrapping_add(1), k1));\n            RandomState { k0, k1 }\n        })\n    }"
 }

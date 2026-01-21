@@ -1,5 +1,5 @@
 {
   "name": "alloc::rc::Rc::<T, A>::from_box_in",
   "span": "$library/alloc/src/rc.rs:2273:5: 2273:47",
-  "src": "fn from_box_in(src: Box<T, A>) -> Rc<T, A>"
+  "src": "fn from_box_in(src: Box<T, A>) -> Rc<T, A> {\n        unsafe {\n            let value_size = size_of_val(&*src);\n            let ptr = Self::allocate_for_ptr_in(&*src, Box::allocator(&src));\n\n            // Copy value as bytes\n            ptr::copy_nonoverlapping(\n                (&raw const *src) as *const u8,\n                (&raw mut (*ptr).value) as *mut u8,\n                value_size,\n            );\n\n            // Free the allocation without dropping its contents\n            let (bptr, alloc) = Box::into_raw_with_allocator(src);\n            let src = Box::from_raw_in(bptr as *mut mem::ManuallyDrop<T>, alloc.by_ref());\n            drop(src);\n\n            Self::from_ptr_in(ptr, alloc)\n        }\n    }"
 }

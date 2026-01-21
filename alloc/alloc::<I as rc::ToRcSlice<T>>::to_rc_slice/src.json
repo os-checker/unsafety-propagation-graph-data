@@ -1,5 +1,5 @@
 {
   "name": "alloc::<I as rc::ToRcSlice<T>>::to_rc_slice",
   "span": "$library/alloc/src/rc.rs:3122:5: 3122:36",
-  "src": "fn to_rc_slice(self) -> Rc<[T]>"
+  "src": "fn to_rc_slice(self) -> Rc<[T]> {\n        // This is the case for a `TrustedLen` iterator.\n        let (low, high) = self.size_hint();\n        if let Some(high) = high {\n            debug_assert_eq!(\n                low,\n                high,\n                \"TrustedLen iterator's size hint is not exact: {:?}\",\n                (low, high)\n            );\n\n            unsafe {\n                // SAFETY: We need to ensure that the iterator has an exact length and we have.\n                Rc::from_iter_exact(self, low)\n            }\n        } else {\n            // TrustedLen contract guarantees that `upper_bound == None` implies an iterator\n            // length exceeding `usize::MAX`.\n            // The default implementation would collect into a vec which would panic.\n            // Thus we panic here immediately without invoking `Vec` code.\n            panic!(\"capacity overflow\");\n        }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "alloc::sync::Arc::<[T]>::new_zeroed_slice",
   "span": "$library/alloc/src/sync.rs:1299:5: 1299:70",
-  "src": "pub fn new_zeroed_slice(len: usize) -> Arc<[mem::MaybeUninit<T>]>"
+  "src": "pub fn new_zeroed_slice(len: usize) -> Arc<[mem::MaybeUninit<T>]> {\n        unsafe {\n            Arc::from_ptr(Arc::allocate_for_layout(\n                Layout::array::<T>(len).unwrap(),\n                |layout| Global.allocate_zeroed(layout),\n                |mem| {\n                    ptr::slice_from_raw_parts_mut(mem as *mut T, len)\n                        as *mut ArcInner<[mem::MaybeUninit<T>]>\n                },\n            ))\n        }\n    }"
 }

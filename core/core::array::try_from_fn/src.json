@@ -1,5 +1,5 @@
 {
   "name": "core::array::try_from_fn",
   "span": "$library/core/src/array/mod.rs:148:1: 151:53",
-  "src": "pub const fn try_from_fn<R, const N: usize, F>(cb: F) -> ChangeOutputType<R, [R::Output; N]>\nwhere\n    R: [const] Try<Residual: [const] Residual<[R::Output; N]>, Output: [const] Destruct>,\n    F: [const] FnMut(usize) -> R + [const] Destruct,"
+  "src": "pub const fn try_from_fn<R, const N: usize, F>(cb: F) -> ChangeOutputType<R, [R::Output; N]>\nwhere\n    R: [const] Try<Residual: [const] Residual<[R::Output; N]>, Output: [const] Destruct>,\n    F: [const] FnMut(usize) -> R + [const] Destruct,\n{\n    let mut array = [const { MaybeUninit::uninit() }; N];\n    match try_from_fn_erased(&mut array, cb) {\n        ControlFlow::Break(r) => FromResidual::from_residual(r),\n        ControlFlow::Continue(()) => {\n            // SAFETY: All elements of the array were populated.\n            try { unsafe { MaybeUninit::array_assume_init(array) } }\n        }\n    }\n}"
 }

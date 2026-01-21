@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::wait::WaitQueue::wake_all",
   "span": "ostd/src/sync/wait.rs:111:5: 111:36",
-  "src": "pub fn wake_all(&self) -> usize"
+  "src": "pub fn wake_all(&self) -> usize {\n        // Fast path\n        if self.is_empty() {\n            return 0;\n        }\n\n        let mut num_woken = 0;\n\n        loop {\n            let mut wakers = self.wakers.lock();\n            let Some(waker) = wakers.pop_front() else {\n                break;\n            };\n            self.num_wakers.fetch_sub(1, Ordering::Release);\n            // Avoid holding lock when calling `wake_up`\n            drop(wakers);\n\n            if waker.wake_up() {\n                num_woken += 1;\n            }\n        }\n\n        num_woken\n    }"
 }

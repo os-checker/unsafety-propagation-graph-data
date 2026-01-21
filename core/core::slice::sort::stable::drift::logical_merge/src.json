@@ -1,5 +1,5 @@
 {
   "name": "core::slice::sort::stable::drift::logical_merge",
   "span": "$library/core/src/slice/sort/stable/drift.rs:191:1: 197:18",
-  "src": "fn logical_merge<T, F: FnMut(&T, &T) -> bool>(\n    v: &mut [T],\n    scratch: &mut [MaybeUninit<T>],\n    left: DriftsortRun,\n    right: DriftsortRun,\n    is_less: &mut F,\n) -> DriftsortRun"
+  "src": "fn logical_merge<T, F: FnMut(&T, &T) -> bool>(\n    v: &mut [T],\n    scratch: &mut [MaybeUninit<T>],\n    left: DriftsortRun,\n    right: DriftsortRun,\n    is_less: &mut F,\n) -> DriftsortRun {\n    // If one or both of the runs are sorted do a physical merge, using\n    // quicksort to sort the unsorted run if present. We also *need* to\n    // physically merge if the combined runs would not fit in the scratch space\n    // anymore (as this would mean we are no longer able to quicksort them).\n    let len = v.len();\n    let can_fit_in_scratch = len <= scratch.len();\n    if !can_fit_in_scratch || left.sorted() || right.sorted() {\n        if !left.sorted() {\n            stable_quicksort(&mut v[..left.len()], scratch, is_less);\n        }\n        if !right.sorted() {\n            stable_quicksort(&mut v[left.len()..], scratch, is_less);\n        }\n        merge(v, scratch, left.len(), is_less);\n\n        DriftsortRun::new_sorted(len)\n    } else {\n        DriftsortRun::new_unsorted(len)\n    }\n}"
 }

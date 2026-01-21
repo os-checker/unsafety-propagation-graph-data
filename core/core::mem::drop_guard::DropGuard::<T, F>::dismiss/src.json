@@ -1,5 +1,5 @@
 {
   "name": "core::mem::drop_guard::DropGuard::<T, F>::dismiss",
   "span": "$library/core/src/mem/drop_guard.rs:85:5: 85:30",
-  "src": "pub fn dismiss(self) -> T"
+  "src": "pub fn dismiss(self) -> T {\n        // First we ensure that dropping the guard will not trigger\n        // its destructor\n        let mut this = ManuallyDrop::new(self);\n\n        // Next we manually read the stored value from the guard.\n        //\n        // SAFETY: this is safe because we've taken ownership of the guard.\n        let value = unsafe { ManuallyDrop::take(&mut this.inner) };\n\n        // Finally we drop the stored closure. We do this *after* having read\n        // the value, so that even if the closure's `drop` function panics,\n        // unwinding still tries to drop the value.\n        //\n        // SAFETY: this is safe because we've taken ownership of the guard.\n        unsafe { ManuallyDrop::drop(&mut this.f) };\n        value\n    }"
 }

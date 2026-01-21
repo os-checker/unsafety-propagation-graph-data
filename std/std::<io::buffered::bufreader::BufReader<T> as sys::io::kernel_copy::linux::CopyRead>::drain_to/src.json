@@ -1,5 +1,5 @@
 {
   "name": "std::<io::buffered::bufreader::BufReader<T> as sys::io::kernel_copy::linux::CopyRead>::drain_to",
   "span": "$library/std/src/sys/io/kernel_copy/linux.rs:509:5: 509:86",
-  "src": "fn drain_to<W: Write>(&mut self, writer: &mut W, outer_limit: u64) -> Result<u64>"
+  "src": "fn drain_to<W: Write>(&mut self, writer: &mut W, outer_limit: u64) -> Result<u64> {\n        let buf = self.buffer();\n        let buf = &buf[0..min(buf.len(), outer_limit.try_into().unwrap_or(usize::MAX))];\n        let bytes = buf.len();\n        writer.write_all(buf)?;\n        self.consume(bytes);\n\n        let remaining = outer_limit - bytes as u64;\n\n        // in case of nested bufreaders we also need to drain the ones closer to the source\n        let inner_bytes = self.get_mut().drain_to(writer, remaining)?;\n\n        Ok(bytes as u64 + inner_bytes)\n    }"
 }

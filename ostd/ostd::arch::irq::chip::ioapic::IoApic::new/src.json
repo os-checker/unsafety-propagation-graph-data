@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::irq::chip::ioapic::IoApic::new",
   "span": "ostd/src/arch/x86/irq/chip/ioapic.rs:30:5: 34:14",
-  "src": "pub(super) unsafe fn new(\n        base_address: usize,\n        base_interrupt: u32,\n        io_mem_builder: &IoMemAllocatorBuilder,\n    ) -> Self"
+  "src": "pub(super) unsafe fn new(\n        base_address: usize,\n        base_interrupt: u32,\n        io_mem_builder: &IoMemAllocatorBuilder,\n    ) -> Self {\n        let mut access = unsafe { IoApicAccess::new(base_address, io_mem_builder) };\n        let max_redirection_entry = access.max_redirection_entry();\n\n        info!(\n            \"[IOAPIC]: Found at {:#x}, ID {}, version {}, interrupt base {}, interrupt count {}\",\n            base_address,\n            access.id(),\n            access.version(),\n            base_interrupt,\n            max_redirection_entry,\n        );\n\n        let mut ioapic = Self {\n            access,\n            interrupt_base: base_interrupt,\n            max_redirection_entry,\n        };\n\n        // Initialize all the entries to the disabled state.\n        for index in 0..=max_redirection_entry {\n            ioapic.disable(index).unwrap();\n        }\n\n        ioapic\n    }"
 }

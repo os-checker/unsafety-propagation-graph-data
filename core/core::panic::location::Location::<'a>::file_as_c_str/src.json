@@ -1,5 +1,5 @@
 {
   "name": "core::panic::location::Location::<'a>::file_as_c_str",
   "span": "$library/core/src/panic/location.rs:233:5: 233:50",
-  "src": "pub const fn file_as_c_str(&self) -> &'a CStr"
+  "src": "pub const fn file_as_c_str(&self) -> &'a CStr {\n        let filename = self.filename.as_ptr();\n\n        // SAFETY: The filename is valid for `filename_len+1` bytes, so this addition can't\n        // overflow.\n        let cstr_len = unsafe { crate::mem::size_of_val_raw(filename).unchecked_add(1) };\n\n        // SAFETY: The filename is valid for `filename_len+1` bytes.\n        let slice = unsafe { crate::slice::from_raw_parts(filename.cast(), cstr_len) };\n\n        // SAFETY: The filename is guaranteed to have a trailing nul byte and no interior nul bytes.\n        unsafe { CStr::from_bytes_with_nul_unchecked(slice) }\n    }"
 }

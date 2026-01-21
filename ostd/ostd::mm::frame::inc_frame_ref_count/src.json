@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::inc_frame_ref_count",
   "span": "ostd/src/mm/frame/mod.rs:342:1: 342:62",
-  "src": "pub(in crate::mm) unsafe fn inc_frame_ref_count(paddr: Paddr)"
+  "src": "pub(in crate::mm) unsafe fn inc_frame_ref_count(paddr: Paddr) {\n    debug_assert!(paddr.is_multiple_of(PAGE_SIZE));\n    debug_assert!(paddr < max_paddr());\n\n    let vaddr: Vaddr = mapping::frame_to_meta::<PagingConsts>(paddr);\n    // SAFETY: `vaddr` points to a valid `MetaSlot` that will never be mutably borrowed, so taking\n    // an immutable reference to it is always safe.\n    let slot = unsafe { &*(vaddr as *const MetaSlot) };\n\n    // SAFETY: We have already held a reference to the frame.\n    unsafe { slot.inc_ref_count() };\n}"
 }

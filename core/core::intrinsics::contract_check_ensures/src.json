@@ -1,5 +1,5 @@
 {
   "name": "core::intrinsics::contract_check_ensures",
   "span": "$library/core/src/intrinsics/mod.rs:2709:1: 2712:9",
-  "src": "pub const fn contract_check_ensures<C: Fn(&Ret) -> bool + Copy, Ret>(\n    cond: Option<C>,\n    ret: Ret,\n) -> Ret"
+  "src": "pub const fn contract_check_ensures<C: Fn(&Ret) -> bool + Copy, Ret>(\n    cond: Option<C>,\n    ret: Ret,\n) -> Ret {\n    const_eval_select!(\n        @capture[C: Fn(&Ret) -> bool + Copy, Ret] { cond: Option<C>, ret: Ret } -> Ret :\n        if const {\n            // Do nothing\n            ret\n        } else {\n            match cond {\n                crate::option::Option::Some(cond) => {\n                    if !cond(&ret) {\n                        // Emit no unwind panic in case this was a safety requirement.\n                        crate::panicking::panic_nounwind(\"failed ensures check\");\n                    }\n                },\n                crate::option::Option::None => {},\n            }\n            ret\n        }\n    )\n}"
 }

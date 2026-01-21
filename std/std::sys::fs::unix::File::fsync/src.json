@@ -1,5 +1,5 @@
 {
   "name": "std::sys::fs::unix::File::fsync",
   "span": "$library/std/src/sys/fs/unix.rs:1238:5: 1238:42",
-  "src": "pub fn fsync(&self) -> io::Result<()>"
+  "src": "pub fn fsync(&self) -> io::Result<()> {\n        cvt_r(|| unsafe { os_fsync(self.as_raw_fd()) })?;\n        return Ok(());\n\n        #[cfg(target_vendor = \"apple\")]\n        unsafe fn os_fsync(fd: c_int) -> c_int {\n            libc::fcntl(fd, libc::F_FULLFSYNC)\n        }\n        #[cfg(not(target_vendor = \"apple\"))]\n        unsafe fn os_fsync(fd: c_int) -> c_int {\n            libc::fsync(fd)\n        }\n    }"
 }

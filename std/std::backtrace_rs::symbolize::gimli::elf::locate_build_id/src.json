@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::symbolize::gimli::elf::locate_build_id",
   "span": "$library/std/src/../../backtrace/src/symbolize/gimli/elf.rs:425:1: 425:55",
-  "src": "fn locate_build_id(build_id: &[u8]) -> Option<PathBuf>"
+  "src": "fn locate_build_id(build_id: &[u8]) -> Option<PathBuf> {\n    const BUILD_ID_PATH: &str = \"/usr/lib/debug/.build-id/\";\n    const BUILD_ID_SUFFIX: &str = \".debug\";\n\n    if build_id.len() < 2 {\n        return None;\n    }\n\n    if !debug_path_exists() {\n        return None;\n    }\n\n    let mut path =\n        String::with_capacity(BUILD_ID_PATH.len() + BUILD_ID_SUFFIX.len() + build_id.len() * 2 + 1);\n    path.push_str(BUILD_ID_PATH);\n    path.push(char::from_digit((build_id[0] >> 4) as u32, 16)?);\n    path.push(char::from_digit((build_id[0] & 0xf) as u32, 16)?);\n    path.push('/');\n    for byte in &build_id[1..] {\n        path.push(char::from_digit((byte >> 4) as u32, 16)?);\n        path.push(char::from_digit((byte & 0xf) as u32, 16)?);\n    }\n    path.push_str(BUILD_ID_SUFFIX);\n    Some(PathBuf::from(path))\n}"
 }

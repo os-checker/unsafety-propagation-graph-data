@@ -1,5 +1,5 @@
 {
   "name": "core::mem::conjure_zst",
   "span": "$library/core/src/mem/mod.rs:1476:1: 1476:42",
-  "src": "pub const unsafe fn conjure_zst<T>() -> T"
+  "src": "pub const unsafe fn conjure_zst<T>() -> T {\n    const_assert!(\n        size_of::<T>() == 0,\n        \"mem::conjure_zst invoked on a nonzero-sized type\",\n        \"mem::conjure_zst invoked on type {t}, which is not zero-sized\",\n        t: &str = stringify!(T)\n    );\n\n    // SAFETY: because the caller must guarantee that it's inhabited and zero-sized,\n    // there's nothing in the representation that needs to be set.\n    // `assume_init` calls `assert_inhabited`, so we don't need to here.\n    unsafe {\n        #[allow(clippy::uninit_assumed_init)]\n        MaybeUninit::uninit().assume_init()\n    }\n}"
 }

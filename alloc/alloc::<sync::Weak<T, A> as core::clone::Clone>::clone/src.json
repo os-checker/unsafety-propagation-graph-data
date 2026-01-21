@@ -1,5 +1,5 @@
 {
   "name": "alloc::<sync::Weak<T, A> as core::clone::Clone>::clone",
   "span": "$library/alloc/src/sync.rs:3400:5: 3400:34",
-  "src": "fn clone(&self) -> Weak<T, A>"
+  "src": "fn clone(&self) -> Weak<T, A> {\n        if let Some(inner) = self.inner() {\n            // See comments in Arc::clone() for why this is relaxed. This can use a\n            // fetch_add (ignoring the lock) because the weak count is only locked\n            // where are *no other* weak pointers in existence. (So we can't be\n            // running this code in that case).\n            let old_size = inner.weak.fetch_add(1, Relaxed);\n\n            // See comments in Arc::clone() for why we do this (for mem::forget).\n            if old_size > MAX_REFCOUNT {\n                abort();\n            }\n        }\n\n        Weak { ptr: self.ptr, alloc: self.alloc.clone() }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::wtf8::Wtf8::check_utf8_boundary",
   "span": "$library/core/src/wtf8.rs:456:5: 456:52",
-  "src": "pub fn check_utf8_boundary(&self, index: usize)"
+  "src": "pub fn check_utf8_boundary(&self, index: usize) {\n        if index == 0 {\n            return;\n        }\n        match self.bytes.get(index) {\n            Some(0xED) => (), // Might be a surrogate\n            Some(&b) if (b as i8) >= -0x40 => return,\n            Some(_) => panic!(\"byte index {index} is not a codepoint boundary\"),\n            None if index == self.len() => return,\n            None => panic!(\"byte index {index} is out of bounds\"),\n        }\n        if self.bytes[index + 1] >= 0xA0 {\n            // There's a surrogate after index. Now check before index.\n            if index >= 3 && self.bytes[index - 3] == 0xED && self.bytes[index - 2] >= 0xA0 {\n                panic!(\"byte index {index} lies between surrogate codepoints\");\n            }\n        }\n    }"
 }

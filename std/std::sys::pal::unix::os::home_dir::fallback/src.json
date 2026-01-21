@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::os::home_dir::fallback",
   "span": "$library/std/src/sys/pal/unix/os.rs:641:5: 641:45",
-  "src": "unsafe fn fallback() -> Option<OsString>"
+  "src": "unsafe fn fallback() -> Option<OsString> {\n        let amt = match libc::sysconf(libc::_SC_GETPW_R_SIZE_MAX) {\n            n if n < 0 => 512 as usize,\n            n => n as usize,\n        };\n        let mut buf = Vec::with_capacity(amt);\n        let mut p = mem::MaybeUninit::<libc::passwd>::uninit();\n        let mut result = ptr::null_mut();\n        match libc::getpwuid_r(\n            libc::getuid(),\n            p.as_mut_ptr(),\n            buf.as_mut_ptr(),\n            buf.capacity(),\n            &mut result,\n        ) {\n            0 if !result.is_null() => {\n                let ptr = (*result).pw_dir as *const _;\n                let bytes = CStr::from_ptr(ptr).to_bytes().to_vec();\n                Some(OsStringExt::from_vec(bytes))\n            }\n            _ => None,\n        }\n    }"
 }

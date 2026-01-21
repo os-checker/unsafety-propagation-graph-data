@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::io::VmWriter::<'_>::fill_zeros",
   "span": "ostd/src/mm/io.rs:927:5: 927:92",
-  "src": "pub fn fill_zeros(&mut self, len: usize) -> core::result::Result<usize, (Error, usize)>"
+  "src": "pub fn fill_zeros(&mut self, len: usize) -> core::result::Result<usize, (Error, usize)> {\n        let len_to_set = self.avail().min(len);\n        if len_to_set == 0 {\n            return Ok(0);\n        }\n\n        // SAFETY: The destination is a subset of the memory range specified by\n        // the current writer, so it is either valid for writing or in user space.\n        let set_len = unsafe { memset_fallible(self.cursor, 0u8, len_to_set) };\n        self.cursor = self.cursor.wrapping_add(set_len);\n\n        if set_len < len_to_set {\n            Err((Error::PageFault, set_len))\n        } else {\n            Ok(len_to_set)\n        }\n    }"
 }

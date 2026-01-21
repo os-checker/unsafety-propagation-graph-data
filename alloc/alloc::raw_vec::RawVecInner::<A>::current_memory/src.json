@@ -1,5 +1,5 @@
 {
   "name": "alloc::raw_vec::RawVecInner::<A>::current_memory",
   "span": "$library/alloc/src/raw_vec/mod.rs:522:5: 522:90",
-  "src": "unsafe fn current_memory(&self, elem_layout: Layout) -> Option<(NonNull<u8>, Layout)>"
+  "src": "unsafe fn current_memory(&self, elem_layout: Layout) -> Option<(NonNull<u8>, Layout)> {\n        if elem_layout.size() == 0 || self.cap.as_inner() == 0 {\n            None\n        } else {\n            // We could use Layout::array here which ensures the absence of isize and usize overflows\n            // and could hypothetically handle differences between stride and size, but this memory\n            // has already been allocated so we know it can't overflow and currently Rust does not\n            // support such types. So we can do better by skipping some checks and avoid an unwrap.\n            unsafe {\n                let alloc_size = elem_layout.size().unchecked_mul(self.cap.as_inner());\n                let layout = Layout::from_size_align_unchecked(alloc_size, elem_layout.align());\n                Some((self.ptr.into(), layout))\n            }\n        }\n    }"
 }

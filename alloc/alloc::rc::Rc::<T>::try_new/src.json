@@ -1,5 +1,5 @@
 {
   "name": "alloc::rc::Rc::<T>::try_new",
   "span": "$library/alloc/src/rc.rs:558:5: 558:58",
-  "src": "pub fn try_new(value: T) -> Result<Rc<T>, AllocError>"
+  "src": "pub fn try_new(value: T) -> Result<Rc<T>, AllocError> {\n        // There is an implicit weak pointer owned by all the strong\n        // pointers, which ensures that the weak destructor never frees\n        // the allocation while the strong destructor is running, even\n        // if the weak pointer is stored inside the strong one.\n        unsafe {\n            Ok(Self::from_inner(\n                Box::leak(Box::try_new(RcInner {\n                    strong: Cell::new(1),\n                    weak: Cell::new(1),\n                    value,\n                })?)\n                .into(),\n            ))\n        }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::core_simd::vector::Simd::<T, N>::store",
   "span": "$library/core/src/../../portable-simd/crates/core_simd/src/vector.rs:237:5: 237:50",
-  "src": "const unsafe fn store(self, ptr: *mut [T; N])"
+  "src": "const unsafe fn store(self, ptr: *mut [T; N]) {\n        // There are potentially simpler ways to write this function, but this should result in\n        // LLVM `store <N x T>`\n\n        // Creating a temporary helps LLVM turn the memcpy into a store.\n        let tmp = self;\n        // SAFETY: `Simd<T, N>` always contains `N` elements of type `T`.  The safety of writing\n        // `ptr` is ensured by the caller.\n        unsafe { core::ptr::copy_nonoverlapping(tmp.as_array(), ptr, 1) }\n    }"
 }

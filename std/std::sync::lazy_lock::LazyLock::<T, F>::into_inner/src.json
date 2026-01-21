@@ -1,5 +1,5 @@
 {
   "name": "std::sync::lazy_lock::LazyLock::<T, F>::into_inner",
   "span": "$library/std/src/sync/lazy_lock.rs:140:5: 140:54",
-  "src": "pub fn into_inner(mut this: Self) -> Result<T, F>"
+  "src": "pub fn into_inner(mut this: Self) -> Result<T, F> {\n        let state = this.once.state();\n        match state {\n            OnceExclusiveState::Poisoned => panic_poisoned(),\n            state => {\n                let this = ManuallyDrop::new(this);\n                let data = unsafe { ptr::read(&this.data) }.into_inner();\n                match state {\n                    OnceExclusiveState::Incomplete => {\n                        Err(ManuallyDrop::into_inner(unsafe { data.f }))\n                    }\n                    OnceExclusiveState::Complete => {\n                        Ok(ManuallyDrop::into_inner(unsafe { data.value }))\n                    }\n                    OnceExclusiveState::Poisoned => unreachable!(),\n                }\n            }\n        }\n    }"
 }

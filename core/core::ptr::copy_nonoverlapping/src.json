@@ -1,5 +1,5 @@
 {
   "name": "core::ptr::copy_nonoverlapping",
   "span": "$library/core/src/ptr/mod.rs:526:1: 526:85",
-  "src": "pub const unsafe fn copy_nonoverlapping<T>(src: *const T, dst: *mut T, count: usize)"
+  "src": "pub const unsafe fn copy_nonoverlapping<T>(src: *const T, dst: *mut T, count: usize) {\n    ub_checks::assert_unsafe_precondition!(\n        check_language_ub,\n        \"ptr::copy_nonoverlapping requires that both pointer arguments are aligned and non-null \\\n        and the specified memory ranges do not overlap\",\n        (\n            src: *const () = src as *const (),\n            dst: *mut () = dst as *mut (),\n            size: usize = size_of::<T>(),\n            align: usize = align_of::<T>(),\n            count: usize = count,\n        ) => {\n            let zero_size = count == 0 || size == 0;\n            ub_checks::maybe_is_aligned_and_not_null(src, align, zero_size)\n                && ub_checks::maybe_is_aligned_and_not_null(dst, align, zero_size)\n                && ub_checks::maybe_is_nonoverlapping(src, dst, size, count)\n        }\n    );\n\n    // SAFETY: the safety contract for `copy_nonoverlapping` must be\n    // upheld by the caller.\n    unsafe { crate::intrinsics::copy_nonoverlapping(src, dst, count) }\n}"
 }

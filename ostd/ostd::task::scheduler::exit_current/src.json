@@ -1,5 +1,5 @@
 {
   "name": "ostd::task::scheduler::exit_current",
   "span": "ostd/src/task/scheduler/mod.rs:507:1: 507:34",
-  "src": "pub(super) fn exit_current() -> !"
+  "src": "pub(super) fn exit_current() -> ! {\n    let mut is_first_try = true;\n\n    reschedule(|local_rq: &mut dyn LocalRunQueue| {\n        let next_task_opt = if is_first_try {\n            is_first_try = false;\n            let should_pick_next = local_rq.update_current(UpdateFlags::Exit);\n            let _current = local_rq.dequeue_current();\n            should_pick_next.then(|| local_rq.pick_next())\n        } else {\n            local_rq.try_pick_next()\n        };\n\n        if let Some(next_task) = next_task_opt {\n            ReschedAction::SwitchTo(next_task.clone())\n        } else {\n            ReschedAction::Retry\n        }\n    });\n\n    unreachable!()\n}"
 }

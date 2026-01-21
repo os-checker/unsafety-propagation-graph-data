@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::meta::add_temp_linear_mapping",
   "span": "ostd/src/mm/frame/meta.rs:611:1: 611:45",
-  "src": "fn add_temp_linear_mapping(max_paddr: Paddr)"
+  "src": "fn add_temp_linear_mapping(max_paddr: Paddr) {\n    use align_ext::AlignExt;\n\n    use crate::mm::kspace::LINEAR_MAPPING_BASE_VADDR;\n\n    const PADDR4G: Paddr = 0x1_0000_0000;\n\n    if max_paddr <= PADDR4G {\n        return;\n    }\n\n    // TODO: We don't know if the allocator would allocate from low to high or\n    // not. So we prepare all linear mappings in the boot page table. Hope it\n    // won't drag the boot performance much.\n    let end_paddr = max_paddr.align_up(PAGE_SIZE);\n    let prange = PADDR4G..end_paddr;\n    let prop = PageProperty {\n        flags: PageFlags::RW,\n        cache: CachePolicy::Writeback,\n        priv_flags: PrivilegedPageFlags::GLOBAL,\n    };\n\n    // SAFETY: we are doing the linear mapping for the kernel.\n    unsafe {\n        boot_pt::with_borrow(|boot_pt| {\n            for paddr in prange.step_by(PAGE_SIZE) {\n                let vaddr = LINEAR_MAPPING_BASE_VADDR + paddr;\n                boot_pt.map_base_page(vaddr, paddr / PAGE_SIZE, prop);\n            }\n        })\n        .unwrap();\n    }\n}"
 }

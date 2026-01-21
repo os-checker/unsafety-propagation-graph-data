@@ -1,5 +1,5 @@
 {
   "name": "std::sys::sync::thread_parking::futex::Parker::park_timeout",
   "span": "$library/std/src/sys/sync/thread_parking/futex.rs:68:5: 68:68",
-  "src": "pub unsafe fn park_timeout(self: Pin<&Self>, timeout: Duration)"
+  "src": "pub unsafe fn park_timeout(self: Pin<&Self>, timeout: Duration) {\n        // Change NOTIFIED=>EMPTY or EMPTY=>PARKED, and directly return in the\n        // first case.\n        if self.state.fetch_sub(1, Acquire) == NOTIFIED {\n            return;\n        }\n        // Wait for something to happen, assuming it's still set to PARKED.\n        futex_wait(&self.state, PARKED, Some(timeout));\n        // This is not just a store, because we need to establish a\n        // release-acquire ordering with unpark().\n        if self.state.swap(EMPTY, Acquire) == NOTIFIED {\n            // Woke up because of unpark().\n        } else {\n            // Timeout or spurious wake up.\n            // We return either way, because we can't easily tell if it was the\n            // timeout or not.\n        }\n    }"
 }

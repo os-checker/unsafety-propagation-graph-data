@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::boot_pt::dismiss",
   "span": "ostd/src/mm/page_table/boot_pt.rs:72:1: 72:31",
-  "src": "pub(crate) unsafe fn dismiss()"
+  "src": "pub(crate) unsafe fn dismiss() {\n    IS_DISMISSED.store(true);\n    if DISMISS_COUNT.fetch_add(1, Ordering::SeqCst) as usize == num_cpus() - 1 {\n        let boot_pt = BOOT_PAGE_TABLE.lock().take().unwrap();\n\n        dfs_walk_on_leave::<PageTableEntry, PagingConsts>(\n            boot_pt.root_pt,\n            PagingConsts::NR_LEVELS,\n            &mut |pte| {\n                if !pte.prop().priv_flags.contains(PTE_POINTS_TO_FIRMWARE_PT) {\n                    // SAFETY: The pointed frame is allocated and forgotten with `into_raw`.\n                    drop(unsafe { Frame::<EarlyAllocatedFrameMeta>::from_raw(pte.paddr()) })\n                }\n                // Firmware provided page tables may be a DAG instead of a tree.\n                // Clear it to avoid double-free when we meet it the second time.\n                *pte = PageTableEntry::new_absent();\n            },\n        );\n    }\n}"
 }

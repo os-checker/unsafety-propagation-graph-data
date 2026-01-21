@@ -1,5 +1,5 @@
 {
   "name": "alloc::string::String::from_utf16le",
   "span": "$library/alloc/src/string.rs:786:5: 786:68",
-  "src": "pub fn from_utf16le(v: &[u8]) -> Result<String, FromUtf16Error>"
+  "src": "pub fn from_utf16le(v: &[u8]) -> Result<String, FromUtf16Error> {\n        let (chunks, []) = v.as_chunks::<2>() else {\n            return Err(FromUtf16Error(()));\n        };\n        match (cfg!(target_endian = \"little\"), unsafe { v.align_to::<u16>() }) {\n            (true, ([], v, [])) => Self::from_utf16(v),\n            _ => char::decode_utf16(chunks.iter().copied().map(u16::from_le_bytes))\n                .collect::<Result<_, _>>()\n                .map_err(|_| FromUtf16Error(())),\n        }\n    }"
 }

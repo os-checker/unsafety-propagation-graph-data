@@ -1,5 +1,5 @@
 {
   "name": "core::ptr::mut_ptr::<impl *mut T>::align_offset",
   "span": "$library/core/src/ptr/mut_ptr.rs:1557:5: 1559:18",
-  "src": "pub fn align_offset(self, align: usize) -> usize\n    where\n        T: Sized,"
+  "src": "pub fn align_offset(self, align: usize) -> usize\n    where\n        T: Sized,\n    {\n        if !align.is_power_of_two() {\n            panic!(\"align_offset: align is not a power-of-two\");\n        }\n\n        // SAFETY: `align` has been checked to be a power of 2 above\n        let ret = unsafe { align_offset(self, align) };\n\n        // Inform Miri that we want to consider the resulting pointer to be suitably aligned.\n        #[cfg(miri)]\n        if ret != usize::MAX {\n            intrinsics::miri_promise_symbolic_alignment(\n                self.wrapping_add(ret).cast_const().cast(),\n                align,\n            );\n        }\n\n        ret\n    }"
 }

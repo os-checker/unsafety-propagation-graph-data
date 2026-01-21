@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::linked_list::LinkedList::<T, A>::push_back_node",
   "span": "$library/alloc/src/collections/linked_list.rs:218:5: 218:64",
-  "src": "unsafe fn push_back_node(&mut self, node: NonNull<Node<T>>)"
+  "src": "unsafe fn push_back_node(&mut self, node: NonNull<Node<T>>) {\n        // This method takes care not to create mutable references to whole nodes,\n        // to maintain validity of aliasing pointers into `element`.\n        unsafe {\n            (*node.as_ptr()).next = None;\n            (*node.as_ptr()).prev = self.tail;\n            let node = Some(node);\n\n            match self.tail {\n                None => self.head = node,\n                // Not creating new mutable (unique!) references overlapping `element`.\n                Some(tail) => (*tail.as_ptr()).next = node,\n            }\n\n            self.tail = node;\n            self.len += 1;\n        }\n    }"
 }

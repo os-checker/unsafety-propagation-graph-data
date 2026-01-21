@@ -1,5 +1,5 @@
 {
   "name": "std::sys::sync::mutex::futex::Mutex::spin",
   "span": "$library/std/src/sys/sync/mutex/futex.rs:68:5: 68:28",
-  "src": "fn spin(&self) -> State"
+  "src": "fn spin(&self) -> State {\n        let mut spin = 100;\n        loop {\n            // We only use `load` (and not `swap` or `compare_exchange`)\n            // while spinning, to be easier on the caches.\n            let state = self.futex.load(Relaxed);\n\n            // We stop spinning when the mutex is UNLOCKED,\n            // but also when it's CONTENDED.\n            if state != LOCKED || spin == 0 {\n                return state;\n            }\n\n            crate::hint::spin_loop();\n            spin -= 1;\n        }\n    }"
 }

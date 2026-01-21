@@ -1,5 +1,5 @@
 {
   "name": "core::iter::traits::iterator::Iterator::find",
   "span": "$library/core/src/iter/traits/iterator.rs:2877:5: 2880:39",
-  "src": "fn find<P>(&mut self, predicate: P) -> Option<Self::Item>\n    where\n        Self: Sized,\n        P: FnMut(&Self::Item) -> bool,"
+  "src": "fn find<P>(&mut self, predicate: P) -> Option<Self::Item>\n    where\n        Self: Sized,\n        P: FnMut(&Self::Item) -> bool,\n    {\n        #[inline]\n        fn check<T>(mut predicate: impl FnMut(&T) -> bool) -> impl FnMut((), T) -> ControlFlow<T> {\n            move |(), x| {\n                if predicate(&x) { ControlFlow::Break(x) } else { ControlFlow::Continue(()) }\n            }\n        }\n\n        self.try_fold((), check(predicate)).break_value()\n    }"
 }

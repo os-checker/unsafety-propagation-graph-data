@@ -1,5 +1,5 @@
 {
   "name": "std::sys::thread_local::native::eager::destroy",
   "span": "$library/std/src/sys/thread_local/native/eager.rs:64:1: 64:46",
-  "src": "unsafe extern \"C\" fn destroy<T>(ptr: *mut u8)"
+  "src": "unsafe extern \"C\" fn destroy<T>(ptr: *mut u8) {\n    // Print a nice abort message if a panic occurs.\n    abort_on_dtor_unwind(|| {\n        let storage = unsafe { &*(ptr as *const Storage<T>) };\n        // Update the state before running the destructor as it may attempt to\n        // access the variable.\n        storage.state.set(State::Destroyed);\n        unsafe {\n            drop_in_place(storage.val.get());\n        }\n    })\n}"
 }

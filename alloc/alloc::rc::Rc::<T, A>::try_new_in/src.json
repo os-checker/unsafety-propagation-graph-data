@@ -1,5 +1,5 @@
 {
   "name": "alloc::rc::Rc::<T, A>::try_new_in",
   "span": "$library/alloc/src/rc.rs:925:5: 925:70",
-  "src": "pub fn try_new_in(value: T, alloc: A) -> Result<Self, AllocError>"
+  "src": "pub fn try_new_in(value: T, alloc: A) -> Result<Self, AllocError> {\n        // There is an implicit weak pointer owned by all the strong\n        // pointers, which ensures that the weak destructor never frees\n        // the allocation while the strong destructor is running, even\n        // if the weak pointer is stored inside the strong one.\n        let (ptr, alloc) = Box::into_unique(Box::try_new_in(\n            RcInner { strong: Cell::new(1), weak: Cell::new(1), value },\n            alloc,\n        )?);\n        Ok(unsafe { Self::from_inner_in(ptr.into(), alloc) })\n    }"
 }

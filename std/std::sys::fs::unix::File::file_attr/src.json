@@ -1,5 +1,5 @@
 {
   "name": "std::sys::fs::unix::File::file_attr",
   "span": "$library/std/src/sys/fs/unix.rs:1219:5: 1219:52",
-  "src": "pub fn file_attr(&self) -> io::Result<FileAttr>"
+  "src": "pub fn file_attr(&self) -> io::Result<FileAttr> {\n        let fd = self.as_raw_fd();\n\n        cfg_has_statx! {\n            if let Some(ret) = unsafe { try_statx(\n                fd,\n                c\"\".as_ptr() as *const c_char,\n                libc::AT_EMPTY_PATH | libc::AT_STATX_SYNC_AS_STAT,\n                libc::STATX_BASIC_STATS | libc::STATX_BTIME,\n            ) } {\n                return ret;\n            }\n        }\n\n        let mut stat: stat64 = unsafe { mem::zeroed() };\n        cvt(unsafe { fstat64(fd, &mut stat) })?;\n        Ok(FileAttr::from_stat64(stat))\n    }"
 }

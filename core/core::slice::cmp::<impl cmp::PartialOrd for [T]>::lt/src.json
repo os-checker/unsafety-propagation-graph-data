@@ -1,5 +1,5 @@
 {
   "name": "core::slice::cmp::<impl cmp::PartialOrd for [T]>::lt",
   "span": "$library/core/src/slice/cmp.rs:56:5: 56:39",
-  "src": "fn lt(&self, other: &Self) -> bool"
+  "src": "fn lt(&self, other: &Self) -> bool {\n        // This is certainly not the obvious way to implement these methods.\n        // Unfortunately, using anything that looks at the discriminant means that\n        // LLVM sees a check for `2` (aka `ControlFlow<bool>::Continue(())`) and\n        // gets very distracted by that, ending up generating extraneous code.\n        // This should be changed to something simpler once either LLVM is smarter,\n        // see <https://github.com/llvm/llvm-project/issues/132678>, or we generate\n        // niche discriminant checks in a way that doesn't trigger it.\n\n        as_underlying(self.__chaining_lt(other)) == 1\n    }"
 }

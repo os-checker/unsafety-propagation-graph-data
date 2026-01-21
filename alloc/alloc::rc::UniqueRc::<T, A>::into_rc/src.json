@@ -1,5 +1,5 @@
 {
   "name": "alloc::rc::UniqueRc::<T, A>::into_rc",
   "span": "$library/alloc/src/rc.rs:4326:5: 4326:43",
-  "src": "pub fn into_rc(this: Self) -> Rc<T, A>"
+  "src": "pub fn into_rc(this: Self) -> Rc<T, A> {\n        let mut this = ManuallyDrop::new(this);\n\n        // Move the allocator out.\n        // SAFETY: `this.alloc` will not be accessed again, nor dropped because it is in\n        // a `ManuallyDrop`.\n        let alloc: A = unsafe { ptr::read(&this.alloc) };\n\n        // SAFETY: This pointer was allocated at creation time so we know it is valid.\n        unsafe {\n            // Convert our weak reference into a strong reference\n            this.ptr.as_mut().strong.set(1);\n            Rc::from_inner_in(this.ptr, alloc)\n        }\n    }"
 }

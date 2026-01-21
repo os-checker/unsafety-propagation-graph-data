@@ -1,5 +1,5 @@
 {
   "name": "core::slice::<impl [T]>::as_ptr_range",
   "span": "$library/core/src/slice/mod.rs:792:5: 792:56",
-  "src": "pub const fn as_ptr_range(&self) -> Range<*const T>"
+  "src": "pub const fn as_ptr_range(&self) -> Range<*const T> {\n        let start = self.as_ptr();\n        // SAFETY: The `add` here is safe, because:\n        //\n        //   - Both pointers are part of the same object, as pointing directly\n        //     past the object also counts.\n        //\n        //   - The size of the slice is never larger than `isize::MAX` bytes, as\n        //     noted here:\n        //       - https://github.com/rust-lang/unsafe-code-guidelines/issues/102#issuecomment-473340447\n        //       - https://doc.rust-lang.org/reference/behavior-considered-undefined.html\n        //       - https://doc.rust-lang.org/core/slice/fn.from_raw_parts.html#safety\n        //     (This doesn't seem normative yet, but the very same assumption is\n        //     made in many places, including the Index implementation of slices.)\n        //\n        //   - There is no wrapping around involved, as slices do not wrap past\n        //     the end of the address space.\n        //\n        // See the documentation of [`pointer::add`].\n        let end = unsafe { start.add(self.len()) };\n        start..end\n    }"
 }

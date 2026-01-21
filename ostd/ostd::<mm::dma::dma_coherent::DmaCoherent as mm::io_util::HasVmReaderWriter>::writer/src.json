@@ -1,5 +1,5 @@
 {
   "name": "ostd::<mm::dma::dma_coherent::DmaCoherent as mm::io_util::HasVmReaderWriter>::writer",
   "span": "ostd/src/mm/dma/dma_coherent.rs:174:5: 174:49",
-  "src": "fn writer(&self) -> VmWriter<'_, Infallible>"
+  "src": "fn writer(&self) -> VmWriter<'_, Infallible> {\n        match &self.inner {\n            Inner::Segment(seg) => seg.writer(),\n            Inner::Kva(kva, _) => {\n                // SAFETY:\n                //  - The memory range points to untyped memory.\n                //  - The KVA is alive during the lifetime `'_`.\n                //  - Using `VmReader` and `VmWriter` is the only way to access the KVA.\n                unsafe { VmWriter::from_kernel_space(kva.start() as *mut u8, kva.size()) }\n            }\n        }\n    }"
 }

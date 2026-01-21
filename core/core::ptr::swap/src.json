@@ -1,5 +1,5 @@
 {
   "name": "core::ptr::swap",
   "span": "$library/core/src/ptr/mod.rs:1297:1: 1297:50",
-  "src": "pub const unsafe fn swap<T>(x: *mut T, y: *mut T)"
+  "src": "pub const unsafe fn swap<T>(x: *mut T, y: *mut T) {\n    // Give ourselves some scratch space to work with.\n    // We do not have to worry about drops: `MaybeUninit` does nothing when dropped.\n    let mut tmp = MaybeUninit::<T>::uninit();\n\n    // Perform the swap\n    // SAFETY: the caller must guarantee that `x` and `y` are\n    // valid for writes and properly aligned. `tmp` cannot be\n    // overlapping either `x` or `y` because `tmp` was just allocated\n    // on the stack as a separate allocation.\n    unsafe {\n        copy_nonoverlapping(x, tmp.as_mut_ptr(), 1);\n        copy(y, x, 1); // `x` and `y` may overlap\n        copy_nonoverlapping(tmp.as_ptr(), y, 1);\n    }\n}"
 }

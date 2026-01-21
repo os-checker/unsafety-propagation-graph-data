@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::allocator::EarlyFrameAllocator::alloc",
   "span": "ostd/src/mm/frame/allocator.rs:297:5: 297:61",
-  "src": "pub fn alloc(&mut self, layout: Layout) -> Option<Paddr>"
+  "src": "pub fn alloc(&mut self, layout: Layout) -> Option<Paddr> {\n        let size = layout.size().align_up(PAGE_SIZE);\n        let align = layout.align().max(PAGE_SIZE);\n\n        for (tail, end) in [\n            (&mut self.under_4g_end, self.under_4g_range.end),\n            (&mut self.max_end, self.max_range.end),\n        ] {\n            let allocated = tail.align_up(align);\n            if let Some(allocated_end) = allocated.checked_add(size)\n                && allocated_end <= end\n            {\n                *tail = allocated_end;\n                return Some(allocated);\n            }\n        }\n\n        None\n    }"
 }

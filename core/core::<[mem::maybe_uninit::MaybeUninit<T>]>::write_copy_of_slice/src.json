@@ -1,5 +1,5 @@
 {
   "name": "core::<[mem::maybe_uninit::MaybeUninit<T>]>::write_copy_of_slice",
   "span": "$library/core/src/mem/maybe_uninit.rs:1145:5: 1147:17",
-  "src": "pub const fn write_copy_of_slice(&mut self, src: &[T]) -> &mut [T]\n    where\n        T: Copy,"
+  "src": "pub const fn write_copy_of_slice(&mut self, src: &[T]) -> &mut [T]\n    where\n        T: Copy,\n    {\n        // SAFETY: &[T] and &[MaybeUninit<T>] have the same layout\n        let uninit_src: &[MaybeUninit<T>] = unsafe { super::transmute(src) };\n\n        self.copy_from_slice(uninit_src);\n\n        // SAFETY: Valid elements have just been copied into `self` so it is initialized\n        unsafe { self.assume_init_mut() }\n    }"
 }

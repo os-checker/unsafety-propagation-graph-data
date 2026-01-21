@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::tlb::TlbFlushOp::for_range",
   "span": "ostd/src/mm/tlb.rs:230:5: 230:56",
-  "src": "pub const fn for_range(range: Range<Vaddr>) -> Self"
+  "src": "pub const fn for_range(range: Range<Vaddr>) -> Self {\n        assert!(\n            range.start.is_multiple_of(PAGE_SIZE),\n            \"Range start must be page-aligned\"\n        );\n        assert!(\n            range.end.is_multiple_of(PAGE_SIZE),\n            \"Range end must be page-aligned\"\n        );\n        assert!(range.start < range.end, \"Range must not be empty\");\n        let num_pages = (range.end - range.start) / PAGE_SIZE;\n        if num_pages >= FLUSH_ALL_PAGES_THRESHOLD {\n            return TlbFlushOp::for_all();\n        }\n        TlbFlushOp(range.start | (num_pages as Vaddr))\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::slice::index::range",
   "span": "$library/core/src/slice/index.rs:908:1: 910:59",
-  "src": "pub const fn range<R>(range: R, bounds: ops::RangeTo<usize>) -> ops::Range<usize>\nwhere\n    R: [const] ops::RangeBounds<usize> + [const] Destruct,"
+  "src": "pub const fn range<R>(range: R, bounds: ops::RangeTo<usize>) -> ops::Range<usize>\nwhere\n    R: [const] ops::RangeBounds<usize> + [const] Destruct,\n{\n    let len = bounds.end;\n\n    let end = match range.end_bound() {\n        ops::Bound::Included(&end) if end >= len => slice_index_fail(0, end, len),\n        // Cannot overflow because `end < len` implies `end < usize::MAX`.\n        ops::Bound::Included(&end) => end + 1,\n\n        ops::Bound::Excluded(&end) if end > len => slice_index_fail(0, end, len),\n        ops::Bound::Excluded(&end) => end,\n        ops::Bound::Unbounded => len,\n    };\n\n    let start = match range.start_bound() {\n        ops::Bound::Excluded(&start) if start >= end => slice_index_fail(start, end, len),\n        // Cannot overflow because `start < end` implies `start < usize::MAX`.\n        ops::Bound::Excluded(&start) => start + 1,\n\n        ops::Bound::Included(&start) if start > end => slice_index_fail(start, end, len),\n        ops::Bound::Included(&start) => start,\n\n        ops::Bound::Unbounded => 0,\n    };\n\n    ops::Range { start, end }\n}"
 }

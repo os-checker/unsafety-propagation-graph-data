@@ -1,5 +1,5 @@
 {
   "name": "core::<iter::adapters::skip::Skip<I> as iter::traits::iterator::Iterator>::nth",
   "span": "$library/core/src/iter/adapters/skip.rs:49:5: 49:51",
-  "src": "fn nth(&mut self, n: usize) -> Option<I::Item>"
+  "src": "fn nth(&mut self, n: usize) -> Option<I::Item> {\n        if self.n > 0 {\n            let skip: usize = crate::mem::take(&mut self.n);\n            // Checked add to handle overflow case.\n            let n = match skip.checked_add(n) {\n                Some(nth) => nth,\n                None => {\n                    // In case of overflow, load skip value, before loading `n`.\n                    // Because the amount of elements to iterate is beyond `usize::MAX`, this\n                    // is split into two `nth` calls where the `skip` `nth` call is discarded.\n                    self.iter.nth(skip - 1)?;\n                    n\n                }\n            };\n            // Load nth element including skip.\n            self.iter.nth(n)\n        } else {\n            self.iter.nth(n)\n        }\n    }"
 }

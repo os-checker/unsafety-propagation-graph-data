@@ -1,5 +1,5 @@
 {
   "name": "core::<ffi::c_str::Bytes<'_> as iter::traits::iterator::Iterator>::next",
   "span": "$library/core/src/ffi/c_str.rs:791:5: 791:37",
-  "src": "fn next(&mut self) -> Option<u8>"
+  "src": "fn next(&mut self) -> Option<u8> {\n        // SAFETY: We only choose a pointer from a valid C string, which must\n        // be non-null and contain at least one value. Since we always stop at\n        // the nul terminator, which is guaranteed to exist, we can assume that\n        // the pointer is non-null and valid. This lets us safely dereference\n        // it and assume that adding 1 will create a new, non-null, valid\n        // pointer.\n        unsafe {\n            let ret = self.ptr.read();\n            if ret == 0 {\n                None\n            } else {\n                self.ptr = self.ptr.add(1);\n                Some(ret)\n            }\n        }\n    }"
 }

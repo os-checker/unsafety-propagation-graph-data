@@ -1,5 +1,5 @@
 {
   "name": "core::core_simd::swizzle::<impl core_simd::vector::Simd<T, N>>::interleave",
   "span": "$library/core/src/../../portable-simd/crates/core_simd/src/swizzle.rs:368:5: 368:57",
-  "src": "pub fn interleave(self, other: Self) -> (Self, Self)"
+  "src": "pub fn interleave(self, other: Self) -> (Self, Self) {\n        const fn interleave<const N: usize>(high: bool) -> [usize; N] {\n            let mut idx = [0; N];\n            let mut i = 0;\n            while i < N {\n                let dst_index = if high { i + N } else { i };\n                let src_index = dst_index / 2 + (dst_index % 2) * N;\n                idx[i] = src_index;\n                i += 1;\n            }\n            idx\n        }\n\n        struct Lo;\n        struct Hi;\n\n        impl<const N: usize> Swizzle<N> for Lo {\n            const INDEX: [usize; N] = interleave::<N>(false);\n        }\n\n        impl<const N: usize> Swizzle<N> for Hi {\n            const INDEX: [usize; N] = interleave::<N>(true);\n        }\n\n        (\n            Lo::concat_swizzle(self, other),\n            Hi::concat_swizzle(self, other),\n        )\n    }"
 }

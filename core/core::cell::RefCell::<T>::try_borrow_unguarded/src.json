@@ -1,5 +1,5 @@
 {
   "name": "core::cell::RefCell::<T>::try_borrow_unguarded",
   "span": "$library/core/src/cell.rs:1370:5: 1370:79",
-  "src": "pub const unsafe fn try_borrow_unguarded(&self) -> Result<&T, BorrowError>"
+  "src": "pub const unsafe fn try_borrow_unguarded(&self) -> Result<&T, BorrowError> {\n        if !is_writing(self.borrow.get()) {\n            // SAFETY: We check that nobody is actively writing now, but it is\n            // the caller's responsibility to ensure that nobody writes until\n            // the returned reference is no longer in use.\n            // Also, `self.value.get()` refers to the value owned by `self`\n            // and is thus guaranteed to be valid for the lifetime of `self`.\n            Ok(unsafe { &*self.value.get() })\n        } else {\n            Err(BorrowError {\n                // If a borrow occurred, then we must already have an outstanding borrow,\n                // so `borrowed_at` will be `Some`\n                #[cfg(feature = \"debug_refcell\")]\n                location: self.borrowed_at.get().unwrap(),\n            })\n        }\n    }"
 }

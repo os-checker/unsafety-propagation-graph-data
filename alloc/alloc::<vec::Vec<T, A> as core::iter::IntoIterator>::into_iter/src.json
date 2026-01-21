@@ -1,5 +1,5 @@
 {
   "name": "alloc::<vec::Vec<T, A> as core::iter::IntoIterator>::into_iter",
   "span": "$library/alloc/src/vec/mod.rs:3750:5: 3750:41",
-  "src": "fn into_iter(self) -> Self::IntoIter"
+  "src": "fn into_iter(self) -> Self::IntoIter {\n        unsafe {\n            let me = ManuallyDrop::new(self);\n            let alloc = ManuallyDrop::new(ptr::read(me.allocator()));\n            let buf = me.buf.non_null();\n            let begin = buf.as_ptr();\n            let end = if T::IS_ZST {\n                begin.wrapping_byte_add(me.len())\n            } else {\n                begin.add(me.len()) as *const T\n            };\n            let cap = me.buf.capacity();\n            IntoIter { buf, phantom: PhantomData, cap, alloc, ptr: buf, end }\n        }\n    }"
 }

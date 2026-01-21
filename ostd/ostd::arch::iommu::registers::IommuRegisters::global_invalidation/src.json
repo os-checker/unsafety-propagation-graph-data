@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::iommu::registers::IommuRegisters::global_invalidation",
   "span": "ostd/src/arch/x86/iommu/registers/mod.rs:230:5: 230:38",
-  "src": "fn global_invalidation(&mut self)"
+  "src": "fn global_invalidation(&mut self) {\n        // Set ICC(63) to 1 to requests invalidation and CIRG(62:61) to 01 to indicate global invalidation request.\n        self.context_command\n            .as_mut_ptr()\n            .write(0xA000_0000_0000_0000);\n\n        // Wait for invalidation complete (ICC set to 0).\n        let mut value = 0x8000_0000_0000_0000;\n        while (value & 0x8000_0000_0000_0000) != 0 {\n            value = self.context_command.as_ptr().read();\n        }\n\n        // Set IVT(63) to 1 to requests IOTLB invalidation and IIRG(61:60) to 01 to indicate global invalidation request.\n        self.invalidate\n            .iotlb_invalidate\n            .as_mut_ptr()\n            .write(0x9000_0000_0000_0000);\n    }"
 }

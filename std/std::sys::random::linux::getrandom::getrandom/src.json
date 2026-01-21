@@ -1,5 +1,5 @@
 {
   "name": "std::sys::random::linux::getrandom::getrandom",
   "span": "$library/std/src/sys/pal/unix/weak/syscall.rs:7:9: 7:49",
-  "src": "unsafe fn $name($($param: $t),*) -> $ret"
+  "src": "unsafe fn $name($($param: $t),*) -> $ret {\n            weak!(fn $name($($param: $t),*) -> $ret;);\n\n            // Use a weak symbol from libc when possible, allowing `LD_PRELOAD`\n            // interposition, but if it's not found just use a raw syscall.\n            if let Some(fun) = $name.get() {\n                unsafe { fun($($param),*) }\n            } else {\n                unsafe { libc::syscall(libc::${concat(SYS_, $name)}, $($param),*) as $ret }\n            }\n        }"
 }

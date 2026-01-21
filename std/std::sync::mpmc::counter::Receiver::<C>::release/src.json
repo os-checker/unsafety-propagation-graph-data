@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::counter::Receiver::<C>::release",
   "span": "$library/std/src/sync/mpmc/counter.rs:113:5: 113:78",
-  "src": "pub(crate) unsafe fn release<F: FnOnce(&C) -> bool>(&self, disconnect: F)"
+  "src": "pub(crate) unsafe fn release<F: FnOnce(&C) -> bool>(&self, disconnect: F) {\n        if self.counter().receivers.fetch_sub(1, Ordering::AcqRel) == 1 {\n            disconnect(&self.counter().chan);\n\n            if self.counter().destroy.swap(true, Ordering::AcqRel) {\n                drop(unsafe { Box::from_raw(self.counter) });\n            }\n        }\n    }"
 }

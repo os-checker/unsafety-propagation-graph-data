@@ -1,5 +1,5 @@
 {
   "name": "core::slice::<impl [[T; N]]>::as_flattened",
   "span": "$library/core/src/slice/mod.rs:4994:5: 4994:45",
-  "src": "pub const fn as_flattened(&self) -> &[T]"
+  "src": "pub const fn as_flattened(&self) -> &[T] {\n        let len = if T::IS_ZST {\n            self.len().checked_mul(N).expect(\"slice len overflow\")\n        } else {\n            // SAFETY: `self.len() * N` cannot overflow because `self` is\n            // already in the address space.\n            unsafe { self.len().unchecked_mul(N) }\n        };\n        // SAFETY: `[T]` is layout-identical to `[T; N]`\n        unsafe { from_raw_parts(self.as_ptr().cast(), len) }\n    }"
 }

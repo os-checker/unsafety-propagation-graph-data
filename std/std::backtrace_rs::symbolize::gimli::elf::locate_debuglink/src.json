@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::symbolize::gimli::elf::locate_debuglink",
   "span": "$library/std/src/../../backtrace/src/symbolize/gimli/elf.rs:462:1: 462:70",
-  "src": "fn locate_debuglink(path: &Path, filename: &OsStr) -> Option<PathBuf>"
+  "src": "fn locate_debuglink(path: &Path, filename: &OsStr) -> Option<PathBuf> {\n    let path = fs::canonicalize(path).ok()?;\n    let parent = path.parent()?;\n    let mut f =\n        PathBuf::with_capacity(DEBUG_PATH.len() + parent.as_os_str().len() + filename.len() + 2);\n    let filename = Path::new(filename);\n\n    // Try \"/parent/filename\" if it differs from \"path\"\n    f.push(parent);\n    f.push(filename);\n    if f != path && f.is_file() {\n        return Some(f);\n    }\n\n    // Try \"/parent/.debug/filename\"\n    f.clear();\n    f.push(parent);\n    f.push(\".debug\");\n    f.push(filename);\n    if f.is_file() {\n        return Some(f);\n    }\n\n    if debug_path_exists() {\n        // Try \"/usr/lib/debug/parent/filename\"\n        f.clear();\n        f.push(DEBUG_PATH);\n        f.push(parent.strip_prefix(\"/\").unwrap());\n        f.push(filename);\n        if f.is_file() {\n            return Some(f);\n        }\n    }\n\n    None\n}"
 }

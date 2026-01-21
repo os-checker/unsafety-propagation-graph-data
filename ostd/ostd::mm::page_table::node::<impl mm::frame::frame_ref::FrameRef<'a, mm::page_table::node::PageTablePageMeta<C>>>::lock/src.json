@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::node::<impl mm::frame::frame_ref::FrameRef<'a, mm::page_table::node::PageTablePageMeta<C>>>::lock",
   "span": "ostd/src/mm/page_table/node/mod.rs:140:5: 142:18",
-  "src": "pub(super) fn lock<'rcu>(self, _guard: &'rcu dyn InAtomicMode) -> PageTableGuard<'rcu, C>\n    where\n        'a: 'rcu,"
+  "src": "pub(super) fn lock<'rcu>(self, _guard: &'rcu dyn InAtomicMode) -> PageTableGuard<'rcu, C>\n    where\n        'a: 'rcu,\n    {\n        while self\n            .meta()\n            .lock\n            .compare_exchange(0, 1, Ordering::Acquire, Ordering::Relaxed)\n            .is_err()\n        {\n            core::hint::spin_loop();\n        }\n\n        PageTableGuard::<'rcu, C> { inner: self }\n    }"
 }

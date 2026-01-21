@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::stack_overflow::thread_info::set_current_info",
   "span": "$library/std/src/sys/pal/unix/stack_overflow/thread_info.rs:112:1: 112:56",
-  "src": "pub fn set_current_info(guard_page_range: Range<usize>)"
+  "src": "pub fn set_current_info(guard_page_range: Range<usize>) {\n    let tid = crate::thread::current_os_id();\n    let name = crate::thread::with_current_name(|name| name.map(Box::from));\n\n    let this = errno_location().addr();\n    let _lock_guard = LOCK.lock();\n    let _spin_guard = spin_lock_in_setup(this);\n\n    // SAFETY: we own the spin lock, so `THREAD_INFO` cannot be aliased.\n    let thread_info = unsafe { &mut *(&raw mut THREAD_INFO) };\n    thread_info.insert(this, ThreadInfo { tid, name, guard_page_range });\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::sys::thread_local::destructors::list::run",
   "span": "$library/std/src/sys/thread_local/destructors/list.rs:24:1: 24:20",
-  "src": "pub unsafe fn run()"
+  "src": "pub unsafe fn run() {\n    loop {\n        let mut dtors = DTORS.borrow_mut();\n        match dtors.pop() {\n            Some((t, dtor)) => {\n                drop(dtors);\n                unsafe {\n                    dtor(t);\n                }\n            }\n            None => {\n                // Free the list memory.\n                *dtors = Vec::new_in(System);\n                break;\n            }\n        }\n    }\n}"
 }

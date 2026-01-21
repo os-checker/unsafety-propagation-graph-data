@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::array::Channel::<T>::len",
   "span": "$library/std/src/sync/mpmc/array.rs:418:5: 418:38",
-  "src": "pub(crate) fn len(&self) -> usize"
+  "src": "pub(crate) fn len(&self) -> usize {\n        loop {\n            // Load the tail, then load the head.\n            let tail = self.tail.load(Ordering::SeqCst);\n            let head = self.head.load(Ordering::SeqCst);\n\n            // If the tail didn't change, we've got consistent values to work with.\n            if self.tail.load(Ordering::SeqCst) == tail {\n                let hix = head & (self.mark_bit - 1);\n                let tix = tail & (self.mark_bit - 1);\n\n                return if hix < tix {\n                    tix - hix\n                } else if hix > tix {\n                    self.cap - hix + tix\n                } else if (tail & !self.mark_bit) == head {\n                    0\n                } else {\n                    self.cap\n                };\n            }\n        }\n    }"
 }

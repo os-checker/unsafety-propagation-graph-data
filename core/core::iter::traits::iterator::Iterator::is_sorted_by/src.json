@@ -1,5 +1,5 @@
 {
   "name": "core::iter::traits::iterator::Iterator::is_sorted_by",
   "span": "$library/core/src/iter/traits/iterator.rs:3972:5: 3975:52",
-  "src": "fn is_sorted_by<F>(mut self, compare: F) -> bool\n    where\n        Self: Sized,\n        F: FnMut(&Self::Item, &Self::Item) -> bool,"
+  "src": "fn is_sorted_by<F>(mut self, compare: F) -> bool\n    where\n        Self: Sized,\n        F: FnMut(&Self::Item, &Self::Item) -> bool,\n    {\n        #[inline]\n        fn check<'a, T>(\n            last: &'a mut T,\n            mut compare: impl FnMut(&T, &T) -> bool + 'a,\n        ) -> impl FnMut(T) -> bool + 'a {\n            move |curr| {\n                if !compare(&last, &curr) {\n                    return false;\n                }\n                *last = curr;\n                true\n            }\n        }\n\n        let mut last = match self.next() {\n            Some(e) => e,\n            None => return true,\n        };\n\n        self.all(check(&mut last, compare))\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::btree::node::Handle::<collections::btree::node::NodeRef<BorrowType, K, V, collections::btree::node::marker::Internal>, collections::btree::node::marker::Edge>::descend",
   "span": "$library/alloc/src/collections/btree/node.rs:1102:5: 1102:85",
-  "src": "pub(super) fn descend(self) -> NodeRef<BorrowType, K, V, marker::LeafOrInternal>"
+  "src": "pub(super) fn descend(self) -> NodeRef<BorrowType, K, V, marker::LeafOrInternal> {\n        const {\n            assert!(BorrowType::TRAVERSAL_PERMIT);\n        }\n\n        // We need to use raw pointers to nodes because, if BorrowType is\n        // marker::ValMut, there might be outstanding mutable references to\n        // values that we must not invalidate. There's no worry accessing the\n        // height field because that value is copied. Beware that, once the\n        // node pointer is dereferenced, we access the edges array with a\n        // reference (Rust issue #73987) and invalidate any other references\n        // to or inside the array, should any be around.\n        let parent_ptr = NodeRef::as_internal_ptr(&self.node);\n        let node = unsafe { (*parent_ptr).edges.get_unchecked(self.idx).assume_init_read() };\n        NodeRef { node, height: self.node.height - 1, _marker: PhantomData }\n    }"
 }

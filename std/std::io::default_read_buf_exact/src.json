@@ -1,5 +1,5 @@
 {
   "name": "std::io::default_read_buf_exact",
   "span": "$library/std/src/io/mod.rs:570:1: 573:16",
-  "src": "pub(crate) fn default_read_buf_exact<R: Read + ?Sized>(\n    this: &mut R,\n    mut cursor: BorrowedCursor<'_>,\n) -> Result<()>"
+  "src": "pub(crate) fn default_read_buf_exact<R: Read + ?Sized>(\n    this: &mut R,\n    mut cursor: BorrowedCursor<'_>,\n) -> Result<()> {\n    while cursor.capacity() > 0 {\n        let prev_written = cursor.written();\n        match this.read_buf(cursor.reborrow()) {\n            Ok(()) => {}\n            Err(e) if e.is_interrupted() => continue,\n            Err(e) => return Err(e),\n        }\n\n        if cursor.written() == prev_written {\n            return Err(Error::READ_EXACT_EOF);\n        }\n    }\n\n    Ok(())\n}"
 }

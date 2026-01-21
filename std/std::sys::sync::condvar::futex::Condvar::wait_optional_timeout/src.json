@@ -1,5 +1,5 @@
 {
   "name": "std::sys::sync::condvar::futex::Condvar::wait_optional_timeout",
   "span": "$library/std/src/sys/sync/condvar/futex.rs:40:5: 40:93",
-  "src": "unsafe fn wait_optional_timeout(&self, mutex: &Mutex, timeout: Option<Duration>) -> bool"
+  "src": "unsafe fn wait_optional_timeout(&self, mutex: &Mutex, timeout: Option<Duration>) -> bool {\n        // Examine the notification counter _before_ we unlock the mutex.\n        let futex_value = self.futex.load(Relaxed);\n\n        // Unlock the mutex before going to sleep.\n        mutex.unlock();\n\n        // Wait, but only if there hasn't been any\n        // notification since we unlocked the mutex.\n        let r = futex_wait(&self.futex, futex_value, timeout);\n\n        // Lock the mutex again.\n        mutex.lock();\n\n        r\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::path::split_file_at_dot",
   "span": "$library/std/src/path.rs:332:1: 332:63",
-  "src": "fn split_file_at_dot(file: &OsStr) -> (&OsStr, Option<&OsStr>)"
+  "src": "fn split_file_at_dot(file: &OsStr) -> (&OsStr, Option<&OsStr>) {\n    let slice = file.as_encoded_bytes();\n    if slice == b\"..\" {\n        return (file, None);\n    }\n\n    // The unsafety here stems from converting between &OsStr and &[u8]\n    // and back. This is safe to do because (1) we only look at ASCII\n    // contents of the encoding and (2) new &OsStr values are produced\n    // only from ASCII-bounded slices of existing &OsStr values.\n    let i = match slice[1..].iter().position(|b| *b == b'.') {\n        Some(i) => i + 1,\n        None => return (file, None),\n    };\n    let before = &slice[..i];\n    let after = &slice[i + 1..];\n    unsafe {\n        (\n            OsStr::from_encoded_bytes_unchecked(before),\n            Some(OsStr::from_encoded_bytes_unchecked(after)),\n        )\n    }\n}"
 }

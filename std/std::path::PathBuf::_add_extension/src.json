@@ -1,5 +1,5 @@
 {
   "name": "std::path::PathBuf::_add_extension",
   "span": "$library/std/src/path.rs:1707:5: 1707:60",
-  "src": "fn _add_extension(&mut self, extension: &OsStr) -> bool"
+  "src": "fn _add_extension(&mut self, extension: &OsStr) -> bool {\n        validate_extension(extension);\n\n        let file_name = match self.file_name() {\n            None => return false,\n            Some(f) => f.as_encoded_bytes(),\n        };\n\n        let new = extension.as_encoded_bytes();\n        if !new.is_empty() {\n            // truncate until right after the file name\n            // this is necessary for trimming the trailing separator\n            let end_file_name = file_name[file_name.len()..].as_ptr().addr();\n            let start = self.inner.as_encoded_bytes().as_ptr().addr();\n            self.inner.truncate(end_file_name.wrapping_sub(start));\n\n            // append the new extension\n            self.inner.reserve_exact(new.len() + 1);\n            self.inner.push(\".\");\n            // SAFETY: Since a UTF-8 string was just pushed, it is not possible\n            // for the buffer to end with a surrogate half.\n            unsafe { self.inner.extend_from_slice_unchecked(new) };\n        }\n\n        true\n    }"
 }

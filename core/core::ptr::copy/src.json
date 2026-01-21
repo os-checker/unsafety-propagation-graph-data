@@ -1,5 +1,5 @@
 {
   "name": "core::ptr::copy",
   "span": "$library/core/src/ptr/mod.rs:623:1: 623:70",
-  "src": "pub const unsafe fn copy<T>(src: *const T, dst: *mut T, count: usize)"
+  "src": "pub const unsafe fn copy<T>(src: *const T, dst: *mut T, count: usize) {\n    // SAFETY: the safety contract for `copy` must be upheld by the caller.\n    unsafe {\n        ub_checks::assert_unsafe_precondition!(\n            check_language_ub,\n            \"ptr::copy requires that both pointer arguments are aligned and non-null\",\n            (\n                src: *const () = src as *const (),\n                dst: *mut () = dst as *mut (),\n                align: usize = align_of::<T>(),\n                zero_size: bool = T::IS_ZST || count == 0,\n            ) =>\n            ub_checks::maybe_is_aligned_and_not_null(src, align, zero_size)\n                && ub_checks::maybe_is_aligned_and_not_null(dst, align, zero_size)\n        );\n        crate::intrinsics::copy(src, dst, count)\n    }\n}"
 }

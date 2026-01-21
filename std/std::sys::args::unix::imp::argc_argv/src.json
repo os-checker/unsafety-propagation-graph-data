@@ -1,5 +1,5 @@
 {
   "name": "std::sys::args::unix::imp::argc_argv",
   "span": "$library/std/src/sys/args/unix.rs:136:5: 136:56",
-  "src": "pub fn argc_argv() -> (isize, *const *const c_char)"
+  "src": "pub fn argc_argv() -> (isize, *const *const c_char) {\n        // Load ARGC and ARGV, which hold the unmodified system-provided\n        // argc/argv, so we can read the pointed-to memory without atomics or\n        // synchronization.\n        //\n        // If either ARGC or ARGV is still zero or null, then either there\n        // really are no arguments, or someone is asking for `args()` before\n        // initialization has completed, and we return an empty list.\n        let argv = ARGV.load(Ordering::Relaxed);\n        let argc = if argv.is_null() { 0 } else { ARGC.load(Ordering::Relaxed) };\n\n        // Cast from `*mut *const u8` to `*const *const c_char`\n        (argc, argv.cast())\n    }"
 }

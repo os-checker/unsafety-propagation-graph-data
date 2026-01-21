@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::stack_overflow::imp::install_main_guard",
   "span": "$library/std/src/sys/pal/unix/stack_overflow.rs:407:5: 407:59",
-  "src": "unsafe fn install_main_guard() -> Option<Range<usize>>"
+  "src": "unsafe fn install_main_guard() -> Option<Range<usize>> {\n        let page_size = PAGE_SIZE.load(Ordering::Relaxed);\n\n        unsafe {\n            // this way someone on any unix-y OS can check that all these compile\n            if cfg!(all(target_os = \"linux\", not(target_env = \"musl\"))) {\n                install_main_guard_linux(page_size)\n            } else if cfg!(all(target_os = \"linux\", target_env = \"musl\")) {\n                install_main_guard_linux_musl(page_size)\n            } else if cfg!(target_os = \"freebsd\") {\n                #[cfg(not(target_os = \"freebsd\"))]\n                return None;\n                // The FreeBSD code cannot be checked on non-BSDs.\n                #[cfg(target_os = \"freebsd\")]\n                install_main_guard_freebsd(page_size)\n            } else if cfg!(any(target_os = \"netbsd\", target_os = \"openbsd\")) {\n                install_main_guard_bsds(page_size)\n            } else {\n                install_main_guard_default(page_size)\n            }\n        }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::slice::<impl [T]>::as_simd",
   "span": "$library/core/src/slice/mod.rs:4225:5: 4229:58",
-  "src": "pub fn as_simd<const LANES: usize>(&self) -> (&[T], &[Simd<T, LANES>], &[T])\n    where\n        Simd<T, LANES>: AsRef<[T; LANES]>,\n        T: simd::SimdElement,\n        simd::LaneCount<LANES>: simd::SupportedLaneCount,"
+  "src": "pub fn as_simd<const LANES: usize>(&self) -> (&[T], &[Simd<T, LANES>], &[T])\n    where\n        Simd<T, LANES>: AsRef<[T; LANES]>,\n        T: simd::SimdElement,\n        simd::LaneCount<LANES>: simd::SupportedLaneCount,\n    {\n        // These are expected to always match, as vector types are laid out like\n        // arrays per <https://llvm.org/docs/LangRef.html#vector-type>, but we\n        // might as well double-check since it'll optimize away anyhow.\n        assert_eq!(size_of::<Simd<T, LANES>>(), size_of::<[T; LANES]>());\n\n        // SAFETY: The simd types have the same layout as arrays, just with\n        // potentially-higher alignment, so the de-facto transmutes are sound.\n        unsafe { self.align_to() }\n    }"
 }

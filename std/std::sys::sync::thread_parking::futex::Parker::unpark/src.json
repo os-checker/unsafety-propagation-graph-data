@@ -1,5 +1,5 @@
 {
   "name": "std::sys::sync::thread_parking::futex::Parker::unpark",
   "span": "$library/std/src/sys/sync/thread_parking/futex.rs:89:5: 89:36",
-  "src": "pub fn unpark(self: Pin<&Self>)"
+  "src": "pub fn unpark(self: Pin<&Self>) {\n        // Change PARKED=>NOTIFIED, EMPTY=>NOTIFIED, or NOTIFIED=>NOTIFIED, and\n        // wake the thread in the first case.\n        //\n        // Note that even NOTIFIED=>NOTIFIED results in a write. This is on\n        // purpose, to make sure every unpark() has a release-acquire ordering\n        // with park().\n        if self.state.swap(NOTIFIED, Release) == PARKED {\n            futex_wake(&self.state);\n        }\n    }"
 }

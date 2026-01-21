@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::vec_deque::VecDeque::<T, A>::write_iter_wrapping",
   "span": "$library/alloc/src/collections/vec_deque/mod.rs:581:5: 586:15",
-  "src": "unsafe fn write_iter_wrapping(\n        &mut self,\n        dst: usize,\n        mut iter: impl Iterator<Item = T>,\n        len: usize,\n    ) -> usize"
+  "src": "unsafe fn write_iter_wrapping(\n        &mut self,\n        dst: usize,\n        mut iter: impl Iterator<Item = T>,\n        len: usize,\n    ) -> usize {\n        struct Guard<'a, T, A: Allocator> {\n            deque: &'a mut VecDeque<T, A>,\n            written: usize,\n        }\n\n        impl<'a, T, A: Allocator> Drop for Guard<'a, T, A> {\n            fn drop(&mut self) {\n                self.deque.len += self.written;\n            }\n        }\n\n        let head_room = self.capacity() - dst;\n\n        let mut guard = Guard { deque: self, written: 0 };\n\n        if head_room >= len {\n            unsafe { guard.deque.write_iter(dst, iter, &mut guard.written) };\n        } else {\n            unsafe {\n                guard.deque.write_iter(\n                    dst,\n                    ByRefSized(&mut iter).take(head_room),\n                    &mut guard.written,\n                );\n                guard.deque.write_iter(0, iter, &mut guard.written)\n            };\n        }\n\n        guard.written\n    }"
 }

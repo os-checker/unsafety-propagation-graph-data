@@ -1,5 +1,5 @@
 {
   "name": "alloc::rc::Rc::<T>::map",
   "span": "$library/alloc/src/rc.rs:667:5: 667:64",
-  "src": "pub fn map<U>(this: Self, f: impl FnOnce(&T) -> U) -> Rc<U>"
+  "src": "pub fn map<U>(this: Self, f: impl FnOnce(&T) -> U) -> Rc<U> {\n        if size_of::<T>() == size_of::<U>()\n            && align_of::<T>() == align_of::<U>()\n            && Rc::is_unique(&this)\n        {\n            unsafe {\n                let ptr = Rc::into_raw(this);\n                let value = ptr.read();\n                let mut allocation = Rc::from_raw(ptr.cast::<mem::MaybeUninit<U>>());\n\n                Rc::get_mut_unchecked(&mut allocation).write(f(&value));\n                allocation.assume_init()\n            }\n        } else {\n            Rc::new(f(&*this))\n        }\n    }"
 }

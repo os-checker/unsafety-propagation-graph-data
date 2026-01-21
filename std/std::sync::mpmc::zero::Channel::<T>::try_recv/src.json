@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::zero::Channel::<T>::try_recv",
   "span": "$library/std/src/sync/mpmc/zero.rs:218:5: 218:61",
-  "src": "pub(crate) fn try_recv(&self) -> Result<T, TryRecvError>"
+  "src": "pub(crate) fn try_recv(&self) -> Result<T, TryRecvError> {\n        let token = &mut Token::default();\n        let mut inner = self.inner.lock().unwrap();\n\n        // If there's a waiting sender, pair up with it.\n        if let Some(operation) = inner.senders.try_select() {\n            token.zero.0 = operation.packet;\n            drop(inner);\n            unsafe { self.read(token).map_err(|_| TryRecvError::Disconnected) }\n        } else if inner.is_disconnected {\n            Err(TryRecvError::Disconnected)\n        } else {\n            Err(TryRecvError::Empty)\n        }\n    }"
 }

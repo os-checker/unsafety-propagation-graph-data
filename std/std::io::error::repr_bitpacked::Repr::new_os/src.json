@@ -1,5 +1,5 @@
 {
   "name": "std::io::error::repr_bitpacked::Repr::new_os",
   "span": "$library/std/src/io/error/repr_bitpacked.rs:167:5: 167:51",
-  "src": "pub(super) fn new_os(code: RawOsError) -> Self"
+  "src": "pub(super) fn new_os(code: RawOsError) -> Self {\n        let utagged = ((code as usize) << 32) | TAG_OS;\n        // Safety: `TAG_OS` is not zero, so the result of the `|` is not 0.\n        let res = Self(\n            NonNull::without_provenance(unsafe { NonZeroUsize::new_unchecked(utagged) }),\n            PhantomData,\n        );\n        // quickly smoke-check we encoded the right thing (This generally will\n        // only run in std's tests, unless the user uses -Zbuild-std)\n        debug_assert!(\n            matches!(res.data(), ErrorData::Os(c) if c == code),\n            \"repr(os) encoding failed for {code}\"\n        );\n        res\n    }"
 }

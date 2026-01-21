@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::context::Context::with",
   "span": "$library/std/src/sync/mpmc/context.rs:37:5: 39:34",
-  "src": "pub fn with<F, R>(f: F) -> R\n    where\n        F: FnOnce(&Context) -> R,"
+  "src": "pub fn with<F, R>(f: F) -> R\n    where\n        F: FnOnce(&Context) -> R,\n    {\n        thread_local! {\n            /// Cached thread-local context.\n            static CONTEXT: Cell<Option<Context>> = Cell::new(Some(Context::new()));\n        }\n\n        let mut f = Some(f);\n        let mut f = |cx: &Context| -> R {\n            let f = f.take().unwrap();\n            f(cx)\n        };\n\n        CONTEXT\n            .try_with(|cell| match cell.take() {\n                None => f(&Context::new()),\n                Some(cx) => {\n                    cx.reset();\n                    let res = f(&cx);\n                    cell.set(Some(cx));\n                    res\n                }\n            })\n            .unwrap_or_else(|_| f(&Context::new()))\n    }"
 }

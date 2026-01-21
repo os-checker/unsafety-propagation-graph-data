@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::iommu::invalidate::init",
   "span": "ostd/src/arch/x86/iommu/invalidate/mod.rs:13:1: 13:21",
-  "src": "pub(super) fn init()"
+  "src": "pub(super) fn init() {\n    let mut iommu_regs = IOMMU_REGS.get().unwrap().lock();\n    if !iommu_regs\n        .read_extended_capability()\n        .flags()\n        .contains(ExtendedCapabilityFlags::QI)\n    {\n        warn!(\"[IOMMU] Queued invalidation not supported\");\n        return;\n    }\n\n    QUEUE.call_once(|| {\n        let queue = Queue::new();\n        iommu_regs.enable_queued_invalidation(&queue);\n        SpinLock::new(queue)\n    });\n\n    info!(\"[IOMMU] Queued invalidation is enabled\");\n}"
 }

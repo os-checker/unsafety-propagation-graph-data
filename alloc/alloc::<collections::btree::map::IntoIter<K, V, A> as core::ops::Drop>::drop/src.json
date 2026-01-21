@@ -1,5 +1,5 @@
 {
   "name": "alloc::<collections::btree::map::IntoIter<K, V, A> as core::ops::Drop>::drop",
   "span": "$library/alloc/src/collections/btree/map.rs:1748:5: 1748:23",
-  "src": "fn drop(&mut self)"
+  "src": "fn drop(&mut self) {\n        struct DropGuard<'a, K, V, A: Allocator + Clone>(&'a mut IntoIter<K, V, A>);\n\n        impl<'a, K, V, A: Allocator + Clone> Drop for DropGuard<'a, K, V, A> {\n            fn drop(&mut self) {\n                // Continue the same loop we perform below. This only runs when unwinding, so we\n                // don't have to care about panics this time (they'll abort).\n                while let Some(kv) = self.0.dying_next() {\n                    // SAFETY: we consume the dying handle immediately.\n                    unsafe { kv.drop_key_val() };\n                }\n            }\n        }\n\n        while let Some(kv) = self.dying_next() {\n            let guard = DropGuard(self);\n            // SAFETY: we don't touch the tree before consuming the dying handle.\n            unsafe { kv.drop_key_val() };\n            mem::forget(guard);\n        }\n    }"
 }

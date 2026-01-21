@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::cursor::locking::unlock_range",
   "span": "ostd/src/mm/page_table/cursor/locking.rs:58:1: 58:75",
-  "src": "pub(super) fn unlock_range<C: PageTableConfig>(cursor: &mut Cursor<'_, C>)"
+  "src": "pub(super) fn unlock_range<C: PageTableConfig>(cursor: &mut Cursor<'_, C>) {\n    for i in (0..cursor.guard_level as usize - 1).rev() {\n        if let Some(guard) = cursor.path[i].take() {\n            let _ = ManuallyDrop::new(guard);\n        }\n    }\n    let guard_node = cursor.path[cursor.guard_level as usize - 1].take().unwrap();\n    let cur_node_va = cursor\n        .barrier_va\n        .start\n        .align_down(page_size::<C>(cursor.guard_level + 1));\n\n    // SAFETY: A cursor maintains that its corresponding sub-tree is locked.\n    unsafe {\n        dfs_release_lock(\n            cursor.rcu_guard,\n            guard_node,\n            cur_node_va,\n            cursor.barrier_va.clone(),\n        )\n    };\n}"
 }

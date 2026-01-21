@@ -1,5 +1,5 @@
 {
   "name": "std::sys::net::connection::socket::setsockopt",
   "span": "$library/std/src/sys/net/connection/socket/mod.rs:222:1: 227:20",
-  "src": "pub unsafe fn setsockopt<T>(\n    sock: &Socket,\n    level: c_int,\n    option_name: c_int,\n    option_value: T,\n) -> io::Result<()>"
+  "src": "pub unsafe fn setsockopt<T>(\n    sock: &Socket,\n    level: c_int,\n    option_name: c_int,\n    option_value: T,\n) -> io::Result<()> {\n    let option_len = size_of::<T>() as c::socklen_t;\n    // SAFETY:\n    // * `sock` is opened for the duration of this call, as `sock` owns the socket.\n    // * the pointer to `option_value` is readable at a size of `size_of::<T>`\n    //   bytes\n    // * the value of `option_value` has a valid type for the given socket option\n    //   (guaranteed by caller).\n    cvt(unsafe {\n        c::setsockopt(\n            sock.as_raw(),\n            level,\n            option_name,\n            (&raw const option_value) as *const _,\n            option_len,\n        )\n    })?;\n    Ok(())\n}"
 }

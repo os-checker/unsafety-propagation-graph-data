@@ -1,5 +1,5 @@
 {
   "name": "std::sys::io::kernel_copy::linux::FdMeta::copy_file_range_candidate",
   "span": "$library/std/src/sys/io/kernel_copy/linux.rs:125:5: 125:61",
-  "src": "fn copy_file_range_candidate(&self, f: FdHandle) -> bool"
+  "src": "fn copy_file_range_candidate(&self, f: FdHandle) -> bool {\n        match self {\n            // copy_file_range will fail on empty procfs files. `read` can determine whether EOF has been reached\n            // without extra cost and skip the write, thus there is no benefit in attempting copy_file_range\n            FdMeta::Metadata(meta) if f == FdHandle::Input && meta.is_file() && meta.len() > 0 => {\n                true\n            }\n            FdMeta::Metadata(meta) if f == FdHandle::Output && meta.is_file() => true,\n            _ => false,\n        }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::io::impls::<impl io::Read for alloc_crate::collections::VecDeque<u8, A>>::read_buf_exact",
   "span": "$library/std/src/io/impls.rs:568:5: 568:83",
-  "src": "fn read_buf_exact(&mut self, mut cursor: BorrowedCursor<'_>) -> io::Result<()>"
+  "src": "fn read_buf_exact(&mut self, mut cursor: BorrowedCursor<'_>) -> io::Result<()> {\n        let len = cursor.capacity();\n        let (front, back) = self.as_slices();\n\n        match front.split_at_checked(cursor.capacity()) {\n            Some((front, _)) => cursor.append(front),\n            None => {\n                cursor.append(front);\n                match back.split_at_checked(cursor.capacity()) {\n                    Some((back, _)) => cursor.append(back),\n                    None => {\n                        cursor.append(back);\n                        self.clear();\n                        return Err(io::Error::READ_EXACT_EOF);\n                    }\n                }\n            }\n        }\n\n        self.drain(..len);\n        Ok(())\n    }"
 }

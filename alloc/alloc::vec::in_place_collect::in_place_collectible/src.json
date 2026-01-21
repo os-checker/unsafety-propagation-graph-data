@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::in_place_collect::in_place_collectible",
   "span": "$library/alloc/src/vec/in_place_collect.rs:168:1: 171:10",
-  "src": "const fn in_place_collectible<DEST, SRC>(\n    step_merge: Option<NonZero<usize>>,\n    step_expand: Option<NonZero<usize>>,\n) -> bool"
+  "src": "const fn in_place_collectible<DEST, SRC>(\n    step_merge: Option<NonZero<usize>>,\n    step_expand: Option<NonZero<usize>>,\n) -> bool {\n    // Require matching alignments because an alignment-changing realloc is inefficient on many\n    // system allocators and better implementations would require the unstable Allocator trait.\n    if const { SRC::IS_ZST || DEST::IS_ZST || align_of::<SRC>() != align_of::<DEST>() } {\n        return false;\n    }\n\n    match (step_merge, step_expand) {\n        (Some(step_merge), Some(step_expand)) => {\n            // At least N merged source items -> at most M expanded destination items\n            // e.g.\n            // - 1 x [u8; 4] -> 4x u8, via flatten\n            // - 4 x u8 -> 1x [u8; 4], via array_chunks\n            size_of::<SRC>() * step_merge.get() >= size_of::<DEST>() * step_expand.get()\n        }\n        // Fall back to other from_iter impls if an overflow occurred in the step merge/expansion\n        // tracking.\n        _ => false,\n    }\n}"
 }

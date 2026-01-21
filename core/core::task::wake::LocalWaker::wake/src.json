@@ -1,5 +1,5 @@
 {
   "name": "core::task::wake::LocalWaker::wake",
   "span": "$library/core/src/task/wake.rs:767:5: 767:22",
-  "src": "pub fn wake(self)"
+  "src": "pub fn wake(self) {\n        // The actual wakeup call is delegated through a virtual function call\n        // to the implementation which is defined by the executor.\n\n        // Don't call `drop` -- the waker will be consumed by `wake`.\n        let this = ManuallyDrop::new(self);\n\n        // SAFETY: This is safe because `Waker::from_raw` is the only way\n        // to initialize `wake` and `data` requiring the user to acknowledge\n        // that the contract of `RawWaker` is upheld.\n        unsafe { (this.waker.vtable.wake)(this.waker.data) };\n    }"
 }

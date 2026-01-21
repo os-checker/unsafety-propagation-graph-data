@@ -1,5 +1,5 @@
 {
   "name": "alloc::string::String::drain",
   "span": "$library/alloc/src/string.rs:1961:5: 1963:31",
-  "src": "pub fn drain<R>(&mut self, range: R) -> Drain<'_>\n    where\n        R: RangeBounds<usize>,"
+  "src": "pub fn drain<R>(&mut self, range: R) -> Drain<'_>\n    where\n        R: RangeBounds<usize>,\n    {\n        // Memory safety\n        //\n        // The String version of Drain does not have the memory safety issues\n        // of the vector version. The data is just plain bytes.\n        // Because the range removal happens in Drop, if the Drain iterator is leaked,\n        // the removal will not happen.\n        let Range { start, end } = slice::range(range, ..self.len());\n        assert!(self.is_char_boundary(start));\n        assert!(self.is_char_boundary(end));\n\n        // Take out two simultaneous borrows. The &mut String won't be accessed\n        // until iteration is over, in Drop.\n        let self_ptr = self as *mut _;\n        // SAFETY: `slice::range` and `is_char_boundary` do the appropriate bounds checks.\n        let chars_iter = unsafe { self.get_unchecked(start..end) }.chars();\n\n        Drain { start, end, iter: chars_iter, string: self_ptr }\n    }"
 }

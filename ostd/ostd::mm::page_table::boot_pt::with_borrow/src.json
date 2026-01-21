@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::boot_pt::with_borrow",
   "span": "ostd/src/mm/page_table/boot_pt.rs:40:1: 42:40",
-  "src": "pub(crate) fn with_borrow<F, R>(f: F) -> Result<R, ()>\nwhere\n    F: FnOnce(&mut BootPageTable) -> R,"
+  "src": "pub(crate) fn with_borrow<F, R>(f: F) -> Result<R, ()>\nwhere\n    F: FnOnce(&mut BootPageTable) -> R,\n{\n    let mut boot_pt = BOOT_PAGE_TABLE.lock();\n\n    if IS_DISMISSED.load() {\n        return Err(());\n    }\n\n    // Lazy initialization.\n    if boot_pt.is_none() {\n        // SAFETY: This function is called only once.\n        *boot_pt = Some(unsafe { BootPageTable::from_current_pt() });\n    }\n\n    let r = f(boot_pt.as_mut().unwrap());\n\n    Ok(r)\n}"
 }

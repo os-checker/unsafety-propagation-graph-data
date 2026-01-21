@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::irq::ipi::send_ipi",
   "span": "ostd/src/arch/x86/irq/ipi.rs:35:1: 35:70",
-  "src": "pub(crate) fn send_ipi(hw_cpu_id: HwCpuId, guard: &dyn PinCurrentCpu)"
+  "src": "pub(crate) fn send_ipi(hw_cpu_id: HwCpuId, guard: &dyn PinCurrentCpu) {\n    use crate::arch::kernel::apic::{self, Icr};\n\n    let irq_num = IPI_IRQ.get().unwrap().num();\n\n    let icr = Icr::new(\n        apic::ApicId::from(hw_cpu_id.0),\n        apic::DestinationShorthand::NoShorthand,\n        apic::TriggerMode::Edge,\n        apic::Level::Assert,\n        apic::DeliveryStatus::Idle,\n        apic::DestinationMode::Physical,\n        apic::DeliveryMode::Fixed,\n        irq_num,\n    );\n\n    let apic = apic::get_or_init(guard);\n    // SAFETY: The ICR is valid to generate the request IPI. Generating the\n    // request IPI is safe.\n    unsafe { apic.send_ipi(icr) };\n}"
 }

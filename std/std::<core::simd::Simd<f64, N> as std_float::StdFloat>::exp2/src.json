@@ -1,5 +1,5 @@
 {
   "name": "std::<core::simd::Simd<f64, N> as std_float::StdFloat>::exp2",
   "span": "$library/std/src/../../portable-simd/crates/std_float/src/lib.rs:178:13: 178:33",
-  "src": "fn $fn(self) -> Self"
+  "src": "fn $fn(self) -> Self {\n                // https://github.com/llvm/llvm-project/issues/83729\n                #[cfg(target_arch = \"aarch64\")]\n                {\n                    let mut ln = Self::splat(0f64);\n                    for i in 0..N {\n                        ln[i] = self[i].$fn()\n                    }\n                    ln\n                }\n\n                #[cfg(not(target_arch = \"aarch64\"))]\n                {\n                    unsafe { intrinsics::$intrinsic(self) }\n                }\n            }"
 }

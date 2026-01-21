@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::symbolize::gimli::Mapping::mk_or_other",
   "span": "$library/std/src/../../backtrace/src/symbolize/gimli.rs:92:5: 94:88",
-  "src": "fn mk_or_other<F>(data: Mmap, mk: F) -> Option<Mapping>\n    where\n        F: for<'a> FnOnce(&'a [u8], &'a Stash) -> Option<Either<Mapping, Context<'a>>>,"
+  "src": "fn mk_or_other<F>(data: Mmap, mk: F) -> Option<Mapping>\n    where\n        F: for<'a> FnOnce(&'a [u8], &'a Stash) -> Option<Either<Mapping, Context<'a>>>,\n    {\n        let stash = Stash::new();\n        let cx = match mk(&data, &stash)? {\n            Either::A(mapping) => return Some(mapping),\n            Either::B(cx) => cx,\n        };\n        Some(Mapping {\n            // Convert to 'static lifetimes since the symbols should\n            // only borrow `map` and `stash` and we're preserving them below.\n            cx: unsafe { core::mem::transmute::<Context<'_>, Context<'static>>(cx) },\n            _map: data,\n            stash,\n        })\n    }"
 }

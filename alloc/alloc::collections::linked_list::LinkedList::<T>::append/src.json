@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::linked_list::LinkedList::<T>::append",
   "span": "$library/alloc/src/collections/linked_list.rs:481:5: 481:47",
-  "src": "pub fn append(&mut self, other: &mut Self)"
+  "src": "pub fn append(&mut self, other: &mut Self) {\n        match self.tail {\n            None => mem::swap(self, other),\n            Some(mut tail) => {\n                // `as_mut` is okay here because we have exclusive access to the entirety\n                // of both lists.\n                if let Some(mut other_head) = other.head.take() {\n                    unsafe {\n                        tail.as_mut().next = Some(other_head);\n                        other_head.as_mut().prev = Some(tail);\n                    }\n\n                    self.tail = other.tail.take();\n                    self.len += mem::replace(&mut other.len, 0);\n                }\n            }\n        }\n    }"
 }

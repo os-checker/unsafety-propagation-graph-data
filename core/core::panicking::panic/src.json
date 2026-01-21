@@ -1,5 +1,5 @@
 {
   "name": "core::panicking::panic",
   "span": "$library/core/src/panicking.rs:138:1: 138:44",
-  "src": "pub const fn panic(expr: &'static str) -> !"
+  "src": "pub const fn panic(expr: &'static str) -> ! {\n    // Use Arguments::from_str instead of format_args!(\"{expr}\") to potentially\n    // reduce size overhead. The format_args! macro uses str's Display trait to\n    // write expr, which calls Formatter::pad, which must accommodate string\n    // truncation and padding (even though none is used here). Using\n    // Arguments::from_str may allow the compiler to omit Formatter::pad from the\n    // output binary, saving up to a few kilobytes.\n    // However, this optimization only works for `'static` strings: `from_str` also makes this\n    // message return `Some` from `Arguments::as_str`, which means it can become part of the panic\n    // payload without any allocation or copying. Shorter-lived strings would become invalid as\n    // stack frames get popped during unwinding, and couldn't be directly referenced from the\n    // payload.\n    panic_fmt(fmt::Arguments::from_str(expr));\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::<mm::frame::unique::UniqueFrame<M> as core::convert::TryFrom<mm::frame::Frame<M>>>::try_from",
   "span": "ostd/src/mm/frame/unique.rs:188:5: 188:62",
-  "src": "fn try_from(frame: Frame<M>) -> Result<Self, Self::Error>"
+  "src": "fn try_from(frame: Frame<M>) -> Result<Self, Self::Error> {\n        match frame.slot().ref_count.compare_exchange(\n            1,\n            REF_COUNT_UNIQUE,\n            Ordering::Relaxed,\n            Ordering::Relaxed,\n        ) {\n            Ok(_) => {\n                // SAFETY: The reference count is now `REF_COUNT_UNIQUE`.\n                Ok(unsafe { core::mem::transmute::<Frame<M>, UniqueFrame<M>>(frame) })\n            }\n            Err(_) => Err(frame),\n        }\n    }"
 }

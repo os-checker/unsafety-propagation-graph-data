@@ -1,5 +1,5 @@
 {
   "name": "core::slice::rotate::ptr_rotate",
   "span": "$library/core/src/slice/rotate.rs:14:1: 14:81",
-  "src": "pub(super) const unsafe fn ptr_rotate<T>(left: usize, mid: *mut T, right: usize)"
+  "src": "pub(super) const unsafe fn ptr_rotate<T>(left: usize, mid: *mut T, right: usize) {\n    if T::IS_ZST {\n        return;\n    }\n    // abort early if the rotate is a no-op\n    if (left == 0) || (right == 0) {\n        return;\n    }\n    // `T` is not a zero-sized type, so it's okay to divide by its size.\n    if !cfg!(feature = \"optimize_for_size\")\n        // FIXME(const-hack): Use cmp::min when available in const\n        && const_min(left, right) <= size_of::<BufType>() / size_of::<T>()\n    {\n        // SAFETY: guaranteed by the caller\n        unsafe { ptr_rotate_memmove(left, mid, right) };\n    } else if !cfg!(feature = \"optimize_for_size\")\n        && ((left + right < 24) || (size_of::<T>() > size_of::<[usize; 4]>()))\n    {\n        // SAFETY: guaranteed by the caller\n        unsafe { ptr_rotate_gcd(left, mid, right) }\n    } else {\n        // SAFETY: guaranteed by the caller\n        unsafe { ptr_rotate_swap(left, mid, right) }\n    }\n}"
 }

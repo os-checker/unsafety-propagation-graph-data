@@ -1,5 +1,5 @@
 {
   "name": "std::sync::once_lock::OnceLock::<T>::get_or_try_init",
   "span": "$library/std/src/sync/once_lock.rs:397:5: 399:37",
-  "src": "pub fn get_or_try_init<F, E>(&self, f: F) -> Result<&T, E>\n    where\n        F: FnOnce() -> Result<T, E>,"
+  "src": "pub fn get_or_try_init<F, E>(&self, f: F) -> Result<&T, E>\n    where\n        F: FnOnce() -> Result<T, E>,\n    {\n        // Fast path check\n        // NOTE: We need to perform an acquire on the state in this method\n        // in order to correctly synchronize `LazyLock::force`. This is\n        // currently done by calling `self.get()`, which in turn calls\n        // `self.is_initialized()`, which in turn performs the acquire.\n        if let Some(value) = self.get() {\n            return Ok(value);\n        }\n        self.initialize(f)?;\n\n        debug_assert!(self.is_initialized());\n\n        // SAFETY: The inner value has been initialized\n        Ok(unsafe { self.get_unchecked() })\n    }"
 }

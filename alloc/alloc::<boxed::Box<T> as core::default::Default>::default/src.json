@@ -1,5 +1,5 @@
 {
   "name": "alloc::<boxed::Box<T> as core::default::Default>::default",
   "span": "$library/alloc/src/boxed.rs:1898:5: 1898:25",
-  "src": "fn default() -> Self"
+  "src": "fn default() -> Self {\n        let mut x: Box<mem::MaybeUninit<T>> = Box::new_uninit();\n        unsafe {\n            // SAFETY: `x` is valid for writing and has the same layout as `T`.\n            // If `T::default()` panics, dropping `x` will just deallocate the Box as `MaybeUninit<T>`\n            // does not have a destructor.\n            //\n            // We use `ptr::write` as `MaybeUninit::write` creates\n            // extra stack copies of `T` in debug mode.\n            //\n            // See https://github.com/rust-lang/rust/issues/136043 for more context.\n            ptr::write(&raw mut *x as *mut T, T::default());\n            // SAFETY: `x` was just initialized above.\n            x.assume_init()\n        }\n    }"
 }

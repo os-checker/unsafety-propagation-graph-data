@@ -1,5 +1,5 @@
 {
   "name": "ostd::<arch::kernel::acpi::AcpiMemoryHandler as acpi::AcpiHandler>::map_physical_region",
   "span": "ostd/src/arch/x86/kernel/acpi/mod.rs:26:5: 30:40",
-  "src": "unsafe fn map_physical_region<T>(\n        &self,\n        physical_address: usize,\n        size: usize,\n    ) -> acpi::PhysicalMapping<Self, T>"
+  "src": "unsafe fn map_physical_region<T>(\n        &self,\n        physical_address: usize,\n        size: usize,\n    ) -> acpi::PhysicalMapping<Self, T> {\n        let virtual_address = NonNull::new(paddr_to_vaddr(physical_address) as *mut T).unwrap();\n\n        // SAFETY: The caller should guarantee that `physical_address..physical_address + size` is\n        // part of the ACPI table. Then the memory region is mapped to `virtual_address` and is\n        // valid for read and immutable dereferencing.\n        // FIXME: The caller guarantee only holds if we trust the hardware to provide a valid ACPI\n        // table. Otherwise, if the table is corrupted, it may reference arbitrary memory regions.\n        unsafe {\n            acpi::PhysicalMapping::new(physical_address, virtual_address, size, size, self.clone())\n        }\n    }"
 }

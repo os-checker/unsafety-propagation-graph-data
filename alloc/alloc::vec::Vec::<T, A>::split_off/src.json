@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<T, A>::split_off",
   "span": "$library/alloc/src/vec/mod.rs:2913:5: 2915:18",
-  "src": "pub fn split_off(&mut self, at: usize) -> Self\n    where\n        A: Clone,"
+  "src": "pub fn split_off(&mut self, at: usize) -> Self\n    where\n        A: Clone,\n    {\n        #[cold]\n        #[cfg_attr(not(panic = \"immediate-abort\"), inline(never))]\n        #[track_caller]\n        #[optimize(size)]\n        fn assert_failed(at: usize, len: usize) -> ! {\n            panic!(\"`at` split index (is {at}) should be <= len (is {len})\");\n        }\n\n        if at > self.len() {\n            assert_failed(at, self.len());\n        }\n\n        let other_len = self.len - at;\n        let mut other = Vec::with_capacity_in(other_len, self.allocator().clone());\n\n        // Unsafely `set_len` and copy items to `other`.\n        unsafe {\n            self.set_len(at);\n            other.set_len(other_len);\n\n            ptr::copy_nonoverlapping(self.as_ptr().add(at), other.as_mut_ptr(), other.len());\n        }\n        other\n    }"
 }

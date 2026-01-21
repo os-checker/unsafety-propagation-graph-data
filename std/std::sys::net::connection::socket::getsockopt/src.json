@@ -1,5 +1,5 @@
 {
   "name": "std::sys::net::connection::socket::getsockopt",
   "span": "$library/std/src/sys/net/connection/socket/mod.rs:251:1: 255:19",
-  "src": "pub unsafe fn getsockopt<T: Copy>(\n    sock: &Socket,\n    level: c_int,\n    option_name: c_int,\n) -> io::Result<T>"
+  "src": "pub unsafe fn getsockopt<T: Copy>(\n    sock: &Socket,\n    level: c_int,\n    option_name: c_int,\n) -> io::Result<T> {\n    let mut option_value = MaybeUninit::<T>::zeroed();\n    let mut option_len = size_of::<T>() as c::socklen_t;\n\n    // SAFETY:\n    // * `sock` is opened for the duration of this call, as `sock` owns the socket.\n    // * the pointer to `option_value` is writable and the stack allocation has\n    //   space for `size_of::<T>` bytes.\n    cvt(unsafe {\n        c::getsockopt(\n            sock.as_raw(),\n            level,\n            option_name,\n            option_value.as_mut_ptr().cast(),\n            &mut option_len,\n        )\n    })?;\n\n    // SAFETY: the `getsockopt` call succeeded and the caller guarantees that\n    //         `T` is the type of this option, thus `option_value` must have\n    //         been initialized by the system.\n    Ok(unsafe { option_value.assume_init() })\n}"
 }

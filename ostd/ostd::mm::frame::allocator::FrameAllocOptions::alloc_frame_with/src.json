@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::allocator::FrameAllocOptions::alloc_frame_with",
   "span": "ostd/src/mm/frame/allocator.rs:54:5: 54:85",
-  "src": "pub fn alloc_frame_with<M: AnyFrameMeta>(&self, metadata: M) -> Result<Frame<M>>"
+  "src": "pub fn alloc_frame_with<M: AnyFrameMeta>(&self, metadata: M) -> Result<Frame<M>> {\n        let single_layout = Layout::from_size_align(PAGE_SIZE, PAGE_SIZE).unwrap();\n        let frame = get_global_frame_allocator()\n            .alloc(single_layout)\n            .map(|paddr| Frame::from_unused(paddr, metadata).unwrap())\n            .ok_or(Error::NoMemory)?;\n\n        if self.zeroed {\n            let addr = paddr_to_vaddr(frame.paddr()) as *mut u8;\n            // SAFETY: The newly allocated frame is guaranteed to be valid.\n            unsafe { core::ptr::write_bytes(addr, 0, PAGE_SIZE) }\n        }\n\n        Ok(frame)\n    }"
 }

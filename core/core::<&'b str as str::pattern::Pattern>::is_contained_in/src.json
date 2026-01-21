@@ -1,5 +1,5 @@
 {
   "name": "core::<&'b str as str::pattern::Pattern>::is_contained_in",
   "span": "$library/core/src/str/pattern.rs:987:5: 987:53",
-  "src": "fn is_contained_in(self, haystack: &str) -> bool"
+  "src": "fn is_contained_in(self, haystack: &str) -> bool {\n        if self.len() == 0 {\n            return true;\n        }\n\n        match self.len().cmp(&haystack.len()) {\n            Ordering::Less => {\n                if self.len() == 1 {\n                    return haystack.as_bytes().contains(&self.as_bytes()[0]);\n                }\n\n                #[cfg(any(\n                    all(target_arch = \"x86_64\", target_feature = \"sse2\"),\n                    all(target_arch = \"loongarch64\", target_feature = \"lsx\")\n                ))]\n                if self.len() <= 32 {\n                    if let Some(result) = simd_contains(self, haystack) {\n                        return result;\n                    }\n                }\n\n                self.into_searcher(haystack).next_match().is_some()\n            }\n            _ => self == haystack,\n        }\n    }"
 }

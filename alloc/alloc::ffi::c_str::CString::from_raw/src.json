@@ -1,5 +1,5 @@
 {
   "name": "alloc::ffi::c_str::CString::from_raw",
   "span": "$library/alloc/src/ffi/c_str.rs:397:5: 397:56",
-  "src": "pub unsafe fn from_raw(ptr: *mut c_char) -> CString"
+  "src": "pub unsafe fn from_raw(ptr: *mut c_char) -> CString {\n        // SAFETY: This is called with a pointer that was obtained from a call\n        // to `CString::into_raw` and the length has not been modified. As such,\n        // we know there is a NUL byte (and only one) at the end and that the\n        // information about the size of the allocation is correct on Rust's\n        // side.\n        unsafe {\n            unsafe extern \"C\" {\n                /// Provided by libc or compiler_builtins.\n                fn strlen(s: *const c_char) -> usize;\n            }\n            let len = strlen(ptr) + 1; // Including the NUL byte\n            let slice = slice::from_raw_parts_mut(ptr, len);\n            CString { inner: Box::from_raw(slice as *mut [c_char] as *mut [u8]) }\n        }\n    }"
 }

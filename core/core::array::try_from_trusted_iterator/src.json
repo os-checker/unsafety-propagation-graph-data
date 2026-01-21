@@ -1,5 +1,5 @@
 {
   "name": "core::array::try_from_trusted_iterator",
   "span": "$library/core/src/array/mod.rs:867:1: 872:35",
-  "src": "fn try_from_trusted_iterator<T, R, const N: usize>(\n    iter: impl UncheckedIterator<Item = R>,\n) -> ChangeOutputType<R, [T; N]>\nwhere\n    R: Try<Output = T>,\n    R::Residual: Residual<[T; N]>,"
+  "src": "fn try_from_trusted_iterator<T, R, const N: usize>(\n    iter: impl UncheckedIterator<Item = R>,\n) -> ChangeOutputType<R, [T; N]>\nwhere\n    R: Try<Output = T>,\n    R::Residual: Residual<[T; N]>,\n{\n    assert!(iter.size_hint().0 >= N);\n    fn next<T>(mut iter: impl UncheckedIterator<Item = T>) -> impl FnMut(usize) -> T {\n        move |_| {\n            // SAFETY: We know that `from_fn` will call this at most N times,\n            // and we checked to ensure that we have at least that many items.\n            unsafe { iter.next_unchecked() }\n        }\n    }\n\n    try_from_fn(next(iter))\n}"
 }

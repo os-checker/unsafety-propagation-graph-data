@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::timer::hpet::init",
   "span": "ostd/src/arch/x86/timer/hpet.rs:138:1: 138:39",
-  "src": "pub fn init() -> Result<(), AcpiError>"
+  "src": "pub fn init() -> Result<(), AcpiError> {\n    let tables = get_acpi_tables().unwrap();\n\n    let hpet_info = HpetInfo::new(&tables)?;\n    assert_ne!(hpet_info.base_address, 0, \"HPET address should not be zero\");\n\n    let base = NonNull::new(paddr_to_vaddr(hpet_info.base_address) as *mut u8).unwrap();\n    // SAFETY: The base address is from the ACPI table and points to the HPET MMIO region.\n    let hpet = unsafe { Hpet::new(base) };\n    HPET_INSTANCE.call_once(|| hpet);\n\n    Ok(())\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::<mm::vm_space::UserPtConfig as mm::page_table::PageTableConfig>::item_from_raw",
   "span": "ostd/src/mm/vm_space.rs:720:5: 720:96",
-  "src": "unsafe fn item_from_raw(paddr: Paddr, level: PagingLevel, prop: PageProperty) -> Self::Item"
+  "src": "unsafe fn item_from_raw(paddr: Paddr, level: PagingLevel, prop: PageProperty) -> Self::Item {\n        debug_assert_eq!(level, 1);\n        if prop.priv_flags.contains(PrivilegedPageFlags::AVAIL1) {\n            // AVAIL1 is set, this is I/O memory.\n            VmItem::new_untracked_io(paddr, prop)\n        } else {\n            // AVAIL1 is clear, this is tracked memory.\n            // SAFETY: The caller ensures safety.\n            let frame = unsafe { Frame::<dyn AnyUFrameMeta>::from_raw(paddr) };\n            VmItem::new_tracked(frame, prop)\n        }\n    }"
 }

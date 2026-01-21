@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::binary_heap::PeekMut::<'a, T, A>::refresh",
   "span": "$library/alloc/src/collections/binary_heap/mod.rs:411:5: 411:38",
-  "src": "pub fn refresh(&mut self) -> bool"
+  "src": "pub fn refresh(&mut self) -> bool {\n        // The length of the underlying heap is unchanged by sifting down. The value stored for leak\n        // amplification thus remains accurate. We erase the leak amplification firstly because the\n        // operation is then equivalent to constructing a new PeekMut and secondly this avoids any\n        // future complication where original_len being non-empty would be interpreted as the heap\n        // having been leak amplified instead of checking the heap itself.\n        if let Some(original_len) = self.original_len.take() {\n            // SAFETY: This is how many elements were in the Vec at the time of\n            // the BinaryHeap::peek_mut call.\n            unsafe { self.heap.data.set_len(original_len.get()) };\n\n            // The length of the heap did not change by sifting, upholding our own invariants.\n\n            // SAFETY: PeekMut is only instantiated for non-empty heaps.\n            (unsafe { self.heap.sift_down(0) }) != 0\n        } else {\n            // The element was not modified.\n            false\n        }\n    }"
 }

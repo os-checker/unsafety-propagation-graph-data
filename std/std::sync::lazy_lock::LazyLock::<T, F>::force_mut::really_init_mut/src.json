@@ -1,5 +1,5 @@
 {
   "name": "std::sync::lazy_lock::LazyLock::<T, F>::force_mut::really_init_mut",
   "span": "$library/std/src/sync/lazy_lock.rs:191:9: 191:92",
-  "src": "unsafe fn really_init_mut<T, F: FnOnce() -> T>(this: &mut LazyLock<T, F>) -> &mut T"
+  "src": "unsafe fn really_init_mut<T, F: FnOnce() -> T>(this: &mut LazyLock<T, F>) -> &mut T {\n            struct PoisonOnPanic<'a, T, F>(&'a mut LazyLock<T, F>);\n            impl<T, F> Drop for PoisonOnPanic<'_, T, F> {\n                #[inline]\n                fn drop(&mut self) {\n                    self.0.once.set_state(OnceExclusiveState::Poisoned);\n                }\n            }\n\n            // SAFETY: We always poison if the initializer panics (then we never check the data),\n            // or set the data on success.\n            let f = unsafe { ManuallyDrop::take(&mut this.data.get_mut().f) };\n            // INVARIANT: Initiated from mutable reference, don't drop because we read it.\n            let guard = PoisonOnPanic(this);\n            let data = f();\n            guard.0.data.get_mut().value = ManuallyDrop::new(data);\n            guard.0.once.set_state(OnceExclusiveState::Complete);\n            core::mem::forget(guard);\n            // SAFETY: We put the value there above.\n            unsafe { &mut this.data.get_mut().value }\n        }"
 }

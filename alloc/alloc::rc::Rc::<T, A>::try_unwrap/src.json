@@ -1,5 +1,5 @@
 {
   "name": "alloc::rc::Rc::<T, A>::try_unwrap",
   "span": "$library/alloc/src/rc.rs:1047:5: 1047:53",
-  "src": "pub fn try_unwrap(this: Self) -> Result<T, Self>"
+  "src": "pub fn try_unwrap(this: Self) -> Result<T, Self> {\n        if Rc::strong_count(&this) == 1 {\n            let this = ManuallyDrop::new(this);\n\n            let val: T = unsafe { ptr::read(&**this) }; // copy the contained object\n            let alloc: A = unsafe { ptr::read(&this.alloc) }; // copy the allocator\n\n            // Indicate to Weaks that they can't be promoted by decrementing\n            // the strong count, and then remove the implicit \"strong weak\"\n            // pointer while also handling drop logic by just crafting a\n            // fake Weak.\n            this.inner().dec_strong();\n            let _weak = Weak { ptr: this.ptr, alloc };\n            Ok(val)\n        } else {\n            Err(this)\n        }\n    }"
 }

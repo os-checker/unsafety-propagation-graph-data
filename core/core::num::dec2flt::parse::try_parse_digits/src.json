@@ -1,5 +1,5 @@
 {
   "name": "core::num::dec2flt::parse::try_parse_digits",
   "span": "$library/core/src/num/dec2flt/parse.rs:29:1: 29:62",
-  "src": "fn try_parse_digits(mut s: &[u8], mut x: u64) -> (&[u8], u64)"
+  "src": "fn try_parse_digits(mut s: &[u8], mut x: u64) -> (&[u8], u64) {\n    // may cause overflows, to be handled later\n\n    while s.len() >= 8 {\n        let num = s.read_u64();\n        if is_8digits(num) {\n            x = x.wrapping_mul(1_0000_0000).wrapping_add(parse_8digits(num));\n            s = &s[8..];\n        } else {\n            break;\n        }\n    }\n\n    s = s.parse_digits(|digit| {\n        x = x.wrapping_mul(10).wrapping_add(digit as _);\n    });\n\n    (s, x)\n}"
 }

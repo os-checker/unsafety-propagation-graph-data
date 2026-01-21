@@ -1,5 +1,5 @@
 {
   "name": "alloc::rc::RcInnerPtr::inc_weak",
   "span": "$library/alloc/src/rc.rs:3768:5: 3768:23",
-  "src": "fn inc_weak(&self)"
+  "src": "fn inc_weak(&self) {\n        let weak = self.weak();\n\n        // We insert an `assume` here to hint LLVM at an otherwise\n        // missed optimization.\n        // SAFETY: The reference count will never be zero when this is\n        // called.\n        unsafe {\n            hint::assert_unchecked(weak != 0);\n        }\n\n        let weak = weak.wrapping_add(1);\n        self.weak_ref().set(weak);\n\n        // We want to abort on overflow instead of dropping the value.\n        // Checking for overflow after the store instead of before\n        // allows for slightly better code generation.\n        if core::intrinsics::unlikely(weak == 0) {\n            abort();\n        }\n    }"
 }

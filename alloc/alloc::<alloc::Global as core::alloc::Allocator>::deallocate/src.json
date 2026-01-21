@@ -1,5 +1,5 @@
 {
   "name": "alloc::<alloc::Global as core::alloc::Allocator>::deallocate",
   "span": "$library/alloc/src/alloc.rs:262:5: 262:66",
-  "src": "unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout)"
+  "src": "unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {\n        if layout.size() != 0 {\n            // SAFETY:\n            // * We have checked that `layout` is non-zero in size.\n            // * The caller is obligated to provide a layout that \"fits\", and in this case,\n            //   \"fit\" always means a layout that is equal to the original, because our\n            //   `allocate()`, `grow()`, and `shrink()` implementations never returns a larger\n            //   allocation than requested.\n            // * Other conditions must be upheld by the caller, as per `Allocator::deallocate()`'s\n            //   safety documentation.\n            unsafe { dealloc(ptr.as_ptr(), layout) }\n        }\n    }"
 }

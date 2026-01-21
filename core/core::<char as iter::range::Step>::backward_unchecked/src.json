@@ -1,5 +1,5 @@
 {
   "name": "core::<char as iter::range::Step>::backward_unchecked",
   "span": "$library/core/src/iter/range.rs:515:5: 515:68",
-  "src": "unsafe fn backward_unchecked(start: char, count: usize) -> char"
+  "src": "unsafe fn backward_unchecked(start: char, count: usize) -> char {\n        let start = start as u32;\n        // SAFETY: the caller must guarantee that this doesn't overflow\n        // the range of values for a char.\n        let mut res = unsafe { Step::backward_unchecked(start, count) };\n        if start >= 0xE000 && 0xE000 > res {\n            // SAFETY: the caller must guarantee that this doesn't overflow\n            // the range of values for a char.\n            res = unsafe { Step::backward_unchecked(res, 0x800) };\n        }\n        // SAFETY: because of the previous contract, this is guaranteed\n        // by the caller to be a valid char.\n        unsafe { char::from_u32_unchecked(res) }\n    }"
 }

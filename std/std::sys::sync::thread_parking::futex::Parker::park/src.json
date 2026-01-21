@@ -1,5 +1,5 @@
 {
   "name": "std::sys::sync::thread_parking::futex::Parker::park",
   "span": "$library/std/src/sys/sync/thread_parking/futex.rs:47:5: 47:41",
-  "src": "pub unsafe fn park(self: Pin<&Self>)"
+  "src": "pub unsafe fn park(self: Pin<&Self>) {\n        // Change NOTIFIED=>EMPTY or EMPTY=>PARKED, and directly return in the\n        // first case.\n        if self.state.fetch_sub(1, Acquire) == NOTIFIED {\n            return;\n        }\n        loop {\n            // Wait for something to happen, assuming it's still set to PARKED.\n            futex_wait(&self.state, PARKED, None);\n            // Change NOTIFIED=>EMPTY and return in that case.\n            if self.state.compare_exchange(NOTIFIED, EMPTY, Acquire, Acquire).is_ok() {\n                return;\n            } else {\n                // Spurious wake up. We loop to try again.\n            }\n        }\n    }"
 }

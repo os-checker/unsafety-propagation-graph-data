@@ -1,5 +1,5 @@
 {
   "name": "alloc::<collections::linked_list::LinkedList<T, A> as core::ops::Drop>::drop",
   "span": "$library/alloc/src/collections/linked_list.rs:1180:5: 1180:23",
-  "src": "fn drop(&mut self)"
+  "src": "fn drop(&mut self) {\n        struct DropGuard<'a, T, A: Allocator>(&'a mut LinkedList<T, A>);\n\n        impl<'a, T, A: Allocator> Drop for DropGuard<'a, T, A> {\n            fn drop(&mut self) {\n                // Continue the same loop we do below. This only runs when a destructor has\n                // panicked. If another one panics this will abort.\n                while self.0.pop_front_node().is_some() {}\n            }\n        }\n\n        // Wrap self so that if a destructor panics, we can try to keep looping\n        let guard = DropGuard(self);\n        while guard.0.pop_front_node().is_some() {}\n        mem::forget(guard);\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::io::IoSlice::<'a>::advance_slices",
   "span": "$library/std/src/io/mod.rs:1582:5: 1582:67",
-  "src": "pub fn advance_slices(bufs: &mut &mut [IoSlice<'a>], n: usize)"
+  "src": "pub fn advance_slices(bufs: &mut &mut [IoSlice<'a>], n: usize) {\n        // Number of buffers to remove.\n        let mut remove = 0;\n        // Remaining length before reaching n. This prevents overflow\n        // that could happen if the length of slices in `bufs` were instead\n        // accumulated. Those slice may be aliased and, if they are large\n        // enough, their added length may overflow a `usize`.\n        let mut left = n;\n        for buf in bufs.iter() {\n            if let Some(remainder) = left.checked_sub(buf.len()) {\n                left = remainder;\n                remove += 1;\n            } else {\n                break;\n            }\n        }\n\n        *bufs = &mut take(bufs)[remove..];\n        if bufs.is_empty() {\n            assert!(left == 0, \"advancing io slices beyond their length\");\n        } else {\n            bufs[0].advance(left);\n        }\n    }"
 }

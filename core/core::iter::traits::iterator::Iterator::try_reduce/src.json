@@ -1,5 +1,5 @@
 {
   "name": "core::iter::traits::iterator::Iterator::try_reduce",
   "span": "$library/core/src/iter/traits/iterator.rs:2704:5: 2710:77",
-  "src": "fn try_reduce<R>(\n        &mut self,\n        f: impl FnMut(Self::Item, Self::Item) -> R,\n    ) -> ChangeOutputType<R, Option<R::Output>>\n    where\n        Self: Sized,\n        R: Try<Output = Self::Item, Residual: Residual<Option<Self::Item>>>,"
+  "src": "fn try_reduce<R>(\n        &mut self,\n        f: impl FnMut(Self::Item, Self::Item) -> R,\n    ) -> ChangeOutputType<R, Option<R::Output>>\n    where\n        Self: Sized,\n        R: Try<Output = Self::Item, Residual: Residual<Option<Self::Item>>>,\n    {\n        let first = match self.next() {\n            Some(i) => i,\n            None => return Try::from_output(None),\n        };\n\n        match self.try_fold(first, f).branch() {\n            ControlFlow::Break(r) => FromResidual::from_residual(r),\n            ControlFlow::Continue(i) => Try::from_output(Some(i)),\n        }\n    }"
 }

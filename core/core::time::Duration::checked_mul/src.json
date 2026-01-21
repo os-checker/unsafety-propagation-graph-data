@@ -1,5 +1,5 @@
 {
   "name": "core::time::Duration::checked_mul",
   "span": "$library/core/src/time.rs:784:5: 784:65",
-  "src": "pub const fn checked_mul(self, rhs: u32) -> Option<Duration>"
+  "src": "pub const fn checked_mul(self, rhs: u32) -> Option<Duration> {\n        // Multiply nanoseconds as u64, because it cannot overflow that way.\n        let total_nanos = self.nanos.as_inner() as u64 * rhs as u64;\n        let extra_secs = total_nanos / (NANOS_PER_SEC as u64);\n        let nanos = (total_nanos % (NANOS_PER_SEC as u64)) as u32;\n        // FIXME(const-hack): use `and_then` once that is possible.\n        if let Some(s) = self.secs.checked_mul(rhs as u64) {\n            if let Some(secs) = s.checked_add(extra_secs) {\n                debug_assert!(nanos < NANOS_PER_SEC);\n                return Some(Duration::new(secs, nanos));\n            }\n        }\n        None\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::sys::fs::unix::readlink",
   "span": "$library/std/src/sys/fs/unix.rs:2032:1: 2032:54",
-  "src": "pub fn readlink(c_path: &CStr) -> io::Result<PathBuf>"
+  "src": "pub fn readlink(c_path: &CStr) -> io::Result<PathBuf> {\n    let p = c_path.as_ptr();\n\n    let mut buf = Vec::with_capacity(256);\n\n    loop {\n        let buf_read =\n            cvt(unsafe { libc::readlink(p, buf.as_mut_ptr() as *mut _, buf.capacity()) })? as usize;\n\n        unsafe {\n            buf.set_len(buf_read);\n        }\n\n        if buf_read != buf.capacity() {\n            buf.shrink_to_fit();\n\n            return Ok(PathBuf::from(OsString::from_vec(buf)));\n        }\n\n        // Trigger the internal buffer resizing logic of `Vec` by requiring\n        // more space than the current capacity. The length is guaranteed to be\n        // the same as the capacity due to the if statement above.\n        buf.reserve(1);\n    }\n}"
 }

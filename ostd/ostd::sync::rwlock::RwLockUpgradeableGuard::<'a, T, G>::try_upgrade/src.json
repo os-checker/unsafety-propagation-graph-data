@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::rwlock::RwLockUpgradeableGuard::<'a, T, G>::try_upgrade",
   "span": "ostd/src/sync/rwlock.rs:363:5: 363:77",
-  "src": "pub fn try_upgrade(mut self) -> Result<RwLockWriteGuard<'a, T, G>, Self>"
+  "src": "pub fn try_upgrade(mut self) -> Result<RwLockWriteGuard<'a, T, G>, Self> {\n        let res = self.inner.lock.compare_exchange(\n            UPGRADEABLE_READER | BEING_UPGRADED,\n            WRITER | UPGRADEABLE_READER,\n            AcqRel,\n            Relaxed,\n        );\n        if res.is_ok() {\n            let inner = self.inner;\n            let guard = self.guard.transfer_to();\n            drop(self);\n            Ok(RwLockWriteGuard { inner, guard })\n        } else {\n            Err(self)\n        }\n    }"
 }

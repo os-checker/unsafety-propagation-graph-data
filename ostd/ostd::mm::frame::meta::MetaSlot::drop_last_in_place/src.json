@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::meta::MetaSlot::drop_last_in_place",
   "span": "ostd/src/mm/frame/meta.rs:392:5: 392:51",
-  "src": "pub(super) unsafe fn drop_last_in_place(&self)"
+  "src": "pub(super) unsafe fn drop_last_in_place(&self) {\n        // This should be guaranteed as a safety requirement.\n        debug_assert_eq!(self.ref_count.load(Ordering::Relaxed), 0);\n\n        // SAFETY: The caller ensures safety.\n        unsafe { self.drop_meta_in_place() };\n\n        // `Release` pairs with the `Acquire` in `Frame::from_unused` and ensures\n        // `drop_meta_in_place` won't be reordered after this memory store.\n        self.ref_count.store(REF_COUNT_UNUSED, Ordering::Release);\n    }"
 }

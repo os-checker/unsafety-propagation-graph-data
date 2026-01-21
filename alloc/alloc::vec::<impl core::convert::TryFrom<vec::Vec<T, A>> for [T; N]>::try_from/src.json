@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::<impl core::convert::TryFrom<vec::Vec<T, A>> for [T; N]>::try_from",
   "span": "$library/alloc/src/vec/mod.rs:4325:5: 4325:65",
-  "src": "fn try_from(mut vec: Vec<T, A>) -> Result<[T; N], Vec<T, A>>"
+  "src": "fn try_from(mut vec: Vec<T, A>) -> Result<[T; N], Vec<T, A>> {\n        if vec.len() != N {\n            return Err(vec);\n        }\n\n        // SAFETY: `.set_len(0)` is always sound.\n        unsafe { vec.set_len(0) };\n\n        // SAFETY: A `Vec`'s pointer is always aligned properly, and\n        // the alignment the array needs is the same as the items.\n        // We checked earlier that we have sufficient items.\n        // The items will not double-drop as the `set_len`\n        // tells the `Vec` not to also drop them.\n        let array = unsafe { ptr::read(vec.as_ptr() as *const [T; N]) };\n        Ok(array)\n    }"
 }

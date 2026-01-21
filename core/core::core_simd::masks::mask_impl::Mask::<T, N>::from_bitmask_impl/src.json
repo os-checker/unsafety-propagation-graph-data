@@ -1,5 +1,5 @@
 {
   "name": "core::core_simd::masks::mask_impl::Mask::<T, N>::from_bitmask_impl",
   "span": "$library/core/src/../../portable-simd/crates/core_simd/src/masks/full_masks.rs:161:5: 163:42",
-  "src": "unsafe fn from_bitmask_impl<U: ReverseBits, const M: usize>(bitmask: U) -> Self\n    where\n        LaneCount<M>: SupportedLaneCount,"
+  "src": "unsafe fn from_bitmask_impl<U: ReverseBits, const M: usize>(bitmask: U) -> Self\n    where\n        LaneCount<M>: SupportedLaneCount,\n    {\n        // LLVM assumes bit order should match endianness\n        let bitmask = if cfg!(target_endian = \"big\") {\n            bitmask.reverse_bits(M)\n        } else {\n            bitmask\n        };\n\n        // SAFETY: `mask` is the correct bitmask type for a u64 bitmask\n        let mask: Simd<T, M> = unsafe {\n            core::intrinsics::simd::simd_select_bitmask(\n                bitmask,\n                Simd::<T, M>::splat(T::TRUE),\n                Simd::<T, M>::splat(T::FALSE),\n            )\n        };\n\n        // SAFETY: `mask` only contains `T::TRUE` or `T::FALSE`\n        unsafe { Self::from_int_unchecked(mask.resize::<N>(T::FALSE)) }\n    }"
 }

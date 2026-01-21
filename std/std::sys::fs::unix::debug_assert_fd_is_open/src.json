@@ -1,5 +1,5 @@
 {
   "name": "std::sys::fs::unix::debug_assert_fd_is_open",
   "span": "$library/std/src/sys/fs/unix.rs:856:1: 856:49",
-  "src": "pub(crate) fn debug_assert_fd_is_open(fd: RawFd)"
+  "src": "pub(crate) fn debug_assert_fd_is_open(fd: RawFd) {\n    use crate::sys::os::errno;\n\n    // this is similar to assert_unsafe_precondition!() but it doesn't require const\n    if core::ub_checks::check_library_ub() {\n        if unsafe { libc::fcntl(fd, libc::F_GETFD) } == -1 && errno() == libc::EBADF {\n            rtabort!(\"IO Safety violation: owned file descriptor already closed\");\n        }\n    }\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::error::Report::<E>::fmt_multiline",
   "span": "$library/std/src/error.rs:478:5: 478:71",
-  "src": "fn fmt_multiline(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result"
+  "src": "fn fmt_multiline(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n        let error = &self.error;\n\n        write!(f, \"{error}\")?;\n\n        if let Some(cause) = error.source() {\n            write!(f, \"\\n\\nCaused by:\")?;\n\n            let multiple = cause.source().is_some();\n\n            for (ind, error) in cause.sources().enumerate() {\n                writeln!(f)?;\n                let mut indented = Indented { inner: f };\n                if multiple {\n                    write!(indented, \"{ind: >4}: {error}\")?;\n                } else {\n                    write!(indented, \"      {error}\")?;\n                }\n            }\n        }\n\n        if self.show_backtrace {\n            if let Some(backtrace) = self.backtrace() {\n                write!(f, \"\\n\\nStack backtrace:\\n{}\", backtrace.to_string().trim_end())?;\n            }\n        }\n\n        Ok(())\n    }"
 }

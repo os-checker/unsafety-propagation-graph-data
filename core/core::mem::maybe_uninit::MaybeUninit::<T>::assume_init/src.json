@@ -1,5 +1,5 @@
 {
   "name": "core::mem::maybe_uninit::MaybeUninit::<T>::assume_init",
   "span": "$library/core/src/mem/maybe_uninit.rs:704:5: 704:47",
-  "src": "pub const unsafe fn assume_init(self) -> T"
+  "src": "pub const unsafe fn assume_init(self) -> T {\n        // SAFETY: the caller must guarantee that `self` is initialized.\n        // This also means that `self` must be a `value` variant.\n        unsafe {\n            intrinsics::assert_inhabited::<T>();\n            // We do this via a raw ptr read instead of `ManuallyDrop::into_inner` so that there's\n            // no trace of `ManuallyDrop` in Miri's error messages here.\n            (&raw const self.value).cast::<T>().read()\n        }\n    }"
 }

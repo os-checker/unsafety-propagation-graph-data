@@ -1,5 +1,5 @@
 {
   "name": "core::sync::atomic::AtomicBool::compare_exchange_weak",
   "span": "$library/core/src/sync/atomic.rs:1014:5: 1020:28",
-  "src": "pub fn compare_exchange_weak(\n        &self,\n        current: bool,\n        new: bool,\n        success: Ordering,\n        failure: Ordering,\n    ) -> Result<bool, bool>"
+  "src": "pub fn compare_exchange_weak(\n        &self,\n        current: bool,\n        new: bool,\n        success: Ordering,\n        failure: Ordering,\n    ) -> Result<bool, bool> {\n        if EMULATE_ATOMIC_BOOL {\n            return self.compare_exchange(current, new, success, failure);\n        }\n\n        // SAFETY: data races are prevented by atomic intrinsics.\n        match unsafe {\n            atomic_compare_exchange_weak(self.v.get(), current as u8, new as u8, success, failure)\n        } {\n            Ok(x) => Ok(x != 0),\n            Err(x) => Err(x != 0),\n        }\n    }"
 }

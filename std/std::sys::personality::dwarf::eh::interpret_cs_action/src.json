@@ -1,5 +1,5 @@
 {
   "name": "std::sys::personality::dwarf::eh::interpret_cs_action",
   "span": "$library/std/src/sys/personality/dwarf/eh.rs:148:1: 152:14",
-  "src": "unsafe fn interpret_cs_action(\n    action_table: *const u8,\n    cs_action_entry: u64,\n    lpad: LPad,\n) -> EHAction"
+  "src": "unsafe fn interpret_cs_action(\n    action_table: *const u8,\n    cs_action_entry: u64,\n    lpad: LPad,\n) -> EHAction {\n    if cs_action_entry == 0 {\n        // If cs_action_entry is 0 then this is a cleanup (Drop::drop). We run these\n        // for both Rust panics and foreign exceptions.\n        EHAction::Cleanup(lpad)\n    } else {\n        // If lpad != 0 and cs_action_entry != 0, we have to check ttype_index.\n        // If ttype_index == 0 under the condition, we take cleanup action.\n        let action_record = unsafe { action_table.offset(cs_action_entry as isize - 1) };\n        let mut action_reader = DwarfReader::new(action_record);\n        let ttype_index = unsafe { action_reader.read_sleb128() };\n        if ttype_index == 0 {\n            EHAction::Cleanup(lpad)\n        } else if ttype_index > 0 {\n            // Stop unwinding Rust panics at catch_unwind.\n            EHAction::Catch(lpad)\n        } else {\n            EHAction::Filter(lpad)\n        }\n    }\n}"
 }

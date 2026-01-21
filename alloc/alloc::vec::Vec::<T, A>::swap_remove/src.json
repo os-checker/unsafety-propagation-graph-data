@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<T, A>::swap_remove",
   "span": "$library/alloc/src/vec/mod.rs:1976:5: 1976:53",
-  "src": "pub fn swap_remove(&mut self, index: usize) -> T"
+  "src": "pub fn swap_remove(&mut self, index: usize) -> T {\n        #[cold]\n        #[cfg_attr(not(panic = \"immediate-abort\"), inline(never))]\n        #[optimize(size)]\n        fn assert_failed(index: usize, len: usize) -> ! {\n            panic!(\"swap_remove index (is {index}) should be < len (is {len})\");\n        }\n\n        let len = self.len();\n        if index >= len {\n            assert_failed(index, len);\n        }\n        unsafe {\n            // We replace self[index] with the last element. Note that if the\n            // bounds check above succeeds there must be a last element (which\n            // can be self[index] itself).\n            let value = ptr::read(self.as_ptr().add(index));\n            let base_ptr = self.as_mut_ptr();\n            ptr::copy(base_ptr.add(len - 1), base_ptr.add(index), 1);\n            self.set_len(len - 1);\n            value\n        }\n    }"
 }

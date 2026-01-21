@@ -1,5 +1,5 @@
 {
   "name": "std::panicking::panic_count::increase",
   "span": "$library/std/src/panicking.rs:418:5: 418:63",
-  "src": "pub fn increase(run_panic_hook: bool) -> Option<MustAbort>"
+  "src": "pub fn increase(run_panic_hook: bool) -> Option<MustAbort> {\n        let global_count = GLOBAL_PANIC_COUNT.fetch_add(1, Ordering::Relaxed);\n        if global_count & ALWAYS_ABORT_FLAG != 0 {\n            // Do *not* access thread-local state, we might be after a `fork`.\n            return Some(MustAbort::AlwaysAbort);\n        }\n\n        LOCAL_PANIC_COUNT.with(|c| {\n            let (count, in_panic_hook) = c.get();\n            if in_panic_hook {\n                return Some(MustAbort::PanicInHook);\n            }\n            c.set((count + 1, run_panic_hook));\n            None\n        })\n    }"
 }

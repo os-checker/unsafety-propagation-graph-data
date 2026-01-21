@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::list::Block::<T>::destroy",
   "span": "$library/std/src/sync/mpmc/list.rs:89:5: 89:57",
-  "src": "unsafe fn destroy(this: *mut Block<T>, start: usize)"
+  "src": "unsafe fn destroy(this: *mut Block<T>, start: usize) {\n        // It is not necessary to set the `DESTROY` bit in the last slot because that slot has\n        // begun destruction of the block.\n        for i in start..BLOCK_CAP - 1 {\n            let slot = unsafe { (*this).slots.get_unchecked(i) };\n\n            // Mark the `DESTROY` bit if a thread is still using the slot.\n            if slot.state.load(Ordering::Acquire) & READ == 0\n                && slot.state.fetch_or(DESTROY, Ordering::AcqRel) & READ == 0\n            {\n                // If a thread is still using the slot, it will continue destruction of the block.\n                return;\n            }\n        }\n\n        // No thread is using the block, now it is safe to destroy it.\n        drop(unsafe { Box::from_raw(this) });\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::tlb::OpsStack::push_from",
   "span": "ostd/src/mm/tlb.rs:347:5: 347:46",
-  "src": "fn push_from(&mut self, other: &OpsStack)"
+  "src": "fn push_from(&mut self, other: &OpsStack) {\n        self.page_keeper.extend(other.page_keeper.iter().cloned());\n\n        if self.need_flush_all() {\n            return;\n        }\n        if other.need_flush_all()\n            || self.num_pages_to_flush + other.num_pages_to_flush\n                >= FLUSH_ALL_PAGES_THRESHOLD as u32\n        {\n            self.num_pages_to_flush = u32::MAX;\n            self.num_ops = 0;\n            return;\n        }\n\n        for other_op in other.ops_iter() {\n            self.ops[self.num_ops as usize].write(other_op.clone());\n            self.num_ops += 1;\n        }\n        self.num_pages_to_flush += other.num_pages_to_flush;\n    }"
 }

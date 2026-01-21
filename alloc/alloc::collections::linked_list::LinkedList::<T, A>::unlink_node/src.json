@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::linked_list::LinkedList::<T, A>::unlink_node",
   "span": "$library/alloc/src/collections/linked_list.rs:264:5: 264:65",
-  "src": "unsafe fn unlink_node(&mut self, mut node: NonNull<Node<T>>)"
+  "src": "unsafe fn unlink_node(&mut self, mut node: NonNull<Node<T>>) {\n        let node = unsafe { node.as_mut() }; // this one is ours now, we can create an &mut.\n\n        // Not creating new mutable (unique!) references overlapping `element`.\n        match node.prev {\n            Some(prev) => unsafe { (*prev.as_ptr()).next = node.next },\n            // this node is the head node\n            None => self.head = node.next,\n        };\n\n        match node.next {\n            Some(next) => unsafe { (*next.as_ptr()).prev = node.prev },\n            // this node is the tail node\n            None => self.tail = node.prev,\n        };\n\n        self.len -= 1;\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::io::borrowed_buf::BorrowedCursor::<'a>::with_unfilled_buf",
   "span": "$library/core/src/io/borrowed_buf.rs:262:5: 262:91",
-  "src": "pub fn with_unfilled_buf<T>(&mut self, f: impl FnOnce(&mut BorrowedBuf<'_>) -> T) -> T"
+  "src": "pub fn with_unfilled_buf<T>(&mut self, f: impl FnOnce(&mut BorrowedBuf<'_>) -> T) -> T {\n        let mut buf = BorrowedBuf::from(self.reborrow());\n        let prev_ptr = buf.buf as *const _;\n        let res = f(&mut buf);\n\n        // Check that the caller didn't replace the `BorrowedBuf`.\n        // This is necessary for the safety of the code below: if the check wasn't\n        // there, one could mark some bytes as initialized even though there aren't.\n        assert!(core::ptr::addr_eq(prev_ptr, buf.buf));\n\n        // SAFETY: These bytes were filled in the `BorrowedBuf`, so they're filled in the cursor\n        // too, because the buffer wasn't replaced.\n        self.buf.filled += buf.filled;\n\n        res\n    }"
 }

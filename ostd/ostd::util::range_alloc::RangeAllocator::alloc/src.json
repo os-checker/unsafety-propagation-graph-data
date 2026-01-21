@@ -1,5 +1,5 @@
 {
   "name": "ostd::util::range_alloc::RangeAllocator::alloc",
   "span": "ostd/src/util/range_alloc.rs:75:5: 75:78",
-  "src": "pub fn alloc(&self, size: usize) -> Result<Range<usize>, RangeAllocError>"
+  "src": "pub fn alloc(&self, size: usize) -> Result<Range<usize>, RangeAllocError> {\n        let mut lock_guard = self.get_freelist_guard();\n        let freelist = lock_guard.as_mut().unwrap();\n        let mut allocate_range = None;\n        let mut to_remove = None;\n\n        for (key, value) in freelist.iter() {\n            if value.block.end - value.block.start >= size {\n                allocate_range = Some((value.block.end - size)..value.block.end);\n                to_remove = Some(*key);\n                break;\n            }\n        }\n\n        if let Some(key) = to_remove\n            && let Some(freenode) = freelist.get_mut(&key)\n        {\n            if freenode.block.end - size == freenode.block.start {\n                freelist.remove(&key);\n            } else {\n                freenode.block.end -= size;\n            }\n        }\n\n        if let Some(range) = allocate_range {\n            Ok(range)\n        } else {\n            Err(RangeAllocError)\n        }\n    }"
 }

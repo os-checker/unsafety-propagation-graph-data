@@ -1,5 +1,5 @@
 {
   "name": "core::<slice::iter::ChunksMut<'a, T> as iter::traits::iterator::Iterator>::nth",
   "span": "$library/core/src/slice/iter.rs:1709:5: 1709:55",
-  "src": "fn nth(&mut self, n: usize) -> Option<&'a mut [T]>"
+  "src": "fn nth(&mut self, n: usize) -> Option<&'a mut [T]> {\n        if let Some(start) = n.checked_mul(self.chunk_size)\n            && start < self.v.len()\n        {\n            // SAFETY: `start < self.v.len()` ensures this is in bounds\n            let (_, rest) = unsafe { self.v.split_at_mut(start) };\n            // SAFETY: `.min(rest.len()` ensures this is in bounds\n            let (chunk, rest) = unsafe { rest.split_at_mut(self.chunk_size.min(rest.len())) };\n            self.v = rest;\n            // SAFETY: Nothing else points to or will point to the contents of this slice.\n            Some(unsafe { &mut *chunk })\n        } else {\n            self.v = &mut [];\n            None\n        }\n    }"
 }

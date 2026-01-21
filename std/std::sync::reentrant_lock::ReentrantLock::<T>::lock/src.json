@@ -1,5 +1,5 @@
 {
   "name": "std::sync::reentrant_lock::ReentrantLock::<T>::lock",
   "span": "$library/std/src/sync/reentrant_lock.rs:284:5: 284:52",
-  "src": "pub fn lock(&self) -> ReentrantLockGuard<'_, T>"
+  "src": "pub fn lock(&self) -> ReentrantLockGuard<'_, T> {\n        let this_thread = current_id();\n        // Safety: We only touch lock_count when we own the inner mutex.\n        // Additionally, we only call `self.owner.set()` while holding\n        // the inner mutex, so no two threads can call it concurrently.\n        unsafe {\n            if self.owner.contains(this_thread) {\n                self.increment_lock_count().expect(\"lock count overflow in reentrant mutex\");\n            } else {\n                self.mutex.lock();\n                self.owner.set(Some(this_thread));\n                debug_assert_eq!(*self.lock_count.get(), 0);\n                *self.lock_count.get() = 1;\n            }\n        }\n        ReentrantLockGuard { lock: self }\n    }"
 }

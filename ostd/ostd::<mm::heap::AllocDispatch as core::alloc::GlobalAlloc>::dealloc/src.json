@@ -1,5 +1,5 @@
 {
   "name": "ostd::<mm::heap::AllocDispatch as core::alloc::GlobalAlloc>::dealloc",
   "span": "ostd/src/mm/heap/mod.rs:127:5: 127:59",
-  "src": "unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout)"
+  "src": "unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {\n        // Now we restore the `HeapSlot` from the pointer and the layout.\n        let Some(required_slot) = slot_size_from_layout(layout) else {\n            abort_with_message!(\n                \"Heap deallocation size not found for layout = {:#x?}\",\n                layout\n            );\n        };\n\n        // SAFETY: The validity of the pointer is guaranteed by the caller. The\n        // size must match the size of the slot when it was allocated, since we\n        // require `slot_size_from_layout` to be idempotent.\n        let slot = unsafe { HeapSlot::new(NonNull::new_unchecked(ptr), required_slot) };\n        let res = get_global_heap_allocator().dealloc(slot);\n\n        if res.is_err() {\n            abort_with_message!(\n                \"Heap deallocation error, ptr = {:p}, layout = {:#x?}, required_slot = {:#x?}\",\n                ptr,\n                layout,\n                required_slot,\n            );\n        }\n    }"
 }

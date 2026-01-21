@@ -1,5 +1,5 @@
 {
   "name": "alloc::wtf8::to_string_lossy",
   "span": "$library/alloc/src/wtf8/mod.rs:465:1: 465:60",
-  "src": "pub(super) fn to_string_lossy(slice: &Wtf8) -> Cow<'_, str>"
+  "src": "pub(super) fn to_string_lossy(slice: &Wtf8) -> Cow<'_, str> {\n    let Some((surrogate_pos, _)) = slice.next_surrogate(0) else {\n        return Cow::Borrowed(unsafe { str::from_utf8_unchecked(slice.as_bytes()) });\n    };\n    let wtf8_bytes = slice.as_bytes();\n    let mut utf8_bytes = Vec::with_capacity(slice.len());\n    utf8_bytes.extend_from_slice(&wtf8_bytes[..surrogate_pos]);\n    utf8_bytes.extend_from_slice(\"\\u{FFFD}\".as_bytes());\n    let mut pos = surrogate_pos + 3;\n    loop {\n        match slice.next_surrogate(pos) {\n            Some((surrogate_pos, _)) => {\n                utf8_bytes.extend_from_slice(&wtf8_bytes[pos..surrogate_pos]);\n                utf8_bytes.extend_from_slice(\"\\u{FFFD}\".as_bytes());\n                pos = surrogate_pos + 3;\n            }\n            None => {\n                utf8_bytes.extend_from_slice(&wtf8_bytes[pos..]);\n                return Cow::Owned(unsafe { String::from_utf8_unchecked(utf8_bytes) });\n            }\n        }\n    }\n}"
 }

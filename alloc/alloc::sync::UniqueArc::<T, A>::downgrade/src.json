@@ -1,5 +1,5 @@
 {
   "name": "alloc::sync::UniqueArc::<T, A>::downgrade",
   "span": "$library/alloc/src/sync.rs:4815:5: 4815:48",
-  "src": "pub fn downgrade(this: &Self) -> Weak<T, A>"
+  "src": "pub fn downgrade(this: &Self) -> Weak<T, A> {\n        // Using a relaxed ordering is alright here, as knowledge of the\n        // original reference prevents other threads from erroneously deleting\n        // the object or converting the object to a normal `Arc<T, A>`.\n        //\n        // Note that we don't need to test if the weak counter is locked because there\n        // are no such operations like `Arc::get_mut` or `Arc::make_mut` that will lock\n        // the weak counter.\n        //\n        // SAFETY: This pointer was allocated at creation time so we know it is valid.\n        let old_size = unsafe { (*this.ptr.as_ptr()).weak.fetch_add(1, Relaxed) };\n\n        // See comments in Arc::clone() for why we do this (for mem::forget).\n        if old_size > MAX_REFCOUNT {\n            abort();\n        }\n\n        Weak { ptr: this.ptr, alloc: this.alloc.clone() }\n    }"
 }

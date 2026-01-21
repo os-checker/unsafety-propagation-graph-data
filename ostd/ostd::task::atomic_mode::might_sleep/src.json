@@ -1,5 +1,5 @@
 {
   "name": "ostd::task::atomic_mode::might_sleep",
   "span": "ostd/src/task/atomic_mode.rs:36:1: 36:21",
-  "src": "pub fn might_sleep()"
+  "src": "pub fn might_sleep() {\n    let preempt_count = super::preempt::cpu_local::get_guard_count();\n    let is_local_irq_enabled = crate::arch::irq::is_local_enabled();\n    if (preempt_count != 0 || !is_local_irq_enabled)\n        && !crate::IN_BOOTSTRAP_CONTEXT.load(Ordering::Relaxed)\n    {\n        panic!(\n            \"This function might break atomic mode (preempt_count = {}, is_local_irq_enabled = {})\",\n            preempt_count, is_local_irq_enabled\n        );\n    }\n}"
 }

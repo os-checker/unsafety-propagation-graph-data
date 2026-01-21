@@ -1,5 +1,5 @@
 {
   "name": "core::array::iter_next_chunk",
   "span": "$library/core/src/array/mod.rs:980:1: 982:36",
-  "src": "pub(crate) fn iter_next_chunk<T, const N: usize>(\n    iter: &mut impl Iterator<Item = T>,\n) -> Result<[T; N], IntoIter<T, N>>"
+  "src": "pub(crate) fn iter_next_chunk<T, const N: usize>(\n    iter: &mut impl Iterator<Item = T>,\n) -> Result<[T; N], IntoIter<T, N>> {\n    let mut array = [const { MaybeUninit::uninit() }; N];\n    let r = iter_next_chunk_erased(&mut array, iter);\n    match r {\n        Ok(()) => {\n            // SAFETY: All elements of `array` were populated.\n            Ok(unsafe { MaybeUninit::array_assume_init(array) })\n        }\n        Err(initialized) => {\n            // SAFETY: Only the first `initialized` elements were populated\n            Err(unsafe { IntoIter::new_unchecked(array, 0..initialized) })\n        }\n    }\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::cpu::context::XSaveArea::new",
   "span": "ostd/src/arch/x86/cpu/context/mod.rs:596:5: 596:21",
-  "src": "fn new() -> Self"
+  "src": "fn new() -> Self {\n        let features = if let Some(xstate_max_features) = XSTATE_MAX_FEATURES.get() {\n            XCr0::read().bits() & *xstate_max_features\n        } else {\n            0\n        };\n\n        let mut xsave_area = Self::new_zeroed();\n        // Set the initial values for the FPU context. Refer to Intel SDM, Table 11-1:\n        // \"IA-32 and Intel® 64 Processor States Following Power-up, Reset, or INIT (Contd.)\".\n        xsave_area.fxsave_area.control = 0x037F;\n        xsave_area.fxsave_area.tag = 0xFFFF;\n        xsave_area.fxsave_area.mxcsr = 0x1F80;\n        xsave_area.features = features;\n\n        xsave_area\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::cursor::Cursor::<'rcu, C>::jump",
   "span": "ostd/src/mm/page_table/cursor/mod.rs:283:5: 283:68",
-  "src": "pub fn jump(&mut self, va: Vaddr) -> Result<(), PageTableError>"
+  "src": "pub fn jump(&mut self, va: Vaddr) -> Result<(), PageTableError> {\n        assert!(va.is_multiple_of(C::BASE_PAGE_SIZE));\n        if !self.barrier_va.contains(&va) {\n            return Err(PageTableError::InvalidVaddr(va));\n        }\n\n        // FIXME: Maintain the `self.barrier_va.contains(self.va)` invariant:\n        // <https://github.com/asterinas/asterinas/pull/2613>.\n        if self.va == self.barrier_va.end {\n            while self.level < self.guard_level {\n                self.pop_level();\n            }\n            self.va = va;\n            return Ok(());\n        }\n\n        debug_assert!(self.barrier_va.contains(&self.va));\n\n        loop {\n            let node_size = page_size::<C>(self.level + 1);\n            let node_start = self.va.align_down(node_size);\n            // If the address is within the current node, we can jump directly.\n            if node_start <= va && va < node_start + node_size {\n                self.va = va;\n                return Ok(());\n            }\n\n            self.pop_level();\n        }\n    }"
 }

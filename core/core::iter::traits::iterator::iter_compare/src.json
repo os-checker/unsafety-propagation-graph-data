@@ -1,5 +1,5 @@
 {
   "name": "core::iter::traits::iterator::iter_compare",
   "span": "$library/core/src/iter/traits/iterator.rs:4086:1: 4090:50",
-  "src": "fn iter_compare<A, B, F, T>(mut a: A, mut b: B, f: F) -> ControlFlow<T, Ordering>\nwhere\n    A: Iterator,\n    B: Iterator,\n    F: FnMut(A::Item, B::Item) -> ControlFlow<T>,"
+  "src": "fn iter_compare<A, B, F, T>(mut a: A, mut b: B, f: F) -> ControlFlow<T, Ordering>\nwhere\n    A: Iterator,\n    B: Iterator,\n    F: FnMut(A::Item, B::Item) -> ControlFlow<T>,\n{\n    #[inline]\n    fn compare<'a, B, X, T>(\n        b: &'a mut B,\n        mut f: impl FnMut(X, B::Item) -> ControlFlow<T> + 'a,\n    ) -> impl FnMut(X) -> ControlFlow<ControlFlow<T, Ordering>> + 'a\n    where\n        B: Iterator,\n    {\n        move |x| match b.next() {\n            None => ControlFlow::Break(ControlFlow::Continue(Ordering::Greater)),\n            Some(y) => f(x, y).map_break(ControlFlow::Break),\n        }\n    }\n\n    match a.try_for_each(compare(&mut b, f)) {\n        ControlFlow::Continue(()) => ControlFlow::Continue(match b.next() {\n            None => Ordering::Equal,\n            Some(_) => Ordering::Less,\n        }),\n        ControlFlow::Break(x) => x,\n    }\n}"
 }

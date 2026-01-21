@@ -1,5 +1,5 @@
 {
   "name": "ostd::<cpu::local::static_cpu_local::StaticStorage<T> as cpu::local::AnyStorage<T>>::get_ptr_on_target",
   "span": "ostd/src/cpu/local/static_cpu_local.rs:105:5: 105:59",
-  "src": "fn get_ptr_on_target(&self, cpu_id: CpuId) -> *const T"
+  "src": "fn get_ptr_on_target(&self, cpu_id: CpuId) -> *const T {\n        super::is_used::debug_set_true();\n\n        let cpu_id = cpu_id.as_usize();\n\n        // If on the BSP, just use the statically linked storage.\n        if cpu_id == 0 {\n            return &self.0 as *const T;\n        }\n\n        let base = {\n            // SAFETY: At this time we have a non-BSP `CpuId`, which means that\n            // `init_cpu_nums` must have been called, so `copy_bsp_for_ap` must\n            // also have been called (see the implementation of `cpu::init_on_bsp`),\n            // so `CPU_LOCAL_STORAGES` must already be initialized.\n            let storages = unsafe { super::CPU_LOCAL_STORAGES.get_unchecked() };\n            // SAFETY: `cpu_id` is guaranteed to be in range because the type\n            // invariant of `CpuId`.\n            let storage = unsafe { *storages.get_unchecked(cpu_id - 1) };\n            crate::mm::paddr_to_vaddr(storage)\n        };\n\n        let offset = self.get_offset();\n        (base + offset) as *const T\n    }"
 }

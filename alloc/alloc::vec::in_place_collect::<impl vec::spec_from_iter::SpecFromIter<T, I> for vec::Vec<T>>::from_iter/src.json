@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::in_place_collect::<impl vec::spec_from_iter::SpecFromIter<T, I> for vec::Vec<T>>::from_iter",
   "span": "$library/alloc/src/vec/in_place_collect.rs:232:5: 232:46",
-  "src": "default fn from_iter(iterator: I) -> Self"
+  "src": "default fn from_iter(iterator: I) -> Self {\n        // Select the implementation in const eval to avoid codegen of the dead branch to improve compile times.\n        let fun: fn(I) -> Vec<T> = const {\n            // See \"Layout constraints\" section in the module documentation. We use const conditions here\n            // since these conditions currently cannot be expressed as trait bounds\n            if in_place_collectible::<T, I::Src>(I::MERGE_BY, I::EXPAND_BY) {\n                from_iter_in_place\n            } else {\n                // fallback\n                SpecFromIterNested::<T, I>::from_iter\n            }\n        };\n\n        fun(iterator)\n    }"
 }

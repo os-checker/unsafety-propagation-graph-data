@@ -1,5 +1,5 @@
 {
   "name": "std::sync::barrier::Barrier::wait",
   "span": "$library/std/src/sync/barrier.rs:123:5: 123:44",
-  "src": "pub fn wait(&self) -> BarrierWaitResult"
+  "src": "pub fn wait(&self) -> BarrierWaitResult {\n        let mut lock = self.lock.lock();\n        let local_gen = lock.generation_id;\n        lock.count += 1;\n        if lock.count < self.num_threads {\n            self.cvar.wait_while(&mut lock, |state| local_gen == state.generation_id);\n            BarrierWaitResult(false)\n        } else {\n            lock.count = 0;\n            lock.generation_id = lock.generation_id.wrapping_add(1);\n            self.cvar.notify_all();\n            BarrierWaitResult(true)\n        }\n    }"
 }

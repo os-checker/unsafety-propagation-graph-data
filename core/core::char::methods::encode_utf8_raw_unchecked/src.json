@@ -1,5 +1,5 @@
 {
   "name": "core::char::methods::encode_utf8_raw_unchecked",
   "span": "$library/core/src/char/methods.rs:1910:1: 1910:71",
-  "src": "pub const unsafe fn encode_utf8_raw_unchecked(code: u32, dst: *mut u8)"
+  "src": "pub const unsafe fn encode_utf8_raw_unchecked(code: u32, dst: *mut u8) {\n    let len = len_utf8(code);\n    // SAFETY: The caller must guarantee that the buffer pointed to by `dst`\n    // is at least `len` bytes long.\n    unsafe {\n        if len == 1 {\n            *dst = code as u8;\n            return;\n        }\n\n        let last1 = (code >> 0 & 0x3F) as u8 | TAG_CONT;\n        let last2 = (code >> 6 & 0x3F) as u8 | TAG_CONT;\n        let last3 = (code >> 12 & 0x3F) as u8 | TAG_CONT;\n        let last4 = (code >> 18 & 0x3F) as u8 | TAG_FOUR_B;\n\n        if len == 2 {\n            *dst = last2 | TAG_TWO_B;\n            *dst.add(1) = last1;\n            return;\n        }\n\n        if len == 3 {\n            *dst = last3 | TAG_THREE_B;\n            *dst.add(1) = last2;\n            *dst.add(2) = last1;\n            return;\n        }\n\n        *dst = last4;\n        *dst.add(1) = last3;\n        *dst.add(2) = last2;\n        *dst.add(3) = last1;\n    }\n}"
 }

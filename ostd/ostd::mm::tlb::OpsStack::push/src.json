@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::tlb::OpsStack::push",
   "span": "ostd/src/mm/tlb.rs:325:5: 325:90",
-  "src": "fn push(&mut self, op: TlbFlushOp, drop_after_flush: Option<Frame<dyn AnyFrameMeta>>)"
+  "src": "fn push(&mut self, op: TlbFlushOp, drop_after_flush: Option<Frame<dyn AnyFrameMeta>>) {\n        if let Some(frame) = drop_after_flush {\n            self.page_keeper.push(frame);\n        }\n\n        if self.need_flush_all() {\n            return;\n        }\n        let op_num_pages = op.num_pages();\n        if op == TlbFlushOp::for_all()\n            || self.num_pages_to_flush + op_num_pages >= FLUSH_ALL_PAGES_THRESHOLD as u32\n        {\n            self.num_pages_to_flush = u32::MAX;\n            self.num_ops = 0;\n            return;\n        }\n\n        self.ops[self.num_ops as usize].write(op);\n        self.num_ops += 1;\n        self.num_pages_to_flush += op_num_pages;\n    }"
 }

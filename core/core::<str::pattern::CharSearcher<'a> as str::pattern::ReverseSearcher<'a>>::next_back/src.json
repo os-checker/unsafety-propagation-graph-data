@@ -1,5 +1,5 @@
 {
   "name": "core::<str::pattern::CharSearcher<'a> as str::pattern::ReverseSearcher<'a>>::next_back",
   "span": "$library/core/src/str/pattern.rs:479:5: 479:42",
-  "src": "fn next_back(&mut self) -> SearchStep"
+  "src": "fn next_back(&mut self) -> SearchStep {\n        let old_finger = self.finger_back;\n        // SAFETY: see the comment for next() above\n        let slice = unsafe { self.haystack.get_unchecked(self.finger..old_finger) };\n        let mut iter = slice.chars();\n        let old_len = iter.iter.len();\n        if let Some(ch) = iter.next_back() {\n            // subtract byte offset of current character\n            // without re-encoding as utf-8\n            self.finger_back -= old_len - iter.iter.len();\n            if ch == self.needle {\n                SearchStep::Match(self.finger_back, old_finger)\n            } else {\n                SearchStep::Reject(self.finger_back, old_finger)\n            }\n        } else {\n            SearchStep::Done\n        }\n    }"
 }

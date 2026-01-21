@@ -1,5 +1,5 @@
 {
   "name": "core::ptr::swap_nonoverlapping_const",
   "span": "$library/core/src/ptr/mod.rs:1403:1: 1403:81",
-  "src": "const unsafe fn swap_nonoverlapping_const<T>(x: *mut T, y: *mut T, count: usize)"
+  "src": "const unsafe fn swap_nonoverlapping_const<T>(x: *mut T, y: *mut T, count: usize) {\n    let mut i = 0;\n    while i < count {\n        // SAFETY: By precondition, `i` is in-bounds because it's below `n`\n        let x = unsafe { x.add(i) };\n        // SAFETY: By precondition, `i` is in-bounds because it's below `n`\n        // and it's distinct from `x` since the ranges are non-overlapping\n        let y = unsafe { y.add(i) };\n\n        // SAFETY: we're only ever given pointers that are valid to read/write,\n        // including being aligned, and nothing here panics so it's drop-safe.\n        unsafe {\n            // Note that it's critical that these use `copy_nonoverlapping`,\n            // rather than `read`/`write`, to avoid #134713 if T has padding.\n            let mut temp = MaybeUninit::<T>::uninit();\n            copy_nonoverlapping(x, temp.as_mut_ptr(), 1);\n            copy_nonoverlapping(y, x, 1);\n            copy_nonoverlapping(temp.as_ptr(), y, 1);\n        }\n\n        i += 1;\n    }\n}"
 }

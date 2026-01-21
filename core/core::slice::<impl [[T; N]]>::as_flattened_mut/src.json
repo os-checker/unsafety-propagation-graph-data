@@ -1,5 +1,5 @@
 {
   "name": "core::slice::<impl [[T; N]]>::as_flattened_mut",
   "span": "$library/core/src/slice/mod.rs:5036:5: 5036:57",
-  "src": "pub const fn as_flattened_mut(&mut self) -> &mut [T]"
+  "src": "pub const fn as_flattened_mut(&mut self) -> &mut [T] {\n        let len = if T::IS_ZST {\n            self.len().checked_mul(N).expect(\"slice len overflow\")\n        } else {\n            // SAFETY: `self.len() * N` cannot overflow because `self` is\n            // already in the address space.\n            unsafe { self.len().unchecked_mul(N) }\n        };\n        // SAFETY: `[T]` is layout-identical to `[T; N]`\n        unsafe { from_raw_parts_mut(self.as_mut_ptr().cast(), len) }\n    }"
 }

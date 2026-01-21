@@ -1,5 +1,5 @@
 {
   "name": "alloc::ffi::c_str::CString::from_vec_with_nul",
   "span": "$library/alloc/src/ffi/c_str.rs:673:5: 673:78",
-  "src": "pub fn from_vec_with_nul(v: Vec<u8>) -> Result<Self, FromVecWithNulError>"
+  "src": "pub fn from_vec_with_nul(v: Vec<u8>) -> Result<Self, FromVecWithNulError> {\n        let nul_pos = memchr::memchr(0, &v);\n        match nul_pos {\n            Some(nul_pos) if nul_pos + 1 == v.len() => {\n                // SAFETY: We know there is only one nul byte, at the end\n                // of the vec.\n                Ok(unsafe { Self::_from_vec_with_nul_unchecked(v) })\n            }\n            Some(nul_pos) => Err(FromVecWithNulError {\n                error_kind: FromBytesWithNulErrorKind::InteriorNul(nul_pos),\n                bytes: v,\n            }),\n            None => Err(FromVecWithNulError {\n                error_kind: FromBytesWithNulErrorKind::NotNulTerminated,\n                bytes: v,\n            }),\n        }\n    }"
 }

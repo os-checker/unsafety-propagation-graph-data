@@ -1,5 +1,5 @@
 {
   "name": "ostd::<mm::io::VmReader<'a, mm::io::Infallible> as mm::io::FallibleVmRead<mm::io::Fallible>>::read_fallible",
   "span": "ostd/src/mm/io.rs:382:13: 385:61",
-  "src": "fn read_fallible(\n                &mut self,\n                writer: &mut VmWriter<'_, $writer_fallibility>,\n            ) -> core::result::Result<usize, (Error, usize)>"
+  "src": "fn read_fallible(\n                &mut self,\n                writer: &mut VmWriter<'_, $writer_fallibility>,\n            ) -> core::result::Result<usize, (Error, usize)> {\n                let copy_len = self.remain().min(writer.avail());\n                if copy_len == 0 {\n                    return Ok(0);\n                }\n\n                // SAFETY: The source and destination are subsets of memory ranges specified by\n                // the reader and writer, so they are either valid for reading and writing or in\n                // user space.\n                let copied_len = unsafe { memcpy_fallible(writer.cursor, self.cursor, copy_len) };\n                self.cursor = self.cursor.wrapping_add(copied_len);\n                writer.cursor = writer.cursor.wrapping_add(copied_len);\n\n                if copied_len < copy_len {\n                    Err((Error::PageFault, copied_len))\n                } else {\n                    Ok(copied_len)\n                }\n            }"
 }

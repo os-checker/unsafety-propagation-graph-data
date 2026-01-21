@@ -1,5 +1,5 @@
 {
   "name": "core::<[u128] as slice::specialize::SpecFill<u128>>::spec_fill",
   "span": "$library/core/src/slice/specialize.rs:52:13: 52:50",
-  "src": "fn spec_fill(&mut self, value: $type)"
+  "src": "fn spec_fill(&mut self, value: $type) {\n                // We always take this fastpath in Miri for long slices as the manual `for`\n                // loop can be prohibitively slow.\n                if (cfg!(miri) && self.len() > 32) || crate::intrinsics::is_val_statically_known(value) {\n                    let bytes = value.to_ne_bytes();\n                    if value == <$type>::from_ne_bytes([bytes[0]; size_of::<$type>()]) {\n                        // SAFETY: The pointer is derived from a reference, so it's writable.\n                        unsafe {\n                            crate::intrinsics::write_bytes(self.as_mut_ptr(), bytes[0], self.len());\n                        }\n                        return;\n                    }\n                }\n                for item in self.iter_mut() {\n                    *item = value;\n                }\n            }"
 }

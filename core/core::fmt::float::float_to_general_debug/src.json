@@ -1,5 +1,5 @@
 {
   "name": "core::fmt::float::float_to_general_debug",
   "span": "$library/core/src/fmt/float.rs:175:1: 177:48",
-  "src": "fn float_to_general_debug<T>(fmt: &mut Formatter<'_>, num: &T) -> Result\nwhere\n    T: flt2dec::DecodableFloat + GeneralFormat,"
+  "src": "fn float_to_general_debug<T>(fmt: &mut Formatter<'_>, num: &T) -> Result\nwhere\n    T: flt2dec::DecodableFloat + GeneralFormat,\n{\n    let force_sign = fmt.sign_plus();\n    let sign = match force_sign {\n        false => flt2dec::Sign::Minus,\n        true => flt2dec::Sign::MinusPlus,\n    };\n\n    if let Some(precision) = fmt.options.get_precision() {\n        // this behavior of {:.PREC?} predates exponential formatting for {:?}\n        float_to_decimal_common_exact(fmt, num, sign, precision)\n    } else {\n        // since there is no precision, there will be no rounding\n        if num.already_rounded_value_should_use_exponential() {\n            let upper = false;\n            float_to_exponential_common_shortest(fmt, num, sign, upper)\n        } else {\n            let min_precision = 1;\n            float_to_decimal_common_shortest(fmt, num, sign, min_precision)\n        }\n    }\n}"
 }

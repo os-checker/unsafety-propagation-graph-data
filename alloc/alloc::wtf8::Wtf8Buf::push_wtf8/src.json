@@ -1,5 +1,5 @@
 {
   "name": "alloc::wtf8::Wtf8Buf::push_wtf8",
   "span": "$library/alloc/src/wtf8/mod.rs:286:5: 286:46",
-  "src": "pub fn push_wtf8(&mut self, other: &Wtf8)"
+  "src": "pub fn push_wtf8(&mut self, other: &Wtf8) {\n        match ((&*self).final_lead_surrogate(), other.initial_trail_surrogate()) {\n            // Replace newly paired surrogates by a supplementary code point.\n            (Some(lead), Some(trail)) => {\n                let len_without_lead_surrogate = self.len() - 3;\n                self.bytes.truncate(len_without_lead_surrogate);\n                let other_without_trail_surrogate = &other.as_bytes()[3..];\n                // 4 bytes for the supplementary code point\n                self.bytes.reserve(4 + other_without_trail_surrogate.len());\n                self.push_char(decode_surrogate_pair(lead, trail));\n                self.bytes.extend_from_slice(other_without_trail_surrogate);\n            }\n            _ => {\n                // If we'll be pushing a string containing a surrogate, we may\n                // no longer have UTF-8.\n                if self.is_known_utf8 && other.next_surrogate(0).is_some() {\n                    self.is_known_utf8 = false;\n                }\n\n                self.bytes.extend_from_slice(other.as_bytes());\n            }\n        }\n    }"
 }

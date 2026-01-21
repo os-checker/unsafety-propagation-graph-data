@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::counter::Receiver::<C>::acquire",
   "span": "$library/std/src/sync/mpmc/counter.rs:97:5: 97:48",
-  "src": "pub(crate) fn acquire(&self) -> Receiver<C>"
+  "src": "pub(crate) fn acquire(&self) -> Receiver<C> {\n        let count = self.counter().receivers.fetch_add(1, Ordering::Relaxed);\n\n        // Cloning receivers and calling `mem::forget` on the clones could potentially overflow the\n        // counter. It's very difficult to recover sensibly from such degenerate scenarios so we\n        // just abort when the count becomes very large.\n        if count > isize::MAX as usize {\n            process::abort();\n        }\n\n        Receiver { counter: self.counter }\n    }"
 }

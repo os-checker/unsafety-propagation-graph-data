@@ -1,5 +1,5 @@
 {
   "name": "alloc::rc::Weak::<T, A>::as_ptr",
   "span": "$library/alloc/src/rc.rs:3373:5: 3373:37",
-  "src": "pub fn as_ptr(&self) -> *const T"
+  "src": "pub fn as_ptr(&self) -> *const T {\n        let ptr: *mut RcInner<T> = NonNull::as_ptr(self.ptr);\n\n        if is_dangling(ptr) {\n            // If the pointer is dangling, we return the sentinel directly. This cannot be\n            // a valid payload address, as the payload is at least as aligned as RcInner (usize).\n            ptr as *const T\n        } else {\n            // SAFETY: if is_dangling returns false, then the pointer is dereferenceable.\n            // The payload may be dropped at this point, and we have to maintain provenance,\n            // so use raw pointer manipulation.\n            unsafe { &raw mut (*ptr).value }\n        }\n    }"
 }

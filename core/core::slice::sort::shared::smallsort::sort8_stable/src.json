@@ -1,5 +1,5 @@
 {
   "name": "core::slice::sort::shared::smallsort::sort8_stable",
   "span": "$library/core/src/slice/sort/shared/smallsort.rs:663:1: 668:2",
-  "src": "unsafe fn sort8_stable<T: FreezeMarker, F: FnMut(&T, &T) -> bool>(\n    v_base: *mut T,\n    dst: *mut T,\n    scratch_base: *mut T,\n    is_less: &mut F,\n)"
+  "src": "unsafe fn sort8_stable<T: FreezeMarker, F: FnMut(&T, &T) -> bool>(\n    v_base: *mut T,\n    dst: *mut T,\n    scratch_base: *mut T,\n    is_less: &mut F,\n) {\n    // SAFETY: these pointers are all in-bounds by the precondition of our function.\n    unsafe {\n        sort4_stable(v_base, scratch_base, is_less);\n        sort4_stable(v_base.add(4), scratch_base.add(4), is_less);\n    }\n\n    // SAFETY: scratch_base[0..8] is now initialized, allowing us to merge back\n    // into dst.\n    unsafe {\n        bidirectional_merge(&*ptr::slice_from_raw_parts(scratch_base, 8), dst, is_less);\n    }\n}"
 }

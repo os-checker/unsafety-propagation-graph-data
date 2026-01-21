@@ -1,5 +1,5 @@
 {
   "name": "core::<future::join::MaybeDone<F> as future::future::Future>::poll",
   "span": "$library/core/src/future/join.rs:177:5: 177:82",
-  "src": "fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output>"
+  "src": "fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {\n        // SAFETY: pinning in structural for `f`\n        unsafe {\n            // Do not mix match ergonomics with unsafe.\n            match *self.as_mut().get_unchecked_mut() {\n                MaybeDone::Future(ref mut f) => {\n                    let val = ready!(Pin::new_unchecked(f).poll(cx));\n                    self.set(Self::Done(val));\n                }\n                MaybeDone::Done(_) => {}\n                MaybeDone::Taken => unreachable!(),\n            }\n        }\n\n        Poll::Ready(())\n    }"
 }

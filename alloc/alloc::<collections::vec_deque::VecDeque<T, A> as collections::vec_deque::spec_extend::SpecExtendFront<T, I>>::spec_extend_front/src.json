@@ -1,5 +1,5 @@
 {
   "name": "alloc::<collections::vec_deque::VecDeque<T, A> as collections::vec_deque::spec_extend::SpecExtendFront<T, I>>::spec_extend_front",
   "span": "$library/alloc/src/collections/vec_deque/spec_extend.rs:129:5: 129:57",
-  "src": "default fn spec_extend_front(&mut self, mut iter: I)"
+  "src": "default fn spec_extend_front(&mut self, mut iter: I) {\n        // This function should be the moral equivalent of:\n        //\n        // for item in iter {\n        //     self.push_front(item);\n        // }\n\n        while let Some(element) = iter.next() {\n            let (lower, _) = iter.size_hint();\n            self.reserve(lower.saturating_add(1));\n\n            // SAFETY: We just reserved space for at least one element.\n            unsafe { self.push_front_unchecked(element) };\n\n            // Inner loop to avoid repeatedly calling `reserve`.\n            while self.len < self.capacity() {\n                let Some(element) = iter.next() else {\n                    return;\n                };\n                // SAFETY: The loop condition guarantees that `self.len() < self.capacity()`.\n                unsafe { self.push_front_unchecked(element) };\n            }\n        }\n    }"
 }

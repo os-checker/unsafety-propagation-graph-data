@@ -1,5 +1,5 @@
 {
   "name": "alloc::boxed::Box::<[T]>::try_new_zeroed_slice",
   "span": "$library/alloc/src/boxed.rs:956:5: 956:94",
-  "src": "pub fn try_new_zeroed_slice(len: usize) -> Result<Box<[mem::MaybeUninit<T>]>, AllocError>"
+  "src": "pub fn try_new_zeroed_slice(len: usize) -> Result<Box<[mem::MaybeUninit<T>]>, AllocError> {\n        let ptr = if T::IS_ZST || len == 0 {\n            NonNull::dangling()\n        } else {\n            let layout = match Layout::array::<mem::MaybeUninit<T>>(len) {\n                Ok(l) => l,\n                Err(_) => return Err(AllocError),\n            };\n            Global.allocate_zeroed(layout)?.cast()\n        };\n        unsafe { Ok(RawVec::from_raw_parts_in(ptr.as_ptr(), len, Global).into_box(len)) }\n    }"
 }

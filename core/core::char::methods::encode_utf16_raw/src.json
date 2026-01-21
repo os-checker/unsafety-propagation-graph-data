@@ -1,5 +1,5 @@
 {
   "name": "core::char::methods::encode_utf16_raw",
   "span": "$library/core/src/char/methods.rs:1958:1: 1958:76",
-  "src": "pub const fn encode_utf16_raw(mut code: u32, dst: &mut [u16]) -> &mut [u16]"
+  "src": "pub const fn encode_utf16_raw(mut code: u32, dst: &mut [u16]) -> &mut [u16] {\n    let len = len_utf16(code);\n    match (len, &mut *dst) {\n        (1, [a, ..]) => {\n            *a = code as u16;\n        }\n        (2, [a, b, ..]) => {\n            code -= 0x1_0000;\n            *a = (code >> 10) as u16 | 0xD800;\n            *b = (code & 0x3FF) as u16 | 0xDC00;\n        }\n        _ => {\n            const_panic!(\n                \"encode_utf16: buffer does not have enough bytes to encode code point\",\n                \"encode_utf16: need {len} bytes to encode U+{code:04X} but buffer has just {dst_len}\",\n                code: u32 = code,\n                len: usize = len,\n                dst_len: usize = dst.len(),\n            )\n        }\n    };\n    // SAFETY: `<&mut [u16]>::as_mut_ptr` is guaranteed to return a valid pointer and `len` has been tested to be within bounds.\n    unsafe { slice::from_raw_parts_mut(dst.as_mut_ptr(), len) }\n}"
 }

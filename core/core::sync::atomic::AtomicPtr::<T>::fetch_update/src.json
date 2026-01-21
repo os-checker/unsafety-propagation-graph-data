@@ -1,5 +1,5 @@
 {
   "name": "core::sync::atomic::AtomicPtr::<T>::fetch_update",
   "span": "$library/core/src/sync/atomic.rs:2045:5: 2052:44",
-  "src": "pub fn fetch_update<F>(\n        &self,\n        set_order: Ordering,\n        fetch_order: Ordering,\n        mut f: F,\n    ) -> Result<*mut T, *mut T>\n    where\n        F: FnMut(*mut T) -> Option<*mut T>,"
+  "src": "pub fn fetch_update<F>(\n        &self,\n        set_order: Ordering,\n        fetch_order: Ordering,\n        mut f: F,\n    ) -> Result<*mut T, *mut T>\n    where\n        F: FnMut(*mut T) -> Option<*mut T>,\n    {\n        let mut prev = self.load(fetch_order);\n        while let Some(next) = f(prev) {\n            match self.compare_exchange_weak(prev, next, set_order, fetch_order) {\n                x @ Ok(_) => return x,\n                Err(next_prev) => prev = next_prev,\n            }\n        }\n        Err(prev)\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::boot::multiboot::parse_initramfs",
   "span": "ostd/src/arch/x86/boot/multiboot/mod.rs:41:1: 41:68",
-  "src": "fn parse_initramfs(mb1_info: &MultibootLegacyInfo) -> Option<&[u8]>"
+  "src": "fn parse_initramfs(mb1_info: &MultibootLegacyInfo) -> Option<&[u8]> {\n    // FIXME: We think all modules are initramfs, can this cause problems?\n    if mb1_info.mods_count == 0 {\n        return None;\n    }\n\n    let mods_addr = paddr_to_vaddr(mb1_info.mods_addr as usize) as *const u32;\n    // SAFETY: We have checked `mods_count` above. By the contract with the Multiboot loader, the\n    // module addresses are available.\n    let (start, end) = unsafe { (*mods_addr, *mods_addr.add(1)) };\n\n    let ptr = paddr_to_vaddr(start as usize) as *const u8;\n    let len = (end - start) as usize;\n\n    // SAFETY: The initramfs is safe to read because of the contract with the loader.\n    Some(unsafe { core::slice::from_raw_parts(ptr, len) })\n}"
 }

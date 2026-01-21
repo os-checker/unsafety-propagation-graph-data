@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::kernel::apic::init",
   "span": "ostd/src/arch/x86/kernel/apic/mod.rs:353:1: 353:81",
-  "src": "pub fn init(io_mem_builder: &IoMemAllocatorBuilder) -> Result<(), ApicInitError>"
+  "src": "pub fn init(io_mem_builder: &IoMemAllocatorBuilder) -> Result<(), ApicInitError> {\n    if x2apic::X2Apic::has_x2apic() {\n        log::info!(\"x2APIC found!\");\n        APIC_TYPE.call_once(|| ApicType::X2Apic);\n        Ok(())\n    } else if xapic::XApic::has_xapic() {\n        log::info!(\"xAPIC found!\");\n        // SAFETY: xAPIC is present.\n        let base_address = unsafe { xapic::read_xapic_base_address() };\n        let io_mem = io_mem_builder.reserve(\n            base_address..(base_address + xapic::XAPIC_MMIO_SIZE),\n            crate::mm::CachePolicy::Uncacheable,\n        );\n        APIC_TYPE.call_once(|| ApicType::XApic(io_mem));\n        Ok(())\n    } else {\n        log::warn!(\"Neither x2APIC nor xAPIC found!\");\n        Err(ApicInitError::NoApic)\n    }\n}"
 }

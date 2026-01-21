@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<T, A>::as_mut_slice",
   "span": "$library/alloc/src/vec/mod.rs:1617:5: 1617:53",
-  "src": "pub const fn as_mut_slice(&mut self) -> &mut [T]"
+  "src": "pub const fn as_mut_slice(&mut self) -> &mut [T] {\n        // SAFETY: `slice::from_raw_parts_mut` requires pointee is a contiguous, aligned buffer of\n        // size `len` containing properly-initialized `T`s. Data must not be accessed through any\n        // other pointer for the returned lifetime. Further, `len * size_of::<T>` <=\n        // `ISIZE::MAX` and allocation does not \"wrap\" through overflowing memory addresses.\n        //\n        // * Vec API guarantees that self.buf:\n        //      * contains only properly-initialized items within 0..len\n        //      * is aligned, contiguous, and valid for `len` reads\n        //      * obeys size and address-wrapping constraints\n        //\n        // * We only construct references to `self.buf` through `&self` and `&mut self` methods;\n        //   borrow-check ensures that it is not possible to construct a reference to `self.buf`\n        //   within the returned lifetime.\n        unsafe { slice::from_raw_parts_mut(self.as_mut_ptr(), self.len) }\n    }"
 }

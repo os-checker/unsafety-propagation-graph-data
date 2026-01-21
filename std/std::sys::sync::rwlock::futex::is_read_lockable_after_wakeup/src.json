@@ -1,5 +1,5 @@
 {
   "name": "std::sys::sync::rwlock::futex::is_read_lockable_after_wakeup",
   "span": "$library/std/src/sys/sync/rwlock/futex.rs:58:1: 58:59",
-  "src": "fn is_read_lockable_after_wakeup(state: Primitive) -> bool"
+  "src": "fn is_read_lockable_after_wakeup(state: Primitive) -> bool {\n    // We make a special case for checking if we can read-lock _after_ a reader thread that went to\n    // sleep has been woken up by a call to `downgrade`.\n    //\n    // `downgrade` will wake up all readers and place the lock in read mode. Thus, there should be\n    // no readers waiting and the lock should be read-locked (not write-locked or unlocked).\n    //\n    // Note that we do not check if any writers are waiting. This is because a call to `downgrade`\n    // implies that the caller wants other readers to read the value protected by the lock. If we\n    // did not allow readers to acquire the lock before writers after a `downgrade`, then only the\n    // original writer would be able to read the value, thus defeating the purpose of `downgrade`.\n    state & MASK < MAX_READERS\n        && !has_readers_waiting(state)\n        && !is_write_locked(state)\n        && !is_unlocked(state)\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::sys::thread::unix::min_stack_size",
   "span": "$library/std/src/sys/thread/unix.rs:862:1: 862:69",
-  "src": "unsafe fn min_stack_size(attr: *const libc::pthread_attr_t) -> usize"
+  "src": "unsafe fn min_stack_size(attr: *const libc::pthread_attr_t) -> usize {\n    // We use dlsym to avoid an ELF version dependency on GLIBC_PRIVATE. (#23628)\n    // We shouldn't really be using such an internal symbol, but there's currently\n    // no other way to account for the TLS size.\n    dlsym!(\n        fn __pthread_get_minstack(attr: *const libc::pthread_attr_t) -> libc::size_t;\n    );\n\n    match __pthread_get_minstack.get() {\n        None => libc::PTHREAD_STACK_MIN,\n        Some(f) => unsafe { f(attr) },\n    }\n}"
 }

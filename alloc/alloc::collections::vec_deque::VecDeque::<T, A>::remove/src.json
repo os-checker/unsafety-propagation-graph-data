@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::vec_deque::VecDeque::<T, A>::remove",
   "span": "$library/alloc/src/collections/vec_deque/mod.rs:2420:5: 2420:56",
-  "src": "pub fn remove(&mut self, index: usize) -> Option<T>"
+  "src": "pub fn remove(&mut self, index: usize) -> Option<T> {\n        if self.len <= index {\n            return None;\n        }\n\n        let wrapped_idx = self.to_physical_idx(index);\n\n        let elem = unsafe { Some(self.buffer_read(wrapped_idx)) };\n\n        let k = self.len - index - 1;\n        // safety: due to the nature of the if-condition, whichever wrap_copy gets called,\n        // its length argument will be at most `self.len / 2`, so there can't be more than\n        // one overlapping area.\n        if k < index {\n            unsafe { self.wrap_copy(self.wrap_add(wrapped_idx, 1), wrapped_idx, k) };\n            self.len -= 1;\n        } else {\n            let old_head = self.head;\n            self.head = self.to_physical_idx(1);\n            unsafe { self.wrap_copy(old_head, self.head, index) };\n            self.len -= 1;\n        }\n\n        elem\n    }"
 }

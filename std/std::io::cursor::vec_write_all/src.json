@@ -1,5 +1,5 @@
 {
   "name": "std::io::cursor::vec_write_all",
   "span": "$library/std/src/io/cursor.rs:528:1: 530:18",
-  "src": "fn vec_write_all<A>(pos_mut: &mut u64, vec: &mut Vec<u8, A>, buf: &[u8]) -> io::Result<usize>\nwhere\n    A: Allocator,"
+  "src": "fn vec_write_all<A>(pos_mut: &mut u64, vec: &mut Vec<u8, A>, buf: &[u8]) -> io::Result<usize>\nwhere\n    A: Allocator,\n{\n    let buf_len = buf.len();\n    let mut pos = reserve_and_pad(pos_mut, vec, buf_len)?;\n\n    // Write the buf then progress the vec forward if necessary\n    // Safety: we have ensured that the capacity is available\n    // and that all bytes get written up to pos\n    unsafe {\n        pos = vec_write_all_unchecked(pos, vec, buf);\n        if pos > vec.len() {\n            vec.set_len(pos);\n        }\n    };\n\n    // Bump us forward\n    *pos_mut += buf_len as u64;\n    Ok(buf_len)\n}"
 }

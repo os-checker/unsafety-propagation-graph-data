@@ -1,5 +1,5 @@
 {
   "name": "core::<iter::adapters::cycle::Cycle<I> as iter::traits::iterator::Iterator>::try_fold",
   "span": "$library/core/src/iter/adapters/cycle.rs:55:5: 58:30",
-  "src": "fn try_fold<Acc, F, R>(&mut self, mut acc: Acc, mut f: F) -> R\n    where\n        F: FnMut(Acc, Self::Item) -> R,\n        R: Try<Output = Acc>,"
+  "src": "fn try_fold<Acc, F, R>(&mut self, mut acc: Acc, mut f: F) -> R\n    where\n        F: FnMut(Acc, Self::Item) -> R,\n        R: Try<Output = Acc>,\n    {\n        // fully iterate the current iterator. this is necessary because\n        // `self.iter` may be empty even when `self.orig` isn't\n        acc = self.iter.try_fold(acc, &mut f)?;\n        self.iter = self.orig.clone();\n\n        // complete a full cycle, keeping track of whether the cycled\n        // iterator is empty or not. we need to return early in case\n        // of an empty iterator to prevent an infinite loop\n        let mut is_empty = true;\n        acc = self.iter.try_fold(acc, |acc, x| {\n            is_empty = false;\n            f(acc, x)\n        })?;\n\n        if is_empty {\n            return try { acc };\n        }\n\n        loop {\n            self.iter = self.orig.clone();\n            acc = self.iter.try_fold(acc, &mut f)?;\n        }\n    }"
 }

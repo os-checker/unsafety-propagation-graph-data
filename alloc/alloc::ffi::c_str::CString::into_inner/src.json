@@ -1,5 +1,5 @@
 {
   "name": "alloc::ffi::c_str::CString::into_inner",
   "span": "$library/alloc/src/ffi/c_str.rs:602:5: 602:37",
-  "src": "fn into_inner(self) -> Box<[u8]>"
+  "src": "fn into_inner(self) -> Box<[u8]> {\n        // Rationale: `mem::forget(self)` invalidates the previous call to `ptr::read(&self.inner)`\n        // so we use `ManuallyDrop` to ensure `self` is not dropped.\n        // Then we can return the box directly without invalidating it.\n        // See https://github.com/rust-lang/rust/issues/62553.\n        let this = mem::ManuallyDrop::new(self);\n        unsafe { ptr::read(&this.inner) }\n    }"
 }

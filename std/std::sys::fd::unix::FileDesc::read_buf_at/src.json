@@ -1,5 +1,5 @@
 {
   "name": "std::sys::fd::unix::FileDesc::read_buf_at",
   "span": "$library/std/src/sys/fd/unix.rs:193:5: 193:93",
-  "src": "pub fn read_buf_at(&self, mut cursor: BorrowedCursor<'_>, offset: u64) -> io::Result<()>"
+  "src": "pub fn read_buf_at(&self, mut cursor: BorrowedCursor<'_>, offset: u64) -> io::Result<()> {\n        // SAFETY: `cursor.as_mut()` starts with `cursor.capacity()` writable bytes\n        let ret = cvt(unsafe {\n            pread64(\n                self.as_raw_fd(),\n                cursor.as_mut().as_mut_ptr().cast::<libc::c_void>(),\n                cmp::min(cursor.capacity(), READ_LIMIT),\n                offset as off64_t, // EINVAL if offset + count overflows\n            )\n        })?;\n\n        // SAFETY: `ret` bytes were written to the initialized portion of the buffer\n        unsafe {\n            cursor.advance(ret as usize);\n        }\n        Ok(())\n    }"
 }

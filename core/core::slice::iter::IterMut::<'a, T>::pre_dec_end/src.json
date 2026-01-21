@@ -1,5 +1,5 @@
 {
   "name": "core::slice::iter::IterMut::<'a, T>::pre_dec_end",
   "span": "$library/core/src/slice/iter/macros.rs:119:13: 119:74",
-  "src": "unsafe fn pre_dec_end(&mut self, offset: usize) -> NonNull<T>"
+  "src": "unsafe fn pre_dec_end(&mut self, offset: usize) -> NonNull<T> {\n                if_zst!(mut self,\n                    // SAFETY: By our precondition, `offset` can be at most the\n                    // current length, so the subtraction can never overflow.\n                    len => unsafe {\n                        // Using the intrinsic directly avoids emitting a UbCheck\n                        *len = crate::intrinsics::unchecked_sub(*len, offset);\n                        self.ptr\n                    },\n                    // SAFETY: the caller guarantees that `offset` doesn't exceed `self.len()`,\n                    // which is guaranteed to not overflow an `isize`. Also, the resulting pointer\n                    // is in bounds of `slice`, which fulfills the other requirements for `offset`.\n                    end => unsafe {\n                        *end = end.sub(offset);\n                        *end\n                    },\n                )\n            }"
 }

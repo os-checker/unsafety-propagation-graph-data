@@ -1,5 +1,5 @@
 {
   "name": "std::ffi::os_str::OsString::push",
   "span": "$library/std/src/ffi/os_str.rs:260:5: 260:50",
-  "src": "pub fn push<T: AsRef<OsStr>>(&mut self, s: T)"
+  "src": "pub fn push<T: AsRef<OsStr>>(&mut self, s: T) {\n        trait SpecPushTo {\n            fn spec_push_to(&self, buf: &mut OsString);\n        }\n\n        impl<T: AsRef<OsStr>> SpecPushTo for T {\n            #[inline]\n            default fn spec_push_to(&self, buf: &mut OsString) {\n                buf.inner.push_slice(&self.as_ref().inner);\n            }\n        }\n\n        // Use a more efficient implementation when the string is UTF-8.\n        macro spec_str($T:ty) {\n            impl SpecPushTo for $T {\n                #[inline]\n                fn spec_push_to(&self, buf: &mut OsString) {\n                    buf.inner.push_str(self);\n                }\n            }\n        }\n        spec_str!(str);\n        spec_str!(String);\n\n        s.spec_push_to(self)\n    }"
 }

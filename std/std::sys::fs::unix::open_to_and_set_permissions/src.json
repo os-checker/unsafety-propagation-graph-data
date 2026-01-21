@@ -1,5 +1,5 @@
 {
   "name": "std::sys::fs::unix::open_to_and_set_permissions",
   "span": "$library/std/src/sys/fs/unix.rs:2232:1: 2235:56",
-  "src": "fn open_to_and_set_permissions(\n    to: &Path,\n    reader_metadata: &crate::fs::Metadata,\n) -> io::Result<(crate::fs::File, crate::fs::Metadata)>"
+  "src": "fn open_to_and_set_permissions(\n    to: &Path,\n    reader_metadata: &crate::fs::Metadata,\n) -> io::Result<(crate::fs::File, crate::fs::Metadata)> {\n    use crate::fs::OpenOptions;\n    use crate::os::unix::fs::{OpenOptionsExt, PermissionsExt};\n\n    let perm = reader_metadata.permissions();\n    let writer = OpenOptions::new()\n        // create the file with the correct mode right away\n        .mode(perm.mode())\n        .write(true)\n        .create(true)\n        .truncate(true)\n        .open(to)?;\n    let writer_metadata = writer.metadata()?;\n    // fchmod is broken on vita\n    #[cfg(not(target_os = \"vita\"))]\n    if writer_metadata.is_file() {\n        // Set the correct file permissions, in case the file already existed.\n        // Don't set the permissions on already existing non-files like\n        // pipes/FIFOs or device nodes.\n        writer.set_permissions(perm)?;\n    }\n    Ok((writer, writer_metadata))\n}"
 }

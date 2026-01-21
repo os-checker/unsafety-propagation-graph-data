@@ -1,5 +1,5 @@
 {
   "name": "std::panicking::resume_unwind",
   "span": "$library/std/src/panicking.rs:856:1: 856:56",
-  "src": "pub fn resume_unwind(payload: Box<dyn Any + Send>) -> !"
+  "src": "pub fn resume_unwind(payload: Box<dyn Any + Send>) -> ! {\n    panic_count::increase(false);\n\n    struct RewrapBox(Box<dyn Any + Send>);\n\n    unsafe impl PanicPayload for RewrapBox {\n        fn take_box(&mut self) -> *mut (dyn Any + Send) {\n            Box::into_raw(mem::replace(&mut self.0, Box::new(())))\n        }\n\n        fn get(&mut self) -> &(dyn Any + Send) {\n            &*self.0\n        }\n    }\n\n    impl fmt::Display for RewrapBox {\n        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n            f.write_str(payload_as_str(&self.0))\n        }\n    }\n\n    rust_panic(&mut RewrapBox(payload))\n}"
 }

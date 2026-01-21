@@ -1,5 +1,5 @@
 {
   "name": "core::slice::<impl [T]>::split_at_unchecked",
   "span": "$library/core/src/slice/mod.rs:2035:5: 2035:78",
-  "src": "pub const unsafe fn split_at_unchecked(&self, mid: usize) -> (&[T], &[T])"
+  "src": "pub const unsafe fn split_at_unchecked(&self, mid: usize) -> (&[T], &[T]) {\n        // FIXME(const-hack): the const function `from_raw_parts` is used to make this\n        // function const; previously the implementation used\n        // `(self.get_unchecked(..mid), self.get_unchecked(mid..))`\n\n        let len = self.len();\n        let ptr = self.as_ptr();\n\n        assert_unsafe_precondition!(\n            check_library_ub,\n            \"slice::split_at_unchecked requires the index to be within the slice\",\n            (mid: usize = mid, len: usize = len) => mid <= len,\n        );\n\n        // SAFETY: Caller has to check that `0 <= mid <= self.len()`\n        unsafe { (from_raw_parts(ptr, mid), from_raw_parts(ptr.add(mid), unchecked_sub(len, mid))) }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::os::unix::net::ucred::impl_linux::peer_cred",
   "span": "$library/std/src/os/unix/net/ucred.rs:48:5: 48:63",
-  "src": "pub fn peer_cred(socket: &UnixStream) -> io::Result<UCred>"
+  "src": "pub fn peer_cred(socket: &UnixStream) -> io::Result<UCred> {\n        let ucred_size = size_of::<ucred>();\n\n        // Trivial sanity checks.\n        assert!(size_of::<u32>() <= size_of::<usize>());\n        assert!(ucred_size <= u32::MAX as usize);\n\n        let mut ucred_size = ucred_size as socklen_t;\n        let mut ucred: ucred = ucred { pid: 1, uid: 1, gid: 1 };\n\n        unsafe {\n            let ret = getsockopt(\n                socket.as_raw_fd(),\n                SOL_SOCKET,\n                SO_PEERCRED,\n                (&raw mut ucred) as *mut c_void,\n                &mut ucred_size,\n            );\n\n            if ret == 0 && ucred_size as usize == size_of::<ucred>() {\n                Ok(UCred { uid: ucred.uid, gid: ucred.gid, pid: Some(ucred.pid) })\n            } else {\n                Err(io::Error::last_os_error())\n            }\n        }\n    }"
 }

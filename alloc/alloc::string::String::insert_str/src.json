@@ -1,5 +1,5 @@
 {
   "name": "alloc::string::String::insert_str",
   "span": "$library/alloc/src/string.rs:1769:5: 1769:59",
-  "src": "pub fn insert_str(&mut self, idx: usize, string: &str)"
+  "src": "pub fn insert_str(&mut self, idx: usize, string: &str) {\n        assert!(self.is_char_boundary(idx));\n\n        let len = self.len();\n        let amt = string.len();\n        self.reserve(amt);\n\n        // SAFETY: Move the bytes starting from `idx` to their new location `amt` bytes\n        // ahead. This is safe because sufficient capacity was just reserved, and `idx`\n        // is a char boundary.\n        unsafe {\n            ptr::copy(self.vec.as_ptr().add(idx), self.vec.as_mut_ptr().add(idx + amt), len - idx);\n        }\n\n        // SAFETY: Copy the new string slice into the vacated region if `idx != len`,\n        // or into the uninitialized spare capacity otherwise. The borrow checker\n        // ensures that the source and destination do not overlap.\n        unsafe {\n            ptr::copy_nonoverlapping(string.as_ptr(), self.vec.as_mut_ptr().add(idx), amt);\n        }\n\n        // SAFETY: Update the length to include the newly added bytes.\n        unsafe {\n            self.vec.set_len(len + amt);\n        }\n    }"
 }

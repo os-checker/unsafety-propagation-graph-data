@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::iommu::interrupt_remapping::table::IntRemappingTable::set_entry",
   "span": "ostd/src/arch/x86/iommu/interrupt_remapping/table.rs:65:5: 65:64",
-  "src": "pub(super) fn set_entry(&self, index: u16, entry: IrtEntry)"
+  "src": "pub(super) fn set_entry(&self, index: u16, entry: IrtEntry) {\n        let _guard = self.modification_lock.lock();\n\n        let [lower, upper] = entry.as_raw_u64();\n\n        let offset = (index as usize) * size_of::<u128>();\n        // Write a zero as the lower bits first to clear the present bit.\n        self.segment\n            .writer()\n            .skip(offset)\n            .write_once(&0u64)\n            .unwrap();\n        // Write the upper bits first (which keeps the present bit unset)\n        self.segment\n            .writer()\n            .skip(offset + size_of::<u64>())\n            .write_once(&upper)\n            .unwrap();\n        self.segment\n            .writer()\n            .skip(offset)\n            .write_once(&lower)\n            .unwrap();\n    }"
 }

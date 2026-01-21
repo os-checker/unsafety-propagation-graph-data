@@ -1,5 +1,5 @@
 {
   "name": "core::<iter::adapters::enumerate::Enumerate<I> as iter::traits::iterator::Iterator>::fold",
   "span": "$library/core/src/iter/adapters/enumerate.rs:129:5: 131:45",
-  "src": "fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc\n    where\n        Fold: FnMut(Acc, Self::Item) -> Acc,"
+  "src": "fn fold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc\n    where\n        Fold: FnMut(Acc, Self::Item) -> Acc,\n    {\n        #[inline]\n        fn enumerate<T, Acc>(\n            mut count: usize,\n            mut fold: impl FnMut(Acc, (usize, T)) -> Acc,\n        ) -> impl FnMut(Acc, T) -> Acc {\n            #[rustc_inherit_overflow_checks]\n            move |acc, item| {\n                let acc = fold(acc, (count, item));\n                count += 1;\n                acc\n            }\n        }\n\n        self.iter.fold(init, enumerate(self.count, fold))\n    }"
 }

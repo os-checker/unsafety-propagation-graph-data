@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::rwlock::RwLock::<T, G>::try_upread",
   "span": "ostd/src/sync/rwlock.rs:212:5: 212:73",
-  "src": "pub fn try_upread(&self) -> Option<RwLockUpgradeableGuard<'_, T, G>>"
+  "src": "pub fn try_upread(&self) -> Option<RwLockUpgradeableGuard<'_, T, G>> {\n        let guard = G::guard();\n        let lock = self.lock.fetch_or(UPGRADEABLE_READER, Acquire) & (WRITER | UPGRADEABLE_READER);\n        if lock == 0 {\n            return Some(RwLockUpgradeableGuard { inner: self, guard });\n        } else if lock == WRITER {\n            self.lock.fetch_sub(UPGRADEABLE_READER, Release);\n        }\n        None\n    }"
 }

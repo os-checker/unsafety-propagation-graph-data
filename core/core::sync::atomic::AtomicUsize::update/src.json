@@ -1,5 +1,5 @@
 {
   "name": "core::sync::atomic::AtomicUsize::update",
   "span": "$library/core/src/sync/atomic.rs:3564:13: 3569:27",
-  "src": "pub fn update(\n                &self,\n                set_order: Ordering,\n                fetch_order: Ordering,\n                mut f: impl FnMut($int_type) -> $int_type,\n            ) -> $int_type"
+  "src": "pub fn update(\n                &self,\n                set_order: Ordering,\n                fetch_order: Ordering,\n                mut f: impl FnMut($int_type) -> $int_type,\n            ) -> $int_type {\n                let mut prev = self.load(fetch_order);\n                loop {\n                    match self.compare_exchange_weak(prev, f(prev), set_order, fetch_order) {\n                        Ok(x) => break x,\n                        Err(next_prev) => prev = next_prev,\n                    }\n                }\n            }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::<str as net::socket_addr::ToSocketAddrs>::to_socket_addrs",
   "span": "$library/std/src/net/socket_addr.rs:226:5: 226:71",
-  "src": "fn to_socket_addrs(&self) -> io::Result<vec::IntoIter<SocketAddr>>"
+  "src": "fn to_socket_addrs(&self) -> io::Result<vec::IntoIter<SocketAddr>> {\n        // Try to parse as a regular SocketAddr first\n        if let Ok(addr) = self.parse() {\n            return Ok(vec![addr].into_iter());\n        }\n\n        // Otherwise, split the string by ':' and convert the second part to u16...\n        let Some((host, port_str)) = self.rsplit_once(':') else {\n            return Err(io::const_error!(io::ErrorKind::InvalidInput, \"invalid socket address\"));\n        };\n        let Ok(port) = port_str.parse::<u16>() else {\n            return Err(io::const_error!(io::ErrorKind::InvalidInput, \"invalid port value\"));\n        };\n\n        // ... and make the system look up the host.\n        lookup_host(host, port)\n    }"
 }

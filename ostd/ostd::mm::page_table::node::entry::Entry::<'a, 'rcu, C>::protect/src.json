@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::node::entry::Entry::<'a, 'rcu, C>::protect",
   "span": "ostd/src/mm/page_table/node/entry.rs:61:5: 61:84",
-  "src": "pub(in crate::mm) fn protect(&mut self, op: &mut impl FnMut(&mut PageProperty))"
+  "src": "pub(in crate::mm) fn protect(&mut self, op: &mut impl FnMut(&mut PageProperty)) {\n        if !self.pte.is_present() {\n            return;\n        }\n\n        let prop = self.pte.prop();\n        let mut new_prop = prop;\n        op(&mut new_prop);\n\n        if prop == new_prop {\n            return;\n        }\n\n        self.pte.set_prop(new_prop);\n\n        // SAFETY:\n        //  1. The index is within the bounds.\n        //  2. We replace the PTE with a new one, which differs only in\n        //     `PageProperty`, so it's in `C` and at the correct paging level.\n        //  3. The child is still owned by the page table node.\n        unsafe { self.node.write_pte(self.idx, self.pte) };\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::sync::poison::condvar::Condvar::wait_timeout_while",
   "span": "$library/std/src/sync/poison/condvar.rs:390:5: 397:34",
-  "src": "pub fn wait_timeout_while<'a, T, F>(\n        &self,\n        mut guard: MutexGuard<'a, T>,\n        dur: Duration,\n        mut condition: F,\n    ) -> LockResult<(MutexGuard<'a, T>, WaitTimeoutResult)>\n    where\n        F: FnMut(&mut T) -> bool,"
+  "src": "pub fn wait_timeout_while<'a, T, F>(\n        &self,\n        mut guard: MutexGuard<'a, T>,\n        dur: Duration,\n        mut condition: F,\n    ) -> LockResult<(MutexGuard<'a, T>, WaitTimeoutResult)>\n    where\n        F: FnMut(&mut T) -> bool,\n    {\n        let start = Instant::now();\n        loop {\n            if !condition(&mut *guard) {\n                return Ok((guard, WaitTimeoutResult(false)));\n            }\n            let timeout = match dur.checked_sub(start.elapsed()) {\n                Some(timeout) => timeout,\n                None => return Ok((guard, WaitTimeoutResult(true))),\n            };\n            guard = self.wait_timeout(guard, timeout)?.0;\n        }\n    }"
 }

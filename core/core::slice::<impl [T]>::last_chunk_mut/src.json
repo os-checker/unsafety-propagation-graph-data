@@ -1,5 +1,5 @@
 {
   "name": "core::slice::<impl [T]>::last_chunk_mut",
   "span": "$library/core/src/slice/mod.rs:538:5: 538:82",
-  "src": "pub const fn last_chunk_mut<const N: usize>(&mut self) -> Option<&mut [T; N]>"
+  "src": "pub const fn last_chunk_mut<const N: usize>(&mut self) -> Option<&mut [T; N]> {\n        // FIXME(const-hack): Without const traits, we need this instead of `get`.\n        let Some(index) = self.len().checked_sub(N) else { return None };\n        let (_, last) = self.split_at_mut(index);\n\n        // SAFETY: We explicitly check for the correct number of elements,\n        //   do not let the reference outlive the slice,\n        //   and require exclusive access to the entire slice to mutate the chunk.\n        Some(unsafe { &mut *(last.as_mut_ptr().cast_array()) })\n    }"
 }

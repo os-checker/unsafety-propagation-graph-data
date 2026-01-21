@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::btree::mem::replace",
   "span": "$library/alloc/src/collections/btree/mem.rs:18:1: 18:78",
-  "src": "pub(super) fn replace<T, R>(v: &mut T, change: impl FnOnce(T) -> (T, R)) -> R"
+  "src": "pub(super) fn replace<T, R>(v: &mut T, change: impl FnOnce(T) -> (T, R)) -> R {\n    struct PanicGuard;\n    impl Drop for PanicGuard {\n        fn drop(&mut self) {\n            intrinsics::abort()\n        }\n    }\n    let guard = PanicGuard;\n    let value = unsafe { ptr::read(v) };\n    let (new_value, ret) = change(value);\n    unsafe {\n        ptr::write(v, new_value);\n    }\n    mem::forget(guard);\n    ret\n}"
 }

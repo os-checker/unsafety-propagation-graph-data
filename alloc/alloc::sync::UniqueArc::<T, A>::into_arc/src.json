@@ -1,5 +1,5 @@
 {
   "name": "alloc::sync::UniqueArc::<T, A>::into_arc",
   "span": "$library/alloc/src/sync.rs:4757:5: 4757:45",
-  "src": "pub fn into_arc(this: Self) -> Arc<T, A>"
+  "src": "pub fn into_arc(this: Self) -> Arc<T, A> {\n        let this = ManuallyDrop::new(this);\n\n        // Move the allocator out.\n        // SAFETY: `this.alloc` will not be accessed again, nor dropped because it is in\n        // a `ManuallyDrop`.\n        let alloc: A = unsafe { ptr::read(&this.alloc) };\n\n        // SAFETY: This pointer was allocated at creation time so we know it is valid.\n        unsafe {\n            // Convert our weak reference into a strong reference\n            (*this.ptr.as_ptr()).strong.store(1, Release);\n            Arc::from_inner_in(this.ptr, alloc)\n        }\n    }"
 }

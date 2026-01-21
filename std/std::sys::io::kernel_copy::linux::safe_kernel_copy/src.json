@@ -1,5 +1,5 @@
 {
   "name": "std::sys::io::kernel_copy::linux::safe_kernel_copy",
   "span": "$library/std/src/sys/io/kernel_copy/linux.rs:147:1: 147:60",
-  "src": "fn safe_kernel_copy(source: &FdMeta, sink: &FdMeta) -> bool"
+  "src": "fn safe_kernel_copy(source: &FdMeta, sink: &FdMeta) -> bool {\n    match (source, sink) {\n        // Data arriving from a socket is safe because the sender can't modify the socket buffer.\n        // Data arriving from a pipe is safe(-ish) because either the sender *copied*\n        // the bytes into the pipe OR explicitly performed an operation that enables zero-copy,\n        // thus promising not to modify the data later.\n        (FdMeta::Socket, _) => true,\n        (FdMeta::Pipe, _) => true,\n        (FdMeta::Metadata(meta), _)\n            if meta.file_type().is_fifo() || meta.file_type().is_socket() =>\n        {\n            true\n        }\n        // Data going into non-pipes/non-sockets is safe because the \"later changes may become visible\" issue\n        // only happens for pages sitting in send buffers or pipes.\n        (_, FdMeta::Metadata(meta))\n            if !meta.file_type().is_fifo() && !meta.file_type().is_socket() =>\n        {\n            true\n        }\n        _ => false,\n    }\n}"
 }

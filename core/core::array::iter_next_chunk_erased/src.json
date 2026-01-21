@@ -1,5 +1,5 @@
 {
   "name": "core::array::iter_next_chunk_erased",
   "span": "$library/core/src/array/mod.rs:1003:1: 1006:23",
-  "src": "fn iter_next_chunk_erased<T>(\n    buffer: &mut [MaybeUninit<T>],\n    iter: &mut impl Iterator<Item = T>,\n) -> Result<(), usize>"
+  "src": "fn iter_next_chunk_erased<T>(\n    buffer: &mut [MaybeUninit<T>],\n    iter: &mut impl Iterator<Item = T>,\n) -> Result<(), usize> {\n    // if `Iterator::next` panics, this guard will drop already initialized items\n    let mut guard = Guard { array_mut: buffer, initialized: 0 };\n    while guard.initialized < guard.array_mut.len() {\n        let Some(item) = iter.next() else {\n            // Unlike `try_from_fn_erased`, we want to keep the partial results,\n            // so we need to defuse the guard instead of using `?`.\n            let initialized = guard.initialized;\n            mem::forget(guard);\n            return Err(initialized);\n        };\n\n        // SAFETY: The loop condition ensures we have space to push the item\n        unsafe { guard.push_unchecked(item) };\n    }\n\n    mem::forget(guard);\n    Ok(())\n}"
 }

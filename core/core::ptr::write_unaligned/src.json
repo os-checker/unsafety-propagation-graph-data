@@ -1,5 +1,5 @@
 {
   "name": "core::ptr::write_unaligned",
   "span": "$library/core/src/ptr/mod.rs:1989:1: 1989:60",
-  "src": "pub const unsafe fn write_unaligned<T>(dst: *mut T, src: T)"
+  "src": "pub const unsafe fn write_unaligned<T>(dst: *mut T, src: T) {\n    // SAFETY: the caller must guarantee that `dst` is valid for writes.\n    // `dst` cannot overlap `src` because the caller has mutable access\n    // to `dst` while `src` is owned by this function.\n    unsafe {\n        copy_nonoverlapping((&raw const src) as *const u8, dst as *mut u8, size_of::<T>());\n        // We are calling the intrinsic directly to avoid function calls in the generated code.\n        intrinsics::forget(src);\n    }\n}"
 }

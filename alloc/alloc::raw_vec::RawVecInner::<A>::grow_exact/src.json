@@ -1,5 +1,5 @@
 {
   "name": "alloc::raw_vec::RawVecInner::<A>::grow_exact",
   "span": "$library/alloc/src/raw_vec/mod.rs:710:5: 715:37",
-  "src": "unsafe fn grow_exact(\n        &mut self,\n        len: usize,\n        additional: usize,\n        elem_layout: Layout,\n    ) -> Result<(), TryReserveError>"
+  "src": "unsafe fn grow_exact(\n        &mut self,\n        len: usize,\n        additional: usize,\n        elem_layout: Layout,\n    ) -> Result<(), TryReserveError> {\n        if elem_layout.size() == 0 {\n            // Since we return a capacity of `usize::MAX` when the type size is\n            // 0, getting to here necessarily means the `RawVec` is overfull.\n            return Err(CapacityOverflow.into());\n        }\n\n        let cap = len.checked_add(additional).ok_or(CapacityOverflow)?;\n\n        // SAFETY: preconditions passed to caller\n        let ptr = unsafe { self.finish_grow(cap, elem_layout)? };\n\n        // SAFETY: `finish_grow` would have failed if `cap > isize::MAX`\n        unsafe { self.set_ptr_and_cap(ptr, cap) };\n        Ok(())\n    }"
 }

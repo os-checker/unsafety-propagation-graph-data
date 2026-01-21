@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::boot::linux_boot::parse_initramfs",
   "span": "ostd/src/arch/x86/boot/linux_boot/mod.rs:70:1: 70:62",
-  "src": "fn parse_initramfs(boot_params: &BootParams) -> Option<&[u8]>"
+  "src": "fn parse_initramfs(boot_params: &BootParams) -> Option<&[u8]> {\n    if boot_params.ext_ramdisk_image != 0 || boot_params.ext_ramdisk_size != 0 {\n        // See the explanation in `parse_kernel_commandline`.\n        return None;\n    }\n\n    if boot_params.hdr.ramdisk_image == 0 || boot_params.hdr.ramdisk_size == 0 {\n        return None;\n    }\n\n    let initramfs_ptr = paddr_to_vaddr(boot_params.hdr.ramdisk_image as usize);\n    let initramfs_len = boot_params.hdr.ramdisk_size as usize;\n    // SAFETY: The initramfs is safe to read because of the contract with the loader.\n    let initramfs =\n        unsafe { core::slice::from_raw_parts(initramfs_ptr as *const u8, initramfs_len) };\n\n    Some(initramfs)\n}"
 }

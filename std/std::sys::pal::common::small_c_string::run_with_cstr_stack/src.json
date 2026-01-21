@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::common::small_c_string::run_with_cstr_stack",
   "span": "$library/std/src/sys/pal/common/small_c_string.rs:35:1: 38:19",
-  "src": "unsafe fn run_with_cstr_stack<T>(\n    bytes: &[u8],\n    f: &dyn Fn(&CStr) -> io::Result<T>,\n) -> io::Result<T>"
+  "src": "unsafe fn run_with_cstr_stack<T>(\n    bytes: &[u8],\n    f: &dyn Fn(&CStr) -> io::Result<T>,\n) -> io::Result<T> {\n    let mut buf = MaybeUninit::<[u8; MAX_STACK_ALLOCATION]>::uninit();\n    let buf_ptr = buf.as_mut_ptr() as *mut u8;\n\n    unsafe {\n        ptr::copy_nonoverlapping(bytes.as_ptr(), buf_ptr, bytes.len());\n        buf_ptr.add(bytes.len()).write(0);\n    }\n\n    match CStr::from_bytes_with_nul(unsafe { slice::from_raw_parts(buf_ptr, bytes.len() + 1) }) {\n        Ok(s) => f(s),\n        Err(_) => Err(NUL_ERR),\n    }\n}"
 }

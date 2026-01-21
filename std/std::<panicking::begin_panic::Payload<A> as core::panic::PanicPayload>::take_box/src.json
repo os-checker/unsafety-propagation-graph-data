@@ -1,5 +1,5 @@
 {
   "name": "std::<panicking::begin_panic::Payload<A> as core::panic::PanicPayload>::take_box",
   "span": "$library/std/src/panicking.rs:730:9: 730:56",
-  "src": "fn take_box(&mut self) -> *mut (dyn Any + Send)"
+  "src": "fn take_box(&mut self) -> *mut (dyn Any + Send) {\n            // Note that this should be the only allocation performed in this code path. Currently\n            // this means that panic!() on OOM will invoke this code path, but then again we're not\n            // really ready for panic on OOM anyway. If we do start doing this, then we should\n            // propagate this allocation to be performed in the parent of this thread instead of the\n            // thread that's panicking.\n            let data = match self.inner.take() {\n                Some(a) => Box::new(a) as Box<dyn Any + Send>,\n                None => process::abort(),\n            };\n            Box::into_raw(data)\n        }"
 }

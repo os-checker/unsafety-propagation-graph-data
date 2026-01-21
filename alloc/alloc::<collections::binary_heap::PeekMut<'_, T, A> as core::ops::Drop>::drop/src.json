@@ -1,5 +1,5 @@
 {
   "name": "alloc::<collections::binary_heap::PeekMut<'_, T, A> as core::ops::Drop>::drop",
   "span": "$library/alloc/src/collections/binary_heap/mod.rs:309:5: 309:23",
-  "src": "fn drop(&mut self)"
+  "src": "fn drop(&mut self) {\n        if let Some(original_len) = self.original_len {\n            // SAFETY: That's how many elements were in the Vec at the time of\n            // the PeekMut::deref_mut call, and therefore also at the time of\n            // the BinaryHeap::peek_mut call. Since the PeekMut did not end up\n            // getting leaked, we are now undoing the leak amplification that\n            // the DerefMut prepared for.\n            unsafe { self.heap.data.set_len(original_len.get()) };\n\n            // SAFETY: PeekMut is only instantiated for non-empty heaps.\n            unsafe { self.heap.sift_down(0) };\n        }\n    }"
 }

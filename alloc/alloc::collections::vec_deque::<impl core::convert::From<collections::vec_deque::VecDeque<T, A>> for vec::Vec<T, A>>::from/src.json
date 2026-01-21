@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::vec_deque::<impl core::convert::From<collections::vec_deque::VecDeque<T, A>> for vec::Vec<T, A>>::from",
   "span": "$library/alloc/src/collections/vec_deque/mod.rs:3721:5: 3721:47",
-  "src": "fn from(mut other: VecDeque<T, A>) -> Self"
+  "src": "fn from(mut other: VecDeque<T, A>) -> Self {\n        other.make_contiguous();\n\n        unsafe {\n            let other = ManuallyDrop::new(other);\n            let buf = other.buf.ptr();\n            let len = other.len();\n            let cap = other.capacity();\n            let alloc = ptr::read(other.allocator());\n\n            if other.head != 0 {\n                ptr::copy(buf.add(other.head), buf, len);\n            }\n            Vec::from_raw_parts_in(buf, len, cap, alloc)\n        }\n    }"
 }

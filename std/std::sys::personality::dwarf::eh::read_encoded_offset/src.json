@@ -1,5 +1,5 @@
 {
   "name": "std::sys::personality::dwarf::eh::read_encoded_offset",
   "span": "$library/std/src/sys/personality/dwarf/eh.rs:191:1: 191:91",
-  "src": "unsafe fn read_encoded_offset(reader: &mut DwarfReader, encoding: u8) -> Result<usize, ()>"
+  "src": "unsafe fn read_encoded_offset(reader: &mut DwarfReader, encoding: u8) -> Result<usize, ()> {\n    if encoding == DW_EH_PE_omit || encoding & 0xF0 != 0 {\n        return Err(());\n    }\n    let result = unsafe {\n        match encoding & 0x0F {\n            // despite the name, LLVM also uses absptr for offsets instead of pointers\n            DW_EH_PE_absptr => reader.read::<usize>(),\n            DW_EH_PE_uleb128 => reader.read_uleb128() as usize,\n            DW_EH_PE_udata2 => reader.read::<u16>() as usize,\n            DW_EH_PE_udata4 => reader.read::<u32>() as usize,\n            DW_EH_PE_udata8 => reader.read::<u64>() as usize,\n            DW_EH_PE_sleb128 => reader.read_sleb128() as usize,\n            DW_EH_PE_sdata2 => reader.read::<i16>() as usize,\n            DW_EH_PE_sdata4 => reader.read::<i32>() as usize,\n            DW_EH_PE_sdata8 => reader.read::<i64>() as usize,\n            _ => return Err(()),\n        }\n    };\n    Ok(result)\n}"
 }

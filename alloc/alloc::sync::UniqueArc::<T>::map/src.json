@@ -1,5 +1,5 @@
 {
   "name": "alloc::sync::UniqueArc::<T>::map",
   "span": "$library/alloc/src/sync.rs:4621:5: 4621:70",
-  "src": "pub fn map<U>(this: Self, f: impl FnOnce(T) -> U) -> UniqueArc<U>"
+  "src": "pub fn map<U>(this: Self, f: impl FnOnce(T) -> U) -> UniqueArc<U> {\n        if size_of::<T>() == size_of::<U>()\n            && align_of::<T>() == align_of::<U>()\n            && UniqueArc::weak_count(&this) == 0\n        {\n            unsafe {\n                let ptr = UniqueArc::into_raw(this);\n                let value = ptr.read();\n                let mut allocation = UniqueArc::from_raw(ptr.cast::<mem::MaybeUninit<U>>());\n\n                allocation.write(f(value));\n                allocation.assume_init()\n            }\n        } else {\n            UniqueArc::new(f(UniqueArc::unwrap(this)))\n        }\n    }"
 }

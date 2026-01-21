@@ -1,5 +1,5 @@
 {
   "name": "alloc::<[T; N] as vec::is_zero::IsZero>::is_zero",
   "span": "$library/alloc/src/vec/is_zero.rs:62:5: 62:30",
-  "src": "fn is_zero(&self) -> bool"
+  "src": "fn is_zero(&self) -> bool {\n        if T::IS_ZST {\n            // If T is a ZST, then there is at most one possible value of `T`,\n            // so we only need to check one element for zeroness.\n            // We can't unconditionally return `true` here, since, e.g.\n            // `T = [NonTrivialCloneZst; 5]` is a ZST that implements `IsZero`\n            // due to the generic array impl, but `T::is_zero` returns `false`\n            // since the length is not 0.\n            self.get(0).is_none_or(IsZero::is_zero)\n        } else {\n            // Because this is generated as a runtime check, it's not obvious that\n            // it's worth doing if the array is really long. The threshold here\n            // is largely arbitrary, but was picked because as of 2022-07-01 LLVM\n            // fails to const-fold the check in `vec![[1; 32]; n]`\n            // See https://github.com/rust-lang/rust/pull/97581#issuecomment-1166628022\n            // Feel free to tweak if you have better evidence.\n\n            N <= 16 && self.iter().all(IsZero::is_zero)\n        }\n    }"
 }

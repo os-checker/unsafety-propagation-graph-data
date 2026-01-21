@@ -1,5 +1,5 @@
 {
   "name": "ostd::cpu::local::dyn_cpu_local::DynCpuLocalChunk::<ITEM_SIZE>::alloc",
   "span": "ostd/src/cpu/local/dyn_cpu_local.rs:156:5: 159:48",
-  "src": "pub fn alloc<T>(\n        &mut self,\n        init_values: &mut impl FnMut(CpuId) -> T,\n    ) -> Option<CpuLocal<T, DynamicStorage<T>>>"
+  "src": "pub fn alloc<T>(\n        &mut self,\n        init_values: &mut impl FnMut(CpuId) -> T,\n    ) -> Option<CpuLocal<T, DynamicStorage<T>>> {\n        assert!(ITEM_SIZE.is_power_of_two());\n        assert!(size_of::<T>() <= ITEM_SIZE);\n        assert!(align_of::<T>() <= ITEM_SIZE);\n\n        let index = self.bitmap.first_zero()?;\n        self.bitmap.set(index, true);\n        // SAFETY:\n        //  - `index` refers to an available position in the chunk\n        //    for allocating a new CPU-local object.\n        //  - We have checked the size and alignment requirement\n        //    for `T` above.\n        unsafe {\n            let vaddr = self.start_vaddr() + index * ITEM_SIZE;\n            Some(CpuLocal::__new_dynamic(vaddr as *mut T, init_values))\n        }\n    }"
 }

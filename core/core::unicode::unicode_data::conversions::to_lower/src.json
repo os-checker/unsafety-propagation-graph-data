@@ -1,5 +1,5 @@
 {
   "name": "core::unicode::unicode_data::conversions::to_lower",
   "span": "$library/core/src/unicode/unicode_data.rs:763:5: 763:42",
-  "src": "pub fn to_lower(c: char) -> [char; 3]"
+  "src": "pub fn to_lower(c: char) -> [char; 3] {\n        if c.is_ascii() {\n            [(c as u8).to_ascii_lowercase() as char, '\\0', '\\0']\n        } else {\n            LOWERCASE_TABLE\n                .binary_search_by(|&(key, _)| key.cmp(&c))\n                .map(|i| {\n                    let u = LOWERCASE_TABLE[i].1;\n                    char::from_u32(u).map(|c| [c, '\\0', '\\0']).unwrap_or_else(|| {\n                        // SAFETY: Index comes from statically generated table\n                        unsafe { *LOWERCASE_TABLE_MULTI.get_unchecked((u & (INDEX_MASK - 1)) as usize) }\n                    })\n                })\n                .unwrap_or([c, '\\0', '\\0'])\n        }\n    }"
 }

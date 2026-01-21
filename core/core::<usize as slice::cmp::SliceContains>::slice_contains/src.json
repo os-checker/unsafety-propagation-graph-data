@@ -1,5 +1,5 @@
 {
   "name": "core::<usize as slice::cmp::SliceContains>::slice_contains",
   "span": "$library/core/src/slice/cmp.rs:403:17: 403:61",
-  "src": "fn slice_contains(&self, arr: &[$t]) -> bool"
+  "src": "fn slice_contains(&self, arr: &[$t]) -> bool {\n                    // Make our LANE_COUNT 4x the normal lane count (aiming for 128 bit vectors).\n                    // The compiler will nicely unroll it.\n                    const LANE_COUNT: usize = 4 * (128 / (size_of::<$t>() * 8));\n                    // SIMD\n                    let mut chunks = arr.chunks_exact(LANE_COUNT);\n                    for chunk in &mut chunks {\n                        if chunk.iter().fold(false, |acc, x| acc | (*x == *self)) {\n                            return true;\n                        }\n                    }\n                    // Scalar remainder\n                    return chunks.remainder().iter().any(|x| *x == *self);\n                }"
 }

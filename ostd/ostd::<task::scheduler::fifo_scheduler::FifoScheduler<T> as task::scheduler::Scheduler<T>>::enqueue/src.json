@@ -1,5 +1,5 @@
 {
   "name": "ostd::<task::scheduler::fifo_scheduler::FifoScheduler<T> as task::scheduler::Scheduler<T>>::enqueue",
   "span": "ostd/src/task/scheduler/fifo_scheduler.rs:44:5: 44:78",
-  "src": "fn enqueue(&self, runnable: Arc<T>, flags: EnqueueFlags) -> Option<CpuId>"
+  "src": "fn enqueue(&self, runnable: Arc<T>, flags: EnqueueFlags) -> Option<CpuId> {\n        let (still_in_rq, target_cpu) = {\n            let selected_cpu_id = self.select_cpu();\n\n            if let Err(task_cpu_id) = runnable.cpu().set_if_is_none(selected_cpu_id) {\n                debug_assert!(flags != EnqueueFlags::Spawn);\n                (true, task_cpu_id)\n            } else {\n                (false, selected_cpu_id)\n            }\n        };\n\n        let mut rq = self.rq[target_cpu.as_usize()].disable_irq().lock();\n        if still_in_rq && let Err(_) = runnable.cpu().set_if_is_none(target_cpu) {\n            return None;\n        }\n        rq.queue.push_back(runnable);\n\n        // All tasks are important. Do not preempt the current task without good reason.\n        None\n    }"
 }

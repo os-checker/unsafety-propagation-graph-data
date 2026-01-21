@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<T, A>::as_slice",
   "span": "$library/alloc/src/vec/mod.rs:1585:5: 1585:41",
-  "src": "pub const fn as_slice(&self) -> &[T]"
+  "src": "pub const fn as_slice(&self) -> &[T] {\n        // SAFETY: `slice::from_raw_parts` requires pointee is a contiguous, aligned buffer of size\n        // `len` containing properly-initialized `T`s. Data must not be mutated for the returned\n        // lifetime. Further, `len * size_of::<T>` <= `isize::MAX`, and allocation does not\n        // \"wrap\" through overflowing memory addresses.\n        //\n        // * Vec API guarantees that self.buf:\n        //      * contains only properly-initialized items within 0..len\n        //      * is aligned, contiguous, and valid for `len` reads\n        //      * obeys size and address-wrapping constraints\n        //\n        // * We only construct `&mut` references to `self.buf` through `&mut self` methods; borrow-\n        //   check ensures that it is not possible to mutably alias `self.buf` within the\n        //   returned lifetime.\n        unsafe { slice::from_raw_parts(self.as_ptr(), self.len) }\n    }"
 }

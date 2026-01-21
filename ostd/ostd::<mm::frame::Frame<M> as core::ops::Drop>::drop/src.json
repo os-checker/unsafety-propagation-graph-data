@@ -1,5 +1,5 @@
 {
   "name": "ostd::<mm::frame::Frame<M> as core::ops::Drop>::drop",
   "span": "ostd/src/mm/frame/mod.rs:247:5: 247:23",
-  "src": "fn drop(&mut self)"
+  "src": "fn drop(&mut self) {\n        let last_ref_cnt = self.slot().ref_count.fetch_sub(1, Ordering::Release);\n        debug_assert!(last_ref_cnt != 0 && last_ref_cnt != REF_COUNT_UNUSED);\n\n        if last_ref_cnt == 1 {\n            // A fence is needed here with the same reasons stated in the implementation of\n            // `Arc::drop`: <https://doc.rust-lang.org/std/sync/struct.Arc.html#method.drop>.\n            core::sync::atomic::fence(Ordering::Acquire);\n\n            // SAFETY: this is the last reference and is about to be dropped.\n            unsafe { self.slot().drop_last_in_place() };\n\n            allocator::get_global_frame_allocator().dealloc(self.paddr(), PAGE_SIZE);\n        }\n    }"
 }

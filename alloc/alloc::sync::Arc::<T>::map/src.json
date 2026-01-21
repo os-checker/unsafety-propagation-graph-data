@@ -1,5 +1,5 @@
 {
   "name": "alloc::sync::Arc::<T>::map",
   "span": "$library/alloc/src/sync.rs:678:5: 678:65",
-  "src": "pub fn map<U>(this: Self, f: impl FnOnce(&T) -> U) -> Arc<U>"
+  "src": "pub fn map<U>(this: Self, f: impl FnOnce(&T) -> U) -> Arc<U> {\n        if size_of::<T>() == size_of::<U>()\n            && align_of::<T>() == align_of::<U>()\n            && Arc::is_unique(&this)\n        {\n            unsafe {\n                let ptr = Arc::into_raw(this);\n                let value = ptr.read();\n                let mut allocation = Arc::from_raw(ptr.cast::<mem::MaybeUninit<U>>());\n\n                Arc::get_mut_unchecked(&mut allocation).write(f(&value));\n                allocation.assume_init()\n            }\n        } else {\n            Arc::new(f(&*this))\n        }\n    }"
 }

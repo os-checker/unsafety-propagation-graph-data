@@ -1,5 +1,5 @@
 {
   "name": "alloc::sync::Arc::<T>::try_map",
   "span": "$library/alloc/src/sync.rs:718:5: 724:47",
-  "src": "pub fn try_map<R>(\n        this: Self,\n        f: impl FnOnce(&T) -> R,\n    ) -> <R::Residual as Residual<Arc<R::Output>>>::TryType\n    where\n        R: Try,\n        R::Residual: Residual<Arc<R::Output>>,"
+  "src": "pub fn try_map<R>(\n        this: Self,\n        f: impl FnOnce(&T) -> R,\n    ) -> <R::Residual as Residual<Arc<R::Output>>>::TryType\n    where\n        R: Try,\n        R::Residual: Residual<Arc<R::Output>>,\n    {\n        if size_of::<T>() == size_of::<R::Output>()\n            && align_of::<T>() == align_of::<R::Output>()\n            && Arc::is_unique(&this)\n        {\n            unsafe {\n                let ptr = Arc::into_raw(this);\n                let value = ptr.read();\n                let mut allocation = Arc::from_raw(ptr.cast::<mem::MaybeUninit<R::Output>>());\n\n                Arc::get_mut_unchecked(&mut allocation).write(f(&value)?);\n                try { allocation.assume_init() }\n            }\n        } else {\n            try { Arc::new(f(&*this)?) }\n        }\n    }"
 }

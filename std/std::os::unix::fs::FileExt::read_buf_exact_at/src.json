@@ -1,5 +1,5 @@
 {
   "name": "std::os::unix::fs::FileExt::read_buf_exact_at",
   "span": "$library/std/src/os/unix/fs.rs:202:5: 202:96",
-  "src": "fn read_buf_exact_at(&self, mut buf: BorrowedCursor<'_>, mut offset: u64) -> io::Result<()>"
+  "src": "fn read_buf_exact_at(&self, mut buf: BorrowedCursor<'_>, mut offset: u64) -> io::Result<()> {\n        while buf.capacity() > 0 {\n            let prev_written = buf.written();\n            match self.read_buf_at(buf.reborrow(), offset) {\n                Ok(()) => {}\n                Err(e) if e.is_interrupted() => {}\n                Err(e) => return Err(e),\n            }\n            let n = buf.written() - prev_written;\n            offset += n as u64;\n            if n == 0 {\n                return Err(io::Error::READ_EXACT_EOF);\n            }\n        }\n        Ok(())\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::array::drain::Drain::<'l, 'f, T, N, F>::new",
   "span": "$library/core/src/array/drain.rs:19:5: 19:94",
-  "src": "pub(super) const unsafe fn new(array: &'l mut ManuallyDrop<[T; N]>, f: &'f mut F) -> Self"
+  "src": "pub(super) const unsafe fn new(array: &'l mut ManuallyDrop<[T; N]>, f: &'f mut F) -> Self {\n        // dont drop the array, transfers \"ownership\" to Self\n        let ptr: NonNull<T> = NonNull::from_mut(array).cast();\n        // SAFETY:\n        // Adding `slice.len()` to the starting pointer gives a pointer\n        // at the end of `slice`. `end` will never be dereferenced, only checked\n        // for direct pointer equality with `ptr` to check if the drainer is done.\n        unsafe {\n            let end = if T::IS_ZST { null_mut() } else { ptr.as_ptr().add(N) };\n            Self { ptr, end, f, l: PhantomData }\n        }\n    }"
 }

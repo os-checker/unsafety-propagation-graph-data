@@ -1,5 +1,5 @@
 {
   "name": "std::<os::unix::net::ancillary::Messages<'a> as core::iter::Iterator>::next",
   "span": "$library/std/src/os/unix/net/ancillary.rs:546:5: 546:45",
-  "src": "fn next(&mut self) -> Option<Self::Item>"
+  "src": "fn next(&mut self) -> Option<Self::Item> {\n        unsafe {\n            let mut msg: libc::msghdr = zeroed();\n            msg.msg_control = self.buffer.as_ptr() as *mut _;\n            msg.msg_controllen = self.buffer.len() as _;\n\n            let cmsg = if let Some(current) = self.current {\n                libc::CMSG_NXTHDR(&msg, current)\n            } else {\n                libc::CMSG_FIRSTHDR(&msg)\n            };\n\n            let cmsg = cmsg.as_ref()?;\n\n            // Most operating systems, but not Linux or emscripten, return the previous pointer\n            // when its length is zero. Therefore, check if the previous pointer is the same as\n            // the current one.\n            if let Some(current) = self.current {\n                if eq(current, cmsg) {\n                    return None;\n                }\n            }\n\n            self.current = Some(cmsg);\n            let ancillary_result = AncillaryData::try_from_cmsghdr(cmsg);\n            Some(ancillary_result)\n        }\n    }"
 }

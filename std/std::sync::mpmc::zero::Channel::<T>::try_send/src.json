@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::zero::Channel::<T>::try_send",
   "span": "$library/std/src/sync/mpmc/zero.rs:142:5: 142:73",
-  "src": "pub(crate) fn try_send(&self, msg: T) -> Result<(), TrySendError<T>>"
+  "src": "pub(crate) fn try_send(&self, msg: T) -> Result<(), TrySendError<T>> {\n        let token = &mut Token::default();\n        let mut inner = self.inner.lock().unwrap();\n\n        // If there's a waiting receiver, pair up with it.\n        if let Some(operation) = inner.receivers.try_select() {\n            token.zero.0 = operation.packet;\n            drop(inner);\n            unsafe {\n                self.write(token, msg).ok().unwrap();\n            }\n            Ok(())\n        } else if inner.is_disconnected {\n            Err(TrySendError::Disconnected(msg))\n        } else {\n            Err(TrySendError::Full(msg))\n        }\n    }"
 }

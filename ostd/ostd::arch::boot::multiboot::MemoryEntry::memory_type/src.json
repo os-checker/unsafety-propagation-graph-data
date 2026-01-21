@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::boot::multiboot::MemoryEntry::memory_type",
   "span": "ostd/src/arch/x86/boot/multiboot/mod.rs:322:5: 322:46",
-  "src": "fn memory_type(&self) -> MemoryRegionType"
+  "src": "fn memory_type(&self) -> MemoryRegionType {\n        // The multiboot (v1) manual doesn't specify the length of the type field.\n        // Experimental result shows that \"u8\" works. So be it.\n        // SAFETY: The entry can only be constructed from a valid address. The offset is in bounds.\n        let typ_val = unsafe { self.ptr.add(20).cast::<u8>().read_unaligned() };\n\n        // The meaning of the values are however documented clearly by the manual.\n        match typ_val {\n            1 => MemoryRegionType::Usable,\n            2 => MemoryRegionType::Reserved,\n            3 => MemoryRegionType::Reclaimable,\n            4 => MemoryRegionType::NonVolatileSleep,\n            5 => MemoryRegionType::BadMemory,\n            _ => MemoryRegionType::Reserved,\n        }\n    }"
 }

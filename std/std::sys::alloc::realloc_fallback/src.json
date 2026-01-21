@@ -1,5 +1,5 @@
 {
   "name": "std::sys::alloc::realloc_fallback",
   "span": "$library/std/src/sys/alloc/mod.rs:50:1: 55:13",
-  "src": "unsafe fn realloc_fallback(\n    alloc: &System,\n    ptr: *mut u8,\n    old_layout: Layout,\n    new_size: usize,\n) -> *mut u8"
+  "src": "unsafe fn realloc_fallback(\n    alloc: &System,\n    ptr: *mut u8,\n    old_layout: Layout,\n    new_size: usize,\n) -> *mut u8 {\n    // SAFETY: Docs for GlobalAlloc::realloc require this to be valid\n    unsafe {\n        let new_layout = Layout::from_size_align_unchecked(new_size, old_layout.align());\n\n        let new_ptr = GlobalAlloc::alloc(alloc, new_layout);\n        if !new_ptr.is_null() {\n            let size = usize::min(old_layout.size(), new_size);\n            ptr::copy_nonoverlapping(ptr, new_ptr, size);\n            GlobalAlloc::dealloc(alloc, ptr, old_layout);\n        }\n\n        new_ptr\n    }\n}"
 }

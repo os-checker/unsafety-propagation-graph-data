@@ -1,5 +1,5 @@
 {
   "name": "core::iter::traits::iterator::Iterator::rposition",
   "span": "$library/core/src/iter/traits/iterator.rs:3114:5: 3117:63",
-  "src": "fn rposition<P>(&mut self, predicate: P) -> Option<usize>\n    where\n        P: FnMut(Self::Item) -> bool,\n        Self: Sized + ExactSizeIterator + DoubleEndedIterator,"
+  "src": "fn rposition<P>(&mut self, predicate: P) -> Option<usize>\n    where\n        P: FnMut(Self::Item) -> bool,\n        Self: Sized + ExactSizeIterator + DoubleEndedIterator,\n    {\n        // No need for an overflow check here, because `ExactSizeIterator`\n        // implies that the number of elements fits into a `usize`.\n        #[inline]\n        fn check<T>(\n            mut predicate: impl FnMut(T) -> bool,\n        ) -> impl FnMut(usize, T) -> ControlFlow<usize, usize> {\n            move |i, x| {\n                let i = i - 1;\n                if predicate(x) { ControlFlow::Break(i) } else { ControlFlow::Continue(i) }\n            }\n        }\n\n        let n = self.len();\n        self.try_rfold(n, check(predicate)).break_value()\n    }"
 }

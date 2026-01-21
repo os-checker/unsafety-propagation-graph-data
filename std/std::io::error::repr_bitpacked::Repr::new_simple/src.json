@@ -1,5 +1,5 @@
 {
   "name": "std::io::error::repr_bitpacked::Repr::new_simple",
   "span": "$library/std/src/io/error/repr_bitpacked.rs:184:5: 184:54",
-  "src": "pub(super) fn new_simple(kind: ErrorKind) -> Self"
+  "src": "pub(super) fn new_simple(kind: ErrorKind) -> Self {\n        let utagged = ((kind as usize) << 32) | TAG_SIMPLE;\n        // Safety: `TAG_SIMPLE` is not zero, so the result of the `|` is not 0.\n        let res = Self(\n            NonNull::without_provenance(unsafe { NonZeroUsize::new_unchecked(utagged) }),\n            PhantomData,\n        );\n        // quickly smoke-check we encoded the right thing (This generally will\n        // only run in std's tests, unless the user uses -Zbuild-std)\n        debug_assert!(\n            matches!(res.data(), ErrorData::Simple(k) if k == kind),\n            \"repr(simple) encoding failed {:?}\",\n            kind,\n        );\n        res\n    }"
 }

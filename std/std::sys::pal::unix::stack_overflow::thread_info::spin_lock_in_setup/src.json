@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::stack_overflow::thread_info::spin_lock_in_setup",
   "span": "$library/std/src/sys/pal/unix/stack_overflow/thread_info.rs:94:1: 94:51",
-  "src": "fn spin_lock_in_setup(this: usize) -> UnlockOnDrop"
+  "src": "fn spin_lock_in_setup(this: usize) -> UnlockOnDrop {\n    loop {\n        match SPIN_LOCK.compare_exchange(0, this, Ordering::Acquire, Ordering::Relaxed) {\n            Ok(_) => return UnlockOnDrop,\n            Err(owner) if owner == this => {\n                unreachable!(\"the thread info setup logic isn't recursive\")\n            }\n            // This function is always called with the outer lock held,\n            // meaning the only time locking can fail is if another thread has\n            // encountered a stack overflow. Since that will abort the process,\n            // we just stop the current thread until that time. We use `pause`\n            // instead of spinning to avoid priority inversion.\n            // SAFETY: this doesn't have any safety preconditions.\n            Err(_) => drop(unsafe { libc::pause() }),\n        }\n    }\n}"
 }

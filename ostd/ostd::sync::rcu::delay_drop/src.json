@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::rcu::delay_drop",
   "span": "ostd/src/sync/rcu/mod.rs:424:1: 424:88",
-  "src": "unsafe fn delay_drop<P: NonNullPtr + Send>(pointer: NonNull<<P as NonNullPtr>::Target>)"
+  "src": "unsafe fn delay_drop<P: NonNullPtr + Send>(pointer: NonNull<<P as NonNullPtr>::Target>) {\n    struct ForceSend<P: NonNullPtr + Send>(NonNull<<P as NonNullPtr>::Target>);\n    // SAFETY: Sending a raw pointer to another task is safe as long as\n    // the pointer access in another task is safe (guaranteed by the trait\n    // bound `P: Send`).\n    unsafe impl<P: NonNullPtr + Send> Send for ForceSend<P> {}\n\n    let pointer: ForceSend<P> = ForceSend(pointer);\n\n    let rcu_monitor = RCU_MONITOR.get().unwrap();\n    rcu_monitor.after_grace_period(move || {\n        // This is necessary to make the Rust compiler to move the entire\n        // `ForceSend` structure into the closure.\n        let pointer = pointer;\n\n        // SAFETY:\n        // 1. The pointer was previously returned by `into_raw`.\n        // 2. The pointer won't be used anymore since the grace period has\n        //    finished and this is the only time the pointer gets dropped.\n        let p = unsafe { <P as NonNullPtr>::from_raw(pointer.0) };\n        drop(p);\n    });\n}"
 }

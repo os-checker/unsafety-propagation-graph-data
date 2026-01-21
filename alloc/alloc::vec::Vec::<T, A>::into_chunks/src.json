@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<T, A>::into_chunks",
   "span": "$library/alloc/src/vec/mod.rs:3178:5: 3178:67",
-  "src": "pub fn into_chunks<const N: usize>(mut self) -> Vec<[T; N], A>"
+  "src": "pub fn into_chunks<const N: usize>(mut self) -> Vec<[T; N], A> {\n        const {\n            assert!(N != 0, \"chunk size must be greater than zero\");\n        }\n\n        let (len, cap) = (self.len(), self.capacity());\n\n        let len_remainder = len % N;\n        if len_remainder != 0 {\n            self.truncate(len - len_remainder);\n        }\n\n        let cap_remainder = cap % N;\n        if !T::IS_ZST && cap_remainder != 0 {\n            self.buf.shrink_to_fit(cap - cap_remainder);\n        }\n\n        let (ptr, _, _, alloc) = self.into_raw_parts_with_alloc();\n\n        // SAFETY:\n        // - `ptr` and `alloc` were just returned from `self.into_raw_parts_with_alloc()`\n        // - `[T; N]` has the same alignment as `T`\n        // - `size_of::<[T; N]>() * cap / N == size_of::<T>() * cap`\n        // - `len / N <= cap / N` because `len <= cap`\n        // - the allocated memory consists of `len / N` valid values of type `[T; N]`\n        // - `cap / N` fits the size of the allocated memory after shrinking\n        unsafe { Vec::from_raw_parts_in(ptr.cast(), len / N, cap / N, alloc) }\n    }"
 }

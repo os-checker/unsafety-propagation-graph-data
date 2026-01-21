@@ -1,5 +1,5 @@
 {
   "name": "std::<ffi::os_str::OsString as core::convert::From<&T>>::from",
   "span": "$library/std/src/ffi/os_str.rs:623:5: 623:31",
-  "src": "fn from(s: &T) -> OsString"
+  "src": "fn from(s: &T) -> OsString {\n        trait SpecToOsString {\n            fn spec_to_os_string(&self) -> OsString;\n        }\n\n        impl<T: AsRef<OsStr>> SpecToOsString for T {\n            #[inline]\n            default fn spec_to_os_string(&self) -> OsString {\n                self.as_ref().to_os_string()\n            }\n        }\n\n        // Preserve the known-UTF-8 property for strings.\n        macro spec_str($T:ty) {\n            impl SpecToOsString for $T {\n                #[inline]\n                fn spec_to_os_string(&self) -> OsString {\n                    OsString::from(String::from(self))\n                }\n            }\n        }\n        spec_str!(str);\n        spec_str!(String);\n\n        s.spec_to_os_string()\n    }"
 }

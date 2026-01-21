@@ -1,5 +1,5 @@
 {
   "name": "std::panic::get_backtrace_style",
   "span": "$library/std/src/panic.rs:509:1: 509:55",
-  "src": "pub fn get_backtrace_style() -> Option<BacktraceStyle>"
+  "src": "pub fn get_backtrace_style() -> Option<BacktraceStyle> {\n    if !cfg!(feature = \"backtrace\") {\n        // If the `backtrace` feature of this crate isn't enabled quickly return\n        // `Unsupported` so this can be constant propagated all over the place\n        // to optimize away callers.\n        return None;\n    }\n\n    let current = SHOULD_CAPTURE.load(Ordering::Relaxed);\n    if let Some(style) = BacktraceStyle::from_u8(current) {\n        return Some(style);\n    }\n\n    let format = match crate::env::var_os(\"RUST_BACKTRACE\") {\n        Some(x) if &x == \"0\" => BacktraceStyle::Off,\n        Some(x) if &x == \"full\" => BacktraceStyle::Full,\n        Some(_) => BacktraceStyle::Short,\n        None if crate::sys::FULL_BACKTRACE_DEFAULT => BacktraceStyle::Full,\n        None => BacktraceStyle::Off,\n    };\n\n    match SHOULD_CAPTURE.compare_exchange(0, format.as_u8(), Ordering::Relaxed, Ordering::Relaxed) {\n        Ok(_) => Some(format),\n        Err(new) => BacktraceStyle::from_u8(new),\n    }\n}"
 }

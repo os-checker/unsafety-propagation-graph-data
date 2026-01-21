@@ -1,5 +1,5 @@
 {
   "name": "std::<sys::fs::unix::Dir as core::ops::Drop>::drop",
   "span": "$library/std/src/sys/fs/unix.rs:868:5: 868:23",
-  "src": "fn drop(&mut self)"
+  "src": "fn drop(&mut self) {\n        // dirfd isn't supported everywhere\n        #[cfg(not(any(\n            miri,\n            target_os = \"redox\",\n            target_os = \"nto\",\n            target_os = \"vita\",\n            target_os = \"hurd\",\n            target_os = \"espidf\",\n            target_os = \"horizon\",\n            target_os = \"vxworks\",\n            target_os = \"rtems\",\n            target_os = \"nuttx\",\n        )))]\n        {\n            let fd = unsafe { libc::dirfd(self.0) };\n            debug_assert_fd_is_open(fd);\n        }\n        let r = unsafe { libc::closedir(self.0) };\n        assert!(\n            r == 0 || crate::io::Error::last_os_error().is_interrupted(),\n            \"unexpected error during closedir: {:?}\",\n            crate::io::Error::last_os_error()\n        );\n    }"
 }

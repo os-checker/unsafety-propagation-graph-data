@@ -1,5 +1,5 @@
 {
   "name": "alloc::wtf8::Wtf8Buf::from_wide",
   "span": "$library/alloc/src/wtf8/mod.rs:143:5: 143:43",
-  "src": "pub fn from_wide(v: &[u16]) -> Wtf8Buf"
+  "src": "pub fn from_wide(v: &[u16]) -> Wtf8Buf {\n        let mut string = Wtf8Buf::with_capacity(v.len());\n        for item in char::decode_utf16(v.iter().cloned()) {\n            match item {\n                Ok(ch) => string.push_char(ch),\n                Err(surrogate) => {\n                    let surrogate = surrogate.unpaired_surrogate();\n                    // Surrogates are known to be in the code point range.\n                    let code_point = unsafe { CodePoint::from_u32_unchecked(surrogate as u32) };\n                    // The string will now contain an unpaired surrogate.\n                    string.is_known_utf8 = false;\n                    // Skip the WTF-8 concatenation check,\n                    // surrogate pairs are already decoded by decode_utf16\n                    unsafe {\n                        string.push_code_point_unchecked(code_point);\n                    }\n                }\n            }\n        }\n        string\n    }"
 }

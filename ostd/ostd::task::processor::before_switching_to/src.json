@@ -1,5 +1,5 @@
 {
   "name": "ostd::task::processor::before_switching_to",
   "span": "ostd/src/task/processor.rs:95:1: 95:76",
-  "src": "fn before_switching_to(next_task: &Task, irq_guard: &DisabledLocalIrqGuard)"
+  "src": "fn before_switching_to(next_task: &Task, irq_guard: &DisabledLocalIrqGuard) {\n    if let Some(handler) = PRE_SCHEDULE_HANDLER.get() {\n        handler();\n    }\n\n    // Ensure that the mapping to the kernel stack is valid.\n    next_task.kstack.flush_tlb(irq_guard);\n\n    // Ensure that we are not switching to a task that is already running.\n    while next_task\n        .switched_to_cpu\n        .compare_exchange(false, true, Ordering::AcqRel, Ordering::Relaxed)\n        .is_err()\n    {\n        log::warn!(\"Switching to a task already running in the foreground\");\n        core::hint::spin_loop();\n    }\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::num::flt2dec::strategy::dragon::mul_pow10",
   "span": "$library/core/src/num/flt2dec/strategy/dragon.rs:30:1: 30:52",
-  "src": "pub fn mul_pow10(x: &mut Big, n: usize) -> &mut Big"
+  "src": "pub fn mul_pow10(x: &mut Big, n: usize) -> &mut Big {\n    debug_assert!(n < 512);\n    // Save ourself the left shift for the smallest cases.\n    if n < 8 {\n        return x.mul_small(POW10[n & 7]);\n    }\n    // Multiply by the powers of 5 and shift the 2s in at the end.\n    // This keeps the intermediate products smaller and faster.\n    if n & 7 != 0 {\n        x.mul_small(POW10[n & 7] >> (n & 7));\n    }\n    if n & 8 != 0 {\n        x.mul_small(POW10[8] >> 8);\n    }\n    if n & 16 != 0 {\n        x.mul_digits(&POW5TO16);\n    }\n    if n & 32 != 0 {\n        x.mul_digits(&POW5TO32);\n    }\n    if n & 64 != 0 {\n        x.mul_digits(&POW5TO64);\n    }\n    if n & 128 != 0 {\n        x.mul_digits(&POW5TO128);\n    }\n    if n & 256 != 0 {\n        x.mul_digits(&POW5TO256);\n    }\n    x.mul_pow2(n)\n}"
 }

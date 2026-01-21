@@ -1,5 +1,5 @@
 {
   "name": "core::slice::<impl [T]>::element_offset",
   "span": "$library/core/src/slice/mod.rs:4836:5: 4836:63",
-  "src": "pub fn element_offset(&self, element: &T) -> Option<usize>"
+  "src": "pub fn element_offset(&self, element: &T) -> Option<usize> {\n        if T::IS_ZST {\n            panic!(\"elements are zero-sized\");\n        }\n\n        let self_start = self.as_ptr().addr();\n        let elem_start = ptr::from_ref(element).addr();\n\n        let byte_offset = elem_start.wrapping_sub(self_start);\n\n        if !byte_offset.is_multiple_of(size_of::<T>()) {\n            return None;\n        }\n\n        let offset = byte_offset / size_of::<T>();\n\n        if offset < self.len() { Some(offset) } else { None }\n    }"
 }

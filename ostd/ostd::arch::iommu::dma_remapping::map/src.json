@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::iommu::dma_remapping::map",
   "span": "ostd/src/arch/x86/iommu/dma_remapping/mod.rs:83:1: 83:72",
-  "src": "pub unsafe fn map(daddr: Daddr, paddr: Paddr) -> Result<(), IommuError>"
+  "src": "pub unsafe fn map(daddr: Daddr, paddr: Paddr) -> Result<(), IommuError> {\n    let Some(table) = PAGE_TABLE.get() else {\n        return Err(IommuError::NoIommu);\n    };\n\n    // The page table of all devices is the same. So we can use any device ID.\n    let mut locked_table = table.lock();\n    // SAFETY: The safety is upheld by the caller.\n    let res = unsafe { locked_table.map(PciDeviceLocation::zero(), daddr, paddr) };\n\n    match res {\n        Ok(()) => Ok(()),\n        Err(context_table::ContextTableError::InvalidDeviceId) => unreachable!(),\n        Err(context_table::ContextTableError::ModificationError(err)) => {\n            Err(IommuError::ModificationError(err))\n        }\n    }\n}"
 }

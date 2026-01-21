@@ -1,5 +1,5 @@
 {
   "name": "alloc::boxed::Box::<T>::try_map",
   "span": "$library/alloc/src/boxed.rs:444:5: 450:47",
-  "src": "pub fn try_map<R>(\n        this: Self,\n        f: impl FnOnce(T) -> R,\n    ) -> <R::Residual as Residual<Box<R::Output>>>::TryType\n    where\n        R: Try,\n        R::Residual: Residual<Box<R::Output>>,"
+  "src": "pub fn try_map<R>(\n        this: Self,\n        f: impl FnOnce(T) -> R,\n    ) -> <R::Residual as Residual<Box<R::Output>>>::TryType\n    where\n        R: Try,\n        R::Residual: Residual<Box<R::Output>>,\n    {\n        if size_of::<T>() == size_of::<R::Output>() && align_of::<T>() == align_of::<R::Output>() {\n            let (value, allocation) = Box::take(this);\n            try {\n                Box::write(\n                    unsafe {\n                        mem::transmute::<Box<MaybeUninit<T>>, Box<MaybeUninit<R::Output>>>(\n                            allocation,\n                        )\n                    },\n                    f(value)?,\n                )\n            }\n        } else {\n            try { Box::new(f(*this)?) }\n        }\n    }"
 }

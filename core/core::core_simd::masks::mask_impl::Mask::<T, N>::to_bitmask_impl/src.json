@@ -1,5 +1,5 @@
 {
   "name": "core::core_simd::masks::mask_impl::Mask::<T, N>::to_bitmask_impl",
   "span": "$library/core/src/../../portable-simd/crates/core_simd/src/masks/full_masks.rs:143:5: 145:42",
-  "src": "unsafe fn to_bitmask_impl<U: ReverseBits, const M: usize>(self) -> U\n    where\n        LaneCount<M>: SupportedLaneCount,"
+  "src": "unsafe fn to_bitmask_impl<U: ReverseBits, const M: usize>(self) -> U\n    where\n        LaneCount<M>: SupportedLaneCount,\n    {\n        let resized = self.to_int().resize::<M>(T::FALSE);\n\n        // Safety: `resized` is an integer vector with length M, which must match T\n        let bitmask: U = unsafe { core::intrinsics::simd::simd_bitmask(resized) };\n\n        // LLVM assumes bit order should match endianness\n        if cfg!(target_endian = \"big\") {\n            bitmask.reverse_bits(M)\n        } else {\n            bitmask\n        }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::alloc::layout::Layout::pad_to_align",
   "span": "$library/core/src/alloc/layout.rs:319:5: 319:47",
-  "src": "pub const fn pad_to_align(&self) -> Layout"
+  "src": "pub const fn pad_to_align(&self) -> Layout {\n        // This cannot overflow. Quoting from the invariant of Layout:\n        // > `size`, when rounded up to the nearest multiple of `align`,\n        // > must not overflow isize (i.e., the rounded value must be\n        // > less than or equal to `isize::MAX`)\n        let new_size = self.size_rounded_up_to_custom_align(self.align);\n\n        // SAFETY: padded size is guaranteed to not exceed `isize::MAX`.\n        unsafe { Layout::from_size_align_unchecked(new_size, self.align()) }\n    }"
 }

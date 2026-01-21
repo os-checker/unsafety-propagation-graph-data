@@ -1,5 +1,5 @@
 {
   "name": "ostd::irq::top_half::IrqLine::on_active",
   "span": "ostd/src/irq/top_half.rs:78:5: 80:51",
-  "src": "pub fn on_active<F>(&mut self, callback: F)\n    where\n        F: Fn(&TrapFrame) + Sync + Send + 'static,"
+  "src": "pub fn on_active<F>(&mut self, callback: F)\n    where\n        F: Fn(&TrapFrame) + Sync + Send + 'static,\n    {\n        let callback_handle = {\n            let callback_box = Box::new(callback);\n            let callback_addr = core::ptr::from_ref(&*callback_box).addr();\n\n            let mut callbacks = self.inner.callbacks.write();\n            callbacks.push(callback_box);\n\n            CallbackHandle {\n                irq_index: self.inner.index,\n                callback_addr,\n            }\n        };\n\n        self.callbacks.push(callback_handle);\n    }"
 }

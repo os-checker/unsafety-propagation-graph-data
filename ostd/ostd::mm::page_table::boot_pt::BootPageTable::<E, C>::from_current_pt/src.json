@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::boot_pt::BootPageTable::<E, C>::from_current_pt",
   "span": "ostd/src/mm/page_table/boot_pt.rs:134:5: 134:40",
-  "src": "unsafe fn from_current_pt() -> Self"
+  "src": "unsafe fn from_current_pt() -> Self {\n        let root_pt = crate::arch::mm::current_page_table_paddr() / C::BASE_PAGE_SIZE;\n        // Make sure the 2 available bits are not set for firmware page tables.\n        dfs_walk_on_leave::<E, C>(root_pt, C::NR_LEVELS, &mut |pte: &mut E| {\n            let mut prop = pte.prop();\n            prop.priv_flags |= PTE_POINTS_TO_FIRMWARE_PT;\n            pte.set_prop(prop);\n        });\n        Self {\n            root_pt,\n            _pretend_to_use: core::marker::PhantomData,\n        }\n    }"
 }

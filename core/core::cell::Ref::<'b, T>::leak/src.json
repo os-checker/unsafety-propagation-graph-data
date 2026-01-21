@@ -1,5 +1,5 @@
 {
   "name": "core::cell::Ref::<'b, T>::leak",
   "span": "$library/core/src/cell.rs:1792:5: 1792:49",
-  "src": "pub const fn leak(orig: Ref<'b, T>) -> &'b T"
+  "src": "pub const fn leak(orig: Ref<'b, T>) -> &'b T {\n        // By forgetting this Ref we ensure that the borrow counter in the RefCell can't go back to\n        // UNUSED within the lifetime `'b`. Resetting the reference tracking state would require a\n        // unique reference to the borrowed RefCell. No further mutable references can be created\n        // from the original cell.\n        mem::forget(orig.borrow);\n        // SAFETY: after forgetting, we can form a reference for the rest of lifetime `'b`.\n        unsafe { orig.value.as_ref() }\n    }"
 }

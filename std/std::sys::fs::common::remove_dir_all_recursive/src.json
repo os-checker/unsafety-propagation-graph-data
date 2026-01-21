@@ -1,5 +1,5 @@
 {
   "name": "std::sys::fs::common::remove_dir_all_recursive",
   "span": "$library/std/src/sys/fs/common.rs:34:1: 34:59",
-  "src": "fn remove_dir_all_recursive(path: &Path) -> io::Result<()>"
+  "src": "fn remove_dir_all_recursive(path: &Path) -> io::Result<()> {\n    for child in fs::read_dir(path)? {\n        let result: io::Result<()> = try {\n            let child = child?;\n            if child.file_type()?.is_dir() {\n                remove_dir_all_recursive(&child.path())?;\n            } else {\n                fs::remove_file(&child.path())?;\n            }\n        };\n        // ignore internal NotFound errors to prevent race conditions\n        if let Err(err) = &result\n            && err.kind() != io::ErrorKind::NotFound\n        {\n            return result;\n        }\n    }\n    ignore_notfound(fs::remove_dir(path))\n}"
 }

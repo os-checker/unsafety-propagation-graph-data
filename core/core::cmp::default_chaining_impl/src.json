@@ -1,5 +1,5 @@
 {
   "name": "core::cmp::default_chaining_impl",
   "span": "$library/core/src/cmp.rs:1497:1: 1504:21",
-  "src": "const fn default_chaining_impl<T, U>(\n    lhs: &T,\n    rhs: &U,\n    p: impl [const] FnOnce(Ordering) -> bool + [const] Destruct,\n) -> ControlFlow<bool>\nwhere\n    T: [const] PartialOrd<U> + PointeeSized,\n    U: PointeeSized,"
+  "src": "const fn default_chaining_impl<T, U>(\n    lhs: &T,\n    rhs: &U,\n    p: impl [const] FnOnce(Ordering) -> bool + [const] Destruct,\n) -> ControlFlow<bool>\nwhere\n    T: [const] PartialOrd<U> + PointeeSized,\n    U: PointeeSized,\n{\n    // It's important that this only call `partial_cmp` once, not call `eq` then\n    // one of the relational operators.  We don't want to `bcmp`-then-`memcp` a\n    // `String`, for example, or similarly for other data structures (#108157).\n    match <T as PartialOrd<U>>::partial_cmp(lhs, rhs) {\n        Some(Equal) => ControlFlow::Continue(()),\n        Some(c) => ControlFlow::Break(p(c)),\n        None => ControlFlow::Break(false),\n    }\n}"
 }

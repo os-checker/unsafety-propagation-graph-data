@@ -1,5 +1,5 @@
 {
   "name": "core::<iter::adapters::enumerate::Enumerate<I> as iter::traits::double_ended::DoubleEndedIterator>::rfold",
   "span": "$library/core/src/iter/adapters/enumerate.rs:221:5: 223:45",
-  "src": "fn rfold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc\n    where\n        Fold: FnMut(Acc, Self::Item) -> Acc,"
+  "src": "fn rfold<Acc, Fold>(self, init: Acc, fold: Fold) -> Acc\n    where\n        Fold: FnMut(Acc, Self::Item) -> Acc,\n    {\n        // Can safely add and subtract the count, as `ExactSizeIterator` promises\n        // that the number of elements fits into a `usize`.\n        fn enumerate<T, Acc>(\n            mut count: usize,\n            mut fold: impl FnMut(Acc, (usize, T)) -> Acc,\n        ) -> impl FnMut(Acc, T) -> Acc {\n            move |acc, item| {\n                count -= 1;\n                fold(acc, (count, item))\n            }\n        }\n\n        let count = self.count + self.iter.len();\n        self.iter.rfold(init, enumerate(count, fold))\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::fmt::num::imp::<impl fmt::Display for isize>::fmt",
   "span": "$library/core/src/fmt/num.rs:156:13: 156:69",
-  "src": "fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result"
+  "src": "fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n                #[cfg(not(feature = \"optimize_for_size\"))]\n                {\n                    const MAX_DEC_N: usize = $Unsigned::MAX.ilog10() as usize + 1;\n                    // Buffer decimals for self with right alignment.\n                    let mut buf = [MaybeUninit::<u8>::uninit(); MAX_DEC_N];\n\n                    // SAFETY: `buf` is always big enough to contain all the digits.\n                    unsafe { f.pad_integral(*self >= 0, \"\", self.unsigned_abs()._fmt(&mut buf)) }\n                }\n                #[cfg(feature = \"optimize_for_size\")]\n                {\n                    // Lossless conversion (with as) is asserted at the top of\n                    // this macro.\n                    return ${concat($fmt_fn, _small)}(self.unsigned_abs() as $T, *self >= 0, f);\n                }\n            }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::cell::lazy::LazyCell::<T, F>::force",
   "span": "$library/core/src/cell/lazy.rs:138:5: 138:46",
-  "src": "pub fn force(this: &LazyCell<T, F>) -> &T"
+  "src": "pub fn force(this: &LazyCell<T, F>) -> &T {\n        // SAFETY:\n        // This invalidates any mutable references to the data. The resulting\n        // reference lives either until the end of the borrow of `this` (in the\n        // initialized case) or is invalidated in `really_init` (in the\n        // uninitialized case; `really_init` will create and return a fresh reference).\n        let state = unsafe { &*this.state.get() };\n        match state {\n            State::Init(data) => data,\n            // SAFETY: The state is uninitialized.\n            State::Uninit(_) => unsafe { LazyCell::really_init(this) },\n            State::Poisoned => panic_poisoned(),\n        }\n    }"
 }

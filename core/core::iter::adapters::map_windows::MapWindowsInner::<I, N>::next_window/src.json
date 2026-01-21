@@ -1,5 +1,5 @@
 {
   "name": "core::iter::adapters::map_windows::MapWindowsInner::<I, N>::next_window",
   "span": "$library/core/src/iter/adapters/map_windows.rs:70:5: 70:55",
-  "src": "fn next_window(&mut self) -> Option<&[I::Item; N]>"
+  "src": "fn next_window(&mut self) -> Option<&[I::Item; N]> {\n        let iter = self.iter.as_mut()?;\n        match self.buffer {\n            // It is the first time to advance. We collect\n            // the first `N` items from `self.iter` to initialize `self.buffer`.\n            None => self.buffer = Buffer::try_from_iter(iter),\n            Some(ref mut buffer) => match iter.next() {\n                None => {\n                    // Fuse the inner iterator since it yields a `None`.\n                    self.iter.take();\n                    self.buffer.take();\n                }\n                // Advance the iterator. We first call `next` before changing our buffer\n                // at all. This means that if `next` panics, our invariant is upheld and\n                // our `Drop` impl drops the correct elements.\n                Some(item) => buffer.push(item),\n            },\n        }\n        self.buffer.as_ref().map(Buffer::as_array_ref)\n    }"
 }

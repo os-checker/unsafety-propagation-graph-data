@@ -1,5 +1,5 @@
 {
   "name": "std::sys::net::connection::socket::TcpListener::accept",
   "span": "$library/std/src/sys/net/connection/socket/mod.rs:596:5: 596:64",
-  "src": "pub fn accept(&self) -> io::Result<(TcpStream, SocketAddr)>"
+  "src": "pub fn accept(&self) -> io::Result<(TcpStream, SocketAddr)> {\n        // The `accept` function will fill in the storage with the address,\n        // so we don't need to zero it here.\n        // reference: https://linux.die.net/man/2/accept4\n        let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();\n        let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;\n        let sock = self.inner.accept(storage.as_mut_ptr() as *mut _, &mut len)?;\n        let addr = unsafe { socket_addr_from_c(storage.as_ptr(), len as usize)? };\n        Ok((TcpStream { inner: sock }, addr))\n    }"
 }

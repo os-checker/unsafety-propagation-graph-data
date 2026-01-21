@@ -1,5 +1,5 @@
 {
   "name": "core::num::flt2dec::strategy::grisu::format_shortest",
   "span": "$library/core/src/num/flt2dec/strategy/grisu.rs:454:1: 457:40",
-  "src": "pub fn format_shortest<'a>(\n    d: &Decoded,\n    buf: &'a mut [MaybeUninit<u8>],\n) -> (/*digits*/ &'a [u8], /*exp*/ i16)"
+  "src": "pub fn format_shortest<'a>(\n    d: &Decoded,\n    buf: &'a mut [MaybeUninit<u8>],\n) -> (/*digits*/ &'a [u8], /*exp*/ i16) {\n    use crate::num::flt2dec::strategy::dragon::format_shortest as fallback;\n    // SAFETY: The borrow checker is not smart enough to let us use `buf`\n    // in the second branch, so we launder the lifetime here. But we only re-use\n    // `buf` if `format_shortest_opt` returned `None` so this is okay.\n    match format_shortest_opt(d, unsafe { &mut *(buf as *mut _) }) {\n        Some(ret) => ret,\n        None => fallback(d, buf),\n    }\n}"
 }

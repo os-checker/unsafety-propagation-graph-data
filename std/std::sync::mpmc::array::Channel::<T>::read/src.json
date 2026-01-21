@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::array::Channel::<T>::read",
   "span": "$library/std/src/sync/mpmc/array.rs:288:5: 288:73",
-  "src": "pub(crate) unsafe fn read(&self, token: &mut Token) -> Result<T, ()>"
+  "src": "pub(crate) unsafe fn read(&self, token: &mut Token) -> Result<T, ()> {\n        if token.array.slot.is_null() {\n            // The channel is disconnected.\n            return Err(());\n        }\n\n        // Read the message from the slot and update the stamp.\n        let msg = unsafe {\n            let slot: &Slot<T> = &*(token.array.slot as *const Slot<T>);\n\n            let msg = slot.msg.get().read().assume_init();\n            slot.stamp.store(token.array.stamp, Ordering::Release);\n            msg\n        };\n\n        // Wake a sleeping sender.\n        self.senders.notify();\n        Ok(msg)\n    }"
 }

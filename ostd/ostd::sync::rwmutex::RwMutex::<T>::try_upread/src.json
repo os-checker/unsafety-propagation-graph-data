@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::rwmutex::RwMutex::<T>::try_upread",
   "span": "ostd/src/sync/rwmutex.rs:185:5: 185:71",
-  "src": "pub fn try_upread(&self) -> Option<RwMutexUpgradeableGuard<'_, T>>"
+  "src": "pub fn try_upread(&self) -> Option<RwMutexUpgradeableGuard<'_, T>> {\n        let lock = self.lock.fetch_or(UPGRADEABLE_READER, Acquire) & (WRITER | UPGRADEABLE_READER);\n        if lock == 0 {\n            return Some(RwMutexUpgradeableGuard { inner: self });\n        } else if lock == WRITER {\n            self.lock.fetch_sub(UPGRADEABLE_READER, Release);\n        }\n        None\n    }"
 }

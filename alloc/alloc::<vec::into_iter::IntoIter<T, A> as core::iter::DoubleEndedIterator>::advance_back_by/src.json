@@ -1,5 +1,5 @@
 {
   "name": "alloc::<vec::into_iter::IntoIter<T, A> as core::iter::DoubleEndedIterator>::advance_back_by",
   "span": "$library/alloc/src/vec/into_iter.rs:405:5: 405:74",
-  "src": "fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>>"
+  "src": "fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {\n        let step_size = self.len().min(n);\n        if T::IS_ZST {\n            // SAFETY: same as for advance_by()\n            self.end = self.end.wrapping_byte_sub(step_size);\n        } else {\n            // SAFETY: same as for advance_by()\n            self.end = unsafe { self.end.sub(step_size) };\n        }\n        let to_drop = ptr::slice_from_raw_parts_mut(self.end as *mut T, step_size);\n        // SAFETY: same as for advance_by()\n        unsafe {\n            ptr::drop_in_place(to_drop);\n        }\n        NonZero::new(n - step_size).map_or(Ok(()), Err)\n    }"
 }

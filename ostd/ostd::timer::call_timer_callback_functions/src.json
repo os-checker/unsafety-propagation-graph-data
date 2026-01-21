@@ -1,5 +1,5 @@
 {
   "name": "ostd::timer::call_timer_callback_functions",
   "span": "ostd/src/timer/mod.rs:45:1: 45:59",
-  "src": "pub(crate) fn call_timer_callback_functions(_: &TrapFrame)"
+  "src": "pub(crate) fn call_timer_callback_functions(_: &TrapFrame) {\n    let irq_guard = irq::disable_local();\n\n    if irq_guard.current_cpu() == CpuId::bsp() {\n        jiffies::ELAPSED.fetch_add(1, Ordering::Relaxed);\n    }\n\n    let callbacks_guard = INTERRUPT_CALLBACKS.get_with(&irq_guard);\n    for callback in callbacks_guard.borrow().iter() {\n        (callback)();\n    }\n    drop(callbacks_guard);\n}"
 }

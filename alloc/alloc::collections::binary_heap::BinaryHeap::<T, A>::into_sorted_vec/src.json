@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::binary_heap::BinaryHeap::<T, A>::into_sorted_vec",
   "span": "$library/alloc/src/collections/binary_heap/mod.rs:711:5: 711:50",
-  "src": "pub fn into_sorted_vec(mut self) -> Vec<T, A>"
+  "src": "pub fn into_sorted_vec(mut self) -> Vec<T, A> {\n        let mut end = self.len();\n        while end > 1 {\n            end -= 1;\n            // SAFETY: `end` goes from `self.len() - 1` to 1 (both included),\n            //  so it's always a valid index to access.\n            //  It is safe to access index 0 (i.e. `ptr`), because\n            //  1 <= end < self.len(), which means self.len() >= 2.\n            unsafe {\n                let ptr = self.data.as_mut_ptr();\n                ptr::swap(ptr, ptr.add(end));\n            }\n            // SAFETY: `end` goes from `self.len() - 1` to 1 (both included) so:\n            //  0 < 1 <= end <= self.len() - 1 < self.len()\n            //  Which means 0 < end and end < self.len().\n            unsafe { self.sift_down_range(0, end) };\n        }\n        self.into_vec()\n    }"
 }

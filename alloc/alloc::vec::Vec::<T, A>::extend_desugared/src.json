@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<T, A>::extend_desugared",
   "span": "$library/alloc/src/vec/mod.rs:3820:5: 3820:75",
-  "src": "fn extend_desugared<I: Iterator<Item = T>>(&mut self, mut iterator: I)"
+  "src": "fn extend_desugared<I: Iterator<Item = T>>(&mut self, mut iterator: I) {\n        // This is the case for a general iterator.\n        //\n        // This function should be the moral equivalent of:\n        //\n        //      for item in iterator {\n        //          self.push(item);\n        //      }\n        while let Some(element) = iterator.next() {\n            let len = self.len();\n            if len == self.capacity() {\n                let (lower, _) = iterator.size_hint();\n                self.reserve(lower.saturating_add(1));\n            }\n            unsafe {\n                ptr::write(self.as_mut_ptr().add(len), element);\n                // Since next() executes user code which can panic we have to bump the length\n                // after each step.\n                // NB can't overflow since we would have had to alloc the address space\n                self.set_len(len + 1);\n            }\n        }\n    }"
 }

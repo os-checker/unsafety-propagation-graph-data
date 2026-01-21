@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::symbolize::gimli::elf::<impl backtrace_rs::symbolize::gimli::Mapping>::new",
   "span": "$library/std/src/../../backtrace/src/symbolize/gimli/elf.rs:27:5: 27:47",
-  "src": "pub fn new(path: &Path) -> Option<Mapping>"
+  "src": "pub fn new(path: &Path) -> Option<Mapping> {\n        let map = super::mmap(path)?;\n        Mapping::mk_or_other(map, |map, stash| {\n            let object = Object::parse(map)?;\n\n            // Try to locate an external debug file using the build ID.\n            if let Some(path_debug) = object.build_id().and_then(locate_build_id) {\n                if let Some(mapping) = Mapping::new_debug(path, path_debug, None) {\n                    return Some(Either::A(mapping));\n                }\n            }\n\n            // Try to locate an external debug file using the GNU debug link section.\n            if let Some((path_debug, crc)) = object.gnu_debuglink_path(path) {\n                if let Some(mapping) = Mapping::new_debug(path, path_debug, Some(crc)) {\n                    return Some(Either::A(mapping));\n                }\n            }\n\n            let dwp = Mapping::load_dwarf_package(path, stash);\n\n            Context::new(stash, object, None, dwp).map(Either::B)\n        })\n    }"
 }

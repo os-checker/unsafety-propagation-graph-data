@@ -1,5 +1,5 @@
 {
   "name": "alloc::boxed::thin::WithHeader::<H>::header",
   "span": "$library/alloc/src/boxed/thin.rs:401:5: 401:31",
-  "src": "fn header(&self) -> *mut H"
+  "src": "fn header(&self) -> *mut H {\n        //  Safety:\n        //  - At least `size_of::<H>()` bytes are allocated ahead of the pointer.\n        //  - We know that H will be aligned because the middle pointer is aligned to the greater\n        //    of the alignment of the header and the data and the header size includes the padding\n        //    needed to align the header. Subtracting the header size from the aligned data pointer\n        //    will always result in an aligned header pointer, it just may not point to the\n        //    beginning of the allocation.\n        let hp = unsafe { self.0.as_ptr().sub(Self::header_size()) as *mut H };\n        debug_assert!(hp.is_aligned());\n        hp\n    }"
 }

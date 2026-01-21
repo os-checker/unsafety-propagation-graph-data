@@ -1,5 +1,5 @@
 {
   "name": "ostd::task::kernel_stack::KernelStack::new_with_guard_page",
   "span": "ostd/src/task/kernel_stack.rs:63:5: 63:56",
-  "src": "pub(super) fn new_with_guard_page() -> Result<Self>"
+  "src": "pub(super) fn new_with_guard_page() -> Result<Self> {\n        let pages = FrameAllocOptions::new()\n            .zeroed(false)\n            .alloc_segment_with(KERNEL_STACK_SIZE / PAGE_SIZE, |_| KernelStackMeta)?;\n        let prop = PageProperty {\n            flags: PageFlags::RW,\n            cache: CachePolicy::Writeback,\n            priv_flags: PrivilegedPageFlags::empty(),\n        };\n        let new_kvirt_area = KVirtArea::map_frames(\n            KERNEL_STACK_SIZE + 4 * PAGE_SIZE,\n            2 * PAGE_SIZE,\n            pages.into_iter(),\n            prop,\n        );\n        let mapped_start = new_kvirt_area.range().start + 2 * PAGE_SIZE;\n        let mapped_end = mapped_start + KERNEL_STACK_SIZE;\n        Ok(Self {\n            kvirt_area: new_kvirt_area,\n            tlb_coherent: AtomicCpuSet::new(CpuSet::new_empty()),\n            end_vaddr: mapped_end,\n        })\n    }"
 }

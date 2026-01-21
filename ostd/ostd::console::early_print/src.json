@@ -1,5 +1,5 @@
 {
   "name": "ostd::console::early_print",
   "span": "ostd/src/console.rs:23:1: 23:36",
-  "src": "pub fn early_print(args: Arguments)"
+  "src": "pub fn early_print(args: Arguments) {\n    #[cfg(target_arch = \"x86_64\")]\n    crate::arch::if_tdx_enabled!({\n        // Hold the lock to prevent the logs from interleaving.\n        let _guard = STDOUT.lock();\n        tdx_guest::print(args);\n    } else {\n        STDOUT.lock().write_fmt(args).unwrap();\n    });\n    #[cfg(not(target_arch = \"x86_64\"))]\n    STDOUT.lock().write_fmt(args).unwrap();\n}"
 }

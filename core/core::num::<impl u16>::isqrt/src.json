@@ -1,5 +1,5 @@
 {
   "name": "core::num::<impl u16>::isqrt",
   "span": "$library/core/src/num/uint_macros.rs:3437:9: 3437:41",
-  "src": "pub const fn isqrt(self) -> Self"
+  "src": "pub const fn isqrt(self) -> Self {\n            let result = crate::num::int_sqrt::$ActualT(self as $ActualT) as $SelfT;\n\n            // Inform the optimizer what the range of outputs is. If testing\n            // `core` crashes with no panic message and a `num::int_sqrt::u*`\n            // test failed, it's because your edits caused these assertions or\n            // the assertions in `fn isqrt` of `nonzero.rs` to become false.\n            //\n            // SAFETY: Integer square root is a monotonically nondecreasing\n            // function, which means that increasing the input will never\n            // cause the output to decrease. Thus, since the input for unsigned\n            // integers is bounded by `[0, <$ActualT>::MAX]`, sqrt(n) will be\n            // bounded by `[sqrt(0), sqrt(<$ActualT>::MAX)]`.\n            unsafe {\n                const MAX_RESULT: $SelfT = crate::num::int_sqrt::$ActualT(<$ActualT>::MAX) as $SelfT;\n                crate::hint::assert_unchecked(result <= MAX_RESULT);\n            }\n\n            result\n        }"
 }

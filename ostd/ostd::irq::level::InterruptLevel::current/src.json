@@ -1,5 +1,5 @@
 {
   "name": "ostd::irq::level::InterruptLevel::current",
   "span": "ostd/src/irq/level.rs:36:5: 36:29",
-  "src": "pub fn current() -> Self"
+  "src": "pub fn current() -> Self {\n        // Parameters about the encoding of INTERRUPT_LEVEL\n        const LEVEL_VAL_OFFSET: u8 = 1;\n        const CPU_PRIV_MASK: u8 = 1 << 0;\n\n        let raw_level = INTERRUPT_LEVEL.load();\n        let level = raw_level >> LEVEL_VAL_OFFSET;\n        match level {\n            0 => Self::L0,\n            1 => {\n                let cpu_priv_at_irq = if (raw_level & CPU_PRIV_MASK) == 0 {\n                    PrivilegeLevel::Kernel\n                } else {\n                    PrivilegeLevel::User\n                };\n                Self::L1(cpu_priv_at_irq)\n            }\n            2 => Self::L2,\n            _ => unreachable!(\"level must between 0 and 2 (inclusive)\"),\n        }\n    }"
 }

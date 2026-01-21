@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::tlb::TlbFlushOp::perform_on_current",
   "span": "ostd/src/mm/tlb.rs:187:5: 187:37",
-  "src": "pub fn perform_on_current(&self)"
+  "src": "pub fn perform_on_current(&self) {\n        use crate::arch::mm::{\n            tlb_flush_addr, tlb_flush_addr_range, tlb_flush_all_excluding_global,\n        };\n        match self.0 {\n            Self::FLUSH_ALL_VAL => tlb_flush_all_excluding_global(),\n            addr => {\n                let start = addr & !Self::FLUSH_RANGE_NPAGES_MASK;\n                let num_pages = addr & Self::FLUSH_RANGE_NPAGES_MASK;\n\n                debug_assert!((addr & (PAGE_SIZE - 1)) < FLUSH_ALL_PAGES_THRESHOLD);\n                debug_assert!(num_pages != 0);\n\n                if num_pages == 1 {\n                    tlb_flush_addr(start);\n                } else {\n                    tlb_flush_addr_range(&(start..start + num_pages * PAGE_SIZE));\n                }\n            }\n        }\n    }"
 }

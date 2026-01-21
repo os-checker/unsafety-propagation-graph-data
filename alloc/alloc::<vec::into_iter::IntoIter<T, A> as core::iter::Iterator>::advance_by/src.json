@@ -1,5 +1,5 @@
 {
   "name": "alloc::<vec::into_iter::IntoIter<T, A> as core::iter::Iterator>::advance_by",
   "span": "$library/alloc/src/vec/into_iter.rs:245:5: 245:69",
-  "src": "fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>>"
+  "src": "fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {\n        let step_size = self.len().min(n);\n        let to_drop = ptr::slice_from_raw_parts_mut(self.ptr.as_ptr(), step_size);\n        if T::IS_ZST {\n            // See `next` for why we sub `end` here.\n            self.end = self.end.wrapping_byte_sub(step_size);\n        } else {\n            // SAFETY: the min() above ensures that step_size is in bounds\n            self.ptr = unsafe { self.ptr.add(step_size) };\n        }\n        // SAFETY: the min() above ensures that step_size is in bounds\n        unsafe {\n            ptr::drop_in_place(to_drop);\n        }\n        NonZero::new(n - step_size).map_or(Ok(()), Err)\n    }"
 }

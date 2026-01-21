@@ -1,5 +1,5 @@
 {
   "name": "core::cell::RefMut::<'b, T>::filter_map",
   "span": "$library/core/src/cell.rs:1877:5: 1879:45",
-  "src": "pub fn filter_map<U: ?Sized, F>(mut orig: RefMut<'b, T>, f: F) -> Result<RefMut<'b, U>, Self>\n    where\n        F: FnOnce(&mut T) -> Option<&mut U>,"
+  "src": "pub fn filter_map<U: ?Sized, F>(mut orig: RefMut<'b, T>, f: F) -> Result<RefMut<'b, U>, Self>\n    where\n        F: FnOnce(&mut T) -> Option<&mut U>,\n    {\n        // SAFETY: function holds onto an exclusive reference for the duration\n        // of its call through `orig`, and the pointer is only de-referenced\n        // inside of the function call never allowing the exclusive reference to\n        // escape.\n        match f(&mut *orig) {\n            Some(value) => {\n                Ok(RefMut { value: NonNull::from(value), borrow: orig.borrow, marker: PhantomData })\n            }\n            None => Err(orig),\n        }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace::Backtrace::create",
   "span": "$library/std/src/backtrace.rs:325:5: 325:38",
-  "src": "fn create(ip: usize) -> Backtrace"
+  "src": "fn create(ip: usize) -> Backtrace {\n        let _lock = lock();\n        let mut frames = Vec::new();\n        let mut actual_start = None;\n        set_image_base();\n        unsafe {\n            backtrace_rs::trace_unsynchronized(|frame| {\n                frames.push(BacktraceFrame {\n                    frame: RawFrame::Actual(frame.clone()),\n                    symbols: Vec::new(),\n                });\n                if frame.symbol_address().addr() == ip && actual_start.is_none() {\n                    actual_start = Some(frames.len());\n                }\n                true\n            });\n        }\n\n        // If no frames came out assume that this is an unsupported platform\n        // since `backtrace` doesn't provide a way of learning this right now,\n        // and this should be a good enough approximation.\n        let inner = if frames.is_empty() {\n            Inner::Unsupported\n        } else {\n            Inner::Captured(LazyLock::new(lazy_resolve(Capture {\n                actual_start: actual_start.unwrap_or(0),\n                frames,\n            })))\n        };\n\n        Backtrace { inner }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::os::error_string",
   "span": "$library/std/src/sys/pal/unix/os.rs:114:1: 114:42",
-  "src": "pub fn error_string(errno: i32) -> String"
+  "src": "pub fn error_string(errno: i32) -> String {\n    unsafe extern \"C\" {\n        #[cfg_attr(\n            all(\n                any(\n                    target_os = \"linux\",\n                    target_os = \"hurd\",\n                    target_env = \"newlib\",\n                    target_os = \"cygwin\"\n                ),\n                not(target_env = \"ohos\")\n            ),\n            link_name = \"__xpg_strerror_r\"\n        )]\n        fn strerror_r(errnum: c_int, buf: *mut c_char, buflen: libc::size_t) -> c_int;\n    }\n\n    let mut buf = [0 as c_char; TMPBUF_SZ];\n\n    let p = buf.as_mut_ptr();\n    unsafe {\n        if strerror_r(errno as c_int, p, buf.len()) < 0 {\n            panic!(\"strerror_r failure\");\n        }\n\n        let p = p as *const _;\n        // We can't always expect a UTF-8 environment. When we don't get that luxury,\n        // it's better to give a low-quality error message than none at all.\n        String::from_utf8_lossy(CStr::from_ptr(p).to_bytes()).into()\n    }\n}"
 }

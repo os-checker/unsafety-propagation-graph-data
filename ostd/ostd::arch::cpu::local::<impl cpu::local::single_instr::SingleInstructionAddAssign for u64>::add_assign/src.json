@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::cpu::local::<impl cpu::local::single_instr::SingleInstructionAddAssign for u64>::add_assign",
   "span": "ostd/src/arch/x86/cpu/local.rs:22:13: 22:59",
-  "src": "unsafe fn add_assign(offset: usize, val: Self)"
+  "src": "unsafe fn add_assign(offset: usize, val: Self) {\n                // SAFETY:\n                // 1. `gs` points to the CPU-local region (global invariant).\n                // 2. `offset` represents the offset of a CPU-local variable\n                //    (upheld by the caller).\n                // 3. The variable is only accessible in the current CPU, is\n                //    a scalar, and is never borrowed, so it is valid to\n                //    read/write using a single instruction (upheld by the\n                //    caller).\n                unsafe {\n                    core::arch::asm!(\n                        concat!(\"add gs:[{0}], {1\", $register_format, \"}\"),\n                        in(reg) offset,\n                        in($inout_type) val,\n                        options(nostack),\n                    );\n                }\n            }"
 }

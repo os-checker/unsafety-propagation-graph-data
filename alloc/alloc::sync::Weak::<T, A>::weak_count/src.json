@@ -1,5 +1,5 @@
 {
   "name": "alloc::sync::Weak::<T, A>::weak_count",
   "span": "$library/alloc/src/sync.rs:3303:5: 3303:38",
-  "src": "pub fn weak_count(&self) -> usize"
+  "src": "pub fn weak_count(&self) -> usize {\n        if let Some(inner) = self.inner() {\n            let weak = inner.weak.load(Acquire);\n            let strong = inner.strong.load(Relaxed);\n            if strong == 0 {\n                0\n            } else {\n                // Since we observed that there was at least one strong pointer\n                // after reading the weak count, we know that the implicit weak\n                // reference (present whenever any strong references are alive)\n                // was still around when we observed the weak count, and can\n                // therefore safely subtract it.\n                weak - 1\n            }\n        } else {\n            0\n        }\n    }"
 }

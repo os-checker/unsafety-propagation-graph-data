@@ -1,5 +1,5 @@
 {
   "name": "std::sys::thread_local::abort_on_dtor_unwind",
   "span": "$library/std/src/sys/thread_local/mod.rs:207:1: 207:42",
-  "src": "fn abort_on_dtor_unwind(f: impl FnOnce())"
+  "src": "fn abort_on_dtor_unwind(f: impl FnOnce()) {\n    // Using a guard like this is lower cost.\n    let guard = DtorUnwindGuard;\n    f();\n    core::mem::forget(guard);\n\n    struct DtorUnwindGuard;\n    impl Drop for DtorUnwindGuard {\n        #[inline]\n        fn drop(&mut self) {\n            // This is not terribly descriptive, but it doesn't need to be as we'll\n            // already have printed a panic message at this point.\n            rtabort!(\"thread local panicked on drop\");\n        }\n    }\n}"
 }

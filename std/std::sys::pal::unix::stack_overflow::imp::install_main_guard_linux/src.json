@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::stack_overflow::imp::install_main_guard_linux",
   "span": "$library/std/src/sys/pal/unix/stack_overflow.rs:431:5: 431:81",
-  "src": "unsafe fn install_main_guard_linux(page_size: usize) -> Option<Range<usize>>"
+  "src": "unsafe fn install_main_guard_linux(page_size: usize) -> Option<Range<usize>> {\n        // Linux doesn't allocate the whole stack right away, and\n        // the kernel has its own stack-guard mechanism to fault\n        // when growing too close to an existing mapping. If we map\n        // our own guard, then the kernel starts enforcing a rather\n        // large gap above that, rendering much of the possible\n        // stack space useless. See #43052.\n        //\n        // Instead, we'll just note where we expect rlimit to start\n        // faulting, so our handler can report \"stack overflow\", and\n        // trust that the kernel's own stack guard will work.\n        let stackptr = stack_start_aligned(page_size)?;\n        let stackaddr = stackptr.addr();\n        Some(stackaddr - page_size..stackaddr)\n    }"
 }

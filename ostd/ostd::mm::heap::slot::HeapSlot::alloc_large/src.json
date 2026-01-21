@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::heap::slot::HeapSlot::alloc_large",
   "span": "ostd/src/mm/heap/slot.rs:82:5: 82:64",
-  "src": "pub fn alloc_large(size: usize) -> Result<Self, AllocError>"
+  "src": "pub fn alloc_large(size: usize) -> Result<Self, AllocError> {\n        assert_eq!(size % PAGE_SIZE, 0);\n        let nframes = size / PAGE_SIZE;\n        let segment = FrameAllocOptions::new()\n            .zeroed(false)\n            .alloc_segment_with(nframes, |_| LargeAllocFrameMeta)\n            .map_err(|_| {\n                log::error!(\"Failed to allocate a large slot\");\n                AllocError\n            })?;\n\n        let paddr_range = segment.into_raw();\n        let vaddr = paddr_to_vaddr(paddr_range.start);\n\n        Ok(Self {\n            addr: NonNull::new(vaddr as *mut u8).unwrap(),\n            info: SlotInfo::LargeSlot(size),\n        })\n    }"
 }

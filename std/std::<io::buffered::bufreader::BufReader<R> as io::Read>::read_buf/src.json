@@ -1,5 +1,5 @@
 {
   "name": "std::<io::buffered::bufreader::BufReader<R> as io::Read>::read_buf",
   "span": "$library/std/src/io/buffered/bufreader.rs:343:5: 343:77",
-  "src": "fn read_buf(&mut self, mut cursor: BorrowedCursor<'_>) -> io::Result<()>"
+  "src": "fn read_buf(&mut self, mut cursor: BorrowedCursor<'_>) -> io::Result<()> {\n        // If we don't have any buffered data and we're doing a massive read\n        // (larger than our internal buffer), bypass our internal buffer\n        // entirely.\n        if self.buf.pos() == self.buf.filled() && cursor.capacity() >= self.capacity() {\n            self.discard_buffer();\n            return self.inner.read_buf(cursor);\n        }\n\n        let prev = cursor.written();\n\n        let mut rem = self.fill_buf()?;\n        rem.read_buf(cursor.reborrow())?; // actually never fails\n\n        self.consume(cursor.written() - prev); //slice impl of read_buf known to never unfill buf\n\n        Ok(())\n    }"
 }

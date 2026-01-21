@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::trap::syscall::init_on_cpu",
   "span": "ostd/src/arch/x86/trap/syscall.rs:44:1: 44:35",
-  "src": "pub(super) unsafe fn init_on_cpu()"
+  "src": "pub(super) unsafe fn init_on_cpu() {\n    // We now assume that all x86-64 CPUs should support the `syscall` and `sysret` instructions.\n    // Otherwise, we should check `has_extensions(IsaExtensions::SYSCALL)` here.\n\n    // Flags to clear on syscall.\n    //\n    // Linux 5.0 uses TF|DF|IF|IOPL|AC|NT. Reference:\n    // <https://github.com/torvalds/linux/blob/v5.0/arch/x86/kernel/cpu/common.c#L1559-L1562>\n    const RFLAGS_MASK: u64 = 0x47700;\n\n    // SAFETY: The segment selectors are correctly initialized (as upheld by the caller), and the\n    // entry point and flags to clear are also correctly set, so enabling the `syscall` and\n    // `sysret` instructions is safe.\n    unsafe {\n        LStar::write(VirtAddr::new(syscall_entry as *const () as usize as u64));\n        SFMask::write(RFlags::from_bits(RFLAGS_MASK).unwrap());\n\n        // Enable the `syscall` and `sysret` instructions.\n        Efer::update(|efer| {\n            efer.insert(EferFlags::SYSTEM_CALL_EXTENSIONS);\n        });\n    }\n}"
 }

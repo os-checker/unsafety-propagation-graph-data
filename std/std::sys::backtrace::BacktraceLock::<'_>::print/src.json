@@ -1,5 +1,5 @@
 {
   "name": "std::sys::backtrace::BacktraceLock::<'_>::print",
   "span": "$library/std/src/sys/backtrace.rs:23:5: 23:90",
-  "src": "pub(crate) fn print(&mut self, w: &mut dyn Write, format: PrintFmt) -> io::Result<()>"
+  "src": "pub(crate) fn print(&mut self, w: &mut dyn Write, format: PrintFmt) -> io::Result<()> {\n        // There are issues currently linking libbacktrace into tests, and in\n        // general during std's own unit tests we're not testing this path. In\n        // test mode immediately return here to optimize away any references to the\n        // libbacktrace symbols\n        if cfg!(test) {\n            return Ok(());\n        }\n\n        struct DisplayBacktrace {\n            format: PrintFmt,\n        }\n        impl fmt::Display for DisplayBacktrace {\n            fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {\n                // SAFETY: the backtrace lock is held\n                unsafe { _print_fmt(fmt, self.format) }\n            }\n        }\n        write!(w, \"{}\", DisplayBacktrace { format })\n    }"
 }

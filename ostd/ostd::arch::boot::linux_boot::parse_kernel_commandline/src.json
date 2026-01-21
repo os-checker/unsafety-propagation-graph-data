@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::boot::linux_boot::parse_kernel_commandline",
   "span": "ostd/src/arch/x86/boot/linux_boot/mod.rs:46:1: 46:70",
-  "src": "fn parse_kernel_commandline(boot_params: &BootParams) -> Option<&str>"
+  "src": "fn parse_kernel_commandline(boot_params: &BootParams) -> Option<&str> {\n    if boot_params.ext_cmd_line_ptr != 0 {\n        // TODO: We can support the above 4GiB command line after setting up\n        // linear mappings. By far, we cannot log the error because the serial is\n        // not up. Proceed as if there was no command line.\n        return None;\n    }\n\n    if boot_params.hdr.cmd_line_ptr == 0 || boot_params.hdr.cmdline_size == 0 {\n        return None;\n    }\n\n    let cmdline_ptr = paddr_to_vaddr(boot_params.hdr.cmd_line_ptr as usize);\n    let cmdline_len = boot_params.hdr.cmdline_size as usize;\n    // SAFETY: The command line is safe to read because of the contract with the loader.\n    let cmdline = unsafe { core::slice::from_raw_parts(cmdline_ptr as *const u8, cmdline_len) };\n\n    // Now, unfortunately, there are silent errors because the serial is not up.\n    core::ffi::CStr::from_bytes_until_nul(cmdline)\n        .ok()?\n        .to_str()\n        .ok()\n}"
 }

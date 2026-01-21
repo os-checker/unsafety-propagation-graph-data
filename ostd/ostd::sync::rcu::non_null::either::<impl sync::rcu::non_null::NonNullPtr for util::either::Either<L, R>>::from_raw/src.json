@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::rcu::non_null::either::<impl sync::rcu::non_null::NonNullPtr for util::either::Either<L, R>>::from_raw",
   "span": "ostd/src/sync/rcu/non_null/either.rs:33:5: 33:59",
-  "src": "unsafe fn from_raw(ptr: NonNull<Self::Target>) -> Self"
+  "src": "unsafe fn from_raw(ptr: NonNull<Self::Target>) -> Self {\n        // SAFETY: The caller ensures that the pointer comes from `Self::into_raw`, which\n        // guarantees that `real_ptr` is a non-null pointer.\n        let (is_right, real_ptr) = unsafe { remove_bits(ptr, 1 << Self::ALIGN_BITS) };\n\n        if is_right == 0 {\n            // SAFETY: `Self::into_raw` guarantees that `real_ptr` comes from `L::into_raw`. Other\n            // safety requirements are upheld by the caller.\n            Either::Left(unsafe { L::from_raw(real_ptr.cast()) })\n        } else {\n            // SAFETY: `Self::into_raw` guarantees that `real_ptr` comes from `R::into_raw`. Other\n            // safety requirements are upheld by the caller.\n            Either::Right(unsafe { R::from_raw(real_ptr.cast()) })\n        }\n    }"
 }

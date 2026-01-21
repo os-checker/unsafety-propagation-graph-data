@@ -1,5 +1,5 @@
 {
   "name": "std::sys::env::unix::env",
   "span": "$library/std/src/sys/env/unix.rs:58:1: 58:20",
-  "src": "pub fn env() -> Env"
+  "src": "pub fn env() -> Env {\n    unsafe {\n        let _guard = env_read_lock();\n        let mut environ = *environ();\n        let mut result = Vec::new();\n        if !environ.is_null() {\n            while !(*environ).is_null() {\n                if let Some(key_value) = parse(CStr::from_ptr(*environ).to_bytes()) {\n                    result.push(key_value);\n                }\n                environ = environ.add(1);\n            }\n        }\n        return Env::new(result);\n    }\n\n    fn parse(input: &[u8]) -> Option<(OsString, OsString)> {\n        // Strategy (copied from glibc): Variable name and value are separated\n        // by an ASCII equals sign '='. Since a variable name must not be\n        // empty, allow variable names starting with an equals sign. Skip all\n        // malformed lines.\n        if input.is_empty() {\n            return None;\n        }\n        let pos = memchr::memchr(b'=', &input[1..]).map(|p| p + 1);\n        pos.map(|p| {\n            (\n                OsStringExt::from_vec(input[..p].to_vec()),\n                OsStringExt::from_vec(input[p + 1..].to_vec()),\n            )\n        })\n    }\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::sys::net::connection::socket::unix::Socket::connect",
   "span": "$library/std/src/sys/net/connection/socket/unix.rs:149:5: 149:63",
-  "src": "pub fn connect(&self, addr: &SocketAddr) -> io::Result<()>"
+  "src": "pub fn connect(&self, addr: &SocketAddr) -> io::Result<()> {\n        let (addr, len) = socket_addr_to_c(addr);\n        loop {\n            let result = unsafe { libc::connect(self.as_raw_fd(), addr.as_ptr(), len) };\n            if result.is_minus_one() {\n                let err = crate::sys::os::errno();\n                match err {\n                    libc::EINTR => continue,\n                    libc::EISCONN => return Ok(()),\n                    _ => return Err(io::Error::from_raw_os_error(err)),\n                }\n            }\n            return Ok(());\n        }\n    }"
 }

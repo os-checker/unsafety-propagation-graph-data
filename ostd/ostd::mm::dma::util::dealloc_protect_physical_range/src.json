@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::dma::util::dealloc_protect_physical_range",
   "span": "ostd/src/mm/dma/util.rs:202:1: 202:66",
-  "src": "unsafe fn dealloc_protect_physical_range(pa_range: &Range<Paddr>)"
+  "src": "unsafe fn dealloc_protect_physical_range(pa_range: &Range<Paddr>) {\n    debug_assert!(pa_range.start.is_multiple_of(PAGE_SIZE));\n    debug_assert!(pa_range.end.is_multiple_of(PAGE_SIZE));\n    let pfn_range = pa_range.start / PAGE_SIZE..pa_range.end / PAGE_SIZE;\n\n    let mut refcnts = PADDR_REF_CNTS.lock();\n    let _removed_frames = refcnts.remove(&pfn_range);\n    #[cfg(target_arch = \"x86_64\")]\n    crate::arch::if_tdx_enabled!({\n        for removed in _removed_frames {\n            // SAFETY:\n            //  - The provided physical address is page aligned.\n            //  - The provided physical address range is in bounds.\n            //  - All of the physical pages are untyped memory.\n            unsafe {\n                crate::arch::tdx_guest::protect_gpa_tdvm_call(\n                    removed.start * PAGE_SIZE,\n                    removed.len() * PAGE_SIZE,\n                )\n                .expect(\"failed to protect the DMA segment in TDX guest\");\n            }\n        }\n    });\n}"
 }

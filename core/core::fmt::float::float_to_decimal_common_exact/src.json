@@ -1,5 +1,5 @@
 {
   "name": "core::fmt::float::float_to_decimal_common_exact",
   "span": "$library/core/src/fmt/float.rs:30:1: 37:32",
-  "src": "fn float_to_decimal_common_exact<T>(\n    fmt: &mut Formatter<'_>,\n    num: &T,\n    sign: flt2dec::Sign,\n    precision: u16,\n) -> Result\nwhere\n    T: flt2dec::DecodableFloat,"
+  "src": "fn float_to_decimal_common_exact<T>(\n    fmt: &mut Formatter<'_>,\n    num: &T,\n    sign: flt2dec::Sign,\n    precision: u16,\n) -> Result\nwhere\n    T: flt2dec::DecodableFloat,\n{\n    let mut buf: [MaybeUninit<u8>; 1024] = [MaybeUninit::uninit(); 1024]; // enough for f32 and f64\n    let mut parts: [MaybeUninit<numfmt::Part<'_>>; 4] = [MaybeUninit::uninit(); 4];\n    let formatted = flt2dec::to_exact_fixed_str(\n        flt2dec::strategy::grisu::format_exact,\n        *num,\n        sign,\n        precision.into(),\n        &mut buf,\n        &mut parts,\n    );\n    // SAFETY: `to_exact_fixed_str` and `format_exact` produce only ASCII characters.\n    unsafe { fmt.pad_formatted_parts(&formatted) }\n}"
 }

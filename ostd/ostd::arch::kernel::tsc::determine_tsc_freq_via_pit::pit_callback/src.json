@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::kernel::tsc::determine_tsc_freq_via_pit::pit_callback",
   "span": "ostd/src/arch/x86/kernel/tsc.rs:61:5: 61:45",
-  "src": "fn pit_callback(_trap_frame: &TrapFrame)"
+  "src": "fn pit_callback(_trap_frame: &TrapFrame) {\n        static IN_TIME: AtomicU64 = AtomicU64::new(0);\n        static TSC_FIRST_COUNT: AtomicU64 = AtomicU64::new(0);\n        // Set a certain times of callbacks to calculate the frequency\n        const CALLBACK_TIMES: u64 = TIMER_FREQ / 10;\n\n        let tsc_current_count = crate::arch::read_tsc();\n\n        if IN_TIME.load(Ordering::Relaxed) < CALLBACK_TIMES || IS_FINISH.load(Ordering::Acquire) {\n            if IN_TIME.load(Ordering::Relaxed) == 0 {\n                TSC_FIRST_COUNT.store(tsc_current_count, Ordering::Relaxed);\n            }\n            IN_TIME.fetch_add(1, Ordering::Relaxed);\n            return;\n        }\n\n        let tsc_first_count = TSC_FIRST_COUNT.load(Ordering::Relaxed);\n        let freq = (tsc_current_count - tsc_first_count) * (TIMER_FREQ / CALLBACK_TIMES);\n        FREQUENCY.store(freq, Ordering::Release);\n        IS_FINISH.store(true, Ordering::Release);\n    }"
 }

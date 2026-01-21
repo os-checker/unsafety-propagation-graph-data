@@ -1,5 +1,5 @@
 {
   "name": "core::ffi::c_str::CStr::from_bytes_until_nul",
   "span": "$library/core/src/ffi/c_str.rs:298:5: 298:93",
-  "src": "pub const fn from_bytes_until_nul(bytes: &[u8]) -> Result<&CStr, FromBytesUntilNulError>"
+  "src": "pub const fn from_bytes_until_nul(bytes: &[u8]) -> Result<&CStr, FromBytesUntilNulError> {\n        let nul_pos = memchr::memchr(0, bytes);\n        match nul_pos {\n            Some(nul_pos) => {\n                // FIXME(const-hack) replace with range index\n                // SAFETY: nul_pos + 1 <= bytes.len()\n                let subslice = unsafe { crate::slice::from_raw_parts(bytes.as_ptr(), nul_pos + 1) };\n                // SAFETY: We know there is a nul byte at nul_pos, so this slice\n                // (ending at the nul byte) is a well-formed C string.\n                Ok(unsafe { CStr::from_bytes_with_nul_unchecked(subslice) })\n            }\n            None => Err(FromBytesUntilNulError(())),\n        }\n    }"
 }

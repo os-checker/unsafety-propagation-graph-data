@@ -1,5 +1,5 @@
 {
   "name": "std::sys::net::connection::socket::unix::Socket::set_timeout",
   "span": "$library/std/src/sys/net/connection/socket/unix.rs:383:5: 383:90",
-  "src": "pub fn set_timeout(&self, dur: Option<Duration>, kind: libc::c_int) -> io::Result<()>"
+  "src": "pub fn set_timeout(&self, dur: Option<Duration>, kind: libc::c_int) -> io::Result<()> {\n        let timeout = match dur {\n            Some(dur) => {\n                if dur.as_secs() == 0 && dur.subsec_nanos() == 0 {\n                    return Err(io::Error::ZERO_TIMEOUT);\n                }\n\n                let secs = if dur.as_secs() > libc::time_t::MAX as u64 {\n                    libc::time_t::MAX\n                } else {\n                    dur.as_secs() as libc::time_t\n                };\n                let mut timeout = libc::timeval {\n                    tv_sec: secs,\n                    tv_usec: dur.subsec_micros() as libc::suseconds_t,\n                };\n                if timeout.tv_sec == 0 && timeout.tv_usec == 0 {\n                    timeout.tv_usec = 1;\n                }\n                timeout\n            }\n            None => libc::timeval { tv_sec: 0, tv_usec: 0 },\n        };\n        unsafe { setsockopt(self, libc::SOL_SOCKET, kind, timeout) }\n    }"
 }

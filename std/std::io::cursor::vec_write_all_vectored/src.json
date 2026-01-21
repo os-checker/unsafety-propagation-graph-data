@@ -1,5 +1,5 @@
 {
   "name": "std::io::cursor::vec_write_all_vectored",
   "span": "$library/std/src/io/cursor.rs:559:1: 565:18",
-  "src": "fn vec_write_all_vectored<A>(\n    pos_mut: &mut u64,\n    vec: &mut Vec<u8, A>,\n    bufs: &[IoSlice<'_>],\n) -> io::Result<usize>\nwhere\n    A: Allocator,"
+  "src": "fn vec_write_all_vectored<A>(\n    pos_mut: &mut u64,\n    vec: &mut Vec<u8, A>,\n    bufs: &[IoSlice<'_>],\n) -> io::Result<usize>\nwhere\n    A: Allocator,\n{\n    // For safety reasons, we don't want this sum to overflow ever.\n    // If this saturates, the reserve should panic to avoid any unsound writing.\n    let buf_len = bufs.iter().fold(0usize, |a, b| a.saturating_add(b.len()));\n    let mut pos = reserve_and_pad(pos_mut, vec, buf_len)?;\n\n    // Write the buf then progress the vec forward if necessary\n    // Safety: we have ensured that the capacity is available\n    // and that all bytes get written up to the last pos\n    unsafe {\n        for buf in bufs {\n            pos = vec_write_all_unchecked(pos, vec, buf);\n        }\n        if pos > vec.len() {\n            vec.set_len(pos);\n        }\n    }\n\n    // Bump us forward\n    *pos_mut += buf_len as u64;\n    Ok(buf_len)\n}"
 }

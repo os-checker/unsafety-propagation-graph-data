@@ -1,5 +1,5 @@
 {
   "name": "ostd::io::io_mem::allocator::IoMemAllocatorBuilder::reserve",
   "span": "ostd/src/io/io_mem/allocator.rs:108:5: 112:26",
-  "src": "pub(crate) fn reserve(\n        &self,\n        range: Range<usize>,\n        cache_policy: CachePolicy,\n    ) -> IoMem<Sensitive>"
+  "src": "pub(crate) fn reserve(\n        &self,\n        range: Range<usize>,\n        cache_policy: CachePolicy,\n    ) -> IoMem<Sensitive> {\n        debug!(\n            \"Try to reserve security-sensitive MMIO range: {:#x?} with cache policy: {:?}\",\n            range, cache_policy\n        );\n\n        self.remove(range.start..range.end);\n\n        // SAFETY:\n        // 1. The `IoMemAllocatorBuilder` instance is constructed after the\n        //    kernel page table is activated.\n        // 2. The range falls within I/O memory area and does not overlap\n        //    with other system devices' I/O memory.\n        unsafe { IoMem::new(range, PageFlags::RW, cache_policy) }\n    }"
 }

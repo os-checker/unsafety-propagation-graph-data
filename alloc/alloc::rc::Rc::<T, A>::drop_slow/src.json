@@ -1,5 +1,5 @@
 {
   "name": "alloc::rc::Rc::<T, A>::drop_slow",
   "span": "$library/alloc/src/rc.rs:387:5: 387:35",
-  "src": "unsafe fn drop_slow(&mut self)"
+  "src": "unsafe fn drop_slow(&mut self) {\n        // Reconstruct the \"strong weak\" pointer and drop it when this\n        // variable goes out of scope. This ensures that the memory is\n        // deallocated even if the destructor of `T` panics.\n        let _weak = Weak { ptr: self.ptr, alloc: &self.alloc };\n\n        // Destroy the contained object.\n        // We cannot use `get_mut_unchecked` here, because `self.alloc` is borrowed.\n        unsafe {\n            ptr::drop_in_place(&mut (*self.ptr.as_ptr()).value);\n        }\n    }"
 }

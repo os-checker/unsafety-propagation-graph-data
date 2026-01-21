@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::cpu::cpuid::cpuid",
   "span": "ostd/src/arch/x86/cpu/cpuid.rs:26:1: 26:61",
-  "src": "pub fn cpuid(leaf: u32, subleaf: u32) -> Option<CpuidResult>"
+  "src": "pub fn cpuid(leaf: u32, subleaf: u32) -> Option<CpuidResult> {\n    fn raw_cpuid(leaf: u32, subleaf: u32) -> CpuidResult {\n        // SAFETY: It is safe to execute the CPUID instruction.\n        unsafe { core::arch::x86_64::__cpuid_count(leaf, subleaf) }\n    }\n\n    let max_leaf = if leaf < Leaf::HypervisorBase as u32 {\n        // Standard leaves (0x0000_0000 - 0x3FFF_FFFF)\n        *MAX_LEAF.call_once(|| raw_cpuid(Leaf::Base as u32, 0).eax)\n    } else if leaf < Leaf::ExtBase as u32 {\n        // Hypervisor leaves (0x4000_0000 - 0x7FFF_FFFF)\n        *MAX_HYPERVISOR_LEAF.call_once(|| raw_cpuid(Leaf::HypervisorBase as u32, 0).eax)\n    } else {\n        // Extended leaves (0x8000_0000 - 0xFFFF_FFFF)\n        *MAX_EXTENDED_LEAF.call_once(|| raw_cpuid(Leaf::ExtBase as u32, 0).eax)\n    };\n\n    if leaf > max_leaf {\n        None\n    } else {\n        Some(raw_cpuid(leaf, subleaf))\n    }\n}"
 }

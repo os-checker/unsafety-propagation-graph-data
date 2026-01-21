@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::boot::smp::wake_up_aps_via_mailbox",
   "span": "ostd/src/arch/x86/boot/smp.rs:217:1: 217:49",
-  "src": "unsafe fn wake_up_aps_via_mailbox(num_cpus: u32)"
+  "src": "unsafe fn wake_up_aps_via_mailbox(num_cpus: u32) {\n    use acpi::platform::wakeup_aps;\n\n    use crate::arch::kernel::acpi::AcpiMemoryHandler;\n\n    // The symbols are defined in `ap_boot.S`.\n    unsafe extern \"C\" {\n        fn ap_boot_from_real_mode();\n        fn ap_boot_from_long_mode();\n    }\n\n    let offset =\n        ap_boot_from_long_mode as *const () as usize - ap_boot_from_real_mode as *const () as usize;\n\n    let acpi_tables = get_acpi_tables().unwrap();\n    for ap_num in 1..num_cpus {\n        wakeup_aps(\n            &acpi_tables,\n            AcpiMemoryHandler {},\n            ap_num,\n            (AP_BOOT_START_PA + offset) as u64,\n            1000,\n        )\n        .unwrap();\n    }\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::cpu::context::enable_essential_features",
   "span": "ostd/src/arch/x86/cpu/context/mod.rs:650:1: 650:51",
-  "src": "pub(in crate::arch) fn enable_essential_features()"
+  "src": "pub(in crate::arch) fn enable_essential_features() {\n    use super::extension::{IsaExtensions, has_extensions};\n\n    if has_extensions(IsaExtensions::XSAVE) {\n        XSTATE_MAX_FEATURES.call_once(|| super::cpuid::query_xstate_max_features().unwrap());\n        XSAVE_AREA_SIZE.call_once(|| {\n            let xsave_area_size = super::cpuid::query_xsave_area_size().unwrap() as usize;\n            assert!(xsave_area_size <= MAX_XSAVE_AREA_SIZE);\n            xsave_area_size\n        });\n    }\n\n    // We now assume that all x86-64 CPUs should have the FPU. Otherwise, we should check\n    // `has_extensions(IsaExtensions::FPU)` here.\n    {\n        let mut cr0 = Cr0::read();\n        cr0.remove(Cr0Flags::TASK_SWITCHED | Cr0Flags::EMULATE_COPROCESSOR);\n\n        unsafe {\n            Cr0::write(cr0);\n            // Flush out any pending x87 state.\n            core::arch::asm!(\"fninit\");\n        }\n    }\n}"
 }

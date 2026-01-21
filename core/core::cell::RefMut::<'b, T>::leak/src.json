@@ -1,5 +1,5 @@
 {
   "name": "core::cell::RefMut::<'b, T>::leak",
   "span": "$library/core/src/cell.rs:2011:5: 2011:60",
-  "src": "pub const fn leak(mut orig: RefMut<'b, T>) -> &'b mut T"
+  "src": "pub const fn leak(mut orig: RefMut<'b, T>) -> &'b mut T {\n        // By forgetting this BorrowRefMut we ensure that the borrow counter in the RefCell can't\n        // go back to UNUSED within the lifetime `'b`. Resetting the reference tracking state would\n        // require a unique reference to the borrowed RefCell. No further references can be created\n        // from the original cell within that lifetime, making the current borrow the only\n        // reference for the remaining lifetime.\n        mem::forget(orig.borrow);\n        // SAFETY: after forgetting, we can form a reference for the rest of lifetime `'b`.\n        unsafe { orig.value.as_mut() }\n    }"
 }

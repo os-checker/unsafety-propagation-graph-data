@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::segment::Segment::<M>::from_unused",
   "span": "ostd/src/mm/frame/segment.rs:85:5: 87:30",
-  "src": "pub fn from_unused<F>(range: Range<Paddr>, mut metadata_fn: F) -> Result<Self, GetFrameError>\n    where\n        F: FnMut(Paddr) -> M,"
+  "src": "pub fn from_unused<F>(range: Range<Paddr>, mut metadata_fn: F) -> Result<Self, GetFrameError>\n    where\n        F: FnMut(Paddr) -> M,\n    {\n        if !range.start.is_multiple_of(PAGE_SIZE) || !range.end.is_multiple_of(PAGE_SIZE) {\n            return Err(GetFrameError::NotAligned);\n        }\n        if range.end > super::max_paddr() {\n            return Err(GetFrameError::OutOfBound);\n        }\n        assert!(range.start < range.end);\n        // Construct a segment early to recycle previously forgotten frames if\n        // the subsequent operations fails in the middle.\n        let mut segment = Self {\n            range: range.start..range.start,\n            _marker: core::marker::PhantomData,\n        };\n        for paddr in range.step_by(PAGE_SIZE) {\n            let frame = Frame::<M>::from_unused(paddr, metadata_fn(paddr))?;\n            let _ = ManuallyDrop::new(frame);\n            segment.range.end = paddr + PAGE_SIZE;\n        }\n        Ok(segment)\n    }"
 }

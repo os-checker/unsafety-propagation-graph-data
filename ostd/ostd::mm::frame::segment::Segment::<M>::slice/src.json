@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::segment::Segment::<M>::slice",
   "span": "ostd/src/mm/frame/segment.rs:158:5: 158:54",
-  "src": "pub fn slice(&self, range: &Range<usize>) -> Self"
+  "src": "pub fn slice(&self, range: &Range<usize>) -> Self {\n        assert!(range.start.is_multiple_of(PAGE_SIZE) && range.end.is_multiple_of(PAGE_SIZE));\n        let start = self.range.start + range.start;\n        let end = self.range.start + range.end;\n        assert!(start <= end && end <= self.range.end);\n\n        for paddr in (start..end).step_by(PAGE_SIZE) {\n            // SAFETY: We already have reference counts for the frames since\n            // for each frame there would be a forgotten handle when creating\n            // the `Segment` object.\n            unsafe { inc_frame_ref_count(paddr) };\n        }\n\n        Self {\n            range: start..end,\n            _marker: core::marker::PhantomData,\n        }\n    }"
 }

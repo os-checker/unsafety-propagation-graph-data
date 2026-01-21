@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::array::Channel::<T>::write",
   "span": "$library/std/src/sync/mpmc/array.rs:196:5: 196:82",
-  "src": "pub(crate) unsafe fn write(&self, token: &mut Token, msg: T) -> Result<(), T>"
+  "src": "pub(crate) unsafe fn write(&self, token: &mut Token, msg: T) -> Result<(), T> {\n        // If there is no slot, the channel is disconnected.\n        if token.array.slot.is_null() {\n            return Err(msg);\n        }\n\n        // Write the message into the slot and update the stamp.\n        unsafe {\n            let slot: &Slot<T> = &*(token.array.slot as *const Slot<T>);\n            slot.msg.get().write(MaybeUninit::new(msg));\n            slot.stamp.store(token.array.stamp, Ordering::Release);\n        }\n\n        // Wake a sleeping receiver.\n        self.receivers.notify();\n        Ok(())\n    }"
 }

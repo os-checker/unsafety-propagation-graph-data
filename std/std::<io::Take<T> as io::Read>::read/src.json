@@ -1,5 +1,5 @@
 {
   "name": "std::<io::Take<T> as io::Read>::read",
   "span": "$library/std/src/io/mod.rs:3053:5: 3053:56",
-  "src": "fn read(&mut self, buf: &mut [u8]) -> Result<usize>"
+  "src": "fn read(&mut self, buf: &mut [u8]) -> Result<usize> {\n        // Don't call into inner reader at all at EOF because it may still block\n        if self.limit == 0 {\n            return Ok(0);\n        }\n\n        let max = cmp::min(buf.len() as u64, self.limit) as usize;\n        let n = self.inner.read(&mut buf[..max])?;\n        assert!(n as u64 <= self.limit, \"number of read bytes exceeds limit\");\n        self.limit -= n as u64;\n        Ok(n)\n    }"
 }

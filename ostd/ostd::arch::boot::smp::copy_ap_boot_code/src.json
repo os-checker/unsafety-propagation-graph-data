@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::boot::smp::copy_ap_boot_code",
   "span": "ostd/src/arch/x86/boot/smp.rs:154:1: 154:30",
-  "src": "unsafe fn copy_ap_boot_code()"
+  "src": "unsafe fn copy_ap_boot_code() {\n    let ap_boot_start = __ap_boot_start as *const () as *const u8;\n    let len = __ap_boot_end as *const () as usize - __ap_boot_start as *const () as usize;\n\n    // SAFETY:\n    // 1. The source memory region is valid for reading because it's inside the kernel text.\n    // 2. The destination memory region is valid for writing because the caller upholds this.\n    // 3. The memory is aligned because the alignment of `u8` is 1.\n    // 4. The two memory regions do not overlap because the kernel text is isolated with the AP\n    //    boot region.\n    unsafe {\n        core::ptr::copy_nonoverlapping(\n            ap_boot_start,\n            crate::mm::paddr_to_vaddr(AP_BOOT_START_PA) as *mut u8,\n            len,\n        );\n    }\n}"
 }

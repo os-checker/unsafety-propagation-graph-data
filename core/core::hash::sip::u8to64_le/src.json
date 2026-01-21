@@ -1,5 +1,5 @@
 {
   "name": "core::hash::sip::u8to64_le",
   "span": "$library/core/src/hash/sip.rs:120:1: 120:65",
-  "src": "unsafe fn u8to64_le(buf: &[u8], start: usize, len: usize) -> u64"
+  "src": "unsafe fn u8to64_le(buf: &[u8], start: usize, len: usize) -> u64 {\n    debug_assert!(len < 8);\n    let mut i = 0; // current byte index (from LSB) in the output u64\n    let mut out = 0;\n    if i + 3 < len {\n        // SAFETY: `i` cannot be greater than `len`, and the caller must guarantee\n        // that the index start..start+len is in bounds.\n        out = unsafe { load_int_le!(buf, start + i, u32) } as u64;\n        i += 4;\n    }\n    if i + 1 < len {\n        // SAFETY: same as above.\n        out |= (unsafe { load_int_le!(buf, start + i, u16) } as u64) << (i * 8);\n        i += 2\n    }\n    if i < len {\n        // SAFETY: same as above.\n        out |= (unsafe { *buf.get_unchecked(start + i) } as u64) << (i * 8);\n        i += 1;\n    }\n    //FIXME(fee1-dead): use debug_assert_eq\n    debug_assert!(i == len);\n    out\n}"
 }

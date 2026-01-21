@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::iommu::interrupt_remapping::init",
   "span": "ostd/src/arch/x86/iommu/interrupt_remapping/mod.rs:52:1: 52:21",
-  "src": "pub(super) fn init()"
+  "src": "pub(super) fn init() {\n    let mut iommu_regs = IOMMU_REGS.get().unwrap().lock();\n\n    // Check if interrupt remapping is supported\n    let extend_cap = iommu_regs.read_extended_capability();\n    if !extend_cap.flags().contains(ExtendedCapabilityFlags::IR) {\n        warn!(\"[IOMMU] Interrupt remapping not supported\");\n        return;\n    }\n\n    // Create interrupt remapping table\n    REMAPPING_TABLE.call_once(IntRemappingTable::new);\n    iommu_regs.enable_interrupt_remapping(REMAPPING_TABLE.get().unwrap());\n\n    info!(\"[IOMMU] Interrupt remapping enabled\");\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::sys::process::unix::unix::Process::try_wait",
   "span": "$library/std/src/sys/process/unix/unix.rs:1020:5: 1020:65",
-  "src": "pub fn try_wait(&mut self) -> io::Result<Option<ExitStatus>>"
+  "src": "pub fn try_wait(&mut self) -> io::Result<Option<ExitStatus>> {\n        if let Some(status) = self.status {\n            return Ok(Some(status));\n        }\n        #[cfg(target_os = \"linux\")]\n        if let Some(pid_fd) = self.pidfd.as_ref() {\n            let status = pid_fd.try_wait()?;\n            if let Some(status) = status {\n                self.status = Some(status)\n            }\n            return Ok(status);\n        }\n        let mut status = 0 as c_int;\n        let pid = cvt(unsafe { libc::waitpid(self.pid, &mut status, libc::WNOHANG) })?;\n        if pid == 0 {\n            Ok(None)\n        } else {\n            self.status = Some(ExitStatus::new(status));\n            Ok(Some(ExitStatus::new(status)))\n        }\n    }"
 }

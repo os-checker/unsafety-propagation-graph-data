@@ -1,5 +1,5 @@
 {
   "name": "core::slice::index::into_slice_range",
   "span": "$library/core/src/slice/index.rs:1039:1: 1042:23",
-  "src": "pub(crate) fn into_slice_range(\n    len: usize,\n    (start, end): (ops::Bound<usize>, ops::Bound<usize>),\n) -> ops::Range<usize>"
+  "src": "pub(crate) fn into_slice_range(\n    len: usize,\n    (start, end): (ops::Bound<usize>, ops::Bound<usize>),\n) -> ops::Range<usize> {\n    let end = match end {\n        ops::Bound::Included(end) if end >= len => slice_index_fail(0, end, len),\n        // Cannot overflow because `end < len` implies `end < usize::MAX`.\n        ops::Bound::Included(end) => end + 1,\n\n        ops::Bound::Excluded(end) if end > len => slice_index_fail(0, end, len),\n        ops::Bound::Excluded(end) => end,\n\n        ops::Bound::Unbounded => len,\n    };\n\n    let start = match start {\n        ops::Bound::Excluded(start) if start >= end => slice_index_fail(start, end, len),\n        // Cannot overflow because `start < end` implies `start < usize::MAX`.\n        ops::Bound::Excluded(start) => start + 1,\n\n        ops::Bound::Included(start) if start > end => slice_index_fail(start, end, len),\n        ops::Bound::Included(start) => start,\n\n        ops::Bound::Unbounded => 0,\n    };\n\n    start..end\n}"
 }

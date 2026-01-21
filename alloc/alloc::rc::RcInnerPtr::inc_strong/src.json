@@ -1,5 +1,5 @@
 {
   "name": "alloc::rc::RcInnerPtr::inc_strong",
   "span": "$library/alloc/src/rc.rs:3735:5: 3735:25",
-  "src": "fn inc_strong(&self)"
+  "src": "fn inc_strong(&self) {\n        let strong = self.strong();\n\n        // We insert an `assume` here to hint LLVM at an otherwise\n        // missed optimization.\n        // SAFETY: The reference count will never be zero when this is\n        // called.\n        unsafe {\n            hint::assert_unchecked(strong != 0);\n        }\n\n        let strong = strong.wrapping_add(1);\n        self.strong_ref().set(strong);\n\n        // We want to abort on overflow instead of dropping the value.\n        // Checking for overflow after the store instead of before\n        // allows for slightly better code generation.\n        if core::intrinsics::unlikely(strong == 0) {\n            abort();\n        }\n    }"
 }

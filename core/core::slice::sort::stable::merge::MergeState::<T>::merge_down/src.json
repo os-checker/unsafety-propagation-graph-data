@@ -1,5 +1,5 @@
 {
   "name": "core::slice::sort::stable::merge::MergeState::<T>::merge_down",
   "span": "$library/core/src/slice/sort/stable/merge.rs:108:5: 114:6",
-  "src": "unsafe fn merge_down<F: FnMut(&T, &T) -> bool>(\n        &mut self,\n        left_end: *const T,\n        right_end: *const T,\n        mut out: *mut T,\n        is_less: &mut F,\n    )"
+  "src": "unsafe fn merge_down<F: FnMut(&T, &T) -> bool>(\n        &mut self,\n        left_end: *const T,\n        right_end: *const T,\n        mut out: *mut T,\n        is_less: &mut F,\n    ) {\n        // SAFETY: See function safety comment.\n        unsafe {\n            loop {\n                let left = self.dst.sub(1);\n                let right = self.end.sub(1);\n                out = out.sub(1);\n\n                let consume_left = is_less(&*right, &*left);\n\n                let src = if consume_left { left } else { right };\n                ptr::copy_nonoverlapping(src, out, 1);\n\n                self.dst = left.add(!consume_left as usize);\n                self.end = right.add(consume_left as usize);\n\n                if self.dst as *const T == left_end || self.end as *const T == right_end {\n                    break;\n                }\n            }\n        }\n    }"
 }

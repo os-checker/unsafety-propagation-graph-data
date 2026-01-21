@@ -1,5 +1,5 @@
 {
   "name": "core::<iter::adapters::step_by::StepBy<I> as iter::adapters::step_by::StepByImpl<I>>::spec_try_fold",
   "span": "$library/core/src/iter/adapters/step_by.rs:296:5: 299:30",
-  "src": "default fn spec_try_fold<Acc, F, R>(&mut self, mut acc: Acc, mut f: F) -> R\n    where\n        F: FnMut(Acc, Self::Item) -> R,\n        R: Try<Output = Acc>,"
+  "src": "default fn spec_try_fold<Acc, F, R>(&mut self, mut acc: Acc, mut f: F) -> R\n    where\n        F: FnMut(Acc, Self::Item) -> R,\n        R: Try<Output = Acc>,\n    {\n        #[inline]\n        fn nth<I: Iterator>(\n            iter: &mut I,\n            step_minus_one: usize,\n        ) -> impl FnMut() -> Option<I::Item> + '_ {\n            move || iter.nth(step_minus_one)\n        }\n\n        if self.first_take {\n            self.first_take = false;\n            match self.iter.next() {\n                None => return try { acc },\n                Some(x) => acc = f(acc, x)?,\n            }\n        }\n        from_fn(nth(&mut self.iter, self.step_minus_one)).try_fold(acc, f)\n    }"
 }

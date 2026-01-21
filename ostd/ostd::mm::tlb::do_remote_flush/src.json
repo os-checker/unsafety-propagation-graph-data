@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::tlb::do_remote_flush",
   "span": "ostd/src/mm/tlb.rs:271:1: 271:21",
-  "src": "fn do_remote_flush()"
+  "src": "fn do_remote_flush() {\n    // No races because we are in IRQs or have disabled preemption.\n    let current_cpu = crate::cpu::CpuId::current_racy();\n\n    let mut new_op_queue = OpsStack::new();\n    {\n        let mut op_queue = FLUSH_OPS.get_on_cpu(current_cpu).lock();\n\n        core::mem::swap(&mut *op_queue, &mut new_op_queue);\n\n        // ACK before dropping the lock so that we won't miss flush requests.\n        ACK_REMOTE_FLUSH\n            .get_on_cpu(current_cpu)\n            .store(true, Ordering::Relaxed);\n    }\n    // Unlock the locks quickly to avoid contention. ACK before flushing is\n    // fine since we cannot switch back to userspace now.\n    new_op_queue.flush_all();\n}"
 }

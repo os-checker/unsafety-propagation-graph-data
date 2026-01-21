@@ -1,5 +1,5 @@
 {
   "name": "std::io::append_to_string",
   "span": "$library/std/src/io/mod.rs:383:1: 385:46",
-  "src": "pub(crate) unsafe fn append_to_string<F>(buf: &mut String, f: F) -> Result<usize>\nwhere\n    F: FnOnce(&mut Vec<u8>) -> Result<usize>,"
+  "src": "pub(crate) unsafe fn append_to_string<F>(buf: &mut String, f: F) -> Result<usize>\nwhere\n    F: FnOnce(&mut Vec<u8>) -> Result<usize>,\n{\n    let mut g = Guard { len: buf.len(), buf: unsafe { buf.as_mut_vec() } };\n    let ret = f(g.buf);\n\n    // SAFETY: the caller promises to only append data to `buf`\n    let appended = unsafe { g.buf.get_unchecked(g.len..) };\n    if str::from_utf8(appended).is_err() {\n        ret.and_then(|_| Err(Error::INVALID_UTF8))\n    } else {\n        g.len = g.buf.len();\n        ret\n    }\n}"
 }

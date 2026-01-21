@@ -1,5 +1,5 @@
 {
   "name": "core::iter::traits::iterator::Iterator::cmp_by",
   "span": "$library/core/src/iter/traits/iterator.rs:3656:5: 3660:51",
-  "src": "fn cmp_by<I, F>(self, other: I, cmp: F) -> Ordering\n    where\n        Self: Sized,\n        I: IntoIterator,\n        F: FnMut(Self::Item, I::Item) -> Ordering,"
+  "src": "fn cmp_by<I, F>(self, other: I, cmp: F) -> Ordering\n    where\n        Self: Sized,\n        I: IntoIterator,\n        F: FnMut(Self::Item, I::Item) -> Ordering,\n    {\n        #[inline]\n        fn compare<X, Y, F>(mut cmp: F) -> impl FnMut(X, Y) -> ControlFlow<Ordering>\n        where\n            F: FnMut(X, Y) -> Ordering,\n        {\n            move |x, y| match cmp(x, y) {\n                Ordering::Equal => ControlFlow::Continue(()),\n                non_eq => ControlFlow::Break(non_eq),\n            }\n        }\n\n        match iter_compare(self, other.into_iter(), compare(cmp)) {\n            ControlFlow::Continue(ord) => ord,\n            ControlFlow::Break(ord) => ord,\n        }\n    }"
 }

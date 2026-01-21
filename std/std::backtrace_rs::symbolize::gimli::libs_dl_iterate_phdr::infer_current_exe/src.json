@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::symbolize::gimli::libs_dl_iterate_phdr::infer_current_exe",
   "span": "$library/std/src/../../backtrace/src/symbolize/gimli/libs_dl_iterate_phdr.rs:32:1: 35:14",
-  "src": "fn infer_current_exe(\n    maps: &Option<Vec<parse_running_mmaps::MapsEntry>>,\n    base_addr: usize,\n) -> OsString"
+  "src": "fn infer_current_exe(\n    maps: &Option<Vec<parse_running_mmaps::MapsEntry>>,\n    base_addr: usize,\n) -> OsString {\n    #[cfg(not(target_os = \"hurd\"))]\n    if let Some(entries) = maps {\n        let opt_path = entries\n            .iter()\n            .find(|e| e.ip_matches(base_addr) && e.pathname().len() > 0)\n            .map(|e| e.pathname())\n            .cloned();\n        if let Some(path) = opt_path {\n            return path;\n        }\n    }\n\n    env::current_exe().map(|e| e.into()).unwrap_or_default()\n}"
 }

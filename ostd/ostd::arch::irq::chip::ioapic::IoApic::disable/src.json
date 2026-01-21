@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::irq::chip::ioapic::IoApic::disable",
   "span": "ostd/src/arch/x86/irq/chip/ioapic.rs:124:5: 124:62",
-  "src": "pub(super) fn disable(&mut self, index: u8) -> Result<()>"
+  "src": "pub(super) fn disable(&mut self, index: u8) -> Result<()> {\n        if index > self.max_redirection_entry {\n            return Err(Error::InvalidArgs);\n        }\n\n        // SAFETY: `index` is inbound. Disabling the redirection entry is always safe.\n        unsafe {\n            // \"Bit 16: Interrupt Mask - R/W. When this bit is 1, the interrupt signal is masked.\"\n            self.access\n                .write(IoApicAccess::IOREDTBL + 2 * index, 1 << 16);\n            self.access.write(IoApicAccess::IOREDTBL + 2 * index + 1, 0);\n        }\n\n        Ok(())\n    }"
 }

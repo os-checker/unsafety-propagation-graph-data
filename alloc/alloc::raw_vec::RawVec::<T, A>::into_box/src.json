@@ -1,5 +1,5 @@
 {
   "name": "alloc::raw_vec::RawVec::<T, A>::into_box",
   "span": "$library/alloc/src/raw_vec/mod.rs:225:5: 225:80",
-  "src": "pub(crate) unsafe fn into_box(self, len: usize) -> Box<[MaybeUninit<T>], A>"
+  "src": "pub(crate) unsafe fn into_box(self, len: usize) -> Box<[MaybeUninit<T>], A> {\n        // Sanity-check one half of the safety requirement (we cannot check the other half).\n        debug_assert!(\n            len <= self.capacity(),\n            \"`len` must be smaller than or equal to `self.capacity()`\"\n        );\n\n        let me = ManuallyDrop::new(self);\n        unsafe {\n            let slice = ptr::slice_from_raw_parts_mut(me.ptr() as *mut MaybeUninit<T>, len);\n            Box::from_raw_in(slice, ptr::read(&me.inner.alloc))\n        }\n    }"
 }

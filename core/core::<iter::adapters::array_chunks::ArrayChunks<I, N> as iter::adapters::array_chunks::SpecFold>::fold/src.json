@@ -1,5 +1,5 @@
 {
   "name": "core::<iter::adapters::array_chunks::ArrayChunks<I, N> as iter::adapters::array_chunks::SpecFold>::fold",
   "span": "$library/core/src/iter/adapters/array_chunks.rs:224:5: 227:38",
-  "src": "fn fold<B, F>(mut self, init: B, mut f: F) -> B\n    where\n        Self: Sized,\n        F: FnMut(B, Self::Item) -> B,"
+  "src": "fn fold<B, F>(mut self, init: B, mut f: F) -> B\n    where\n        Self: Sized,\n        F: FnMut(B, Self::Item) -> B,\n    {\n        let mut accum = init;\n        let inner_len = self.iter.size();\n        let mut i = 0;\n        // Use a while loop because (0..len).step_by(N) doesn't optimize well.\n        while inner_len - i >= N {\n            let chunk = crate::array::from_fn(|local| {\n                // SAFETY: The method consumes the iterator and the loop condition ensures that\n                // all accesses are in bounds and only happen once.\n                unsafe {\n                    let idx = i + local;\n                    self.iter.__iterator_get_unchecked(idx)\n                }\n            });\n            accum = f(accum, chunk);\n            i += N;\n        }\n\n        // unlike try_fold this method does not need to take care of the remainder\n        // since `self` will be dropped\n\n        accum\n    }"
 }

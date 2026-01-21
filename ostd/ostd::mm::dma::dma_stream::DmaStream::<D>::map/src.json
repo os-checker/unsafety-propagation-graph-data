@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::dma::dma_stream::DmaStream::<D>::map",
   "span": "ostd/src/mm/dma/dma_stream.rs:158:5: 158:82",
-  "src": "pub fn map(segment: USegment, is_cache_coherent: bool) -> Result<Self, Error>"
+  "src": "pub fn map(segment: USegment, is_cache_coherent: bool) -> Result<Self, Error> {\n        let cvm = cvm_need_private_protection();\n        let size = segment.size();\n\n        let (inner, paddr) = if (can_sync_dma() || is_cache_coherent) && !cvm {\n            let paddr = segment.paddr();\n\n            (Inner::Segment(segment), paddr)\n        } else {\n            let (kva, paddr) = alloc_kva(size / PAGE_SIZE, is_cache_coherent)?;\n\n            (Inner::Both(kva, paddr, segment), paddr)\n        };\n\n        let paddr_range = paddr..paddr + size;\n\n        // SAFETY: The physical address range is untyped DMA memory before `drop`.\n        let map_daddr = unsafe { prepare_dma(&paddr_range) };\n\n        Ok(Self {\n            inner,\n            map_daddr,\n            is_cache_coherent,\n            _phantom: PhantomData,\n        })\n    }"
 }

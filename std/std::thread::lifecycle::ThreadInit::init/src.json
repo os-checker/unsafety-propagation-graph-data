@@ -1,5 +1,5 @@
 {
   "name": "std::thread::lifecycle::ThreadInit::init",
   "span": "$library/std/src/thread/lifecycle.rs:151:5: 151:61",
-  "src": "pub fn init(self: Box<Self>) -> Box<dyn FnOnce() + Send>"
+  "src": "pub fn init(self: Box<Self>) -> Box<dyn FnOnce() + Send> {\n        // Set the current thread before any (de)allocations on the global allocator occur,\n        // so that it may call std::thread::current() in its implementation. This is also\n        // why we take Box<Self>, to ensure the Box is not destroyed until after this point.\n        // Cloning the handle does not invoke the global allocator, it is an Arc.\n        if let Err(_thread) = set_current(self.handle.clone()) {\n            // The current thread should not have set yet. Use an abort to save binary size (see #123356).\n            rtabort!(\"current thread handle already set during thread spawn\");\n        }\n\n        if let Some(name) = self.handle.cname() {\n            imp::set_name(name);\n        }\n\n        self.rust_start\n    }"
 }

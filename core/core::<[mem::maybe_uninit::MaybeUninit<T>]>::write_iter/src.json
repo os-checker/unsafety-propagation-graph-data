@@ -1,5 +1,5 @@
 {
   "name": "core::<[mem::maybe_uninit::MaybeUninit<T>]>::write_iter",
   "span": "$library/core/src/mem/maybe_uninit.rs:1368:5: 1370:35",
-  "src": "pub fn write_iter<I>(&mut self, it: I) -> (&mut [T], &mut [MaybeUninit<T>])\n    where\n        I: IntoIterator<Item = T>,"
+  "src": "pub fn write_iter<I>(&mut self, it: I) -> (&mut [T], &mut [MaybeUninit<T>])\n    where\n        I: IntoIterator<Item = T>,\n    {\n        let iter = it.into_iter();\n        let mut guard = Guard { slice: self, initialized: 0 };\n\n        for (element, val) in guard.slice.iter_mut().zip(iter) {\n            element.write(val);\n            guard.initialized += 1;\n        }\n\n        let initialized_len = guard.initialized;\n        super::forget(guard);\n\n        // SAFETY: guard.initialized <= self.len()\n        let (initted, remainder) = unsafe { self.split_at_mut_unchecked(initialized_len) };\n\n        // SAFETY: Valid elements have just been written into `init`, so that portion\n        // of `this` is initialized.\n        (unsafe { initted.assume_init_mut() }, remainder)\n    }"
 }

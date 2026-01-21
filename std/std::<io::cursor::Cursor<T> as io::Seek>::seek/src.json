@@ -1,5 +1,5 @@
 {
   "name": "std::<io::cursor::Cursor<T> as io::Seek>::seek",
   "span": "$library/std/src/io/cursor.rs:293:5: 293:59",
-  "src": "fn seek(&mut self, style: SeekFrom) -> io::Result<u64>"
+  "src": "fn seek(&mut self, style: SeekFrom) -> io::Result<u64> {\n        let (base_pos, offset) = match style {\n            SeekFrom::Start(n) => {\n                self.pos = n;\n                return Ok(n);\n            }\n            SeekFrom::End(n) => (self.inner.as_ref().len() as u64, n),\n            SeekFrom::Current(n) => (self.pos, n),\n        };\n        match base_pos.checked_add_signed(offset) {\n            Some(n) => {\n                self.pos = n;\n                Ok(self.pos)\n            }\n            None => Err(io::const_error!(\n                ErrorKind::InvalidInput,\n                \"invalid seek to a negative or overflowing position\",\n            )),\n        }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::core_simd::vector::Simd::<T, N>::load",
   "span": "$library/core/src/../../portable-simd/crates/core_simd/src/vector.rs:216:5: 216:53",
-  "src": "const unsafe fn load(ptr: *const [T; N]) -> Self"
+  "src": "const unsafe fn load(ptr: *const [T; N]) -> Self {\n        // There are potentially simpler ways to write this function, but this should result in\n        // LLVM `load <N x T>`\n\n        let mut tmp = core::mem::MaybeUninit::<Self>::uninit();\n        // SAFETY: `Simd<T, N>` always contains `N` elements of type `T`.  It may have padding\n        // which does not need to be initialized.  The safety of reading `ptr` is ensured by the\n        // caller.\n        unsafe {\n            core::ptr::copy_nonoverlapping(ptr, tmp.as_mut_ptr().cast(), 1);\n            tmp.assume_init()\n        }\n    }"
 }

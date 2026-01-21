@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<T, A>::split_at_spare_mut_with_len",
   "span": "$library/alloc/src/vec/mod.rs:3129:5: 3131:55",
-  "src": "unsafe fn split_at_spare_mut_with_len(\n        &mut self,\n    ) -> (&mut [T], &mut [MaybeUninit<T>], &mut usize)"
+  "src": "unsafe fn split_at_spare_mut_with_len(\n        &mut self,\n    ) -> (&mut [T], &mut [MaybeUninit<T>], &mut usize) {\n        let ptr = self.as_mut_ptr();\n        // SAFETY:\n        // - `ptr` is guaranteed to be valid for `self.len` elements\n        // - but the allocation extends out to `self.buf.capacity()` elements, possibly\n        // uninitialized\n        let spare_ptr = unsafe { ptr.add(self.len) };\n        let spare_ptr = spare_ptr.cast_uninit();\n        let spare_len = self.buf.capacity() - self.len;\n\n        // SAFETY:\n        // - `ptr` is guaranteed to be valid for `self.len` elements\n        // - `spare_ptr` is pointing one element past the buffer, so it doesn't overlap with `initialized`\n        unsafe {\n            let initialized = slice::from_raw_parts_mut(ptr, self.len);\n            let spare = slice::from_raw_parts_mut(spare_ptr, spare_len);\n\n            (initialized, spare, &mut self.len)\n        }\n    }"
 }

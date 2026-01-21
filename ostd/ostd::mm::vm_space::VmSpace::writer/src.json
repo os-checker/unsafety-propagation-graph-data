@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::vm_space::VmSpace::writer",
   "span": "ostd/src/mm/vm_space.rs:179:5: 179:85",
-  "src": "pub fn writer(&self, vaddr: Vaddr, len: usize) -> Result<VmWriter<'_, Fallible>>"
+  "src": "pub fn writer(&self, vaddr: Vaddr, len: usize) -> Result<VmWriter<'_, Fallible>> {\n        if current_page_table_paddr() != self.pt.root_paddr() {\n            return Err(Error::AccessDenied);\n        }\n\n        if vaddr.saturating_add(len) > MAX_USERSPACE_VADDR {\n            return Err(Error::AccessDenied);\n        }\n\n        // `VmWriter` is neither `Sync` nor `Send`, so it will not live longer than the current\n        // task. This ensures that the correct page table is activated during the usage period of\n        // the `VmWriter`.\n        //\n        // SAFETY: The memory range is in user space, as checked above.\n        Ok(unsafe { VmWriter::<Fallible>::from_user_space(vaddr as *mut u8, len) })\n    }"
 }

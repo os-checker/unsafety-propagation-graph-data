@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::irq::ops::enable_local_and_halt",
   "span": "ostd/src/arch/x86/irq/ops.rs:25:1: 25:38",
-  "src": "pub(crate) fn enable_local_and_halt()"
+  "src": "pub(crate) fn enable_local_and_halt() {\n    // SAFETY:\n    // 1. `sti` is safe to use because its safety requirement is upheld by the caller.\n    // 2. `hlt` is safe to use because it halts the CPU for interrupts.\n    unsafe {\n        // Intel(R) 64 and IA-32 Architectures Software Developer's Manual says:\n        // \"If IF = 0, maskable hardware interrupts remain inhibited on the instruction boundary\n        // following an execution of STI.\"\n        //\n        // So interrupts will only occur at or after the HLT instruction, which guarantee that\n        // interrupts won't occur between enabling the local IRQs and halting the CPU.\n        core::arch::asm!(\"sti\", \"hlt\", options(nomem, nostack, preserves_flags),)\n    };\n}"
 }

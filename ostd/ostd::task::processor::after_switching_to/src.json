@@ -1,5 +1,5 @@
 {
   "name": "ostd::task::processor::after_switching_to",
   "span": "ostd/src/task/processor.rs:119:1: 119:42",
-  "src": "pub(super) unsafe fn after_switching_to()"
+  "src": "pub(super) unsafe fn after_switching_to() {\n    // Release the previous task.\n    let prev = PREVIOUS_TASK_PTR.load();\n    let prev = if !prev.is_null() {\n        PREVIOUS_TASK_PTR.store(core::ptr::null());\n\n        // SAFETY: The pointer is set by `switch_to_task` and is guaranteed to\n        // be built with `Arc::into_raw`. We couldn't do it twice since we set\n        // it to NULL after the read.\n        let prev_task = unsafe { Arc::from_raw(prev) };\n\n        // Allows it to be switched on a CPU again, if anyone wants to.\n        prev_task.switched_to_cpu.store(false, Ordering::Release);\n\n        Some(prev_task)\n    } else {\n        None\n    };\n\n    if let Some(handler) = POST_SCHEDULE_HANDLER.get() {\n        handler();\n    }\n\n    // See `switch_to_task`, where we forgot an IRQ guard.\n    crate::arch::irq::enable_local();\n\n    // It was forgotten using `Arc::into_raw` at `switch_to_task`.\n    // We drop it after enabling the IRQ in case dropping user-provided\n    // resources would violate the atomic mode.\n    drop(prev);\n}"
 }

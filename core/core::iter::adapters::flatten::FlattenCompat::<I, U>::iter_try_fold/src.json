@@ -1,5 +1,5 @@
 {
   "name": "core::iter::adapters::flatten::FlattenCompat::<I, U>::iter_try_fold",
   "span": "$library/core/src/iter/adapters/flatten.rs:410:5: 413:30",
-  "src": "fn iter_try_fold<Acc, Fold, R>(&mut self, mut acc: Acc, mut fold: Fold) -> R\n    where\n        Fold: FnMut(Acc, &mut U) -> R,\n        R: Try<Output = Acc>,"
+  "src": "fn iter_try_fold<Acc, Fold, R>(&mut self, mut acc: Acc, mut fold: Fold) -> R\n    where\n        Fold: FnMut(Acc, &mut U) -> R,\n        R: Try<Output = Acc>,\n    {\n        #[inline]\n        fn flatten<'a, T: IntoIterator, Acc, R: Try<Output = Acc>>(\n            frontiter: &'a mut Option<T::IntoIter>,\n            fold: &'a mut impl FnMut(Acc, &mut T::IntoIter) -> R,\n        ) -> impl FnMut(Acc, T) -> R + 'a {\n            move |acc, iter| fold(acc, frontiter.insert(iter.into_iter()))\n        }\n\n        if let Some(iter) = &mut self.frontiter {\n            acc = fold(acc, iter)?;\n        }\n        self.frontiter = None;\n\n        acc = self.iter.try_fold(acc, flatten(&mut self.frontiter, &mut fold))?;\n        self.frontiter = None;\n\n        if let Some(iter) = &mut self.backiter {\n            acc = fold(acc, iter)?;\n        }\n        self.backiter = None;\n\n        try { acc }\n    }"
 }

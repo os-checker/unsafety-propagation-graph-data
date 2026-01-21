@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::in_place_collect::write_in_place_with_drop",
   "span": "$library/alloc/src/vec/in_place_collect.rs:336:1: 338:64",
-  "src": "fn write_in_place_with_drop<T>(\n    src_end: *const T,\n) -> impl FnMut(InPlaceDrop<T>, T) -> Result<InPlaceDrop<T>, !>"
+  "src": "fn write_in_place_with_drop<T>(\n    src_end: *const T,\n) -> impl FnMut(InPlaceDrop<T>, T) -> Result<InPlaceDrop<T>, !> {\n    move |mut sink, item| {\n        unsafe {\n            // the InPlaceIterable contract cannot be verified precisely here since\n            // try_fold has an exclusive reference to the source pointer\n            // all we can do is check if it's still in range\n            debug_assert!(sink.dst as *const _ <= src_end, \"InPlaceIterable contract violation\");\n            ptr::write(sink.dst, item);\n            // Since this executes user code which can panic we have to bump the pointer\n            // after each step.\n            sink.dst = sink.dst.add(1);\n        }\n        Ok(sink)\n    }\n}"
 }

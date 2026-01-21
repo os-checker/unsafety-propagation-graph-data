@@ -1,5 +1,5 @@
 {
   "name": "core::core_simd::vector::Simd::<T, N>::splat",
   "span": "$library/core/src/../../portable-simd/crates/core_simd/src/vector.rs:148:5: 148:41",
-  "src": "pub const fn splat(value: T) -> Self"
+  "src": "pub const fn splat(value: T) -> Self {\n        const fn splat_const<T, const N: usize>(value: T) -> Simd<T, N>\n        where\n            T: SimdElement,\n            LaneCount<N>: SupportedLaneCount,\n        {\n            Simd::from_array([value; N])\n        }\n\n        fn splat_rt<T, const N: usize>(value: T) -> Simd<T, N>\n        where\n            T: SimdElement,\n            LaneCount<N>: SupportedLaneCount,\n        {\n            // This is preferred over `[value; N]`, since it's explicitly a splat:\n            // https://github.com/rust-lang/rust/issues/97804\n            struct Splat;\n            impl<const N: usize> Swizzle<N> for Splat {\n                const INDEX: [usize; N] = [0; N];\n            }\n\n            Splat::swizzle::<T, 1>(Simd::<T, 1>::from([value]))\n        }\n\n        core::intrinsics::const_eval_select((value,), splat_const, splat_rt)\n    }"
 }

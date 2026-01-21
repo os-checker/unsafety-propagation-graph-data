@@ -1,5 +1,5 @@
 {
   "name": "std::sys::io::kernel_copy::linux::FdMeta::potential_sendfile_source",
   "span": "$library/std/src/sys/io/kernel_copy/linux.rs:110:5: 110:48",
-  "src": "fn potential_sendfile_source(&self) -> bool"
+  "src": "fn potential_sendfile_source(&self) -> bool {\n        match self {\n            // procfs erroneously shows 0 length on non-empty readable files.\n            // and if a file is truly empty then a `read` syscall will determine that and skip the write syscall\n            // thus there would be benefit from attempting sendfile\n            FdMeta::Metadata(meta)\n                if meta.file_type().is_file() && meta.len() > 0\n                    || meta.file_type().is_block_device() =>\n            {\n                true\n            }\n            _ => false,\n        }\n    }"
 }

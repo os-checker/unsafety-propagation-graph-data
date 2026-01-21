@@ -1,5 +1,5 @@
 {
   "name": "core::slice::<impl [T]>::reverse::revswap",
   "span": "$library/core/src/slice/mod.rs:1000:9: 1000:64",
-  "src": "const fn revswap<T>(a: &mut [T], b: &mut [T], n: usize)"
+  "src": "const fn revswap<T>(a: &mut [T], b: &mut [T], n: usize) {\n            debug_assert!(a.len() == n);\n            debug_assert!(b.len() == n);\n\n            // Because this function is first compiled in isolation,\n            // this check tells LLVM that the indexing below is\n            // in-bounds. Then after inlining -- once the actual\n            // lengths of the slices are known -- it's removed.\n            // FIXME(const_trait_impl) replace with let (a, b) = (&mut a[..n], &mut b[..n]);\n            let (a, _) = a.split_at_mut(n);\n            let (b, _) = b.split_at_mut(n);\n\n            let mut i = 0;\n            while i < n {\n                mem::swap(&mut a[i], &mut b[n - 1 - i]);\n                i += 1;\n            }\n        }"
 }

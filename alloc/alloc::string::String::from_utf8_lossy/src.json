@@ -1,5 +1,5 @@
 {
   "name": "alloc::string::String::from_utf8_lossy",
   "span": "$library/alloc/src/string.rs:619:5: 619:53",
-  "src": "pub fn from_utf8_lossy(v: &[u8]) -> Cow<'_, str>"
+  "src": "pub fn from_utf8_lossy(v: &[u8]) -> Cow<'_, str> {\n        let mut iter = v.utf8_chunks();\n\n        let first_valid = if let Some(chunk) = iter.next() {\n            let valid = chunk.valid();\n            if chunk.invalid().is_empty() {\n                debug_assert_eq!(valid.len(), v.len());\n                return Cow::Borrowed(valid);\n            }\n            valid\n        } else {\n            return Cow::Borrowed(\"\");\n        };\n\n        const REPLACEMENT: &str = \"\\u{FFFD}\";\n\n        let mut res = String::with_capacity(v.len());\n        res.push_str(first_valid);\n        res.push_str(REPLACEMENT);\n\n        for chunk in iter {\n            res.push_str(chunk.valid());\n            if !chunk.invalid().is_empty() {\n                res.push_str(REPLACEMENT);\n            }\n        }\n\n        Cow::Owned(res)\n    }"
 }

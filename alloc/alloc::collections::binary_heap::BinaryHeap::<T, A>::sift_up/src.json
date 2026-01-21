@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::binary_heap::BinaryHeap::<T, A>::sift_up",
   "span": "$library/alloc/src/collections/binary_heap/mod.rs:745:5: 745:68",
-  "src": "unsafe fn sift_up(&mut self, start: usize, pos: usize) -> usize"
+  "src": "unsafe fn sift_up(&mut self, start: usize, pos: usize) -> usize {\n        // Take out the value at `pos` and create a hole.\n        // SAFETY: The caller guarantees that pos < self.len()\n        let mut hole = unsafe { Hole::new(&mut self.data, pos) };\n\n        while hole.pos() > start {\n            let parent = (hole.pos() - 1) / 2;\n\n            // SAFETY: hole.pos() > start >= 0, which means hole.pos() > 0\n            //  and so hole.pos() - 1 can't underflow.\n            //  This guarantees that parent < hole.pos() so\n            //  it's a valid index and also != hole.pos().\n            if hole.element() <= unsafe { hole.get(parent) } {\n                break;\n            }\n\n            // SAFETY: Same as above\n            unsafe { hole.move_to(parent) };\n        }\n\n        hole.pos()\n    }"
 }

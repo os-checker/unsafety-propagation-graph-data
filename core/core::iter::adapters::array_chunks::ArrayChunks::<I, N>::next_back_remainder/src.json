@@ -1,5 +1,5 @@
 {
   "name": "core::iter::adapters::array_chunks::ArrayChunks::<I, N>::next_back_remainder",
   "span": "$library/core/src/iter/adapters/array_chunks.rs:154:5: 154:38",
-  "src": "fn next_back_remainder(&mut self)"
+  "src": "fn next_back_remainder(&mut self) {\n        // Make sure to not override `self.remainder` with an empty array\n        // when `next_back` is called after `ArrayChunks` exhaustion.\n        if self.remainder.is_some() {\n            return;\n        }\n\n        // We use the `ExactSizeIterator` implementation of the underlying\n        // iterator to know how many remaining elements there are.\n        let rem = self.iter.len() % N;\n\n        // Take the last `rem` elements out of `self.iter`.\n        let mut remainder =\n            // SAFETY: `unwrap_err` always succeeds because x % N < N for all x.\n            unsafe { self.iter.by_ref().rev().take(rem).next_chunk().unwrap_err_unchecked() };\n\n        // We used `.rev()` above, so we need to re-reverse the reminder\n        remainder.as_mut_slice().reverse();\n        self.remainder = Some(remainder);\n    }"
 }

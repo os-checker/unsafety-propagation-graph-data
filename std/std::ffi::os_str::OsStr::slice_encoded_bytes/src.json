@@ -1,5 +1,5 @@
 {
   "name": "std::ffi::os_str::OsStr::slice_encoded_bytes",
   "span": "$library/std/src/ffi/os_str.rs:1104:5: 1104:85",
-  "src": "pub fn slice_encoded_bytes<R: ops::RangeBounds<usize>>(&self, range: R) -> &Self"
+  "src": "pub fn slice_encoded_bytes<R: ops::RangeBounds<usize>>(&self, range: R) -> &Self {\n        let encoded_bytes = self.as_encoded_bytes();\n        let Range { start, end } = slice::range(range, ..encoded_bytes.len());\n\n        // `check_public_boundary` should panic if the index does not lie on an\n        // `OsStr` boundary as described above. It's possible to do this in an\n        // encoding-agnostic way, but details of the internal encoding might\n        // permit a more efficient implementation.\n        self.inner.check_public_boundary(start);\n        self.inner.check_public_boundary(end);\n\n        // SAFETY: `slice::range` ensures that `start` and `end` are valid\n        let slice = unsafe { encoded_bytes.get_unchecked(start..end) };\n\n        // SAFETY: `slice` comes from `self` and we validated the boundaries\n        unsafe { Self::from_encoded_bytes_unchecked(slice) }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::sys::fs::unix::canonicalize",
   "span": "$library/std/src/sys/fs/unix.rs:2115:1: 2115:56",
-  "src": "pub fn canonicalize(path: &CStr) -> io::Result<PathBuf>"
+  "src": "pub fn canonicalize(path: &CStr) -> io::Result<PathBuf> {\n    let r = unsafe { libc::realpath(path.as_ptr(), ptr::null_mut()) };\n    if r.is_null() {\n        return Err(io::Error::last_os_error());\n    }\n    Ok(PathBuf::from(OsString::from_vec(unsafe {\n        let buf = CStr::from_ptr(r).to_bytes().to_vec();\n        libc::free(r as *mut _);\n        buf\n    })))\n}"
 }

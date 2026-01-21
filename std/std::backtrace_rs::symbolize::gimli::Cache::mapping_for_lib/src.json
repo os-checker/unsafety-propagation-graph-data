@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::symbolize::gimli::Cache::mapping_for_lib",
   "span": "$library/std/src/../../backtrace/src/symbolize/gimli.rs:417:5: 417:97",
-  "src": "fn mapping_for_lib<'a>(&'a mut self, lib: usize) -> Option<(&'a mut Context<'a>, &'a Stash)>"
+  "src": "fn mapping_for_lib<'a>(&'a mut self, lib: usize) -> Option<(&'a mut Context<'a>, &'a Stash)> {\n        let cache_idx = self.mappings.iter().position(|(lib_id, _)| *lib_id == lib);\n\n        let cache_entry = if let Some(idx) = cache_idx {\n            self.mappings.move_to_front(idx)\n        } else {\n            // When the mapping is not in the cache, create a new mapping and insert it,\n            // which will also evict the oldest entry.\n            create_mapping(&self.libraries[lib])\n                .and_then(|mapping| self.mappings.push_front((lib, mapping)))\n        };\n\n        let (_, mapping) = cache_entry?;\n        let cx: &'a mut Context<'static> = &mut mapping.cx;\n        let stash: &'a Stash = &mapping.stash;\n        // don't leak the `'static` lifetime, make sure it's scoped to just\n        // ourselves\n        Some((\n            unsafe { mem::transmute::<&'a mut Context<'static>, &'a mut Context<'a>>(cx) },\n            stash,\n        ))\n    }"
 }

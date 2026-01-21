@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::btree::map::BTreeMap::<K, collections::btree::set_val::SetValZST, A>::get_or_insert_with",
   "span": "$library/alloc/src/collections/btree/map.rs:336:5: 340:28",
-  "src": "pub(super) fn get_or_insert_with<Q: ?Sized, F>(&mut self, q: &Q, f: F) -> &K\n    where\n        K: Borrow<Q> + Ord,\n        Q: Ord,\n        F: FnOnce(&Q) -> K,"
+  "src": "pub(super) fn get_or_insert_with<Q: ?Sized, F>(&mut self, q: &Q, f: F) -> &K\n    where\n        K: Borrow<Q> + Ord,\n        Q: Ord,\n        F: FnOnce(&Q) -> K,\n    {\n        let (map, dormant_map) = DormantMutRef::new(self);\n        let root_node =\n            map.root.get_or_insert_with(|| Root::new((*map.alloc).clone())).borrow_mut();\n        match root_node.search_tree(q) {\n            Found(handle) => handle.into_kv_mut().0,\n            GoDown(handle) => {\n                let key = f(q);\n                assert!(*key.borrow() == *q, \"new value is not equal\");\n                VacantEntry {\n                    key,\n                    handle: Some(handle),\n                    dormant_map,\n                    alloc: (*map.alloc).clone(),\n                    _marker: PhantomData,\n                }\n                .insert_entry(SetValZST)\n                .into_key()\n            }\n        }\n    }"
 }

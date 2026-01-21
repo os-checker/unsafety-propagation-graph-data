@@ -1,5 +1,5 @@
 {
   "name": "ostd::<arch::kernel::apic::xapic::XApic as arch::kernel::apic::Apic>::send_ipi",
   "span": "ostd/src/arch/x86/kernel/apic/xapic.rs:81:5: 81:47",
-  "src": "unsafe fn send_ipi(&self, icr: super::Icr)"
+  "src": "unsafe fn send_ipi(&self, icr: super::Icr) {\n        let _guard = crate::irq::disable_local();\n\n        // SAFETY: These operations write the interrupt command to APIC and wait for results. The\n        // caller guarantees it's safe to execute this interrupt command.\n        unsafe {\n            self.io_mem.write_once(xapic::XAPIC_ESR as usize, &0u32);\n            // The upper 32 bits of ICR must be written into XAPIC_ICR1 first,\n            // because writing into XAPIC_ICR0 will trigger the action of\n            // interrupt sending.\n            self.io_mem\n                .write_once(xapic::XAPIC_ICR1 as usize, &icr.upper());\n            self.io_mem\n                .write_once(xapic::XAPIC_ICR0 as usize, &icr.lower());\n            loop {\n                let icr = self.io_mem.read_once::<u32>(xapic::XAPIC_ICR0 as usize);\n                if ((icr >> 12) & 0x1) == 0 {\n                    break;\n                }\n                if self.io_mem.read_once::<u32>(xapic::XAPIC_ESR as usize) > 0 {\n                    break;\n                }\n            }\n        }\n    }"
 }

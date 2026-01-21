@@ -1,5 +1,5 @@
 {
   "name": "std::thread::spawnhook::run_spawn_hooks",
   "span": "$library/std/src/thread/spawnhook.rs:113:1: 113:66",
-  "src": "pub(super) fn run_spawn_hooks(thread: &Thread) -> ChildSpawnHooks"
+  "src": "pub(super) fn run_spawn_hooks(thread: &Thread) -> ChildSpawnHooks {\n    // Get a snapshot of the spawn hooks.\n    // (Increments the refcount to the first node.)\n    if let Ok(hooks) = SPAWN_HOOKS.try_with(|hooks| {\n        let snapshot = hooks.take();\n        hooks.set(snapshot.clone());\n        snapshot\n    }) {\n        // Iterate over the hooks, run them, and collect the results in a vector.\n        let to_run: Vec<_> = iter::successors(hooks.first.as_deref(), |hook| hook.next.as_deref())\n            .map(|hook| (hook.hook)(thread))\n            .collect();\n        // Pass on the snapshot of the hooks and the results to the new thread,\n        // which will then run SpawnHookResults::run().\n        ChildSpawnHooks { hooks, to_run }\n    } else {\n        // TLS has been destroyed. Skip running the hooks.\n        // See https://github.com/rust-lang/rust/issues/138696\n        ChildSpawnHooks::default()\n    }\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::io::stdio::cleanup",
   "span": "$library/std/src/io/stdio.rs:726:1: 726:17",
-  "src": "pub fn cleanup()"
+  "src": "pub fn cleanup() {\n    let mut initialized = false;\n    let stdout = STDOUT.get_or_init(|| {\n        initialized = true;\n        ReentrantLock::new(RefCell::new(LineWriter::with_capacity(0, stdout_raw())))\n    });\n\n    if !initialized {\n        // The buffer was previously initialized, overwrite it here.\n        // We use try_lock() instead of lock(), because someone\n        // might have leaked a StdoutLock, which would\n        // otherwise cause a deadlock here.\n        if let Some(lock) = stdout.try_lock() {\n            *lock.borrow_mut() = LineWriter::with_capacity(0, stdout_raw());\n        }\n    }\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::io::VmReader::<'a, mm::io::Infallible>::read_val",
   "span": "ostd/src/mm/io.rs:475:5: 475:52",
-  "src": "pub fn read_val<T: Pod>(&mut self) -> Result<T>"
+  "src": "pub fn read_val<T: Pod>(&mut self) -> Result<T> {\n        if self.remain() < size_of::<T>() {\n            return Err(Error::InvalidArgs);\n        }\n\n        let mut val = MaybeUninit::<T>::uninit();\n\n        // SAFETY:\n        // - The memory range points to typed memory.\n        // - The validity requirements for write accesses are met because the pointer is converted\n        //   from a mutable pointer where the underlying storage outlives the temporary lifetime\n        //   and no other Rust references to the same storage exist during the lifetime.\n        // - The type, i.e., `T`, is plain-old-data.\n        let mut writer =\n            unsafe { VmWriter::from_kernel_space(val.as_mut_ptr().cast(), size_of::<T>()) };\n        self.read(&mut writer);\n        debug_assert!(!writer.has_avail());\n\n        // SAFETY:\n        // - `self.read` has initialized all the bytes in `val`.\n        // - The type is plain-old-data.\n        let val_inited = unsafe { val.assume_init() };\n        Ok(val_inited)\n    }"
 }

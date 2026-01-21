@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::vec_deque::VecDeque::<T, A>::copy_slice_reversed",
   "span": "$library/alloc/src/collections/vec_deque/mod.rs:529:5: 529:68",
-  "src": "unsafe fn copy_slice_reversed(&mut self, dst: usize, src: &[T])"
+  "src": "unsafe fn copy_slice_reversed(&mut self, dst: usize, src: &[T]) {\n        /// # Safety\n        ///\n        /// See [`ptr::copy_nonoverlapping`].\n        unsafe fn copy_nonoverlapping_reversed<T>(src: *const T, dst: *mut T, count: usize) {\n            for i in 0..count {\n                unsafe { ptr::copy_nonoverlapping(src.add(count - 1 - i), dst.add(i), 1) };\n            }\n        }\n\n        debug_assert!(src.len() <= self.capacity());\n        let head_room = self.capacity() - dst;\n        if src.len() <= head_room {\n            unsafe {\n                copy_nonoverlapping_reversed(src.as_ptr(), self.ptr().add(dst), src.len());\n            }\n        } else {\n            let (left, right) = src.split_at(src.len() - head_room);\n            unsafe {\n                copy_nonoverlapping_reversed(right.as_ptr(), self.ptr().add(dst), right.len());\n                copy_nonoverlapping_reversed(left.as_ptr(), self.ptr(), left.len());\n            }\n        }\n    }"
 }

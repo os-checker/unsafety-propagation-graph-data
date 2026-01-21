@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::kernel::acpi::init",
   "span": "ostd/src/arch/x86/kernel/acpi/mod.rs:93:1: 93:30",
-  "src": "pub(in crate::arch) fn init()"
+  "src": "pub(in crate::arch) fn init() {\n    let mut acpi_info = AcpiInfo {\n        century_register: None,\n        boot_flags: None,\n        reset_port_and_val: None,\n    };\n\n    if let Some(acpi_tables) = get_acpi_tables()\n        && let Ok(fadt) = acpi_tables.find_table::<Fadt>()\n    {\n        // A zero means that the century register does not exist.\n        acpi_info.century_register = NonZeroU8::new(fadt.century);\n        acpi_info.boot_flags = Some(fadt.iapc_boot_arch);\n        if let Ok(reset_reg) = fadt.reset_register()\n            && reset_reg.address_space == AddressSpace::SystemIo\n            && let Ok(reset_port) = reset_reg.address.try_into()\n        {\n            acpi_info.reset_port_and_val = Some((reset_port, fadt.reset_value));\n        }\n    };\n\n    log::info!(\"[ACPI]: Collected information {:?}\", acpi_info);\n\n    ACPI_INFO.call_once(|| acpi_info);\n}"
 }

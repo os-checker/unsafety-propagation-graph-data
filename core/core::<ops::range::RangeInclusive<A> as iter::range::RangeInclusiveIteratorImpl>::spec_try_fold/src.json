@@ -1,5 +1,5 @@
 {
   "name": "core::<ops::range::RangeInclusive<A> as iter::range::RangeInclusiveIteratorImpl>::spec_try_fold",
   "span": "$library/core/src/iter/range.rs:1081:5: 1085:28",
-  "src": "default fn spec_try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R\n    where\n        Self: Sized,\n        F: FnMut(B, A) -> R,\n        R: Try<Output = B>,"
+  "src": "default fn spec_try_fold<B, F, R>(&mut self, init: B, mut f: F) -> R\n    where\n        Self: Sized,\n        F: FnMut(B, A) -> R,\n        R: Try<Output = B>,\n    {\n        if self.is_empty() {\n            return try { init };\n        }\n\n        let mut accum = init;\n\n        while self.start < self.end {\n            let n =\n                Step::forward_checked(self.start.clone(), 1).expect(\"`Step` invariants not upheld\");\n            let n = mem::replace(&mut self.start, n);\n            accum = f(accum, n)?;\n        }\n\n        self.exhausted = true;\n\n        if self.start == self.end {\n            accum = f(accum, self.start.clone())?;\n        }\n\n        try { accum }\n    }"
 }

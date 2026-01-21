@@ -1,5 +1,5 @@
 {
   "name": "ostd::task::scheduler::enable_preemption_on_cpu",
   "span": "ostd/src/task/scheduler/mod.rs:100:1: 100:34",
-  "src": "pub fn enable_preemption_on_cpu()"
+  "src": "pub fn enable_preemption_on_cpu() {\n    timer::register_callback_on_cpu(|| {\n        SCHEDULER.get().unwrap().mut_local_rq_with(&mut |local_rq| {\n            let should_pick_next = local_rq.update_current(UpdateFlags::Tick);\n            if should_pick_next {\n                cpu_local::set_need_preempt();\n            }\n        })\n    });\n}"
 }

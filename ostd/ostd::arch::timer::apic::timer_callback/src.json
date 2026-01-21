@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::timer::apic::timer_callback",
   "span": "ostd/src/arch/x86/timer/apic.rs:42:1: 42:31",
-  "src": "pub(super) fn timer_callback()"
+  "src": "pub(super) fn timer_callback() {\n    use x86::msr::{IA32_TSC_DEADLINE, wrmsr};\n\n    match CONFIG.get().expect(\"ACPI timer config is not initialized\") {\n        Config::DeadlineMode { tsc_interval } => {\n            let tsc_value = crate::arch::read_tsc();\n            let next_tsc_value = tsc_interval + tsc_value;\n            unsafe { wrmsr(IA32_TSC_DEADLINE, next_tsc_value) };\n        }\n        Config::PeriodicMode { .. } => {}\n    }\n}"
 }

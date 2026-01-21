@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::read_random",
   "span": "ostd/src/arch/x86/mod.rs:128:1: 128:36",
-  "src": "pub fn read_random() -> Option<u64>"
+  "src": "pub fn read_random() -> Option<u64> {\n    use core::arch::x86_64::_rdrand64_step;\n\n    use cpu::extension::{IsaExtensions, has_extensions};\n\n    if !has_extensions(IsaExtensions::RDRAND) {\n        return None;\n    }\n\n    // Recommendation from \"Intel(R) Digital Random Number Generator (DRNG) Software\n    // Implementation Guide\" - Section 5.2.1 and \"Intel(R) 64 and IA-32 Architectures\n    // Software Developer's Manual\" - Volume 1 - Section 7.3.17.1.\n    const RETRY_LIMIT: usize = 10;\n\n    for _ in 0..RETRY_LIMIT {\n        let mut val = 0;\n        let generated = unsafe { _rdrand64_step(&mut val) };\n        if generated == 1 {\n            return Some(val);\n        }\n    }\n    None\n}"
 }

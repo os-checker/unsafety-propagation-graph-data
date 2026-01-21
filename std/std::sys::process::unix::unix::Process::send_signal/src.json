@@ -1,5 +1,5 @@
 {
   "name": "std::sys::process::unix::unix::Process::send_signal",
   "span": "$library/std/src/sys/process/unix/unix.rs:988:5: 988:68",
-  "src": "pub(crate) fn send_signal(&self, signal: i32) -> io::Result<()>"
+  "src": "pub(crate) fn send_signal(&self, signal: i32) -> io::Result<()> {\n        // If we've already waited on this process then the pid can be recycled and\n        // used for another process, and we probably shouldn't be sending signals to\n        // random processes, so return Ok because the process has exited already.\n        if self.status.is_some() {\n            return Ok(());\n        }\n        #[cfg(target_os = \"linux\")]\n        if let Some(pid_fd) = self.pidfd.as_ref() {\n            // pidfd_send_signal predates pidfd_open. so if we were able to get an fd then sending signals will work too\n            return pid_fd.send_signal(signal);\n        }\n        cvt(unsafe { libc::kill(self.pid, signal) }).map(drop)\n    }"
 }

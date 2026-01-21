@@ -1,5 +1,5 @@
 {
   "name": "std::sys::personality::gcc::find_eh_action",
   "span": "$library/std/src/sys/personality/gcc.rs:323:1: 323:84",
-  "src": "unsafe fn find_eh_action(context: *mut uw::_Unwind_Context) -> Result<EHAction, ()>"
+  "src": "unsafe fn find_eh_action(context: *mut uw::_Unwind_Context) -> Result<EHAction, ()> {\n    unsafe {\n        let lsda = uw::_Unwind_GetLanguageSpecificData(context) as *const u8;\n        let mut ip_before_instr: c_int = 0;\n        let ip = uw::_Unwind_GetIPInfo(context, &mut ip_before_instr);\n        let eh_context = EHContext {\n            // The return address points 1 byte past the call instruction,\n            // which could be in the next IP range in LSDA range table.\n            //\n            // `ip = -1` has special meaning, so use wrapping sub to allow for that\n            ip: if ip_before_instr != 0 { ip } else { ip.wrapping_sub(1) },\n            func_start: uw::_Unwind_GetRegionStart(context),\n            get_text_start: &|| uw::_Unwind_GetTextRelBase(context),\n            get_data_start: &|| uw::_Unwind_GetDataRelBase(context),\n        };\n        eh::find_eh_action(lsda, &eh_context)\n    }\n}"
 }

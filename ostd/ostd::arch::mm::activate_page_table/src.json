@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::mm::activate_page_table",
   "span": "ostd/src/arch/x86/mm/mod.rs:150:1: 150:88",
-  "src": "pub(crate) unsafe fn activate_page_table(root_paddr: Paddr, root_pt_cache: CachePolicy)"
+  "src": "pub(crate) unsafe fn activate_page_table(root_paddr: Paddr, root_pt_cache: CachePolicy) {\n    let addr = PhysFrame::from_start_address(x86_64::PhysAddr::new(root_paddr as u64)).unwrap();\n    let flags = match root_pt_cache {\n        CachePolicy::Writeback => x86_64::registers::control::Cr3Flags::empty(),\n        CachePolicy::Writethrough => x86_64::registers::control::Cr3Flags::PAGE_LEVEL_WRITETHROUGH,\n        CachePolicy::Uncacheable => x86_64::registers::control::Cr3Flags::PAGE_LEVEL_CACHE_DISABLE,\n        // Write-combining and write-protected are not supported for root page table (CR3)\n        // as CR3 only supports WB, WT, and UC via PCD/PWT bits\n        _ => {\n            panic!(\n                \"unsupported cache policy for the root page table (only WB, WT, and UC are allowed)\"\n            )\n        }\n    };\n\n    // SAFETY: The safety is upheld by the caller.\n    unsafe { x86_64::registers::control::Cr3::write(addr, flags) };\n}"
 }

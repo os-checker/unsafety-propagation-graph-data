@@ -1,5 +1,5 @@
 {
   "name": "core::array::iter::iter_inner::PolymorphicIter::<[mem::maybe_uninit::MaybeUninit<T>]>::advance_by",
   "span": "$library/core/src/array/iter/iter_inner.rs:185:5: 185:80",
-  "src": "pub(super) fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>>"
+  "src": "pub(super) fn advance_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {\n        // This also moves the start, which marks them as conceptually \"dropped\",\n        // so if anything goes bad then our drop impl won't double-free them.\n        let range_to_drop = self.alive.take_prefix(n);\n        let remaining = n - range_to_drop.len();\n\n        // SAFETY: These elements are currently initialized, so it's fine to drop them.\n        unsafe {\n            let slice = self.data.get_unchecked_mut(range_to_drop);\n            slice.assume_init_drop();\n        }\n\n        NonZero::new(remaining).map_or(Ok(()), Err)\n    }"
 }

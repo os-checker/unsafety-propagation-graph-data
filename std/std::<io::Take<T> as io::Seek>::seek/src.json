@@ -1,5 +1,5 @@
 {
   "name": "std::<io::Take<T> as io::Seek>::seek",
   "span": "$library/std/src/io/mod.rs:3143:5: 3143:53",
-  "src": "fn seek(&mut self, pos: SeekFrom) -> Result<u64>"
+  "src": "fn seek(&mut self, pos: SeekFrom) -> Result<u64> {\n        let new_position = match pos {\n            SeekFrom::Start(v) => Some(v),\n            SeekFrom::Current(v) => self.position().checked_add_signed(v),\n            SeekFrom::End(v) => self.len.checked_add_signed(v),\n        };\n        let new_position = match new_position {\n            Some(v) if v <= self.len => v,\n            _ => return Err(ErrorKind::InvalidInput.into()),\n        };\n        while new_position != self.position() {\n            if let Some(offset) = new_position.checked_signed_diff(self.position()) {\n                self.inner.seek_relative(offset)?;\n                self.limit = self.limit.wrapping_sub(offset as u64);\n                break;\n            }\n            let offset = if new_position > self.position() { i64::MAX } else { i64::MIN };\n            self.inner.seek_relative(offset)?;\n            self.limit = self.limit.wrapping_sub(offset as u64);\n        }\n        Ok(new_position)\n    }"
 }

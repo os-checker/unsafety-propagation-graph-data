@@ -1,5 +1,5 @@
 {
   "name": "core::mem::transmutability::TransmuteFrom::transmute",
   "span": "$library/core/src/mem/transmutability.rs:116:5: 119:21",
-  "src": "unsafe fn transmute(src: Src) -> Self\n    where\n        Src: Sized,\n        Self: Sized,"
+  "src": "unsafe fn transmute(src: Src) -> Self\n    where\n        Src: Sized,\n        Self: Sized,\n    {\n        use super::ManuallyDrop;\n\n        #[repr(C)]\n        union Transmute<Src, Dst> {\n            src: ManuallyDrop<Src>,\n            dst: ManuallyDrop<Dst>,\n        }\n\n        let transmute = Transmute { src: ManuallyDrop::new(src) };\n\n        // SAFETY: It is safe to reinterpret the bits of `src` as a value of\n        // type `Self`, because, by combination of invariant on this trait and\n        // contract on the caller, `src` has been proven to satisfy both the\n        // language and library invariants of `Self`. For all invariants not\n        // `ASSUME`'d by the caller, the safety obligation is supplied by the\n        // compiler. Conversely, for all invariants `ASSUME`'d by the caller,\n        // the safety obligation is supplied by contract on the caller.\n        let dst = unsafe { transmute.dst };\n\n        ManuallyDrop::into_inner(dst)\n    }"
 }

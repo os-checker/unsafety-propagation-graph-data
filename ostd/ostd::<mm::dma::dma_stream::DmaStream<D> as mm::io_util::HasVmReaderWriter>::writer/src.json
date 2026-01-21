@@ -1,5 +1,5 @@
 {
   "name": "ostd::<mm::dma::dma_stream::DmaStream<D> as mm::io_util::HasVmReaderWriter>::writer",
   "span": "ostd/src/mm/dma/dma_stream.rs:398:5: 398:64",
-  "src": "fn writer(&self) -> Result<VmWriter<'_, Infallible>, Error>"
+  "src": "fn writer(&self) -> Result<VmWriter<'_, Infallible>, Error> {\n        if !D::CAN_WRITE_TO_DEVICE {\n            return Err(Error::AccessDenied);\n        }\n        match &self.inner {\n            Inner::Segment(seg) | Inner::Both(_, _, seg) => Ok(seg.writer()),\n            Inner::Kva(kva, _) => {\n                // SAFETY:\n                //  - Although the memory range points to typed memory, the range is for DMA\n                //    and the access is not by linear mapping.\n                //  - The KVA is alive during the lifetime `'_`.\n                //  - Using `VmReader` and `VmWriter` is the only way to access the KVA.\n                unsafe {\n                    Ok(VmWriter::from_kernel_space(\n                        kva.start() as *mut u8,\n                        kva.size(),\n                    ))\n                }\n            }\n        }\n    }"
 }

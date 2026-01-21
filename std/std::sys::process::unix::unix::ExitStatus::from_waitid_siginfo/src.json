@@ -1,5 +1,5 @@
 {
   "name": "std::sys::process::unix::unix::ExitStatus::from_waitid_siginfo",
   "span": "$library/std/src/sys/process/unix/unix.rs:1062:5: 1062:71",
-  "src": "pub fn from_waitid_siginfo(siginfo: libc::siginfo_t) -> ExitStatus"
+  "src": "pub fn from_waitid_siginfo(siginfo: libc::siginfo_t) -> ExitStatus {\n        let status = unsafe { siginfo.si_status() };\n\n        match siginfo.si_code {\n            libc::CLD_EXITED => ExitStatus((status & 0xff) << 8),\n            libc::CLD_KILLED => ExitStatus(status),\n            libc::CLD_DUMPED => ExitStatus(status | 0x80),\n            libc::CLD_CONTINUED => ExitStatus(0xffff),\n            libc::CLD_STOPPED | libc::CLD_TRAPPED => ExitStatus(((status & 0xff) << 8) | 0x7f),\n            _ => unreachable!(\"waitid() should only return the above codes\"),\n        }\n    }"
 }

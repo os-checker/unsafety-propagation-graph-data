@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::btree::map::entry::OccupiedEntry::<'a, K, V, A>::remove_kv",
   "span": "$library/alloc/src/collections/btree/map/entry.rs:606:5: 606:44",
-  "src": "pub(super) fn remove_kv(self) -> (K, V)"
+  "src": "pub(super) fn remove_kv(self) -> (K, V) {\n        let mut emptied_internal_root = false;\n        let (old_kv, _) =\n            self.handle.remove_kv_tracking(|| emptied_internal_root = true, self.alloc.clone());\n        // SAFETY: we consumed the intermediate root borrow, `self.handle`.\n        let map = unsafe { self.dormant_map.awaken() };\n        map.length -= 1;\n        if emptied_internal_root {\n            let root = map.root.as_mut().unwrap();\n            root.pop_internal_level(self.alloc);\n        }\n        old_kv\n    }"
 }

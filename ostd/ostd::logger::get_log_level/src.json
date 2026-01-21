@@ -1,5 +1,5 @@
 {
   "name": "ostd::logger::get_log_level",
   "span": "ostd/src/logger.rs:88:1: 88:42",
-  "src": "fn get_log_level() -> Option<LevelFilter>"
+  "src": "fn get_log_level() -> Option<LevelFilter> {\n    let kcmdline = EARLY_INFO.get().unwrap().kernel_cmdline;\n\n    // Although OSTD is agnostic of the parsing of the kernel command line,\n    // the logger assumes that it follows the Linux kernel command line format.\n    // We search for the `ostd.log_level=ARGUMENT` pattern in string.\n    let value = kcmdline\n        .split(' ')\n        .find(|arg| arg.starts_with(\"ostd.log_level=\"))\n        .map(|arg| arg.split('=').next_back().unwrap_or_default())?;\n\n    LevelFilter::from_str(value).ok()\n}"
 }

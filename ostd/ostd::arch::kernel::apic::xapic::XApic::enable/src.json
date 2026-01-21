@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::kernel::apic::xapic::XApic::enable",
   "span": "ostd/src/arch/x86/kernel/apic/xapic.rs:44:5: 44:36",
-  "src": "pub(super) fn enable(&mut self)"
+  "src": "pub(super) fn enable(&mut self) {\n        const XAPIC_ENABLE_BITS: u64 = {\n            // IA32_APIC_BASE MSR's EN bit: xAPIC global enable/disable\n            const EN_BIT_IDX: u8 = 11;\n\n            1 << EN_BIT_IDX\n        };\n\n        // SAFETY: These operations enable xAPIC, which is safe because `XApic` will only be\n        // constructed if xAPIC is known to be present.\n        unsafe {\n            // Enable xAPIC if it is not enabled by default.\n            wrmsr(\n                IA32_APIC_BASE,\n                self.io_mem.paddr() as u64 | XAPIC_ENABLE_BITS,\n            );\n\n            // Set SVR. Enable APIC and set Spurious Vector to 15 (reserved IRQ number).\n            let svr: u32 = (1 << 8) | 15;\n            self.io_mem.write_once(xapic::XAPIC_SVR as usize, &svr);\n        }\n    }"
 }

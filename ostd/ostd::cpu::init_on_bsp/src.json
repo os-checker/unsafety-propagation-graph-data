@@ -1,5 +1,5 @@
 {
   "name": "ostd::cpu::init_on_bsp",
   "span": "ostd/src/cpu/mod.rs:28:1: 28:35",
-  "src": "pub(crate) unsafe fn init_on_bsp()"
+  "src": "pub(crate) unsafe fn init_on_bsp() {\n    let num_cpus = crate::arch::boot::smp::count_processors().unwrap_or(1);\n\n    // SAFETY:\n    // 1. We're in the boot context of the BSP and APs have not yet booted.\n    // 2. The number of CPUs is correct.\n    // 3. CPU-local storage has NOT been used.\n    unsafe { local::copy_bsp_for_ap(num_cpus as usize) };\n\n    // For this point on, CPU-local storage on all CPUs are safe to use.\n\n    // SAFETY:\n    // 1. We're in the boot context of the BSP.\n    // 2. The number of CPUs is correct.\n    unsafe { id::init_on_bsp(num_cpus) };\n}"
 }

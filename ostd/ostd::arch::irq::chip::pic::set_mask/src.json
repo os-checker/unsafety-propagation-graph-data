@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::irq::chip::pic::set_mask",
   "span": "ostd/src/arch/x86/irq/chip/pic.rs:28:1: 28:45",
-  "src": "fn set_mask(master_mask: u8, slave_mask: u8)"
+  "src": "fn set_mask(master_mask: u8, slave_mask: u8) {\n    // Start initialization\n    MASTER_CMD.write(0x11);\n    SLAVE_CMD.write(0x11);\n\n    // Set offsets\n    // - Map master PIC vector 0x00~0x07 to IRQ number 0x20~0x27\n    MASTER_DATA.write(IRQ_OFFSET);\n    // - Map slave PIC vector 0x00~0x07 to IRQ number 0x28~0x2f\n    SLAVE_DATA.write(IRQ_OFFSET + 0x08);\n\n    // Set up cascade (there is a slave PIC at IRQ2)\n    MASTER_DATA.write(4);\n    SLAVE_DATA.write(2);\n\n    // Set up interrupt mode (1 is 8086/88 mode, 2 is auto EOI)\n    MASTER_DATA.write(1);\n    SLAVE_DATA.write(1);\n\n    // Mask interrupts\n    MASTER_DATA.write(master_mask);\n    SLAVE_DATA.write(slave_mask);\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::sync::once_lock::OnceLock::<T>::initialize",
   "span": "$library/std/src/sync/once_lock.rs:524:5: 526:37",
-  "src": "fn initialize<F, E>(&self, f: F) -> Result<(), E>\n    where\n        F: FnOnce() -> Result<T, E>,"
+  "src": "fn initialize<F, E>(&self, f: F) -> Result<(), E>\n    where\n        F: FnOnce() -> Result<T, E>,\n    {\n        let mut res: Result<(), E> = Ok(());\n        let slot = &self.value;\n\n        // Ignore poisoning from other threads\n        // If another thread panics, then we'll be able to run our closure\n        self.once.call_once_force(|p| {\n            match f() {\n                Ok(value) => {\n                    unsafe { (&mut *slot.get()).write(value) };\n                }\n                Err(e) => {\n                    res = Err(e);\n\n                    // Treat the underlying `Once` as poisoned since we\n                    // failed to initialize our value.\n                    p.poison();\n                }\n            }\n        });\n        res\n    }"
 }

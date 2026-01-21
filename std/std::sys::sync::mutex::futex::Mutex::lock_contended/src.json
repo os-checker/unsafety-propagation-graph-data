@@ -1,5 +1,5 @@
 {
   "name": "std::sys::sync::mutex::futex::Mutex::lock_contended",
   "span": "$library/std/src/sys/sync/mutex/futex.rs:38:5: 38:29",
-  "src": "fn lock_contended(&self)"
+  "src": "fn lock_contended(&self) {\n        // Spin first to speed things up if the lock is released quickly.\n        let mut state = self.spin();\n\n        // If it's unlocked now, attempt to take the lock\n        // without marking it as contended.\n        if state == UNLOCKED {\n            match self.futex.compare_exchange(UNLOCKED, LOCKED, Acquire, Relaxed) {\n                Ok(_) => return, // Locked!\n                Err(s) => state = s,\n            }\n        }\n\n        loop {\n            // Put the lock in contended state.\n            // We avoid an unnecessary write if it as already set to CONTENDED,\n            // to be friendlier for the caches.\n            if state != CONTENDED && self.futex.swap(CONTENDED, Acquire) == UNLOCKED {\n                // We changed it from UNLOCKED to CONTENDED, so we just successfully locked it.\n                return;\n            }\n\n            // Wait for the futex to change state, assuming it is still CONTENDED.\n            futex_wait(&self.futex, CONTENDED, None);\n\n            // Spin again after waking up.\n            state = self.spin();\n        }\n    }"
 }

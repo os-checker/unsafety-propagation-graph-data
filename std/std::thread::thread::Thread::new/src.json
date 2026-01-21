@@ -1,5 +1,5 @@
 {
   "name": "std::thread::thread::Thread::new",
   "span": "$library/std/src/thread/thread.rs:93:5: 93:68",
-  "src": "pub(crate) fn new(id: ThreadId, name: Option<String>) -> Thread"
+  "src": "pub(crate) fn new(id: ThreadId, name: Option<String>) -> Thread {\n        let name = name.map(ThreadNameString::from);\n\n        // We have to use `unsafe` here to construct the `Parker` in-place,\n        // which is required for the UNIX implementation.\n        //\n        // SAFETY: We pin the Arc immediately after creation, so its address never\n        // changes.\n        let inner = unsafe {\n            let mut arc = Arc::<Inner, _>::new_uninit_in(System);\n            let ptr = Arc::get_mut_unchecked(&mut arc).as_mut_ptr();\n            (&raw mut (*ptr).name).write(name);\n            (&raw mut (*ptr).id).write(id);\n            Parker::new_in_place(&raw mut (*ptr).parker);\n            Pin::new_unchecked(arc.assume_init())\n        };\n\n        Thread { inner }\n    }"
 }

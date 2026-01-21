@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::io::VmWriter::<'_>::write_val",
   "span": "ostd/src/mm/io.rs:844:5: 844:67",
-  "src": "pub fn write_val<T: Pod>(&mut self, new_val: &T) -> Result<()>"
+  "src": "pub fn write_val<T: Pod>(&mut self, new_val: &T) -> Result<()> {\n        if self.avail() < size_of::<T>() {\n            return Err(Error::InvalidArgs);\n        }\n\n        let mut reader = VmReader::from(new_val.as_bytes());\n        self.write_fallible(&mut reader)\n            .map_err(|(err, copied_len)| {\n                // The `copied_len` is the number of bytes written so far.\n                // So the `cursor` can be moved back to the original position.\n                self.cursor = self.cursor.wrapping_sub(copied_len);\n                err\n            })?;\n        Ok(())\n    }"
 }

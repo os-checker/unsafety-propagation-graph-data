@@ -1,5 +1,5 @@
 {
   "name": "std::sys::fs::unix::FileAttr::created",
   "span": "$library/std/src/sys/fs/unix.rs:572:5: 572:52",
-  "src": "pub fn created(&self) -> io::Result<SystemTime>"
+  "src": "pub fn created(&self) -> io::Result<SystemTime> {\n        cfg_has_statx! {\n            if let Some(ext) = &self.statx_extra_fields {\n                return if (ext.stx_mask & libc::STATX_BTIME) != 0 {\n                    SystemTime::new(ext.stx_btime.tv_sec, ext.stx_btime.tv_nsec as i64)\n                } else {\n                    Err(io::const_error!(\n                        io::ErrorKind::Unsupported,\n                        \"creation time is not available for the filesystem\",\n                    ))\n                };\n            }\n        }\n\n        Err(io::const_error!(\n            io::ErrorKind::Unsupported,\n            \"creation time is not available on this platform currently\",\n        ))\n    }"
 }

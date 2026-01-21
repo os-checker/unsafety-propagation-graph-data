@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::boot_pt::BootPageTable::<E, C>::alloc_child",
   "span": "ostd/src/mm/page_table/boot_pt.rs:254:5: 254:35",
-  "src": "fn alloc_child(&mut self) -> E"
+  "src": "fn alloc_child(&mut self) -> E {\n        let frame_paddr = if frame::meta::is_initialized() {\n            let frame = FrameAllocOptions::new()\n                .zeroed(false)\n                .alloc_frame_with(EarlyAllocatedFrameMeta)\n                .unwrap();\n            frame.into_raw()\n        } else {\n            allocator::early_alloc(\n                Layout::from_size_align(C::BASE_PAGE_SIZE, C::BASE_PAGE_SIZE).unwrap(),\n            )\n            .unwrap()\n        };\n\n        // Zero it out.\n        let vaddr = paddr_to_vaddr(frame_paddr) as *mut u8;\n        unsafe { core::ptr::write_bytes(vaddr, 0, PAGE_SIZE) };\n\n        E::new_pt(frame_paddr)\n    }"
 }

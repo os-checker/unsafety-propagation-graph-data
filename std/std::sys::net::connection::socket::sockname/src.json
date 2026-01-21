@@ -1,5 +1,5 @@
 {
   "name": "std::sys::net::connection::socket::sockname",
   "span": "$library/std/src/sys/net/connection/socket/mod.rs:286:1: 288:61",
-  "src": "unsafe fn sockname<F>(f: F) -> io::Result<SocketAddr>\nwhere\n    F: FnOnce(*mut c::sockaddr, *mut c::socklen_t) -> c_int,"
+  "src": "unsafe fn sockname<F>(f: F) -> io::Result<SocketAddr>\nwhere\n    F: FnOnce(*mut c::sockaddr, *mut c::socklen_t) -> c_int,\n{\n    let mut storage = MaybeUninit::<c::sockaddr_storage>::zeroed();\n    let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;\n    cvt(f(storage.as_mut_ptr().cast(), &mut len))?;\n    // SAFETY:\n    // The caller guarantees that the storage has been successfully initialized\n    // and its size written to `len` if `f` returns a success.\n    unsafe { socket_addr_from_c(storage.as_ptr(), len as usize) }\n}"
 }

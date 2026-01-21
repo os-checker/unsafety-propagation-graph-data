@@ -1,5 +1,5 @@
 {
   "name": "std::io::copy::stack_buffer_copy",
   "span": "$library/std/src/io/copy.rs:258:1: 261:17",
-  "src": "fn stack_buffer_copy<R: Read + ?Sized, W: Write + ?Sized>(\n    reader: &mut R,\n    writer: &mut W,\n) -> Result<u64>"
+  "src": "fn stack_buffer_copy<R: Read + ?Sized, W: Write + ?Sized>(\n    reader: &mut R,\n    writer: &mut W,\n) -> Result<u64> {\n    let buf: &mut [_] = &mut [MaybeUninit::uninit(); DEFAULT_BUF_SIZE];\n    let mut buf: BorrowedBuf<'_> = buf.into();\n\n    let mut len = 0;\n\n    loop {\n        match reader.read_buf(buf.unfilled()) {\n            Ok(()) => {}\n            Err(e) if e.is_interrupted() => continue,\n            Err(e) => return Err(e),\n        };\n\n        if buf.filled().is_empty() {\n            break;\n        }\n\n        len += buf.filled().len() as u64;\n        writer.write_all(buf.filled())?;\n        buf.clear();\n    }\n\n    Ok(len)\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::process::Child::wait_with_output",
   "span": "$library/std/src/process.rs:2368:5: 2368:60",
-  "src": "pub fn wait_with_output(mut self) -> io::Result<Output>"
+  "src": "pub fn wait_with_output(mut self) -> io::Result<Output> {\n        drop(self.stdin.take());\n\n        let (mut stdout, mut stderr) = (Vec::new(), Vec::new());\n        match (self.stdout.take(), self.stderr.take()) {\n            (None, None) => {}\n            (Some(mut out), None) => {\n                let res = out.read_to_end(&mut stdout);\n                res.unwrap();\n            }\n            (None, Some(mut err)) => {\n                let res = err.read_to_end(&mut stderr);\n                res.unwrap();\n            }\n            (Some(out), Some(err)) => {\n                let res = read2(out.inner, &mut stdout, err.inner, &mut stderr);\n                res.unwrap();\n            }\n        }\n\n        let status = self.wait()?;\n        Ok(Output { status, stdout, stderr })\n    }"
 }

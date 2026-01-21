@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::backtrace::libunwind::Frame::ip",
   "span": "$library/std/src/../../backtrace/src/backtrace/libunwind.rs:38:5: 38:36",
-  "src": "pub fn ip(&self) -> *mut c_void"
+  "src": "pub fn ip(&self) -> *mut c_void {\n        let ctx = match *self {\n            Frame::Raw(ctx) => ctx,\n            Frame::Cloned { ip, .. } => return ip,\n        };\n        #[allow(unused_mut)]\n        let mut ip = unsafe { uw::_Unwind_GetIP(ctx) as *mut c_void };\n\n        // To reduce TCB size in SGX enclaves, we do not want to implement\n        // symbol resolution functionality. Rather, we can print the offset of\n        // the address here, which could be later mapped to correct function.\n        #[cfg(all(target_env = \"sgx\", target_vendor = \"fortanix\"))]\n        {\n            let image_base = super::sgx_image_base::get_image_base();\n            ip = usize::wrapping_sub(ip as usize, image_base as _) as _;\n        }\n        ip\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::irq::bottom_half::process_l1",
   "span": "ostd/src/irq/bottom_half.rs:50:1: 50:27",
-  "src": "fn process_l1(irq_num: u8)"
+  "src": "fn process_l1(irq_num: u8) {\n    let Some(handler) = BOTTOM_HALF_HANDLER_L1.get() else {\n        return;\n    };\n\n    // We need to disable preemption when processing bottom half since\n    // the interrupt is enabled in this context.\n    // This needs to be done before enabling the local interrupts to\n    // avoid race conditions.\n    let preempt_guard = disable_preempt();\n    crate::arch::irq::enable_local();\n\n    // We need to ensure that local interrupts are disabled\n    // when the handler returns to prevent race conditions.\n    // See <https://github.com/asterinas/asterinas/pull/1623#discussion_r1964709636> for more details.\n    let irq_guard = disable_local();\n    let irq_guard = handler(irq_guard, irq_num);\n\n    // Interrupts should remain disabled when `process_bottom_half` returns,\n    // so we simply forget the guard.\n    core::mem::forget(irq_guard);\n    drop(preempt_guard);\n}"
 }

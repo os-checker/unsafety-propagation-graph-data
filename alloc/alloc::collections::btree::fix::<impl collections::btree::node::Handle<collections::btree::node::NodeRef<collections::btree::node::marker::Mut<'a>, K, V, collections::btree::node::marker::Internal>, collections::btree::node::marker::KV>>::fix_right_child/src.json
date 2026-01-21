@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::btree::fix::<impl collections::btree::node::Handle<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'a>, K, V, collections::btree::node::marker::Internal>, collections::btree::node::marker::KV>>::fix_right_child",
   "span": "$library/alloc/src/collections/btree/fix.rs:167:5: 170:64",
-  "src": "fn fix_right_child<A: Allocator + Clone>(\n        self,\n        alloc: A,\n    ) -> NodeRef<marker::Mut<'a>, K, V, marker::LeafOrInternal>"
+  "src": "fn fix_right_child<A: Allocator + Clone>(\n        self,\n        alloc: A,\n    ) -> NodeRef<marker::Mut<'a>, K, V, marker::LeafOrInternal> {\n        let mut internal_kv = self.consider_for_balancing();\n        let right_len = internal_kv.right_child_len();\n        debug_assert!(internal_kv.left_child_len() >= MIN_LEN);\n        if internal_kv.can_merge() {\n            internal_kv.merge_tracking_child(alloc)\n        } else {\n            // `MIN_LEN + 1` to avoid readjust if merge happens on the next level.\n            let count = (MIN_LEN + 1).saturating_sub(right_len);\n            if count > 0 {\n                internal_kv.bulk_steal_left(count);\n            }\n            internal_kv.into_right_child()\n        }\n    }"
 }

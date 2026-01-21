@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace::Backtrace::enabled",
   "span": "$library/std/src/backtrace.rs:253:5: 253:25",
-  "src": "fn enabled() -> bool"
+  "src": "fn enabled() -> bool {\n        // Cache the result of reading the environment variables to make\n        // backtrace captures speedy, because otherwise reading environment\n        // variables every time can be somewhat slow.\n        static ENABLED: Atomic<u8> = AtomicU8::new(0);\n        match ENABLED.load(Relaxed) {\n            0 => {}\n            1 => return false,\n            _ => return true,\n        }\n        let enabled = match env::var(\"RUST_LIB_BACKTRACE\") {\n            Ok(s) => s != \"0\",\n            Err(_) => match env::var(\"RUST_BACKTRACE\") {\n                Ok(s) => s != \"0\",\n                Err(_) => false,\n            },\n        };\n        ENABLED.store(enabled as u8 + 1, Relaxed);\n        enabled\n    }"
 }

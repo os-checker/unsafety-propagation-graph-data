@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::stack_overflow::imp::get_stack_start",
   "span": "$library/std/src/sys/pal/unix/stack_overflow.rs:361:5: 361:61",
-  "src": "unsafe fn get_stack_start() -> Option<*mut libc::c_void>"
+  "src": "unsafe fn get_stack_start() -> Option<*mut libc::c_void> {\n        let mut ret = None;\n        let mut attr: mem::MaybeUninit<libc::pthread_attr_t> = mem::MaybeUninit::uninit();\n        if !cfg!(target_os = \"freebsd\") {\n            attr = mem::MaybeUninit::zeroed();\n        }\n        #[cfg(target_os = \"freebsd\")]\n        assert_eq!(libc::pthread_attr_init(attr.as_mut_ptr()), 0);\n        #[cfg(target_os = \"freebsd\")]\n        let e = libc::pthread_attr_get_np(libc::pthread_self(), attr.as_mut_ptr());\n        #[cfg(not(target_os = \"freebsd\"))]\n        let e = libc::pthread_getattr_np(libc::pthread_self(), attr.as_mut_ptr());\n        if e == 0 {\n            let mut stackaddr = crate::ptr::null_mut();\n            let mut stacksize = 0;\n            assert_eq!(\n                libc::pthread_attr_getstack(attr.as_ptr(), &mut stackaddr, &mut stacksize),\n                0\n            );\n            ret = Some(stackaddr);\n        }\n        if e == 0 || cfg!(target_os = \"freebsd\") {\n            assert_eq!(libc::pthread_attr_destroy(attr.as_mut_ptr()), 0);\n        }\n        ret\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::sys::alloc::unix::aligned_malloc",
   "span": "$library/std/src/sys/alloc/unix.rs:73:9: 73:61",
-  "src": "unsafe fn aligned_malloc(layout: &Layout) -> *mut u8"
+  "src": "unsafe fn aligned_malloc(layout: &Layout) -> *mut u8 {\n            let mut out = ptr::null_mut();\n            // We prefer posix_memalign over aligned_alloc since it is more widely available, and\n            // since with aligned_alloc, implementations are making almost arbitrary choices for\n            // which alignments are \"supported\", making it hard to use. For instance, some\n            // implementations require the size to be a multiple of the alignment (wasi emmalloc),\n            // while others require the alignment to be at least the pointer size (Illumos, macOS).\n            // posix_memalign only has one, clear requirement: that the alignment be a multiple of\n            // `sizeof(void*)`. Since these are all powers of 2, we can just use max.\n            let align = layout.align().max(size_of::<usize>());\n            let ret = unsafe { libc::posix_memalign(&mut out, align, layout.size()) };\n            if ret != 0 { ptr::null_mut() } else { out as *mut u8 }\n        }"
 }

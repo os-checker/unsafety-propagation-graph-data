@@ -1,5 +1,5 @@
 {
   "name": "std::sys::net::connection::each_addr",
   "span": "$library/std/src/sys/net/connection/mod.rs:43:1: 45:63",
-  "src": "fn each_addr<A: crate::net::ToSocketAddrs, F, T>(addr: A, mut f: F) -> crate::io::Result<T>\nwhere\n    F: FnMut(&crate::net::SocketAddr) -> crate::io::Result<T>,"
+  "src": "fn each_addr<A: crate::net::ToSocketAddrs, F, T>(addr: A, mut f: F) -> crate::io::Result<T>\nwhere\n    F: FnMut(&crate::net::SocketAddr) -> crate::io::Result<T>,\n{\n    use crate::io::Error;\n\n    let mut last_err = None;\n    for addr in addr.to_socket_addrs()? {\n        match f(&addr) {\n            Ok(l) => return Ok(l),\n            Err(e) => last_err = Some(e),\n        }\n    }\n\n    match last_err {\n        Some(err) => Err(err),\n        None => Err(Error::NO_ADDRESSES),\n    }\n}"
 }

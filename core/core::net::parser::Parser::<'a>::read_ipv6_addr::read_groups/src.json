@@ -1,5 +1,5 @@
 {
   "name": "core::net::parser::Parser::<'a>::read_ipv6_addr::read_groups",
   "span": "$library/core/src/net/parser.rs:184:9: 184:80",
-  "src": "fn read_groups(p: &mut Parser<'_>, groups: &mut [u16]) -> (usize, bool)"
+  "src": "fn read_groups(p: &mut Parser<'_>, groups: &mut [u16]) -> (usize, bool) {\n            let limit = groups.len();\n\n            for (i, slot) in groups.iter_mut().enumerate() {\n                // Try to read a trailing embedded IPv4 address. There must be\n                // at least two groups left.\n                if i < limit - 1 {\n                    let ipv4 = p.read_separator(':', i, |p| p.read_ipv4_addr());\n\n                    if let Some(v4_addr) = ipv4 {\n                        let [one, two, three, four] = v4_addr.octets();\n                        groups[i + 0] = u16::from_be_bytes([one, two]);\n                        groups[i + 1] = u16::from_be_bytes([three, four]);\n                        return (i + 2, true);\n                    }\n                }\n\n                let group = p.read_separator(':', i, |p| p.read_number(16, Some(4), true));\n\n                match group {\n                    Some(g) => *slot = g,\n                    None => return (i, false),\n                }\n            }\n            (groups.len(), false)\n        }"
 }

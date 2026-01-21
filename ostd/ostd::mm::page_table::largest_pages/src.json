@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::largest_pages",
   "span": "ostd/src/mm/page_table/mod.rs:168:1: 172:48",
-  "src": "pub(crate) fn largest_pages<C: PageTableConfig>(\n    mut va: Vaddr,\n    mut pa: Paddr,\n    mut len: usize,\n) -> impl Iterator<Item = (Paddr, PagingLevel)>"
+  "src": "pub(crate) fn largest_pages<C: PageTableConfig>(\n    mut va: Vaddr,\n    mut pa: Paddr,\n    mut len: usize,\n) -> impl Iterator<Item = (Paddr, PagingLevel)> {\n    assert_eq!(va % C::BASE_PAGE_SIZE, 0);\n    assert_eq!(pa % C::BASE_PAGE_SIZE, 0);\n    assert_eq!(len % C::BASE_PAGE_SIZE, 0);\n    assert!(is_valid_range::<C>(&(va..(va + len))));\n\n    core::iter::from_fn(move || {\n        if len == 0 {\n            return None;\n        }\n\n        let mut level = C::HIGHEST_TRANSLATION_LEVEL;\n        while page_size::<C>(level) > len\n            || !va.is_multiple_of(page_size::<C>(level))\n            || !pa.is_multiple_of(page_size::<C>(level))\n        {\n            level -= 1;\n        }\n\n        let item_start = pa;\n        va += page_size::<C>(level);\n        pa += page_size::<C>(level);\n        len -= page_size::<C>(level);\n\n        Some((item_start, level))\n    })\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::<wtf8::Wtf8 as fmt::Display>::fmt",
   "span": "$library/core/src/wtf8.rs:180:5: 180:69",
-  "src": "fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result"
+  "src": "fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {\n        let wtf8_bytes = &self.bytes;\n        let mut pos = 0;\n        loop {\n            match self.next_surrogate(pos) {\n                Some((surrogate_pos, _)) => {\n                    // SAFETY: next_surrogate provides an index for a range of valid UTF-8 bytes.\n                    formatter.write_str(unsafe {\n                        str::from_utf8_unchecked(&wtf8_bytes[pos..surrogate_pos])\n                    })?;\n                    formatter.write_char(char::REPLACEMENT_CHARACTER)?;\n                    pos = surrogate_pos + 3;\n                }\n                None => {\n                    // SAFETY: after next_surrogate returns None, the remainder is valid UTF-8.\n                    let s = unsafe { str::from_utf8_unchecked(&wtf8_bytes[pos..]) };\n                    if pos == 0 { return s.fmt(formatter) } else { return formatter.write_str(s) }\n                }\n            }\n        }\n    }"
 }

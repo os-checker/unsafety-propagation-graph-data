@@ -1,5 +1,5 @@
 {
   "name": "std::io::default_read_to_string",
   "span": "$library/std/src/io/mod.rs:509:1: 513:19",
-  "src": "pub(crate) fn default_read_to_string<R: Read + ?Sized>(\n    r: &mut R,\n    buf: &mut String,\n    size_hint: Option<usize>,\n) -> Result<usize>"
+  "src": "pub(crate) fn default_read_to_string<R: Read + ?Sized>(\n    r: &mut R,\n    buf: &mut String,\n    size_hint: Option<usize>,\n) -> Result<usize> {\n    // Note that we do *not* call `r.read_to_end()` here. We are passing\n    // `&mut Vec<u8>` (the raw contents of `buf`) into the `read_to_end`\n    // method to fill it up. An arbitrary implementation could overwrite the\n    // entire contents of the vector, not just append to it (which is what\n    // we are expecting).\n    //\n    // To prevent extraneously checking the UTF-8-ness of the entire buffer\n    // we pass it to our hardcoded `default_read_to_end` implementation which\n    // we know is guaranteed to only read data into the end of the buffer.\n    unsafe { append_to_string(buf, |b| default_read_to_end(r, b, size_hint)) }\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::cursor::Cursor::<'rcu, C>::new",
   "span": "ostd/src/mm/page_table/cursor/mod.rs:120:5: 124:38",
-  "src": "pub fn new(\n        pt: &'rcu PageTable<C>,\n        guard: &'rcu dyn InAtomicMode,\n        va: &Range<Vaddr>,\n    ) -> Result<Self, PageTableError>"
+  "src": "pub fn new(\n        pt: &'rcu PageTable<C>,\n        guard: &'rcu dyn InAtomicMode,\n        va: &Range<Vaddr>,\n    ) -> Result<Self, PageTableError> {\n        if !is_valid_range::<C>(va) || va.is_empty() {\n            return Err(PageTableError::InvalidVaddrRange(va.start, va.end));\n        }\n        if !va.start.is_multiple_of(C::BASE_PAGE_SIZE) || !va.end.is_multiple_of(C::BASE_PAGE_SIZE)\n        {\n            return Err(PageTableError::UnalignedVaddr);\n        }\n\n        const { assert!(C::NR_LEVELS as usize <= MAX_NR_LEVELS) };\n\n        Ok(locking::lock_range(pt, guard, va))\n    }"
 }

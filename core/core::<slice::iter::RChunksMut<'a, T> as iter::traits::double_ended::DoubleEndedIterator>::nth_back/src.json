@@ -1,5 +1,5 @@
 {
   "name": "core::<slice::iter::RChunksMut<'a, T> as iter::traits::double_ended::DoubleEndedIterator>::nth_back",
   "span": "$library/core/src/slice/iter.rs:2558:5: 2558:59",
-  "src": "fn nth_back(&mut self, n: usize) -> Option<Self::Item>"
+  "src": "fn nth_back(&mut self, n: usize) -> Option<Self::Item> {\n        let len = self.len();\n        if n < len {\n            // can't underflow because `n < len`\n            let offset_from_end = (len - 1 - n) * self.chunk_size;\n            let end = self.v.len() - offset_from_end;\n            let start = end.saturating_sub(self.chunk_size);\n            // SAFETY: The self.v contract ensures that any split_at_mut is valid.\n            let (tmp, tail) = unsafe { self.v.split_at_mut(end) };\n            // SAFETY: The self.v contract ensures that any split_at_mut is valid.\n            let (_, nth_back) = unsafe { tmp.split_at_mut(start) };\n            self.v = tail;\n            // SAFETY: Nothing else points to or will point to the contents of this slice.\n            Some(unsafe { &mut *nth_back })\n        } else {\n            self.v = &mut [];\n            None\n        }\n    }"
 }

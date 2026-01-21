@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::wait::Waiter::wait_until_or_cancelled",
   "span": "ostd/src/sync/wait.rs:209:5: 216:54",
-  "src": "pub fn wait_until_or_cancelled<F, R, FCancel, E>(\n        &self,\n        mut cond: F,\n        cancel_cond: FCancel,\n    ) -> core::result::Result<R, E>\n    where\n        F: FnMut() -> Option<R>,\n        FCancel: Fn() -> core::result::Result<(), E>,"
+  "src": "pub fn wait_until_or_cancelled<F, R, FCancel, E>(\n        &self,\n        mut cond: F,\n        cancel_cond: FCancel,\n    ) -> core::result::Result<R, E>\n    where\n        F: FnMut() -> Option<R>,\n        FCancel: Fn() -> core::result::Result<(), E>,\n    {\n        loop {\n            if let Some(res) = cond() {\n                return Ok(res);\n            };\n\n            if let Err(e) = cancel_cond() {\n                // Close the waker and check again to avoid missing a wake event.\n                self.waker.close();\n                return cond().ok_or(e);\n            }\n\n            self.wait();\n        }\n    }"
 }

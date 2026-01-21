@@ -1,5 +1,5 @@
 {
   "name": "std::os::unix::net::addr::SocketAddr::address",
   "span": "$library/std/src/os/unix/net/addr.rs:238:5: 238:41",
-  "src": "fn address(&self) -> AddressKind<'_>"
+  "src": "fn address(&self) -> AddressKind<'_> {\n        let len = self.len as usize - SUN_PATH_OFFSET;\n        let path = unsafe { mem::transmute::<&[libc::c_char], &[u8]>(&self.addr.sun_path) };\n\n        // macOS seems to return a len of 16 and a zeroed sun_path for unnamed addresses\n        if len == 0\n            || (cfg!(not(any(target_os = \"linux\", target_os = \"android\", target_os = \"cygwin\")))\n                && self.addr.sun_path[0] == 0)\n        {\n            AddressKind::Unnamed\n        } else if self.addr.sun_path[0] == 0 {\n            AddressKind::Abstract(ByteStr::from_bytes(&path[1..len]))\n        } else {\n            AddressKind::Pathname(OsStr::from_bytes(&path[..len - 1]).as_ref())\n        }\n    }"
 }

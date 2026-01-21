@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<T, A>::truncate",
   "span": "$library/alloc/src/vec/mod.rs:1548:5: 1548:43",
-  "src": "pub fn truncate(&mut self, len: usize)"
+  "src": "pub fn truncate(&mut self, len: usize) {\n        // This is safe because:\n        //\n        // * the slice passed to `drop_in_place` is valid; the `len > self.len`\n        //   case avoids creating an invalid slice, and\n        // * the `len` of the vector is shrunk before calling `drop_in_place`,\n        //   such that no value will be dropped twice in case `drop_in_place`\n        //   were to panic once (if it panics twice, the program aborts).\n        unsafe {\n            // Note: It's intentional that this is `>` and not `>=`.\n            //       Changing it to `>=` has negative performance\n            //       implications in some cases. See #78884 for more.\n            if len > self.len {\n                return;\n            }\n            let remaining_len = self.len - len;\n            let s = ptr::slice_from_raw_parts_mut(self.as_mut_ptr().add(len), remaining_len);\n            self.len = len;\n            ptr::drop_in_place(s);\n        }\n    }"
 }

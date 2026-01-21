@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::init_cvm_guest",
   "span": "ostd/src/arch/x86/mod.rs:23:1: 23:31",
-  "src": "pub(crate) fn init_cvm_guest()"
+  "src": "pub(crate) fn init_cvm_guest() {\n    use ::tdx_guest::{\n        disable_sept_ve, init_tdx, metadata, reduce_unnecessary_ve,\n        tdcall::{InitError, write_td_metadata},\n    };\n    match init_tdx() {\n        Ok(td_info) => {\n            reduce_unnecessary_ve().unwrap();\n            disable_sept_ve(td_info.attributes).unwrap();\n            // Enable notification for zero step attack detection.\n            write_td_metadata(metadata::NOTIFY_ENABLES, 1, 1).unwrap();\n\n            crate::early_println!(\n                \"[kernel] Intel TDX initialized\\n[kernel] td gpaw: {}, td attributes: {:?}\",\n                td_info.gpaw,\n                td_info.attributes\n            );\n        }\n        Err(InitError::TdxGetVpInfoError(td_call_error)) => {\n            panic!(\n                \"[kernel] Intel TDX not initialized, Failed to get TD info: {:?}\",\n                td_call_error\n            );\n        }\n        // The machine has no TDX support.\n        Err(_) => {}\n    }\n}"
 }

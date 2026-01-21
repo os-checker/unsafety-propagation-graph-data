@@ -1,5 +1,5 @@
 {
   "name": "core::slice::<impl [T]>::as_chunks_unchecked_mut",
   "span": "$library/core/src/slice/mod.rs:1497:5: 1497:92",
-  "src": "pub const unsafe fn as_chunks_unchecked_mut<const N: usize>(&mut self) -> &mut [[T; N]]"
+  "src": "pub const unsafe fn as_chunks_unchecked_mut<const N: usize>(&mut self) -> &mut [[T; N]] {\n        assert_unsafe_precondition!(\n            check_language_ub,\n            \"slice::as_chunks_unchecked requires `N != 0` and the slice to split exactly into `N`-element chunks\",\n            (n: usize = N, len: usize = self.len()) => n != 0 && len.is_multiple_of(n)\n        );\n        // SAFETY: Caller must guarantee that `N` is nonzero and exactly divides the slice length\n        let new_len = unsafe { exact_div(self.len(), N) };\n        // SAFETY: We cast a slice of `new_len * N` elements into\n        // a slice of `new_len` many `N` elements chunks.\n        unsafe { from_raw_parts_mut(self.as_mut_ptr().cast(), new_len) }\n    }"
 }

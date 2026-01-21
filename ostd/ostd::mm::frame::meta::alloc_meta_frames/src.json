@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::meta::alloc_meta_frames",
   "span": "ostd/src/mm/frame/meta.rs:530:1: 530:61",
-  "src": "fn alloc_meta_frames(tot_nr_frames: usize) -> (usize, Paddr)"
+  "src": "fn alloc_meta_frames(tot_nr_frames: usize) -> (usize, Paddr) {\n    let nr_meta_pages = tot_nr_frames\n        .checked_mul(size_of::<MetaSlot>())\n        .unwrap()\n        .div_ceil(PAGE_SIZE);\n    let paddr = allocator::early_alloc(\n        Layout::from_size_align(nr_meta_pages * PAGE_SIZE, PAGE_SIZE).unwrap(),\n    )\n    .unwrap();\n\n    let slots = paddr_to_vaddr(paddr) as *mut MetaSlot;\n\n    // Initialize the metadata slots.\n    for i in 0..tot_nr_frames {\n        // SAFETY: The memory is successfully allocated with `tot_nr_frames`\n        // slots so the index must be within the range.\n        let slot = unsafe { slots.add(i) };\n        // SAFETY: The memory is just allocated so we have exclusive access and\n        // it's valid for writing.\n        unsafe {\n            slot.write(MetaSlot {\n                storage: UnsafeCell::new([0; FRAME_METADATA_MAX_SIZE]),\n                ref_count: AtomicU64::new(REF_COUNT_UNUSED),\n                vtable_ptr: UnsafeCell::new(MaybeUninit::uninit()),\n                in_list: AtomicU64::new(0),\n            })\n        };\n    }\n\n    (nr_meta_pages, paddr)\n}"
 }

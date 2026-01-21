@@ -1,5 +1,5 @@
 {
   "name": "core::cell::RefMut::<'b, T>::try_map",
   "span": "$library/core/src/cell.rs:1929:5: 1932:42",
-  "src": "pub fn try_map<U: ?Sized, E>(\n        mut orig: RefMut<'b, T>,\n        f: impl FnOnce(&mut T) -> Result<&mut U, E>,\n    ) -> Result<RefMut<'b, U>, (Self, E)>"
+  "src": "pub fn try_map<U: ?Sized, E>(\n        mut orig: RefMut<'b, T>,\n        f: impl FnOnce(&mut T) -> Result<&mut U, E>,\n    ) -> Result<RefMut<'b, U>, (Self, E)> {\n        // SAFETY: function holds onto an exclusive reference for the duration\n        // of its call through `orig`, and the pointer is only de-referenced\n        // inside of the function call never allowing the exclusive reference to\n        // escape.\n        match f(&mut *orig) {\n            Ok(value) => {\n                Ok(RefMut { value: NonNull::from(value), borrow: orig.borrow, marker: PhantomData })\n            }\n            Err(e) => Err((orig, e)),\n        }\n    }"
 }

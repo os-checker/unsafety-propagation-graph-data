@@ -1,5 +1,5 @@
 {
   "name": "core::str::traits::<impl slice::index::SliceIndex<str> for ops::range::Range<usize>>::get_unchecked_mut",
   "span": "$library/core/src/str/traits.rs:224:5: 224:76",
-  "src": "unsafe fn get_unchecked_mut(self, slice: *mut str) -> *mut Self::Output"
+  "src": "unsafe fn get_unchecked_mut(self, slice: *mut str) -> *mut Self::Output {\n        let slice = slice as *mut [u8];\n\n        assert_unsafe_precondition!(\n            check_library_ub,\n            \"str::get_unchecked_mut requires that the range is within the string slice\",\n            (\n                start: usize = self.start,\n                end: usize = self.end,\n                len: usize = slice.len()\n            ) => end >= start && end <= len,\n        );\n\n        // SAFETY: see comments for `get_unchecked`.\n        unsafe {\n            let new_len = unchecked_sub(self.end, self.start);\n            ptr::slice_from_raw_parts_mut(slice.as_mut_ptr().add(self.start), new_len) as *mut str\n        }\n    }"
 }

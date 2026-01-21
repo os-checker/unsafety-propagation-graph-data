@@ -1,5 +1,5 @@
 {
   "name": "core::<[mem::maybe_uninit::MaybeUninit<T>]>::write_clone_of_slice",
   "span": "$library/core/src/mem/maybe_uninit.rs:1205:5: 1207:18",
-  "src": "pub fn write_clone_of_slice(&mut self, src: &[T]) -> &mut [T]\n    where\n        T: Clone,"
+  "src": "pub fn write_clone_of_slice(&mut self, src: &[T]) -> &mut [T]\n    where\n        T: Clone,\n    {\n        // unlike copy_from_slice this does not call clone_from_slice on the slice\n        // this is because `MaybeUninit<T: Clone>` does not implement Clone.\n\n        assert_eq!(self.len(), src.len(), \"destination and source slices have different lengths\");\n\n        // NOTE: We need to explicitly slice them to the same length\n        // for bounds checking to be elided, and the optimizer will\n        // generate memcpy for simple cases (for example T = u8).\n        let len = self.len();\n        let src = &src[..len];\n\n        // guard is needed b/c panic might happen during a clone\n        let mut guard = Guard { slice: self, initialized: 0 };\n\n        for i in 0..len {\n            guard.slice[i].write(src[i].clone());\n            guard.initialized += 1;\n        }\n\n        super::forget(guard);\n\n        // SAFETY: Valid elements have just been written into `self` so it is initialized\n        unsafe { self.assume_init_mut() }\n    }"
 }

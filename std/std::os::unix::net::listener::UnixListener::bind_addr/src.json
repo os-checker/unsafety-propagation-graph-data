@@ -1,5 +1,5 @@
 {
   "name": "std::os::unix::net::listener::UnixListener::bind_addr",
   "span": "$library/std/src/os/unix/net/listener.rs:137:5: 137:75",
-  "src": "pub fn bind_addr(socket_addr: &SocketAddr) -> io::Result<UnixListener>"
+  "src": "pub fn bind_addr(socket_addr: &SocketAddr) -> io::Result<UnixListener> {\n        unsafe {\n            let inner = Socket::new(libc::AF_UNIX, libc::SOCK_STREAM)?;\n            #[cfg(target_os = \"linux\")]\n            const backlog: core::ffi::c_int = -1;\n            #[cfg(not(target_os = \"linux\"))]\n            const backlog: core::ffi::c_int = 128;\n            cvt(libc::bind(\n                inner.as_raw_fd(),\n                (&raw const socket_addr.addr) as *const _,\n                socket_addr.len as _,\n            ))?;\n            cvt(libc::listen(inner.as_raw_fd(), backlog))?;\n            Ok(UnixListener(inner))\n        }\n    }"
 }

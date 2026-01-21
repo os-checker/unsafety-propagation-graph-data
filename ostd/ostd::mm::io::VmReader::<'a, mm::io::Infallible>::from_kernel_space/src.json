@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::io::VmReader::<'a, mm::io::Infallible>::from_kernel_space",
   "span": "ostd/src/mm/io.rs:437:5: 437:72",
-  "src": "pub unsafe fn from_kernel_space(ptr: *const u8, len: usize) -> Self"
+  "src": "pub unsafe fn from_kernel_space(ptr: *const u8, len: usize) -> Self {\n        // Rust is allowed to give the reference to a zero-sized object a very small address,\n        // falling out of the kernel virtual address space range.\n        // So when `len` is zero, we should not and need not to check `ptr`.\n        debug_assert!(len == 0 || KERNEL_BASE_VADDR <= ptr.addr());\n        debug_assert!(len == 0 || ptr.addr().checked_add(len).unwrap() <= KERNEL_END_VADDR);\n\n        Self {\n            cursor: ptr,\n            end: ptr.wrapping_add(len),\n            phantom: PhantomData,\n        }\n    }"
 }

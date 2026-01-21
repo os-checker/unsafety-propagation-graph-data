@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::rcu::RcuInner::<P>::update",
   "span": "ostd/src/sync/rcu/mod.rs:147:5: 147:41",
-  "src": "fn update(&self, new_ptr: Option<P>)"
+  "src": "fn update(&self, new_ptr: Option<P>) {\n        let new_ptr = if let Some(new_ptr) = new_ptr {\n            <P as NonNullPtr>::into_raw(new_ptr).as_ptr()\n        } else {\n            core::ptr::null_mut()\n        };\n\n        let old_raw_ptr = self.ptr.swap(new_ptr, AcqRel);\n\n        if let Some(p) = NonNull::new(old_raw_ptr) {\n            // SAFETY:\n            // 1. The pointer was previously returned by `into_raw`.\n            // 2. The pointer is removed from the RCU slot so that no one will\n            //    use it after the end of the current grace period. The removal\n            //    is done atomically, so it will only be dropped once.\n            unsafe { delay_drop::<P>(p) };\n        }\n    }"
 }

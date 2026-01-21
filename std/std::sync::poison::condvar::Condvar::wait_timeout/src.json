@@ -1,5 +1,5 @@
 {
   "name": "std::sync::poison::condvar::Condvar::wait_timeout",
   "span": "$library/std/src/sync/poison/condvar.rs:323:5: 327:60",
-  "src": "pub fn wait_timeout<'a, T>(\n        &self,\n        guard: MutexGuard<'a, T>,\n        dur: Duration,\n    ) -> LockResult<(MutexGuard<'a, T>, WaitTimeoutResult)>"
+  "src": "pub fn wait_timeout<'a, T>(\n        &self,\n        guard: MutexGuard<'a, T>,\n        dur: Duration,\n    ) -> LockResult<(MutexGuard<'a, T>, WaitTimeoutResult)> {\n        let (poisoned, result) = unsafe {\n            let lock = mutex::guard_lock(&guard);\n            let success = self.inner.wait_timeout(lock, dur);\n            (mutex::guard_poison(&guard).get(), WaitTimeoutResult(!success))\n        };\n        if poisoned { Err(PoisonError::new((guard, result))) } else { Ok((guard, result)) }\n    }"
 }

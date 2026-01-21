@@ -1,5 +1,5 @@
 {
   "name": "std::sync::poison::rwlock::RwLockWriteGuard::<'rwlock, T>::downgrade",
   "span": "$library/std/src/sync/poison/rwlock.rs:869:5: 869:61",
-  "src": "pub fn downgrade(s: Self) -> RwLockReadGuard<'rwlock, T>"
+  "src": "pub fn downgrade(s: Self) -> RwLockReadGuard<'rwlock, T> {\n        let lock = s.lock;\n\n        // We don't want to call the destructor since that calls `write_unlock`.\n        forget(s);\n\n        // SAFETY: We take ownership of a write guard, so we must already have the `RwLock` in write\n        // mode, satisfying the `downgrade` contract.\n        unsafe { lock.inner.downgrade() };\n\n        // SAFETY: We have just successfully called `downgrade`, so we fulfill the safety contract.\n        unsafe { RwLockReadGuard::new(lock).unwrap_or_else(PoisonError::into_inner) }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::wait::WaitQueue::is_empty",
   "span": "ostd/src/sync/wait.rs:136:5: 136:31",
-  "src": "fn is_empty(&self) -> bool"
+  "src": "fn is_empty(&self) -> bool {\n        // On x86-64, this generates `mfence; mov`, which is exactly the right way to implement\n        // atomic loading with `Ordering::Release`. It performs much better than naively\n        // translating `fetch_add(0)` to `lock; xadd`.\n        self.num_wakers.fetch_add(0, Ordering::Release) == 0\n    }"
 }

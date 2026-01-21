@@ -1,5 +1,5 @@
 {
   "name": "std::sys::fs::unix::OpenOptions::get_access_mode",
   "span": "$library/std/src/sys/fs/unix.rs:1128:5: 1128:51",
-  "src": "fn get_access_mode(&self) -> io::Result<c_int>"
+  "src": "fn get_access_mode(&self) -> io::Result<c_int> {\n        match (self.read, self.write, self.append) {\n            (true, false, false) => Ok(libc::O_RDONLY),\n            (false, true, false) => Ok(libc::O_WRONLY),\n            (true, true, false) => Ok(libc::O_RDWR),\n            (false, _, true) => Ok(libc::O_WRONLY | libc::O_APPEND),\n            (true, _, true) => Ok(libc::O_RDWR | libc::O_APPEND),\n            (false, false, false) => {\n                // If no access mode is set, check if any creation flags are set\n                // to provide a more descriptive error message\n                if self.create || self.create_new || self.truncate {\n                    Err(io::Error::new(\n                        io::ErrorKind::InvalidInput,\n                        \"creating or truncating a file requires write or append access\",\n                    ))\n                } else {\n                    Err(io::Error::new(\n                        io::ErrorKind::InvalidInput,\n                        \"must specify at least one of read, write, or append access\",\n                    ))\n                }\n            }\n        }\n    }"
 }

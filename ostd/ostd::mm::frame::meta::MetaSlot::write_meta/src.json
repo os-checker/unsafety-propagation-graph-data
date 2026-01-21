@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::meta::MetaSlot::write_meta",
   "span": "ostd/src/mm/frame/meta.rs:368:5: 368:73",
-  "src": "pub(super) unsafe fn write_meta<M: AnyFrameMeta>(&self, metadata: M)"
+  "src": "pub(super) unsafe fn write_meta<M: AnyFrameMeta>(&self, metadata: M) {\n        const { assert!(size_of::<M>() <= FRAME_METADATA_MAX_SIZE) };\n        const { assert!(align_of::<M>() <= FRAME_METADATA_MAX_ALIGN) };\n\n        // SAFETY: Caller ensures that the access to the fields are exclusive.\n        let vtable_ptr = unsafe { &mut *self.vtable_ptr.get() };\n        vtable_ptr.write(core::ptr::metadata(&metadata as &dyn AnyFrameMeta));\n\n        let ptr = self.storage.get();\n        // SAFETY:\n        // 1. `ptr` points to the metadata storage.\n        // 2. The size and the alignment of the metadata storage is large enough to hold `M`\n        //    (guaranteed by the const assertions above).\n        // 3. We have exclusive access to the metadata storage (guaranteed by the caller).\n        unsafe { ptr.cast::<M>().write(metadata) };\n    }"
 }

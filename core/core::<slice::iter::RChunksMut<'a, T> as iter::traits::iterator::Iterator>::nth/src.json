@@ -1,5 +1,5 @@
 {
   "name": "core::<slice::iter::RChunksMut<'a, T> as iter::traits::iterator::Iterator>::nth",
   "span": "$library/core/src/slice/iter.rs:2495:5: 2495:55",
-  "src": "fn nth(&mut self, n: usize) -> Option<&'a mut [T]>"
+  "src": "fn nth(&mut self, n: usize) -> Option<&'a mut [T]> {\n        if let Some(end) = n.checked_mul(self.chunk_size)\n            && end < self.v.len()\n        {\n            let end = self.v.len() - end;\n            let start = match end.checked_sub(self.chunk_size) {\n                Some(sum) => sum,\n                None => 0,\n            };\n            // SAFETY: This type ensures that self.v is a valid pointer with a correct len.\n            // Therefore the bounds check in split_at_mut guarantees the split point is inbounds.\n            let (head, tail) = unsafe { self.v.split_at_mut(start) };\n            // SAFETY: This type ensures that self.v is a valid pointer with a correct len.\n            // Therefore the bounds check in split_at_mut guarantees the split point is inbounds.\n            let (nth, _) = unsafe { tail.split_at_mut(end - start) };\n            self.v = head;\n            // SAFETY: Nothing else points to or will point to the contents of this slice.\n            Some(unsafe { &mut *nth })\n        } else {\n            self.v = &mut [];\n            None\n        }\n    }"
 }

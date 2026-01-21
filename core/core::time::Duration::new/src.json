@@ -1,5 +1,5 @@
 {
   "name": "core::time::Duration::new",
   "span": "$library/core/src/time.rs:194:5: 194:56",
-  "src": "pub const fn new(secs: u64, nanos: u32) -> Duration"
+  "src": "pub const fn new(secs: u64, nanos: u32) -> Duration {\n        if nanos < NANOS_PER_SEC {\n            // SAFETY: nanos < NANOS_PER_SEC, therefore nanos is within the valid range\n            Duration { secs, nanos: unsafe { Nanoseconds::new_unchecked(nanos) } }\n        } else {\n            let secs = secs\n                .checked_add((nanos / NANOS_PER_SEC) as u64)\n                .expect(\"overflow in Duration::new\");\n            let nanos = nanos % NANOS_PER_SEC;\n            // SAFETY: nanos % NANOS_PER_SEC < NANOS_PER_SEC, therefore nanos is within the valid range\n            Duration { secs, nanos: unsafe { Nanoseconds::new_unchecked(nanos) } }\n        }\n    }"
 }

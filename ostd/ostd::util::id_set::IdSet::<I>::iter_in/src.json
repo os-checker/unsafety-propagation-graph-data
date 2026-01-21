@@ -1,5 +1,5 @@
 {
   "name": "ostd::util::id_set::IdSet::<I>::iter_in",
   "span": "ostd/src/util/id_set.rs:263:5: 263:88",
-  "src": "pub fn iter_in<S: IdSetSlicer<I>>(&self, slicer: S) -> impl Iterator<Item = I> + '_"
+  "src": "pub fn iter_in<S: IdSetSlicer<I>>(&self, slicer: S) -> impl Iterator<Item = I> + '_ {\n        let (start, end) = slicer.to_range_bounds();\n\n        self.bits.view_bits::<Lsb0>()[start..end]\n            .iter_ones()\n            .map(move |offset| {\n                // SAFETY: `offset` is relative to the slice `[start..end]`,\n                // therefore `start + offset` is the absolute index of the bit.\n                // Since `offset` only iterates over relative positions of bit 1s, the\n                // resulting absolute index must refer to an active bit in `self.bits`.\n                unsafe { I::new_unchecked((start + offset) as u32) }\n            })\n    }"
 }

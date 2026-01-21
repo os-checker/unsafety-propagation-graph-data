@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::symbolize::gimli::lru::Lru::<T, N>::move_to_front",
   "span": "$library/std/src/../../backtrace/src/symbolize/gimli/lru.rs:61:5: 61:66",
-  "src": "pub fn move_to_front(&mut self, idx: usize) -> Option<&mut T>"
+  "src": "pub fn move_to_front(&mut self, idx: usize) -> Option<&mut T> {\n        let elem = self.arr[0..self.len].get_mut(idx)?;\n        // SAFETY: we already bailed if the index is bad, so our slicing will be infallible,\n        // so it is permissible to allow the len invariant to decay, as we always restore it\n        let mut last = mem::replace(elem, MaybeUninit::uninit());\n        for elem in self.arr[0..=idx].iter_mut() {\n            // OPT(size): using `mem::swap` allows surprising size regressions\n            last = mem::replace(elem, last);\n        }\n        self.arr\n            .first_mut()\n            // SAFETY: we have restored the len invariant\n            .map(|elem| unsafe { elem.assume_init_mut() })\n    }"
 }

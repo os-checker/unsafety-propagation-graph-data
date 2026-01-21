@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::iommu::registers::IommuRegisters::enable_dma_remapping",
   "span": "ostd/src/arch/x86/iommu/registers/mod.rs:110:5: 113:6",
-  "src": "pub(super) fn enable_dma_remapping(\n        &mut self,\n        root_table: &'static SpinLock<RootTable, LocalIrqDisabled>,\n    )"
+  "src": "pub(super) fn enable_dma_remapping(\n        &mut self,\n        root_table: &'static SpinLock<RootTable, LocalIrqDisabled>,\n    ) {\n        // Set root table address\n        self.root_table_address\n            .as_mut_ptr()\n            .write(root_table.lock().root_paddr() as u64);\n        self.write_global_command(GlobalCommand::SRTP, true);\n        while !self.read_global_status().contains(GlobalStatus::RTPS) {}\n\n        // Enable DMA remapping\n        self.write_global_command(GlobalCommand::TE, true);\n        while !self.read_global_status().contains(GlobalStatus::TES) {}\n    }"
 }

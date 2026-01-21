@@ -1,5 +1,5 @@
 {
   "name": "std::io::impls::<impl io::Read for &[u8]>::read_exact",
   "span": "$library/std/src/io/impls.rs:347:5: 347:63",
-  "src": "fn read_exact(&mut self, buf: &mut [u8]) -> io::Result<()>"
+  "src": "fn read_exact(&mut self, buf: &mut [u8]) -> io::Result<()> {\n        if buf.len() > self.len() {\n            // `read_exact` makes no promise about the content of `buf` if it\n            // fails so don't bother about that.\n            *self = &self[self.len()..];\n            return Err(io::Error::READ_EXACT_EOF);\n        }\n        let (a, b) = self.split_at(buf.len());\n\n        // First check if the amount of bytes we want to read is small:\n        // `copy_from_slice` will generally expand to a call to `memcpy`, and\n        // for a single byte the overhead is significant.\n        if buf.len() == 1 {\n            buf[0] = a[0];\n        } else {\n            buf.copy_from_slice(a);\n        }\n\n        *self = b;\n        Ok(())\n    }"
 }

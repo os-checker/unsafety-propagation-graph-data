@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::stack_overflow::imp::make_handler",
   "span": "$library/std/src/sys/pal/unix/stack_overflow.rs:250:5: 250:61",
-  "src": "pub unsafe fn make_handler(main_thread: bool) -> Handler"
+  "src": "pub unsafe fn make_handler(main_thread: bool) -> Handler {\n        if cfg!(panic = \"immediate-abort\") || !NEED_ALTSTACK.load(Ordering::Acquire) {\n            return Handler::null();\n        }\n\n        if !main_thread {\n            if let Some(guard_page_range) = unsafe { current_guard() } {\n                set_current_info(guard_page_range);\n            }\n        }\n\n        // SAFETY: assuming stack_t is zero-initializable\n        let mut stack = unsafe { mem::zeroed() };\n        // SAFETY: reads current stack_t into stack\n        unsafe { sigaltstack(ptr::null(), &mut stack) };\n        // Configure alternate signal stack, if one is not already set.\n        if stack.ss_flags & SS_DISABLE != 0 {\n            // SAFETY: We warned our caller this would happen!\n            unsafe {\n                stack = get_stack();\n                sigaltstack(&stack, ptr::null_mut());\n            }\n            Handler { data: stack.ss_sp as *mut libc::c_void }\n        } else {\n            Handler::null()\n        }\n    }"
 }

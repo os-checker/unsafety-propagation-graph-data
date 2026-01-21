@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::print::BacktraceFrameFmt::<'_, '_, '_>::print_raw_with_column",
   "span": "$library/std/src/../../backtrace/src/print.rs:198:5: 205:21",
-  "src": "pub fn print_raw_with_column(\n        &mut self,\n        frame_ip: *mut c_void,\n        symbol_name: Option<SymbolName<'_>>,\n        filename: Option<BytesOrWideString<'_>>,\n        lineno: Option<u32>,\n        colno: Option<u32>,\n    ) -> fmt::Result"
+  "src": "pub fn print_raw_with_column(\n        &mut self,\n        frame_ip: *mut c_void,\n        symbol_name: Option<SymbolName<'_>>,\n        filename: Option<BytesOrWideString<'_>>,\n        lineno: Option<u32>,\n        colno: Option<u32>,\n    ) -> fmt::Result {\n        // Fuchsia is unable to symbolize within a process so it has a special\n        // format which can be used to symbolize later. Print that instead of\n        // printing addresses in our own format here.\n        if cfg!(target_os = \"fuchsia\") {\n            self.print_raw_fuchsia(frame_ip)?;\n        } else {\n            self.print_raw_generic(frame_ip, symbol_name, filename, lineno, colno)?;\n        }\n        self.symbol_index += 1;\n        Ok(())\n    }"
 }

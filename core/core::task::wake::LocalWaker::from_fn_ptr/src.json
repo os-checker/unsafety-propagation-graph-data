@@ -1,5 +1,5 @@
 {
   "name": "core::task::wake::LocalWaker::from_fn_ptr",
   "span": "$library/core/src/task/wake.rs:909:5: 909:46",
-  "src": "pub const fn from_fn_ptr(f: fn()) -> Self"
+  "src": "pub const fn from_fn_ptr(f: fn()) -> Self {\n        // SAFETY: Unsafe is used for transmutes, pointer came from `fn()` so it\n        //         is sound to transmute it back to `fn()`.\n        static VTABLE: RawWakerVTable = unsafe {\n            RawWakerVTable::new(\n                |this| RawWaker::new(this, &VTABLE),\n                |this| transmute::<*const (), fn()>(this)(),\n                |this| transmute::<*const (), fn()>(this)(),\n                |_| {},\n            )\n        };\n        let raw = RawWaker::new(f as *const (), &VTABLE);\n\n        // SAFETY: `clone` is just a copy, `drop` is a no-op while `wake` and\n        //         `wake_by_ref` just call the function pointer.\n        unsafe { Self::from_raw(raw) }\n    }"
 }

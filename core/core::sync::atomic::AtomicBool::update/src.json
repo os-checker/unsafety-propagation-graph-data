@@ -1,5 +1,5 @@
 {
   "name": "core::sync::atomic::AtomicBool::update",
   "span": "$library/core/src/sync/atomic.rs:1471:5: 1476:14",
-  "src": "pub fn update(\n        &self,\n        set_order: Ordering,\n        fetch_order: Ordering,\n        mut f: impl FnMut(bool) -> bool,\n    ) -> bool"
+  "src": "pub fn update(\n        &self,\n        set_order: Ordering,\n        fetch_order: Ordering,\n        mut f: impl FnMut(bool) -> bool,\n    ) -> bool {\n        let mut prev = self.load(fetch_order);\n        loop {\n            match self.compare_exchange_weak(prev, f(prev), set_order, fetch_order) {\n                Ok(x) => break x,\n                Err(next_prev) => prev = next_prev,\n            }\n        }\n    }"
 }

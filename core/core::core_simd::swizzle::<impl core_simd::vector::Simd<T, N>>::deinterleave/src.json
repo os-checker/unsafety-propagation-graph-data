@@ -1,5 +1,5 @@
 {
   "name": "core::core_simd::swizzle::<impl core_simd::vector::Simd<T, N>>::deinterleave",
   "span": "$library/core/src/../../portable-simd/crates/core_simd/src/swizzle.rs:421:5: 421:59",
-  "src": "pub fn deinterleave(self, other: Self) -> (Self, Self)"
+  "src": "pub fn deinterleave(self, other: Self) -> (Self, Self) {\n        const fn deinterleave<const N: usize>(second: bool) -> [usize; N] {\n            let mut idx = [0; N];\n            let mut i = 0;\n            while i < N {\n                idx[i] = i * 2 + second as usize;\n                i += 1;\n            }\n            idx\n        }\n\n        struct Even;\n        struct Odd;\n\n        impl<const N: usize> Swizzle<N> for Even {\n            const INDEX: [usize; N] = deinterleave::<N>(false);\n        }\n\n        impl<const N: usize> Swizzle<N> for Odd {\n            const INDEX: [usize; N] = deinterleave::<N>(true);\n        }\n\n        (\n            Even::concat_swizzle(self, other),\n            Odd::concat_swizzle(self, other),\n        )\n    }"
 }

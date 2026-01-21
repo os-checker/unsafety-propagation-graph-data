@@ -1,5 +1,5 @@
 {
   "name": "std::sync::poison::mutex::Mutex::<T>::set",
   "span": "$library/std/src/sync/poison/mutex.rs:405:5: 405:62",
-  "src": "pub fn set(&self, value: T) -> Result<(), PoisonError<T>>"
+  "src": "pub fn set(&self, value: T) -> Result<(), PoisonError<T>> {\n        if mem::needs_drop::<T>() {\n            // If the contained value has non-trivial destructor, we\n            // call that destructor after the lock being released.\n            self.replace(value).map(drop)\n        } else {\n            match self.lock() {\n                Ok(mut guard) => {\n                    *guard = value;\n\n                    Ok(())\n                }\n                Err(_) => Err(PoisonError::new(value)),\n            }\n        }\n    }"
 }

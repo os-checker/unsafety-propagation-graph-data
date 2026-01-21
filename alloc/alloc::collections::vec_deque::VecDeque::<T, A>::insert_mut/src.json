@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::vec_deque::VecDeque::<T, A>::insert_mut",
   "span": "$library/alloc/src/collections/vec_deque/mod.rs:2368:5: 2368:67",
-  "src": "pub fn insert_mut(&mut self, index: usize, value: T) -> &mut T"
+  "src": "pub fn insert_mut(&mut self, index: usize, value: T) -> &mut T {\n        assert!(index <= self.len(), \"index out of bounds\");\n\n        if self.is_full() {\n            self.grow();\n        }\n\n        let k = self.len - index;\n        if k < index {\n            // `index + 1` can't overflow, because if index was usize::MAX, then either the\n            // assert would've failed, or the deque would've tried to grow past usize::MAX\n            // and panicked.\n            unsafe {\n                // see `remove()` for explanation why this wrap_copy() call is safe.\n                self.wrap_copy(self.to_physical_idx(index), self.to_physical_idx(index + 1), k);\n                self.len += 1;\n                self.buffer_write(self.to_physical_idx(index), value)\n            }\n        } else {\n            let old_head = self.head;\n            self.head = self.wrap_sub(self.head, 1);\n            unsafe {\n                self.wrap_copy(old_head, self.head, index);\n                self.len += 1;\n                self.buffer_write(self.to_physical_idx(index), value)\n            }\n        }\n    }"
 }

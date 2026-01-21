@@ -1,5 +1,5 @@
 {
   "name": "std::io::default_read_buf",
   "span": "$library/std/src/io/mod.rs:556:1: 558:43",
-  "src": "pub(crate) fn default_read_buf<F>(read: F, mut cursor: BorrowedCursor<'_>) -> Result<()>\nwhere\n    F: FnOnce(&mut [u8]) -> Result<usize>,"
+  "src": "pub(crate) fn default_read_buf<F>(read: F, mut cursor: BorrowedCursor<'_>) -> Result<()>\nwhere\n    F: FnOnce(&mut [u8]) -> Result<usize>,\n{\n    // SAFETY: We do not uninitialize any part of the buffer.\n    let n = read(unsafe { cursor.as_mut().write_filled(0) })?;\n    assert!(n <= cursor.capacity());\n    // SAFETY: We've initialized the entire buffer, and `read` can't make it uninitialized.\n    unsafe {\n        cursor.advance(n);\n    }\n    Ok(())\n}"
 }

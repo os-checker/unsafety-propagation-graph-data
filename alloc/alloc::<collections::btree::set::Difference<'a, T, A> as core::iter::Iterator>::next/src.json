@@ -1,5 +1,5 @@
 {
   "name": "alloc::<collections::btree::set::Difference<'a, T, A> as core::iter::Iterator>::next",
   "span": "$library/alloc/src/collections/btree/set.rs:1951:5: 1951:40",
-  "src": "fn next(&mut self) -> Option<&'a T>"
+  "src": "fn next(&mut self) -> Option<&'a T> {\n        match &mut self.inner {\n            DifferenceInner::Stitch { self_iter, other_iter } => {\n                let mut self_next = self_iter.next()?;\n                loop {\n                    match other_iter.peek().map_or(Less, |other_next| self_next.cmp(other_next)) {\n                        Less => return Some(self_next),\n                        Equal => {\n                            self_next = self_iter.next()?;\n                            other_iter.next();\n                        }\n                        Greater => {\n                            other_iter.next();\n                        }\n                    }\n                }\n            }\n            DifferenceInner::Search { self_iter, other_set } => loop {\n                let self_next = self_iter.next()?;\n                if !other_set.contains(&self_next) {\n                    return Some(self_next);\n                }\n            },\n            DifferenceInner::Iterate(iter) => iter.next(),\n        }\n    }"
 }

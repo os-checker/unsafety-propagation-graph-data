@@ -1,5 +1,5 @@
 {
   "name": "core::ptr::read_volatile",
   "span": "$library/core/src/ptr/mod.rs:2071:1: 2071:51",
-  "src": "pub unsafe fn read_volatile<T>(src: *const T) -> T"
+  "src": "pub unsafe fn read_volatile<T>(src: *const T) -> T {\n    // SAFETY: the caller must uphold the safety contract for `volatile_load`.\n    unsafe {\n        ub_checks::assert_unsafe_precondition!(\n            check_language_ub,\n            \"ptr::read_volatile requires that the pointer argument is aligned\",\n            (\n                addr: *const () = src as *const (),\n                align: usize = align_of::<T>(),\n            ) => ub_checks::maybe_is_aligned(addr, align)\n        );\n        intrinsics::volatile_load(src)\n    }\n}"
 }

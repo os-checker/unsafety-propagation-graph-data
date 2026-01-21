@@ -1,5 +1,5 @@
 {
   "name": "core::fmt::num::enc_16lsd",
   "span": "$library/core/src/fmt/num.rs:821:1: 821:71",
-  "src": "fn enc_16lsd<const OFFSET: usize>(buf: &mut [MaybeUninit<u8>], n: u64)"
+  "src": "fn enc_16lsd<const OFFSET: usize>(buf: &mut [MaybeUninit<u8>], n: u64) {\n    // Consume the least-significant decimals from a working copy.\n    let mut remain = n;\n\n    // Format per four digits from the lookup table.\n    for quad_index in (0..4).rev() {\n        // pull two pairs\n        let quad = remain % 1_00_00;\n        remain /= 1_00_00;\n        let pair1 = (quad / 100) as usize;\n        let pair2 = (quad % 100) as usize;\n        buf[quad_index * 4 + OFFSET + 0].write(DECIMAL_PAIRS[pair1 * 2 + 0]);\n        buf[quad_index * 4 + OFFSET + 1].write(DECIMAL_PAIRS[pair1 * 2 + 1]);\n        buf[quad_index * 4 + OFFSET + 2].write(DECIMAL_PAIRS[pair2 * 2 + 0]);\n        buf[quad_index * 4 + OFFSET + 3].write(DECIMAL_PAIRS[pair2 * 2 + 1]);\n    }\n}"
 }

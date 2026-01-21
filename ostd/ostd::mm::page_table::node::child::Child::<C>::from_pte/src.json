@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::node::child::Child::<C>::from_pte",
   "span": "ostd/src/mm/page_table/node/child.rs:51:5: 51:73",
-  "src": "pub(super) unsafe fn from_pte(pte: C::E, level: PagingLevel) -> Self"
+  "src": "pub(super) unsafe fn from_pte(pte: C::E, level: PagingLevel) -> Self {\n        if !pte.is_present() {\n            return Child::None;\n        }\n\n        let paddr = pte.paddr();\n\n        if !pte.is_last(level) {\n            // SAFETY: The caller ensures that this node was created by\n            // `into_pte`, so that restoring the forgotten reference is safe.\n            let node = unsafe { PageTableNode::from_raw(paddr) };\n            debug_assert_eq!(node.level(), level - 1);\n            return Child::PageTable(RcuDrop::new(node));\n        }\n\n        Child::Frame(paddr, level, pte.prop())\n    }"
 }

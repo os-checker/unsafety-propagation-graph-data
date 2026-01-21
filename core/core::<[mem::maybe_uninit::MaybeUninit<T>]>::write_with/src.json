@@ -1,5 +1,5 @@
 {
   "name": "core::<[mem::maybe_uninit::MaybeUninit<T>]>::write_with",
   "span": "$library/core/src/mem/maybe_uninit.rs:1292:5: 1294:30",
-  "src": "pub fn write_with<F>(&mut self, mut f: F) -> &mut [T]\n    where\n        F: FnMut(usize) -> T,"
+  "src": "pub fn write_with<F>(&mut self, mut f: F) -> &mut [T]\n    where\n        F: FnMut(usize) -> T,\n    {\n        let mut guard = Guard { slice: self, initialized: 0 };\n\n        for (idx, element) in guard.slice.iter_mut().enumerate() {\n            element.write(f(idx));\n            guard.initialized += 1;\n        }\n\n        super::forget(guard);\n\n        // SAFETY: Valid elements have just been written into `this` so it is initialized\n        unsafe { self.assume_init_mut() }\n    }"
 }

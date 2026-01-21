@@ -1,5 +1,5 @@
 {
   "name": "std::sys::alloc::unix::<impl core::alloc::GlobalAlloc for alloc::System>::alloc",
   "span": "$library/std/src/sys/alloc/unix.rs:8:5: 8:54",
-  "src": "unsafe fn alloc(&self, layout: Layout) -> *mut u8"
+  "src": "unsafe fn alloc(&self, layout: Layout) -> *mut u8 {\n        // jemalloc provides alignment less than MIN_ALIGN for small allocations.\n        // So only rely on MIN_ALIGN if size >= align.\n        // Also see <https://github.com/rust-lang/rust/issues/45955> and\n        // <https://github.com/rust-lang/rust/issues/62251#issuecomment-507580914>.\n        if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {\n            unsafe { libc::malloc(layout.size()) as *mut u8 }\n        } else {\n            // `posix_memalign` returns a non-aligned value if supplied a very\n            // large alignment on older versions of Apple's platforms (unknown\n            // exactly which version range, but the issue is definitely\n            // present in macOS 10.14 and iOS 13.3).\n            //\n            // <https://github.com/rust-lang/rust/issues/30170>\n            #[cfg(target_vendor = \"apple\")]\n            {\n                if layout.align() > (1 << 31) {\n                    return ptr::null_mut();\n                }\n            }\n            unsafe { aligned_malloc(&layout) }\n        }\n    }"
 }

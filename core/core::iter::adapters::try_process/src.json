@@ -1,5 +1,5 @@
 {
   "name": "core::iter::adapters::try_process",
   "span": "$library/core/src/iter/adapters/mod.rs:152:1: 156:20",
-  "src": "pub(crate) fn try_process<I, T, R, F, U>(iter: I, mut f: F) -> ChangeOutputType<I::Item, U>\nwhere\n    I: Iterator<Item: Try<Output = T, Residual = R>>,\n    for<'a> F: FnMut(GenericShunt<'a, I, R>) -> U,\n    R: Residual<U>,"
+  "src": "pub(crate) fn try_process<I, T, R, F, U>(iter: I, mut f: F) -> ChangeOutputType<I::Item, U>\nwhere\n    I: Iterator<Item: Try<Output = T, Residual = R>>,\n    for<'a> F: FnMut(GenericShunt<'a, I, R>) -> U,\n    R: Residual<U>,\n{\n    let mut residual = None;\n    let shunt = GenericShunt { iter, residual: &mut residual };\n    let value = f(shunt);\n    match residual {\n        Some(r) => FromResidual::from_residual(r),\n        None => Try::from_output(value),\n    }\n}"
 }

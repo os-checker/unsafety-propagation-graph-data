@@ -1,5 +1,5 @@
 {
   "name": "std::sys::process::unix::common::construct_envp",
   "span": "$library/std/src/sys/process/unix/common.rs:376:1: 376:89",
-  "src": "fn construct_envp(env: BTreeMap<OsString, OsString>, saw_nul: &mut bool) -> CStringArray"
+  "src": "fn construct_envp(env: BTreeMap<OsString, OsString>, saw_nul: &mut bool) -> CStringArray {\n    let mut result = CStringArray::with_capacity(env.len());\n    for (mut k, v) in env {\n        // Reserve additional space for '=' and null terminator\n        k.reserve_exact(v.len() + 2);\n        k.push(\"=\");\n        k.push(&v);\n\n        // Add the new entry into the array\n        if let Ok(item) = CString::new(k.into_vec()) {\n            result.push(item);\n        } else {\n            *saw_nul = true;\n        }\n    }\n\n    result\n}"
 }

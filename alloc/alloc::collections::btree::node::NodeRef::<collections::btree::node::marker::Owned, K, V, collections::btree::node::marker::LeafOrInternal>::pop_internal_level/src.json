@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::btree::node::NodeRef::<collections::btree::node::marker::Owned, K, V, collections::btree::node::marker::LeafOrInternal>::pop_internal_level",
   "span": "$library/alloc/src/collections/btree/node.rs:617:5: 617:80",
-  "src": "pub(super) fn pop_internal_level<A: Allocator + Clone>(&mut self, alloc: A)"
+  "src": "pub(super) fn pop_internal_level<A: Allocator + Clone>(&mut self, alloc: A) {\n        assert!(self.height > 0);\n\n        let top = self.node;\n\n        // SAFETY: we asserted to be internal.\n        let mut internal_self = unsafe { self.borrow_mut().cast_to_internal_unchecked() };\n        let internal_node = internal_self.as_internal_mut();\n        // SAFETY: the first edge is always initialized.\n        self.node = unsafe { internal_node.edges[0].assume_init_read() };\n        self.height -= 1;\n        self.clear_parent_link();\n\n        unsafe {\n            alloc.deallocate(top.cast(), Layout::new::<InternalNode<K, V>>());\n        }\n    }"
 }

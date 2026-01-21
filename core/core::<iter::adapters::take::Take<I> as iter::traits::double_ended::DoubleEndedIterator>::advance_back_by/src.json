@@ -1,5 +1,5 @@
 {
   "name": "core::<iter::adapters::take::Take<I> as iter::traits::double_ended::DoubleEndedIterator>::advance_back_by",
   "span": "$library/core/src/iter/adapters/take.rs:220:5: 220:74",
-  "src": "fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>>"
+  "src": "fn advance_back_by(&mut self, n: usize) -> Result<(), NonZero<usize>> {\n        // The amount by which the inner iterator needs to be shortened for it to be\n        // at most as long as the take() amount.\n        let trim_inner = self.iter.len().saturating_sub(self.n);\n        // The amount we need to advance inner to fulfill the caller's request.\n        // take(), advance_by() and len() all can be at most usize, so we don't have to worry\n        // about having to advance more than usize::MAX here.\n        let advance_by = trim_inner.saturating_add(n);\n\n        let remainder = match self.iter.advance_back_by(advance_by) {\n            Ok(()) => 0,\n            Err(rem) => rem.get(),\n        };\n        let advanced_by_inner = advance_by - remainder;\n        let advanced_by = advanced_by_inner - trim_inner;\n        self.n -= advanced_by;\n        NonZero::new(n - advanced_by).map_or(Ok(()), Err)\n    }"
 }

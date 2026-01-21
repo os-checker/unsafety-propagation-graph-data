@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::iommu::interrupt_remapping::table::IntRemappingTable::encode",
   "span": "ostd/src/arch/x86/iommu/interrupt_remapping/table.rs:91:5: 91:39",
-  "src": "pub(crate) fn encode(&self) -> u64"
+  "src": "pub(crate) fn encode(&self) -> u64 {\n        let mut encoded = self.segment.paddr() as u64;\n\n        // Bit Range 11 - Extended Interrupt Mode Enable (EIME)\n        encoded |= match self.extended_interrupt_mode {\n            ExtendedInterruptMode::XApic => 0,\n            ExtendedInterruptMode::X2Apic => 1 << 11,\n        };\n\n        // Bit Range 3:0 - Size (S)\n        encoded |= {\n            assert!(self.num_entries.is_power_of_two());\n            // num_entries = 2^(size+1)\n            let size = self.num_entries.trailing_zeros().checked_sub(1).unwrap();\n            assert!(size <= 15);\n            size as u64\n        };\n\n        encoded\n    }"
 }

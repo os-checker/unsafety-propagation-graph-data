@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::allocator::FrameAllocOptions::alloc_segment_with",
   "span": "ostd/src/mm/frame/allocator.rs:79:5: 85:30",
-  "src": "pub fn alloc_segment_with<M: AnyFrameMeta, F>(\n        &self,\n        nframes: usize,\n        metadata_fn: F,\n    ) -> Result<Segment<M>>\n    where\n        F: FnMut(Paddr) -> M,"
+  "src": "pub fn alloc_segment_with<M: AnyFrameMeta, F>(\n        &self,\n        nframes: usize,\n        metadata_fn: F,\n    ) -> Result<Segment<M>>\n    where\n        F: FnMut(Paddr) -> M,\n    {\n        if nframes == 0 {\n            return Err(Error::InvalidArgs);\n        }\n        let layout = Layout::from_size_align(nframes * PAGE_SIZE, PAGE_SIZE).unwrap();\n        let segment = get_global_frame_allocator()\n            .alloc(layout)\n            .map(|start| {\n                Segment::from_unused(start..start + nframes * PAGE_SIZE, metadata_fn).unwrap()\n            })\n            .ok_or(Error::NoMemory)?;\n\n        if self.zeroed {\n            let addr = paddr_to_vaddr(segment.paddr()) as *mut u8;\n            // SAFETY: The newly allocated segment is guaranteed to be valid.\n            unsafe { core::ptr::write_bytes(addr, 0, nframes * PAGE_SIZE) }\n        }\n\n        Ok(segment)\n    }"
 }

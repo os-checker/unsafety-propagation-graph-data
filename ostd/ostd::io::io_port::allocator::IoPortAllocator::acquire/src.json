@@ -1,5 +1,5 @@
 {
   "name": "ostd::io::io_port::allocator::IoPortAllocator::acquire",
   "span": "ostd/src/io/io_port/allocator.rs:31:5: 31:96",
-  "src": "pub(super) fn acquire<T, A>(&self, port: u16, is_overlapping: bool) -> Option<IoPort<T, A>>"
+  "src": "pub(super) fn acquire<T, A>(&self, port: u16, is_overlapping: bool) -> Option<IoPort<T, A>> {\n        let range = if !is_overlapping {\n            port..port.checked_add(size_of::<T>().try_into().ok()?)?\n        } else {\n            port..port.checked_add(1)?\n        };\n        debug!(\"Try to acquire PIO range: {:#x?}\", range);\n\n        let mut allocator = self.allocator.lock();\n        if range.clone().any(|i| allocator.is_allocated(i as usize)) {\n            return None;\n        }\n\n        for i in range.clone() {\n            allocator.alloc_specific(i as usize);\n        }\n\n        // SAFETY: The created `IoPort` is guaranteed not to access system device I/O.\n        unsafe { Some(IoPort::new_overlapping(port, is_overlapping)) }\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "alloc::wtf8::Wtf8Buf::into_string_lossy",
   "span": "$library/alloc/src/wtf8/mod.rs:381:5: 381:49",
-  "src": "pub fn into_string_lossy(mut self) -> String"
+  "src": "pub fn into_string_lossy(mut self) -> String {\n        if !self.is_known_utf8 {\n            let mut pos = 0;\n            while let Some((surrogate_pos, _)) = self.next_surrogate(pos) {\n                pos = surrogate_pos + 3;\n                // Surrogates and the replacement character are all 3 bytes, so\n                // they can substituted in-place.\n                self.bytes[surrogate_pos..pos].copy_from_slice(\"\\u{FFFD}\".as_bytes());\n            }\n        }\n        unsafe { String::from_utf8_unchecked(self.bytes) }\n    }"
 }

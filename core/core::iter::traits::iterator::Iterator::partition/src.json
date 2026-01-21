@@ -1,5 +1,5 @@
 {
   "name": "core::iter::traits::iterator::Iterator::partition",
   "span": "$library/core/src/iter/traits/iterator.rs:2206:5: 2210:39",
-  "src": "fn partition<B, F>(self, f: F) -> (B, B)\n    where\n        Self: Sized,\n        B: Default + Extend<Self::Item>,\n        F: FnMut(&Self::Item) -> bool,"
+  "src": "fn partition<B, F>(self, f: F) -> (B, B)\n    where\n        Self: Sized,\n        B: Default + Extend<Self::Item>,\n        F: FnMut(&Self::Item) -> bool,\n    {\n        #[inline]\n        fn extend<'a, T, B: Extend<T>>(\n            mut f: impl FnMut(&T) -> bool + 'a,\n            left: &'a mut B,\n            right: &'a mut B,\n        ) -> impl FnMut((), T) + 'a {\n            move |(), x| {\n                if f(&x) {\n                    left.extend_one(x);\n                } else {\n                    right.extend_one(x);\n                }\n            }\n        }\n\n        let mut left: B = Default::default();\n        let mut right: B = Default::default();\n\n        self.fold((), extend(f, &mut left, &mut right));\n\n        (left, right)\n    }"
 }

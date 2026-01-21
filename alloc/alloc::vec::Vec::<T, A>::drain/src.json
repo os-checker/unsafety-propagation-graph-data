@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<T, A>::drain",
   "span": "$library/alloc/src/vec/mod.rs:2781:5: 2783:31",
-  "src": "pub fn drain<R>(&mut self, range: R) -> Drain<'_, T, A>\n    where\n        R: RangeBounds<usize>,"
+  "src": "pub fn drain<R>(&mut self, range: R) -> Drain<'_, T, A>\n    where\n        R: RangeBounds<usize>,\n    {\n        // Memory safety\n        //\n        // When the Drain is first created, it shortens the length of\n        // the source vector to make sure no uninitialized or moved-from elements\n        // are accessible at all if the Drain's destructor never gets to run.\n        //\n        // Drain will ptr::read out the values to remove.\n        // When finished, remaining tail of the vec is copied back to cover\n        // the hole, and the vector length is restored to the new length.\n        //\n        let len = self.len();\n        let Range { start, end } = slice::range(range, ..len);\n\n        unsafe {\n            // set self.vec length's to start, to be safe in case Drain is leaked\n            self.set_len(start);\n            let range_slice = slice::from_raw_parts(self.as_ptr().add(start), end - start);\n            Drain {\n                tail_start: end,\n                tail_len: len - end,\n                iter: range_slice.iter(),\n                vec: NonNull::from(self),\n            }\n        }\n    }"
 }

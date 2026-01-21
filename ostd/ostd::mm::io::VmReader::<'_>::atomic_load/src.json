@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::io::VmReader::<'_>::atomic_load",
   "span": "ostd/src/mm/io.rs:619:5: 619:57",
-  "src": "pub fn atomic_load<T: PodAtomic>(&self) -> Result<T>"
+  "src": "pub fn atomic_load<T: PodAtomic>(&self) -> Result<T> {\n        if self.remain() < size_of::<T>() {\n            return Err(Error::InvalidArgs);\n        }\n\n        let cursor = self.cursor.cast::<T>();\n        assert!(cursor.is_aligned());\n\n        // SAFETY:\n        // 1. The cursor is either valid for reading or in user space for `size_of::<T>()` bytes.\n        // 2. The cursor is aligned on an `align_of::<T>()`-byte boundary.\n        unsafe { T::atomic_load_fallible(cursor) }\n    }"
 }

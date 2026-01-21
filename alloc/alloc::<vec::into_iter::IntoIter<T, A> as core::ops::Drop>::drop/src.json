@@ -1,5 +1,5 @@
 {
   "name": "alloc::<vec::into_iter::IntoIter<T, A> as core::ops::Drop>::drop",
   "span": "$library/alloc/src/vec/into_iter.rs:493:5: 493:23",
-  "src": "fn drop(&mut self)"
+  "src": "fn drop(&mut self) {\n        struct DropGuard<'a, T, A: Allocator>(&'a mut IntoIter<T, A>);\n\n        impl<T, A: Allocator> Drop for DropGuard<'_, T, A> {\n            fn drop(&mut self) {\n                unsafe {\n                    // `IntoIter::alloc` is not used anymore after this and will be dropped by RawVec\n                    let alloc = ManuallyDrop::take(&mut self.0.alloc);\n                    // RawVec handles deallocation\n                    let _ = RawVec::from_nonnull_in(self.0.buf, self.0.cap, alloc);\n                }\n            }\n        }\n\n        let guard = DropGuard(self);\n        // destroy the remaining elements\n        unsafe {\n            ptr::drop_in_place(guard.0.as_raw_mut_slice());\n        }\n        // now `guard` will be dropped and do the rest\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "std::fs::DirBuilder::create_dir_all",
   "span": "$library/std/src/fs.rs:3331:5: 3331:60",
-  "src": "fn create_dir_all(&self, path: &Path) -> io::Result<()>"
+  "src": "fn create_dir_all(&self, path: &Path) -> io::Result<()> {\n        if path == Path::new(\"\") {\n            return Ok(());\n        }\n\n        match self.inner.mkdir(path) {\n            Ok(()) => return Ok(()),\n            Err(ref e) if e.kind() == io::ErrorKind::NotFound => {}\n            Err(_) if path.is_dir() => return Ok(()),\n            Err(e) => return Err(e),\n        }\n        match path.parent() {\n            Some(p) => self.create_dir_all(p)?,\n            None => {\n                return Err(io::const_error!(\n                    io::ErrorKind::Uncategorized,\n                    \"failed to create whole tree\",\n                ));\n            }\n        }\n        match self.inner.mkdir(path) {\n            Ok(()) => Ok(()),\n            Err(_) if path.is_dir() => Ok(()),\n            Err(e) => Err(e),\n        }\n    }"
 }

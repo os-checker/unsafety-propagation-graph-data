@@ -1,5 +1,5 @@
 {
   "name": "alloc::<sync::UniqueArc<T, A> as core::ops::DerefMut>::deref_mut",
   "span": "$library/alloc/src/sync.rs:4860:5: 4860:38",
-  "src": "fn deref_mut(&mut self) -> &mut T"
+  "src": "fn deref_mut(&mut self) -> &mut T {\n        // SAFETY: This pointer was allocated at creation time so we know it is valid. We know we\n        // have unique ownership and therefore it's safe to make a mutable reference because\n        // `UniqueArc` owns the only strong reference to itself.\n        // We also need to be careful to only create a mutable reference to the `data` field,\n        // as a mutable reference to the entire `ArcInner` would assert uniqueness over the\n        // ref count fields too, invalidating any attempt by `Weak`s to access the ref count.\n        unsafe { &mut (*self.ptr.as_ptr()).data }\n    }"
 }

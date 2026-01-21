@@ -1,5 +1,5 @@
 {
   "name": "alloc::<vec::Vec<T, A> as vec::ExtendFromWithinSpec>::spec_extend_from_within",
   "span": "$library/alloc/src/vec/mod.rs:3551:5: 3551:68",
-  "src": "unsafe fn spec_extend_from_within(&mut self, src: Range<usize>)"
+  "src": "unsafe fn spec_extend_from_within(&mut self, src: Range<usize>) {\n        let count = src.len();\n        {\n            let (init, spare) = self.split_at_spare_mut();\n\n            // SAFETY:\n            // - caller guarantees that `src` is a valid index\n            let source = unsafe { init.get_unchecked(src) };\n\n            // SAFETY:\n            // - Both pointers are created from unique slice references (`&mut [_]`)\n            //   so they are valid and do not overlap.\n            // - Elements implement `TrivialClone` so this is equivalent to calling\n            //   `clone` on every one of them.\n            // - `count` is equal to the len of `source`, so source is valid for\n            //   `count` reads\n            // - `.reserve(count)` guarantees that `spare.len() >= count` so spare\n            //   is valid for `count` writes\n            unsafe { ptr::copy_nonoverlapping(source.as_ptr(), spare.as_mut_ptr() as _, count) };\n        }\n\n        // SAFETY:\n        // - The elements were just initialized by `copy_nonoverlapping`\n        self.len += count;\n    }"
 }

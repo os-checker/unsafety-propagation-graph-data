@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::rcu::monitor::RcuMonitor::after_grace_period",
   "span": "ostd/src/sync/rcu/monitor.rs:76:5: 78:38",
-  "src": "pub(super) fn after_grace_period<F>(&self, f: F)\n    where\n        F: FnOnce() + Send + 'static,"
+  "src": "pub(super) fn after_grace_period<F>(&self, f: F)\n    where\n        F: FnOnce() + Send + 'static,\n    {\n        let mut state = self.state.disable_irq().lock();\n\n        state.next_callbacks.push_back(Box::new(f));\n\n        if !state.current_gp.is_complete() {\n            return;\n        }\n\n        let callbacks = core::mem::take(&mut state.next_callbacks);\n        state.current_gp.restart(callbacks);\n        self.is_monitoring.store(true, Relaxed);\n    }"
 }

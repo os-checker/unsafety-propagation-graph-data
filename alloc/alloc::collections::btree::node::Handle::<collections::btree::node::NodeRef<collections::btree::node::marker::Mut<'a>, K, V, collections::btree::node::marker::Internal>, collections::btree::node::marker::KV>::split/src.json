@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::btree::node::Handle::<collections::btree::node::NodeRef<collections::btree::node::marker::Mut<'a>, K, V, collections::btree::node::marker::Internal>, collections::btree::node::marker::KV>::split",
   "span": "$library/alloc/src/collections/btree/node.rs:1288:5: 1291:49",
-  "src": "pub(super) fn split<A: Allocator + Clone>(\n        mut self,\n        alloc: A,\n    ) -> SplitResult<'a, K, V, marker::Internal>"
+  "src": "pub(super) fn split<A: Allocator + Clone>(\n        mut self,\n        alloc: A,\n    ) -> SplitResult<'a, K, V, marker::Internal> {\n        let old_len = self.node.len();\n        unsafe {\n            let mut new_node = InternalNode::new(alloc);\n            let kv = self.split_leaf_data(&mut new_node.data);\n            let new_len = usize::from(new_node.data.len);\n            move_to_slice(\n                self.node.edge_area_mut(self.idx + 1..old_len + 1),\n                &mut new_node.edges[..new_len + 1],\n            );\n\n            // SAFETY: self is `marker::Internal`, so `self.node.height` is positive\n            let height = NonZero::new_unchecked(self.node.height);\n            let right = NodeRef::from_new_internal(new_node, height);\n\n            SplitResult { left: self.node, kv, right }\n        }\n    }"
 }

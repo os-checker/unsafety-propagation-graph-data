@@ -1,5 +1,5 @@
 {
   "name": "std::thread::current::try_with_current",
   "span": "$library/std/src/thread/current.rs:190:1: 192:37",
-  "src": "fn try_with_current<F, R>(f: F) -> R\nwhere\n    F: FnOnce(Option<&Thread>) -> R,"
+  "src": "fn try_with_current<F, R>(f: F) -> R\nwhere\n    F: FnOnce(Option<&Thread>) -> R,\n{\n    let current = CURRENT.get();\n    if current > DESTROYED {\n        // SAFETY: `Arc` does not contain interior mutability, so it does not\n        // matter that the address of the handle might be different depending\n        // on where this is called.\n        unsafe {\n            let current = ManuallyDrop::new(Thread::from_raw(current));\n            f(Some(&current))\n        }\n    } else {\n        f(None)\n    }\n}"
 }

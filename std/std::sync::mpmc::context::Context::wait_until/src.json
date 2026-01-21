@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::context::Context::wait_until",
   "span": "$library/std/src/sync/mpmc/context.rs:119:5: 119:75",
-  "src": "pub unsafe fn wait_until(&self, deadline: Option<Instant>) -> Selected"
+  "src": "pub unsafe fn wait_until(&self, deadline: Option<Instant>) -> Selected {\n        loop {\n            // Check whether an operation has been selected.\n            let sel = Selected::from(self.inner.select.load(Ordering::Acquire));\n            if sel != Selected::Waiting {\n                return sel;\n            }\n\n            // If there's a deadline, park the current thread until the deadline is reached.\n            if let Some(end) = deadline {\n                let now = Instant::now();\n\n                if now < end {\n                    // SAFETY: guaranteed by caller.\n                    unsafe { self.inner.thread.park_timeout(end - now) };\n                } else {\n                    // The deadline has been reached. Try aborting select.\n                    return match self.try_select(Selected::Aborted) {\n                        Ok(()) => Selected::Aborted,\n                        Err(s) => s,\n                    };\n                }\n            } else {\n                // SAFETY: guaranteed by caller.\n                unsafe { self.inner.thread.park() };\n            }\n        }\n    }"
 }

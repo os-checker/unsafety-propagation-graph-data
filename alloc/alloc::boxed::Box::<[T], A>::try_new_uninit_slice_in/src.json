@@ -1,5 +1,5 @@
 {
   "name": "alloc::boxed::Box::<[T], A>::try_new_uninit_slice_in",
   "span": "$library/alloc/src/boxed.rs:1065:5: 1068:59",
-  "src": "pub fn try_new_uninit_slice_in(\n        len: usize,\n        alloc: A,\n    ) -> Result<Box<[mem::MaybeUninit<T>], A>, AllocError>"
+  "src": "pub fn try_new_uninit_slice_in(\n        len: usize,\n        alloc: A,\n    ) -> Result<Box<[mem::MaybeUninit<T>], A>, AllocError> {\n        let ptr = if T::IS_ZST || len == 0 {\n            NonNull::dangling()\n        } else {\n            let layout = match Layout::array::<mem::MaybeUninit<T>>(len) {\n                Ok(l) => l,\n                Err(_) => return Err(AllocError),\n            };\n            alloc.allocate(layout)?.cast()\n        };\n        unsafe { Ok(RawVec::from_raw_parts_in(ptr.as_ptr(), len, alloc).into_box(len)) }\n    }"
 }

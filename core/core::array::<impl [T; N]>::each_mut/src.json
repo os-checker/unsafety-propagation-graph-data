@@ -1,5 +1,5 @@
 {
   "name": "core::array::<impl [T; N]>::each_mut",
   "span": "$library/core/src/array/mod.rs:681:5: 681:52",
-  "src": "pub const fn each_mut(&mut self) -> [&mut T; N]"
+  "src": "pub const fn each_mut(&mut self) -> [&mut T; N] {\n        let mut buf = [null_mut::<T>(); N];\n\n        // FIXME(const_trait_impl): We would like to simply use iterators for this (as in the original implementation), but this is not allowed in constant expressions.\n        let mut i = 0;\n        while i < N {\n            buf[i] = &raw mut self[i];\n\n            i += 1;\n        }\n\n        // SAFETY: `*mut T` has the same layout as `&mut T`, and we've also initialised each pointer as a valid reference.\n        unsafe { transmute_unchecked(buf) }\n    }"
 }

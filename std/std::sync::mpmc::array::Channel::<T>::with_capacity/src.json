@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::array::Channel::<T>::with_capacity",
   "span": "$library/std/src/sync/mpmc/array.rs:90:5: 90:52",
-  "src": "pub(crate) fn with_capacity(cap: usize) -> Self"
+  "src": "pub(crate) fn with_capacity(cap: usize) -> Self {\n        assert!(cap > 0, \"capacity must be positive\");\n\n        // Compute constants `mark_bit` and `one_lap`.\n        let mark_bit = (cap + 1).next_power_of_two();\n        let one_lap = mark_bit * 2;\n\n        // Head is initialized to `{ lap: 0, mark: 0, index: 0 }`.\n        let head = 0;\n        // Tail is initialized to `{ lap: 0, mark: 0, index: 0 }`.\n        let tail = 0;\n\n        // Allocate a buffer of `cap` slots initialized\n        // with stamps.\n        let buffer: Box<[Slot<T>]> = (0..cap)\n            .map(|i| {\n                // Set the stamp to `{ lap: 0, mark: 0, index: i }`.\n                Slot { stamp: AtomicUsize::new(i), msg: UnsafeCell::new(MaybeUninit::uninit()) }\n            })\n            .collect();\n\n        Channel {\n            buffer,\n            cap,\n            one_lap,\n            mark_bit,\n            head: CachePadded::new(AtomicUsize::new(head)),\n            tail: CachePadded::new(AtomicUsize::new(tail)),\n            senders: SyncWaker::new(),\n            receivers: SyncWaker::new(),\n        }\n    }"
 }

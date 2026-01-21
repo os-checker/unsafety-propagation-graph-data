@@ -1,5 +1,5 @@
 {
   "name": "core::mem::uninitialized",
   "span": "$library/core/src/mem/mod.rs:710:1: 710:38",
-  "src": "pub unsafe fn uninitialized<T>() -> T"
+  "src": "pub unsafe fn uninitialized<T>() -> T {\n    // SAFETY: the caller must guarantee that an uninitialized value is valid for `T`.\n    unsafe {\n        intrinsics::assert_mem_uninitialized_valid::<T>();\n        let mut val = MaybeUninit::<T>::uninit();\n\n        // Fill memory with 0x01, as an imperfect mitigation for old code that uses this function on\n        // bool, nonnull, and noundef types. But don't do this if we actively want to detect UB.\n        if !cfg!(any(miri, sanitize = \"memory\")) {\n            val.as_mut_ptr().write_bytes(0x01, 1);\n        }\n\n        val.assume_init()\n    }\n}"
 }

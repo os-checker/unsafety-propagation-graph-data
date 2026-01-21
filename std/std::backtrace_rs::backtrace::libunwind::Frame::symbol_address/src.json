@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::backtrace::libunwind::Frame::symbol_address",
   "span": "$library/std/src/../../backtrace/src/backtrace/libunwind.rs:64:5: 64:48",
-  "src": "pub fn symbol_address(&self) -> *mut c_void"
+  "src": "pub fn symbol_address(&self) -> *mut c_void {\n        if let Frame::Cloned { symbol_address, .. } = *self {\n            return symbol_address;\n        }\n\n        // The macOS linker emits a \"compact\" unwind table that only includes an\n        // entry for a function if that function either has an LSDA or its\n        // encoding differs from that of the previous entry.  Consequently, on\n        // macOS, `_Unwind_FindEnclosingFunction` is unreliable (it can return a\n        // pointer to some totally unrelated function).  Instead, we just always\n        // return the ip.\n        //\n        // https://github.com/rust-lang/rust/issues/74771#issuecomment-664056788\n        //\n        // Note the `skip_inner_frames.rs` test is skipped on macOS due to this\n        // clause, and if this is fixed that test in theory can be run on macOS!\n        if cfg!(target_vendor = \"apple\") {\n            self.ip()\n        } else {\n            unsafe { uw::_Unwind_FindEnclosingFunction(self.ip()) }\n        }\n    }"
 }

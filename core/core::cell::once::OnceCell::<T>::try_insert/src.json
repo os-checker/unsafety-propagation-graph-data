@@ -1,5 +1,5 @@
 {
   "name": "core::cell::once::OnceCell::<T>::try_insert",
   "span": "$library/core/src/cell/once.rs:125:5: 125:62",
-  "src": "pub fn try_insert(&self, value: T) -> Result<&T, (&T, T)>"
+  "src": "pub fn try_insert(&self, value: T) -> Result<&T, (&T, T)> {\n        if let Some(old) = self.get() {\n            return Err((old, value));\n        }\n\n        // SAFETY: This is the only place where we set the slot, no races\n        // due to reentrancy/concurrency are possible, and we've\n        // checked that slot is currently `None`, so this write\n        // maintains the `inner`'s invariant.\n        let slot = unsafe { &mut *self.inner.get() };\n        Ok(slot.insert(value))\n    }"
 }

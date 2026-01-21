@@ -1,5 +1,5 @@
 {
   "name": "std::backtrace_rs::symbolize::format_symbol_name",
   "span": "$library/std/src/../../backtrace/src/symbolize/mod.rs:344:1: 348:17",
-  "src": "fn format_symbol_name(\n    fmt: fn(&str, &mut fmt::Formatter<'_>) -> fmt::Result,\n    mut bytes: &[u8],\n    f: &mut fmt::Formatter<'_>,\n) -> fmt::Result"
+  "src": "fn format_symbol_name(\n    fmt: fn(&str, &mut fmt::Formatter<'_>) -> fmt::Result,\n    mut bytes: &[u8],\n    f: &mut fmt::Formatter<'_>,\n) -> fmt::Result {\n    while bytes.len() > 0 {\n        match str::from_utf8(bytes) {\n            Ok(name) => {\n                fmt(name, f)?;\n                break;\n            }\n            Err(err) => {\n                fmt(\"\\u{FFFD}\", f)?;\n\n                match err.error_len() {\n                    Some(len) => bytes = &bytes[err.valid_up_to() + len..],\n                    None => break,\n                }\n            }\n        }\n    }\n    Ok(())\n}"
 }

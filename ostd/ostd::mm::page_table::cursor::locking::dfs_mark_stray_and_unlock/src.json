@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::page_table::cursor::locking::dfs_mark_stray_and_unlock",
   "span": "ostd/src/mm/page_table/cursor/locking.rs:253:1: 256:11",
-  "src": "pub(super) unsafe fn dfs_mark_stray_and_unlock<C: PageTableConfig>(\n    rcu_guard: &dyn InAtomicMode,\n    mut sub_tree: PageTableGuard<C>,\n) -> usize"
+  "src": "pub(super) unsafe fn dfs_mark_stray_and_unlock<C: PageTableConfig>(\n    rcu_guard: &dyn InAtomicMode,\n    mut sub_tree: PageTableGuard<C>,\n) -> usize {\n    *sub_tree.stray_mut() = true;\n\n    if sub_tree.level() == 1 {\n        return sub_tree.nr_children() as usize;\n    }\n\n    let mut num_frames = 0;\n\n    for i in (0..nr_subpage_per_huge::<C>()).rev() {\n        let child = sub_tree.entry(i);\n        match child.to_ref() {\n            ChildRef::PageTable(pt) => {\n                // SAFETY: The caller ensures that the node is locked and the new guard is unique.\n                let locked_pt = unsafe { pt.make_guard_unchecked(rcu_guard) };\n                // SAFETY: The caller ensures that all the nodes in the sub-tree are locked and all\n                // guards are forgotten.\n                num_frames += unsafe { dfs_mark_stray_and_unlock(rcu_guard, locked_pt) };\n            }\n            ChildRef::None | ChildRef::Frame(_, _, _) => {}\n        }\n    }\n\n    num_frames\n}"
 }

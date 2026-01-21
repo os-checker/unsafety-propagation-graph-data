@@ -1,5 +1,5 @@
 {
   "name": "alloc::wtf8::Wtf8Buf::push",
   "span": "$library/alloc/src/wtf8/mod.rs:323:5: 323:50",
-  "src": "pub fn push(&mut self, code_point: CodePoint)"
+  "src": "pub fn push(&mut self, code_point: CodePoint) {\n        if let Some(trail) = code_point.to_trail_surrogate() {\n            if let Some(lead) = (&*self).final_lead_surrogate() {\n                let len_without_lead_surrogate = self.len() - 3;\n                self.bytes.truncate(len_without_lead_surrogate);\n                self.push_char(decode_surrogate_pair(lead, trail));\n                return;\n            }\n\n            // We're pushing a trailing surrogate.\n            self.is_known_utf8 = false;\n        } else if code_point.to_lead_surrogate().is_some() {\n            // We're pushing a leading surrogate.\n            self.is_known_utf8 = false;\n        }\n\n        // No newly paired surrogates at the boundary.\n        unsafe { self.push_code_point_unchecked(code_point) }\n    }"
 }

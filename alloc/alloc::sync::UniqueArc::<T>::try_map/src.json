@@ -1,5 +1,5 @@
 {
   "name": "alloc::sync::UniqueArc::<T>::try_map",
   "span": "$library/alloc/src/sync.rs:4662:5: 4668:53",
-  "src": "pub fn try_map<R>(\n        this: Self,\n        f: impl FnOnce(T) -> R,\n    ) -> <R::Residual as Residual<UniqueArc<R::Output>>>::TryType\n    where\n        R: Try,\n        R::Residual: Residual<UniqueArc<R::Output>>,"
+  "src": "pub fn try_map<R>(\n        this: Self,\n        f: impl FnOnce(T) -> R,\n    ) -> <R::Residual as Residual<UniqueArc<R::Output>>>::TryType\n    where\n        R: Try,\n        R::Residual: Residual<UniqueArc<R::Output>>,\n    {\n        if size_of::<T>() == size_of::<R::Output>()\n            && align_of::<T>() == align_of::<R::Output>()\n            && UniqueArc::weak_count(&this) == 0\n        {\n            unsafe {\n                let ptr = UniqueArc::into_raw(this);\n                let value = ptr.read();\n                let mut allocation = UniqueArc::from_raw(ptr.cast::<mem::MaybeUninit<R::Output>>());\n\n                allocation.write(f(value)?);\n                try { allocation.assume_init() }\n            }\n        } else {\n            try { UniqueArc::new(f(UniqueArc::unwrap(this))?) }\n        }\n    }"
 }

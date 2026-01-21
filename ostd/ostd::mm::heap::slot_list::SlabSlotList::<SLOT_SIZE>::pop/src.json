@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::heap::slot_list::SlabSlotList::<SLOT_SIZE>::pop",
   "span": "ostd/src/mm/heap/slot_list.rs:73:5: 73:46",
-  "src": "pub fn pop(&mut self) -> Option<HeapSlot>"
+  "src": "pub fn pop(&mut self) -> Option<HeapSlot> {\n        let original_head = self.head?;\n\n        // SAFETY: The head is a valid pointer to a free slot.\n        // The slot contains a pointer to the next slot.\n        let next = unsafe { original_head.as_ptr().cast::<usize>().read() } as *mut u8;\n\n        self.head = if next.is_null() {\n            None\n        } else {\n            // SAFETY: We already verified that the next slot is not NULL.\n            Some(unsafe { NonNull::new_unchecked(next) })\n        };\n\n        Some(unsafe { HeapSlot::new(original_head, super::SlotInfo::SlabSlot(SLOT_SIZE)) })\n    }"
 }

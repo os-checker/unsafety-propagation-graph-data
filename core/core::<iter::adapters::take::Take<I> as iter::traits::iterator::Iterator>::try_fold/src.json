@@ -1,5 +1,5 @@
 {
   "name": "core::<iter::adapters::take::Take<I> as iter::traits::iterator::Iterator>::try_fold",
   "span": "$library/core/src/iter/adapters/take.rs:78:5: 81:30",
-  "src": "fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R\n    where\n        Fold: FnMut(Acc, Self::Item) -> R,\n        R: Try<Output = Acc>,"
+  "src": "fn try_fold<Acc, Fold, R>(&mut self, init: Acc, fold: Fold) -> R\n    where\n        Fold: FnMut(Acc, Self::Item) -> R,\n        R: Try<Output = Acc>,\n    {\n        fn check<'a, T, Acc, R: Try<Output = Acc>>(\n            n: &'a mut usize,\n            mut fold: impl FnMut(Acc, T) -> R + 'a,\n        ) -> impl FnMut(Acc, T) -> ControlFlow<R, Acc> + 'a {\n            move |acc, x| {\n                *n -= 1;\n                let r = fold(acc, x);\n                if *n == 0 { ControlFlow::Break(r) } else { ControlFlow::from_try(r) }\n            }\n        }\n\n        if self.n == 0 {\n            try { init }\n        } else {\n            let n = &mut self.n;\n            self.iter.try_fold(init, check(n, fold)).into_try()\n        }\n    }"
 }

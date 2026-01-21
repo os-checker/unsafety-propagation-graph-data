@@ -1,5 +1,5 @@
 {
   "name": "std::sys::pal::unix::stack_overflow::imp::stack_start_aligned",
   "span": "$library/std/src/sys/pal/unix/stack_overflow.rs:388:5: 388:74",
-  "src": "fn stack_start_aligned(page_size: usize) -> Option<*mut libc::c_void>"
+  "src": "fn stack_start_aligned(page_size: usize) -> Option<*mut libc::c_void> {\n        let stackptr = unsafe { get_stack_start()? };\n        let stackaddr = stackptr.addr();\n\n        // Ensure stackaddr is page aligned! A parent process might\n        // have reset RLIMIT_STACK to be non-page aligned. The\n        // pthread_attr_getstack() reports the usable stack area\n        // stackaddr < stackaddr + stacksize, so if stackaddr is not\n        // page-aligned, calculate the fix such that stackaddr <\n        // new_page_aligned_stackaddr < stackaddr + stacksize\n        let remainder = stackaddr % page_size;\n        Some(if remainder == 0 {\n            stackptr\n        } else {\n            stackptr.with_addr(stackaddr + page_size - remainder)\n        })\n    }"
 }

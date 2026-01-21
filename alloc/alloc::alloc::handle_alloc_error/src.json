@@ -1,5 +1,5 @@
 {
   "name": "alloc::alloc::handle_alloc_error",
   "span": "$library/alloc/src/alloc.rs:399:1: 399:53",
-  "src": "pub const fn handle_alloc_error(layout: Layout) -> !"
+  "src": "pub const fn handle_alloc_error(layout: Layout) -> ! {\n    const fn ct_error(_: Layout) -> ! {\n        panic!(\"allocation failed\");\n    }\n\n    #[inline]\n    fn rt_error(layout: Layout) -> ! {\n        unsafe {\n            __rust_alloc_error_handler(layout.size(), layout.align());\n        }\n    }\n\n    #[cfg(not(panic = \"immediate-abort\"))]\n    {\n        core::intrinsics::const_eval_select((layout,), ct_error, rt_error)\n    }\n\n    #[cfg(panic = \"immediate-abort\")]\n    ct_error(layout)\n}"
 }

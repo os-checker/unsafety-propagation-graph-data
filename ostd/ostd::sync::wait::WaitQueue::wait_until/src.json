@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::wait::WaitQueue::wait_until",
   "span": "ostd/src/sync/wait.rs:69:5: 71:33",
-  "src": "pub fn wait_until<F, R>(&self, mut cond: F) -> R\n    where\n        F: FnMut() -> Option<R>,"
+  "src": "pub fn wait_until<F, R>(&self, mut cond: F) -> R\n    where\n        F: FnMut() -> Option<R>,\n    {\n        if let Some(res) = cond() {\n            return res;\n        }\n\n        let (waiter, _) = Waiter::new_pair();\n        let cond = || {\n            self.enqueue(waiter.waker());\n            cond()\n        };\n        waiter\n            .wait_until_or_cancelled(cond, || Ok::<(), ()>(()))\n            .unwrap()\n    }"
 }

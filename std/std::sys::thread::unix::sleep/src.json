@@ -1,5 +1,5 @@
 {
   "name": "std::sys::thread::unix::sleep",
   "span": "$library/std/src/sys/thread/unix.rs:522:1: 522:28",
-  "src": "pub fn sleep(dur: Duration)"
+  "src": "pub fn sleep(dur: Duration) {\n    let mut secs = dur.as_secs();\n    let mut nsecs = dur.subsec_nanos() as _;\n\n    // If we're awoken with a signal then the return value will be -1 and\n    // nanosleep will fill in `ts` with the remaining time.\n    unsafe {\n        while secs > 0 || nsecs > 0 {\n            let mut ts = libc::timespec {\n                tv_sec: cmp::min(libc::time_t::MAX as u64, secs) as libc::time_t,\n                tv_nsec: nsecs,\n            };\n            secs -= ts.tv_sec as u64;\n            let ts_ptr = &raw mut ts;\n            if libc::nanosleep(ts_ptr, ts_ptr) == -1 {\n                assert_eq!(os::errno(), libc::EINTR);\n                secs += ts.tv_sec as u64;\n                nsecs = ts.tv_nsec;\n            } else {\n                nsecs = 0;\n            }\n        }\n    }\n}"
 }

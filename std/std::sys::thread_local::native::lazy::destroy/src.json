@@ -1,5 +1,5 @@
 {
   "name": "std::sys::thread_local::native::lazy::destroy",
   "span": "$library/std/src/sys/thread_local/native/lazy.rs:112:1: 112:46",
-  "src": "unsafe extern \"C\" fn destroy<T>(ptr: *mut u8)"
+  "src": "unsafe extern \"C\" fn destroy<T>(ptr: *mut u8) {\n    // Print a nice abort message if a panic occurs.\n    abort_on_dtor_unwind(|| {\n        let storage = unsafe { &*(ptr as *const Storage<T, ()>) };\n        if let State::Alive = storage.state.replace(State::Destroyed(())) {\n            // SAFETY: we ensured the state was Alive so the value was initialized.\n            // We also updated the state to Destroyed to prevent the destructor\n            // from accessing the thread-local variable, as this would violate\n            // the exclusive access provided by &mut T in Drop::drop.\n            unsafe { (*storage.value.get()).assume_init_drop() }\n        }\n    })\n}"
 }

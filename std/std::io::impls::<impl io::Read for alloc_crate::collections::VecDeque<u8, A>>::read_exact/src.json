@@ -1,5 +1,5 @@
 {
   "name": "std::io::impls::<impl io::Read for alloc_crate::collections::VecDeque<u8, A>>::read_exact",
   "span": "$library/std/src/io/impls.rs:535:5: 535:63",
-  "src": "fn read_exact(&mut self, buf: &mut [u8]) -> io::Result<()>"
+  "src": "fn read_exact(&mut self, buf: &mut [u8]) -> io::Result<()> {\n        let (front, back) = self.as_slices();\n\n        // Use only the front buffer if it is big enough to fill `buf`, else use\n        // the back buffer too.\n        match buf.split_at_mut_checked(front.len()) {\n            None => buf.copy_from_slice(&front[..buf.len()]),\n            Some((buf_front, buf_back)) => match back.split_at_checked(buf_back.len()) {\n                Some((back, _)) => {\n                    buf_front.copy_from_slice(front);\n                    buf_back.copy_from_slice(back);\n                }\n                None => {\n                    self.clear();\n                    return Err(io::Error::READ_EXACT_EOF);\n                }\n            },\n        }\n\n        self.drain(..buf.len());\n        Ok(())\n    }"
 }

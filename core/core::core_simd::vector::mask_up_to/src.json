@@ -1,5 +1,5 @@
 {
   "name": "core::core_simd::vector::mask_up_to",
   "span": "$library/core/src/../../portable-simd/crates/core_simd/src/vector.rs:1247:1: 1250:20",
-  "src": "fn mask_up_to<M, const N: usize>(len: usize) -> Mask<M, N>\nwhere\n    LaneCount<N>: SupportedLaneCount,\n    M: MaskElement,"
+  "src": "fn mask_up_to<M, const N: usize>(len: usize) -> Mask<M, N>\nwhere\n    LaneCount<N>: SupportedLaneCount,\n    M: MaskElement,\n{\n    let index = lane_indices::<N>();\n    let max_value: u64 = M::max_unsigned();\n    macro_rules! case {\n        ($ty:ty) => {\n            if N < <$ty>::MAX as usize && max_value as $ty as u64 == max_value {\n                return index.cast().simd_lt(Simd::splat(len.min(N) as $ty)).cast();\n            }\n        };\n    }\n    case!(u8);\n    case!(u16);\n    case!(u32);\n    case!(u64);\n    index.simd_lt(Simd::splat(len)).cast()\n}"
 }

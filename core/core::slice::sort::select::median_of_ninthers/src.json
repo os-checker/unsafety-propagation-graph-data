@@ -1,5 +1,5 @@
 {
   "name": "core::slice::sort::select::median_of_ninthers",
   "span": "$library/core/src/slice/sort/select.rs:219:1: 219:90",
-  "src": "fn median_of_ninthers<T, F: FnMut(&T, &T) -> bool>(v: &mut [T], is_less: &mut F) -> usize"
+  "src": "fn median_of_ninthers<T, F: FnMut(&T, &T) -> bool>(v: &mut [T], is_less: &mut F) -> usize {\n    // use `saturating_mul` so the multiplication doesn't overflow on 16-bit platforms.\n    let frac = if v.len() <= 1024 {\n        v.len() / 12\n    } else if v.len() <= 128_usize.saturating_mul(1024) {\n        v.len() / 64\n    } else {\n        v.len() / 1024\n    };\n\n    let pivot = frac / 2;\n    let lo = v.len() / 2 - pivot;\n    let hi = frac + lo;\n    let gap = (v.len() - 9 * frac) / 4;\n    let mut a = lo - 4 * frac - gap;\n    let mut b = hi + gap;\n    for i in lo..hi {\n        ninther(v, is_less, a, i - frac, b, a + 1, i, b + 1, a + 2, i + frac, b + 2);\n        a += 3;\n        b += 3;\n    }\n\n    median_of_medians(&mut v[lo..lo + frac], is_less, pivot);\n\n    partition(v, lo + pivot, is_less)\n}"
 }

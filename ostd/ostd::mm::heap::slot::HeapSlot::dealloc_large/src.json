@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::heap::slot::HeapSlot::dealloc_large",
   "span": "ostd/src/mm/heap/slot.rs:109:5: 109:31",
-  "src": "pub fn dealloc_large(self)"
+  "src": "pub fn dealloc_large(self) {\n        let SlotInfo::LargeSlot(size) = self.info else {\n            log::error!(\n                \"Deallocating a large slot that was not allocated with `HeapSlot::alloc_large`\"\n            );\n            crate::panic::abort();\n        };\n\n        debug_assert_eq!(size % PAGE_SIZE, 0);\n        debug_assert_eq!(self.paddr() % PAGE_SIZE, 0);\n        let range = self.paddr()..self.paddr() + size;\n\n        // SAFETY: The segment was once forgotten when allocated.\n        drop(unsafe { Segment::<LargeAllocFrameMeta>::from_raw(range) });\n    }"
 }

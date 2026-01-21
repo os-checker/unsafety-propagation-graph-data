@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::cpu::cpuid::query_is_running_in_qemu",
   "span": "ostd/src/arch/x86/cpu/cpuid.rs:108:1: 108:58",
-  "src": "pub(in crate::arch) fn query_is_running_in_qemu() -> bool"
+  "src": "pub(in crate::arch) fn query_is_running_in_qemu() -> bool {\n    let Some(result) = cpuid(Leaf::HypervisorBase as u32, 0) else {\n        return false;\n    };\n\n    let mut signature = [0u8; 12];\n    signature[0..4].copy_from_slice(&result.ebx.to_ne_bytes());\n    signature[4..8].copy_from_slice(&result.ecx.to_ne_bytes());\n    signature[8..12].copy_from_slice(&result.edx.to_ne_bytes());\n\n    // Check for the QEMU hypervisor signature: \"TCGTCGTCGTCG\" or \"KVMKVMKVM\\0\\0\\0\".\n    // Reference: <https://wiki.osdev.org/QEMU_fw_cfg#Detecting_QEMU>\n    matches!(&signature, b\"TCGTCGTCGTCG\" | b\"KVMKVMKVM\\0\\0\\0\")\n}"
 }

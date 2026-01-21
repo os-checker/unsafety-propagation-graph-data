@@ -1,5 +1,5 @@
 {
   "name": "std::sys::fs::unix::DirEntry::metadata",
   "span": "$library/std/src/sys/fs/unix.rs:915:5: 915:51",
-  "src": "pub fn metadata(&self) -> io::Result<FileAttr>"
+  "src": "pub fn metadata(&self) -> io::Result<FileAttr> {\n        let fd = cvt(unsafe { dirfd(self.dir.dirp.0) })?;\n        let name = self.name_cstr().as_ptr();\n\n        cfg_has_statx! {\n            if let Some(ret) = unsafe { try_statx(\n                fd,\n                name,\n                libc::AT_SYMLINK_NOFOLLOW | libc::AT_STATX_SYNC_AS_STAT,\n                libc::STATX_BASIC_STATS | libc::STATX_BTIME,\n            ) } {\n                return ret;\n            }\n        }\n\n        let mut stat: stat64 = unsafe { mem::zeroed() };\n        cvt(unsafe { fstatat64(fd, name, &mut stat, libc::AT_SYMLINK_NOFOLLOW) })?;\n        Ok(FileAttr::from_stat64(stat))\n    }"
 }

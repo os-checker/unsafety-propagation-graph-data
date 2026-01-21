@@ -1,5 +1,5 @@
 {
   "name": "core::alloc::global::GlobalAlloc::realloc",
   "span": "$library/core/src/alloc/global.rs:286:5: 286:87",
-  "src": "unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8"
+  "src": "unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {\n        // SAFETY: the caller must ensure that the `new_size` does not overflow.\n        // `layout.align()` comes from a `Layout` and is thus guaranteed to be valid.\n        let new_layout = unsafe { Layout::from_size_align_unchecked(new_size, layout.align()) };\n        // SAFETY: the caller must ensure that `new_layout` is greater than zero.\n        let new_ptr = unsafe { self.alloc(new_layout) };\n        if !new_ptr.is_null() {\n            // SAFETY: the previously allocated block cannot overlap the newly allocated block.\n            // The safety contract for `dealloc` must be upheld by the caller.\n            unsafe {\n                ptr::copy_nonoverlapping(ptr, new_ptr, cmp::min(layout.size(), new_size));\n                self.dealloc(ptr, layout);\n            }\n        }\n        new_ptr\n    }"
 }

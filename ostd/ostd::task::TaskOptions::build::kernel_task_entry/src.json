@@ -1,5 +1,5 @@
 {
   "name": "ostd::task::TaskOptions::build::kernel_task_entry",
   "span": "ostd/src/task/mod.rs:174:9: 174:54",
-  "src": "unsafe extern \"C\" fn kernel_task_entry() -> !"
+  "src": "unsafe extern \"C\" fn kernel_task_entry() -> ! {\n            // SAFETY: The new task is switched on a CPU for the first time, `after_switching_to`\n            // hasn't been called yet.\n            unsafe { processor::after_switching_to() };\n\n            let current_task = Task::current()\n                .expect(\"no current task, it should have current task in kernel task entry\");\n\n            // SAFETY: The `func` field will only be accessed by the current task in the task\n            // context, so the data won't be accessed concurrently.\n            let task_func = unsafe { current_task.func.get() };\n            let task_func = task_func\n                .take()\n                .expect(\"task function is `None` when trying to run\");\n            task_func();\n\n            // Manually drop all the on-stack variables to prevent memory leakage!\n            // This is needed because `scheduler::exit_current()` will never return.\n            //\n            // However, `current_task` _borrows_ the current task without holding\n            // an extra reference count. So we do nothing here.\n\n            scheduler::exit_current();\n        }"
 }

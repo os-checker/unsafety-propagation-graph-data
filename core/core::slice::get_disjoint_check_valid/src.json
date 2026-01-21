@@ -1,5 +1,5 @@
 {
   "name": "core::slice::get_disjoint_check_valid",
   "span": "$library/core/src/slice/mod.rs:5227:1: 5230:37",
-  "src": "fn get_disjoint_check_valid<I: GetDisjointMutIndex, const N: usize>(\n    indices: &[I; N],\n    len: usize,\n) -> Result<(), GetDisjointMutError>"
+  "src": "fn get_disjoint_check_valid<I: GetDisjointMutIndex, const N: usize>(\n    indices: &[I; N],\n    len: usize,\n) -> Result<(), GetDisjointMutError> {\n    // NB: The optimizer should inline the loops into a sequence\n    // of instructions without additional branching.\n    for (i, idx) in indices.iter().enumerate() {\n        if !idx.is_in_bounds(len) {\n            return Err(GetDisjointMutError::IndexOutOfBounds);\n        }\n        for idx2 in &indices[..i] {\n            if idx.is_overlapping(idx2) {\n                return Err(GetDisjointMutError::OverlappingIndices);\n            }\n        }\n    }\n    Ok(())\n}"
 }

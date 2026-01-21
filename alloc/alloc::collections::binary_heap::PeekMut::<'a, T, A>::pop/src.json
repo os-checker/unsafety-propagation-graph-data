@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::binary_heap::PeekMut::<'a, T, A>::pop",
   "span": "$library/alloc/src/collections/binary_heap/mod.rs:434:5: 434:49",
-  "src": "pub fn pop(mut this: PeekMut<'a, T, A>) -> T"
+  "src": "pub fn pop(mut this: PeekMut<'a, T, A>) -> T {\n        if let Some(original_len) = this.original_len.take() {\n            // SAFETY: This is how many elements were in the Vec at the time of\n            // the BinaryHeap::peek_mut call.\n            unsafe { this.heap.data.set_len(original_len.get()) };\n\n            // Unlike in Drop, here we don't also need to do a sift_down even if\n            // the caller could've mutated the element. It is removed from the\n            // heap on the next line and pop() is not sensitive to its value.\n        }\n\n        // SAFETY: Have a `PeekMut` element proves that the associated binary heap being non-empty,\n        // so the `pop` operation will not fail.\n        unsafe { this.heap.pop().unwrap_unchecked() }\n    }"
 }

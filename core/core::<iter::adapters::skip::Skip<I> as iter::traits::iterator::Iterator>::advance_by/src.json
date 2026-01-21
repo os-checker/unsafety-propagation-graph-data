@@ -1,5 +1,5 @@
 {
   "name": "core::<iter::adapters::skip::Skip<I> as iter::traits::iterator::Iterator>::advance_by",
   "span": "$library/core/src/iter/adapters/skip.rs:137:5: 137:73",
-  "src": "fn advance_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>>"
+  "src": "fn advance_by(&mut self, mut n: usize) -> Result<(), NonZero<usize>> {\n        let skip_inner = self.n;\n        let skip_and_advance = skip_inner.saturating_add(n);\n\n        let remainder = match self.iter.advance_by(skip_and_advance) {\n            Ok(()) => 0,\n            Err(n) => n.get(),\n        };\n        let advanced_inner = skip_and_advance - remainder;\n        n -= advanced_inner.saturating_sub(skip_inner);\n        self.n = self.n.saturating_sub(advanced_inner);\n\n        // skip_and_advance may have saturated\n        if unlikely(remainder == 0 && n > 0) {\n            n = match self.iter.advance_by(n) {\n                Ok(()) => 0,\n                Err(n) => n.get(),\n            }\n        }\n\n        NonZero::new(n).map_or(Ok(()), Err)\n    }"
 }

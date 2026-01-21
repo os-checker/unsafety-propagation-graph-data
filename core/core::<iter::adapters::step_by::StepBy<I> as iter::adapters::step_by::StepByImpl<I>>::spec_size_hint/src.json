@@ -1,5 +1,5 @@
 {
   "name": "core::<iter::adapters::step_by::StepBy<I> as iter::adapters::step_by::StepByImpl<I>>::spec_size_hint",
   "span": "$library/core/src/iter/adapters/step_by.rs:230:5: 230:63",
-  "src": "default fn spec_size_hint(&self) -> (usize, Option<usize>)"
+  "src": "default fn spec_size_hint(&self) -> (usize, Option<usize>) {\n        #[inline]\n        fn first_size(step: NonZero<usize>) -> impl Fn(usize) -> usize {\n            move |n| if n == 0 { 0 } else { 1 + (n - 1) / step }\n        }\n\n        #[inline]\n        fn other_size(step: NonZero<usize>) -> impl Fn(usize) -> usize {\n            move |n| n / step\n        }\n\n        let (low, high) = self.iter.size_hint();\n\n        if self.first_take {\n            let f = first_size(self.original_step());\n            (f(low), high.map(f))\n        } else {\n            let f = other_size(self.original_step());\n            (f(low), high.map(f))\n        }\n    }"
 }

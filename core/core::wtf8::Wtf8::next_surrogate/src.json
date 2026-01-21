@@ -1,5 +1,5 @@
 {
   "name": "core::wtf8::Wtf8::next_surrogate",
   "span": "$library/core/src/wtf8.rs:290:5: 290:73",
-  "src": "pub fn next_surrogate(&self, mut pos: usize) -> Option<(usize, u16)>"
+  "src": "pub fn next_surrogate(&self, mut pos: usize) -> Option<(usize, u16)> {\n        let mut iter = self.bytes[pos..].iter();\n        loop {\n            let b = *iter.next()?;\n            if b < 0x80 {\n                pos += 1;\n            } else if b < 0xE0 {\n                iter.next();\n                pos += 2;\n            } else if b == 0xED {\n                match (iter.next(), iter.next()) {\n                    (Some(&b2), Some(&b3)) if b2 >= 0xA0 => {\n                        return Some((pos, decode_surrogate(b2, b3)));\n                    }\n                    _ => pos += 3,\n                }\n            } else if b < 0xF0 {\n                iter.next();\n                iter.next();\n                pos += 3;\n            } else {\n                iter.next();\n                iter.next();\n                iter.next();\n                pos += 4;\n            }\n        }\n    }"
 }

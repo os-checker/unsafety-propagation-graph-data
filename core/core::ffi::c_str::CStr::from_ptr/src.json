@@ -1,5 +1,5 @@
 {
   "name": "core::ffi::c_str::CStr::from_ptr",
   "span": "$library/core/src/ffi/c_str.rs:253:5: 253:69",
-  "src": "pub const unsafe fn from_ptr<'a>(ptr: *const c_char) -> &'a CStr"
+  "src": "pub const unsafe fn from_ptr<'a>(ptr: *const c_char) -> &'a CStr {\n        // SAFETY: The caller has provided a pointer that points to a valid C\n        // string with a NUL terminator less than `isize::MAX` from `ptr`.\n        let len = unsafe { strlen(ptr) };\n\n        // SAFETY: The caller has provided a valid pointer with length less than\n        // `isize::MAX`, so `from_raw_parts` is safe. The content remains valid\n        // and doesn't change for the lifetime of the returned `CStr`. This\n        // means the call to `from_bytes_with_nul_unchecked` is correct.\n        //\n        // The cast from c_char to u8 is ok because a c_char is always one byte.\n        unsafe { Self::from_bytes_with_nul_unchecked(slice::from_raw_parts(ptr.cast(), len + 1)) }\n    }"
 }

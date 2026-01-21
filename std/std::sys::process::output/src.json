@@ -1,5 +1,5 @@
 {
   "name": "std::sys::process::output",
   "span": "$library/std/src/sys/process/mod.rs:47:1: 47:86",
-  "src": "pub fn output(cmd: &mut Command) -> crate::io::Result<(ExitStatus, Vec<u8>, Vec<u8>)>"
+  "src": "pub fn output(cmd: &mut Command) -> crate::io::Result<(ExitStatus, Vec<u8>, Vec<u8>)> {\n    use crate::sys::pipe::read2;\n\n    let (mut process, mut pipes) = cmd.spawn(Stdio::MakePipe, false)?;\n\n    drop(pipes.stdin.take());\n    let (mut stdout, mut stderr) = (Vec::new(), Vec::new());\n    match (pipes.stdout.take(), pipes.stderr.take()) {\n        (None, None) => {}\n        (Some(out), None) => {\n            let res = out.read_to_end(&mut stdout);\n            res.unwrap();\n        }\n        (None, Some(err)) => {\n            let res = err.read_to_end(&mut stderr);\n            res.unwrap();\n        }\n        (Some(out), Some(err)) => {\n            let res = read2(out, &mut stdout, err, &mut stderr);\n            res.unwrap();\n        }\n    }\n\n    let status = process.wait()?;\n    Ok((status, stdout, stderr))\n}"
 }

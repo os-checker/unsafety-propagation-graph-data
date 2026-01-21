@@ -1,5 +1,5 @@
 {
   "name": "std::sync::mpmc::list::Channel::<T>::read",
   "span": "$library/std/src/sync/mpmc/list.rs:369:5: 369:73",
-  "src": "pub(crate) unsafe fn read(&self, token: &mut Token) -> Result<T, ()>"
+  "src": "pub(crate) unsafe fn read(&self, token: &mut Token) -> Result<T, ()> {\n        if token.list.block.is_null() {\n            // The channel is disconnected.\n            return Err(());\n        }\n\n        // Read the message.\n        let block = token.list.block as *mut Block<T>;\n        let offset = token.list.offset;\n        unsafe {\n            let slot = (*block).slots.get_unchecked(offset);\n            slot.wait_write();\n            let msg = slot.msg.get().read().assume_init();\n\n            // Destroy the block if we've reached the end, or if another thread wanted to destroy but\n            // couldn't because we were busy reading from the slot.\n            if offset + 1 == BLOCK_CAP {\n                Block::destroy(block, 0);\n            } else if slot.state.fetch_or(READ, Ordering::AcqRel) & DESTROY != 0 {\n                Block::destroy(block, offset + 1);\n            }\n\n            Ok(msg)\n        }\n    }"
 }

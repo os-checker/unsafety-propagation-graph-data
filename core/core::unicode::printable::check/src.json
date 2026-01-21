@@ -1,5 +1,5 @@
 {
   "name": "core::unicode::printable::check",
   "span": "$library/core/src/unicode/printable.rs:4:1: 4:94",
-  "src": "fn check(x: u16, singletonuppers: &[(u8, u8)], singletonlowers: &[u8], normal: &[u8]) -> bool"
+  "src": "fn check(x: u16, singletonuppers: &[(u8, u8)], singletonlowers: &[u8], normal: &[u8]) -> bool {\n    let xupper = (x >> 8) as u8;\n    let mut lowerstart = 0;\n    for &(upper, lowercount) in singletonuppers {\n        let lowerend = lowerstart + lowercount as usize;\n        if xupper == upper {\n            for &lower in &singletonlowers[lowerstart..lowerend] {\n                if lower == x as u8 {\n                    return false;\n                }\n            }\n        } else if xupper < upper {\n            break;\n        }\n        lowerstart = lowerend;\n    }\n\n    let mut x = x as i32;\n    let mut normal = normal.iter().cloned();\n    let mut current = true;\n    while let Some(v) = normal.next() {\n        let len = if v & 0x80 != 0 {\n            ((v & 0x7f) as i32) << 8 | normal.next().unwrap() as i32\n        } else {\n            v as i32\n        };\n        x -= len;\n        if x < 0 {\n            break;\n        }\n        current = !current;\n    }\n    current\n}"
 }

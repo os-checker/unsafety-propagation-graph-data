@@ -1,5 +1,5 @@
 {
   "name": "alloc::vec::Vec::<T, A>::clear",
   "span": "$library/alloc/src/vec/mod.rs:2827:5: 2827:28",
-  "src": "pub fn clear(&mut self)"
+  "src": "pub fn clear(&mut self) {\n        let elems: *mut [T] = self.as_mut_slice();\n\n        // SAFETY:\n        // - `elems` comes directly from `as_mut_slice` and is therefore valid.\n        // - Setting `self.len` before calling `drop_in_place` means that,\n        //   if an element's `Drop` impl panics, the vector's `Drop` impl will\n        //   do nothing (leaking the rest of the elements) instead of dropping\n        //   some twice.\n        unsafe {\n            self.len = 0;\n            ptr::drop_in_place(elems);\n        }\n    }"
 }

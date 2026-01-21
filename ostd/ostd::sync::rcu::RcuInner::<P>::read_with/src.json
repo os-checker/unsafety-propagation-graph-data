@@ -1,5 +1,5 @@
 {
   "name": "ostd::sync::rcu::RcuInner::<P>::read_with",
   "span": "ostd/src/sync/rcu/mod.rs:175:5: 175:83",
-  "src": "fn read_with<'a>(&'a self, _guard: &'a dyn InAtomicMode) -> Option<P::Ref<'a>>"
+  "src": "fn read_with<'a>(&'a self, _guard: &'a dyn InAtomicMode) -> Option<P::Ref<'a>> {\n        let obj_ptr = self.ptr.load(Acquire);\n        if obj_ptr.is_null() {\n            return None;\n        }\n        // SAFETY:\n        // 1. This pointer is not NULL.\n        // 2. The `_guard` guarantees atomic mode for the duration of lifetime\n        //    `'a`, the pointer is valid because other writers won't release the\n        //    allocation until this task passes the quiescent state.\n        NonNull::new(obj_ptr).map(|ptr| unsafe { P::raw_as_ref(ptr) })\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "core::fmt::builders::DebugStruct::<'a, 'b>::field_with",
   "span": "$library/core/src/fmt/builders.rs:141:5: 143:59",
-  "src": "pub fn field_with<F>(&mut self, name: &str, value_fmt: F) -> &mut Self\n    where\n        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,"
+  "src": "pub fn field_with<F>(&mut self, name: &str, value_fmt: F) -> &mut Self\n    where\n        F: FnOnce(&mut fmt::Formatter<'_>) -> fmt::Result,\n    {\n        self.result = self.result.and_then(|_| {\n            if self.is_pretty() {\n                if !self.has_fields {\n                    self.fmt.write_str(\" {\\n\")?;\n                }\n                let mut slot = None;\n                let mut state = Default::default();\n                let mut writer = PadAdapter::wrap(self.fmt, &mut slot, &mut state);\n                writer.write_str(name)?;\n                writer.write_str(\": \")?;\n                value_fmt(&mut writer)?;\n                writer.write_str(\",\\n\")\n            } else {\n                let prefix = if self.has_fields { \", \" } else { \" { \" };\n                self.fmt.write_str(prefix)?;\n                self.fmt.write_str(name)?;\n                self.fmt.write_str(\": \")?;\n                value_fmt(self.fmt)\n            }\n        });\n\n        self.has_fields = true;\n        self\n    }"
 }

@@ -1,5 +1,5 @@
 {
   "name": "alloc::sync::Weak::<T, A>::from_raw_in",
   "span": "$library/alloc/src/sync.rs:3203:5: 3203:63",
-  "src": "pub unsafe fn from_raw_in(ptr: *const T, alloc: A) -> Self"
+  "src": "pub unsafe fn from_raw_in(ptr: *const T, alloc: A) -> Self {\n        // See Weak::as_ptr for context on how the input pointer is derived.\n\n        let ptr = if is_dangling(ptr) {\n            // This is a dangling Weak.\n            ptr as *mut ArcInner<T>\n        } else {\n            // Otherwise, we're guaranteed the pointer came from a nondangling Weak.\n            // SAFETY: data_offset is safe to call, as ptr references a real (potentially dropped) T.\n            let offset = unsafe { data_offset(ptr) };\n            // Thus, we reverse the offset to get the whole ArcInner.\n            // SAFETY: the pointer originated from a Weak, so this offset is safe.\n            unsafe { ptr.byte_sub(offset) as *mut ArcInner<T> }\n        };\n\n        // SAFETY: we now have recovered the original Weak pointer, so can create the Weak.\n        Weak { ptr: unsafe { NonNull::new_unchecked(ptr) }, alloc }\n    }"
 }

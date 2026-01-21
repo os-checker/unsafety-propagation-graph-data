@@ -1,5 +1,5 @@
 {
   "name": "std::thread::current::set_current",
   "span": "$library/std/src/thread/current.rs:121:1: 121:64",
-  "src": "pub(super) fn set_current(thread: Thread) -> Result<(), Thread>"
+  "src": "pub(super) fn set_current(thread: Thread) -> Result<(), Thread> {\n    if CURRENT.get() != NONE {\n        return Err(thread);\n    }\n\n    match id::get() {\n        Some(id) if id == thread.id() => {}\n        None => id::set(thread.id()),\n        _ => return Err(thread),\n    }\n\n    // Make sure that `crate::rt::thread_cleanup` will be run, which will\n    // call `drop_current`.\n    crate::sys::thread_local::guard::enable();\n    CURRENT.set(thread.into_raw().cast_mut());\n    Ok(())\n}"
 }

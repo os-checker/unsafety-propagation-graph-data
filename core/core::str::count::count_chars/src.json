@@ -1,5 +1,5 @@
 {
   "name": "core::str::count::count_chars",
   "span": "$library/core/src/str/count.rs:27:1: 27:44",
-  "src": "pub(super) fn count_chars(s: &str) -> usize"
+  "src": "pub(super) fn count_chars(s: &str) -> usize {\n    if cfg!(feature = \"optimize_for_size\") || s.len() < USIZE_SIZE * UNROLL_INNER {\n        // Avoid entering the optimized implementation for strings where the\n        // difference is not likely to matter, or where it might even be slower.\n        // That said, a ton of thought was not spent on the particular threshold\n        // here, beyond \"this value seems to make sense\".\n        char_count_general_case(s.as_bytes())\n    } else {\n        do_count_chars(s)\n    }\n}"
 }

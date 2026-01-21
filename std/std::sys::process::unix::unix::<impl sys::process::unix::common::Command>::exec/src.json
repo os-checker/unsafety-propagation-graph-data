@@ -1,5 +1,5 @@
 {
   "name": "std::sys::process::unix::unix::<impl sys::process::unix::common::Command>::exec",
   "span": "$library/std/src/sys/process/unix/unix.rs:224:5: 224:56",
-  "src": "pub fn exec(&mut self, default: Stdio) -> io::Error"
+  "src": "pub fn exec(&mut self, default: Stdio) -> io::Error {\n        let envp = self.capture_env();\n\n        if self.saw_nul() {\n            return io::const_error!(ErrorKind::InvalidInput, \"nul byte found in provided data\");\n        }\n\n        match self.setup_io(default, true) {\n            Ok((_, theirs)) => {\n                unsafe {\n                    // Similar to when forking, we want to ensure that access to\n                    // the environment is synchronized, so make sure to grab the\n                    // environment lock before we try to exec.\n                    let _lock = sys::env::env_read_lock();\n\n                    let Err(e) = self.do_exec(theirs, envp.as_ref());\n                    e\n                }\n            }\n            Err(e) => e,\n        }\n    }"
 }

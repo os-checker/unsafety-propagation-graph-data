@@ -1,5 +1,5 @@
 {
   "name": "alloc::collections::linked_list::LinkedList::<T, A>::pop_back_node",
   "span": "$library/alloc/src/collections/linked_list.rs:239:5: 239:60",
-  "src": "fn pop_back_node(&mut self) -> Option<Box<Node<T>, &A>>"
+  "src": "fn pop_back_node(&mut self) -> Option<Box<Node<T>, &A>> {\n        // This method takes care not to create mutable references to whole nodes,\n        // to maintain validity of aliasing pointers into `element`.\n        self.tail.map(|node| unsafe {\n            let node = Box::from_raw_in(node.as_ptr(), &self.alloc);\n            self.tail = node.prev;\n\n            match self.tail {\n                None => self.head = None,\n                // Not creating new mutable (unique!) references overlapping `element`.\n                Some(tail) => (*tail.as_ptr()).next = None,\n            }\n\n            self.len -= 1;\n            node\n        })\n    }"
 }

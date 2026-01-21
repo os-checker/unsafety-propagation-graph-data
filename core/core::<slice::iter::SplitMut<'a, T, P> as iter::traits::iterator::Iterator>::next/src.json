@@ -1,5 +1,5 @@
 {
   "name": "core::<slice::iter::SplitMut<'a, T, P> as iter::traits::iterator::Iterator>::next",
   "span": "$library/core/src/slice/iter.rs:727:5: 727:46",
-  "src": "fn next(&mut self) -> Option<&'a mut [T]>"
+  "src": "fn next(&mut self) -> Option<&'a mut [T]> {\n        if self.finished {\n            return None;\n        }\n\n        match self.v.iter().position(|x| (self.pred)(x)) {\n            None => self.finish(),\n            Some(idx) => {\n                let tmp = mem::take(&mut self.v);\n                // idx is the index of the element we are splitting on. We want to set self to the\n                // region after idx, and return the subslice before and not including idx.\n                // So first we split after idx\n                let (head, tail) = tmp.split_at_mut(idx + 1);\n                self.v = tail;\n                // Then return the subslice up to but not including the found element\n                Some(&mut head[..idx])\n            }\n        }\n    }"
 }

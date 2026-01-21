@@ -1,5 +1,5 @@
 {
   "name": "ostd::arch::tdx_guest::protect_gpa_tdvm_call",
   "span": "ostd/src/arch/x86/tdx_guest.rs:51:1: 51:93",
-  "src": "pub unsafe fn protect_gpa_tdvm_call(gpa: Paddr, size: usize) -> Result<(), PageConvertError>"
+  "src": "pub unsafe fn protect_gpa_tdvm_call(gpa: Paddr, size: usize) -> Result<(), PageConvertError> {\n    debug_assert!(gpa.is_multiple_of(PAGE_SIZE));\n\n    map_gpa(gpa as u64, size as u64).map_err(|_| PageConvertError::TdVmcall)?;\n    for page_gpa in (gpa..gpa + size).step_by(PAGE_SIZE) {\n        // SAFETY: The caller ensures the safety of this operation.\n        unsafe {\n            accept_page(0, page_gpa as u64).map_err(|_| PageConvertError::TdCall)?;\n        }\n    }\n\n    Ok(())\n}"
 }

@@ -1,5 +1,5 @@
 {
   "name": "ostd::mm::frame::allocator::init",
   "span": "ostd/src/mm/frame/allocator.rs:199:1: 199:28",
-  "src": "pub(crate) unsafe fn init()"
+  "src": "pub(crate) unsafe fn init() {\n    let regions = &crate::boot::EARLY_INFO.get().unwrap().memory_regions;\n\n    // Retire the early allocator.\n    let early_allocator = EARLY_ALLOCATOR.lock().take().unwrap();\n    let (range_1, range_2) = early_allocator.allocated_regions();\n\n    for region in regions.iter() {\n        if region.typ() == MemoryRegionType::Usable {\n            debug_assert!(region.base().is_multiple_of(PAGE_SIZE));\n            debug_assert!(region.len().is_multiple_of(PAGE_SIZE));\n\n            // Add global free pages to the frame allocator.\n            // Truncate the early allocated frames if there is an overlap.\n            for r1 in range_difference(&(region.base()..region.end()), &range_1) {\n                for r2 in range_difference(&r1, &range_2) {\n                    log::info!(\"Adding free frames to the allocator: {:x?}\", r2);\n                    get_global_frame_allocator().add_free_memory(r2.start, r2.len());\n                }\n            }\n        }\n    }\n}"
 }
