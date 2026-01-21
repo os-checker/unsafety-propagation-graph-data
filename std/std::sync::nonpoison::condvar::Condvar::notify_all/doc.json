@@ -1,0 +1,5 @@
+{
+  "name": "std::sync::nonpoison::condvar::Condvar::notify_all",
+  "span": "$library/std/src/sync/nonpoison/condvar.rs:426:5: 426:29",
+  "doc": " Wakes up all blocked threads on this condvar.\n\n This method will ensure that any current waiters on the condition\n variable are awoken. Calls to `notify_all()` are not buffered in any\n way.\n\n To wake up only one thread, see [`notify_one`].\n\n [`notify_one`]: Self::notify_one\n\n # Examples\n\n ```\n #![feature(nonpoison_mutex)]\n #![feature(nonpoison_condvar)]\n\n use std::sync::nonpoison::{Mutex, Condvar};\n use std::sync::Arc;\n use std::thread;\n\n let pair = Arc::new((Mutex::new(false), Condvar::new()));\n let pair2 = Arc::clone(&pair);\n\n thread::spawn(move || {\n     let (lock, cvar) = &*pair2;\n     let mut started = lock.lock();\n     *started = true;\n     // We notify the condvar that the value has changed.\n     cvar.notify_all();\n });\n\n // Wait for the thread to start up.\n let (lock, cvar) = &*pair;\n let mut started = lock.lock();\n // As long as the value inside the `Mutex<bool>` is `false`, we wait.\n while !*started {\n     cvar.wait(&mut started);\n }\n ```\n"
+}

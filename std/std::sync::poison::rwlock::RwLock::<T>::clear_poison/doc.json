@@ -1,0 +1,5 @@
+{
+  "name": "std::sync::poison::rwlock::RwLock::<T>::clear_poison",
+  "span": "$library/std/src/sync/poison/rwlock.rs:605:5: 605:31",
+  "doc": " Clear the poisoned state from a lock.\n\n If the lock is poisoned, it will remain poisoned until this function is called. This allows\n recovering from a poisoned state and marking that it has recovered. For example, if the\n value is overwritten by a known-good value, then the lock can be marked as un-poisoned. Or\n possibly, the value could be inspected to determine if it is in a consistent state, and if\n so the poison is removed.\n\n # Examples\n\n ```\n use std::sync::{Arc, RwLock};\n use std::thread;\n\n let lock = Arc::new(RwLock::new(0));\n let c_lock = Arc::clone(&lock);\n\n let _ = thread::spawn(move || {\n     let _lock = c_lock.write().unwrap();\n     panic!(); // the lock gets poisoned\n }).join();\n\n assert_eq!(lock.is_poisoned(), true);\n let guard = lock.write().unwrap_or_else(|mut e| {\n     **e.get_mut() = 1;\n     lock.clear_poison();\n     e.into_inner()\n });\n assert_eq!(lock.is_poisoned(), false);\n assert_eq!(*guard, 1);\n ```\n"
+}

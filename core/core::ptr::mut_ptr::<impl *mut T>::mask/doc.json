@@ -1,0 +1,5 @@
+{
+  "name": "core::ptr::mut_ptr::<impl *mut T>::mask",
+  "span": "$library/core/src/ptr/mut_ptr.rs:528:5: 528:45",
+  "doc": " Masks out bits of the pointer according to a mask.\n\n This is convenience for `ptr.map_addr(|a| a & mask)`.\n\n For non-`Sized` pointees this operation changes only the data pointer,\n leaving the metadata untouched.\n\n ## Examples\n\n ```\n #![feature(ptr_mask)]\n let mut v = 17_u32;\n let ptr: *mut u32 = &mut v;\n\n // `u32` is 4 bytes aligned,\n // which means that lower 2 bits are always 0.\n let tag_mask = 0b11;\n let ptr_mask = !tag_mask;\n\n // We can store something in these lower bits\n let tagged_ptr = ptr.map_addr(|a| a | 0b10);\n\n // Get the \"tag\" back\n let tag = tagged_ptr.addr() & tag_mask;\n assert_eq!(tag, 0b10);\n\n // Note that `tagged_ptr` is unaligned, it's UB to read from/write to it.\n // To get original pointer `mask` can be used:\n let masked_ptr = tagged_ptr.mask(ptr_mask);\n assert_eq!(unsafe { *masked_ptr }, 17);\n\n unsafe { *masked_ptr = 0 };\n assert_eq!(v, 0);\n ```\n"
+}

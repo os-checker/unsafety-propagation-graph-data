@@ -1,0 +1,5 @@
+{
+  "name": "std::sync::poison::mutex::Mutex::<T>::clear_poison",
+  "span": "$library/std/src/sync/poison/mutex.rs:610:5: 610:31",
+  "doc": " Clear the poisoned state from a mutex.\n\n If the mutex is poisoned, it will remain poisoned until this function is called. This\n allows recovering from a poisoned state and marking that it has recovered. For example, if\n the value is overwritten by a known-good value, then the mutex can be marked as\n un-poisoned. Or possibly, the value could be inspected to determine if it is in a\n consistent state, and if so the poison is removed.\n\n # Examples\n\n ```\n use std::sync::{Arc, Mutex};\n use std::thread;\n\n let mutex = Arc::new(Mutex::new(0));\n let c_mutex = Arc::clone(&mutex);\n\n let _ = thread::spawn(move || {\n     let _lock = c_mutex.lock().unwrap();\n     panic!(); // the mutex gets poisoned\n }).join();\n\n assert_eq!(mutex.is_poisoned(), true);\n let x = mutex.lock().unwrap_or_else(|mut e| {\n     **e.get_mut() = 1;\n     mutex.clear_poison();\n     e.into_inner()\n });\n assert_eq!(mutex.is_poisoned(), false);\n assert_eq!(*x, 1);\n ```\n"
+}

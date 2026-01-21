@@ -1,0 +1,5 @@
+{
+  "name": "core::sync::atomic::AtomicPtr::<T>::get_mut_slice",
+  "span": "$library/core/src/sync/atomic.rs:1639:5: 1639:61",
+  "doc": " Gets non-atomic access to a `&mut [AtomicPtr]` slice.\n\n This is safe because the mutable reference guarantees that no other threads are\n concurrently accessing the atomic data.\n\n # Examples\n\n ```ignore-wasm\n #![feature(atomic_from_mut)]\n use std::ptr::null_mut;\n use std::sync::atomic::{AtomicPtr, Ordering};\n\n let mut some_ptrs = [const { AtomicPtr::new(null_mut::<String>()) }; 10];\n\n let view: &mut [*mut String] = AtomicPtr::get_mut_slice(&mut some_ptrs);\n assert_eq!(view, [null_mut::<String>(); 10]);\n view\n     .iter_mut()\n     .enumerate()\n     .for_each(|(i, ptr)| *ptr = Box::into_raw(Box::new(format!(\"iteration#{i}\"))));\n\n std::thread::scope(|s| {\n     for ptr in &some_ptrs {\n         s.spawn(move || {\n             let ptr = ptr.load(Ordering::Relaxed);\n             assert!(!ptr.is_null());\n\n             let name = unsafe { Box::from_raw(ptr) };\n             println!(\"Hello, {name}!\");\n         });\n     }\n });\n ```\n"
+}
