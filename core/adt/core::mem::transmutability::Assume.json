@@ -1,0 +1,97 @@
+{
+  "name": "core::mem::transmutability::Assume",
+  "constructors": [
+    "core::mem::transmutability::Assume::and",
+    "core::mem::transmutability::Assume::but_not",
+    "core::<mem::transmutability::Assume as ops::arith::Add>::add",
+    "core::<mem::transmutability::Assume as ops::arith::Sub>::sub",
+    "core::<mem::transmutability::Assume as clone::Clone>::clone"
+  ],
+  "access_self_as_arg": {
+    "read": [
+      "core::<mem::transmutability::Assume as cmp::PartialEq>::eq",
+      "core::<mem::transmutability::Assume as cmp::Eq>::assert_receiver_is_total_eq",
+      "core::<mem::transmutability::Assume as clone::Clone>::clone",
+      "core::<mem::transmutability::Assume as fmt::Debug>::fmt"
+    ],
+    "write": [
+      "core::<mem::transmutability::Assume as clone::Clone>::clone"
+    ],
+    "other": [
+      "core::mem::transmutability::Assume::and",
+      "core::mem::transmutability::Assume::but_not",
+      "core::mem::transmutability::Assume::and",
+      "core::mem::transmutability::Assume::but_not",
+      "core::mem::transmutability::Assume::and",
+      "core::mem::transmutability::Assume::but_not",
+      "core::mem::transmutability::Assume::and",
+      "core::mem::transmutability::Assume::but_not",
+      "core::mem::transmutability::Assume::and",
+      "core::mem::transmutability::Assume::but_not",
+      "core::<mem::transmutability::Assume as ops::arith::Add>::add",
+      "core::<mem::transmutability::Assume as ops::arith::Sub>::sub",
+      "core::<mem::transmutability::Assume as clone::Clone>::clone"
+    ]
+  },
+  "access_self_as_locals": {
+    "read": [],
+    "write": [],
+    "other": []
+  },
+  "access_field": [
+    {
+      "read": [
+        "core::<mem::transmutability::Assume as cmp::PartialEq>::eq",
+        "core::<mem::transmutability::Assume as fmt::Debug>::fmt"
+      ],
+      "write": [],
+      "other": []
+    },
+    {
+      "read": [
+        "core::<mem::transmutability::Assume as cmp::PartialEq>::eq",
+        "core::<mem::transmutability::Assume as fmt::Debug>::fmt"
+      ],
+      "write": [],
+      "other": []
+    },
+    {
+      "read": [
+        "core::<mem::transmutability::Assume as cmp::PartialEq>::eq",
+        "core::<mem::transmutability::Assume as fmt::Debug>::fmt"
+      ],
+      "write": [],
+      "other": []
+    },
+    {
+      "read": [
+        "core::<mem::transmutability::Assume as cmp::PartialEq>::eq",
+        "core::<mem::transmutability::Assume as fmt::Debug>::fmt"
+      ],
+      "write": [],
+      "other": []
+    }
+  ],
+  "span": "$library/core/src/mem/transmutability.rs:151:1: 151:18",
+  "src": "pub struct Assume",
+  "kind": "Struct",
+  "doc_adt": " Configurable proof assumptions of [`TransmuteFrom`].\n\n When `false`, the respective proof obligation belongs to the compiler. When\n `true`, the onus of the safety proof belongs to the programmer.\n",
+  "variant_fields": {
+    "VariantIdx(None)-FieldIdx(Some(0))": {
+      "name": "alignment",
+      "doc": " When `false`, [`TransmuteFrom`] is not implemented for transmutations\n that might violate the alignment requirements of references; e.g.:\n\n ```compile_fail,E0277\n #![feature(transmutability)]\n use core::mem::TransmuteFrom;\n\n assert_eq!(align_of::<[u8; 2]>(), 1);\n assert_eq!(align_of::<u16>(), 2);\n\n let src: &[u8; 2] = &[0xFF, 0xFF];\n\n // SAFETY: No safety obligations.\n let dst: &u16 = unsafe {\n     <_ as TransmuteFrom<_>>::transmute(src)\n };\n ```\n\n When `true`, [`TransmuteFrom`] assumes that *you* have ensured\n that references in the transmuted value satisfy the alignment\n requirements of their referent types; e.g.:\n\n ```rust\n #![feature(pointer_is_aligned_to, transmutability)]\n use core::mem::{Assume, TransmuteFrom};\n\n let src: &[u8; 2] = &[0xFF, 0xFF];\n\n let maybe_dst: Option<&u16> = if <*const _>::is_aligned_to(src, align_of::<u16>()) {\n     // SAFETY: We have checked above that the address of `src` satisfies the\n     // alignment requirements of `u16`.\n     Some(unsafe {\n         <_ as TransmuteFrom<_, { Assume::ALIGNMENT }>>::transmute(src)\n     })\n } else {\n     None\n };\n\n assert!(matches!(maybe_dst, Some(&u16::MAX) | None));\n ```\n"
+    },
+    "VariantIdx(None)-FieldIdx(Some(1))": {
+      "name": "lifetimes",
+      "doc": " When `false`, [`TransmuteFrom`] is not implemented for transmutations\n that extend the lifetimes of references.\n\n When `true`, [`TransmuteFrom`] assumes that *you* have ensured that\n references in the transmuted value do not outlive their referents.\n"
+    },
+    "VariantIdx(None)-FieldIdx(Some(2))": {
+      "name": "safety",
+      "doc": " When `false`, [`TransmuteFrom`] is not implemented for transmutations\n that might violate the library safety invariants of the destination\n type; e.g.:\n\n ```compile_fail,E0277\n #![feature(transmutability)]\n use core::mem::TransmuteFrom;\n\n let src: u8 = 3;\n\n struct EvenU8 {\n     // SAFETY: `val` must be an even number.\n     val: u8,\n }\n\n // SAFETY: No safety obligations.\n let dst: EvenU8 = unsafe {\n     <_ as TransmuteFrom<_>>::transmute(src)\n };\n ```\n\n When `true`, [`TransmuteFrom`] assumes that *you* have ensured\n that undefined behavior does not arise from using the transmuted value;\n e.g.:\n\n ```rust\n #![feature(transmutability)]\n use core::mem::{Assume, TransmuteFrom};\n\n let src: u8 = 42;\n\n struct EvenU8 {\n     // SAFETY: `val` must be an even number.\n     val: u8,\n }\n\n let maybe_dst: Option<EvenU8> = if src % 2 == 0 {\n     // SAFETY: We have checked above that the value of `src` is even.\n     Some(unsafe {\n         <_ as TransmuteFrom<_, { Assume::SAFETY }>>::transmute(src)\n     })\n } else {\n     None\n };\n\n assert!(matches!(maybe_dst, Some(EvenU8 { val: 42 })));\n ```\n"
+    },
+    "VariantIdx(None)-FieldIdx(Some(3))": {
+      "name": "validity",
+      "doc": " When `false`, [`TransmuteFrom`] is not implemented for transmutations\n that might violate the language-level bit-validity invariant of the\n destination type; e.g.:\n\n ```compile_fail,E0277\n #![feature(transmutability)]\n use core::mem::TransmuteFrom;\n\n let src: u8 = 3;\n\n // SAFETY: No safety obligations.\n let dst: bool = unsafe {\n     <_ as TransmuteFrom<_>>::transmute(src)\n };\n ```\n\n When `true`, [`TransmuteFrom`] assumes that *you* have ensured\n that the value being transmuted is a bit-valid instance of the\n transmuted value; e.g.:\n\n ```rust\n #![feature(transmutability)]\n use core::mem::{Assume, TransmuteFrom};\n\n let src: u8 = 1;\n\n let maybe_dst: Option<bool> = if src == 0 || src == 1 {\n     // SAFETY: We have checked above that the value of `src` is a bit-valid\n     // instance of `bool`.\n     Some(unsafe {\n         <_ as TransmuteFrom<_, { Assume::VALIDITY }>>::transmute(src)\n     })\n } else {\n     None\n };\n\n assert_eq!(maybe_dst, Some(true));\n ```\n"
+    }
+  }
+}

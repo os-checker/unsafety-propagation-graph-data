@@ -1,0 +1,116 @@
+{
+  "name": "core::task::wake::RawWakerVTable",
+  "constructors": [
+    "core::task::wake::RawWakerVTable::new",
+    "core::<task::wake::RawWakerVTable as clone::Clone>::clone"
+  ],
+  "access_self_as_arg": {
+    "read": [
+      "core::task::wake::RawWaker::new",
+      "core::task::wake::Waker::new",
+      "core::task::wake::LocalWaker::new",
+      "core::<task::wake::RawWakerVTable as cmp::PartialEq>::eq",
+      "core::<task::wake::RawWakerVTable as clone::Clone>::clone",
+      "core::<task::wake::RawWakerVTable as fmt::Debug>::fmt"
+    ],
+    "write": [
+      "core::<task::wake::RawWakerVTable as clone::Clone>::clone"
+    ],
+    "other": [
+      "core::<task::wake::RawWakerVTable as clone::Clone>::clone"
+    ]
+  },
+  "access_self_as_locals": {
+    "read": [
+      "core::task::wake::Waker::wake",
+      "core::task::wake::Waker::wake_by_ref",
+      "core::task::wake::Waker::will_wake",
+      "core::task::wake::Waker::vtable",
+      "core::task::wake::Waker::from_fn_ptr",
+      "core::<task::wake::Waker as clone::Clone>::clone",
+      "core::<task::wake::Waker as ops::drop::Drop>::drop",
+      "core::<task::wake::Waker as fmt::Debug>::fmt",
+      "core::task::wake::LocalWaker::wake",
+      "core::task::wake::LocalWaker::wake_by_ref",
+      "core::task::wake::LocalWaker::will_wake",
+      "core::task::wake::LocalWaker::vtable",
+      "core::task::wake::LocalWaker::from_fn_ptr",
+      "core::<task::wake::LocalWaker as clone::Clone>::clone",
+      "core::<task::wake::LocalWaker as ops::drop::Drop>::drop",
+      "core::<task::wake::LocalWaker as fmt::Debug>::fmt"
+    ],
+    "write": [
+      "core::task::wake::Waker::will_wake",
+      "core::<task::wake::Waker as fmt::Debug>::fmt",
+      "core::task::wake::LocalWaker::will_wake",
+      "core::<task::wake::LocalWaker as fmt::Debug>::fmt"
+    ],
+    "other": [
+      "core::task::wake::RawWakerVTable::new"
+    ]
+  },
+  "access_field": [
+    {
+      "read": [
+        "core::<task::wake::Waker as clone::Clone>::clone",
+        "core::<task::wake::LocalWaker as clone::Clone>::clone",
+        "core::<task::wake::RawWakerVTable as cmp::PartialEq>::eq",
+        "core::<task::wake::RawWakerVTable as fmt::Debug>::fmt"
+      ],
+      "write": [],
+      "other": []
+    },
+    {
+      "read": [
+        "core::task::wake::Waker::wake",
+        "core::task::wake::LocalWaker::wake",
+        "core::<task::wake::RawWakerVTable as cmp::PartialEq>::eq",
+        "core::<task::wake::RawWakerVTable as fmt::Debug>::fmt"
+      ],
+      "write": [],
+      "other": []
+    },
+    {
+      "read": [
+        "core::task::wake::Waker::wake_by_ref",
+        "core::task::wake::LocalWaker::wake_by_ref",
+        "core::<task::wake::RawWakerVTable as cmp::PartialEq>::eq",
+        "core::<task::wake::RawWakerVTable as fmt::Debug>::fmt"
+      ],
+      "write": [],
+      "other": []
+    },
+    {
+      "read": [
+        "core::<task::wake::Waker as ops::drop::Drop>::drop",
+        "core::<task::wake::LocalWaker as ops::drop::Drop>::drop",
+        "core::<task::wake::RawWakerVTable as cmp::PartialEq>::eq",
+        "core::<task::wake::RawWakerVTable as fmt::Debug>::fmt"
+      ],
+      "write": [],
+      "other": []
+    }
+  ],
+  "span": "$library/core/src/task/wake.rs:109:1: 109:26",
+  "src": "pub struct RawWakerVTable",
+  "kind": "Struct",
+  "doc_adt": " A virtual function pointer table (vtable) that specifies the behavior\n of a [`RawWaker`].\n\n The pointer passed to all functions inside the vtable is the `data` pointer\n from the enclosing [`RawWaker`] object.\n\n The functions inside this struct are only intended to be called on the `data`\n pointer of a properly constructed [`RawWaker`] object from inside the\n [`RawWaker`] implementation. Calling one of the contained functions using\n any other `data` pointer will cause undefined behavior.\n\n Note that while this type implements `PartialEq`, comparing function pointers, and hence\n comparing structs like this that contain function pointers, is unreliable: pointers to the same\n function can compare inequal (because functions are duplicated in multiple codegen units), and\n pointers to *different* functions can compare equal (since identical functions can be\n deduplicated within a codegen unit).\n\n # Thread safety\n If the [`RawWaker`] will be used to construct a [`Waker`] then\n these functions must all be thread-safe (even though [`RawWaker`] is\n <code>\\![Send] + \\![Sync]</code>). This is because [`Waker`] is <code>[Send] + [Sync]</code>,\n and it may be moved to arbitrary threads or invoked by `&` reference. For example,\n this means that if the `clone` and `drop` functions manage a reference count,\n they must do so atomically.\n\n However, if the [`RawWaker`] will be used to construct a [`LocalWaker`] instead, then\n these functions don't need to be thread safe. This means that <code>\\![Send] + \\![Sync]</code>\n  data can be stored in the data pointer, and reference counting does not need any atomic\n synchronization. This is because [`LocalWaker`] is not thread safe itself, so it cannot\n be sent across threads.\n",
+  "variant_fields": {
+    "VariantIdx(None)-FieldIdx(Some(0))": {
+      "name": "clone",
+      "doc": " This function will be called when the [`RawWaker`] gets cloned, e.g. when\n the [`Waker`] in which the [`RawWaker`] is stored gets cloned.\n\n The implementation of this function must retain all resources that are\n required for this additional instance of a [`RawWaker`] and associated\n task. Calling `wake` on the resulting [`RawWaker`] should result in a wakeup\n of the same task that would have been awoken by the original [`RawWaker`].\n"
+    },
+    "VariantIdx(None)-FieldIdx(Some(1))": {
+      "name": "wake",
+      "doc": " This function will be called when `wake` is called on the [`Waker`].\n It must wake up the task associated with this [`RawWaker`].\n\n The implementation of this function must make sure to release any\n resources that are associated with this instance of a [`RawWaker`] and\n associated task.\n"
+    },
+    "VariantIdx(None)-FieldIdx(Some(2))": {
+      "name": "wake_by_ref",
+      "doc": " This function will be called when `wake_by_ref` is called on the [`Waker`].\n It must wake up the task associated with this [`RawWaker`].\n\n This function is similar to `wake`, but must not consume the provided data\n pointer.\n"
+    },
+    "VariantIdx(None)-FieldIdx(Some(3))": {
+      "name": "drop",
+      "doc": " This function will be called when a [`Waker`] gets dropped.\n\n The implementation of this function must make sure to release any\n resources that are associated with this instance of a [`RawWaker`] and\n associated task.\n"
+    }
+  }
+}

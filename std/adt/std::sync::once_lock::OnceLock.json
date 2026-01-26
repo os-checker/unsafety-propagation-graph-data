@@ -1,0 +1,111 @@
+{
+  "name": "std::sync::once_lock::OnceLock",
+  "constructors": [
+    "std::sync::once_lock::OnceLock::<T>::new",
+    "std::<sync::once_lock::OnceLock<T> as core::default::Default>::default",
+    "std::<sync::once_lock::OnceLock<T> as core::clone::Clone>::clone",
+    "std::<sync::once_lock::OnceLock<T> as core::convert::From<T>>::from"
+  ],
+  "access_self_as_arg": {
+    "read": [
+      "std::sync::once_lock::OnceLock::<T>::get",
+      "std::sync::once_lock::OnceLock::<T>::get_mut",
+      "std::sync::once_lock::OnceLock::<T>::wait",
+      "std::sync::once_lock::OnceLock::<T>::set",
+      "std::sync::once_lock::OnceLock::<T>::try_insert",
+      "std::sync::once_lock::OnceLock::<T>::get_or_init",
+      "std::sync::once_lock::OnceLock::<T>::get_or_try_init",
+      "std::sync::once_lock::OnceLock::<T>::get_mut_or_try_init",
+      "std::sync::once_lock::OnceLock::<T>::take",
+      "std::sync::once_lock::OnceLock::<T>::is_initialized",
+      "std::sync::once_lock::OnceLock::<T>::initialize",
+      "std::sync::once_lock::OnceLock::<T>::get_unchecked",
+      "std::sync::once_lock::OnceLock::<T>::get_unchecked_mut",
+      "std::<sync::once_lock::OnceLock<T> as core::fmt::Debug>::fmt",
+      "std::<sync::once_lock::OnceLock<T> as core::clone::Clone>::clone",
+      "std::<sync::once_lock::OnceLock<T> as core::cmp::PartialEq>::eq",
+      "std::<sync::once_lock::OnceLock<T> as core::ops::Drop>::drop"
+    ],
+    "write": [
+      "std::sync::once_lock::OnceLock::<T>::get_mut",
+      "std::sync::once_lock::OnceLock::<T>::get_mut_or_try_init",
+      "std::sync::once_lock::OnceLock::<T>::take",
+      "std::sync::once_lock::OnceLock::<T>::get_unchecked_mut",
+      "std::<sync::once_lock::OnceLock<T> as core::ops::Drop>::drop",
+      "std::sync::once_lock::OnceLock::<T>::get_mut",
+      "std::sync::once_lock::OnceLock::<T>::get_mut_or_init",
+      "std::sync::once_lock::OnceLock::<T>::get_mut_or_try_init",
+      "std::sync::once_lock::OnceLock::<T>::into_inner",
+      "std::sync::once_lock::OnceLock::<T>::take",
+      "std::sync::once_lock::OnceLock::<T>::get_unchecked_mut",
+      "std::<sync::once_lock::OnceLock<T> as core::ops::Drop>::drop"
+    ],
+    "other": [
+      "std::sync::once_lock::OnceLock::<T>::into_inner",
+      "std::<sync::once_lock::OnceLock<T> as core::clone::Clone>::clone"
+    ]
+  },
+  "access_self_as_locals": {
+    "read": [
+      "std::io::stdio::stdin",
+      "std::io::stdio::stdout",
+      "std::io::stdio::cleanup",
+      "std::<sync::once_lock::OnceLock<T> as core::convert::From<T>>::from",
+      "std::sys::random::linux::getrandom"
+    ],
+    "write": [],
+    "other": [
+      "std::sync::once_lock::OnceLock::<T>::new",
+      "std::<sync::once_lock::OnceLock<T> as core::default::Default>::default",
+      "std::<sync::once_lock::OnceLock<T> as core::convert::From<T>>::from"
+    ]
+  },
+  "access_field": [
+    {
+      "read": [
+        "std::sync::once_lock::OnceLock::<T>::wait",
+        "std::sync::once_lock::OnceLock::<T>::is_initialized",
+        "std::sync::once_lock::OnceLock::<T>::initialize"
+      ],
+      "write": [
+        "std::sync::once_lock::OnceLock::<T>::take"
+      ],
+      "other": []
+    },
+    {
+      "read": [
+        "std::sync::once_lock::OnceLock::<T>::initialize",
+        "std::sync::once_lock::OnceLock::<T>::get_unchecked"
+      ],
+      "write": [
+        "std::sync::once_lock::OnceLock::<T>::take",
+        "std::sync::once_lock::OnceLock::<T>::get_unchecked_mut",
+        "std::<sync::once_lock::OnceLock<T> as core::ops::Drop>::drop"
+      ],
+      "other": []
+    },
+    {
+      "read": [],
+      "write": [],
+      "other": []
+    }
+  ],
+  "span": "$library/std/src/sync/once_lock.rs:108:1: 108:23",
+  "src": "pub struct OnceLock<T>",
+  "kind": "Struct",
+  "doc_adt": " A synchronization primitive which can nominally be written to only once.\n\n This type is a thread-safe [`OnceCell`], and can be used in statics.\n In many simple cases, you can use [`LazyLock<T, F>`] instead to get the benefits of this type\n with less effort: `LazyLock<T, F>` \"looks like\" `&T` because it initializes with `F` on deref!\n Where OnceLock shines is when LazyLock is too simple to support a given case, as LazyLock\n doesn't allow additional inputs to its function after you call [`LazyLock::new(|| ...)`].\n\n A `OnceLock` can be thought of as a safe abstraction over uninitialized data that becomes\n initialized once written.\n\n Unlike [`Mutex`](crate::sync::Mutex), `OnceLock` is never poisoned on panic.\n\n [`OnceCell`]: crate::cell::OnceCell\n [`LazyLock<T, F>`]: crate::sync::LazyLock\n [`LazyLock::new(|| ...)`]: crate::sync::LazyLock::new\n\n # Examples\n\n Writing to a `OnceLock` from a separate thread:\n\n ```\n use std::sync::OnceLock;\n\n static CELL: OnceLock<usize> = OnceLock::new();\n\n // `OnceLock` has not been written to yet.\n assert!(CELL.get().is_none());\n\n // Spawn a thread and write to `OnceLock`.\n std::thread::spawn(|| {\n     let value = CELL.get_or_init(|| 12345);\n     assert_eq!(value, &12345);\n })\n .join()\n .unwrap();\n\n // `OnceLock` now contains the value.\n assert_eq!(\n     CELL.get(),\n     Some(&12345),\n );\n ```\n\n You can use `OnceLock` to implement a type that requires \"append-only\" logic:\n\n ```\n use std::sync::{OnceLock, atomic::{AtomicU32, Ordering}};\n use std::thread;\n\n struct OnceList<T> {\n     data: OnceLock<T>,\n     next: OnceLock<Box<OnceList<T>>>,\n }\n impl<T> OnceList<T> {\n     const fn new() -> OnceList<T> {\n         OnceList { data: OnceLock::new(), next: OnceLock::new() }\n     }\n     fn push(&self, value: T) {\n         // FIXME: this impl is concise, but is also slow for long lists or many threads.\n         // as an exercise, consider how you might improve on it while preserving the behavior\n         if let Err(value) = self.data.set(value) {\n             let next = self.next.get_or_init(|| Box::new(OnceList::new()));\n             next.push(value)\n         };\n     }\n     fn contains(&self, example: &T) -> bool\n     where\n         T: PartialEq,\n     {\n         self.data.get().map(|item| item == example).filter(|v| *v).unwrap_or_else(|| {\n             self.next.get().map(|next| next.contains(example)).unwrap_or(false)\n         })\n     }\n }\n\n // Let's exercise this new Sync append-only list by doing a little counting\n static LIST: OnceList<u32> = OnceList::new();\n static COUNTER: AtomicU32 = AtomicU32::new(0);\n\n # const LEN: u32 = if cfg!(miri) { 50 } else { 1000 };\n # /*\n const LEN: u32 = 1000;\n # */\n thread::scope(|s| {\n     for _ in 0..thread::available_parallelism().unwrap().get() {\n         s.spawn(|| {\n             while let i @ 0..LEN = COUNTER.fetch_add(1, Ordering::Relaxed) {\n                 LIST.push(i);\n             }\n         });\n     }\n });\n\n for i in 0..LEN {\n     assert!(LIST.contains(&i));\n }\n\n ```\n",
+  "variant_fields": {
+    "VariantIdx(None)-FieldIdx(Some(0))": {
+      "name": "once",
+      "doc": ""
+    },
+    "VariantIdx(None)-FieldIdx(Some(1))": {
+      "name": "value",
+      "doc": ""
+    },
+    "VariantIdx(None)-FieldIdx(Some(2))": {
+      "name": "_marker",
+      "doc": " `PhantomData` to make sure dropck understands we're dropping T in our Drop impl.\n\n ```compile_fail,E0597\n use std::sync::OnceLock;\n\n struct A<'a>(&'a str);\n\n impl<'a> Drop for A<'a> {\n     fn drop(&mut self) {}\n }\n\n let cell = OnceLock::new();\n {\n     let s = String::new();\n     let _ = cell.set(A(&s));\n }\n ```\n"
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "name": "ostd::mm::frame::linked_list::LinkedList",
+  "constructors": [
+    "ostd::<mm::frame::linked_list::LinkedList<M> as core::default::Default>::default",
+    "ostd::mm::frame::linked_list::LinkedList::<M>::new"
+  ],
+  "access_self_as_arg": {
+    "read": [
+      "ostd::mm::frame::linked_list::LinkedList::<M>::size",
+      "ostd::mm::frame::linked_list::LinkedList::<M>::is_empty"
+    ],
+    "write": [
+      "ostd::mm::frame::linked_list::LinkedList::<M>::push_front",
+      "ostd::mm::frame::linked_list::LinkedList::<M>::pop_front",
+      "ostd::mm::frame::linked_list::LinkedList::<M>::push_back",
+      "ostd::mm::frame::linked_list::LinkedList::<M>::pop_back",
+      "ostd::mm::frame::linked_list::LinkedList::<M>::contains",
+      "ostd::mm::frame::linked_list::LinkedList::<M>::cursor_mut_at",
+      "ostd::mm::frame::linked_list::LinkedList::<M>::cursor_front_mut",
+      "ostd::mm::frame::linked_list::LinkedList::<M>::cursor_back_mut",
+      "ostd::mm::frame::linked_list::LinkedList::<M>::cursor_at_ghost_mut",
+      "ostd::mm::frame::linked_list::LinkedList::<M>::lazy_get_id",
+      "ostd::<mm::frame::linked_list::LinkedList<M> as core::ops::Drop>::drop"
+    ],
+    "other": []
+  },
+  "access_self_as_locals": {
+    "read": [
+      "ostd::mm::frame::linked_list::CursorMut::<'_, M>::as_list"
+    ],
+    "write": [
+      "ostd::mm::frame::linked_list::CursorMut::<'_, M>::move_next",
+      "ostd::mm::frame::linked_list::CursorMut::<'_, M>::move_prev",
+      "ostd::mm::frame::linked_list::CursorMut::<'_, M>::take_current",
+      "ostd::mm::frame::linked_list::CursorMut::<'_, M>::insert_before",
+      "ostd::mm::frame::linked_list::CursorMut::<'_, M>::as_list",
+      "ostd::mm::frame::linked_list::CursorMut::<'_, M>::as_list"
+    ],
+    "other": [
+      "ostd::<mm::frame::linked_list::LinkedList<M> as core::default::Default>::default",
+      "ostd::mm::frame::linked_list::LinkedList::<M>::new"
+    ]
+  },
+  "access_field": [
+    {
+      "read": [
+        "ostd::mm::frame::linked_list::LinkedList::<M>::is_empty"
+      ],
+      "write": [
+        "ostd::mm::frame::linked_list::LinkedList::<M>::cursor_front_mut",
+        "ostd::mm::frame::linked_list::CursorMut::<'_, M>::move_next",
+        "ostd::mm::frame::linked_list::CursorMut::<'_, M>::take_current",
+        "ostd::mm::frame::linked_list::CursorMut::<'_, M>::insert_before"
+      ],
+      "other": []
+    },
+    {
+      "read": [
+        "ostd::mm::frame::linked_list::LinkedList::<M>::is_empty"
+      ],
+      "write": [
+        "ostd::mm::frame::linked_list::LinkedList::<M>::cursor_back_mut",
+        "ostd::mm::frame::linked_list::CursorMut::<'_, M>::move_prev",
+        "ostd::mm::frame::linked_list::CursorMut::<'_, M>::take_current",
+        "ostd::mm::frame::linked_list::CursorMut::<'_, M>::insert_before"
+      ],
+      "other": []
+    },
+    {
+      "read": [
+        "ostd::mm::frame::linked_list::LinkedList::<M>::size",
+        "ostd::mm::frame::linked_list::LinkedList::<M>::is_empty"
+      ],
+      "write": [
+        "ostd::mm::frame::linked_list::CursorMut::<'_, M>::take_current",
+        "ostd::mm::frame::linked_list::CursorMut::<'_, M>::insert_before"
+      ],
+      "other": []
+    },
+    {
+      "read": [],
+      "write": [
+        "ostd::mm::frame::linked_list::LinkedList::<M>::lazy_get_id"
+      ],
+      "other": []
+    }
+  ],
+  "span": "ostd/src/mm/frame/linked_list.rs:71:1: 71:25",
+  "src": "pub struct LinkedList<M>",
+  "kind": "Struct",
+  "doc_adt": " A linked list of frames.\n\n Two key features that [`LinkedList`] is different from\n [`alloc::collections::LinkedList`] is that:\n  1. It is intrusive, meaning that the links are part of the frame metadata.\n     This allows the linked list to be used without heap allocation. But it\n     disallows a frame to be in multiple linked lists at the same time.\n  2. The linked list exclusively own the frames, meaning that it takes\n     unique pointers [`UniqueFrame`]. And other bodies cannot\n     [`from_in_use`] a frame that is inside a linked list.\n  3. We also allow creating cursors at a specific frame, allowing $O(1)$\n     removal without iterating through the list at a cost of some checks.\n\n # Example\n\n To create metadata types that allows linked list links, wrap the metadata\n type in [`Link`]:\n\n ```rust\n use ostd::{\n     mm::{frame::{linked_list::{Link, LinkedList}, Frame}, FrameAllocOptions},\n     impl_untyped_frame_meta_for,\n };\n\n #[derive(Debug)]\n struct MyMeta { mark: usize }\n\n type MyFrame = Frame<Link<MyMeta>>;\n\n impl_untyped_frame_meta_for!(MyMeta);\n\n let alloc_options = FrameAllocOptions::new();\n let frame1 = alloc_options.alloc_frame_with(Link::new(MyMeta { mark: 1 })).unwrap();\n let frame2 = alloc_options.alloc_frame_with(Link::new(MyMeta { mark: 2 })).unwrap();\n\n let mut list = LinkedList::new();\n list.push_front(frame1.try_into().unwrap());\n list.push_front(frame2.try_into().unwrap());\n\n let mut cursor = list.cursor_front_mut();\n assert_eq!(cursor.current_meta().unwrap().mark, 2);\n cursor.move_next();\n assert_eq!(cursor.current_meta().unwrap().mark, 1);\n ```\n\n [`from_in_use`]: super::Frame::from_in_use\n",
+  "variant_fields": {
+    "VariantIdx(None)-FieldIdx(Some(0))": {
+      "name": "front",
+      "doc": ""
+    },
+    "VariantIdx(None)-FieldIdx(Some(1))": {
+      "name": "back",
+      "doc": ""
+    },
+    "VariantIdx(None)-FieldIdx(Some(2))": {
+      "name": "size",
+      "doc": " The number of frames in the list.\n"
+    },
+    "VariantIdx(None)-FieldIdx(Some(3))": {
+      "name": "list_id",
+      "doc": " A lazily initialized ID, used to check whether a frame is in the list.\n 0 means uninitialized.\n"
+    }
+  }
+}

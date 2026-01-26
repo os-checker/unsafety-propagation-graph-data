@@ -1,0 +1,53 @@
+{
+  "name": "std::sync::nonpoison::condvar::Condvar",
+  "constructors": [
+    "std::sync::nonpoison::condvar::Condvar::new",
+    "std::<sync::nonpoison::condvar::Condvar as core::default::Default>::default"
+  ],
+  "access_self_as_arg": {
+    "read": [
+      "std::sync::nonpoison::condvar::Condvar::wait",
+      "std::sync::nonpoison::condvar::Condvar::wait_while",
+      "std::sync::nonpoison::condvar::Condvar::wait_timeout",
+      "std::sync::nonpoison::condvar::Condvar::wait_timeout_while",
+      "std::sync::nonpoison::condvar::Condvar::notify_one",
+      "std::sync::nonpoison::condvar::Condvar::notify_all",
+      "std::<sync::nonpoison::condvar::Condvar as core::fmt::Debug>::fmt"
+    ],
+    "write": [],
+    "other": []
+  },
+  "access_self_as_locals": {
+    "read": [
+      "std::sync::barrier::Barrier::wait"
+    ],
+    "write": [],
+    "other": [
+      "std::sync::barrier::Barrier::new",
+      "std::sync::nonpoison::condvar::Condvar::new",
+      "std::<sync::nonpoison::condvar::Condvar as core::default::Default>::default"
+    ]
+  },
+  "access_field": [
+    {
+      "read": [
+        "std::sync::nonpoison::condvar::Condvar::wait",
+        "std::sync::nonpoison::condvar::Condvar::wait_timeout",
+        "std::sync::nonpoison::condvar::Condvar::notify_one",
+        "std::sync::nonpoison::condvar::Condvar::notify_all"
+      ],
+      "write": [],
+      "other": []
+    }
+  ],
+  "span": "$library/std/src/sync/nonpoison/condvar.rs:49:1: 49:19",
+  "src": "pub struct Condvar",
+  "kind": "Struct",
+  "doc_adt": " A Condition Variable\n\n For more information about condition variables, check out the documentation for the poisoning\n variant of this type at [`poison::Condvar`].\n\n # Examples\n\n Note that this `Condvar` does **not** propagate information about threads that panic while\n holding a lock. If you need this functionality, see [`poison::Mutex`] and [`poison::Condvar`].\n\n ```\n #![feature(nonpoison_mutex)]\n #![feature(nonpoison_condvar)]\n\n use std::sync::nonpoison::{Mutex, Condvar};\n use std::sync::Arc;\n use std::thread;\n\n let pair = Arc::new((Mutex::new(false), Condvar::new()));\n let pair2 = Arc::clone(&pair);\n\n // Inside of our lock, spawn a new thread, and then wait for it to start.\n thread::spawn(move || {\n     let (lock, cvar) = &*pair2;\n     let mut started = lock.lock();\n     *started = true;\n     // We notify the condvar that the value has changed.\n     cvar.notify_one();\n });\n\n // Wait for the thread to start up.\n let (lock, cvar) = &*pair;\n let mut started = lock.lock();\n while !*started {\n     cvar.wait(&mut started);\n }\n ```\n\n [`poison::Mutex`]: crate::sync::poison::Mutex\n [`poison::Condvar`]: crate::sync::poison::Condvar\n",
+  "variant_fields": {
+    "VariantIdx(None)-FieldIdx(Some(0))": {
+      "name": "inner",
+      "doc": ""
+    }
+  }
+}
