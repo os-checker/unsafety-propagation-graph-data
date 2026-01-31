@@ -53,7 +53,7 @@
     }
   ],
   "span": "$library/core/src/iter/adapters/map_windows.rs:16:1: 16:52",
-  "src": "struct MapWindowsInner<I: Iterator, const N: usize>",
+  "src": "struct MapWindowsInner<I: Iterator, const N: usize> {\n    // We fuse the inner iterator because there shouldn't be \"holes\" in\n    // the sliding window. Once the iterator returns a `None`, we make\n    // our `MapWindows` iterator return `None` forever.\n    iter: Option<I>,\n    // Since iterators are assumed lazy, i.e. it only yields an item when\n    // `Iterator::next()` is called, and `MapWindows` is not an exception.\n    //\n    // Before the first iteration, we keep the buffer `None`. When the user\n    // first call `next` or other methods that makes the iterator advance,\n    // we collect the first `N` items yielded from the inner iterator and\n    // put it into the buffer.\n    //\n    // When the inner iterator has returned a `None` (i.e. fused), we take\n    // away this `buffer` and leave it `None` to reclaim its resources.\n    //\n    // FIXME: should we shrink the size of `buffer` using niche optimization?\n    buffer: Option<Buffer<I::Item, N>>,\n}",
   "kind": "Struct",
   "doc_adt": "",
   "variant_fields": {

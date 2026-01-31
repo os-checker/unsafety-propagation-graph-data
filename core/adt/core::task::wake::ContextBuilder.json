@@ -75,7 +75,7 @@
     }
   ],
   "span": "$library/core/src/task/wake.rs:301:1: 301:30",
-  "src": "pub struct ContextBuilder<'a>",
+  "src": "pub struct ContextBuilder<'a> {\n    waker: &'a Waker,\n    local_waker: &'a LocalWaker,\n    ext: ExtData<'a>,\n    // Ensure we future-proof against variance changes by forcing\n    // the lifetime to be invariant (argument-position lifetimes\n    // are contravariant while return-position lifetimes are\n    // covariant).\n    _marker: PhantomData<fn(&'a ()) -> &'a ()>,\n    // Ensure `Context` is `!Send` and `!Sync` in order to allow\n    // for future `!Send` and / or `!Sync` fields.\n    _marker2: PhantomData<*mut ()>,\n}",
   "kind": "Struct",
   "doc_adt": " A Builder used to construct a `Context` instance\n with support for `LocalWaker`.\n\n # Examples\n ```\n #![feature(local_waker)]\n use std::task::{ContextBuilder, LocalWaker, Waker, Poll};\n use std::future::Future;\n\n let local_waker = LocalWaker::noop();\n let waker = Waker::noop();\n\n let mut cx = ContextBuilder::from_waker(&waker)\n     .local_waker(&local_waker)\n     .build();\n\n let mut future = std::pin::pin!(async { 20 });\n let poll = future.as_mut().poll(&mut cx);\n assert_eq!(poll, Poll::Ready(20));\n\n ```\n",
   "variant_fields": {

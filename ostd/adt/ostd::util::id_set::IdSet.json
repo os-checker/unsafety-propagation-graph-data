@@ -101,7 +101,7 @@
     }
   ],
   "span": "ostd/src/util/id_set.rs:128:1: 128:20",
-  "src": "pub struct IdSet<I>",
+  "src": "pub struct IdSet<I> {\n    bits: SmallVec<[InnerPart; NR_PARTS_NO_ALLOC]>,\n    phantom: PhantomData<I>,\n}",
   "kind": "Struct",
   "doc_adt": " A set of IDs.\n\n # Examples\n\n Assume that you have a type named `MyId`,\n which represents a set of IDs from 0 to 10 (exclusive).\n\n ```\n #[derive(Copy, Clone, Debug, Eq, PartialEq)]\n pub struct MyId(u32);\n\n // SAFETY: `MyId` maintains the 1:1 mapping invariant for 0..10.\n unsafe impl Id for MyId {\n     fn new_unchecked(raw_id: u32) -> Self { Self(raw_id) }\n     fn cardinality() -> u32 { 10 } // Fixed cardinality for this example\n }\n impl From<MyId> for u32 { fn from(id: MyId) -> u32 { id.0 } }\n ```\n\n Now you can use `IdSet<MyId>` as a container for `MyID`s.\n\n ```\n let mut my_id_set: IdSet<MyId> = IdSet::new_empty();\n\n let id0 = MyId::new(0);\n my_id_set.add(id0);\n assert!(my_id_set.contains(id0));\n assert_eq!(my_id_set.count(), 1);\n\n let id5 = MyId::new(5);\n my_id_set.add(id5);\n assert!(my_id_set.contains(id5));\n assert_eq!(my_id_set.count(), 2);\n\n my_id_set.remove(id0);\n assert!(!my_id_set.contains(id0));\n assert_eq!(my_id_set.count(), 1);\n\n let full_set = IdSet::<MyId>::new_full();\n assert_eq!(full_set.count(), 10);\n assert!(full_set.contains(MyId::new(9)));\n ```\n",
   "variant_fields": {
